@@ -10,7 +10,7 @@ namespace Commands
     public class CommandCoordinator : ICommandCoordinator
     {
         /// <summary>
-        /// 
+        /// Instantiates a new instance of <see cref="CommandCoordinator"/>
         /// </summary>
         public CommandCoordinator()
         {
