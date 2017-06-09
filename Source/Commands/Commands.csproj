@@ -5,5 +5,5 @@
     <AssemblyName>Commands</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../default.props"></Import>
+  <Import Project="../../Build/default.props"></Import>
 </Project>
