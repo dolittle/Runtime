@@ -8,7 +8,7 @@
     "tasks": [
         {
             "taskName": "build",
-            "args": ["Specifications/Commands", "-f", "netcoreapp1.1" ],
+            "args": ["${workspaceRoot}/Specifications/Commands"],
             "isBuildCommand": true,
             "showOutput": "always",
             "problemMatcher": "$msCompile"
