@@ -2,18 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
-    <AssemblyName>Commands.Specs</AssemblyName>
+    <AssemblyName>doLittle.Runtime.Commands.Specs</AssemblyName>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.2.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />
-    <PackageReference Include="Machine.Specifications" Version="0.11.0" />
-    <PackageReference Include="Machine.Specifications.Should" Version="0.11.0" />
-    <PackageReference Include="moq" Version="4.7.8" />
-    <DotNetCliToolReference Include="Microsoft.DotNet.Watcher.Tools" Version="1.0.0-*" />
-  </ItemGroup>
-
+  <Import Project="../../Build/MSBuild/specs.props"></Import>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Commands\Commands.csproj" />

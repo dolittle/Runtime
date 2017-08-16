@@ -14,8 +14,6 @@ namespace Commands
         /// </summary>
         public CommandCoordinator()
         {
-            
-            
         }
     }
 }
