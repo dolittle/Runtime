@@ -1,0 +1,19 @@
+﻿/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+namespace doLittle.Runtime.Tenancy
+{
+    /// <summary>
+    /// Defines a visitor that takes part in populating all the details for a tenant
+    /// </summary>
+    public interface ICanPopulateTenant
+    {
+        /// <summary>
+        /// Method that gets called when the <see cref="Tenant"/> is being set up
+        /// </summary>
+        /// <param name="tenant"><see cref="ITenant"/> that is being populated</param>
+        /// <param name="details">Details for the <see cref="ITenant"/> - can be expanded on</param>
+        void Populate(ITenant tenant, dynamic details);
+    }
+}
