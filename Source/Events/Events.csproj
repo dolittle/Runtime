@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>doLittle.Runtime.Events</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/default.props" />
+
+  <ItemGroup>
+    <PackageReference Include="doLittle.Collections" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Concepts" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Time" Version="2.0.0-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Applications\Applications.csproj" />
+    <ProjectReference Include="..\Transactions\Transactions.csproj" />
+  </ItemGroup>
+</Project>
