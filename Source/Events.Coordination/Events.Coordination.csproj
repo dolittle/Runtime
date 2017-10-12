@@ -11,5 +11,6 @@
     <ProjectReference Include="..\Events\Events.csproj" />
     <ProjectReference Include="..\Events.Publishing\Events.Publishing.csproj" />
     <ProjectReference Include="..\Events.Stores\Events.Stores.csproj" />
+    <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
   </ItemGroup>
 </Project>
