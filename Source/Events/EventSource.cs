@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Represents a <see cref="IEventSource">IEventSource</see>

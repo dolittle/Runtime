@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Versioning
 {
     /// <summary>
     /// Defines a discoverer that is able to detect all events and group them into <see cref="EventMigrationHierarchy">EventMigrationHierarchies</see>

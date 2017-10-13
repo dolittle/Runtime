@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Stores
 {
     /// <summary>
     /// Exception that gets thrown if <see cref="IEventEnvelopes"/> is not provided e.g. for <see cref="EventSource"/>

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Represents the versioning for an <see cref="EventSource"/>

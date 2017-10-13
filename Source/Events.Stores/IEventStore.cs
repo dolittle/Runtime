@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Stores
 {
     /// <summary>
     /// Defines a repository that holds events generated

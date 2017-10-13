@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Represents a <see cref="IApplicationResourceType">application resource type</see> for 

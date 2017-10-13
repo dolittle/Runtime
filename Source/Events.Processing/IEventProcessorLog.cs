@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Defines a system for logging related to <see cref="IEventProcessor">event processors</see>

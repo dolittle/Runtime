@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Defines a system that knows about state related to <see cref="IEventProcessor">event processors</see>

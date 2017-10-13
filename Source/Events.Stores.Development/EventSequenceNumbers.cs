@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 using doLittle.Execution;
 using doLittle.Logging;
 
-namespace doLittle.Events.Files
+namespace doLittle.Runtime.Events.Stores.Development
 {
     /// <summary>
     /// Represents a simple and naïve implementation of <see cref="IEventSequenceNumbers"/>

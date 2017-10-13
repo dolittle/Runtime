@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Concepts;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Represents the identification of who or what caused the <see cref="IEvent"/>

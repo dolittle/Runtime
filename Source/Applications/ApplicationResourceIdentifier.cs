@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using doLittle.Collections;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// Represents an implementation of <see cref="IApplicationResourceIdentifier"/> - an identifier for <see cref="IApplicationResource">resources</see> in an <see cref="IApplication"/>

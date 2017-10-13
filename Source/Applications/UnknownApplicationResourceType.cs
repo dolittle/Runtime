@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// Exception that gets thrown if a specific <see cref="IApplicationResourceType"/> is unknown

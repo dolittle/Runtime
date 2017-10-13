@@ -5,7 +5,7 @@
 using System;
 using doLittle.Logging;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// Represents an implementation of <see cref="IApplicationConfigurationBuilder"/>

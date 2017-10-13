@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Globalization;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 using doLittle.DependencyInversion;
 using doLittle.Runtime.Tenancy;
 using doLittle.Security;
 
-namespace doLittle.Execution
+namespace doLittle.Runtime.Execution
 {
     /// <summary>
     /// Represents a <see cref="IExecutionContextFactory"/>

@@ -7,7 +7,7 @@ using System.IO;
 using doLittle.Logging;
 using doLittle.Serialization;
 
-namespace doLittle.Events.Files
+namespace doLittle.Runtime.Events.Stores.Development
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFiles"/>

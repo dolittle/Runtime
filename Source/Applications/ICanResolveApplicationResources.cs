@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// Defines a resolver that can resolve <see cref="Type">types</see> from <see cref="IApplicationResourceIdentifier"/>

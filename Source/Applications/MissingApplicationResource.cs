@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// The exception that gets thrown when parsing an <see cref="IApplicationResourceIdentifier"/>

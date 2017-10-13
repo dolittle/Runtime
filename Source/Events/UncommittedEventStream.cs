@@ -6,7 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Represents a stream of events that are uncommitted

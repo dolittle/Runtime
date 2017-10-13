@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Concepts;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Represents a unqiue identifier for a <see cref="IEventProcessor"/>

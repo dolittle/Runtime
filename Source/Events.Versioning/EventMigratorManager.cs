@@ -10,7 +10,7 @@ using doLittle.Execution;
 using doLittle.Types;
 using doLittle.DependencyInversion;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Versioning
 {
     /// <summary>
     /// Represents a <see cref="IEventMigratorManager">IEventMigratorManager</see>

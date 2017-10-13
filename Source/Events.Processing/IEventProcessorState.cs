@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Defines the state for an <see cref="IEventProcessor"/>

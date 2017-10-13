@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using doLittle.Concepts;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Represents a message that can occur during <see cref="IEventProcessor">event processing</see>

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Runtime.Transactions;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// An EventSource is a domain object that is capable of generating and applying events.  It is an AggregateRoot in the context

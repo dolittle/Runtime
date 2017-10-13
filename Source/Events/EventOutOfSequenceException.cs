@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// The exception that is thrown when an <see cref="IEvent"/> is out of sequence in an <see cref="IEvent">stream of events</see>

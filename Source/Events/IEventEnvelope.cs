@@ -3,10 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 using doLittle.Runtime.Transactions;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Defines the envelope for the event with all the metadata related to the event

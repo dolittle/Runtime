@@ -9,7 +9,7 @@ using doLittle.Execution;
 using doLittle.Reflection;
 using doLittle.Types;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// Represents an implementation of <see cref="IApplicationResourceTypes"/>

@@ -5,12 +5,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Applications;
-using doLittle.Execution;
+using doLittle.Runtime.Applications;
+using doLittle.Runtime.Execution;
 using doLittle.Time;
 using doLittle.Runtime.Transactions;
+using doLittle.Runtime.Events.Versioning;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Stores
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventEnvelopes"/>

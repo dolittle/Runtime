@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Reflection;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 using Newtonsoft.Json;
 
 namespace doLittle.Runtime.Applications.Serialization.Json

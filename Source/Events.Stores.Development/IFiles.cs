@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 
-namespace doLittle.Events.Files
+namespace doLittle.Runtime.Events.Stores.Development
 {
     /// <summary>
     /// Defines a system for working with files on the filesystem

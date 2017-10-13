@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-namespace doLittle.Execution
+namespace doLittle.Runtime.Execution
 {
     /// <summary>
     /// Defines a visitor that takes part in populating all the details for the <see cref="IExecutionContext"/>.

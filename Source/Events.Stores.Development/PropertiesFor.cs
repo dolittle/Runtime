@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 using doLittle.Reflection;
 using doLittle.Strings;
 
-namespace doLittle.Events.Files
+namespace doLittle.Runtime.Events.Stores.Development
 {
     /// <summary>
     /// Represents helper methods for working with property conversion related to Azure Tables and entities

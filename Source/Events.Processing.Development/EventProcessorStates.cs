@@ -8,7 +8,7 @@ using doLittle.Logging;
 using doLittle.Serialization;
 using doLittle.Time;
 
-namespace doLittle.Events.Files
+namespace doLittle.Runtime.Events.Processing.Development
 {
     /// <summary>
     /// Represents a simple and naïve implementation for handling <see cref="IEventProcessorStates"/>

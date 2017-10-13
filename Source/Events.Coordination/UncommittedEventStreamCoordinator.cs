@@ -7,8 +7,10 @@ using System.Linq;
 using doLittle.Execution;
 using doLittle.Runtime.Transactions;
 using doLittle.Logging;
+using doLittle.Runtime.Events.Stores;
+using doLittle.Runtime.Events.Publishing;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Coordination
 {
     /// <summary>
     /// Represents a <see cref="IUncommittedEventStreamCoordinator"/>

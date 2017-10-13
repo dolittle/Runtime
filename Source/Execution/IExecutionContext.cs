@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Globalization;
 using System.Security.Claims;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 using doLittle.Runtime.Tenancy;
 
-namespace doLittle.Execution
+namespace doLittle.Runtime.Execution
 {
     /// <summary>
     /// Defines the execution context in which things are within

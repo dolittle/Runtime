@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using doLittle.Types;
 using doLittle.DependencyInversion;
 
-namespace doLittle.Execution
+namespace doLittle.Runtime.Execution
 {
     /// <summary>
     /// Represents a <see cref="IExecutionContextDetailsPopulator"/>

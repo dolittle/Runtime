@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// Defines an identifier for <see cref="IApplicationResource">resources</see> in an <see cref="IApplication"/>

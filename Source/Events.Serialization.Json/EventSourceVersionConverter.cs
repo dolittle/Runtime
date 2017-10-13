@@ -7,7 +7,7 @@ using System.Reflection;
 using doLittle.Events;
 using Newtonsoft.Json;
 
-namespace doLittle.JSON.Events
+namespace doLittle.Runtime.Events.Serialization.Json
 {
     /// <summary>
     /// Represents a <see cref="JsonConverter"/> that can serialize and deserialize <see cref="EventSourceVersion"/>

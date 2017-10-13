@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using doLittle.Serialization.Json;
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 
 namespace doLittle.Runtime.Applications.Serialization.Json
 {

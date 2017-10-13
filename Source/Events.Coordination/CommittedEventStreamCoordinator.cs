@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using doLittle.Collections;
 using doLittle.Execution;
 using doLittle.Reflection;
+using doLittle.Runtime.Events.Processing;
+using doLittle.Runtime.Events.Publishing;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Coordination
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICommittedEventStreamCoordinator"/>

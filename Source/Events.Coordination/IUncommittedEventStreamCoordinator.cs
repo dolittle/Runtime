@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Runtime.Transactions;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Coordination
 {
     /// <summary>
     /// Defines a coordinator for dealing with <see cref="UncommittedEventStream"/>

@@ -2,10 +2,10 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Applications;
+using doLittle.Runtime.Applications;
 using doLittle.Logging;
 
-namespace doLittle.Events.Files
+namespace doLittle.Runtime.Events.Stores.Development
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventSourceVersions"/> for holding <see cref="EventSourceVersion"/>

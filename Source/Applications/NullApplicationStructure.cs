@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using doLittle.Strings;
 
-namespace doLittle.Applications
+namespace doLittle.Runtime.Applications
 {
     /// <summary>
     /// Represents a null implementation of <see cref="IApplicationStructure"/>

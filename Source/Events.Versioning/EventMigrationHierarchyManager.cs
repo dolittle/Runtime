@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using doLittle.Execution;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Versioning
 {
     /// <summary>
     /// Represents a <see cref="IEventMigrationHierarchyManager">IEventMigrationHierarchyManager</see>

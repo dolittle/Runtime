@@ -5,7 +5,7 @@
 using System;
 using doLittle.Concepts;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Represents the identification of an <see cref="IEvent"/>

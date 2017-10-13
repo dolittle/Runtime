@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Versioning
 {
     /// <summary>
     /// Represents an exceptional situation where an <see cref="IEvent">Event</see> in an <see cref="EventMigrationHierarchy">EventMigrationHierarchy</see>
-    /// has not implemented the correct <see cref="doLittle.Events.IAmNextGenerationOf{T}">interface</see>.
+    /// has not implemented the correct <see cref="doLittle.Runtime.Events.Versioning.IAmNextGenerationOf{T}">interface</see>.
     /// </summary>
     public class NotAMigratedEventTypeException : Exception
     {

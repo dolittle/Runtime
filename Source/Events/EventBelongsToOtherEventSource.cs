@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events
 {
     /// <summary>
     /// Exception that gets thrown if an <see cref="IEvent"/> has a mismatch with the <see cref="IEventSource"/>

@@ -9,7 +9,7 @@ using System.Reflection;
 using doLittle.Execution;
 using doLittle.Types;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Versioning
 {
     /// <summary>
     /// Represents a <see cref="IEventMigrationHierarchyDiscoverer">IEventMigrationHierarchyDiscoverer</see>

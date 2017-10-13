@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using doLittle.Runtime.Transactions;
 
-namespace doLittle.Events
+namespace doLittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Defines the result from an <see cref="IEventProcessor"/>
