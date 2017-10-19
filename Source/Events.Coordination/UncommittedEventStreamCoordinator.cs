@@ -7,7 +7,7 @@ using System.Linq;
 using doLittle.Execution;
 using doLittle.Runtime.Transactions;
 using doLittle.Logging;
-using doLittle.Runtime.Events.Stores;
+using doLittle.Runtime.Events.Storage;
 using doLittle.Runtime.Events.Publishing;
 
 namespace doLittle.Runtime.Events.Coordination

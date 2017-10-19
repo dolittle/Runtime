@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 
-namespace doLittle.Runtime.Events.Stores
+namespace doLittle.Runtime.Events.Storage
 {
     /// <summary>
     /// Defines a system for working with <see cref="EventEnvelope"/>

@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using doLittle.Runtime.Applications;
 
-namespace doLittle.Runtime.Events.Stores
+namespace doLittle.Runtime.Events.Storage
 {
     /// <summary>
     /// Represents a null implementation of <see cref="IEventStore"/>

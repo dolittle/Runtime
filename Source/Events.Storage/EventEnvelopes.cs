@@ -11,7 +11,7 @@ using doLittle.Time;
 using doLittle.Runtime.Transactions;
 using doLittle.Runtime.Events.Versioning;
 
-namespace doLittle.Runtime.Events.Stores
+namespace doLittle.Runtime.Events.Storage
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventEnvelopes"/>
