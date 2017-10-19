@@ -29,9 +29,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Processing", "Source
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Publishing", "Source\Events.Publishing\Events.Publishing.csproj", "{E0C8BA28-D731-4CA3-950B-1F9C428E9824}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Stores", "Source\Events.Stores\Events.Stores.csproj", "{5897317C-6489-46DB-B2FB-BFEE6B1276FA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Storage", "Source\Events.Storage\Events.Storage.csproj", "{5897317C-6489-46DB-B2FB-BFEE6B1276FA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Stores.Development", "Source\Events.Stores.Development\Events.Stores.Development.csproj", "{F5CF7FD2-69B3-4D5D-8EEC-862CD90750B9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Storage.Development", "Source\Events.Storage.Development\Events.Storage.Development.csproj", "{F5CF7FD2-69B3-4D5D-8EEC-862CD90750B9}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Versioning", "Source\Events.Versioning\Events.Versioning.csproj", "{18630DDF-354F-43EC-A537-1FD69914D17D}"
 EndProject
