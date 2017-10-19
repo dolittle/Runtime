@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Events.Stores.Development</AssemblyName>
+    <AssemblyName>doLittle.Runtime.Events.Storage.Development</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Events\Events.csproj" />
-    <ProjectReference Include="..\Events.Stores\Events.Stores.csproj" />
+    <ProjectReference Include="..\Events.Storage\Events.Storage.csproj" />
   </ItemGroup>
 
 </Project>

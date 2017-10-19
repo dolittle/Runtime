@@ -8,7 +8,7 @@ using doLittle.Runtime.Applications;
 using doLittle.Execution;
 using doLittle.Logging;
 
-namespace doLittle.Runtime.Events.Stores.Development
+namespace doLittle.Runtime.Events.Storage.Development
 {
     /// <summary>
     /// Represents a simple and naïve implementation of <see cref="IEventSequenceNumbers"/>
