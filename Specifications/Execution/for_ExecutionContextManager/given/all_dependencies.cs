@@ -1,0 +1,19 @@
+﻿using doLittle.Execution;
+using Machine.Specifications;
+using Moq;
+
+
+namespace doLittle.Runtime.Execution.Specs.for_ExecutionContextManager.given
+{
+    public class all_dependencies
+    {
+        protected static Mock<IExecutionContextFactory> execution_context_factory_mock;
+        protected static Mock<ICallContext> call_context_mock;
+
+        Establish context = () =>
+        {
+            call_context_mock = new Mock<ICallContext>();
+            execution_context_factory_mock = new Mock<IExecutionContextFactory>();
+        };
+    }
+}
