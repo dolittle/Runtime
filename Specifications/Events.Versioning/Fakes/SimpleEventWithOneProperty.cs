@@ -1,4 +1,5 @@
 ﻿using System;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Versioning.Specs.Fakes
 {

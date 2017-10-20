@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using doLittle.Concepts;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events
 {

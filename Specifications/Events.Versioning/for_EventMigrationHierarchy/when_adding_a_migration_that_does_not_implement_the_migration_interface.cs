@@ -1,5 +1,6 @@
 using System;
 using Machine.Specifications;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Versioning.Specs.for_EventMigrationHierarchy
 {

@@ -4,6 +4,7 @@ using Moq;
 using System;
 using doLittle.Runtime.Events.Versioning.Specs.Fakes;
 using doLittle.Types;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Versioning.Specs.for_EventMigrationLevelDiscoverer.given
 {

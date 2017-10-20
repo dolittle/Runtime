@@ -9,6 +9,7 @@ using System.Reflection;
 using doLittle.Execution;
 using doLittle.Types;
 using doLittle.DependencyInversion;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Versioning
 {

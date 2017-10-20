@@ -9,6 +9,7 @@ using doLittle.Runtime.Transactions;
 using doLittle.Logging;
 using doLittle.Runtime.Events.Storage;
 using doLittle.Runtime.Events.Publishing;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Coordination
 {

@@ -1,6 +1,7 @@
 ﻿using doLittle.Runtime.Events.Versioning.Specs.Fakes;
 using doLittle.Runtime.Events.Versioning.Specs.for_EventMigrationService.given;
 using Machine.Specifications;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Versioning.Specs.for_EventMigrationService
 {

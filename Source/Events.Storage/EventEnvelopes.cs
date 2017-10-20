@@ -10,6 +10,7 @@ using doLittle.Runtime.Execution;
 using doLittle.Time;
 using doLittle.Runtime.Transactions;
 using doLittle.Runtime.Events.Versioning;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Storage
 {

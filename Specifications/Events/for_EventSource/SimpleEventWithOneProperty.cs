@@ -1,4 +1,5 @@
 ﻿using System;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Specs.for_EventSource
 {

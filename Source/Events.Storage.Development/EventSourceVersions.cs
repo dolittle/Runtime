@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Runtime.Applications;
 using doLittle.Logging;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Storage.Development
 {

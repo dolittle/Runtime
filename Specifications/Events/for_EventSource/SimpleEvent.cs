@@ -1,4 +1,6 @@
-﻿namespace doLittle.Runtime.Events.Specs.for_EventSource
+﻿using doLittle.Events;
+
+namespace doLittle.Runtime.Events.Specs.for_EventSource
 {
     public class SimpleEvent : IEvent
     {

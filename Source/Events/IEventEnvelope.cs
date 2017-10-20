@@ -5,6 +5,7 @@
 using System;
 using doLittle.Runtime.Applications;
 using doLittle.Runtime.Transactions;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events
 {

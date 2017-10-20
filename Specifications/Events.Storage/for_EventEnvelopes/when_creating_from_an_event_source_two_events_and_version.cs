@@ -7,6 +7,7 @@ using doLittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Storage.Specs.for_EventEnvelopes
 {

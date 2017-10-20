@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using doLittle.Runtime.Applications;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Storage
 {

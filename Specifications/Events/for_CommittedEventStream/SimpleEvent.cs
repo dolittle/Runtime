@@ -1,4 +1,6 @@
-﻿namespace doLittle.Runtime.Events.Specs.for_CommittedEventStream
+﻿using doLittle.Events;
+
+namespace doLittle.Runtime.Events.Specs.for_CommittedEventStream
 {
     public class SimpleEvent : IEvent
     {

@@ -9,6 +9,7 @@ using doLittle.Collections;
 using doLittle.Execution;
 using doLittle.Reflection;
 using doLittle.Types;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Processing
 {

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events
 {
@@ -14,9 +15,12 @@ namespace doLittle.Runtime.Events
     /// </summary>
     public static class EventSourceExtensions
     {
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public static class EventSourceHandleMethods<T>
         {
+            /// <summary>
+            /// Methods organized per event tyope
+            /// </summary>
             public static readonly Dictionary<Type, MethodInfo> MethodsPerEventType = new Dictionary<Type, MethodInfo>();
 
             static EventSourceHandleMethods()
@@ -39,7 +43,7 @@ namespace doLittle.Runtime.Events
         }
 
 
-        private static Dictionary<Type, MethodInfo> GetHandleMethodsFor(Type eventSourceType)
+        static Dictionary<Type, MethodInfo> GetHandleMethodsFor(Type eventSourceType)
         {
             var methods = typeof(EventSourceHandleMethods<>)
                               .MakeGenericType(eventSourceType)
@@ -49,8 +53,6 @@ namespace doLittle.Runtime.Events
 
 
         }
-
-#pragma warning restore 1591 // Xml Comments
 
 
         /// <summary>

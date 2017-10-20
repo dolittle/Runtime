@@ -1,6 +1,7 @@
 ﻿using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
+using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Specs.for_UncommittedEventStream
 {
