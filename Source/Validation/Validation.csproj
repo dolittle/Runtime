@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>doLittle.Runtime.Validation</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/default.props" />
+
+  <ItemGroup>
+    <PackageReference Include="doLittle.Rules" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Types" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Reflection" Version="2.0.0-*" />
+  </ItemGroup>
+</Project>
