@@ -5,18 +5,15 @@
 namespace doLittle.Runtime.Commands
 {
     /// <summary>
-    /// Defines a coordinator for coordinating commands coming into the system
+    /// Defines the validators for validating a <see cref="CommandRequest"/>
     /// </summary>
-    public partial interface ICommandCoordinator
+    public interface ICommandValidators
     {
         /// <summary>
-        /// Handle a command
+        /// Validate the command
         /// </summary>
-        /// <param name="command"><see cref="CommandRequest">command</see> to handle</param>
-        /// <returns>
-        /// Result from the handle.
-        /// Within the result one can check if the handling was success or not
-        /// </returns>
-        CommandResult Handle(CommandRequest command);
+        /// <param name="command">Instance to be validated</param>
+        /// <returns>Validation results for a <see cref="CommandRequest">Command</see></returns>
+        CommandValidationResult Validate(CommandRequest command);
     }
 }

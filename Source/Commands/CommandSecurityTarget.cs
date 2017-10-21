@@ -2,21 +2,23 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using doLittle.Security;
+using doLittle.Commands;
+
 namespace doLittle.Runtime.Commands
 {
     /// <summary>
-    /// Defines a coordinator for coordinating commands coming into the system
+    /// Represents a specific <see cref="ISecurityTarget"/> for <see cref="ICommand">commands</see>
     /// </summary>
-    public partial interface ICommandCoordinator
+    public class CommandSecurityTarget : SecurityTarget
     {
+        const string COMMAND = "Command";
+
         /// <summary>
-        /// Handle a command
+        /// Instantiates an instance of <see cref="CommandSecurityTarget"/>
         /// </summary>
-        /// <param name="command"><see cref="CommandRequest">command</see> to handle</param>
-        /// <returns>
-        /// Result from the handle.
-        /// Within the result one can check if the handling was success or not
-        /// </returns>
-        CommandResult Handle(CommandRequest command);
+        public CommandSecurityTarget() : base(COMMAND)
+        {
+        }
     }
 }
