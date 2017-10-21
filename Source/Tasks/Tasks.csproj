@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>doLittle.Runtime.Read</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/default.props" />
+
+  <ItemGroup>
+    <PackageReference Include="doLittle.Collections" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Execution" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Types" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Reflection" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.DependencyInversion" Version="2.0.0-*" />
+  </ItemGroup>
+
+  <ItemGroup>
+  </ItemGroup>
+  
+</Project>
