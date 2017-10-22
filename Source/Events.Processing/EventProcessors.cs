@@ -34,7 +34,7 @@ namespace doLittle.Runtime.Events.Processing
         public EventProcessors(IApplicationResources applicationResources, IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowsAboutEventProcessors, ILogger logger)
         {
             _applicationResources = applicationResources;
-            GatherEventProcessorsFrom(systemsThatKnowsAboutEventProcessors);
+            _eventProcessorsByResourceIdentifier = GatherEventProcessorsFrom(systemsThatKnowsAboutEventProcessors);
             _logger = logger;
         }
 
@@ -62,20 +62,22 @@ namespace doLittle.Runtime.Events.Processing
             return new EventProcessingResults(results);
         }
 
-        void GatherEventProcessorsFrom(IEnumerable<IKnowAboutEventProcessors> systemsThatHasEventProcessors)
+        Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>> GatherEventProcessorsFrom(IEnumerable<IKnowAboutEventProcessors> systemsThatHasEventProcessors)
         {
-            _eventProcessorsByResourceIdentifier = new Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>>();
+            var eventProcessorsByResourceIdentifier = new Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>>();
             systemsThatHasEventProcessors.ForEach(a => a.ForEach(e =>
             {
                 List<IEventProcessor> eventProcessors;
-                if (_eventProcessorsByResourceIdentifier.ContainsKey(e.Event)) eventProcessors = _eventProcessorsByResourceIdentifier[e.Event];
+                if (eventProcessorsByResourceIdentifier.ContainsKey(e.Event)) eventProcessors = _eventProcessorsByResourceIdentifier[e.Event];
                 else
                 {
                     eventProcessors = new List<IEventProcessor>();
-                    _eventProcessorsByResourceIdentifier[e.Event] = eventProcessors;
+                    eventProcessorsByResourceIdentifier[e.Event] = eventProcessors;
                 }
                 eventProcessors.Add(e);
             }));
+
+            return eventProcessorsByResourceIdentifier;
         }
     }
 }
