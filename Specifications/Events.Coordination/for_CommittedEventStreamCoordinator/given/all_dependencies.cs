@@ -2,6 +2,7 @@
 using doLittle.Runtime.Events.Processing;
 using Machine.Specifications;
 using Moq;
+using doLittle.Logging;
 
 namespace doLittle.Runtime.Events.Coordination.Specs.for_CommittedEventStreamCoordinator.given
 {
@@ -11,6 +12,8 @@ namespace doLittle.Runtime.Events.Coordination.Specs.for_CommittedEventStreamCoo
         protected static Mock<IEventProcessors> event_processors;
         protected static Mock<IEventProcessorLog> event_processor_log;
         protected static Mock<IEventProcessorStates> event_processor_states;
+
+        protected static ILogger logger = Mock.Of<ILogger>();
 
         Establish context = () =>
         {
