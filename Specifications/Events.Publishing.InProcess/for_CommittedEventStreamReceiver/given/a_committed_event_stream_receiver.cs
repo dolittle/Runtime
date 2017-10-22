@@ -6,6 +6,6 @@ namespace doLittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventS
     {
         protected static CommittedEventStreamReceiver committed_event_stream_receiver;
 
-        Establish context = () => committed_event_stream_receiver = new CommittedEventStreamReceiver(committed_event_stream_bridge.Object);
+        Establish context = () => committed_event_stream_receiver = new CommittedEventStreamReceiver(committed_event_stream_bridge.Object, logger);
     }
 }

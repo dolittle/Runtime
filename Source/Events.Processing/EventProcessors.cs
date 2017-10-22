@@ -10,6 +10,7 @@ using doLittle.Execution;
 using doLittle.Reflection;
 using doLittle.Types;
 using doLittle.Events;
+using doLittle.Logging;
 
 namespace doLittle.Runtime.Events.Processing
 {
@@ -19,19 +20,22 @@ namespace doLittle.Runtime.Events.Processing
     [Singleton]
     public class EventProcessors : IEventProcessors
     {
-        Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>> _eventProcessorsByResourceIdentifier;
-        List<IEventProcessor> _eventProcessors = new List<IEventProcessor>();
-        IApplicationResources _applicationResources;
+        readonly Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>> _eventProcessorsByResourceIdentifier;
+        readonly List<IEventProcessor> _eventProcessors = new List<IEventProcessor>();
+        readonly IApplicationResources _applicationResources;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of <see cref="EventProcessors"/>
         /// </summary>
-        /// <param name="applicationResources"></param>
-        /// <param name="systemsThatKnowsAboutEventProcessors"></param>
-        public EventProcessors(IApplicationResources applicationResources, IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowsAboutEventProcessors)
+        /// <param name="applicationResources"><see cref="IApplicationResources"/> for resolving resources</param>
+        /// <param name="systemsThatKnowsAboutEventProcessors">Instances of <see cref="IKnowAboutEventProcessors"/></param>
+        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        public EventProcessors(IApplicationResources applicationResources, IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowsAboutEventProcessors, ILogger logger)
         {
             _applicationResources = applicationResources;
             GatherEventProcessorsFrom(systemsThatKnowsAboutEventProcessors);
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -40,12 +44,20 @@ namespace doLittle.Runtime.Events.Processing
         /// <inheritdoc/>
         public IEventProcessingResults Process(IEventEnvelope envelope, IEvent @event)
         {
+            _logger.Trace("Process event");
             var identifier = _applicationResources.Identify(@event);
-            if (!_eventProcessorsByResourceIdentifier.ContainsKey(identifier)) return new EventProcessingResults(new IEventProcessingResult[0]);
+            _logger.Trace($"Identifier for event - {identifier}");
+            if (!_eventProcessorsByResourceIdentifier.ContainsKey(identifier)) {
+                _logger.Trace("No event processors able to process - return");
+                return new EventProcessingResults(new IEventProcessingResult[0]);
+            }
 
             List<IEventProcessingResult> results = new List<IEventProcessingResult>();
             var eventProcessors = _eventProcessorsByResourceIdentifier[identifier];
-            eventProcessors.ForEach(e => results.Add(e.Process(envelope, @event)));
+            eventProcessors.ForEach(e => {
+                _logger.Trace($"Process event with processor : {e.Identifier}");
+                results.Add(e.Process(envelope, @event));
+            });
 
             return new EventProcessingResults(results);
         }

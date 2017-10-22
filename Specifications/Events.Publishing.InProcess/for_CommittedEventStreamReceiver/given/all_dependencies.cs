@@ -1,4 +1,5 @@
-﻿using Machine.Specifications;
+﻿using doLittle.Logging;
+using Machine.Specifications;
 using Moq;
 
 namespace doLittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamReceiver.given
@@ -6,6 +7,7 @@ namespace doLittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventS
     public class all_dependencies
     {
         protected static Mock<ICommittedEventStreamBridge> committed_event_stream_bridge;
+        protected static ILogger logger = Mock.Of<ILogger>();
 
         Establish context = () => committed_event_stream_bridge = new Mock<ICommittedEventStreamBridge>();
     }
