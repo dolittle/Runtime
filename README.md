@@ -1,4 +1,4 @@
-# DotNET.Runtime
+# Runtime
 
 ## Cloning
 
