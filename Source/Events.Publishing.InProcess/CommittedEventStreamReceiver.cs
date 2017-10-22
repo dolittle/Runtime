@@ -2,6 +2,8 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using doLittle.Logging;
+
 namespace doLittle.Runtime.Events.Publishing.InProcess
 {
     /// <summary>
@@ -17,9 +19,14 @@ namespace doLittle.Runtime.Events.Publishing.InProcess
         /// Initializes a new instance of <see cref="CommittedEventStreamReceiver"/>
         /// </summary>
         /// <param name="committedEventStreamBridge"><see cref="ICommittedEventStreamBridge"/> to use</param>
-        public CommittedEventStreamReceiver(ICommittedEventStreamBridge committedEventStreamBridge)
+        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        public CommittedEventStreamReceiver(ICommittedEventStreamBridge committedEventStreamBridge, ILogger logger)
         {
-            committedEventStreamBridge.Received += (s) => Received(s);
+            committedEventStreamBridge.Received += (s) =>
+            {
+                logger.Trace("Committed event stream received");
+                Received(s);
+            };
         }
     }
 }

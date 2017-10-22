@@ -2,6 +2,8 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using doLittle.Logging;
+
 namespace doLittle.Runtime.Events.Publishing.InProcess
 {
     /// <summary>
@@ -9,20 +11,25 @@ namespace doLittle.Runtime.Events.Publishing.InProcess
     /// </summary>
     public class CommittedEventStreamSender : ICanSendCommittedEventStream
     {
-        ICommittedEventStreamBridge _bridge;
+        readonly ICommittedEventStreamBridge _bridge;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of <see cref="CommittedEventStreamSender"/>
         /// </summary>
-        public CommittedEventStreamSender(ICommittedEventStreamBridge bridge)
+        /// <param name="bridge"><see cref="ICommittedEventStreamBridge"/> to use for bridging</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        public CommittedEventStreamSender(ICommittedEventStreamBridge bridge, ILogger logger)
         {
             _bridge = bridge;
+            _logger = logger;
         }
 
 
         /// <inheritdoc/>
         public void Send(CommittedEventStream committedEventStream)
         {
+            _logger.Trace("Sending committed event stream");
             _bridge.Send(committedEventStream);
         }
     }
