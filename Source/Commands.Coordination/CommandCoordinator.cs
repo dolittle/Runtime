@@ -7,7 +7,9 @@ using System.Reflection;
 using doLittle.Globalization;
 using doLittle.Logging;
 using doLittle.Runtime.Transactions;
-using doLittle.Commands;
+using doLittle.Runtime.Commands;
+using doLittle.Runtime.Commands.Security;
+using doLittle.Runtime.Commands.Validation;
 
 namespace doLittle.Runtime.Commands.Coordination
 {
@@ -29,7 +31,7 @@ namespace doLittle.Runtime.Commands.Coordination
         /// <param name="commandHandlerManager">A <see cref="ICommandHandlerManager"/> for handling commands</param>
         /// <param name="commandContextManager">A <see cref="ICommandContextManager"/> for establishing a <see cref="CommandContext"/></param>
         /// <param name="commandSecurityManager">A <see cref="ICommandSecurityManager"/> for dealing with security and commands</param>
-        /// <param name="commandValidators">A <see cref="ICommandValidators"/> for validating a <see cref="ICommand"/> before handling</param>
+        /// <param name="commandValidators">A <see cref="ICommandValidators"/> for validating a <see cref="CommandRequest"/> before handling</param>
         /// <param name="localizer">A <see cref="ILocalizer"/> to use for controlling localization of current thread when handling commands</param>
         /// <param name="logger"><see cref="ILogger"/> to log with</param>
         public CommandCoordinator(

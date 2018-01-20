@@ -9,9 +9,17 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Commands\Commands.csproj" />
+    <ProjectReference Include="..\Commands.Handling\Commands.Handling.csproj" />
+    <ProjectReference Include="..\Commands.Security\Commands.Security.csproj" />
+    <ProjectReference Include="..\Commands.Validation\Commands.Validation.csproj" />
+    <ProjectReference Include="..\Execution\Execution.csproj" />
+    <ProjectReference Include="..\Transactions\Transactions.csproj" />
+    <ProjectReference Include="..\Events.Coordination\Events.Coordination.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Globalization" Version="2.0.0-*" />
   </ItemGroup>
 
 </Project>

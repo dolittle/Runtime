@@ -2,14 +2,14 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Commands;
+using doLittle.Runtime.Commands;
 
 namespace doLittle.Runtime.Commands
 {
     /// <summary>
     /// Defines the functionality for a manager that handles commands
     /// 
-    /// Handles a <see cref="ICommand">command</see> by calling any
+    /// Handles a <see cref="CommandRequest">command</see> by calling any
     /// command handlers that can handle the specific command
     /// </summary>
     public interface ICommandHandlerManager

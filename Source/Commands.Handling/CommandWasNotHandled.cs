@@ -7,7 +7,7 @@ using System;
 namespace doLittle.Runtime.Commands
 {
     /// <summary>
-    /// The exception that is thrown when a command is not handled by any <see cref="ICanHandleCommands"/>
+    /// The exception that is thrown when a command is not handled by any handlers
     /// </summary>
     public class CommandWasNotHandled : ArgumentException
     {

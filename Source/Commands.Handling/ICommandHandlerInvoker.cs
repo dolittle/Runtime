@@ -7,10 +7,6 @@ namespace doLittle.Runtime.Commands
     /// <summary>
     /// Invokes a command for a command handler type
     /// </summary>
-    /// <remarks>
-    /// Typically, the default invoker handles the generic
-    /// <see cref="ICanHandleCommands">command handlers</see>
-    /// </remarks>
     public interface ICommandHandlerInvoker
     {
         /// <summary>

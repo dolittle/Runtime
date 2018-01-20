@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.Commands;
+using doLittle.Runtime.Commands;
 using doLittle.Runtime.Events;
 using doLittle.Runtime.Execution;
 using doLittle.Runtime.Transactions;
@@ -11,7 +11,7 @@ using doLittle.Runtime.Transactions;
 namespace doLittle.Runtime.Commands.Coordination
 {
     /// <summary>
-    /// Defines a context for a <see cref="ICommand">command</see> passing through
+    /// Defines a context for a <see cref="CommandRequest">command</see> passing through
     /// the system
     /// </summary>
     public interface ICommandContext : ITransaction

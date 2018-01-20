@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Commands;
+using doLittle.Runtime.Commands;
 
 namespace doLittle.Runtime.Commands.Coordination
 {
@@ -26,7 +26,7 @@ namespace doLittle.Runtime.Commands.Coordination
         ICommandContext GetCurrent();
 
         /// <summary>
-        /// Establish a <see cref="ICommandContext">command context</see> for a specific <see cref="ICommand">command</see>.
+        /// Establish a <see cref="ICommandContext">command context</see> for a specific <see cref="CommandRequest">command</see>.
         /// This will be the current command context, unless something else establishes a new context
         /// </summary>
         /// <param name="command"><see cref="CommandRequest">Command</see> to establish for</param>

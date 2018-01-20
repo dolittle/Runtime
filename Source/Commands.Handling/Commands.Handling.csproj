@@ -14,6 +14,7 @@
   <ItemGroup>
     <PackageReference Include="doLittle.Types" Version="2.0.0-*" />
     <PackageReference Include="doLittle.Execution" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
   </ItemGroup>
 
 </Project>
