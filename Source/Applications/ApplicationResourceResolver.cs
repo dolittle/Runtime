@@ -5,6 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using doLittle.Applications;
+using doLittle.Artifacts;
 using doLittle.Collections;
 using doLittle.Execution;
 using doLittle.Logging;
@@ -28,13 +30,13 @@ namespace doLittle.Runtime.Applications
         /// Initializes a new instance of <see cref="ApplicationResourceResolver"/>
         /// </summary>
         /// <param name="application">Current <see cref="IApplication">Application</see></param>
-        /// <param name="types"><see cref="IApplicationResourceTypes">Resource types</see> available</param>
+        /// <param name="types"><see cref="IArtifactTypes">Resource types</see> available</param>
         /// <param name="resolvers">Instances of <see cref="ICanResolveApplicationResources"/> for specialized resolving</param>
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for discovering types needed</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public ApplicationResourceResolver(
             IApplication application, 
-            IApplicationResourceTypes types, 
+            IArtifactTypes types, 
             IInstancesOf<ICanResolveApplicationResources> resolvers, 
             ITypeFinder typeFinder,
             ILogger logger)
