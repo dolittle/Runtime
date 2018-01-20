@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="doLittle.Concepts" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
+    <PackageReference Include="doLittle.Artifacts" Version="2.0.0-*" />
     <PackageReference Include="doLittle.DependencyInversion.Conventions" Version="2.0.0-*" />
     <PackageReference Include="doLittle.Strings" Version="2.0.0-*" />
   </ItemGroup>
