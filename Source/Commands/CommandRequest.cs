@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Runtime.Transactions;
 
 namespace doLittle.Runtime.Commands
@@ -17,9 +17,9 @@ namespace doLittle.Runtime.Commands
         /// Initializes a new instance of <see cref="CommandRequest"/>
         /// </summary>
         /// <param name="correlationId"><see cref="TransactionCorrelationId"/> for the transaction</param>
-        /// <param name="type"><see cref="IApplicationResourceIdentifier">Identifier</see> of the command</param>
+        /// <param name="type"><see cref="IApplicationArtifactIdentifier">Identifier</see> of the command</param>
         /// <param name="content">Content of the command</param>
-        public CommandRequest(TransactionCorrelationId correlationId, IApplicationResourceIdentifier type, IDictionary<string, object> content)
+        public CommandRequest(TransactionCorrelationId correlationId, IApplicationArtifactIdentifier type, IDictionary<string, object> content)
         {
             CorrelationId = correlationId;
             Type = type;
@@ -33,12 +33,12 @@ namespace doLittle.Runtime.Commands
         public TransactionCorrelationId CorrelationId { get; }
 
         /// <summary>
-        /// Gets the <see cref="IApplicationResourceIdentifier"/> representing the type of the Command
+        /// Gets the <see cref="IApplicationArtifactIdentifier"/> representing the type of the Command
         /// </summary>
         /// <returns>
-        /// <see cref="IApplicationResourceIdentifier"/> representing the type of the Command
+        /// <see cref="IApplicationArtifactIdentifier"/> representing the type of the Command
         /// </returns>
-        public IApplicationResourceIdentifier   Type { get; }
+        public IApplicationArtifactIdentifier   Type { get; }
 
         /// <summary>
         /// Gets the content of the command
