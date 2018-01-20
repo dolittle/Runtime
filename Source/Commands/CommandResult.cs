@@ -6,13 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using doLittle.Validation;
-using doLittle.Commands;
 
 namespace doLittle.Runtime.Commands
 {
     /// <summary>
-    /// Represents the result from the <see cref="ICommandCoordinator">CommandCoordinator</see>
+    /// Represents the result after handling a <see cref="CommandRequest"/>
     /// </summary>
     public class CommandResult
     {
