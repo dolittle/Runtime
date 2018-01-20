@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using doLittle.Validation;
 
 namespace doLittle.Runtime.Commands
 {
@@ -108,10 +109,10 @@ namespace doLittle.Runtime.Commands
 
 
         /// <summary>
-        /// Create a <see cref="CommandResult"/> for a given <see cref="ICommand"/> instance
+        /// Create a <see cref="CommandResult"/> for a given <see cref="CommandRequest"/> instance
         /// </summary>
-        /// <param name="command"><see cref="ICommand"/> to create from</param>
-        /// <returns>A <see cref="CommandResult"/> with <see cref="ICommand"/> details populated</returns>
+        /// <param name="command"><see cref="CommandRequest"/> to create from</param>
+        /// <returns>A <see cref="CommandResult"/> with <see cref="CommandRequest"/> details populated</returns>
         public static CommandResult ForCommand(CommandRequest command)
         {
             return new CommandResult
