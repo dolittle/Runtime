@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Read.Validation;
 using doLittle.Rules;
 
 namespace doLittle.Read
@@ -22,7 +21,7 @@ namespace doLittle.Read
         public QueryResult()
         {
             SecurityMessages = new string[0];
-            Validation = new QueryValidationResult(new BrokenRule[0]);
+            BrokenRules = new BrokenRule[0];
         }
 
         /// <summary>
@@ -51,9 +50,9 @@ namespace doLittle.Read
         public IEnumerable<string> SecurityMessages { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="QueryValidationResult">validation result</see>
+        /// Gets all the broken rules
         /// </summary>
-        public QueryValidationResult Validation { get; set; }
+        public IEnumerable<BrokenRule> BrokenRules { get; private set; }
 
         /// <summary>
         /// Gets or sets wether or not command passed security
@@ -66,24 +65,16 @@ namespace doLittle.Read
         /// <summary>
         /// Get wether or not the query was successful or not
         /// </summary>
-        public bool Success
-        {
-            get
-            {
-                return  Exception == null && 
-                        Items != null && 
-                        Validation.Success &&
-                        PassedSecurity;
-            }
-        }
+        public bool Success =>
+            Exception == null &&
+            Items != null &&
+            Invalid &&
+            PassedSecurity;
 
         /// <summary>
         /// Get wether or not the query is considered invalid in validation terms
         /// </summary>
-        public bool Invalid
-        {
-            get { return !Validation.Success; }
-        }
+        public bool Invalid => BrokenRules.Count()> 0;
 
         /// <summary>
         /// Creates a <see cref="QueryResult"/> for a given <see cref="IQuery"/>

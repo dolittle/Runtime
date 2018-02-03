@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>doLittle.Runtime.Queries.Coordination</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/default.props" />
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\Queries\Queries.csproj" />
+    <ProjectReference Include="..\Queries.Security\Queries.Security.csproj" />
+    <ProjectReference Include="..\Queries.Validation\Queries.Validation.csproj" />
+  </ItemGroup>
+  
+</Project>
