@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Storage
@@ -21,8 +21,8 @@ namespace doLittle.Runtime.Events.Storage
         /// <summary>
         /// Allocate the next global <see cref="EventSequenceNumber"/> for a specific <see cref="IEvent">event type</see>
         /// </summary>
-        /// <param name="identifier"><see cref="IApplicationResourceIdentifier">Identifier</see> for the <see cref="IEvent">event type</see></param>
+        /// <param name="identifier"><see cref="IApplicationArtifactIdentifier">Identifier</see> for the <see cref="IEvent">event type</see></param>
         /// <returns>The next <see cref="EventSequenceNumber"/> for the <see cref="IEvent">event type</see></returns>
-        EventSequenceNumber NextForType(IApplicationResourceIdentifier identifier);
+        EventSequenceNumber NextForType(IApplicationArtifactIdentifier identifier);
     }
 }

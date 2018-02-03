@@ -23,7 +23,7 @@ namespace doLittle.Runtime.Events.Processing
     {
         readonly Dictionary<IApplicationArtifactIdentifier, List<IEventProcessor>> _eventProcessorsByResourceIdentifier;
         readonly List<IEventProcessor> _eventProcessors = new List<IEventProcessor>();
-        readonly IArtifacts _applicationResources;
+        readonly IApplicationResources _applicationResources;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -63,9 +63,9 @@ namespace doLittle.Runtime.Events.Processing
             return new EventProcessingResults(results);
         }
 
-        Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>> GatherEventProcessorsFrom(IEnumerable<IKnowAboutEventProcessors> systemsThatHasEventProcessors)
+        Dictionary<IApplicationArtifactIdentifier, List<IEventProcessor>> GatherEventProcessorsFrom(IEnumerable<IKnowAboutEventProcessors> systemsThatHasEventProcessors)
         {
-            var eventProcessorsByResourceIdentifier = new Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>>();
+            var eventProcessorsByResourceIdentifier = new Dictionary<IApplicationArtifactIdentifier, List<IEventProcessor>>();
             systemsThatHasEventProcessors.ForEach(a => a.ForEach(e =>
             {
                 List<IEventProcessor> eventProcessors;

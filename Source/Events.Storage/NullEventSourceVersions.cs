@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 
 namespace doLittle.Runtime.Events.Storage
 {
@@ -24,7 +24,7 @@ namespace doLittle.Runtime.Events.Storage
 
 
         /// <inheritdoc/>
-        public EventSourceVersion GetFor(IApplicationResourceIdentifier eventSource, EventSourceId eventSourceId)
+        public EventSourceVersion GetFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
         {
             var version = EventSourceVersion.Zero;
             version = _eventStore.GetVersionFor(eventSource, eventSourceId);
@@ -32,7 +32,7 @@ namespace doLittle.Runtime.Events.Storage
         }
 
         /// <inheritdoc/>
-        public void SetFor(IApplicationResourceIdentifier eventSource, EventSourceId eventSourceId, EventSourceVersion version)
+        public void SetFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId, EventSourceVersion version)
         {
         }
     }

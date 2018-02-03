@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Logging;
 using doLittle.Events;
 
@@ -17,7 +17,7 @@ namespace doLittle.Runtime.Events.Storage.Development
         const string VersionForPrefix = "VersionFor";
 
         IFiles _files;
-        IApplicationResourceIdentifierConverter _applicationResourceIdentifierConverter;
+        IApplicationArtifactIdentifierStringConverter _applicationArtifactIdentifierStringConverter;
         IEventStore _eventStore;
         string _path;
 
@@ -26,25 +26,25 @@ namespace doLittle.Runtime.Events.Storage.Development
         /// </summary>
         /// <param name="files">A system to work with <see cref="IFiles"/></param>
         /// <param name="eventStore"><see cref="IEventStore"/> for getting information if not found in file system</param>
-        /// <param name="applicationResourceIdentifierConverter">Converter for converting <see cref="IApplicationResourceIdentifier"/> "/></param>
+        /// <param name="applicationArtifactIdentifierStringConverter">Converter for converting <see cref="IApplicationArtifactIdentifier"/> "/></param>
         /// <param name="pathProvider">A delegate that can provide path to store <see cref="EventSourceVersion"/> for <see cref="IEventSource"/> - see <see cref="ICanProvideEventSourceVersionsPath"/></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public EventSourceVersions(
             IFiles files, 
             IEventStore eventStore, 
-            IApplicationResourceIdentifierConverter applicationResourceIdentifierConverter, 
+            IApplicationArtifactIdentifierStringConverter applicationArtifactIdentifierStringConverter, 
             ICanProvideEventSourceVersionsPath pathProvider,
             ILogger logger)
         {
             _files = files;
             _eventStore = eventStore;
-            _applicationResourceIdentifierConverter = applicationResourceIdentifierConverter;
+            _applicationArtifactIdentifierStringConverter = applicationArtifactIdentifierStringConverter;
             _path = pathProvider();
             logger.Information($"Using path : {_path}");
         }
 
         /// <inheritdoc/>
-        public EventSourceVersion GetFor(IApplicationResourceIdentifier eventSource, EventSourceId eventSourceId)
+        public EventSourceVersion GetFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
         {
             var fileName = GetFileNameFor(eventSource, eventSourceId);
             var version = EventSourceVersion.Zero;
@@ -59,16 +59,16 @@ namespace doLittle.Runtime.Events.Storage.Development
         }
 
         /// <inheritdoc/>
-        public void SetFor(IApplicationResourceIdentifier eventSource, EventSourceId eventSourceId, EventSourceVersion version)
+        public void SetFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId, EventSourceVersion version)
         {
             var fileName = GetFileNameFor(eventSource, eventSourceId);
             _files.WriteString(_path, fileName, version.Combine().ToString());
         }
 
 
-        string GetFileNameFor(IApplicationResourceIdentifier eventSource, EventSourceId eventSourceId)
+        string GetFileNameFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
         {
-            var key = $"{VersionForPrefix}_{_applicationResourceIdentifierConverter.AsString(eventSource)}_{eventSourceId.Value}";
+            var key = $"{VersionForPrefix}_{_applicationArtifactIdentifierStringConverter.AsString(eventSource)}_{eventSourceId.Value}";
             return key;
         }
     }

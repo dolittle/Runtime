@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Execution;
 using doLittle.Logging;
 
@@ -21,22 +21,22 @@ namespace doLittle.Runtime.Events.Storage.Development
 
         object _globalSequenceLock = new object();
         Dictionary<int, object> _sequenceLocksPerType = new Dictionary<int, object>();
-        IApplicationResourceIdentifierConverter _applicationResourceIdentifierConverter;
+        IApplicationArtifactIdentifierStringConverter _applicationArtifactIdentifierStringConverter;
         IFiles _files;
         string _path;
 
         /// <summary>
         /// Initializes a new instance of <see cref="EventSequenceNumbers"/>
         /// </summary>
-        /// <param name="applicationResourceIdentifierConverter"><see cref="IApplicationResourceIdentifierConverter"/> for getting string representation of <see cref="IApplicationResourceIdentifier"/></param>
+        /// <param name="applicationArtifactIdentifierStringConverter"><see cref="IApplicationArtifactIdentifierStringConverter"/> for getting string representation of <see cref="IApplicationArtifactIdentifier"/></param>
         /// <param name="files"><see cref="IFiles"/> to work with files</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public EventSequenceNumbers(
-            IApplicationResourceIdentifierConverter applicationResourceIdentifierConverter, 
+            IApplicationArtifactIdentifierStringConverter applicationArtifactIdentifierStringConverter, 
             IFiles files,
             ILogger logger)
         {
-            _applicationResourceIdentifierConverter = applicationResourceIdentifierConverter;
+            _applicationArtifactIdentifierStringConverter = applicationArtifactIdentifierStringConverter;
             _files = files;
             _path = "";
             throw new NotImplementedException("MISSING PATH CONFIGURATION");
@@ -55,7 +55,7 @@ namespace doLittle.Runtime.Events.Storage.Development
         }
 
         /// <inheritdoc/>
-        public EventSequenceNumber NextForType(IApplicationResourceIdentifier identifier)
+        public EventSequenceNumber NextForType(IApplicationArtifactIdentifier identifier)
         {
             var hashCode = identifier.GetHashCode();
             lock( _sequenceLocksPerType )
@@ -65,7 +65,7 @@ namespace doLittle.Runtime.Events.Storage.Development
 
             lock( _sequenceLocksPerType[hashCode] )
             {
-                var identifierAsString = _applicationResourceIdentifierConverter.AsString(identifier);
+                var identifierAsString = _applicationArtifactIdentifierStringConverter.AsString(identifier);
                 var file = $"{SequenceForPrefix}{identifierAsString}";
                 var sequence = GetNextInSequenceFromFile(file);
                 _files.WriteString(_path, file, sequence.ToString());

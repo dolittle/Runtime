@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Applications\Applications.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
   </ItemGroup>
 

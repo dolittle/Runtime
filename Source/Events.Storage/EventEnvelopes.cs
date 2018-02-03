@@ -9,7 +9,7 @@ using doLittle.Applications;
 using doLittle.Runtime.Execution;
 using doLittle.Time;
 using doLittle.Runtime.Transactions;
-using doLittle.Runtime.Events.Versioning;
+using doLittle.Runtime.Events.Migration;
 using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Storage
