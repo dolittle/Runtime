@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 
-namespace doLittle.Runtime.Events.Versioning
+namespace doLittle.Runtime.Events.Migration
 {
     /// <summary>
     /// Represents a migration hierarchy for a logical event, containing the concrete type for each step in the chain.

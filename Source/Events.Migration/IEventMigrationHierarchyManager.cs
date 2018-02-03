@@ -5,7 +5,7 @@
 using System;
 using doLittle.Events;
 
-namespace doLittle.Runtime.Events.Versioning
+namespace doLittle.Runtime.Events.Migration
 {
     /// <summary>
     /// Defines a manager that is able to determine what the current migration level for an <see cref="IEvent">Event</see>

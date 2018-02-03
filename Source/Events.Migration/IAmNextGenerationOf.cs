@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Events;
 
-namespace doLittle.Runtime.Events.Versioning
+namespace doLittle.Runtime.Events.Migration
 {
 
     /// <summary>

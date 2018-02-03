@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Runtime.Events.Versioning
+namespace doLittle.Runtime.Events.Migration
 {
     /// <summary>
     /// Represents an exceptional situation where an event in an <see cref="EventMigrationHierarchy">EventMigrationHierarchy</see>

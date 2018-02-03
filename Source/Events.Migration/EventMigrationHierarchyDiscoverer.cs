@@ -10,7 +10,7 @@ using doLittle.Execution;
 using doLittle.Types;
 using doLittle.Events;
 
-namespace doLittle.Runtime.Events.Versioning
+namespace doLittle.Runtime.Events.Migration
 {
     /// <summary>
     /// Represents a <see cref="IEventMigrationHierarchyDiscoverer">IEventMigrationHierarchyDiscoverer</see>
