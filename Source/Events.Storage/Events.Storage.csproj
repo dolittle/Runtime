@@ -15,7 +15,7 @@
     <ProjectReference Include="..\Events\Events.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
     <ProjectReference Include="..\Execution\Execution.csproj" />
-    <ProjectReference Include="..\Events.Versioning\Events.Versioning.csproj" />
+    <ProjectReference Include="..\Events.Migration\Events.Migration.csproj" />
   </ItemGroup>
 
 </Project>
