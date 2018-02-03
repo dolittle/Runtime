@@ -2,19 +2,19 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Security;
-using doLittle.Commands;
 using System;
+using doLittle.Security;
+using doLittle.Runtime.Commands;
 
 namespace doLittle.Runtime.Commands.Security
 {
     /// <summary>
-    /// Extensions for building a security descriptor specific for <see cref="ICommand">commands</see>
+    /// Extensions for building a security descriptor specific for <see cref="CommandRequest">commands</see>
     /// </summary>
     public static class CommandSecurityExtensions
     {
         /// <summary>
-        /// Add an <see cref="HandleCommand">action</see> to describe the handling of <see cref="ICommand">commands</see>
+        /// Add an <see cref="HandleCommand">action</see> to describe the handling of <see cref="CommandRequest">commands</see>
         /// </summary>
         /// <param name="descriptorBuilder"><see cref="ISecurityDescriptorBuilder"/> to extend</param>
         /// <returns><see cref="HandleCommand"/> for describing the action</returns>
@@ -55,11 +55,11 @@ namespace doLittle.Runtime.Commands.Security
         /// <summary>
         /// Add a <see cref="TypeSecurable"/> to the <see cref="CommandSecurityTarget"/> for a given type
         /// </summary>
-        /// <typeparam name="T">Type of <see cref="ICommand"/> to secure</typeparam>
+        /// <typeparam name="T">Type of <see cref="CommandRequest"/> to secure</typeparam>
         /// <param name="target"><see cref="CommandSecurityTarget"/> to add to</param>
         /// <param name="continueWith">Callback for continuing the fluent interface</param>
         /// <returns><see cref="TypeSecurable"/> for the specific type</returns>
-        public static CommandSecurityTarget InstanceOf<T>(this CommandSecurityTarget target, Action<TypeSecurable> continueWith) where T : ICommand
+        public static CommandSecurityTarget InstanceOf<T>(this CommandSecurityTarget target, Action<TypeSecurable> continueWith) where T : CommandRequest
         {
             var securable = new TypeSecurable(typeof(T));
             target.AddSecurable(securable);

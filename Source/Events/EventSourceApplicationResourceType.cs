@@ -3,23 +3,16 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Runtime.Applications;
+using doLittle.Artifacts;
 
 namespace doLittle.Runtime.Events
 {
     /// <summary>
-    /// Represents a <see cref="IApplicationResourceType">application resource type</see> for 
-    /// <see cref="IEventSource">events</see>
+    /// Represents a <see cref="IArtifactType">artifact type</see> for <see cref="IEventSource">events</see>
     /// </summary>
-    public class EventSourceApplicationResourceType : IApplicationResourceType
+    public class EventSourceApplicationResourceType : IArtifactType
     {
         /// <inheritdoc/>
         public string Identifier => "EventSource";
-
-        /// <inheritdoc/>
-        public Type Type => typeof(IEventSource);
-
-        /// <inheritdoc/>
-        public ApplicationArea Area => ApplicationAreas.Domain;
     }
 }

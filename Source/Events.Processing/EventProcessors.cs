@@ -4,7 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
+using doLittle.Artifacts;
 using doLittle.Collections;
 using doLittle.Execution;
 using doLittle.Reflection;
@@ -20,9 +21,9 @@ namespace doLittle.Runtime.Events.Processing
     [Singleton]
     public class EventProcessors : IEventProcessors
     {
-        readonly Dictionary<IApplicationResourceIdentifier, List<IEventProcessor>> _eventProcessorsByResourceIdentifier;
+        readonly Dictionary<IApplicationArtifactIdentifier, List<IEventProcessor>> _eventProcessorsByResourceIdentifier;
         readonly List<IEventProcessor> _eventProcessors = new List<IEventProcessor>();
-        readonly IApplicationResources _applicationResources;
+        readonly IArtifacts _applicationResources;
         private readonly ILogger _logger;
 
         /// <summary>

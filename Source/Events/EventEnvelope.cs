@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using doLittle.Events;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Runtime.Transactions;
 
 namespace doLittle.Runtime.Events
@@ -22,9 +22,9 @@ namespace doLittle.Runtime.Events
         /// <param name="sequenceNumber"></param>
         /// <param name="sequenceNumberForEventType"></param>
         /// <param name="generation"><see cref="EventGeneration"/> for the <see cref="IEvent"/> </param>
-        /// <param name="event"><see cref="IApplicationResourceIdentifier"/> representing the <see cref="IEvent"/></param>
+        /// <param name="event"><see cref="IApplicationArtifactIdentifier"/> representing the <see cref="IEvent"/></param>
         /// <param name="eventSourceId"><see cref="EventSourceId"/> for the <see cref="IEventSource"/></param>
-        /// <param name="eventSource"><see cref="IApplicationResourceIdentifier"/> representing the <see cref="IEventSource"/></param>
+        /// <param name="eventSource"><see cref="IApplicationArtifactIdentifier"/> representing the <see cref="IEventSource"/></param>
         /// <param name="version"><see cref="EventSourceVersion">Version</see> of the event related to the <see cref="IEventSource"/></param>
         /// <param name="causedBy"><see cref="string"/> representing which person or what system caused the event</param>
         /// <param name="occurred"><see cref="DateTime">When</see> the event occured</param>
@@ -34,9 +34,9 @@ namespace doLittle.Runtime.Events
             EventSequenceNumber sequenceNumber,
             EventSequenceNumber sequenceNumberForEventType,
             EventGeneration generation, 
-            IApplicationResourceIdentifier @event, 
+            IApplicationArtifactIdentifier @event, 
             EventSourceId eventSourceId, 
-            IApplicationResourceIdentifier eventSource, 
+            IApplicationArtifactIdentifier eventSource, 
             EventSourceVersion version, 
             CausedBy causedBy, 
             DateTimeOffset occurred)
@@ -70,13 +70,13 @@ namespace doLittle.Runtime.Events
         public EventGeneration Generation { get; }
 
         /// <inheritdoc/>
-        public IApplicationResourceIdentifier Event { get; }
+        public IApplicationArtifactIdentifier Event { get; }
 
         /// <inheritdoc/>
         public EventSourceId EventSourceId { get; }
 
         /// <inheritdoc/>
-        public IApplicationResourceIdentifier EventSource { get; }
+        public IApplicationArtifactIdentifier EventSource { get; }
 
         /// <inheritdoc/>
         public EventSourceVersion Version { get; }

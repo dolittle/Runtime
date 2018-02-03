@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Globalization;
 using System.Security.Claims;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Dynamic;
 using doLittle.Runtime.Tenancy;
 using doLittle.DependencyInversion.Conventions;

@@ -3,13 +3,13 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.Commands;
+using doLittle.Runtime.Commands;
 using doLittle.Validation;
 
 namespace doLittle.Runtime.Commands.Validation
 {
     /// <summary>
-    /// Represents the result of validation for a <see cref="ICommand"/>
+    /// Represents the result of validation for a <see cref="CommandRequest"/>
     /// </summary>
     public class CommandValidationResult
     {

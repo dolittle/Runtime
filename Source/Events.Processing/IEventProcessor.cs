@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Events;
 
 namespace doLittle.Runtime.Events.Processing
@@ -18,10 +18,10 @@ namespace doLittle.Runtime.Events.Processing
         EventProcessorIdentifier Identifier { get; }
 
         /// <summary>
-        /// Gets the <see cref="IApplicationResourceIdentifier"/> for the <see cref="IEvent">event type</see>
+        /// Gets the <see cref="IApplicationArtifactIdentifier"/> for the <see cref="IEvent">event type</see>
         /// it represents
         /// </summary>
-        IApplicationResourceIdentifier Event { get; }
+        IApplicationArtifactIdentifier Event { get; }
 
         /// <summary>
         /// Process an event 

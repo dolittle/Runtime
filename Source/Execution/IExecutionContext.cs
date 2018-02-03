@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Globalization;
 using System.Security.Claims;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Runtime.Tenancy;
 
 namespace doLittle.Runtime.Execution

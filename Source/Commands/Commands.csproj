@@ -9,11 +9,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
-    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
+    <ProjectReference Include="..\Validation\Validation.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Validation\Validation.csproj" />
+    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
   </ItemGroup>
 
 </Project>

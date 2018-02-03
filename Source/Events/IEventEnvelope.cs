@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Runtime.Transactions;
 using doLittle.Events;
 
@@ -41,9 +41,9 @@ namespace doLittle.Runtime.Events
         EventGeneration Generation { get; }
 
         /// <summary>
-        /// Gets the <see cref="IApplicationResourceIdentifier">identifier</see> identifying the <see cref="IEvent"/>
+        /// Gets the <see cref="IApplicationArtifactIdentifier">identifier</see> identifying the <see cref="IEvent"/>
         /// </summary>
-        IApplicationResourceIdentifier Event { get; }
+        IApplicationArtifactIdentifier Event { get; }
 
         /// <summary>
         /// Gets the <see cref="EventSourceId">id</see> of the <see cref="IEventSource"/>
@@ -51,9 +51,9 @@ namespace doLittle.Runtime.Events
         EventSourceId EventSourceId { get; }
 
         /// <summary>
-        /// Gets the <see cref="IApplicationResourceIdentifier">identifier</see> identifying the <see cref="IEventSource"/>
+        /// Gets the <see cref="IApplicationArtifactIdentifier">identifier</see> identifying the <see cref="IEventSource"/>
         /// </summary>
-        IApplicationResourceIdentifier EventSource { get; }
+        IApplicationArtifactIdentifier EventSource { get; }
 
         /// <summary>
         /// Gets the <see cref="EventSourceVersion">version</see> of the <see cref="IEventSource"/>

@@ -3,12 +3,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Security;
-using doLittle.Commands;
+using doLittle.Runtime.Commands;
 
 namespace doLittle.Runtime.Commands.Security
 {
     /// <summary>
-    /// Represents a <see cref="ISecurityAction"/> for handling <see cref="ICommand">commands</see>
+    /// Represents a <see cref="ISecurityAction"/> for handling <see cref="CommandRequest">commands</see>
     /// </summary>
     public class HandleCommand : SecurityAction
     {

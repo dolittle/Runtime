@@ -5,7 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Runtime.Execution;
 using doLittle.Time;
 using doLittle.Runtime.Transactions;
