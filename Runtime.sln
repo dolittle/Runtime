@@ -31,7 +31,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Storage", "Source\Ev
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Storage.Development", "Source\Events.Storage.Development\Events.Storage.Development.csproj", "{F5CF7FD2-69B3-4D5D-8EEC-862CD90750B9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Versioning", "Source\Events.Versioning\Events.Versioning.csproj", "{18630DDF-354F-43EC-A537-1FD69914D17D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Migration", "Source\Events.Migration\Events.Migration.csproj", "{18630DDF-354F-43EC-A537-1FD69914D17D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events", "Specifications\Events\Events.csproj", "{F6553F17-615C-437B-980A-D15DAF3F93F0}"
 EndProject
@@ -41,7 +41,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Coordination", "Spec
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tenancy", "Specifications\Tenancy\Tenancy.csproj", "{0E2A40E9-F351-417D-AE6C-19CAFA608F73}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Versioning", "Specifications\Events.Versioning\Events.Versioning.csproj", "{EEFDEA31-B4B4-4CFC-9A90-5B6A44CA096A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Migration", "Specifications\Events.Migration\Events.Migration.csproj", "{EEFDEA31-B4B4-4CFC-9A90-5B6A44CA096A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Processing", "Specifications\Events.Processing\Events.Processing.csproj", "{B4A328C7-F067-436E-9C29-92C03099A284}"
 EndProject

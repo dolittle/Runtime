@@ -8,7 +8,7 @@
   <Import Project="../../Build/MSBuild/specs.props"></Import>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Events.Versioning\Events.Versioning.csproj" />
+    <ProjectReference Include="..\..\Source\Events.Migration\Events.Migration.csproj" />
   </ItemGroup>
 
 
