@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using Machine.Specifications;
-using doLittle.Commands;
 using doLittle.Validation;
 
 namespace doLittle.Runtime.Commands.Specs.for_CommandResult
