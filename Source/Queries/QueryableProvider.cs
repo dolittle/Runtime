@@ -4,14 +4,14 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Linq;
 
-namespace doLittle.Read
+namespace doLittle.Queries
 {
     /// <summary>
     /// Represents an implementation of a <see cref="IQueryProviderFor{T}"/> for <see cref="IQueryable"/>
     /// </summary>
     public class QueryableProvider : IQueryProviderFor<IQueryable>
     {
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public QueryProviderResult Execute(IQueryable query, PagingInfo paging)
         {
             var result = new QueryProviderResult();
@@ -30,6 +30,5 @@ namespace doLittle.Read
 
             return result;
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

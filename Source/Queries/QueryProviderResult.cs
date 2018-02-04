@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections;
 
-namespace doLittle.Read
+namespace doLittle.Queries
 {
     /// <summary>
     /// Represents the result of issuing a query for a provider

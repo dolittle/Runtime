@@ -7,11 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using doLittle.Execution;
-using doLittle.Read.Validation;
 using doLittle.Types;
 using doLittle.DependencyInversion;
+using doLittle.ReadModels;
+using doLittle.Queries.Security;
+using doLittle.Queries.Validation;
 
-namespace doLittle.Read
+namespace doLittle.Queries.Coordination
 {
     /// <summary>
     /// Represents an implementation of <see cref="IQueryProvider"/>
@@ -52,7 +54,7 @@ namespace doLittle.Read
         }
 
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public QueryResult Execute(IQuery query, PagingInfo paging)
         {
             ThrowIfNoQueryPropertyOnQuery(query);
@@ -68,8 +70,9 @@ namespace doLittle.Read
                     result.Items = new object[0];
                     return result;
                 }
-                result.Validation = _validator.Validate(query);
-                if (!result.Validation.Success)
+                var validation = _validator.Validate(query);
+                result.BrokenRules = validation.BrokenRules;
+                if (!validation.Success)
                 {
                     result.Items = new object[0];
                     return result;
@@ -94,10 +97,6 @@ namespace doLittle.Read
 
             return result;
         }
-
-
-
-#pragma warning restore 1591 // Xml Comments
 
 
         void ThrowIfNoQueryPropertyOnQuery(IQuery query)

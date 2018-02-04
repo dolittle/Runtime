@@ -5,7 +5,7 @@
 using System.Reflection;
 using doLittle.Validation;
 
-namespace doLittle.Read.Validation
+namespace doLittle.Queries.Validation
 {
     /// <summary>
     /// Represents a builder for building validation description for a query

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Read
+namespace doLittle.ReadModels
 {
     /// <summary>
     /// The exception that is thrown when a readmodelof is not known by its name in the system

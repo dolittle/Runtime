@@ -2,7 +2,9 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-namespace doLittle.Read
+using doLittle.ReadModels;
+
+namespace doLittle.Queries
 {
     /// <summary>
     /// Defines a query for a specified type of <see cref="IReadModel"/>.

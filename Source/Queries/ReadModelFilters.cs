@@ -8,8 +8,9 @@ using System.Linq;
 using doLittle.DependencyInversion;
 using doLittle.Execution;
 using doLittle.Types;
+using doLittle.ReadModels;
 
-namespace doLittle.Read
+namespace doLittle.Queries
 {
     /// <summary>
     /// Represents an implementation of <see cref="IReadModelFilters"/>

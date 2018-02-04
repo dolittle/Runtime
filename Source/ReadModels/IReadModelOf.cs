@@ -5,7 +5,7 @@
 using System;
 using System.Linq.Expressions;
 
-namespace doLittle.Read
+namespace doLittle.ReadModels
 {
     /// <summary>
     /// Defines a way of retrieving a single <see cref="IReadModel"/>.

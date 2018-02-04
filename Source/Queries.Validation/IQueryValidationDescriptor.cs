@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using doLittle.Validation;
 
-namespace doLittle.Read.Validation
+namespace doLittle.Queries.Validation
 {
     /// <summary>
     /// Defines a descriptor for describing the validation rules for a query.

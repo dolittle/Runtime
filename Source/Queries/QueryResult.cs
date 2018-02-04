@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using doLittle.Rules;
 
-namespace doLittle.Read
+namespace doLittle.Queries
 {
     /// <summary>
     /// Represents the result of a query
@@ -52,7 +52,7 @@ namespace doLittle.Read
         /// <summary>
         /// Gets all the broken rules
         /// </summary>
-        public IEnumerable<BrokenRule> BrokenRules { get; private set; }
+        public IEnumerable<BrokenRule> BrokenRules { get; set; }
 
         /// <summary>
         /// Gets or sets wether or not command passed security

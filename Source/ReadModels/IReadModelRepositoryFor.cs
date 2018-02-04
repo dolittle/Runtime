@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Linq;
 
-namespace doLittle.Read
+namespace doLittle.ReadModels
 {
     /// <summary>
     /// Defines a repository for dealing with <see cref="IReadModel"/>s.

@@ -9,7 +9,7 @@ using doLittle.Collections;
 using doLittle.Reflection;
 using doLittle.Validation;
 
-namespace doLittle.Read.Validation
+namespace doLittle.Queries.Validation
 {
     /// <summary>
     /// Represents the basis for a validation descriptor for describing validation for queries
@@ -52,7 +52,7 @@ namespace doLittle.Read.Validation
             return builder;
         }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public IEnumerable<IValueRule> ArgumentRules
         {
             get 
@@ -62,6 +62,5 @@ namespace doLittle.Read.Validation
                 return rules;
             }
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

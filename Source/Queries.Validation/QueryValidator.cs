@@ -10,7 +10,7 @@ using doLittle.Reflection;
 using System.Reflection;
 using System.Collections.Generic;
 
-namespace doLittle.Read.Validation
+namespace doLittle.Queries.Validation
 {
     /// <summary>
     /// Represents an implementation of <see cref="IQueryValidator"/>
@@ -31,7 +31,7 @@ namespace doLittle.Read.Validation
             _ruleContexts = ruleContexts;
         }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public QueryValidationResult Validate(IQuery query)
         {
             var brokenRules = new Dictionary<IRule, BrokenRule>();
@@ -67,6 +67,5 @@ namespace doLittle.Read.Validation
                 brokenRule.AddReason(reason);
             };
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

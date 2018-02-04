@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using doLittle.Rules;
 
-namespace doLittle.Read.Validation
+namespace doLittle.Queries.Validation
 {
     /// <summary>
     /// Represents an argument on a query

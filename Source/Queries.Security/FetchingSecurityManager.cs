@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Security;
+using doLittle.ReadModels;
 
-namespace doLittle.Read
+namespace doLittle.Queries.Security
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFetchingSecurityManager"/>
@@ -22,16 +23,16 @@ namespace doLittle.Read
             _securityManager = securityManager;
         }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public AuthorizationResult Authorize<T>(IReadModelOf<T> readModelOf) where T : IReadModel
         {
             return _securityManager.Authorize<Fetching>(readModelOf);
         }
 
+        /// <inheritdoc/>
         public AuthorizationResult Authorize(IQuery query)
         {
             return _securityManager.Authorize<Fetching>(query);
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

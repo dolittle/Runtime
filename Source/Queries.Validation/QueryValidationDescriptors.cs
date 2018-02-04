@@ -11,7 +11,7 @@ using doLittle.Execution;
 using doLittle.Collections;
 using doLittle.Types;
 
-namespace doLittle.Read.Validation
+namespace doLittle.Queries.Validation
 {
     /// <summary>
     /// Represents an implementation of <see cref="IQueryValidationDescriptors"/> 

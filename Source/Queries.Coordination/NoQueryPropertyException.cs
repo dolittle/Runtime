@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Read
+namespace doLittle.Queries.Coordination
 {
     /// <summary>
     /// The exception that is thrown when a well known query does not have the query property on it

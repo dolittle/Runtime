@@ -4,8 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using doLittle.Security;
+using doLittle.ReadModels;
 
-namespace doLittle.Read
+namespace doLittle.Queries.Security
 {
     /// <summary>
     /// Extensions for building a security descriptor specific for dealing with <see cref="IReadModel">read models</see>

@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
+using doLittle.ReadModels;
 
-namespace doLittle.Read
+namespace doLittle.Queries
 {
     /// <summary>
     /// Defines a filter that can be applied to a set of <see cref="IReadModel">ReadModels</see>.

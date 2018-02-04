@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Security;
+using doLittle.ReadModels;
 
-namespace doLittle.Read
+namespace doLittle.Queries.Security
 {
     /// <summary>
     /// Defines a manager for dealing with security for <see cref="Fetching">fetching read models</see>

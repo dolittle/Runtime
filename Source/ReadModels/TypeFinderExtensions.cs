@@ -7,7 +7,7 @@ using doLittle.Execution;
 using doLittle.Reflection;
 using doLittle.Types;
 
-namespace doLittle.Read
+namespace doLittle.ReadModels
 {
     /// <summary>
     /// Extension methods for <see cref="ITypeFinder"/> for dealing with ReadModels and Queries

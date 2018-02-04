@@ -2,7 +2,7 @@
  *  Copyright (c) 2008-2017 doLittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-namespace doLittle.Read
+namespace doLittle.Queries
 {
     /// <summary>
     /// Defines a provider that can deal with a query for <typeparamref name="T"/>.

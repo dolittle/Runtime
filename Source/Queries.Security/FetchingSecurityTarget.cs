@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Security;
 
-namespace doLittle.Read
+namespace doLittle.Queries.Security
 {
     /// <summary>
     /// Represents a <see cref="ISecurityTarget">security target</see> for <see cref="Fetching"/>

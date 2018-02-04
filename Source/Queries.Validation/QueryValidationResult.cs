@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using doLittle.Rules;
 
-namespace doLittle.Read.Validation
+namespace doLittle.Queries.Validation
 {
     /// <summary>
     /// Represents the result of query validation, typically done by <see cref="IQueryValidator"/>

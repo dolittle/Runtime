@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Read
+namespace doLittle.Queries
 {
     /// <summary>
     /// The exception that is thrown when a query is not known by its name in the system

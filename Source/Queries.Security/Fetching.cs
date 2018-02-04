@@ -3,19 +3,19 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using doLittle.Security;
+using doLittle.ReadModels;
 
-namespace doLittle.Read
+namespace doLittle.Queries.Security
 {
     /// <summary>
     /// Represents a <see cref="ISecurityAction"/> for fetching <see cref="IReadModel">read models</see> 
     /// </summary>
     public class Fetching : SecurityAction
     {
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public override string ActionType
         {
             get { return "Fetching"; }
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

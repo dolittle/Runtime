@@ -6,7 +6,7 @@ using System;
 using System.Linq;
 using System.Linq.Expressions;
 
-namespace doLittle.Read
+namespace doLittle.ReadModels
 {
     /// <summary>
     /// Represents an implementation of <see cref="IReadModelOf{T}"/> for dealing with fetching of single <see cref="IReadModel"/> instances
