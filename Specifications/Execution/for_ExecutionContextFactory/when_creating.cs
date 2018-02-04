@@ -1,7 +1,7 @@
 ﻿using System.Dynamic;
 using System.Globalization;
 using System.Security.Claims;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.DependencyInversion;
 using doLittle.Security;
 using doLittle.Runtime.Tenancy;
