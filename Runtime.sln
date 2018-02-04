@@ -61,8 +61,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tasks", "Specifications\Tas
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Validation", "Specifications\Validation\Validation.csproj", "{74CE8C14-5924-4407-97A3-983F64F70F25}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Read", "Specifications\Read\Read.csproj", "{87E4B978-2DB8-4BC8-95EC-309895925D02}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Events.Serialization.Json", "Source\Events.Serialization.Json\Events.Serialization.Json.csproj", "{2C6DCE2E-7C9F-4280-8827-BA1884D9F115}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ReadModels", "Source\ReadModels\ReadModels.csproj", "{747D0E58-496A-4F4D-A048-76C977EFF870}"
