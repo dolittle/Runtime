@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
@@ -23,7 +23,7 @@ namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
         static Mock<IEventSource> event_source;
         static EventSourceId event_source_id = Guid.NewGuid();
         static EventSourceVersion event_source_version;
-        static Mock<IApplicationResourceIdentifier> event_source_identifier;
+        static Mock<IApplicationArtifactIdentifier> event_source_identifier;
 
         static IEnumerable<EventAndEnvelope> uncommitted_events;
         static UncommittedEventStream uncommitted_event_stream;
@@ -33,7 +33,7 @@ namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
         
         static Mock<IEvent> @event;
         static IEventEnvelope event_envelope;
-        static Mock<IApplicationResourceIdentifier> event_identifier;
+        static Mock<IApplicationArtifactIdentifier> event_identifier;
         
 
         Establish context = () =>
@@ -41,11 +41,11 @@ namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
             transaction_correlation_id = Guid.NewGuid();
 
             event_source_version = new EventSourceVersion(4, 2);
-            event_source_identifier = new Mock<IApplicationResourceIdentifier>();
+            event_source_identifier = new Mock<IApplicationArtifactIdentifier>();
             event_source = new Mock<IEventSource>();
             event_source.SetupGet(e => e.EventSourceId).Returns(event_source_id);
 
-            event_identifier = new Mock<IApplicationResourceIdentifier>();
+            event_identifier = new Mock<IApplicationArtifactIdentifier>();
             @event = new Mock<IEvent>();
             event_envelope = new EventEnvelope(
                 TransactionCorrelationId.NotSet,

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Runtime.Applications;
+using doLittle.Applications;
 using doLittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
@@ -30,29 +30,28 @@ namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
 
         static Mock<IEventSource> event_source;
         static EventSourceId event_source_id = Guid.NewGuid();
-        static Mock<IApplicationResourceIdentifier> event_source_identifier;
+        static Mock<IApplicationArtifactIdentifier> event_source_identifier;
 
         static Mock<IEvent> first_event;
         static IEventEnvelope first_event_envelope;
-        static Mock<IApplicationResourceIdentifier> first_event_identifier;
+        static Mock<IApplicationArtifactIdentifier> first_event_identifier;
         static EventSourceVersion first_event_source_version;
 
         static Mock<IEvent> second_event;
         static IEventEnvelope second_event_envelope;
-        static Mock<IApplicationResourceIdentifier> second_event_identifier;
+        static Mock<IApplicationArtifactIdentifier> second_event_identifier;
         static EventSourceVersion second_event_source_version;
 
-        Establish context = () =>
+        Establish context = ()=>
         {
             transaction_correlation_id = Guid.NewGuid();
 
-            
-            event_source_identifier = new Mock<IApplicationResourceIdentifier>();
+            event_source_identifier = new Mock<IApplicationArtifactIdentifier>();
             event_source = new Mock<IEventSource>();
             event_source.SetupGet(e => e.EventSourceId).Returns(event_source_id);
 
             first_event_source_version = new EventSourceVersion(4, 2);
-            first_event_identifier = new Mock<IApplicationResourceIdentifier>();
+            first_event_identifier = new Mock<IApplicationArtifactIdentifier>();
             first_event = new Mock<IEvent>();
             first_event_envelope = new EventEnvelope(
                 TransactionCorrelationId.NotSet,
@@ -71,7 +70,7 @@ namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
             var first_event_and_version = new EventAndVersion(first_event.Object, first_event_source_version);
 
             second_event_source_version = new EventSourceVersion(4, 3);
-            second_event_identifier = new Mock<IApplicationResourceIdentifier>();
+            second_event_identifier = new Mock<IApplicationArtifactIdentifier>();
             second_event = new Mock<IEvent>();
             second_event_envelope = new EventEnvelope(
                 TransactionCorrelationId.NotSet,
@@ -102,54 +101,53 @@ namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
             event_store.Setup(e => e.Commit(uncommitted_events));
 
             event_store.Setup(e => e.Commit(Moq.It.IsAny<IEnumerable<EventAndEnvelope>>())).Callback(
-                (IEnumerable<EventAndEnvelope> e) =>
+                (IEnumerable<EventAndEnvelope> e)=>
                 {
                     uncommitted_events = e;
                     sequence_string = sequence_string + "1";
                 });
 
-            var numbers = new[] { first_event_sequence_number, second_event_sequence_number };
-            var numbers_for_types = new[] { first_event_sequence_number_for_type, second_event_sequence_number_for_type };
+            var numbers = new [] { first_event_sequence_number, second_event_sequence_number };
+            var numbers_for_types = new [] { first_event_sequence_number_for_type, second_event_sequence_number_for_type };
             var sequence = 0;
             var sequence_for_types = 0;
-            event_sequence_numbers.Setup(e => e.Next()).Returns(() => numbers[sequence++]);
-            event_sequence_numbers.Setup(e => e.NextForType(Moq.It.IsAny<IApplicationResourceIdentifier>())).Returns(() => numbers_for_types[sequence_for_types++]);
+            event_sequence_numbers.Setup(e => e.Next()).Returns(()=> numbers[sequence++]);
+            event_sequence_numbers.Setup(e => e.NextForType(Moq.It.IsAny<IApplicationArtifactIdentifier>())).Returns(()=> numbers_for_types[sequence_for_types++]);
 
             committed_event_stream_sender.Setup(e => e.Send(Moq.It.IsAny<CommittedEventStream>()))
-                .Callback((CommittedEventStream c) =>
+                .Callback((CommittedEventStream c)=>
                 {
                     committed_event_stream = c;
                     sequence_string = sequence_string + "2";
                 });
         };
 
-        Because of = () => coordinator.Commit(transaction_correlation_id, uncommitted_event_stream);
+        Because of = ()=> coordinator.Commit(transaction_correlation_id, uncommitted_event_stream);
 
-        It should_commit_insert_event_with_correct_event_to_event_store = () => uncommitted_events.First().Event.ShouldEqual(first_event.Object);
+        It should_commit_insert_event_with_correct_event_to_event_store = ()=> uncommitted_events.First().Event.ShouldEqual(first_event.Object);
 
-        It should_commit_two_events = () => uncommitted_events.Count().ShouldEqual(2);
-        It should_hold_the_correct_correlation_id_for_first_event_when_committing = () => uncommitted_events.ToArray()[0].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
-        It should_hold_the_correct_sequence_number_for_first_event_when_committing = () => uncommitted_events.ToArray()[0].Envelope.SequenceNumber.ShouldEqual(first_event_sequence_number);
-        It should_hold_the_correct_sequence_number_for_event_type_for_first_event_when_committing = () => uncommitted_events.ToArray()[0].Envelope.SequenceNumberForEventType.ShouldEqual(first_event_sequence_number_for_type);
-        It should_hold_the_correct_event_for_first_event_when_committing = () => uncommitted_events.ToArray()[0].Event.ShouldEqual(first_event.Object);
+        It should_commit_two_events = ()=> uncommitted_events.Count().ShouldEqual(2);
+        It should_hold_the_correct_correlation_id_for_first_event_when_committing = ()=> uncommitted_events.ToArray()[0].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
+        It should_hold_the_correct_sequence_number_for_first_event_when_committing = ()=> uncommitted_events.ToArray()[0].Envelope.SequenceNumber.ShouldEqual(first_event_sequence_number);
+        It should_hold_the_correct_sequence_number_for_event_type_for_first_event_when_committing = ()=> uncommitted_events.ToArray()[0].Envelope.SequenceNumberForEventType.ShouldEqual(first_event_sequence_number_for_type);
+        It should_hold_the_correct_event_for_first_event_when_committing = ()=> uncommitted_events.ToArray()[0].Event.ShouldEqual(first_event.Object);
 
-        It should_hold_the_correct_correlation_id_for_second_event_when_committing = () => uncommitted_events.ToArray()[1].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
-        It should_hold_the_correct_sequence_number_for_second_event_when_committing = () => uncommitted_events.ToArray()[1].Envelope.SequenceNumber.ShouldEqual(second_event_sequence_number);
-        It should_hold_the_correct_sequence_number_for_event_type_for_second_event_when_committing = () => uncommitted_events.ToArray()[1].Envelope.SequenceNumberForEventType.ShouldEqual(second_event_sequence_number_for_type);
-        It should_hold_the_correct_event_for_second_event_when_committing = () => uncommitted_events.ToArray()[1].Event.ShouldEqual(second_event.Object);
+        It should_hold_the_correct_correlation_id_for_second_event_when_committing = ()=> uncommitted_events.ToArray()[1].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
+        It should_hold_the_correct_sequence_number_for_second_event_when_committing = ()=> uncommitted_events.ToArray()[1].Envelope.SequenceNumber.ShouldEqual(second_event_sequence_number);
+        It should_hold_the_correct_sequence_number_for_event_type_for_second_event_when_committing = ()=> uncommitted_events.ToArray()[1].Envelope.SequenceNumberForEventType.ShouldEqual(second_event_sequence_number_for_type);
+        It should_hold_the_correct_event_for_second_event_when_committing = ()=> uncommitted_events.ToArray()[1].Event.ShouldEqual(second_event.Object);
 
+        It should_send_two_events = ()=> committed_event_stream.Count.ShouldEqual(2);
+        It should_hold_the_correct_correlation_id_for_first_event_when_sending = ()=> committed_event_stream.ToArray()[0].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
+        It should_hold_the_correct_sequence_number_for_first_event_when_sending = ()=> committed_event_stream.ToArray()[0].Envelope.SequenceNumber.ShouldEqual(first_event_sequence_number);
+        It should_hold_the_correct_sequence_number_for_event_type_for_first_event_when_sending = ()=> committed_event_stream.ToArray()[0].Envelope.SequenceNumberForEventType.ShouldEqual(first_event_sequence_number_for_type);
+        It should_hold_the_correct_event_for_first_event_when_sending = ()=> committed_event_stream.ToArray()[0].Event.ShouldEqual(first_event.Object);
 
-        It should_send_two_events = () => committed_event_stream.Count.ShouldEqual(2);
-        It should_hold_the_correct_correlation_id_for_first_event_when_sending = () => committed_event_stream.ToArray()[0].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
-        It should_hold_the_correct_sequence_number_for_first_event_when_sending = () => committed_event_stream.ToArray()[0].Envelope.SequenceNumber.ShouldEqual(first_event_sequence_number);
-        It should_hold_the_correct_sequence_number_for_event_type_for_first_event_when_sending = () => committed_event_stream.ToArray()[0].Envelope.SequenceNumberForEventType.ShouldEqual(first_event_sequence_number_for_type);
-        It should_hold_the_correct_event_for_first_event_when_sending = () => committed_event_stream.ToArray()[0].Event.ShouldEqual(first_event.Object);
+        It should_hold_the_correct_correlation_id_for_second_event_when_sending = ()=> committed_event_stream.ToArray()[1].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
+        It should_hold_the_correct_sequence_number_for_second_event_when_sending = ()=> committed_event_stream.ToArray()[1].Envelope.SequenceNumber.ShouldEqual(second_event_sequence_number);
+        It should_hold_the_correct_sequence_number_for_event_type_for_second_event_when_sending = ()=> committed_event_stream.ToArray()[1].Envelope.SequenceNumberForEventType.ShouldEqual(second_event_sequence_number_for_type);
+        It should_hold_the_correct_event_for_second_event_when_sending = ()=> committed_event_stream.ToArray()[1].Event.ShouldEqual(second_event.Object);
 
-        It should_hold_the_correct_correlation_id_for_second_event_when_sending = () => committed_event_stream.ToArray()[1].Envelope.CorrelationId.ShouldEqual(transaction_correlation_id);
-        It should_hold_the_correct_sequence_number_for_second_event_when_sending = () => committed_event_stream.ToArray()[1].Envelope.SequenceNumber.ShouldEqual(second_event_sequence_number);
-        It should_hold_the_correct_sequence_number_for_event_type_for_second_event_when_sending = () => committed_event_stream.ToArray()[1].Envelope.SequenceNumberForEventType.ShouldEqual(second_event_sequence_number_for_type);
-        It should_hold_the_correct_event_for_second_event_when_sending = () => committed_event_stream.ToArray()[1].Event.ShouldEqual(second_event.Object);
-
-        It should_commit_before_sending = () => sequence_string.ShouldEqual("12");
+        It should_commit_before_sending = ()=> sequence_string.ShouldEqual("12");
     }
 }
