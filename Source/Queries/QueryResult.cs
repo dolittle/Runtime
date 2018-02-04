@@ -68,7 +68,7 @@ namespace doLittle.Queries
         public bool Success =>
             Exception == null &&
             Items != null &&
-            Invalid &&
+            !Invalid &&
             PassedSecurity;
 
         /// <summary>
