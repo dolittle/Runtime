@@ -9,7 +9,6 @@ namespace doLittle.Runtime.Tenancy
     /// <summary>
     /// Represents a <see cref="ITenant"/> in the system
     /// </summary>
-    [IgnoreDefaultConvention]
     public class Tenant : ITenant
     {
         /// <summary>
