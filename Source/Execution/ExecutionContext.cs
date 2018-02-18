@@ -14,7 +14,6 @@ namespace doLittle.Runtime.Execution
     /// <summary>
     /// Represents a <see cref="IExecutionContext"/>
     /// </summary>
-    [IgnoreDefaultConvention]
     public class ExecutionContext : IExecutionContext
     {
         /// <summary>
