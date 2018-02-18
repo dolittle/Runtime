@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using doLittle.Execution;
 using doLittle.Types;
 
-namespace doLittle.Runtime.Commands
+namespace doLittle.Runtime.Commands.Handling
 {
     /// <summary>
     /// Represents a <see cref="ICommandHandlerManager">ICommandHandlerManager</see>

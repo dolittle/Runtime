@@ -8,6 +8,7 @@ using doLittle.Globalization;
 using doLittle.Logging;
 using doLittle.Runtime.Transactions;
 using doLittle.Runtime.Commands;
+using doLittle.Runtime.Commands.Handling;
 using doLittle.Runtime.Commands.Security;
 using doLittle.Runtime.Commands.Validation;
 

@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 
-namespace doLittle.Runtime.Commands
+namespace doLittle.Runtime.Commands.Handling
 {
     /// <summary>
     /// The exception that is thrown when a command is not handled by any handlers
