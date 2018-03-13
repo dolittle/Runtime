@@ -1,14 +1,14 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
-using doLittle.Reflection;
-using doLittle.Strings;
+using Dolittle.Reflection;
+using Dolittle.Strings;
 
-namespace doLittle.Runtime.Events.Storage.Development
+namespace Dolittle.Runtime.Events.Storage.Development
 {
     /// <summary>
     /// Represents helper methods for working with property conversion related to Azure Tables and entities

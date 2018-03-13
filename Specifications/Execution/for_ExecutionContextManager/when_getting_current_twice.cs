@@ -2,7 +2,7 @@
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Execution.Specs.for_ExecutionContextManager
+namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextManager
 {
     public class when_getting_current_twice : given.an_execution_context_manager
     {

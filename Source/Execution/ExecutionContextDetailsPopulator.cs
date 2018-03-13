@@ -1,13 +1,13 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using doLittle.Types;
-using doLittle.DependencyInversion;
+using Dolittle.Types;
+using Dolittle.DependencyInversion;
 
-namespace doLittle.Runtime.Execution
+namespace Dolittle.Runtime.Execution
 {
     /// <summary>
     /// Represents a <see cref="IExecutionContextDetailsPopulator"/>

@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Specs.for_CommandResult
+namespace Dolittle.Runtime.Commands.Specs.for_CommandResult
 {
     public class when_having_an_exception_without_validation_results
     {

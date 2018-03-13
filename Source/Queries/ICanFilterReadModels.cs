@@ -1,11 +1,11 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.ReadModels;
+using Dolittle.ReadModels;
 
-namespace doLittle.Queries
+namespace Dolittle.Queries
 {
     /// <summary>
     /// Defines a filter that can be applied to a set of <see cref="IReadModel">ReadModels</see>.

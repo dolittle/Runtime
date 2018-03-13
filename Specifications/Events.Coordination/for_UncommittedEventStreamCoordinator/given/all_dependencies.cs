@@ -1,11 +1,11 @@
-﻿using doLittle.Runtime.Events.Storage;
-using doLittle.Runtime.Events.Publishing;
-using doLittle.Runtime.Events.Processing;
-using doLittle.Logging;
+﻿using Dolittle.Runtime.Events.Storage;
+using Dolittle.Runtime.Events.Publishing;
+using Dolittle.Runtime.Events.Processing;
+using Dolittle.Logging;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamCoordinator.given
+namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamCoordinator.given
 {
     public class all_dependencies
     {

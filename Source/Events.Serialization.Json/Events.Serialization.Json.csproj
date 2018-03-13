@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Events.Serialization.Json</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Events.Serialization.Json</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />

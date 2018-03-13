@@ -1,6 +1,6 @@
-﻿using doLittle.ReadModels;
+﻿using Dolittle.ReadModels;
 
-namespace doLittle.Queries.Security.Specs.for_FetchingSecurityManager
+namespace Dolittle.Queries.Security.Specs.for_FetchingSecurityManager
 {
     public class SomeReadModel : IReadModel
     {

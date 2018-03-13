@@ -1,10 +1,10 @@
-﻿using doLittle.Execution;
-using doLittle.Types;
-using doLittle.Validation.MetaData;
+﻿using Dolittle.Execution;
+using Dolittle.Types;
+using Dolittle.Validation.MetaData;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Specs.Validation.for_ValidationMetaData.given
+namespace Dolittle.Specs.Validation.for_ValidationMetaData.given
 {
     public class all_dependencies
     {

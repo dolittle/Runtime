@@ -1,8 +1,8 @@
-﻿using doLittle.Execution;
+﻿using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Tenancy.Specs.for_TenantManager.given
+namespace Dolittle.Runtime.Tenancy.Specs.for_TenantManager.given
 {
     public class all_dependencies
     {

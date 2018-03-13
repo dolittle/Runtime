@@ -1,7 +1,7 @@
-﻿using doLittle.Rules;
+﻿using Dolittle.Rules;
 using Machine.Specifications;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryArgumentValidationResult.given
+namespace Dolittle.Queries.Validation.Specs.for_QueryArgumentValidationResult.given
 {
     public class a_query_argument_validation_result_with_null_passed_as_broken_rules
     {

@@ -1,6 +1,6 @@
-﻿using doLittle.Events;
+﻿using Dolittle.Events;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs
+namespace Dolittle.Runtime.Commands.Coordination.Specs
 {
     public class SimpleEvent : IEvent
     {

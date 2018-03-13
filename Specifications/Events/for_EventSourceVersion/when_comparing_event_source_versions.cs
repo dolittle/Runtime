@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_EventSourceVersion
+namespace Dolittle.Runtime.Events.Specs.for_EventSourceVersion
 {
     [Subject(typeof (EventSourceVersion))]
     public class when_comparing_event_source_versions: given.a_range_of_event_source_versions

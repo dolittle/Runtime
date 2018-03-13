@@ -2,17 +2,17 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Events</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Events</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="doLittle.Collections" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Concepts" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Time" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Artifacts" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Collections" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Concepts" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Time" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Artifacts" Version="2.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>

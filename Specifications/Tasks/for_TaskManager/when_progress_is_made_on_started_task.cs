@@ -1,7 +1,7 @@
-﻿using doLittle.Tasks;
+﻿using Dolittle.Tasks;
 using Machine.Specifications;
 
-namespace doLittle.Specs.Tasks.for_TaskManager
+namespace Dolittle.Specs.Tasks.for_TaskManager
 {
     public class when_progress_is_made_on_started_task : given.a_task_manager_with_one_reporter
     {

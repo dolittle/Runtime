@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Tenancy.Specs.for_DefaultTenantIdResolver
+namespace Dolittle.Runtime.Tenancy.Specs.for_DefaultTenantIdResolver
 {
     public class when_tenant_id_claim_is_on_principal : given.a_default_tenant_id_resolver
     {

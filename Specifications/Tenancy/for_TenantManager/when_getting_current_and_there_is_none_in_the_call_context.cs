@@ -1,7 +1,7 @@
 ﻿using System.Dynamic;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Tenancy.Specs.for_TenantManager
+namespace Dolittle.Runtime.Tenancy.Specs.for_TenantManager
 {
     public class when_getting_current_and_there_is_none_in_the_call_context : given.a_tenant_manager
     {

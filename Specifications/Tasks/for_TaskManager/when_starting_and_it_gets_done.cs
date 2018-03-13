@@ -1,8 +1,8 @@
 ﻿using Machine.Specifications;
 using System;
-using doLittle.Tasks;
+using Dolittle.Tasks;
 
-namespace doLittle.Specs.Tasks.for_TaskManager
+namespace Dolittle.Specs.Tasks.for_TaskManager
 {
     public class when_starting_and_it_gets_done : given.a_task_manager_with_one_reporter
     {

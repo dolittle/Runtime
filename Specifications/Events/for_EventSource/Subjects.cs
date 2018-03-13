@@ -1,4 +1,4 @@
-﻿namespace doLittle.Runtime.Events.Specs.for_EventSource
+﻿namespace Dolittle.Runtime.Events.Specs.for_EventSource
 {
     public class Subjects
     {

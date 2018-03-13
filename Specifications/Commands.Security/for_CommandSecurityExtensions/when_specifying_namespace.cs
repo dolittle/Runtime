@@ -1,9 +1,9 @@
 ﻿using System.Linq;
-using doLittle.Security;
+using Dolittle.Security;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Commands.Security.Specs.for_CommandSecurityExtensions
+namespace Dolittle.Runtime.Commands.Security.Specs.for_CommandSecurityExtensions
 {
     public class when_specifying_namespace
     {

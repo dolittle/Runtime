@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationDescriptors
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationDescriptors
 {
     public class when_asking_if_has_descriptor_and_no_descriptors_exists : given.no_query_validation_descriptors
     {

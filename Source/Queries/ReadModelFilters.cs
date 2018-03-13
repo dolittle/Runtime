@@ -1,16 +1,16 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.DependencyInversion;
-using doLittle.Execution;
-using doLittle.Types;
-using doLittle.ReadModels;
+using Dolittle.DependencyInversion;
+using Dolittle.Execution;
+using Dolittle.Types;
+using Dolittle.ReadModels;
 
-namespace doLittle.Queries
+namespace Dolittle.Queries
 {
     /// <summary>
     /// Represents an implementation of <see cref="IReadModelFilters"/>

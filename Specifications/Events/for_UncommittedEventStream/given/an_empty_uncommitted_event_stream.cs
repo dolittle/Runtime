@@ -2,7 +2,7 @@
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Events.Specs.for_UncommittedEventStream.given
+namespace Dolittle.Runtime.Events.Specs.for_UncommittedEventStream.given
 {
     public abstract class an_empty_uncommitted_event_stream
     {

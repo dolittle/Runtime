@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamCoordinator.given
+namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamCoordinator.given
 {
     public class an_uncommitted_event_stream_coordinator : all_dependencies
     {

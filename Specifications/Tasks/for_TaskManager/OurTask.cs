@@ -1,7 +1,7 @@
-﻿using doLittle.Tasks;
+﻿using Dolittle.Tasks;
 using System.Collections.Generic;
 
-namespace doLittle.Specs.Tasks.for_TaskManager
+namespace Dolittle.Specs.Tasks.for_TaskManager
 {
     public class OurTask : Task
     {

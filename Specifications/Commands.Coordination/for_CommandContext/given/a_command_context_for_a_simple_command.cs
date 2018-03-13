@@ -1,14 +1,14 @@
-﻿using doLittle.Applications;
-using doLittle.Events;
-using doLittle.Runtime.Transactions;
+﻿using Dolittle.Applications;
+using Dolittle.Events;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using System.Dynamic;
-using doLittle.Logging;
-using doLittle.Runtime.Events.Coordination;
-using doLittle.Runtime.Events.Storage;
+using Dolittle.Logging;
+using Dolittle.Runtime.Events.Coordination;
+using Dolittle.Runtime.Events.Storage;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
 {
     public class a_command_context_for_a_simple_command
     {

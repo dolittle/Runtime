@@ -1,9 +1,9 @@
-﻿using doLittle.Concurrency;
-using doLittle.Tasks;
+﻿using Dolittle.Concurrency;
+using Dolittle.Tasks;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Specs.Tasks.for_TaskScheduler.given
+namespace Dolittle.Specs.Tasks.for_TaskScheduler.given
 {
     public class a_task_scheduler
     {

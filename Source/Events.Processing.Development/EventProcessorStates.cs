@@ -1,14 +1,14 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Dynamic;
-using doLittle.Logging;
-using doLittle.Serialization;
-using doLittle.Time;
+using Dolittle.Logging;
+using Dolittle.Serialization;
+using Dolittle.Time;
 
-namespace doLittle.Runtime.Events.Processing.Development
+namespace Dolittle.Runtime.Events.Processing.Development
 {
     /// <summary>
     /// Represents a simple and naïve implementation for handling <see cref="IEventProcessorStates"/>

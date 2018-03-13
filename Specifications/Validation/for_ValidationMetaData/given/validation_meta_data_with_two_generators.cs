@@ -1,7 +1,7 @@
-﻿using doLittle.Validation.MetaData;
+﻿using Dolittle.Validation.MetaData;
 using Machine.Specifications;
 
-namespace doLittle.Specs.Validation.for_ValidationMetaData.given
+namespace Dolittle.Specs.Validation.for_ValidationMetaData.given
 {
     public class validation_meta_data_with_two_generators : two_generators
     {

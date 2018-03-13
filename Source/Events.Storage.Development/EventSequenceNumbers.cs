@@ -1,14 +1,14 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
-using doLittle.Applications;
-using doLittle.Execution;
-using doLittle.Logging;
+using Dolittle.Applications;
+using Dolittle.Execution;
+using Dolittle.Logging;
 
-namespace doLittle.Runtime.Events.Storage.Development
+namespace Dolittle.Runtime.Events.Storage.Development
 {
     /// <summary>
     /// Represents a simple and naïve implementation of <see cref="IEventSequenceNumbers"/>

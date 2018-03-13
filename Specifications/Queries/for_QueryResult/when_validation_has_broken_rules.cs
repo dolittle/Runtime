@@ -1,7 +1,7 @@
-﻿using doLittle.Rules;
+﻿using Dolittle.Rules;
 using Machine.Specifications;
 
-namespace doLittle.Queries.Specs.for_QueryResult
+namespace Dolittle.Queries.Specs.for_QueryResult
 {
     public class when_validation_has_broken_rules
     {

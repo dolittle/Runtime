@@ -1,9 +1,9 @@
-﻿using doLittle.Execution;
+﻿using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 
 
-namespace doLittle.Runtime.Execution.Specs.for_ExecutionContextManager.given
+namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextManager.given
 {
     public class all_dependencies
     {

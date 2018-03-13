@@ -2,7 +2,7 @@
 using System.Linq;
 using Machine.Specifications;
 
-namespace doLittle.Queries.Specs.for_QueryableProvider
+namespace Dolittle.Queries.Specs.for_QueryableProvider
 {
     public class when_paging_is_set_two_show_second_page
     {

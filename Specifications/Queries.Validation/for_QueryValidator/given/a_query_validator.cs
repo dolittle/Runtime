@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidator.given
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidator.given
 {
     public class a_query_validator : all_dependencies
     {

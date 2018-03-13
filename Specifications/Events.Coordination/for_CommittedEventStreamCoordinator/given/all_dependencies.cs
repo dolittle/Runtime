@@ -1,10 +1,10 @@
-﻿using doLittle.Runtime.Events.Publishing;
-using doLittle.Runtime.Events.Processing;
+﻿using Dolittle.Runtime.Events.Publishing;
+using Dolittle.Runtime.Events.Processing;
 using Machine.Specifications;
 using Moq;
-using doLittle.Logging;
+using Dolittle.Logging;
 
-namespace doLittle.Runtime.Events.Coordination.Specs.for_CommittedEventStreamCoordinator.given
+namespace Dolittle.Runtime.Events.Coordination.Specs.for_CommittedEventStreamCoordinator.given
 {
     public class all_dependencies
     {

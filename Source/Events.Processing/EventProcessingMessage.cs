@@ -1,11 +1,11 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.Concepts;
+using Dolittle.Concepts;
 
-namespace doLittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Represents a message that can occur during <see cref="IEventProcessor">event processing</see>

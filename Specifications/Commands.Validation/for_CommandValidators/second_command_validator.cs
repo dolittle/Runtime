@@ -1,4 +1,4 @@
-﻿namespace doLittle.Runtime.Commands.Validation.Specs.for_CommandValidators
+﻿namespace Dolittle.Runtime.Commands.Validation.Specs.for_CommandValidators
 {
     public class second_command_validator : ICommandValidator
     {

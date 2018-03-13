@@ -1,10 +1,10 @@
-using doLittle.Runtime.Commands.Validation;
-using doLittle.Validation;
+using Dolittle.Runtime.Commands.Validation;
+using Dolittle.Validation;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator
 {
     [Subject(typeof(CommandCoordinator))]
     public class when_handling_an_invalid_command : given.a_command_coordinator

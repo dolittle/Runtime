@@ -1,11 +1,11 @@
 ﻿using System.Reflection;
-using doLittle.Rules;
-using doLittle.Validation;
+using Dolittle.Rules;
+using Dolittle.Validation;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Specs.Validation.for_ValueValidationBuilder
+namespace Dolittle.Specs.Validation.for_ValueValidationBuilder
 {
     public class when_adding_rule
     {

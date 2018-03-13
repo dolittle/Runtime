@@ -1,8 +1,8 @@
-﻿using doLittle.Logging;
+﻿using Dolittle.Logging;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamReceiver.given
+namespace Dolittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamReceiver.given
 {
     public class all_dependencies
     {

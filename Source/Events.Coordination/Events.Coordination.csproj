@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Events.Coordination</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Events.Coordination</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Artifacts" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Artifacts" Version="2.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>

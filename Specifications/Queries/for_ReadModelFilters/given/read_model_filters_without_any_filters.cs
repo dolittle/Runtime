@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Specs.for_ReadModelFilters.given
+namespace Dolittle.Queries.Specs.for_ReadModelFilters.given
 {
     public class read_model_filters_without_any_filters : all_dependencies
     {

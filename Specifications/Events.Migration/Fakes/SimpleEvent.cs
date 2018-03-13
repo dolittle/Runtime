@@ -1,6 +1,6 @@
-﻿using doLittle.Events;
+﻿using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Migration.Specs.Fakes
+namespace Dolittle.Runtime.Events.Migration.Specs.Fakes
 {
     public class SimpleEvent : IEvent
     {

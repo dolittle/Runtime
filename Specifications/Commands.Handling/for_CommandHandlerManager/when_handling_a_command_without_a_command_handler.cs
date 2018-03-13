@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Dynamic;
-using doLittle.Applications;
-using doLittle.Runtime.Transactions;
+using Dolittle.Applications;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Commands.Specs.for_CommandHandlerManager
+namespace Dolittle.Runtime.Commands.Specs.for_CommandHandlerManager
 {
     public class when_handling_a_command_without_a_command_handler : given.a_command_handler_manager
     {

@@ -1,10 +1,10 @@
-﻿using doLittle.DependencyInversion;
-using doLittle.Execution;
-using doLittle.Types;
+﻿using Dolittle.DependencyInversion;
+using Dolittle.Execution;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Queries.Specs.for_ReadModelFilters.given
+namespace Dolittle.Queries.Specs.for_ReadModelFilters.given
 {
     public class all_dependencies
     {

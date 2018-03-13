@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using doLittle.Validation;
+using Dolittle.Validation;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Validation.Specs.for_CommandValidators.given
+namespace Dolittle.Runtime.Commands.Validation.Specs.for_CommandValidators.given
 {
     public class command_validators_with_two_providers : all_dependencies
     {

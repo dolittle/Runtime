@@ -1,6 +1,6 @@
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Runtime.Events.Specs.for_EventSource
 {
     [Subject(typeof(EventSource))]
     public class when_fast_fowarding_a_stateless_aggregate_root_that_is_the_initial_version : given.a_stateless_event_source

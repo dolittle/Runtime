@@ -1,9 +1,9 @@
-﻿using doLittle.Runtime.Events.Migration.Specs.Fakes.v2;
-using doLittle.Runtime.Events.Migration.Specs.for_EventMigrationService.given;
+﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes.v2;
+using Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationService.given;
 using Machine.Specifications;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationService
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationService
 {
     public class when_migrating_a_second_generation_event_that_has_a_single_migrator_registered : an_event_with_a_migrator
     {

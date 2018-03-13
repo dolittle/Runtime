@@ -1,8 +1,8 @@
 ﻿using System;
-using doLittle.Runtime.Events.Migration.Specs.Fakes.v2;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes.v2;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy
 {
     public class when_adding_the_same_migration_type_twice : given.an_initialized_event_migration_hierarchy
     {

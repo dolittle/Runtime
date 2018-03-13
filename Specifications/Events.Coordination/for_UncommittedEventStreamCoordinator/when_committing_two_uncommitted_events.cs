@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Applications;
-using doLittle.Runtime.Transactions;
+using Dolittle.Applications;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamCoordinator
+namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamCoordinator
 {
     [Subject(typeof(UncommittedEventStreamCoordinator))]
     public class when_committing_two_uncommitted_events : given.an_uncommitted_event_stream_coordinator

@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Security.Specs.for_FetchingSecurityManager
+namespace Dolittle.Queries.Security.Specs.for_FetchingSecurityManager
 {
     public class when_authorizing_a_query_for : given.a_fetching_security_manager
     {

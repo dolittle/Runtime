@@ -1,9 +1,9 @@
 ﻿using Machine.Specifications;
 using System;
-using doLittle.Events;
-using doLittle.Runtime.Events;
+using Dolittle.Events;
+using Dolittle.Runtime.Events;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
 {
     public class a_command_context_for_a_simple_command_with_one_tracked_object : a_command_context_for_a_simple_command
     {

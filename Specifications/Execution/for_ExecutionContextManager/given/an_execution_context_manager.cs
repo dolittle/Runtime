@@ -1,7 +1,7 @@
 ﻿using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Execution.Specs.for_ExecutionContextManager.given
+namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextManager.given
 {
     public class an_execution_context_manager : all_dependencies
     {

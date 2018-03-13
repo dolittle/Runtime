@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_CommittedEventStream
+namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream
 {
     public class when_creating_a_new_committed_event_stream : given.an_empty_committed_event_stream
     {

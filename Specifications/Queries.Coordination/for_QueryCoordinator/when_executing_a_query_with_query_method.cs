@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 {
     public class when_executing_a_query_with_query_method : given.a_query_coordinator
     {

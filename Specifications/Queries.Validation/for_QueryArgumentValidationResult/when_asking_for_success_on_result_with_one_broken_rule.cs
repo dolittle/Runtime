@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryArgumentValidationResult
+namespace Dolittle.Queries.Validation.Specs.for_QueryArgumentValidationResult
 {
     public class when_asking_for_success_on_result_with_one_broken_rule : given.a_query_argument_validation_result_with_one_broken_rule
     {

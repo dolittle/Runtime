@@ -1,4 +1,4 @@
-﻿namespace doLittle.Runtime.Events.Migration.Specs.Fakes.v3
+﻿namespace Dolittle.Runtime.Events.Migration.Specs.Fakes.v3
 {
     public class SimpleEvent : v2.SimpleEvent, IAmNextGenerationOf<v2.SimpleEvent>
     {

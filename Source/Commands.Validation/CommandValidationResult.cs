@@ -1,12 +1,12 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.Runtime.Commands;
-using doLittle.Validation;
+using Dolittle.Runtime.Commands;
+using Dolittle.Validation;
 
-namespace doLittle.Runtime.Commands.Validation
+namespace Dolittle.Runtime.Commands.Validation
 {
     /// <summary>
     /// Represents the result of validation for a <see cref="CommandRequest"/>

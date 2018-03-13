@@ -1,9 +1,9 @@
-﻿using doLittle.Validation;
+﻿using Dolittle.Validation;
 using Machine.Specifications;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace doLittle.Runtime.Commands.Specs.for_CommandResult
+namespace Dolittle.Runtime.Commands.Specs.for_CommandResult
 {
     public class when_merging_with_another_command_result
     {

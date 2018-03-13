@@ -1,10 +1,10 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Security;
+using Dolittle.Security;
 
-namespace doLittle.Queries.Security
+namespace Dolittle.Queries.Security
 {
     /// <summary>
     /// Represents a <see cref="ISecurityTarget">security target</see> for <see cref="Fetching"/>

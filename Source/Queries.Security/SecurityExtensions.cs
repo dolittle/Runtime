@@ -1,12 +1,12 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Security;
-using doLittle.ReadModels;
+using Dolittle.Security;
+using Dolittle.ReadModels;
 
-namespace doLittle.Queries.Security
+namespace Dolittle.Queries.Security
 {
     /// <summary>
     /// Extensions for building a security descriptor specific for dealing with <see cref="IReadModel">read models</see>

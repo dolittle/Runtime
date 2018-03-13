@@ -1,10 +1,10 @@
-﻿using doLittle.Rules;
-using doLittle.Validation.Rules;
+﻿using Dolittle.Rules;
+using Dolittle.Validation.Rules;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Specs.Validation.Rules.for_LessThanOrEqual
+namespace Dolittle.Specs.Validation.Rules.for_LessThanOrEqual
 {
     public class when_checking_value_that_is_equal_to
     {

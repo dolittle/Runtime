@@ -2,7 +2,7 @@
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidator
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
 {
     public class when_validating_query_without_descriptor : given.a_query_validator
     {

@@ -1,11 +1,11 @@
-﻿using doLittle.Applications;
-using doLittle.Runtime.Transactions;
+﻿using Dolittle.Applications;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using System.Dynamic;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContextFactory
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextFactory
 {
     [Subject(typeof (CommandContextFactory))]
     public class when_building_for_a_command : given.a_command_context_factory

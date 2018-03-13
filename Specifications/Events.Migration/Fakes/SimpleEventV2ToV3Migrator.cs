@@ -1,4 +1,4 @@
-﻿namespace doLittle.Runtime.Events.Migration.Specs.Fakes
+﻿namespace Dolittle.Runtime.Events.Migration.Specs.Fakes
 {
     public class SimpleEventV2ToV3Migrator : IEventMigrator<v2.SimpleEvent, v3.SimpleEvent>
     {

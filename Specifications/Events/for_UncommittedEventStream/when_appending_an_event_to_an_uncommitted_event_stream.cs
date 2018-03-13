@@ -1,9 +1,9 @@
 ﻿using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Specs.for_UncommittedEventStream
+namespace Dolittle.Runtime.Events.Specs.for_UncommittedEventStream
 {
     public class when_appending_an_event_to_an_uncommitted_event_stream : given.an_empty_uncommitted_event_stream
     {

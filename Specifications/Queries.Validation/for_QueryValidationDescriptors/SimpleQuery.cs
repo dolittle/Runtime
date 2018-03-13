@@ -1,6 +1,6 @@
-﻿using doLittle.ReadModels;
+﻿using Dolittle.ReadModels;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationDescriptors
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationDescriptors
 {
     public class SimpleQuery : IQuery
     {

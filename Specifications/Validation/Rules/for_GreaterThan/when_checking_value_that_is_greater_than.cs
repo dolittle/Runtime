@@ -1,10 +1,10 @@
-﻿using doLittle.Rules;
-using doLittle.Validation.Rules;
+﻿using Dolittle.Rules;
+using Dolittle.Validation.Rules;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Specs.Validation.Rules.for_GreaterThan
+namespace Dolittle.Specs.Validation.Rules.for_GreaterThan
 {
     public class when_checking_value_that_is_greater_than
     {

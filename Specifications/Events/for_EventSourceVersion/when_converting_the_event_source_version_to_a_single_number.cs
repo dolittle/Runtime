@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_EventSourceVersion
+namespace Dolittle.Runtime.Events.Specs.for_EventSourceVersion
 {
     [Subject(typeof (EventSourceVersion))]
     public class when_converting_the_event_source_version_to_a_single_number : given.a_range_of_event_source_versions

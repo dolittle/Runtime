@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
-using doLittle.Execution;
-using doLittle.Types;
+using Dolittle.Execution;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Commands.Specs.for_CommandHandlerManager.given
+namespace Dolittle.Runtime.Commands.Specs.for_CommandHandlerManager.given
 {
     public class a_command_handler_manager
     {

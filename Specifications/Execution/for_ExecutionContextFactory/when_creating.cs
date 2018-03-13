@@ -1,15 +1,15 @@
 ﻿using System.Dynamic;
 using System.Globalization;
 using System.Security.Claims;
-using doLittle.Applications;
-using doLittle.DependencyInversion;
-using doLittle.Security;
-using doLittle.Runtime.Tenancy;
+using Dolittle.Applications;
+using Dolittle.DependencyInversion;
+using Dolittle.Security;
+using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Execution.Specs.for_ExecutionContextFactory
+namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextFactory
 {
     public class when_creating
     {

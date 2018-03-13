@@ -1,7 +1,7 @@
-﻿using doLittle.Runtime.Transactions;
+﻿using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_EventEnvelope
+namespace Dolittle.Runtime.Events.Specs.for_EventEnvelope
 {
     public class when_building_with_new_transaction_correlation_id : given.an_event_envelope
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using Machine.Specifications;
-using doLittle.Tasks;
+using Dolittle.Tasks;
 
-namespace doLittle.Specs.Tasks.for_TaskScheduler
+namespace Dolittle.Specs.Tasks.for_TaskScheduler
 {
     [Subject(typeof(TaskScheduler))]
     public class when_starting_synchronous_task_with_two_operations_and_first_operation_is_done : given.a_task_scheduler

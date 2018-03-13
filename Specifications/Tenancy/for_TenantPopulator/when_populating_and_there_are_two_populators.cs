@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Dynamic;
-using doLittle.Types;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Tenancy.Specs.for_TenantPopulator
+namespace Dolittle.Runtime.Tenancy.Specs.for_TenantPopulator
 {
     public class when_populating_and_there_are_two_populators
     {

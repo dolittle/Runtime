@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Machine.Specifications;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationDescriptorFor
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationDescriptorFor
 {
     public class when_describing_same_argument_twice : given.an_empty_query_validation_descriptor
     {

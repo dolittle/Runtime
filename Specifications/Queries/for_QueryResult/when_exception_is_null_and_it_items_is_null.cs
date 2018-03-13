@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Specs.for_QueryResult
+namespace Dolittle.Queries.Specs.for_QueryResult
 {
     public class when_exception_is_null_and_it_items_is_null
     {

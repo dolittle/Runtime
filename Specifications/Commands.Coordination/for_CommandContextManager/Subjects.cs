@@ -1,4 +1,4 @@
-﻿namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
+﻿namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
 {
     public class Subjects
     {

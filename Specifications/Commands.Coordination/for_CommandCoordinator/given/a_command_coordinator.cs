@@ -1,15 +1,15 @@
 ﻿using System.Dynamic;
-using doLittle.Applications;
-using doLittle.Globalization;
-using doLittle.Logging;
-using doLittle.Runtime.Commands.Security;
-using doLittle.Runtime.Commands.Validation;
-using doLittle.Runtime.Transactions;
-using doLittle.Security;
+using Dolittle.Applications;
+using Dolittle.Globalization;
+using Dolittle.Logging;
+using Dolittle.Runtime.Commands.Security;
+using Dolittle.Runtime.Commands.Validation;
+using Dolittle.Runtime.Transactions;
+using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator.given
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator.given
 {
     public class a_command_coordinator
     {

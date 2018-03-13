@@ -1,6 +1,6 @@
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
 {
     public class when_getting_the_current_migration_level_for_a_registered_event : given.an_event_migration_hierarchy_manager_with_two_logical_events
     {

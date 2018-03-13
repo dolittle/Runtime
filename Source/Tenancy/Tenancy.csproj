@@ -2,18 +2,18 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Tenancy</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Tenancy</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props"/>
   
   <ItemGroup>
     <PackageReference Include="System.Security.Claims" Version="4.3.0" />
-    <PackageReference Include="doLittle.Concepts" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Execution" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.DependencyInversion.Conventions" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Dynamic" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Types" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Concepts" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Execution" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.DependencyInversion.Conventions" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Dynamic" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Types" Version="2.0.0-*" />
   </ItemGroup>
 
 

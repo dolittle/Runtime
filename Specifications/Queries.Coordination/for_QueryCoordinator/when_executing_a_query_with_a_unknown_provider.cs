@@ -1,7 +1,7 @@
 ﻿using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 {
     public class when_executing_a_query_with_a_unknown_provider : given.a_query_coordinator
     {

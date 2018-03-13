@@ -1,8 +1,8 @@
-﻿using doLittle.Queries.Validation;
-using doLittle.Rules;
+﻿using Dolittle.Queries.Validation;
+using Dolittle.Rules;
 using Machine.Specifications;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 {
     public class when_executing_a_query_that_does_not_pass_validation : given.a_query_coordinator
     {

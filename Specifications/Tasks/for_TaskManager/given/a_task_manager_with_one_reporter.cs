@@ -1,13 +1,13 @@
-﻿using doLittle.Tasks;
+﻿using Dolittle.Tasks;
 using Machine.Specifications;
 using Moq;
-using doLittle.Execution;
-using doLittle.Types;
-using doLittle.DependencyInversion;
+using Dolittle.Execution;
+using Dolittle.Types;
+using Dolittle.DependencyInversion;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace doLittle.Specs.Tasks.for_TaskManager.given
+namespace Dolittle.Specs.Tasks.for_TaskManager.given
 {
     public class a_task_manager_with_one_reporter
     {

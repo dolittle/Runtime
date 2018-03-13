@@ -1,17 +1,17 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Execution;
-using doLittle.Runtime.Transactions;
-using doLittle.Logging;
-using doLittle.Runtime.Events.Storage;
-using doLittle.Runtime.Events.Publishing;
-using doLittle.Events;
+using Dolittle.Execution;
+using Dolittle.Runtime.Transactions;
+using Dolittle.Logging;
+using Dolittle.Runtime.Events.Storage;
+using Dolittle.Runtime.Events.Publishing;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Coordination
+namespace Dolittle.Runtime.Events.Coordination
 {
     /// <summary>
     /// Represents a <see cref="IUncommittedEventStreamCoordinator"/>

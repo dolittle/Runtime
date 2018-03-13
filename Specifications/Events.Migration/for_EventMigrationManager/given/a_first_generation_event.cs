@@ -1,12 +1,12 @@
-﻿using doLittle.Execution;
-using doLittle.Runtime.Events.Migration.Specs.Fakes;
+﻿using Dolittle.Execution;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
 using Machine.Specifications;
 using Moq;
 using System;
-using doLittle.Types;
-using doLittle.DependencyInversion;
+using Dolittle.Types;
+using Dolittle.DependencyInversion;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationManager.given
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationManager.given
 {
     public abstract class an_event_migrator_service_with_no_registered_migrators
     {

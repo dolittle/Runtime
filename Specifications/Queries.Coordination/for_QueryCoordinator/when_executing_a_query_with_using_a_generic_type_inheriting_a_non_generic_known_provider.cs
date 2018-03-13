@@ -3,7 +3,7 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 {
     public class when_executing_a_query_with_using_a_generic_type_inheriting_a_non_generic_known_provider : given.a_query_coordinator_with_non_generic_known_provider
     {

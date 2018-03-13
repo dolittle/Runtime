@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Queries</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Queries</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="doLittle.DependencyInversion" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Types" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Reflection" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Types" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Reflection" Version="2.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>

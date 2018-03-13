@@ -1,17 +1,17 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Linq;
 using System.Threading.Tasks;
-using doLittle.Collections;
-using doLittle.Execution;
-using doLittle.Logging;
-using doLittle.Reflection;
-using doLittle.Runtime.Events.Processing;
-using doLittle.Runtime.Events.Publishing;
+using Dolittle.Collections;
+using Dolittle.Execution;
+using Dolittle.Logging;
+using Dolittle.Reflection;
+using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Publishing;
 
-namespace doLittle.Runtime.Events.Coordination
+namespace Dolittle.Runtime.Events.Coordination
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICommittedEventStreamCoordinator"/>

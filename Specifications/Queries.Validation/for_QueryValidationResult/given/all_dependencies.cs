@@ -1,8 +1,8 @@
-﻿using doLittle.Rules;
+﻿using Dolittle.Rules;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationResult.given
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationResult.given
 {
     public class all_dependencies
     {

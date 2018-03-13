@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamSender.given
+namespace Dolittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamSender.given
 {
     public class a_committed_event_stream_sender : all_dependencies
     {

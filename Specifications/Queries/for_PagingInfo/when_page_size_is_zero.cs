@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Specs.for_PagingInfo
+namespace Dolittle.Queries.Specs.for_PagingInfo
 {
     public class when_page_size_is_zero
     {

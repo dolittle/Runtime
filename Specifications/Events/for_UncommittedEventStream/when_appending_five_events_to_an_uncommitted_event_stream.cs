@@ -2,7 +2,7 @@
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Events.Specs.for_UncommittedEventStream
+namespace Dolittle.Runtime.Events.Specs.for_UncommittedEventStream
 {
     public class when_appending_five_events_to_an_uncommitted_event_stream : given.an_empty_uncommitted_event_stream
     {

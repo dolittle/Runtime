@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Runtime.Events.Specs.for_EventSource
 {
     [Subject(typeof (EventSourceExtensions))]
     public class when_getting_the_on_method_on_an_event_source_for_an_event : given.two_different_event_source_types_that_handle_different_events

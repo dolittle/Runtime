@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using doLittle.ReadModels;
+using Dolittle.ReadModels;
 
-namespace doLittle.Queries.Specs.for_ReadModelFilters
+namespace Dolittle.Queries.Specs.for_ReadModelFilters
 {
     public class FilterThatDoesNotFilter : ICanFilterReadModels
     {

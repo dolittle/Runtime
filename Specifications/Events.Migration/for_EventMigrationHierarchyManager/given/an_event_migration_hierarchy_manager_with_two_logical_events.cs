@@ -1,9 +1,9 @@
-﻿using doLittle.Runtime.Events.Migration.Specs.Fakes;
-using doLittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscoverer.given;
+﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+using Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscoverer.given;
 using Machine.Specifications;
 using System;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager.given
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager.given
 {
     public class an_event_migration_hierarchy_manager_with_two_logical_events : an_event_migration_hierarchy_discoverer_with_two_logical_events_one_of_which_is_migrated
     {

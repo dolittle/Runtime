@@ -1,11 +1,11 @@
-﻿using doLittle.DependencyInversion;
-using doLittle.Queries.Security;
-using doLittle.Queries.Validation;
-using doLittle.Types;
+﻿using Dolittle.DependencyInversion;
+using Dolittle.Queries.Security;
+using Dolittle.Queries.Validation;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator.given
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator.given
 {
     public class all_dependencies
     {

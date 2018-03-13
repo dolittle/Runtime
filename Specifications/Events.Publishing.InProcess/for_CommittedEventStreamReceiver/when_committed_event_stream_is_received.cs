@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamReceiver
+namespace Dolittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamReceiver
 {
     public class when_committed_event_stream_is_received : given.a_committed_event_stream_receiver
     {

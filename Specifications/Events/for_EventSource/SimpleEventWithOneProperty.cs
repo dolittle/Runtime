@@ -1,7 +1,7 @@
 ﻿using System;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Runtime.Events.Specs.for_EventSource
 {
     public class SimpleEventWithOneProperty : IEvent
     {

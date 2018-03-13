@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_CommittedEventStream.given
+namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream.given
 {
     public abstract class an_empty_committed_event_stream
     {

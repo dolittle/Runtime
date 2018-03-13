@@ -1,14 +1,14 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events
+namespace Dolittle.Runtime.Events
 {
     /// <summary>
     /// Extensions for <see cref="EventSource"/>

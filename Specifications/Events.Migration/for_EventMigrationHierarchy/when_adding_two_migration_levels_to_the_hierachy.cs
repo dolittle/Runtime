@@ -1,7 +1,7 @@
-﻿using doLittle.Runtime.Events.Migration.Specs.Fakes.v2;
+﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes.v2;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy
 {
     public class when_adding_two_migration_levels_to_the_hierachy : given.an_initialized_event_migration_hierarchy
     {

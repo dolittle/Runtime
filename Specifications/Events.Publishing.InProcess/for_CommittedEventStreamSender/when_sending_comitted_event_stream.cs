@@ -3,7 +3,7 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamSender
+namespace Dolittle.Runtime.Events.Publishing.InProcess.Specs.for_CommittedEventStreamSender
 {
     public class when_sending_comitted_event_stream : given.a_committed_event_stream_sender
     {

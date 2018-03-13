@@ -1,13 +1,13 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Globalization;
 using System.Security.Claims;
-using doLittle.Applications;
-using doLittle.Runtime.Tenancy;
+using Dolittle.Applications;
+using Dolittle.Runtime.Tenancy;
 
-namespace doLittle.Runtime.Execution
+namespace Dolittle.Runtime.Execution
 {
     /// <summary>
     /// Defines the execution context in which things are within

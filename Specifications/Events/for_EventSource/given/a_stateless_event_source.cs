@@ -1,7 +1,7 @@
 ﻿using Machine.Specifications;
 using System;
 
-namespace doLittle.Runtime.Events.Specs.for_EventSource.given
+namespace Dolittle.Runtime.Events.Specs.for_EventSource.given
 {
     public class a_stateless_event_source
     {

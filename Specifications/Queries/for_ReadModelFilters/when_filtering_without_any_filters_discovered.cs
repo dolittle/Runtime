@@ -1,9 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using Machine.Specifications;
-using doLittle.ReadModels;
+using Dolittle.ReadModels;
 
-namespace doLittle.Queries.Specs.for_ReadModelFilters
+namespace Dolittle.Queries.Specs.for_ReadModelFilters
 {
     public class when_filtering_without_any_filters_discovered : given.read_model_filters_without_any_filters
     {

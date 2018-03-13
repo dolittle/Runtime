@@ -1,7 +1,7 @@
-﻿using doLittle.Tasks;
+﻿using Dolittle.Tasks;
 using System;
 
-namespace doLittle.Specs.Tasks.for_TaskScheduler
+namespace Dolittle.Specs.Tasks.for_TaskScheduler
 {
     public class TaskWithTwoOperations : Task
     {

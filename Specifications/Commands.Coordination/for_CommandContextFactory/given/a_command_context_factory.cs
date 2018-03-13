@@ -1,12 +1,12 @@
-﻿using doLittle.Events;
+﻿using Dolittle.Events;
 using Machine.Specifications;
 using Moq;
-using doLittle.Execution;
-using doLittle.Logging;
-using doLittle.Runtime.Events.Coordination;
-using doLittle.Runtime.Execution;
+using Dolittle.Execution;
+using Dolittle.Logging;
+using Dolittle.Runtime.Events.Coordination;
+using Dolittle.Runtime.Execution;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContextFactory.given
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextFactory.given
 {
     public class a_command_context_factory
     {

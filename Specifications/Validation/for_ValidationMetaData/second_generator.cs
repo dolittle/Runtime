@@ -1,7 +1,7 @@
 ﻿using System;
-using doLittle.Validation.MetaData;
+using Dolittle.Validation.MetaData;
 
-namespace doLittle.Specs.Validation.for_ValidationMetaData
+namespace Dolittle.Specs.Validation.for_ValidationMetaData
 {
     public class second_generator : ICanGenerateValidationMetaData
     {

@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Events.Storage</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Events.Storage</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="doLittle.Time" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Time" Version="2.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>

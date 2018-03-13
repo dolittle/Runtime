@@ -1,13 +1,13 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Events;
-using doLittle.Applications;
-using doLittle.Runtime.Transactions;
+using Dolittle.Events;
+using Dolittle.Applications;
+using Dolittle.Runtime.Transactions;
 
-namespace doLittle.Runtime.Events
+namespace Dolittle.Runtime.Events
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventEnvelope"/>; the envelope for the event with all the metadata related to the event

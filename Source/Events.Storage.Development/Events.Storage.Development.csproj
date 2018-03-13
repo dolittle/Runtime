@@ -2,15 +2,15 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Events.Storage.Development</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Events.Storage.Development</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
   
-    <PackageReference Include="doLittle.Serialization.Json" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Concepts.Serialization.Json" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Serialization.Json" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="2.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>

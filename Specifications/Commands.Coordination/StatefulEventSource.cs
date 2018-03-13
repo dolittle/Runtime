@@ -1,7 +1,7 @@
 ﻿using System;
-using doLittle.Runtime.Events;
+using Dolittle.Runtime.Events;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs
+namespace Dolittle.Runtime.Commands.Coordination.Specs
 {
     public class StatefulEventSource : EventSource
     {

@@ -1,15 +1,15 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Migration
+namespace Dolittle.Runtime.Events.Migration
 {
     /// <summary>
     /// Represents an exceptional situation where an <see cref="IEvent">Event</see> in an <see cref="EventMigrationHierarchy">EventMigrationHierarchy</see>
-    /// has not implemented the correct <see cref="doLittle.Runtime.Events.Migration.IAmNextGenerationOf{T}">interface</see>.
+    /// has not implemented the correct <see cref="Dolittle.Runtime.Events.Migration.IAmNextGenerationOf{T}">interface</see>.
     /// </summary>
     public class NotAMigratedEventTypeException : Exception
     {

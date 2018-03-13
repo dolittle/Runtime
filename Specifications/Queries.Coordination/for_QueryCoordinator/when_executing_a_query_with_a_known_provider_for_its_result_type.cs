@@ -4,7 +4,7 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 {
     public class when_executing_a_query_with_a_known_provider_for_its_result_type : given.a_query_coordinator_with_known_provider
     {

@@ -1,14 +1,14 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using doLittle.Validation;
+using Dolittle.Validation;
 
-namespace doLittle.Runtime.Commands
+namespace Dolittle.Runtime.Commands
 {
     /// <summary>
     /// Represents the result after handling a <see cref="CommandRequest"/>

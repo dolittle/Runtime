@@ -1,8 +1,8 @@
-﻿using doLittle.Runtime.Events.Migration.Specs.Fakes;
+﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
 using Machine.Specifications;
 using System;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
 {
     public class when_getting_the_concrete_type_for_a_registered_event_with_a_valid_level : given.an_event_migration_hierarchy_manager_with_two_logical_events
     {

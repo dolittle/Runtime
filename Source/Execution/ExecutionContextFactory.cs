@@ -1,14 +1,14 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Globalization;
-using doLittle.Applications;
-using doLittle.DependencyInversion;
-using doLittle.Runtime.Tenancy;
-using doLittle.Security;
+using Dolittle.Applications;
+using Dolittle.DependencyInversion;
+using Dolittle.Runtime.Tenancy;
+using Dolittle.Security;
 
-namespace doLittle.Runtime.Execution
+namespace Dolittle.Runtime.Execution
 {
     /// <summary>
     /// Represents a <see cref="IExecutionContextFactory"/>

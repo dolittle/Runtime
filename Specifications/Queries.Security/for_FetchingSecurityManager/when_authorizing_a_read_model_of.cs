@@ -1,9 +1,9 @@
-﻿using doLittle.ReadModels;
+﻿using Dolittle.ReadModels;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Queries.Security.Specs.for_FetchingSecurityManager
+namespace Dolittle.Queries.Security.Specs.for_FetchingSecurityManager
 {
     public class when_authorizing_a_read_model_of : given.a_fetching_security_manager
     {

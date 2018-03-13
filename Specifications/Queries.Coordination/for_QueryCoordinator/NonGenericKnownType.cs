@@ -1,4 +1,4 @@
-﻿namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator
+﻿namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 {
     public interface NonGenericKnownType
     {

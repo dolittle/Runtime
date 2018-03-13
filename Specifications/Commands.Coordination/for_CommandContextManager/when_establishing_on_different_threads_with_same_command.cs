@@ -1,12 +1,12 @@
 ﻿using System.Dynamic;
 using System.Threading;
-using doLittle.Applications;
-using doLittle.Runtime.Transactions;
+using Dolittle.Applications;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
 {
     [Subject(Subjects.establishing_context)]
     public class when_establishing_on_different_threads_with_same_command : given.a_command_context_manager

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using doLittle.Runtime.Events;
+using Dolittle.Runtime.Events;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContext
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext
 {
     public class when_getting_objects_being_tracked : given.a_command_context_for_a_simple_command_with_one_tracked_object
     {

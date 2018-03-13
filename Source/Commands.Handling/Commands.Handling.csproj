@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Commands.Handling</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Commands.Handling</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props"></Import>
@@ -12,9 +12,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="doLittle.Types" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Execution" Version="2.0.0-*" />
-    <PackageReference Include="doLittle.Applications" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Types" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Execution" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
   </ItemGroup>
 
 </Project>

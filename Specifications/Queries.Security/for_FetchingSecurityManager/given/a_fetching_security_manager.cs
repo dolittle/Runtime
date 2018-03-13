@@ -1,9 +1,9 @@
-﻿using doLittle.Queries.Security;
-using doLittle.Security;
+﻿using Dolittle.Queries.Security;
+using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Queries.Security.Specs.for_FetchingSecurityManager.given
+namespace Dolittle.Queries.Security.Specs.for_FetchingSecurityManager.given
 {
     public class a_fetching_security_manager
     {

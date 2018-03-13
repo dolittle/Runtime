@@ -1,12 +1,12 @@
-﻿using doLittle.Execution;
+﻿using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 using System;
-using doLittle.Runtime.Events.Migration.Specs.Fakes;
-using doLittle.Types;
-using doLittle.Events;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+using Dolittle.Types;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscoverer.given
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscoverer.given
 {
     public class an_event_migration_hierarchy_discoverer_with_two_logical_events_one_of_which_is_migrated
     {

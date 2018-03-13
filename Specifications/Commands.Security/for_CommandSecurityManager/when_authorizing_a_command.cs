@@ -1,11 +1,11 @@
 ﻿using System.Dynamic;
-using doLittle.Applications;
-using doLittle.Runtime.Transactions;
+using Dolittle.Applications;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Commands.Security.Specs.for_CommandSecurityManager
+namespace Dolittle.Runtime.Commands.Security.Specs.for_CommandSecurityManager
 {
     public class when_authorizing_a_command : given.a_command_security_manager
     {

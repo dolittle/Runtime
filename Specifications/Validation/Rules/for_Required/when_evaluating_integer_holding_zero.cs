@@ -1,11 +1,11 @@
 ﻿using System;
-using doLittle.Rules;
-using doLittle.Validation.Rules;
+using Dolittle.Rules;
+using Dolittle.Validation.Rules;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Specs.Validation.Rules.for_Required
+namespace Dolittle.Specs.Validation.Rules.for_Required
 {
     public class when_evaluating_integer_holding_zero
     {

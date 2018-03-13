@@ -1,8 +1,8 @@
 using System;
 using Machine.Specifications;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
+namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
 {
     public class when_getting_the_logical_type_for_an_event_that_is_unregistered : given.an_event_migration_hierarchy_manager_with_two_logical_events
     {

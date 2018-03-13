@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using doLittle.Validation;
+using Dolittle.Validation;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Specs.for_CommandResult
+namespace Dolittle.Runtime.Commands.Specs.for_CommandResult
 {
     public class when_containing_exception_and_one_validation_results
     {

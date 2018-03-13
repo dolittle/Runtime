@@ -1,9 +1,9 @@
 ﻿using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
-using doLittle.Events;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Specs.for_CommittedEventStream
+namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream
 {
     public class when_creating_a_stream_with_one_event : given.an_empty_committed_event_stream
     {

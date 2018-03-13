@@ -1,8 +1,8 @@
-﻿using doLittle.Security;
+﻿using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Commands.Security.Specs.for_CommandSecurityManager.given
+namespace Dolittle.Runtime.Commands.Security.Specs.for_CommandSecurityManager.given
 {
     public class a_command_security_manager
     {

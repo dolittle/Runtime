@@ -1,18 +1,18 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Reflection;
-using doLittle.Globalization;
-using doLittle.Logging;
-using doLittle.Runtime.Transactions;
-using doLittle.Runtime.Commands;
-using doLittle.Runtime.Commands.Handling;
-using doLittle.Runtime.Commands.Security;
-using doLittle.Runtime.Commands.Validation;
+using Dolittle.Globalization;
+using Dolittle.Logging;
+using Dolittle.Runtime.Transactions;
+using Dolittle.Runtime.Commands;
+using Dolittle.Runtime.Commands.Handling;
+using Dolittle.Runtime.Commands.Security;
+using Dolittle.Runtime.Commands.Validation;
 
-namespace doLittle.Runtime.Commands.Coordination
+namespace Dolittle.Runtime.Commands.Coordination
 {
     /// <summary>
     /// Represents a <see cref="ICommandCoordinator">ICommandCoordinator</see>

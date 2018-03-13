@@ -1,9 +1,9 @@
 ﻿using System;
-using doLittle.Security;
+using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator.given
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator.given
 {
     public class a_query_coordinator_with_provider_for_known_query_and_one_for_derived_type : a_query_coordinator
     {

@@ -1,11 +1,11 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Concepts;
-using doLittle.Events;
+using Dolittle.Concepts;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events
+namespace Dolittle.Runtime.Events
 {
     /// <summary>
     /// Represents the identification of who or what caused the <see cref="IEvent"/>

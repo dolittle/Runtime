@@ -1,13 +1,13 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Execution;
+using Dolittle.Execution;
 
-namespace doLittle.Runtime.Events.Migration
+namespace Dolittle.Runtime.Events.Migration
 {
     /// <summary>
     /// Represents a <see cref="IEventMigrationHierarchyManager">IEventMigrationHierarchyManager</see>

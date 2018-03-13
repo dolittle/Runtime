@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator
 {
     [Subject(typeof(CommandCoordinator))]
     public class when_handling_command_and_an_exception_occurs_during_validation : given.a_command_coordinator

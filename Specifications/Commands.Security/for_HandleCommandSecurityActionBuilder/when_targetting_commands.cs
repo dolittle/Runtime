@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Security.Specs.for_HandleCommandSecurityActionBuilder
+namespace Dolittle.Runtime.Commands.Security.Specs.for_HandleCommandSecurityActionBuilder
 {
     public class when_targetting_commands
     {

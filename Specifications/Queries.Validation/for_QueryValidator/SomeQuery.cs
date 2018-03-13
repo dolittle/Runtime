@@ -1,4 +1,4 @@
-﻿namespace doLittle.Queries.Validation.Specs.for_QueryValidator
+﻿namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
 {
     public class SomeQuery : IQuery
     {

@@ -1,9 +1,9 @@
-﻿using doLittle.Security;
+﻿using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator
 {
     [Subject(typeof(CommandCoordinator))]
     public class when_handling_a_command_that_fails_security : given.a_command_coordinator

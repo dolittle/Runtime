@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using Machine.Specifications;
-using doLittle.Validation;
+using Dolittle.Validation;
 
-namespace doLittle.Runtime.Commands.Specs.for_CommandResult
+namespace Dolittle.Runtime.Commands.Specs.for_CommandResult
 {
     public class when_containing_one_validation_result
     {

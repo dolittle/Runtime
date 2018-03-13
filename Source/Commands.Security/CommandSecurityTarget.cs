@@ -1,11 +1,11 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Security;
-using doLittle.Runtime.Commands;
+using Dolittle.Security;
+using Dolittle.Runtime.Commands;
 
-namespace doLittle.Runtime.Commands.Security
+namespace Dolittle.Runtime.Commands.Security
 {
     /// <summary>
     /// Represents a specific <see cref="ISecurityTarget"/> for <see cref="CommandRequest">commands</see>

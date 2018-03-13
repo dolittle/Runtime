@@ -1,12 +1,12 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using doLittle.Security;
-using doLittle.Runtime.Commands;
+using Dolittle.Security;
+using Dolittle.Runtime.Commands;
 
-namespace doLittle.Runtime.Commands.Security
+namespace Dolittle.Runtime.Commands.Security
 {
     /// <summary>
     /// Extensions for building a security descriptor specific for <see cref="CommandRequest">commands</see>

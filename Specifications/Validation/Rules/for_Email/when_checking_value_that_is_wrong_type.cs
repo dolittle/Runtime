@@ -1,11 +1,11 @@
-﻿using doLittle.Rules;
-using doLittle.Validation;
-using doLittle.Validation.Rules;
+﻿using Dolittle.Rules;
+using Dolittle.Validation;
+using Dolittle.Validation.Rules;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Specs.Validation.Rules.for_Email
+namespace Dolittle.Specs.Validation.Rules.for_Email
 {
     public class when_checking_value_that_is_wrong_type
     {

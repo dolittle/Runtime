@@ -1,12 +1,12 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using doLittle.Applications;
-using doLittle.Events;
+using Dolittle.Applications;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Storage
+namespace Dolittle.Runtime.Events.Storage
 {
     /// <summary>
     /// Defines a repository that holds events generated

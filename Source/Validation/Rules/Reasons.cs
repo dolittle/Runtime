@@ -1,10 +1,10 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using doLittle.Rules;
+using Dolittle.Rules;
 
-namespace doLittle.Validation.Rules
+namespace Dolittle.Validation.Rules
 {
     /// <summary>
     /// Contains common <see cref="BrokenRuleReason">reasons</see> for broken validation rules

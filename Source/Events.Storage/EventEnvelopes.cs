@@ -1,18 +1,18 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Applications;
-using doLittle.Runtime.Execution;
-using doLittle.Time;
-using doLittle.Runtime.Transactions;
-using doLittle.Runtime.Events.Migration;
-using doLittle.Events;
+using Dolittle.Applications;
+using Dolittle.Runtime.Execution;
+using Dolittle.Time;
+using Dolittle.Runtime.Transactions;
+using Dolittle.Runtime.Events.Migration;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Storage
+namespace Dolittle.Runtime.Events.Storage
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventEnvelopes"/>

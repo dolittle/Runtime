@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>doLittle.Runtime.Queries.Validation</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Queries.Validation</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="doLittle.Rules" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Rules" Version="2.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>

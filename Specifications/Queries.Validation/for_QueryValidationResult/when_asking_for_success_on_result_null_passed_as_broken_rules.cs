@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationResult
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationResult
 {
     public class when_asking_for_success_on_result_null_passed_as_broken_rules : given.a_query_validation_result_with_null_passed_as_broken_rules
     {

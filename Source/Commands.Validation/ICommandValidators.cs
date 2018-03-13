@@ -1,8 +1,8 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-namespace doLittle.Runtime.Commands.Validation
+namespace Dolittle.Runtime.Commands.Validation
 {
     /// <summary>
     /// Defines the validators for validating a <see cref="CommandRequest"/>

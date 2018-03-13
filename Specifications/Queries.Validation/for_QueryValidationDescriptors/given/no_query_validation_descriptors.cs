@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationDescriptors.given
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationDescriptors.given
 {
     public class no_query_validation_descriptors : given.all_dependencies
     {

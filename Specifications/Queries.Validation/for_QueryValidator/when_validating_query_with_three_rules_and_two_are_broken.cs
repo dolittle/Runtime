@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using doLittle.Rules;
-using doLittle.Validation;
+using Dolittle.Rules;
+using Dolittle.Validation;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidator
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
 {
     public class when_validating_query_with_three_rules_and_two_are_broken : given.a_query_validator
     {

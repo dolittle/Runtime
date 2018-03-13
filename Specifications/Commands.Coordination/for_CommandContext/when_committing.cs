@@ -1,8 +1,8 @@
-﻿using doLittle.Runtime.Events;
-using doLittle.Runtime.Transactions;
+﻿using Dolittle.Runtime.Events;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Coordination.Specs.for_CommandContext
+namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext
 {
     public class when_committing : given.a_command_context_for_a_simple_command_with_one_tracked_object_with_one_uncommitted_event
     {

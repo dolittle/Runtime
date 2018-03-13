@@ -1,12 +1,12 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Reflection;
-using doLittle.Rules;
+using Dolittle.Rules;
 
-namespace doLittle.Validation.Rules
+namespace Dolittle.Validation.Rules
 {
     /// <summary>
     /// Represents the <see cref="ValueRule"/> for less than - any value must be less than a given value

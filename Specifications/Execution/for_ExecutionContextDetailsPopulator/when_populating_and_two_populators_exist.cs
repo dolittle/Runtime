@@ -1,11 +1,11 @@
 ﻿using System.Dynamic;
-using doLittle.DependencyInversion;
-using doLittle.Types;
+using Dolittle.DependencyInversion;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Execution.Specs.for_ExecutionContextDetailsPopulator
+namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextDetailsPopulator
 {
     public class when_populating_and_two_populators_exist
     {

@@ -2,7 +2,7 @@
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Runtime.Tenancy.Specs.for_TenantManager
+namespace Dolittle.Runtime.Tenancy.Specs.for_TenantManager
 {
     public class when_getting_current_and_it_is_in_the_call_context : given.a_tenant_manager
     {

@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Machine.Specifications;
 
-namespace doLittle.Runtime.Commands.Specs.for_CommandResult
+namespace Dolittle.Runtime.Commands.Specs.for_CommandResult
 {
     public class when_containing_one_command_validation_message 
     {

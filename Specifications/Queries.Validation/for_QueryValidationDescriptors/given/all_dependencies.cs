@@ -1,10 +1,10 @@
-﻿using doLittle.DependencyInversion;
-using doLittle.Execution;
-using doLittle.Types;
+﻿using Dolittle.DependencyInversion;
+using Dolittle.Execution;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationDescriptors.given
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationDescriptors.given
 {
     public class all_dependencies
     {

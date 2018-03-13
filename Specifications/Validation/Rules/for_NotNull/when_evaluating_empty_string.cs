@@ -1,11 +1,11 @@
 ﻿using System;
-using doLittle.Rules;
-using doLittle.Validation.Rules;
+using Dolittle.Rules;
+using Dolittle.Validation.Rules;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace doLittle.Specs.Validation.Rules.for_NotNull
+namespace Dolittle.Specs.Validation.Rules.for_NotNull
 {
     public class when_evaluating_empty_string
     {

@@ -1,17 +1,17 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using doLittle.Logging;
-using doLittle.Runtime.Execution;
-using doLittle.Runtime.Events.Coordination;
-using doLittle.Runtime.Transactions;
-using doLittle.Runtime.Events;
+using Dolittle.Logging;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Events.Coordination;
+using Dolittle.Runtime.Transactions;
+using Dolittle.Runtime.Events;
 
-namespace doLittle.Runtime.Commands.Coordination
+namespace Dolittle.Runtime.Commands.Coordination
 {
     /// <summary>
     /// Represents a <see cref="ICommandContext">ICommandContext</see>

@@ -1,9 +1,9 @@
-﻿using doLittle.Execution;
-using doLittle.Types;
+﻿using Dolittle.Execution;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Commands.Validation.Specs.for_CommandValidators.given
+namespace Dolittle.Runtime.Commands.Validation.Specs.for_CommandValidators.given
 {
     public class all_dependencies
     {

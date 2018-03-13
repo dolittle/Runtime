@@ -1,6 +1,6 @@
-﻿using doLittle.ReadModels;
+﻿using Dolittle.ReadModels;
 
-namespace doLittle.Queries.Coordination.Specs.for_QueryCoordinator
+namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 {
     public class ReadModelWithString : IReadModel
     {

@@ -1,17 +1,17 @@
 ﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) 2008-2017 doLittle. All rights reserved.
+ *  Copyright (c) 2008-2017 Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using doLittle.Execution;
-using doLittle.Types;
-using doLittle.DependencyInversion;
-using doLittle.Events;
+using Dolittle.Execution;
+using Dolittle.Types;
+using Dolittle.DependencyInversion;
+using Dolittle.Events;
 
-namespace doLittle.Runtime.Events.Migration
+namespace Dolittle.Runtime.Events.Migration
 {
     /// <summary>
     /// Represents a <see cref="IEventMigratorManager">IEventMigratorManager</see>

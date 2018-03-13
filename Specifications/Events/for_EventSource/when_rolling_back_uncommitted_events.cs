@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Runtime.Events.Specs.for_EventSource
 {
     [Subject(Subjects.rolling_back)]
     public class when_rolling_back_uncommitted_events : given.an_event_source_with_2_uncommitted_events

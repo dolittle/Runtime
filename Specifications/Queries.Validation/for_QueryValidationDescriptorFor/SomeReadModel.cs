@@ -1,6 +1,6 @@
-﻿using doLittle.ReadModels;
+﻿using Dolittle.ReadModels;
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidationDescriptorFor
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidationDescriptorFor
 {
     public class SomeReadModel : IReadModel
     {

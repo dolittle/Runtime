@@ -1,10 +1,10 @@
 ﻿using System;
-using doLittle.Applications;
-using doLittle.Runtime.Transactions;
+using Dolittle.Applications;
+using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 
-namespace doLittle.Runtime.Events.Specs.for_EventEnvelope.given
+namespace Dolittle.Runtime.Events.Specs.for_EventEnvelope.given
 {
     public class an_event_envelope
     {

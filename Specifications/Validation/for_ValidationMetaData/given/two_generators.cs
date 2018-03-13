@@ -1,8 +1,8 @@
 ﻿using System.Linq;
-using doLittle.Validation.MetaData;
+using Dolittle.Validation.MetaData;
 using Machine.Specifications;
 
-namespace doLittle.Specs.Validation.for_ValidationMetaData.given
+namespace Dolittle.Specs.Validation.for_ValidationMetaData.given
 {
     public class two_generators : all_dependencies
     {

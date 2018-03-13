@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace doLittle.Runtime.Tenancy.Specs.for_TenantManager.given
+namespace Dolittle.Runtime.Tenancy.Specs.for_TenantManager.given
 {
     public class a_tenant_manager : all_dependencies
     {

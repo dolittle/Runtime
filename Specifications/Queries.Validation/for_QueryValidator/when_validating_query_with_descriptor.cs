@@ -1,10 +1,10 @@
-﻿using doLittle.Validation;
+﻿using Dolittle.Validation;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
 
-namespace doLittle.Queries.Validation.Specs.for_QueryValidator
+namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
 {
     public class when_validating_query_with_descriptor : given.a_query_validator
     {
