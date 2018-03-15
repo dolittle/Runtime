@@ -1,7 +1,7 @@
 ﻿using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource.given
+namespace Dolittle.Events.Specs.for_EventSource.given
 {
     [Subject(typeof(EventSourceExtensions))]
     public class two_different_event_source_types_that_handle_different_events

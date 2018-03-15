@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Logging;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Events.Coordination;
 using Dolittle.Runtime.Transactions;
 using Dolittle.Runtime.Events;
+using Dolittle.Events;
+using Dolittle.Runtime.Events.Coordination;
 
 namespace Dolittle.Runtime.Commands.Coordination
 {

@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Events.Specs.for_EventSource
 {
     [Subject(typeof (EventSourceExtensions))]
     public class when_checking_if_stateless_on_a_stateful_event_source : given.a_stateful_event_source

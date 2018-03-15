@@ -1,4 +1,5 @@
 ﻿using System;
+using Dolittle.Events;
 using Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs

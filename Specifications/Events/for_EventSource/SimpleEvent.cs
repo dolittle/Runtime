@@ -1,6 +1,6 @@
 ﻿using Dolittle.Events;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Events.Specs.for_EventSource
 {
     public class SimpleEvent : IEvent
     {

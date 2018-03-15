@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Events;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Events
 {
     /// <summary>
     /// Extensions for <see cref="EventSource"/>

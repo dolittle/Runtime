@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using Dolittle.Events;
+using Dolittle.Runtime.Events;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Events
 {
     /// <summary>
     /// Represents a <see cref="IEventSource">IEventSource</see>
@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Initializes an instance of <see cref="EventSource">EventSource</see>
         /// </summary>
-        /// <param name="id"><see cref="Events.EventSourceId"/> of the event source</param>
+        /// <param name="id"><see cref="EventSourceId"/> of the event source</param>
         protected EventSource(EventSourceId id)
         {
             EventSourceId = id;

@@ -1,4 +1,5 @@
 ﻿using System;
+using Dolittle.Events;
 using Machine.Specifications;
 using Moq;
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Dynamic;
 using Dolittle.Applications;
+using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;

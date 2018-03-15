@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Events.Specs.for_EventSource
 {
     public class StatefulEventSource : EventSource
     {

@@ -5,7 +5,7 @@
 using System;
 using Dolittle.Artifacts;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Events
 {
     /// <summary>
     /// Represents a <see cref="IArtifactType">artifact type</see> for <see cref="IEventSource">events</see>

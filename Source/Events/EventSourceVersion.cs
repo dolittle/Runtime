@@ -7,7 +7,7 @@ using System;
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Represents the versioning for an <see cref="EventSource"/>
+    /// Represents the versioning for an event source
     /// </summary>
     public struct EventSourceVersion : IComparable<EventSourceVersion>
     {

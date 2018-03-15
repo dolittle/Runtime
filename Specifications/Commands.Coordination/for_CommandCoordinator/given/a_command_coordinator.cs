@@ -2,6 +2,7 @@
 using Dolittle.Applications;
 using Dolittle.Globalization;
 using Dolittle.Logging;
+using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Commands.Security;
 using Dolittle.Runtime.Commands.Validation;
 using Dolittle.Runtime.Transactions;

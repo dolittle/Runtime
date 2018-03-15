@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Events.Specs.for_EventSource
 {
     [Subject(Subjects.committing_events)]
     public class when_comitting_uncommitted_events : given.an_event_source_with_2_uncommitted_events

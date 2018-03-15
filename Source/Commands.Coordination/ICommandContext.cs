@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
+using Dolittle.Events;
 using Dolittle.Runtime.Commands;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Execution;

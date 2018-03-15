@@ -1,6 +1,6 @@
 ﻿using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource.given
+namespace Dolittle.Events.Specs.for_EventSource.given
 {
 	public class an_event_source_with_2_uncommitted_events : a_stateful_event_source
 	{

@@ -1,9 +1,9 @@
-﻿using Machine.Specifications;
+﻿using Dolittle.Runtime.Events;
+using Machine.Specifications;
 using Moq;
 using System;
-using Dolittle.Events;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource.given
+namespace Dolittle.Events.Specs.for_EventSource.given
 {
     public class a_stateful_event_source
 	{

@@ -2,8 +2,9 @@
 using Moq;
 using It = Machine.Specifications.It;
 using Dolittle.Events;
+using Dolittle.Runtime.Events;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Events.Specs.for_EventSource
 {
     [Subject(Subjects.reapplying_events)]
     public class when_reapplying_a_stream_of_committed_events : given.a_stateful_event_source

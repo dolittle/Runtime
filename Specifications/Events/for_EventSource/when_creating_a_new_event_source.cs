@@ -1,7 +1,8 @@
 ﻿using System;
+using Dolittle.Runtime.Events;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Specs.for_EventSource
+namespace Dolittle.Events.Specs.for_EventSource
 {
 	[Subject(Subjects.creating_event_source)]
 	public class when_creating_a_new_event_source : given.a_stateful_event_source 

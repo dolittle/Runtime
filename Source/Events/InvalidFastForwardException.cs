@@ -7,7 +7,7 @@ using System;
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Represents an exceptional situation where an <see cref="IEventSource">EventSource</see> is stateful 
+    /// Represents an exceptional situation where an event source is stateful 
     /// but there has been an attempt to retrieve it without restoring state by replaying events (fast-forwarding)
     /// </summary>
     public class InvalidFastForwardException : Exception

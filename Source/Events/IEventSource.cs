@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Runtime.Transactions;
-using Dolittle.Events;
+using Dolittle.Runtime.Events;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Events
 {
     /// <summary>
     /// An EventSource is a domain object that is capable of generating and applying events.  It is an AggregateRoot in the context

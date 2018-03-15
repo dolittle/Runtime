@@ -8,7 +8,7 @@ using Dolittle.Concepts;
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Represents the identification of an <see cref="IEventSource"/>
+    /// Represents the identification of an event source
     /// </summary>
     public class EventSourceId : ConceptAs<Guid>
     {

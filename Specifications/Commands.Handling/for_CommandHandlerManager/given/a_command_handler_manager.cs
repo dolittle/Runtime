@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Dolittle.Execution;
+using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
