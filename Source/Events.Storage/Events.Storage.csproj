@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Time" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Serialization.Protobuf" Version="2.0.0-*" />
+    <PackageReference Include="Handlebars.Net" Version="1.9.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +18,7 @@
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
     <ProjectReference Include="..\Execution\Execution.csproj" />
     <ProjectReference Include="..\Events.Migration\Events.Migration.csproj" />
+    <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
   </ItemGroup>
 
 </Project>
