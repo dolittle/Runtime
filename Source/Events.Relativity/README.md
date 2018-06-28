@@ -1,4 +1,4 @@
-# Event Horizon
+# Events Relativity
 
 ## Protobuf
 
