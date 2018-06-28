@@ -2,13 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyName>Dolittle.Runtime.Events.Storage.Specs</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Events.Relativity.Specs</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/specs.props"></Import>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Events.Storage\Events.Storage.csproj" />
+    <ProjectReference Include="..\..\Source\Events.Relativity\Events.Relativity.csproj" />
   </ItemGroup>
 
 

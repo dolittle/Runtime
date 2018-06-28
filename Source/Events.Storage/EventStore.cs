@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Storage
     {
         readonly IEventStorage _storage;
         readonly ISerializer _serializer;
-        private readonly IEventStoragePaths _paths;
+        readonly IEventStoragePaths _paths;
 
         /// <summary>
         /// 
