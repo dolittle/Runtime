@@ -23,7 +23,7 @@ The particles, representing committed events. By committed events, we mean event
 
 ### [Singularity](https://en.wikipedia.org/wiki/Gravitational_singularity)
 
-A singularity represents a single destination point for an event-particle. An event horizon can get [spaghettified](https://en.wikipedia.org/wiki/Spaghettification) into multiple singularities.
+A singularity represents a single destination point for an event-particle. An event horizon can [spaghettified](https://en.wikipedia.org/wiki/Spaghettification) particles into multiple singularities.
 
 ### [Quantum Tunnel](https://en.wikipedia.org/wiki/Quantum_tunnelling)
 
