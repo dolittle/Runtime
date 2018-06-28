@@ -12,12 +12,12 @@ namespace Dolittle.Runtime.Events.Relativity
     public class Singularity : ISingularity
     {
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="Singularity"/>
         /// </summary>
-        /// <param name="subscriptions"></param>
+        /// <param name="subscriptions"><see cref="IEnumerable{ParticleSubscription}">Subscriptions</see></param>
         public Singularity(IEnumerable<ParticleSubscription> subscriptions)
         {
-
+            Subscriptions = subscriptions;
         }
 
         /// <inheritdoc/>
