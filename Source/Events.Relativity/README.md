@@ -3,7 +3,7 @@
 ## Protobuf
 
 We're using [gRPC](https://www.grpc.io) for communication which relies on protobuf.
-All services exposed are exposed through `.proto` files. After changing these you need to
+All available services and messages are defined through `.proto` files. After changing these you need to
 generate the source by running the following in your shell:
 
 ```shell
