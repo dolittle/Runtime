@@ -7,14 +7,20 @@ using System.Collections.Generic;
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Defines the single singularity in which is the destination for particles known as
-    /// events
+    /// Represents an implementation of <see cref="ISingularity"/>
     /// </summary>
-    public interface ISingularity
+    public class Singularity : ISingularity
     {
         /// <summary>
-        /// Gets the <see cref="IEnumerable{ParticleSubscription}"/> 
+        /// 
         /// </summary>
-        IEnumerable<ParticleSubscription> Subscriptions { get; }
+        /// <param name="subscriptions"></param>
+        public Singularity(IEnumerable<ParticleSubscription> subscriptions)
+        {
+
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<ParticleSubscription> Subscriptions {  get; }
     }
 }

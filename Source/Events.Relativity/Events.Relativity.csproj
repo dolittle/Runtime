@@ -11,4 +11,13 @@
     <ProjectReference Include="..\Events\Events.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
+    <PackageReference Include="Google.Protobuf" Version="3.5.0" />
+    <PackageReference Include="Google.Protobuf.Tools" Version="3.5.0" />
+    <PackageReference Include="Grpc" Version="1.8.0" />
+    <PackageReference Include="Grpc.Tools" Version="1.8.0" />
+  </ItemGroup>
+
+
 </Project>
