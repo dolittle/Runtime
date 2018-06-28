@@ -5,7 +5,7 @@
     <AssemblyName>Dolittle.Runtime.Commands</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../Build/MSBuild/default.props"></Import>
+  <Import Project="../../Build/MSBuild/default.props"/>
 
   <ItemGroup>
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
