@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HandlebarsDotNet;
 
 namespace Dolittle.Runtime.Events.Storage
@@ -13,18 +14,26 @@ namespace Dolittle.Runtime.Events.Storage
     /// </summary>
     public class EventStoragePaths : IEventStoragePaths
     {
-        static string[] _templates = {
-            "{{ApplicationName}}/{{Tenant}}//{{EventSourceId}}",
-            "{{ApplicationName}}/{{Tenant}}//{{DateTime}}/{{EventSourceId}}"
-        };
+        readonly IEventStoragePathTemplates _templates;
+        private readonly IEventStorageContexts _eventStorageContexts;
+
+        /*
+static string[] _templates = {
+"{{ApplicationName}}/{{Tenant}}//{{EventSourceId}}",
+"{{ApplicationName}}/{{Tenant}}//{{DateTime}}/{{EventSourceId}}"
+};*/
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="EventStoragePaths"/>
         /// </summary>
         /// <param name="templates"></param>
-        public EventStoragePaths(IEventStoragePathTemplates templates)
+        /// <param name="eventStorageContexts"></param>
+        public EventStoragePaths(
+            IEventStoragePathTemplates templates,
+            IEventStorageContexts eventStorageContexts)
         {
-
+            _templates = templates;
+            _eventStorageContexts = eventStorageContexts;
         }
 
 
@@ -32,7 +41,9 @@ namespace Dolittle.Runtime.Events.Storage
         /// <inheritdoc/>
         public IEnumerable<EventStoragePath> GetForContext(EventSourceId eventSourceId)
         {
-            throw new NotImplementedException();
+            var context = _eventStorageContexts.GetCurrentFor(eventSourceId);
+            var paths = _templates.All.Select(_ => (EventStoragePath)_.Function(context));
+            return paths;
         }
     }
 }
