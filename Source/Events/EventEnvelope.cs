@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events
         /// <param name="event"><see cref="IApplicationArtifactIdentifier"/> representing the <see cref="IEvent"/></param>
         /// <param name="eventSourceId"><see cref="EventSourceId"/> for the <see cref="IEventSource"/></param>
         /// <param name="eventSource"><see cref="IApplicationArtifactIdentifier"/> representing the <see cref="IEventSource"/></param>
-        /// <param name="version"><see cref="EventSourceVersion">Version</see> of the event related to the <see cref="IEventSource"/></param>
+        /// <param name="version"><see cref="EventSourceVersion">version</see> of the event related to the <see cref="IEventSource"/></param>
         /// <param name="causedBy"><see cref="string"/> representing which person or what system caused the event</param>
         /// <param name="occurred"><see cref="DateTime">When</see> the event occured</param>
         public EventEnvelope(
