@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="artifact">The artifact</param>
         /// <param name="generation">The generation</param>
-        public ArtifactGeneration(ApplicationArtifactIdentifier artifact, Generation generation)
+        public ArtifactGeneration(IApplicationArtifactIdentifier artifact, Generation generation)
         {
             Artifact = artifact;
             Generation = generation;
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store
         /// The artifact that this generation refers to
         /// </summary>
         /// <value></value>
-        public ApplicationArtifactIdentifier Artifact { get; }
+        public IApplicationArtifactIdentifier Artifact { get; }
         /// <summary>
         /// The generation of this artifact
         /// </summary>
