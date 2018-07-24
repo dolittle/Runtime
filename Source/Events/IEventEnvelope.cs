@@ -6,6 +6,7 @@ using System;
 using Dolittle.Applications;
 using Dolittle.Runtime.Transactions;
 using Dolittle.Events;
+using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events
 {
@@ -41,9 +42,9 @@ namespace Dolittle.Runtime.Events
         EventGeneration Generation { get; }
 
         /// <summary>
-        /// Gets the <see cref="IApplicationArtifactIdentifier">identifier</see> identifying the <see cref="IEvent"/>
+        /// Gets the <see cref="Artifact">identifier</see> identifying the <see cref="IEvent"/>
         /// </summary>
-        IApplicationArtifactIdentifier Event { get; }
+        Artifact Event { get; }
 
         /// <summary>
         /// Gets the <see cref="EventSourceId">id</see> of the <see cref="IEventSource"/>
@@ -51,9 +52,9 @@ namespace Dolittle.Runtime.Events
         EventSourceId EventSourceId { get; }
 
         /// <summary>
-        /// Gets the <see cref="IApplicationArtifactIdentifier">identifier</see> identifying the <see cref="IEventSource"/>
+        /// Gets the <see cref="Artifact">identifier</see> identifying the <see cref="IEventSource"/>
         /// </summary>
-        IApplicationArtifactIdentifier EventSource { get; }
+        Artifact EventSource { get; }
 
         /// <summary>
         /// Gets the <see cref="EventSourceVersion">version</see> of the <see cref="IEventSource"/>

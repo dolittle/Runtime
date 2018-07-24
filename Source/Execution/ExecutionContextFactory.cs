@@ -17,7 +17,8 @@ namespace Dolittle.Runtime.Execution
     {
         ICanResolvePrincipal _principalResolver;
         IExecutionContextDetailsPopulator _detailsPopulator;
-        IApplication _application;
+        Application _application;
+        BoundedContext _boundedContext;
         IContainer _container;
 
         /// <summary>
@@ -25,17 +26,20 @@ namespace Dolittle.Runtime.Execution
         /// </summary>
         /// <param name="principalResolver"><see cref="ICanResolvePrincipal"/> for resolving the identity</param>
         /// <param name="detailsPopulator">A <see cref="IExecutionContextDetailsPopulator"/> to use for populating any <see cref="IExecutionContext"/> being created</param>
-        /// <param name="application">The current <see cref="IApplication"/></param>
+        /// <param name="application">The current <see cref="Application"/></param>
+        /// <param name="boundedContext">The current <see cref="BoundedContext"/></param>
         /// <param name="container">The <see cref="IContainer">IOC container</see> to resolve runtime dependencies</param>
         public ExecutionContextFactory(
             ICanResolvePrincipal principalResolver, 
             IExecutionContextDetailsPopulator detailsPopulator, 
-            IApplication application, 
+            Application application, 
+            BoundedContext boundedContext,
             IContainer container)
         {
             _principalResolver = principalResolver;
             _detailsPopulator = detailsPopulator;
             _application = application;
+            _boundedContext = boundedContext;
             _container = container;
         }
 
@@ -47,6 +51,7 @@ namespace Dolittle.Runtime.Execution
                 CultureInfo.CurrentCulture,
                 _detailsPopulator.Populate,
                 _application,
+                _boundedContext,
                 _container.Get<ITenant>());
 
             return executionContext;
