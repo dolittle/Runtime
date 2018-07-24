@@ -1,5 +1,5 @@
 ﻿using System.Dynamic;
-using Dolittle.Applications;
+using Dolittle.Artifacts;
 using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
@@ -15,8 +15,8 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
 
         Because of = () =>
                          {
-                             var firstCommand = new CommandRequest(TransactionCorrelationId.NotSet, Mock.Of<IApplicationArtifactIdentifier>(), new ExpandoObject());
-                             var secondCommand = new CommandRequest(TransactionCorrelationId.NotSet, Mock.Of<IApplicationArtifactIdentifier>(), new ExpandoObject());
+                             var firstCommand = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+                             var secondCommand = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
                              firstCommandContext = Manager.EstablishForCommand(firstCommand);
                              secondCommandContext = Manager.EstablishForCommand(secondCommand);
                          };

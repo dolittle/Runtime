@@ -16,7 +16,8 @@ namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextFactory
         static ExecutionContextFactory factory;
         static Mock<ICanResolvePrincipal> identity_resolver;
         static Mock<IExecutionContextDetailsPopulator> details_populator;
-        static Mock<IApplication> application;
+        static Application application;
+        static BoundedContext bounded_context;
         static Mock<IContainer> container;
         static Mock<ITenant> tenant;
         static IExecutionContext instance;
@@ -32,13 +33,14 @@ namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextFactory
 
             details_populator = new Mock<IExecutionContextDetailsPopulator>();
 
-            application = new Mock<IApplication>();
+            application = Application.New();
+            bounded_context = BoundedContext.New();
             container = new Mock<IContainer>();
             tenant = new Mock<ITenant>();
 
             container.Setup(c => c.Get<ITenant>()).Returns(tenant.Object);
 
-            factory = new ExecutionContextFactory(identity_resolver.Object, details_populator.Object, application.Object, container.Object);
+            factory = new ExecutionContextFactory(identity_resolver.Object, details_populator.Object, application, bounded_context, container.Object);
         };
 
         Because of = () => instance = factory.Create();
@@ -47,7 +49,8 @@ namespace Dolittle.Runtime.Execution.Specs.for_ExecutionContextFactory
         It should_create_with_the_resolved_identity = () => instance.Principal.ShouldEqual(principal);
         It should_populate_details = () => details_populator.Verify(d => d.Populate(instance, Moq.It.IsAny<DynamicObject>()), Times.Once());
         It should_be_initialized_with_the_current_threads_culture = () => instance.Culture.ShouldEqual(CultureInfo.CurrentCulture);
-        It should_be_initialized_with_the_configured_system_name = () => instance.Application.ShouldEqual(application.Object);
+        It should_be_initialized_with_the_configured_application = () => instance.Application.ShouldEqual(application);
+        It should_be_initialized_with_the_cofigured_bounded_context = () => instance.BoundedContext.ShouldEqual(bounded_context);
         It should_be_initialized_with_the_current_tenant = () => instance.Tenant.ShouldEqual(tenant.Object);
     }
 }

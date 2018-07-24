@@ -1,5 +1,5 @@
 ﻿using System.Dynamic;
-using Dolittle.Applications;
+using Dolittle.Artifacts;
 using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
 
         Establish context = () =>
                                 {
-                                    command = new CommandRequest(TransactionCorrelationId.NotSet, Mock.Of<IApplicationArtifactIdentifier>(), new ExpandoObject());
+                                    command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
                                     commandContext = Manager.EstablishForCommand(command);
                                 };
 
