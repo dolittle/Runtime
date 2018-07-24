@@ -27,7 +27,7 @@ A singularity represents a single destination point for an event-particle. An ev
 
 ### [Quantum Tunnel](https://en.wikipedia.org/wiki/Quantum_tunnelling)
 
-Each singularity can connect any event horizon, they establish a quantum tunnel for the purpose of moving particles across.
+Each singularity can connect to any event horizon, they establish a quantum tunnel for the purpose of passing particles through.
 
 ### [Wave Function](https://en.wikipedia.org/wiki/Wave_function)
 
