@@ -3,7 +3,6 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Applications;
-using Dolittle.Artifacts;
 using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Processing
@@ -19,10 +18,10 @@ namespace Dolittle.Runtime.Events.Processing
         EventProcessorIdentifier Identifier { get; }
 
         /// <summary>
-        /// Gets the <see cref="Artifact"/> for the <see cref="IEvent">event type</see>
+        /// Gets the <see cref="IApplicationArtifactIdentifier"/> for the <see cref="IEvent">event type</see>
         /// it represents
         /// </summary>
-        Artifact Event { get; }
+        IApplicationArtifactIdentifier Event { get; }
 
         /// <summary>
         /// Process an event 

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Dynamic;
-using Dolittle.Artifacts;
+using Dolittle.Applications;
 using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Commands.Specs.for_CommandHandlerManager
 
         Because of = () =>
                          {
-                             handled_command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+                             handled_command = new CommandRequest(TransactionCorrelationId.NotSet, Mock.Of<IApplicationArtifactIdentifier>(), new ExpandoObject());
                              thrown_exception = Catch.Exception(() => manager.Handle(handled_command));
                          };
 

@@ -22,21 +22,13 @@ namespace Dolittle.Runtime.Execution
         /// <param name="principal"><see cref="ClaimsPrincipal"/> to populate with</param>
         /// <param name="cultureInfo"><see cref="CultureInfo"/> for the <see cref="ExecutionContext"/></param>
         /// <param name="detailsPopulator">Callback that gets called for populating the details of the <see cref="ExecutionContext"/></param>
-        /// <param name="application"><see cref="Application"/> that is currently executing</param>
-        /// <param name="boundedContext"><see cref="BoundedContext"/> that is currently executing</param>
+        /// <param name="application"><see cref="IApplication"/> that is currently executing</param>
         /// <param name="tenant"><see cref="ITenant"/> that is currently part of the <see cref="IExecutionContext"/></param>
-        public ExecutionContext(
-            ClaimsPrincipal principal,
-            CultureInfo cultureInfo,
-            ExecutionContextPopulator detailsPopulator,
-            Application application,
-            BoundedContext boundedContext,
-            ITenant tenant)
+        public ExecutionContext(ClaimsPrincipal principal, CultureInfo cultureInfo, ExecutionContextPopulator detailsPopulator, IApplication application, ITenant tenant)
         {
             Principal = principal;
             Culture = cultureInfo;
             Application = application;
-            BoundedContext = boundedContext;
             Tenant = tenant;
             Details = new WriteOnceExpandoObject(d => detailsPopulator(this,d));
         }
@@ -48,10 +40,7 @@ namespace Dolittle.Runtime.Execution
         public CultureInfo Culture { get; }
 
         /// <inheritdoc/>
-        public Application Application { get; }
-
-        /// <inheritdoc/>
-        public BoundedContext BoundedContext { get; }
+        public IApplication Application { get; }
 
         /// <inheritdoc/>
         public ITenant Tenant { get; }

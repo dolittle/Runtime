@@ -6,7 +6,6 @@ using System;
 using Dolittle.Events;
 using Dolittle.Applications;
 using Dolittle.Runtime.Transactions;
-using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events
 {
@@ -23,9 +22,9 @@ namespace Dolittle.Runtime.Events
         /// <param name="sequenceNumber"></param>
         /// <param name="sequenceNumberForEventType"></param>
         /// <param name="generation"><see cref="EventGeneration"/> for the <see cref="IEvent"/> </param>
-        /// <param name="event"><see cref="Artifact"/> representing the <see cref="IEvent"/></param>
+        /// <param name="event"><see cref="IApplicationArtifactIdentifier"/> representing the <see cref="IEvent"/></param>
         /// <param name="eventSourceId"><see cref="EventSourceId"/> for the <see cref="IEventSource"/></param>
-        /// <param name="eventSource"><see cref="Artifact"/> representing the <see cref="IEventSource"/></param>
+        /// <param name="eventSource"><see cref="IApplicationArtifactIdentifier"/> representing the <see cref="IEventSource"/></param>
         /// <param name="version"><see cref="EventSourceVersion">Version</see> of the event related to the <see cref="IEventSource"/></param>
         /// <param name="causedBy"><see cref="string"/> representing which person or what system caused the event</param>
         /// <param name="occurred"><see cref="DateTime">When</see> the event occured</param>
@@ -35,9 +34,9 @@ namespace Dolittle.Runtime.Events
             EventSequenceNumber sequenceNumber,
             EventSequenceNumber sequenceNumberForEventType,
             EventGeneration generation, 
-            Artifact @event, 
+            IApplicationArtifactIdentifier @event, 
             EventSourceId eventSourceId, 
-            Artifact eventSource, 
+            IApplicationArtifactIdentifier eventSource, 
             EventSourceVersion version, 
             CausedBy causedBy, 
             DateTimeOffset occurred)
@@ -71,13 +70,13 @@ namespace Dolittle.Runtime.Events
         public EventGeneration Generation { get; }
 
         /// <inheritdoc/>
-        public Artifact Event { get; }
+        public IApplicationArtifactIdentifier Event { get; }
 
         /// <inheritdoc/>
         public EventSourceId EventSourceId { get; }
 
         /// <inheritdoc/>
-        public Artifact EventSource { get; }
+        public IApplicationArtifactIdentifier EventSource { get; }
 
         /// <inheritdoc/>
         public EventSourceVersion Version { get; }

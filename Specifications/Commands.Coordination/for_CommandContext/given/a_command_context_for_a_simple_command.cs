@@ -1,4 +1,5 @@
-﻿using Dolittle.Events;
+﻿using Dolittle.Applications;
+using Dolittle.Events;
 using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
@@ -6,7 +7,6 @@ using System.Dynamic;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Coordination;
 using Dolittle.Runtime.Events.Storage;
-using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
 {
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
 
         Establish context = () =>
         {
-            command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+            command = new CommandRequest(TransactionCorrelationId.NotSet, Mock.Of<IApplicationArtifactIdentifier>(), new ExpandoObject());
             uncommitted_event_stream_coordinator = new Mock<IUncommittedEventStreamCoordinator>();
             event_envelopes = new Mock<IEventEnvelopes>();
             logger = new Mock<ILogger>();

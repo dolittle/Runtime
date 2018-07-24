@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Applications;
 using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 using Dolittle.Events;
-using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamCoordinator
 {
@@ -30,28 +30,28 @@ namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
 
         static Mock<IEventSource> event_source;
         static EventSourceId event_source_id = Guid.NewGuid();
-        static Artifact event_source_identifier;
+        static Mock<IApplicationArtifactIdentifier> event_source_identifier;
 
         static Mock<IEvent> first_event;
         static IEventEnvelope first_event_envelope;
-        static Artifact first_event_identifier;
+        static Mock<IApplicationArtifactIdentifier> first_event_identifier;
         static EventSourceVersion first_event_source_version;
 
         static Mock<IEvent> second_event;
         static IEventEnvelope second_event_envelope;
-        static Artifact second_event_identifier;
+        static Mock<IApplicationArtifactIdentifier> second_event_identifier;
         static EventSourceVersion second_event_source_version;
 
         Establish context = ()=>
         {
             transaction_correlation_id = Guid.NewGuid();
 
-            event_source_identifier = Artifact.New();
+            event_source_identifier = new Mock<IApplicationArtifactIdentifier>();
             event_source = new Mock<IEventSource>();
             event_source.SetupGet(e => e.EventSourceId).Returns(event_source_id);
 
             first_event_source_version = new EventSourceVersion(4, 2);
-            first_event_identifier = Artifact.New();
+            first_event_identifier = new Mock<IApplicationArtifactIdentifier>();
             first_event = new Mock<IEvent>();
             first_event_envelope = new EventEnvelope(
                 TransactionCorrelationId.NotSet,
@@ -59,9 +59,9 @@ namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
                 EventSequenceNumber.Zero,
                 EventSequenceNumber.Zero,
                 EventGeneration.First,
-                first_event_identifier,
+                first_event_identifier.Object,
                 event_source_id,
-                event_source_identifier,
+                event_source_identifier.Object,
                 first_event_source_version,
                 CausedBy.Unknown,
                 DateTimeOffset.UtcNow
@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
             var first_event_and_version = new EventAndVersion(first_event.Object, first_event_source_version);
 
             second_event_source_version = new EventSourceVersion(4, 3);
-            second_event_identifier = Artifact.New();
+            second_event_identifier = new Mock<IApplicationArtifactIdentifier>();
             second_event = new Mock<IEvent>();
             second_event_envelope = new EventEnvelope(
                 TransactionCorrelationId.NotSet,
@@ -78,9 +78,9 @@ namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
                 EventSequenceNumber.Zero,
                 EventSequenceNumber.Zero,
                 EventGeneration.First,
-                first_event_identifier,
+                first_event_identifier.Object,
                 event_source_id,
-                event_source_identifier,
+                event_source_identifier.Object,
                 second_event_source_version,
                 CausedBy.Unknown,
                 DateTimeOffset.UtcNow
@@ -112,7 +112,7 @@ namespace Dolittle.Runtime.Events.Coordination.Specs.for_UncommittedEventStreamC
             var sequence = 0;
             var sequence_for_types = 0;
             event_sequence_numbers.Setup(e => e.Next()).Returns(()=> numbers[sequence++]);
-            event_sequence_numbers.Setup(e => e.NextForType(Moq.It.IsAny<Artifact>())).Returns(()=> numbers_for_types[sequence_for_types++]);
+            event_sequence_numbers.Setup(e => e.NextForType(Moq.It.IsAny<IApplicationArtifactIdentifier>())).Returns(()=> numbers_for_types[sequence_for_types++]);
 
             committed_event_stream_sender.Setup(e => e.Send(Moq.It.IsAny<CommittedEventStream>()))
                 .Callback((CommittedEventStream c)=>

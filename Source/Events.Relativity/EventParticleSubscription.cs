@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using Dolittle.Artifacts;
+using Dolittle.Applications;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Initializes a new instance of <see cref="EventParticleSubscription"/>
         /// </summary>
         /// <param name="events"></param>
-        public EventParticleSubscription(IEnumerable<Artifact> events)
+        public EventParticleSubscription(IEnumerable<ApplicationArtifactIdentifier> events)
         {
             Events = events;
         }
@@ -24,6 +24,6 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Gets the events the subscription is for
         /// </summary>
-        public IEnumerable<Artifact>   Events { get; }
+        public IEnumerable<ApplicationArtifactIdentifier>   Events { get; }
     }
 }
