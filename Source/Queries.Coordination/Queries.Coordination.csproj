@@ -7,7 +7,6 @@
 
   <Import Project="../../Build/MSBuild/default.props" />
 
-
   <ItemGroup>
     <ProjectReference Include="..\Queries\Queries.csproj" />
     <ProjectReference Include="..\Queries.Security\Queries.Security.csproj" />
