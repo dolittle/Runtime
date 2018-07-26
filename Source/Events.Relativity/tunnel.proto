@@ -5,7 +5,7 @@ option csharp_namespace = "Dolittle.Runtime.Events.Relativity";
 package relativity;
 
 service QuantumTunnelService {
-    rpc Open(ParticleSubscriptionsMessage) returns (stream ParticleMessage) {}
+    rpc Open(OpenTunnelMessage) returns (stream EventParticleMessage) {}
 }
 
 message EventParticleSubscriptionMessage {
@@ -13,8 +13,10 @@ message EventParticleSubscriptionMessage {
     int64   offset = 2;
 }
 
-message EventParticleSubscriptionsMessage {
-    repeated ParticleSubscriptionMessage   subscriptions = 1;
+message OpenTunnelMessage {
+    string application = 1;
+    repeated string applicationLocation = 2;
+    repeated EventParticleSubscriptionMessage   subscriptions = 3;
 }
 
 message EventParticleMessage {

@@ -5,10 +5,10 @@
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Defines the tunnel in which particles known as events pass through
-    /// Each singularity can connect to any event horizon, they establish a quantum tunnel for the purpose of moving particles across.
+    /// Defines the system that knows about all the singularities and orchestrates work towards them
     /// </summary>
-    public interface IQuantumTunnel
+    public interface ISingularities
     {
+
     }
 }

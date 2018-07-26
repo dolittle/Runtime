@@ -10,13 +10,13 @@ namespace Dolittle.Runtime.Events.Relativity
     /// <summary>
     /// Represents a subscription for particles
     /// </summary>
-    public class ParticleSubscription
+    public class EventParticleSubscription
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="ParticleSubscription"/>
+        /// Initializes a new instance of <see cref="EventParticleSubscription"/>
         /// </summary>
         /// <param name="events"></param>
-        public ParticleSubscription(IEnumerable<ApplicationArtifactIdentifier> events)
+        public EventParticleSubscription(IEnumerable<ApplicationArtifactIdentifier> events)
         {
             Events = events;
         }
@@ -25,6 +25,5 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Gets the events the subscription is for
         /// </summary>
         public IEnumerable<ApplicationArtifactIdentifier>   Events { get; }
-        
     }
 }
