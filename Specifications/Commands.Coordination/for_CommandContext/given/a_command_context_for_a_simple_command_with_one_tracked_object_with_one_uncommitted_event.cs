@@ -15,7 +15,6 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
             uncommitted_event = new SimpleEvent();
             event_envelope = new Mock<IEventEnvelope>();
             event_envelope.SetupGet(e => e.EventSourceId).Returns(aggregated_root.EventSourceId);
-            event_envelopes.Setup(e => e.CreateFrom(aggregated_root, uncommitted_event, Moq.It.IsAny<EventSourceVersion>())).Returns(event_envelope.Object);
             aggregated_root.Apply(uncommitted_event);
         };
     }
