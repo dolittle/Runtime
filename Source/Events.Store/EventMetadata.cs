@@ -1,10 +1,11 @@
-using System;
-using Dolittle.Concepts;
-using Dolittle.Runtime.Events;
-using Dolittle.Events;
-
 namespace Dolittle.Runtime.Events.Store
 {
+    using System;
+    using Dolittle.Concepts;
+    using Dolittle.Runtime.Events;
+    using Dolittle.Events;
+    using Dolittle.Artifacts;
+
     /// <summary>
     /// Represents the metadata associated with a particular <see cref="IEvent" /> instance>
     /// Exhibits value equality semantics
