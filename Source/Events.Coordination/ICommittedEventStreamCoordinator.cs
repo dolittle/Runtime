@@ -9,9 +9,5 @@ namespace Dolittle.Runtime.Events.Coordination
     /// </summary>
     public interface ICommittedEventStreamCoordinator
     {
-        /// <summary>
-        /// Initialize the coordinator
-        /// </summary>
-        void Initialize();
     }
 }

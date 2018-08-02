@@ -9,7 +9,6 @@ using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Reflection;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Publishing;
 
 namespace Dolittle.Runtime.Events.Coordination
 {
@@ -19,7 +18,6 @@ namespace Dolittle.Runtime.Events.Coordination
     [Singleton]
     public class CommittedEventStreamCoordinator : ICommittedEventStreamCoordinator
     {
-        readonly ICanReceiveCommittedEventStream _committedEventStreamReceiver;
         readonly IEventProcessors _eventProcessors;
         readonly IEventProcessorLog _eventProcessorLog;
         readonly IEventProcessorStates _eventProcessorStates;
@@ -28,29 +26,20 @@ namespace Dolittle.Runtime.Events.Coordination
         /// <summary>
         /// Initializes a new instance of <see cref="CommittedEventStreamCoordinator"/>
         /// </summary>
-        /// <param name="committedEventStreamReceiver"><see cref="ICanReceiveCommittedEventStream">Committed event stream receiver</see> for receiving events</param>
         /// <param name="eventProcessors"></param>
         /// <param name="eventProcessorLog"></param>
         /// <param name="eventProcessorStates"></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public CommittedEventStreamCoordinator(
-            ICanReceiveCommittedEventStream committedEventStreamReceiver,
             IEventProcessors eventProcessors,
             IEventProcessorLog eventProcessorLog,
             IEventProcessorStates eventProcessorStates, 
             ILogger logger)
         {
-            _committedEventStreamReceiver = committedEventStreamReceiver;
             _eventProcessors = eventProcessors;
             _eventProcessorLog = eventProcessorLog;
             _eventProcessorStates = eventProcessorStates;
             _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public void Initialize()
-        {
-            _committedEventStreamReceiver.Received += CommittedEventStreamReceived;
         }
 
         void CommittedEventStreamReceived(CommittedEventStream committedEventStream)

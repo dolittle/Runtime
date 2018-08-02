@@ -5,7 +5,6 @@
 using Dolittle.Execution;
 using Dolittle.Runtime.Transactions;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Publishing;
 
 namespace Dolittle.Runtime.Events.Coordination
 {
@@ -15,27 +14,28 @@ namespace Dolittle.Runtime.Events.Coordination
     [Singleton]
     public class UncommittedEventStreamCoordinator : IUncommittedEventStreamCoordinator
     {
-        readonly ICanSendCommittedEventStream _committedEventStreamSender;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes an instance of a <see cref="UncommittedEventStreamCoordinator"/>
         /// </summary>
-        /// <param name="committedEventStreamSender"><see cref="ICanSendCommittedEventStream"/> send the <see cref="CommittedEventStream"/></param>
         /// <param name="logger"><see cref="ILogger"/> for doing logging</param>
         public UncommittedEventStreamCoordinator(
-            ICanSendCommittedEventStream committedEventStreamSender,
             ILogger logger)
         {
-            _committedEventStreamSender = committedEventStreamSender;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public void Commit(TransactionCorrelationId correlationId, UncommittedEventStream uncommittedEventStream)
         {
+            // Steps:
+            // - Save to the event store to get a committed event stream
+            // - in parallel
+            //   - Send it off to the event horizon
+            //   - Process in current bounded context (IEventProcessors)
+
             _logger.Trace("Send the committed event stream");
-            //_committedEventStreamSender.Send(committedEventStream);
         }
     }
 }
