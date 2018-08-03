@@ -17,14 +17,14 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="versionedEventSource">The <see cref="VersionedEventSource" /> that this event applies to.</param>
         /// <param name="correlationId">A <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system</param>
-        /// <param name="generation">The <see cref="ArtifactGeneration" /> that the event represents</param>
+        /// <param name="artifact">The <see cref="Artifact" /> that represents this event</param>
         /// <param name="causedBy">The <see cref="CausedBy" /> instance that caused this <see cref="IEvent" /></param>
         /// <param name="occurred">A timestamp in the form of a <see cref="DateTimeOffset" /> recording when the <see cref="IEvent" /> occurred.</param>
-        public EventMetadata(VersionedEventSource versionedEventSource, CorrelationId correlationId, ArtifactGeneration generation, CausedBy causedBy, DateTimeOffset occurred)
+        public EventMetadata(VersionedEventSource versionedEventSource, CorrelationId correlationId, Artifact artifact, CausedBy causedBy, DateTimeOffset occurred)
         {
             VersionedEventSource = versionedEventSource;
             CorrelationId = correlationId;
-            ArtifactGeneration = generation;
+            Artifact = artifact;
             CausedBy = causedBy;
             Occurred = occurred;
         }
@@ -39,10 +39,10 @@ namespace Dolittle.Runtime.Events.Store
         /// <value></value>
         public CorrelationId CorrelationId { get; }
         /// <summary>
-        /// The <see cref="ArtifactGeneration" /> that the event represents
+        /// The <see cref="Artifact" /> that the event represents
         /// </summary>
         /// <value></value>
-        public ArtifactGeneration ArtifactGeneration { get; }
+        public Artifact Artifact { get; }
         /// <summary>
         /// The <see cref="EventSourceId" /> identifying the <see cref="IEventSource" /> that this event applies to.
         /// </summary>
