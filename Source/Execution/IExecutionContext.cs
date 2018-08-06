@@ -26,9 +26,14 @@ namespace Dolittle.Runtime.Execution
         CultureInfo Culture { get; }
 
         /// <summary>
-        /// Gets the <see cref="IApplication"/> for the <see cref="IExecutionContext">execution context</see>
+        /// Gets the <see cref="Application"/> for the <see cref="IExecutionContext">execution context</see>
         /// </summary>
-        IApplication Application { get; }
+        Application Application { get; }
+
+        /// <summary>
+        /// Gets the <see cref="BoundedContext"/> for the <see cref="IExecutionContext">execution context</see>
+        /// </summary>
+        BoundedContext BoundedContext { get; }
 
         /// <summary>
         /// Gets the <see cref="ITenant"/> for the <see cref="IExecutionContext">execution context</see>

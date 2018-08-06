@@ -2,7 +2,7 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using Dolittle.Applications;
+using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Storage
 {
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Storage
         }
 
         /// <inheritdoc/>
-        public EventSequenceNumber NextForType(IApplicationArtifactIdentifier identifier)
+        public EventSequenceNumber NextForType(Artifact identifier)
         {
             return 0L;
         }

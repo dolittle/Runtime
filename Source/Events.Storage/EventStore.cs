@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Applications;
+using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Serialization.Protobuf;
 
@@ -50,19 +50,19 @@ namespace Dolittle.Runtime.Events.Storage
         }
 
         /// <inheritdoc/>
-        public IEnumerable<EventAndEnvelope> GetFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
+        public IEnumerable<EventAndEnvelope> GetFor(Artifact eventSource, EventSourceId eventSourceId)
         {
             throw new System.NotImplementedException();
         }
 
         /// <inheritdoc/>
-        public EventSourceVersion GetVersionFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
+        public EventSourceVersion GetVersionFor(Artifact eventSource, EventSourceId eventSourceId)
         {
             throw new System.NotImplementedException();
         }
 
         /// <inheritdoc/>
-        public bool HasEventsFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
+        public bool HasEventsFor(Artifact eventSource, EventSourceId eventSourceId)
         {
             throw new System.NotImplementedException();
         }

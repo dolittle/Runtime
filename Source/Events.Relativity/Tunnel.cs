@@ -22,31 +22,33 @@ namespace Dolittle.Runtime.Events.Relativity {
     static TunnelReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cgx0dW5uZWwucHJvdG8SCnJlbGF0aXZpdHkiPAobUGFydGljbGVTdWJzY3Jp",
-            "cHRpb25NZXNzYWdlEg0KBWV2ZW50GAEgASgJEg4KBm9mZnNldBgCIAEoAyJe",
-            "ChxQYXJ0aWNsZVN1YnNjcmlwdGlvbnNNZXNzYWdlEj4KDXN1YnNjcmlwdGlv",
-            "bnMYASADKAsyJy5yZWxhdGl2aXR5LlBhcnRpY2xlU3Vic2NyaXB0aW9uTWVz",
-            "c2FnZSJOCg9QYXJ0aWNsZU1lc3NhZ2USCgoCaWQYASABKAwSEAoIbWV0YWRh",
-            "dGEYAiABKAwSDQoFZXZlbnQYAyABKAwSDgoGY29tbWl0GAQgASgDMlsKBlR1",
-            "bm5lbBJRCgRPcGVuEigucmVsYXRpdml0eS5QYXJ0aWNsZVN1YnNjcmlwdGlv",
-            "bnNNZXNzYWdlGhsucmVsYXRpdml0eS5QYXJ0aWNsZU1lc3NhZ2UiADABQiWq",
-            "AiJEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5SZWxhdGl2aXR5YgZwcm90bzM="));
+            "Cgx0dW5uZWwucHJvdG8SCnJlbGF0aXZpdHkiQQogRXZlbnRQYXJ0aWNsZVN1",
+            "YnNjcmlwdGlvbk1lc3NhZ2USDQoFZXZlbnQYASABKAkSDgoGb2Zmc2V0GAIg",
+            "ASgDIooBChFPcGVuVHVubmVsTWVzc2FnZRITCgthcHBsaWNhdGlvbhgBIAEo",
+            "CRIbChNhcHBsaWNhdGlvbkxvY2F0aW9uGAIgAygJEkMKDXN1YnNjcmlwdGlv",
+            "bnMYAyADKAsyLC5yZWxhdGl2aXR5LkV2ZW50UGFydGljbGVTdWJzY3JpcHRp",
+            "b25NZXNzYWdlIlMKFEV2ZW50UGFydGljbGVNZXNzYWdlEgoKAmlkGAEgASgM",
+            "EhAKCG1ldGFkYXRhGAIgASgMEg0KBWV2ZW50GAMgASgMEg4KBmNvbW1pdBgE",
+            "IAEoAzJjChRRdWFudHVtVHVubmVsU2VydmljZRJLCgRPcGVuEh0ucmVsYXRp",
+            "dml0eS5PcGVuVHVubmVsTWVzc2FnZRogLnJlbGF0aXZpdHkuRXZlbnRQYXJ0",
+            "aWNsZU1lc3NhZ2UiADABQiWqAiJEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5S",
+            "ZWxhdGl2aXR5YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionMessage), global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionMessage.Parser, new[]{ "Event", "Offset" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionsMessage), global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionsMessage.Parser, new[]{ "Subscriptions" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.ParticleMessage), global::Dolittle.Runtime.Events.Relativity.ParticleMessage.Parser, new[]{ "Id", "Metadata", "Event", "Commit" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage), global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage.Parser, new[]{ "Event", "Offset" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.OpenTunnelMessage), global::Dolittle.Runtime.Events.Relativity.OpenTunnelMessage.Parser, new[]{ "Application", "ApplicationLocation", "Subscriptions" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.EventParticleMessage), global::Dolittle.Runtime.Events.Relativity.EventParticleMessage.Parser, new[]{ "Id", "Metadata", "Event", "Commit" }, null, null, null)
           }));
     }
     #endregion
 
   }
   #region Messages
-  public sealed partial class ParticleSubscriptionMessage : pb::IMessage<ParticleSubscriptionMessage> {
-    private static readonly pb::MessageParser<ParticleSubscriptionMessage> _parser = new pb::MessageParser<ParticleSubscriptionMessage>(() => new ParticleSubscriptionMessage());
+  public sealed partial class EventParticleSubscriptionMessage : pb::IMessage<EventParticleSubscriptionMessage> {
+    private static readonly pb::MessageParser<EventParticleSubscriptionMessage> _parser = new pb::MessageParser<EventParticleSubscriptionMessage>(() => new EventParticleSubscriptionMessage());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<ParticleSubscriptionMessage> Parser { get { return _parser; } }
+    public static pb::MessageParser<EventParticleSubscriptionMessage> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -59,21 +61,21 @@ namespace Dolittle.Runtime.Events.Relativity {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleSubscriptionMessage() {
+    public EventParticleSubscriptionMessage() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleSubscriptionMessage(ParticleSubscriptionMessage other) : this() {
+    public EventParticleSubscriptionMessage(EventParticleSubscriptionMessage other) : this() {
       event_ = other.event_;
       offset_ = other.offset_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleSubscriptionMessage Clone() {
-      return new ParticleSubscriptionMessage(this);
+    public EventParticleSubscriptionMessage Clone() {
+      return new EventParticleSubscriptionMessage(this);
     }
 
     /// <summary>Field number for the "event" field.</summary>
@@ -100,11 +102,11 @@ namespace Dolittle.Runtime.Events.Relativity {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as ParticleSubscriptionMessage);
+      return Equals(other as EventParticleSubscriptionMessage);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(ParticleSubscriptionMessage other) {
+    public bool Equals(EventParticleSubscriptionMessage other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -154,7 +156,7 @@ namespace Dolittle.Runtime.Events.Relativity {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(ParticleSubscriptionMessage other) {
+    public void MergeFrom(EventParticleSubscriptionMessage other) {
       if (other == null) {
         return;
       }
@@ -188,10 +190,10 @@ namespace Dolittle.Runtime.Events.Relativity {
 
   }
 
-  public sealed partial class ParticleSubscriptionsMessage : pb::IMessage<ParticleSubscriptionsMessage> {
-    private static readonly pb::MessageParser<ParticleSubscriptionsMessage> _parser = new pb::MessageParser<ParticleSubscriptionsMessage>(() => new ParticleSubscriptionsMessage());
+  public sealed partial class OpenTunnelMessage : pb::IMessage<OpenTunnelMessage> {
+    private static readonly pb::MessageParser<OpenTunnelMessage> _parser = new pb::MessageParser<OpenTunnelMessage>(() => new OpenTunnelMessage());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<ParticleSubscriptionsMessage> Parser { get { return _parser; } }
+    public static pb::MessageParser<OpenTunnelMessage> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -204,45 +206,70 @@ namespace Dolittle.Runtime.Events.Relativity {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleSubscriptionsMessage() {
+    public OpenTunnelMessage() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleSubscriptionsMessage(ParticleSubscriptionsMessage other) : this() {
+    public OpenTunnelMessage(OpenTunnelMessage other) : this() {
+      application_ = other.application_;
+      applicationLocation_ = other.applicationLocation_.Clone();
       subscriptions_ = other.subscriptions_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleSubscriptionsMessage Clone() {
-      return new ParticleSubscriptionsMessage(this);
+    public OpenTunnelMessage Clone() {
+      return new OpenTunnelMessage(this);
+    }
+
+    /// <summary>Field number for the "application" field.</summary>
+    public const int ApplicationFieldNumber = 1;
+    private string application_ = "";
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Application {
+      get { return application_; }
+      set {
+        application_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "applicationLocation" field.</summary>
+    public const int ApplicationLocationFieldNumber = 2;
+    private static readonly pb::FieldCodec<string> _repeated_applicationLocation_codec
+        = pb::FieldCodec.ForString(18);
+    private readonly pbc::RepeatedField<string> applicationLocation_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<string> ApplicationLocation {
+      get { return applicationLocation_; }
     }
 
     /// <summary>Field number for the "subscriptions" field.</summary>
-    public const int SubscriptionsFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionMessage> _repeated_subscriptions_codec
-        = pb::FieldCodec.ForMessage(10, global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionMessage.Parser);
-    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionMessage> subscriptions_ = new pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionMessage>();
+    public const int SubscriptionsFieldNumber = 3;
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage> _repeated_subscriptions_codec
+        = pb::FieldCodec.ForMessage(26, global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage> subscriptions_ = new pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.ParticleSubscriptionMessage> Subscriptions {
+    public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage> Subscriptions {
       get { return subscriptions_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as ParticleSubscriptionsMessage);
+      return Equals(other as OpenTunnelMessage);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(ParticleSubscriptionsMessage other) {
+    public bool Equals(OpenTunnelMessage other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (Application != other.Application) return false;
+      if(!applicationLocation_.Equals(other.applicationLocation_)) return false;
       if(!subscriptions_.Equals(other.subscriptions_)) return false;
       return true;
     }
@@ -250,6 +277,8 @@ namespace Dolittle.Runtime.Events.Relativity {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (Application.Length != 0) hash ^= Application.GetHashCode();
+      hash ^= applicationLocation_.GetHashCode();
       hash ^= subscriptions_.GetHashCode();
       return hash;
     }
@@ -261,21 +290,34 @@ namespace Dolittle.Runtime.Events.Relativity {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
+      if (Application.Length != 0) {
+        output.WriteRawTag(10);
+        output.WriteString(Application);
+      }
+      applicationLocation_.WriteTo(output, _repeated_applicationLocation_codec);
       subscriptions_.WriteTo(output, _repeated_subscriptions_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (Application.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Application);
+      }
+      size += applicationLocation_.CalculateSize(_repeated_applicationLocation_codec);
       size += subscriptions_.CalculateSize(_repeated_subscriptions_codec);
       return size;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(ParticleSubscriptionsMessage other) {
+    public void MergeFrom(OpenTunnelMessage other) {
       if (other == null) {
         return;
       }
+      if (other.Application.Length != 0) {
+        Application = other.Application;
+      }
+      applicationLocation_.Add(other.applicationLocation_);
       subscriptions_.Add(other.subscriptions_);
     }
 
@@ -288,6 +330,14 @@ namespace Dolittle.Runtime.Events.Relativity {
             input.SkipLastField();
             break;
           case 10: {
+            Application = input.ReadString();
+            break;
+          }
+          case 18: {
+            applicationLocation_.AddEntriesFrom(input, _repeated_applicationLocation_codec);
+            break;
+          }
+          case 26: {
             subscriptions_.AddEntriesFrom(input, _repeated_subscriptions_codec);
             break;
           }
@@ -297,10 +347,10 @@ namespace Dolittle.Runtime.Events.Relativity {
 
   }
 
-  public sealed partial class ParticleMessage : pb::IMessage<ParticleMessage> {
-    private static readonly pb::MessageParser<ParticleMessage> _parser = new pb::MessageParser<ParticleMessage>(() => new ParticleMessage());
+  public sealed partial class EventParticleMessage : pb::IMessage<EventParticleMessage> {
+    private static readonly pb::MessageParser<EventParticleMessage> _parser = new pb::MessageParser<EventParticleMessage>(() => new EventParticleMessage());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<ParticleMessage> Parser { get { return _parser; } }
+    public static pb::MessageParser<EventParticleMessage> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -313,14 +363,14 @@ namespace Dolittle.Runtime.Events.Relativity {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleMessage() {
+    public EventParticleMessage() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleMessage(ParticleMessage other) : this() {
+    public EventParticleMessage(EventParticleMessage other) : this() {
       id_ = other.id_;
       metadata_ = other.metadata_;
       event_ = other.event_;
@@ -328,8 +378,8 @@ namespace Dolittle.Runtime.Events.Relativity {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ParticleMessage Clone() {
-      return new ParticleMessage(this);
+    public EventParticleMessage Clone() {
+      return new EventParticleMessage(this);
     }
 
     /// <summary>Field number for the "id" field.</summary>
@@ -378,11 +428,11 @@ namespace Dolittle.Runtime.Events.Relativity {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as ParticleMessage);
+      return Equals(other as EventParticleMessage);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(ParticleMessage other) {
+    public bool Equals(EventParticleMessage other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -450,7 +500,7 @@ namespace Dolittle.Runtime.Events.Relativity {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(ParticleMessage other) {
+    public void MergeFrom(EventParticleMessage other) {
       if (other == null) {
         return;
       }
