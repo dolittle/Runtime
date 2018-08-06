@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Storage
         /// </summary>
         /// <param name="eventSource"><see cref="IEventSource"/> to create <see cref="EventEnvelope"/> from</param>
         /// <param name="event"><see cref="IEvent"/> to create <see cref="EventEnvelope"/> from</param>
-        /// <param name="version"><see cref="EventSourceVersion">Version</see> of the <see cref="IEvent"/> on an <see cref="IEventSource"/></param>
+        /// <param name="version"><see cref="EventSourceVersion">version</see> of the <see cref="IEvent"/> on an <see cref="IEventSource"/></param>
         /// <returns><see cref="IEventEnvelope"/></returns>
         IEventEnvelope CreateFrom(IEventSource eventSource, IEvent @event, EventSourceVersion version);
 
