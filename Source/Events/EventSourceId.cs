@@ -13,6 +13,23 @@ namespace Dolittle.Runtime.Events
     public class EventSourceId : ConceptAs<Guid>
     {
         /// <summary>
+        /// A static singleton instance to represent an "Empty" <see cref="EventSourceId" />
+        /// </summary>
+        public static readonly EventSourceId Empty = Guid.Empty;
+
+        /// <summary>
+        /// Creates a new instance of an <see cref="EventSourceId"/> with an empty guid 
+        /// </summary>
+        public EventSourceId() => Value = Guid.Empty;
+
+        /// <summary>
+        /// Instantiates a new instance of an <see cref="EventSourceId"/> with a unique id
+        /// </summary>
+        /// <param name="guid"></param>
+        public EventSourceId(Guid guid) => Value = guid;
+
+
+        /// <summary>
         /// Creates a new instance of <see cref="EventSourceId"/> with a unique id
         /// </summary>
         /// <returns>A new <see cref="EventSourceId"/></returns>
