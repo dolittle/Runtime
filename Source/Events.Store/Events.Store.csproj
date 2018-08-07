@@ -8,7 +8,7 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Dynamic" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.PropertyBags" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Concepts" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Time" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
