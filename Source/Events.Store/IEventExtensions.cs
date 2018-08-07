@@ -1,5 +1,5 @@
 using System;
-using Dolittle.Dynamic;
+using Dolittle.PropertyBags;
 using Dolittle.Concepts;
 using Dolittle.Events;
 using Dolittle.Runtime.Events;
