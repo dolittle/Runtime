@@ -24,8 +24,15 @@ namespace Dolittle.Runtime.Events.Relativity
         BoundedContext BoundedContext { get; }
 
         /// <summary>
-        /// Gets the <see cref="IEnumerable{ParticleSubscription}"/> 
+        /// Determines wether or not the <see cref="ISingularity"/> is capable of receiving a <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/>
         /// </summary>
-        IEnumerable<EventParticleSubscription> Subscriptions { get; }
+        /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to ask for</param>
+        /// <returns>True if it can, false if not</returns>
+        bool CanReceive(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
+
+        /// <summary>
+        /// Gets the <see cref="IQuantumTunnel"/>
+        /// </summary>
+        IQuantumTunnel Tunnel { get; }
     }
 }
