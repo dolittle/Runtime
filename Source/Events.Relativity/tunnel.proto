@@ -5,23 +5,44 @@ option csharp_namespace = "Dolittle.Runtime.Events.Relativity";
 package relativity;
 
 service QuantumTunnelService {
-    rpc Open(OpenTunnelMessage) returns (stream EventParticleMessage) {}
+    rpc Open(OpenTunnelMessage) returns (stream CommittedEventStreamParticleMessage) {}
 }
 
-message EventParticleSubscriptionMessage {
-    string  event = 1;
-    int64   offset = 2;
+message EventArtifactMessage {
+    bytes event = 1;
+    int32 generation = 2;
 }
+
 
 message OpenTunnelMessage {
-    string application = 1;
-    repeated string applicationLocation = 2;
-    repeated EventParticleSubscriptionMessage   subscriptions = 3;
+    bytes application = 1;
+    bytes boundedContext = 2;
+    uint64  offset = 3;
+    repeated EventArtifactMessage   events = 4;
 }
 
 message EventParticleMessage {
     bytes id = 1;
     bytes metadata = 2;
     bytes event = 3;
-    int64 commit = 4;
+}
+
+message EventSourceVersionMessage {
+    uint64 commit = 1;
+    uint64 sequence = 2;
+}
+
+message VersionedEventSourceMessage {
+    EventSourceVersionMessage   version = 1;
+    bytes eventSource = 2;
+    bytes artifact = 3;
+} 
+
+message CommittedEventStreamParticleMessage {
+    VersionedEventSourceMessage source = 1;
+    uint64 sequence = 2;
+    bytes id = 3;
+    int64 timeStamp = 4;
+    bytes correlationId = 5;
+    repeated EventParticleMessage events = 6;
 }

@@ -22,33 +22,45 @@ namespace Dolittle.Runtime.Events.Relativity {
     static TunnelReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "Cgx0dW5uZWwucHJvdG8SCnJlbGF0aXZpdHkiQQogRXZlbnRQYXJ0aWNsZVN1",
-            "YnNjcmlwdGlvbk1lc3NhZ2USDQoFZXZlbnQYASABKAkSDgoGb2Zmc2V0GAIg",
-            "ASgDIooBChFPcGVuVHVubmVsTWVzc2FnZRITCgthcHBsaWNhdGlvbhgBIAEo",
-            "CRIbChNhcHBsaWNhdGlvbkxvY2F0aW9uGAIgAygJEkMKDXN1YnNjcmlwdGlv",
-            "bnMYAyADKAsyLC5yZWxhdGl2aXR5LkV2ZW50UGFydGljbGVTdWJzY3JpcHRp",
-            "b25NZXNzYWdlIlMKFEV2ZW50UGFydGljbGVNZXNzYWdlEgoKAmlkGAEgASgM",
-            "EhAKCG1ldGFkYXRhGAIgASgMEg0KBWV2ZW50GAMgASgMEg4KBmNvbW1pdBgE",
-            "IAEoAzJjChRRdWFudHVtVHVubmVsU2VydmljZRJLCgRPcGVuEh0ucmVsYXRp",
-            "dml0eS5PcGVuVHVubmVsTWVzc2FnZRogLnJlbGF0aXZpdHkuRXZlbnRQYXJ0",
-            "aWNsZU1lc3NhZ2UiADABQiWqAiJEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5S",
-            "ZWxhdGl2aXR5YgZwcm90bzM="));
+            "Cgx0dW5uZWwucHJvdG8SCnJlbGF0aXZpdHkiOQoURXZlbnRBcnRpZmFjdE1l",
+            "c3NhZ2USDQoFZXZlbnQYASABKAwSEgoKZ2VuZXJhdGlvbhgCIAEoBSKCAQoR",
+            "T3BlblR1bm5lbE1lc3NhZ2USEwoLYXBwbGljYXRpb24YASABKAwSFgoOYm91",
+            "bmRlZENvbnRleHQYAiABKAwSDgoGb2Zmc2V0GAMgASgEEjAKBmV2ZW50cxgE",
+            "IAMoCzIgLnJlbGF0aXZpdHkuRXZlbnRBcnRpZmFjdE1lc3NhZ2UiQwoURXZl",
+            "bnRQYXJ0aWNsZU1lc3NhZ2USCgoCaWQYASABKAwSEAoIbWV0YWRhdGEYAiAB",
+            "KAwSDQoFZXZlbnQYAyABKAwiPQoZRXZlbnRTb3VyY2VWZXJzaW9uTWVzc2Fn",
+            "ZRIOCgZjb21taXQYASABKAQSEAoIc2VxdWVuY2UYAiABKAQifAobVmVyc2lv",
+            "bmVkRXZlbnRTb3VyY2VNZXNzYWdlEjYKB3ZlcnNpb24YASABKAsyJS5yZWxh",
+            "dGl2aXR5LkV2ZW50U291cmNlVmVyc2lvbk1lc3NhZ2USEwoLZXZlbnRTb3Vy",
+            "Y2UYAiABKAwSEAoIYXJ0aWZhY3QYAyABKAwi2AEKI0NvbW1pdHRlZEV2ZW50",
+            "U3RyZWFtUGFydGljbGVNZXNzYWdlEjcKBnNvdXJjZRgBIAEoCzInLnJlbGF0",
+            "aXZpdHkuVmVyc2lvbmVkRXZlbnRTb3VyY2VNZXNzYWdlEhAKCHNlcXVlbmNl",
+            "GAIgASgEEgoKAmlkGAMgASgMEhEKCXRpbWVTdGFtcBgEIAEoAxIVCg1jb3Jy",
+            "ZWxhdGlvbklkGAUgASgMEjAKBmV2ZW50cxgGIAMoCzIgLnJlbGF0aXZpdHku",
+            "RXZlbnRQYXJ0aWNsZU1lc3NhZ2UycgoUUXVhbnR1bVR1bm5lbFNlcnZpY2US",
+            "WgoET3BlbhIdLnJlbGF0aXZpdHkuT3BlblR1bm5lbE1lc3NhZ2UaLy5yZWxh",
+            "dGl2aXR5LkNvbW1pdHRlZEV2ZW50U3RyZWFtUGFydGljbGVNZXNzYWdlIgAw",
+            "AUIlqgIiRG9saXR0bGUuUnVudGltZS5FdmVudHMuUmVsYXRpdml0eWIGcHJv",
+            "dG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage), global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage.Parser, new[]{ "Event", "Offset" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.OpenTunnelMessage), global::Dolittle.Runtime.Events.Relativity.OpenTunnelMessage.Parser, new[]{ "Application", "ApplicationLocation", "Subscriptions" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.EventParticleMessage), global::Dolittle.Runtime.Events.Relativity.EventParticleMessage.Parser, new[]{ "Id", "Metadata", "Event", "Commit" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.EventArtifactMessage), global::Dolittle.Runtime.Events.Relativity.EventArtifactMessage.Parser, new[]{ "Event", "Generation" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.OpenTunnelMessage), global::Dolittle.Runtime.Events.Relativity.OpenTunnelMessage.Parser, new[]{ "Application", "BoundedContext", "Offset", "Events" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.EventParticleMessage), global::Dolittle.Runtime.Events.Relativity.EventParticleMessage.Parser, new[]{ "Id", "Metadata", "Event" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.EventSourceVersionMessage), global::Dolittle.Runtime.Events.Relativity.EventSourceVersionMessage.Parser, new[]{ "Commit", "Sequence" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.VersionedEventSourceMessage), global::Dolittle.Runtime.Events.Relativity.VersionedEventSourceMessage.Parser, new[]{ "Version", "EventSource", "Artifact" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.CommittedEventStreamParticleMessage), global::Dolittle.Runtime.Events.Relativity.CommittedEventStreamParticleMessage.Parser, new[]{ "Source", "Sequence", "Id", "TimeStamp", "CorrelationId", "Events" }, null, null, null)
           }));
     }
     #endregion
 
   }
   #region Messages
-  public sealed partial class EventParticleSubscriptionMessage : pb::IMessage<EventParticleSubscriptionMessage> {
-    private static readonly pb::MessageParser<EventParticleSubscriptionMessage> _parser = new pb::MessageParser<EventParticleSubscriptionMessage>(() => new EventParticleSubscriptionMessage());
+  public sealed partial class EventArtifactMessage : pb::IMessage<EventArtifactMessage> {
+    private static readonly pb::MessageParser<EventArtifactMessage> _parser = new pb::MessageParser<EventArtifactMessage>(() => new EventArtifactMessage());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<EventParticleSubscriptionMessage> Parser { get { return _parser; } }
+    public static pb::MessageParser<EventArtifactMessage> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -61,52 +73,52 @@ namespace Dolittle.Runtime.Events.Relativity {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public EventParticleSubscriptionMessage() {
+    public EventArtifactMessage() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public EventParticleSubscriptionMessage(EventParticleSubscriptionMessage other) : this() {
+    public EventArtifactMessage(EventArtifactMessage other) : this() {
       event_ = other.event_;
-      offset_ = other.offset_;
+      generation_ = other.generation_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public EventParticleSubscriptionMessage Clone() {
-      return new EventParticleSubscriptionMessage(this);
+    public EventArtifactMessage Clone() {
+      return new EventArtifactMessage(this);
     }
 
     /// <summary>Field number for the "event" field.</summary>
     public const int EventFieldNumber = 1;
-    private string event_ = "";
+    private pb::ByteString event_ = pb::ByteString.Empty;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Event {
+    public pb::ByteString Event {
       get { return event_; }
       set {
         event_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "offset" field.</summary>
-    public const int OffsetFieldNumber = 2;
-    private long offset_;
+    /// <summary>Field number for the "generation" field.</summary>
+    public const int GenerationFieldNumber = 2;
+    private int generation_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public long Offset {
-      get { return offset_; }
+    public int Generation {
+      get { return generation_; }
       set {
-        offset_ = value;
+        generation_ = value;
       }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as EventParticleSubscriptionMessage);
+      return Equals(other as EventArtifactMessage);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(EventParticleSubscriptionMessage other) {
+    public bool Equals(EventArtifactMessage other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -114,7 +126,7 @@ namespace Dolittle.Runtime.Events.Relativity {
         return true;
       }
       if (Event != other.Event) return false;
-      if (Offset != other.Offset) return false;
+      if (Generation != other.Generation) return false;
       return true;
     }
 
@@ -122,7 +134,7 @@ namespace Dolittle.Runtime.Events.Relativity {
     public override int GetHashCode() {
       int hash = 1;
       if (Event.Length != 0) hash ^= Event.GetHashCode();
-      if (Offset != 0L) hash ^= Offset.GetHashCode();
+      if (Generation != 0) hash ^= Generation.GetHashCode();
       return hash;
     }
 
@@ -135,11 +147,11 @@ namespace Dolittle.Runtime.Events.Relativity {
     public void WriteTo(pb::CodedOutputStream output) {
       if (Event.Length != 0) {
         output.WriteRawTag(10);
-        output.WriteString(Event);
+        output.WriteBytes(Event);
       }
-      if (Offset != 0L) {
+      if (Generation != 0) {
         output.WriteRawTag(16);
-        output.WriteInt64(Offset);
+        output.WriteInt32(Generation);
       }
     }
 
@@ -147,24 +159,24 @@ namespace Dolittle.Runtime.Events.Relativity {
     public int CalculateSize() {
       int size = 0;
       if (Event.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Event);
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Event);
       }
-      if (Offset != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Offset);
+      if (Generation != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Generation);
       }
       return size;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(EventParticleSubscriptionMessage other) {
+    public void MergeFrom(EventArtifactMessage other) {
       if (other == null) {
         return;
       }
       if (other.Event.Length != 0) {
         Event = other.Event;
       }
-      if (other.Offset != 0L) {
-        Offset = other.Offset;
+      if (other.Generation != 0) {
+        Generation = other.Generation;
       }
     }
 
@@ -177,11 +189,11 @@ namespace Dolittle.Runtime.Events.Relativity {
             input.SkipLastField();
             break;
           case 10: {
-            Event = input.ReadString();
+            Event = input.ReadBytes();
             break;
           }
           case 16: {
-            Offset = input.ReadInt64();
+            Generation = input.ReadInt32();
             break;
           }
         }
@@ -215,8 +227,9 @@ namespace Dolittle.Runtime.Events.Relativity {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public OpenTunnelMessage(OpenTunnelMessage other) : this() {
       application_ = other.application_;
-      applicationLocation_ = other.applicationLocation_.Clone();
-      subscriptions_ = other.subscriptions_.Clone();
+      boundedContext_ = other.boundedContext_;
+      offset_ = other.offset_;
+      events_ = other.events_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -226,33 +239,45 @@ namespace Dolittle.Runtime.Events.Relativity {
 
     /// <summary>Field number for the "application" field.</summary>
     public const int ApplicationFieldNumber = 1;
-    private string application_ = "";
+    private pb::ByteString application_ = pb::ByteString.Empty;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Application {
+    public pb::ByteString Application {
       get { return application_; }
       set {
         application_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
 
-    /// <summary>Field number for the "applicationLocation" field.</summary>
-    public const int ApplicationLocationFieldNumber = 2;
-    private static readonly pb::FieldCodec<string> _repeated_applicationLocation_codec
-        = pb::FieldCodec.ForString(18);
-    private readonly pbc::RepeatedField<string> applicationLocation_ = new pbc::RepeatedField<string>();
+    /// <summary>Field number for the "boundedContext" field.</summary>
+    public const int BoundedContextFieldNumber = 2;
+    private pb::ByteString boundedContext_ = pb::ByteString.Empty;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<string> ApplicationLocation {
-      get { return applicationLocation_; }
+    public pb::ByteString BoundedContext {
+      get { return boundedContext_; }
+      set {
+        boundedContext_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
     }
 
-    /// <summary>Field number for the "subscriptions" field.</summary>
-    public const int SubscriptionsFieldNumber = 3;
-    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage> _repeated_subscriptions_codec
-        = pb::FieldCodec.ForMessage(26, global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage.Parser);
-    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage> subscriptions_ = new pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage>();
+    /// <summary>Field number for the "offset" field.</summary>
+    public const int OffsetFieldNumber = 3;
+    private ulong offset_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleSubscriptionMessage> Subscriptions {
-      get { return subscriptions_; }
+    public ulong Offset {
+      get { return offset_; }
+      set {
+        offset_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "events" field.</summary>
+    public const int EventsFieldNumber = 4;
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Events.Relativity.EventArtifactMessage> _repeated_events_codec
+        = pb::FieldCodec.ForMessage(34, global::Dolittle.Runtime.Events.Relativity.EventArtifactMessage.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventArtifactMessage> events_ = new pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventArtifactMessage>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventArtifactMessage> Events {
+      get { return events_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -269,8 +294,9 @@ namespace Dolittle.Runtime.Events.Relativity {
         return true;
       }
       if (Application != other.Application) return false;
-      if(!applicationLocation_.Equals(other.applicationLocation_)) return false;
-      if(!subscriptions_.Equals(other.subscriptions_)) return false;
+      if (BoundedContext != other.BoundedContext) return false;
+      if (Offset != other.Offset) return false;
+      if(!events_.Equals(other.events_)) return false;
       return true;
     }
 
@@ -278,8 +304,9 @@ namespace Dolittle.Runtime.Events.Relativity {
     public override int GetHashCode() {
       int hash = 1;
       if (Application.Length != 0) hash ^= Application.GetHashCode();
-      hash ^= applicationLocation_.GetHashCode();
-      hash ^= subscriptions_.GetHashCode();
+      if (BoundedContext.Length != 0) hash ^= BoundedContext.GetHashCode();
+      if (Offset != 0UL) hash ^= Offset.GetHashCode();
+      hash ^= events_.GetHashCode();
       return hash;
     }
 
@@ -292,20 +319,32 @@ namespace Dolittle.Runtime.Events.Relativity {
     public void WriteTo(pb::CodedOutputStream output) {
       if (Application.Length != 0) {
         output.WriteRawTag(10);
-        output.WriteString(Application);
+        output.WriteBytes(Application);
       }
-      applicationLocation_.WriteTo(output, _repeated_applicationLocation_codec);
-      subscriptions_.WriteTo(output, _repeated_subscriptions_codec);
+      if (BoundedContext.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteBytes(BoundedContext);
+      }
+      if (Offset != 0UL) {
+        output.WriteRawTag(24);
+        output.WriteUInt64(Offset);
+      }
+      events_.WriteTo(output, _repeated_events_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
       if (Application.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Application);
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Application);
       }
-      size += applicationLocation_.CalculateSize(_repeated_applicationLocation_codec);
-      size += subscriptions_.CalculateSize(_repeated_subscriptions_codec);
+      if (BoundedContext.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(BoundedContext);
+      }
+      if (Offset != 0UL) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(Offset);
+      }
+      size += events_.CalculateSize(_repeated_events_codec);
       return size;
     }
 
@@ -317,8 +356,13 @@ namespace Dolittle.Runtime.Events.Relativity {
       if (other.Application.Length != 0) {
         Application = other.Application;
       }
-      applicationLocation_.Add(other.applicationLocation_);
-      subscriptions_.Add(other.subscriptions_);
+      if (other.BoundedContext.Length != 0) {
+        BoundedContext = other.BoundedContext;
+      }
+      if (other.Offset != 0UL) {
+        Offset = other.Offset;
+      }
+      events_.Add(other.events_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -330,15 +374,19 @@ namespace Dolittle.Runtime.Events.Relativity {
             input.SkipLastField();
             break;
           case 10: {
-            Application = input.ReadString();
+            Application = input.ReadBytes();
             break;
           }
           case 18: {
-            applicationLocation_.AddEntriesFrom(input, _repeated_applicationLocation_codec);
+            BoundedContext = input.ReadBytes();
             break;
           }
-          case 26: {
-            subscriptions_.AddEntriesFrom(input, _repeated_subscriptions_codec);
+          case 24: {
+            Offset = input.ReadUInt64();
+            break;
+          }
+          case 34: {
+            events_.AddEntriesFrom(input, _repeated_events_codec);
             break;
           }
         }
@@ -374,7 +422,6 @@ namespace Dolittle.Runtime.Events.Relativity {
       id_ = other.id_;
       metadata_ = other.metadata_;
       event_ = other.event_;
-      commit_ = other.commit_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -415,17 +462,6 @@ namespace Dolittle.Runtime.Events.Relativity {
       }
     }
 
-    /// <summary>Field number for the "commit" field.</summary>
-    public const int CommitFieldNumber = 4;
-    private long commit_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public long Commit {
-      get { return commit_; }
-      set {
-        commit_ = value;
-      }
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as EventParticleMessage);
@@ -442,7 +478,6 @@ namespace Dolittle.Runtime.Events.Relativity {
       if (Id != other.Id) return false;
       if (Metadata != other.Metadata) return false;
       if (Event != other.Event) return false;
-      if (Commit != other.Commit) return false;
       return true;
     }
 
@@ -452,7 +487,6 @@ namespace Dolittle.Runtime.Events.Relativity {
       if (Id.Length != 0) hash ^= Id.GetHashCode();
       if (Metadata.Length != 0) hash ^= Metadata.GetHashCode();
       if (Event.Length != 0) hash ^= Event.GetHashCode();
-      if (Commit != 0L) hash ^= Commit.GetHashCode();
       return hash;
     }
 
@@ -475,10 +509,6 @@ namespace Dolittle.Runtime.Events.Relativity {
         output.WriteRawTag(26);
         output.WriteBytes(Event);
       }
-      if (Commit != 0L) {
-        output.WriteRawTag(32);
-        output.WriteInt64(Commit);
-      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -492,9 +522,6 @@ namespace Dolittle.Runtime.Events.Relativity {
       }
       if (Event.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeBytesSize(Event);
-      }
-      if (Commit != 0L) {
-        size += 1 + pb::CodedOutputStream.ComputeInt64Size(Commit);
       }
       return size;
     }
@@ -512,9 +539,6 @@ namespace Dolittle.Runtime.Events.Relativity {
       }
       if (other.Event.Length != 0) {
         Event = other.Event;
-      }
-      if (other.Commit != 0L) {
-        Commit = other.Commit;
       }
     }
 
@@ -538,8 +562,583 @@ namespace Dolittle.Runtime.Events.Relativity {
             Event = input.ReadBytes();
             break;
           }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class EventSourceVersionMessage : pb::IMessage<EventSourceVersionMessage> {
+    private static readonly pb::MessageParser<EventSourceVersionMessage> _parser = new pb::MessageParser<EventSourceVersionMessage>(() => new EventSourceVersionMessage());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<EventSourceVersionMessage> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Dolittle.Runtime.Events.Relativity.TunnelReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public EventSourceVersionMessage() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public EventSourceVersionMessage(EventSourceVersionMessage other) : this() {
+      commit_ = other.commit_;
+      sequence_ = other.sequence_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public EventSourceVersionMessage Clone() {
+      return new EventSourceVersionMessage(this);
+    }
+
+    /// <summary>Field number for the "commit" field.</summary>
+    public const int CommitFieldNumber = 1;
+    private ulong commit_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ulong Commit {
+      get { return commit_; }
+      set {
+        commit_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "sequence" field.</summary>
+    public const int SequenceFieldNumber = 2;
+    private ulong sequence_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ulong Sequence {
+      get { return sequence_; }
+      set {
+        sequence_ = value;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as EventSourceVersionMessage);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(EventSourceVersionMessage other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Commit != other.Commit) return false;
+      if (Sequence != other.Sequence) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (Commit != 0UL) hash ^= Commit.GetHashCode();
+      if (Sequence != 0UL) hash ^= Sequence.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (Commit != 0UL) {
+        output.WriteRawTag(8);
+        output.WriteUInt64(Commit);
+      }
+      if (Sequence != 0UL) {
+        output.WriteRawTag(16);
+        output.WriteUInt64(Sequence);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (Commit != 0UL) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(Commit);
+      }
+      if (Sequence != 0UL) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(Sequence);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(EventSourceVersionMessage other) {
+      if (other == null) {
+        return;
+      }
+      if (other.Commit != 0UL) {
+        Commit = other.Commit;
+      }
+      if (other.Sequence != 0UL) {
+        Sequence = other.Sequence;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 8: {
+            Commit = input.ReadUInt64();
+            break;
+          }
+          case 16: {
+            Sequence = input.ReadUInt64();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class VersionedEventSourceMessage : pb::IMessage<VersionedEventSourceMessage> {
+    private static readonly pb::MessageParser<VersionedEventSourceMessage> _parser = new pb::MessageParser<VersionedEventSourceMessage>(() => new VersionedEventSourceMessage());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<VersionedEventSourceMessage> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Dolittle.Runtime.Events.Relativity.TunnelReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public VersionedEventSourceMessage() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public VersionedEventSourceMessage(VersionedEventSourceMessage other) : this() {
+      Version = other.version_ != null ? other.Version.Clone() : null;
+      eventSource_ = other.eventSource_;
+      artifact_ = other.artifact_;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public VersionedEventSourceMessage Clone() {
+      return new VersionedEventSourceMessage(this);
+    }
+
+    /// <summary>Field number for the "version" field.</summary>
+    public const int VersionFieldNumber = 1;
+    private global::Dolittle.Runtime.Events.Relativity.EventSourceVersionMessage version_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Dolittle.Runtime.Events.Relativity.EventSourceVersionMessage Version {
+      get { return version_; }
+      set {
+        version_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "eventSource" field.</summary>
+    public const int EventSourceFieldNumber = 2;
+    private pb::ByteString eventSource_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString EventSource {
+      get { return eventSource_; }
+      set {
+        eventSource_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "artifact" field.</summary>
+    public const int ArtifactFieldNumber = 3;
+    private pb::ByteString artifact_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString Artifact {
+      get { return artifact_; }
+      set {
+        artifact_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as VersionedEventSourceMessage);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(VersionedEventSourceMessage other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Version, other.Version)) return false;
+      if (EventSource != other.EventSource) return false;
+      if (Artifact != other.Artifact) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (version_ != null) hash ^= Version.GetHashCode();
+      if (EventSource.Length != 0) hash ^= EventSource.GetHashCode();
+      if (Artifact.Length != 0) hash ^= Artifact.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (version_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Version);
+      }
+      if (EventSource.Length != 0) {
+        output.WriteRawTag(18);
+        output.WriteBytes(EventSource);
+      }
+      if (Artifact.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteBytes(Artifact);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (version_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Version);
+      }
+      if (EventSource.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(EventSource);
+      }
+      if (Artifact.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Artifact);
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(VersionedEventSourceMessage other) {
+      if (other == null) {
+        return;
+      }
+      if (other.version_ != null) {
+        if (version_ == null) {
+          version_ = new global::Dolittle.Runtime.Events.Relativity.EventSourceVersionMessage();
+        }
+        Version.MergeFrom(other.Version);
+      }
+      if (other.EventSource.Length != 0) {
+        EventSource = other.EventSource;
+      }
+      if (other.Artifact.Length != 0) {
+        Artifact = other.Artifact;
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            if (version_ == null) {
+              version_ = new global::Dolittle.Runtime.Events.Relativity.EventSourceVersionMessage();
+            }
+            input.ReadMessage(version_);
+            break;
+          }
+          case 18: {
+            EventSource = input.ReadBytes();
+            break;
+          }
+          case 26: {
+            Artifact = input.ReadBytes();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class CommittedEventStreamParticleMessage : pb::IMessage<CommittedEventStreamParticleMessage> {
+    private static readonly pb::MessageParser<CommittedEventStreamParticleMessage> _parser = new pb::MessageParser<CommittedEventStreamParticleMessage>(() => new CommittedEventStreamParticleMessage());
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<CommittedEventStreamParticleMessage> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Dolittle.Runtime.Events.Relativity.TunnelReflection.Descriptor.MessageTypes[5]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public CommittedEventStreamParticleMessage() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public CommittedEventStreamParticleMessage(CommittedEventStreamParticleMessage other) : this() {
+      Source = other.source_ != null ? other.Source.Clone() : null;
+      sequence_ = other.sequence_;
+      id_ = other.id_;
+      timeStamp_ = other.timeStamp_;
+      correlationId_ = other.correlationId_;
+      events_ = other.events_.Clone();
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public CommittedEventStreamParticleMessage Clone() {
+      return new CommittedEventStreamParticleMessage(this);
+    }
+
+    /// <summary>Field number for the "source" field.</summary>
+    public const int SourceFieldNumber = 1;
+    private global::Dolittle.Runtime.Events.Relativity.VersionedEventSourceMessage source_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Dolittle.Runtime.Events.Relativity.VersionedEventSourceMessage Source {
+      get { return source_; }
+      set {
+        source_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "sequence" field.</summary>
+    public const int SequenceFieldNumber = 2;
+    private ulong sequence_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ulong Sequence {
+      get { return sequence_; }
+      set {
+        sequence_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "id" field.</summary>
+    public const int IdFieldNumber = 3;
+    private pb::ByteString id_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString Id {
+      get { return id_; }
+      set {
+        id_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "timeStamp" field.</summary>
+    public const int TimeStampFieldNumber = 4;
+    private long timeStamp_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public long TimeStamp {
+      get { return timeStamp_; }
+      set {
+        timeStamp_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "correlationId" field.</summary>
+    public const int CorrelationIdFieldNumber = 5;
+    private pb::ByteString correlationId_ = pb::ByteString.Empty;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString CorrelationId {
+      get { return correlationId_; }
+      set {
+        correlationId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+
+    /// <summary>Field number for the "events" field.</summary>
+    public const int EventsFieldNumber = 6;
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Events.Relativity.EventParticleMessage> _repeated_events_codec
+        = pb::FieldCodec.ForMessage(50, global::Dolittle.Runtime.Events.Relativity.EventParticleMessage.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleMessage> events_ = new pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleMessage>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.EventParticleMessage> Events {
+      get { return events_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as CommittedEventStreamParticleMessage);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(CommittedEventStreamParticleMessage other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Source, other.Source)) return false;
+      if (Sequence != other.Sequence) return false;
+      if (Id != other.Id) return false;
+      if (TimeStamp != other.TimeStamp) return false;
+      if (CorrelationId != other.CorrelationId) return false;
+      if(!events_.Equals(other.events_)) return false;
+      return true;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (source_ != null) hash ^= Source.GetHashCode();
+      if (Sequence != 0UL) hash ^= Sequence.GetHashCode();
+      if (Id.Length != 0) hash ^= Id.GetHashCode();
+      if (TimeStamp != 0L) hash ^= TimeStamp.GetHashCode();
+      if (CorrelationId.Length != 0) hash ^= CorrelationId.GetHashCode();
+      hash ^= events_.GetHashCode();
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (source_ != null) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Source);
+      }
+      if (Sequence != 0UL) {
+        output.WriteRawTag(16);
+        output.WriteUInt64(Sequence);
+      }
+      if (Id.Length != 0) {
+        output.WriteRawTag(26);
+        output.WriteBytes(Id);
+      }
+      if (TimeStamp != 0L) {
+        output.WriteRawTag(32);
+        output.WriteInt64(TimeStamp);
+      }
+      if (CorrelationId.Length != 0) {
+        output.WriteRawTag(42);
+        output.WriteBytes(CorrelationId);
+      }
+      events_.WriteTo(output, _repeated_events_codec);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (source_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Source);
+      }
+      if (Sequence != 0UL) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(Sequence);
+      }
+      if (Id.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(Id);
+      }
+      if (TimeStamp != 0L) {
+        size += 1 + pb::CodedOutputStream.ComputeInt64Size(TimeStamp);
+      }
+      if (CorrelationId.Length != 0) {
+        size += 1 + pb::CodedOutputStream.ComputeBytesSize(CorrelationId);
+      }
+      size += events_.CalculateSize(_repeated_events_codec);
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(CommittedEventStreamParticleMessage other) {
+      if (other == null) {
+        return;
+      }
+      if (other.source_ != null) {
+        if (source_ == null) {
+          source_ = new global::Dolittle.Runtime.Events.Relativity.VersionedEventSourceMessage();
+        }
+        Source.MergeFrom(other.Source);
+      }
+      if (other.Sequence != 0UL) {
+        Sequence = other.Sequence;
+      }
+      if (other.Id.Length != 0) {
+        Id = other.Id;
+      }
+      if (other.TimeStamp != 0L) {
+        TimeStamp = other.TimeStamp;
+      }
+      if (other.CorrelationId.Length != 0) {
+        CorrelationId = other.CorrelationId;
+      }
+      events_.Add(other.events_);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            input.SkipLastField();
+            break;
+          case 10: {
+            if (source_ == null) {
+              source_ = new global::Dolittle.Runtime.Events.Relativity.VersionedEventSourceMessage();
+            }
+            input.ReadMessage(source_);
+            break;
+          }
+          case 16: {
+            Sequence = input.ReadUInt64();
+            break;
+          }
+          case 26: {
+            Id = input.ReadBytes();
+            break;
+          }
           case 32: {
-            Commit = input.ReadInt64();
+            TimeStamp = input.ReadInt64();
+            break;
+          }
+          case 42: {
+            CorrelationId = input.ReadBytes();
+            break;
+          }
+          case 50: {
+            events_.AddEntriesFrom(input, _repeated_events_codec);
             break;
           }
         }
