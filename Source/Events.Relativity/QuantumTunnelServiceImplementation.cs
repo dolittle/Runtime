@@ -2,7 +2,12 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Applications;
+using Dolittle.Artifacts;
+using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity
@@ -12,19 +17,43 @@ namespace Dolittle.Runtime.Events.Relativity
     /// </summary>
     public class QuantumTunnelServiceImplementation : QuantumTunnelService.QuantumTunnelServiceBase
     {
+        readonly IEventHorizon _eventHorizon;
+        readonly ISerializer _serializer;
+
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelServiceImplementation"/>
         /// </summary>
-        /// <param name="eventHorizon"></param>
-        public QuantumTunnelServiceImplementation(IEventHorizon eventHorizon)
+        /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with</param>
+        /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization</param>
+        public QuantumTunnelServiceImplementation(
+            IEventHorizon eventHorizon,
+            ISerializer serializer)
         {
-
+            _eventHorizon = eventHorizon;
+            _serializer = serializer;
         }
 
         /// <inheritdoc/>
-        public override async Task Open(OpenTunnelMessage request, IServerStreamWriter<EventParticleMessage> responseStream, ServerCallContext context)
+        public override async Task Open(OpenTunnelMessage request, IServerStreamWriter<CommittedEventStreamParticleMessage> responseStream, ServerCallContext context)
         {
-            await Task.CompletedTask;
+            var tunnel = new QuantumTunnel(_serializer, responseStream);
+            var application = (Application) new Guid(request.Application.ToByteArray());
+            var boundedContext = (BoundedContext) new Guid(request.Application.ToByteArray());
+            var events = request
+                .Events
+                .Select(@event =>
+                    new Artifact(
+                        new Guid(
+                            @event.Event.ToByteArray()),
+                            @event.Generation)
+                )
+                .ToArray();
+
+            var subscription = new EventParticleSubscription(events);
+
+            var singularity = new Singularity(application, boundedContext, tunnel, subscription);
+            _eventHorizon.GravitateTowards(singularity);
+            tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
 
             // Create a quantum tunnel
 
@@ -41,6 +70,8 @@ namespace Dolittle.Runtime.Events.Relativity
             // - timeout after a while and then remove singularity - collapse
             // - Disable the tunnel
             // - If a singularity comes back before singularity is collapsed - establish a new tunnel for the singularity
+
+            await Task.CompletedTask;
         }
     }
 }
