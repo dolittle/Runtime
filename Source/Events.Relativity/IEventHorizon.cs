@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Pass events through the <see cref="IEventHorizon"/>
         /// </summary>
         /// <param name="committedEventStream"><see cref="CommittedEventStream"/> to pass through</param>
-        void PassThrough(CommittedEventStream committedEventStream);
+        void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
 
         /// <summary>
         /// Gravitate towards <see cref="ISingularity"/>
