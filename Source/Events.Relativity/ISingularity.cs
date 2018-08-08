@@ -14,14 +14,14 @@ namespace Dolittle.Runtime.Events.Relativity
     public interface ISingularity
     {
         /// <summary>
-        /// Gets the <see cef="ApplicationName"/> the <see cref="ISingularity"/> represents
+        /// Gets the <see cef="Application"/> the <see cref="ISingularity"/> represents
         /// </summary>
-        ApplicationName Application { get; }
+        Application Application { get; }
 
         /// <summary>
-        /// Gets the <see cref="ApplicationLocation"/> in form of <see cref="IApplicationLocationSegmentName">names</see> within the <see cref="Application"/> in which the <see cref="ISingularity"/> represents
+        /// Gets the <see cref="BoundedContext"/> in which the <see cref="ISingularity"/> represents
         /// </summary>
-        IEnumerable<IApplicationLocationSegmentName> ApplicationLocation { get; }
+        BoundedContext BoundedContext { get; }
 
         /// <summary>
         /// Gets the <see cref="IEnumerable{ParticleSubscription}"/> 

@@ -16,25 +16,25 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Initializes a new instance of <see cref="Singularity"/>
         /// </summary>
         /// <param name="subscriptions"><see cref="IEnumerable{ParticleSubscription}">Subscriptions</see></param>
-        /// <param name="application"><see cref="ApplicationName">Application</see> representing the singularity</param>
-        /// <param name="applicationLocation"><see cref="IEnumerable{IApplicationLocationSegmentName}"/> representing the location within the <see cref="Application"/> representing the singularity</param>
+        /// <param name="application"><see cref="Application">Application</see> representing the singularity</param>
+        /// <param name="boundedContext"><see cref="BoundedContext"/> representing the bounded context of the singularity</param>
         public Singularity(
             IEnumerable<EventParticleSubscription> subscriptions,
-            ApplicationName application,
-            IEnumerable<IApplicationLocationSegmentName> applicationLocation)
+            Application application,
+            BoundedContext boundedContext)
         {
             Subscriptions = subscriptions;
             Application = application;
-            ApplicationLocation = applicationLocation;
+            BoundedContext = boundedContext;
         }
 
         /// <inheritdoc/>
         public IEnumerable<EventParticleSubscription> Subscriptions {  get; }
 
         /// <inheritdoc/>
-        public ApplicationName Application { get; }
+        public Application Application { get; }
 
         /// <inheritdoc/>
-        public IEnumerable<IApplicationLocationSegmentName> ApplicationLocation { get; }
+        public BoundedContext BoundedContext { get; }
     }
 }

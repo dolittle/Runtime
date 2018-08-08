@@ -1,5 +1,5 @@
 ﻿using System.Dynamic;
-using Dolittle.Applications;
+using Dolittle.Artifacts;
 using Dolittle.Globalization;
 using Dolittle.Logging;
 using Dolittle.Runtime.Commands.Handling;
@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator.gi
 
         Establish context = ()=>
         {
-            command = new CommandRequest(TransactionCorrelationId.NotSet, Mock.Of<IApplicationArtifactIdentifier>(), new ExpandoObject());
+            command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
             command_handler_manager_mock = new Mock<ICommandHandlerManager>();
             command_context_manager_mock = new Mock<ICommandContextManager>();
             command_validators_mock = new Mock<ICommandValidators>();

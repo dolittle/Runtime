@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using Dolittle.Applications;
+using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Storage
 {
@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Storage
     public class NullEventStore : IEventStore
     {
         /// <inheritdoc/>
-        public IEnumerable<EventAndEnvelope> GetFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
+        public IEnumerable<EventAndEnvelope> GetFor(Artifact eventSource, EventSourceId eventSourceId)
         {
             return new EventAndEnvelope[0];
         }
@@ -24,13 +24,13 @@ namespace Dolittle.Runtime.Events.Storage
         }
 
         /// <inheritdoc/>
-        public bool HasEventsFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
+        public bool HasEventsFor(Artifact eventSource, EventSourceId eventSourceId)
         {
             return false;
         }
 
         /// <inheritdoc/>
-        public EventSourceVersion GetVersionFor(IApplicationArtifactIdentifier eventSource, EventSourceId eventSourceId)
+        public EventSourceVersion GetVersionFor(Artifact eventSource, EventSourceId eventSourceId)
         {
             return EventSourceVersion.Zero;
         }
