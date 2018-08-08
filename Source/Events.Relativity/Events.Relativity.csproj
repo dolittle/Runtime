@@ -9,10 +9,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Events\Events.csproj" />
+    <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Bootstrapping" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Serialization.Json" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="2.0.0-*" />
     <PackageReference Include="Google.Protobuf" Version="3.5.1" />
     <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
