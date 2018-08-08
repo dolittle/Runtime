@@ -2,6 +2,7 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,13 +19,15 @@ namespace Dolittle.Runtime.Events.Relativity
     /// <summary>
     /// Represents a concrete connection through a <see cref="IBarrier"/>
     /// </summary>
-    public class Connection
+    public class Connection : IDisposable
     {
         readonly string _url;
         readonly IEnumerable<Artifact> _events;
         readonly ILogger _logger;
         readonly Application _application;
         readonly BoundedContext _boundedContext;
+        readonly Channel _channel;
+        readonly QuantumTunnelService.QuantumTunnelServiceClient _client;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Connection"/>
@@ -41,15 +44,22 @@ namespace Dolittle.Runtime.Events.Relativity
             _logger = logger;
             _application = application;
             _boundedContext = boundedContext;
+            _channel = new Channel(_url, ChannelCredentials.Insecure);
+            _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
 
-            Run();
+            Task.Run(() => Run());
         }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _channel.ShutdownAsync();
+        }
+
 
         void Run()
         {
             _logger.Information($"Establishing connection towards event horizon at '{_url}'");
-            var channel = new Channel(_url, ChannelCredentials.Insecure);
-            var client = new QuantumTunnelService.QuantumTunnelServiceClient(channel);
 
             Task.Run(async() =>
             {
@@ -57,11 +67,11 @@ namespace Dolittle.Runtime.Events.Relativity
                 {
                     try
                     {
-                        await OpenAndHandleStream(client);
+                        await OpenAndHandleStream();
                     }
-                    catch
+                    catch( Exception ex )
                     {
-
+                        _logger.Error(ex, "Error occurred during establishing quantum tunnel");
                     }
                     _logger.Warning("Connection broken - backing off for a second");
                     Thread.Sleep(1000);
@@ -69,11 +79,14 @@ namespace Dolittle.Runtime.Events.Relativity
                 }
             }).Wait();
 
-            channel.ShutdownAsync();
+            _channel.ShutdownAsync();
         }
 
-        async Task OpenAndHandleStream(QuantumTunnelService.QuantumTunnelServiceClient client)
+
+
+        async Task OpenAndHandleStream()
         {
+
             var openTunnelMessage = new OpenTunnelMessage
             {
                 Application = ByteString.CopyFrom(_application.Value.ToByteArray()),
@@ -86,11 +99,14 @@ namespace Dolittle.Runtime.Events.Relativity
                 Generation = _.Generation
             }).ForEach(openTunnelMessage.Events.Add);
 
-            var stream = client.Open(openTunnelMessage);
+            var stream = _client.Open(openTunnelMessage);
             while (await stream.ResponseStream.MoveNext(CancellationToken.None))
             {
                 _logger.Information("Event received");
             }
+
+            _logger.Information("Done opening and handling the stream");
         }
+
     }
 }

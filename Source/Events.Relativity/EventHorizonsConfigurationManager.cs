@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.IO;
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Serialization.Json;
 
@@ -11,6 +12,7 @@ namespace Dolittle.Runtime.Events.Relativity
     /// <summary>
     /// Represents an implementation of <see cref="IEventHorizonsConfigurationManager"/>
     /// </summary>
+    [Singleton]
     public class EventHorizonsConfigurationManager : IEventHorizonsConfigurationManager
     {
         const string _configurationFile = "event-horizons.json";

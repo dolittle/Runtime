@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
 using Dolittle.Serialization.Protobuf;
@@ -70,6 +71,24 @@ namespace Dolittle.Runtime.Events.Relativity
             {
                 Collapsed(this);
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task Open()
+        {
+            await Task.Run(() => {
+                for( ;; )
+                {
+                    try {
+
+                    } catch {
+                        break;
+                    }
+                    Thread.Sleep(1000);
+                }
+            });
+
+            Collapsed(this);
         }
     }
 }

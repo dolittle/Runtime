@@ -28,27 +28,38 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="configurationManager"></param>
         /// <param name="serializer"></param>
         /// <param name="logger"></param>
-        public EventHorizon(ISerializer serializer, ILogger logger)
+        public EventHorizon(IEventHorizonsConfigurationManager configurationManager, ISerializer serializer, ILogger logger)
         {
             _logger = logger;
 
-            _server = new Server
+            try
             {
-                Services = { QuantumTunnelService.BindService(new QuantumTunnelServiceImplementation(this, serializer) )},
-                Ports = {
-                    new ServerPort("localhost", _port, SslServerCredentials.Insecure),
-                    new ServerPort("unix:/var/run/dolittle.sock", 0, SslServerCredentials.Insecure)
-                }
-            };
+                _server = new Server
+                {
+                    Services = { QuantumTunnelService.BindService(new QuantumTunnelServiceImplementation(this, serializer, logger)) },
+                    Ports = {
+                    new ServerPort("localhost", configurationManager.Current.Port, SslServerCredentials.Insecure)
+                    //new ServerPort($"unix:{configurationManager.Current.UnixSocket}", 0, SslServerCredentials.Insecure)
+                    }
+                };
 
-            _server
-                .Ports
-                .ForEach(_ => 
-                    _logger.Information($"Starting gRPC server on {_.Host}"+(_.Port > 0 ? $" for port {_.Port}": string.Empty)));
-                    
-            _server.Start();
+                _server
+                    .Ports
+                    .ForEach(_ =>
+                        _logger.Information($"Starting gRPC server on {_.Host}" + (_.Port > 0 ? $" for port {_.Port}" : string.Empty)));
+
+                _server.Start();
+
+
+                _logger.Information("Server started");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Couldn't not establish an event horizon");
+            }
         }
 
         /// <inheritdoc/>
@@ -57,12 +68,12 @@ namespace Dolittle.Runtime.Events.Relativity
             _server.ShutdownAsync().Wait();
         }
 
-
         /// <inheritdoc/>
         public void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
         {
             lock(_singularities)
             {
+                _logger.Information($"Passing committed events through {_singularities.Count} singularities");
                 _singularities
                     .Where(_ => _.CanReceive(committedEventStream)).AsParallel()
                     .ForEach(_ =>
@@ -77,6 +88,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             lock(_singularities)
             {
+                _logger.Information($"Quantum tunnel collapsed for singularity identified with bounded context '{singularity.BoundedContext}' in application '{singularity.Application}'");
                 _singularities.Remove(singularity);
             }
         }
@@ -86,6 +98,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             lock(_singularities)
             {
+                _logger.Information($"Gravitate events in the event horizon towards singularity identified with bounded context '{singularity.BoundedContext}' in application '{singularity.Application}'");
                 _singularities.Add(singularity);
             }
         }

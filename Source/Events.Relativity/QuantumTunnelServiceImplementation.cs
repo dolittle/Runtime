@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
+using Dolittle.Logging;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
@@ -19,18 +20,22 @@ namespace Dolittle.Runtime.Events.Relativity
     {
         readonly IEventHorizon _eventHorizon;
         readonly ISerializer _serializer;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelServiceImplementation"/>
         /// </summary>
         /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with</param>
         /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization</param>
+        /// <param name="logger"></param>
         public QuantumTunnelServiceImplementation(
             IEventHorizon eventHorizon,
-            ISerializer serializer)
+            ISerializer serializer,
+            ILogger logger)
         {
             _eventHorizon = eventHorizon;
             _serializer = serializer;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -51,9 +56,17 @@ namespace Dolittle.Runtime.Events.Relativity
 
             var subscription = new EventParticleSubscription(events);
 
+            _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
+
+            
             var singularity = new Singularity(application, boundedContext, tunnel, subscription);
             _eventHorizon.GravitateTowards(singularity);
             tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
+
+            await tunnel.Open();
+
+            _logger.Information("Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
+            
 
             // Create a quantum tunnel
 

@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Relativity
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="IEventHorizon"/>
     /// </summary>
-    public class EventHorizonsBootProcedure : ICanPerformBootProcedure
+    public class EventHorizonBootProcedure : ICanPerformBootProcedure
     {
         readonly IEventHorizonsConfigurationManager _configuration;
         readonly IBarrier _barrier;
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// 
         /// </summary>
-        public EventHorizonsBootProcedure(IEventHorizonsConfigurationManager configuration, IBarrier barrier)
+        public EventHorizonBootProcedure(IEventHorizonsConfigurationManager configuration, IBarrier barrier, IEventHorizon eventHorizon)
         {
             _configuration = configuration;
             _barrier = barrier;
