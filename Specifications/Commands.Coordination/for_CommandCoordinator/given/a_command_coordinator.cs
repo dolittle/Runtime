@@ -26,7 +26,8 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator.gi
 
         Establish context = ()=>
         {
-            command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+            var artifact = Artifact.New();
+            command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
             command_handler_manager_mock = new Mock<ICommandHandlerManager>();
             command_context_manager_mock = new Mock<ICommandContextManager>();
             command_validators_mock = new Mock<ICommandValidators>();

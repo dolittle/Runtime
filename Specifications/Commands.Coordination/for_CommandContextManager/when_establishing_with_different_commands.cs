@@ -15,8 +15,10 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
 
         Because of = () =>
                          {
-                             var firstCommand = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
-                             var secondCommand = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+                             var first_artifact = Artifact.New();
+                             var second_artifact = Artifact.New();
+                             var firstCommand = new CommandRequest(TransactionCorrelationId.NotSet, first_artifact.Id, first_artifact.Generation, new ExpandoObject());
+                             var secondCommand = new CommandRequest(TransactionCorrelationId.NotSet, second_artifact.Id, second_artifact.Generation, new ExpandoObject());
                              firstCommandContext = Manager.EstablishForCommand(firstCommand);
                              secondCommandContext = Manager.EstablishForCommand(secondCommand);
                          };

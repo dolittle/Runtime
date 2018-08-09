@@ -16,7 +16,8 @@ namespace Dolittle.Runtime.Commands.Specs.for_CommandHandlerManager
 
         Because of = () =>
                          {
-                             handled_command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+                             var artifact = Artifact.New();
+                             handled_command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
                              thrown_exception = Catch.Exception(() => manager.Handle(handled_command));
                          };
 
