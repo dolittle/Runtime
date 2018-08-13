@@ -41,6 +41,11 @@ A undefined process in Dolittle, but seems interesting is the [wave function ren
 Particles are small objects, and in Dolittle there is an event particle. This is the thing that passes through the event
 horizon into each singularity.
 
+### Barrier
+
+For quantum tunnels to be opened from a singularity towards an event horizon, it has to penetrate the barrier.
+This is the last line of defense for connecting - the barrier can refuse the opening of the tunnel.
+
 ### [Geodesics](https://vrs.amsi.org.au/geodesic-incompleteness-spacetime/)
 
 An observer travelling along a geodesic path may remain in motion forever, or the path may terminate after a finite amount of time. Paths that carry on indefinitely are called complete geodesics, and those that stop abruptly, incomplete geodesics.
