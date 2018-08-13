@@ -13,7 +13,7 @@ $ ./generate_protos.sh
 ## Vocabulary
 
 The vocabulary in this is loosely based on [general relativity](https://en.wikipedia.org/wiki/General_relativity) and a tribute to the late professor [Stephen Hawking](https://en.wikipedia.org/wiki/Stephen_Hawkings) with a semi scientific approach linking the concepts
-to what they actually do in the software.
+to what they actually do in the software. You can find a fun video [here](https://www.youtube.com/watch?v=E8hzLM0JpYw) that explains event horizons in 60 seconds.
 
 ### [Event Horizon](https://en.wikipedia.org/wiki/Event_horizon)
 
