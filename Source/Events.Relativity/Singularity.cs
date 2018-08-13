@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Applications;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -14,6 +15,7 @@ namespace Dolittle.Runtime.Events.Relativity
     public class Singularity : ISingularity
     {
         readonly EventParticleSubscription _subscription;
+        readonly IQuantumTunnel _tunnel;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Singularity"/>
@@ -29,8 +31,9 @@ namespace Dolittle.Runtime.Events.Relativity
             EventParticleSubscription subscription)
         {
             _subscription = subscription;
+            _tunnel = tunnel;
             Application = application;
-            Tunnel = tunnel;
+            
             BoundedContext = boundedContext;
         }
 
@@ -38,15 +41,21 @@ namespace Dolittle.Runtime.Events.Relativity
         public bool CanReceive(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
         {
             return true;
-        }      
+        }
+
+        /// <inheritdoc/>
+        public bool PassThrough(Store.CommittedEventStream committedEventStream)
+        {
+            if( !CanReceive(committedEventStream)) return false;
+            _tunnel.PassThrough(committedEventStream);
+
+            return true;
+        }
 
         /// <inheritdoc/>
         public Application Application { get; }
 
         /// <inheritdoc/>
         public BoundedContext BoundedContext { get; }
-
-        /// <inheritdoc/>
-        public IQuantumTunnel Tunnel { get; }
     }
 }

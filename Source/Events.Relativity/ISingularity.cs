@@ -24,15 +24,21 @@ namespace Dolittle.Runtime.Events.Relativity
         BoundedContext BoundedContext { get; }
 
         /// <summary>
+        /// Pass an <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> through
+        /// </summary>
+        /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to pass through</param>
+        /// <returns>True if it could pass through, false if not</returns>
+        /// <remarks>
+        /// Not all singularities will be interested in events in a <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/>
+        /// If a singularity is not interested, it won't pass through and won't then do that
+        /// </remarks>
+        bool PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
+
+        /// <summary>
         /// Determines wether or not the <see cref="ISingularity"/> is capable of receiving a <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/>
         /// </summary>
         /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to ask for</param>
         /// <returns>True if it can, false if not</returns>
         bool CanReceive(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
-
-        /// <summary>
-        /// Gets the <see cref="IQuantumTunnel"/>
-        /// </summary>
-        IQuantumTunnel Tunnel { get; }
     }
 }

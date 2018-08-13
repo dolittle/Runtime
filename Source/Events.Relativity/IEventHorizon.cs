@@ -2,6 +2,8 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System.Collections.Generic;
+
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
@@ -28,5 +30,10 @@ namespace Dolittle.Runtime.Events.Relativity
         /// </summary>
         /// <param name="singularity"><see cref="ISingularity"/> that collapsed</param>
         void Collapse(ISingularity singularity);
+
+        /// <summary>
+        /// Get the collection of <see cref="ISingularity">singularities</see> in the system
+        /// </summary>
+        IEnumerable<ISingularity>  Singularities { get; }
     }
 }

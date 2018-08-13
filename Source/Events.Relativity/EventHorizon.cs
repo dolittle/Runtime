@@ -17,55 +17,20 @@ namespace Dolittle.Runtime.Events.Relativity
     /// Represents an implementation of <see cref="IEventHorizon"/>
     /// </summary>
     [Singleton]
-    public class EventHorizon : IEventHorizon, IDisposable
+    public class EventHorizon : IEventHorizon
     {
-        const int _port = 50051;
         readonly List<ISingularity> _singularities = new List<ISingularity>();
-
-        readonly Server _server;
         readonly ILogger _logger;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="EventHorizon"/>
         /// </summary>
-        /// <param name="configurationManager"></param>
-        /// <param name="serializer"></param>
-        /// <param name="logger"></param>
-        public EventHorizon(IEventHorizonsConfigurationManager configurationManager, ISerializer serializer, ILogger logger)
+        /// <param name="gravitationalLens">The <see cref="IGravitationalLens"/> used to observe</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        public EventHorizon(IGravitationalLens gravitationalLens, ILogger logger)
         {
             _logger = logger;
-
-            try
-            {
-                _server = new Server
-                {
-                    Services = { QuantumTunnelService.BindService(new QuantumTunnelServiceImplementation(this, serializer, logger)) },
-                    Ports = {
-                    new ServerPort("localhost", configurationManager.Current.Port, SslServerCredentials.Insecure)
-                    //new ServerPort($"unix:{configurationManager.Current.UnixSocket}", 0, SslServerCredentials.Insecure)
-                    }
-                };
-
-                _server
-                    .Ports
-                    .ForEach(_ =>
-                        _logger.Information($"Starting gRPC server on {_.Host}" + (_.Port > 0 ? $" for port {_.Port}" : string.Empty)));
-
-                _server.Start();
-
-
-                _logger.Information("Server started");
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, "Couldn't not establish an event horizon");
-            }
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _server.ShutdownAsync().Wait();
+            gravitationalLens.ObserveFor(this);
         }
 
         /// <inheritdoc/>
@@ -78,7 +43,7 @@ namespace Dolittle.Runtime.Events.Relativity
                     .Where(_ => _.CanReceive(committedEventStream)).AsParallel()
                     .ForEach(_ =>
                     {
-                        _.Tunnel.PassThrough(committedEventStream);
+                        _.PassThrough(committedEventStream);
                     });
             }
         }
@@ -100,6 +65,15 @@ namespace Dolittle.Runtime.Events.Relativity
             {
                 _logger.Information($"Gravitate events in the event horizon towards singularity identified with bounded context '{singularity.BoundedContext}' in application '{singularity.Application}'");
                 _singularities.Add(singularity);
+            }
+        }
+
+        /// <inheritdoc/>
+        public IEnumerable<ISingularity> Singularities
+        {
+            get
+            {
+                lock(_singularities) return _singularities;
             }
         }
     }
