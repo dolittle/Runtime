@@ -2,6 +2,7 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System;
 using System.Linq;
 using System.Security.Claims;
 
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Tenancy
     /// <see cref="IdentityProviderClaimType"/>
     /// <see cref="ClaimTypes.Sid"/>
     /// 
-    /// If not any of these claims are found to be identifying the tenant id, the <see cref="UnknownTenantId"/>
+    /// If not any of these claims are found to be identifying the tenant id, the <see cref="TenantId.Unknown"/>
     /// will be returned when resolving
     /// </remarks>
     public class DefaultTenantIdResolver : ICanResolveTenantId
@@ -31,22 +32,17 @@ namespace Dolittle.Runtime.Tenancy
         /// </summary>
         public const string IdentityProviderClaimType = "http://schemas.microsoft.com/identity/claims/identityprovider";
 
-        /// <summary>
-        /// The string that represents an unknown tenant id
-        /// </summary>
-        public const string UnknownTenantId = "[UnknownTenant]";
-
         /// <inheritdoc/>
         public TenantId Resolve()
         {
             var principal = ClaimsPrincipal.Current;
-            if (principal == null) return UnknownTenantId;
+            if (principal == null) return TenantId.Unknown;
 
             var claim = principal.Claims.FirstOrDefault(c => c.Type == TenantIdClaimType);
             if (claim == null) claim = principal.Claims.FirstOrDefault(c => c.Type == IdentityProviderClaimType);
             if (claim == null) claim = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Sid);
 
-            var tenantId = (claim != null) ? claim.Value : UnknownTenantId;
+            var tenantId = (claim != null) ? (TenantId)Guid.Parse(claim.Value) : TenantId.Unknown;
             return tenantId;
         }
     }

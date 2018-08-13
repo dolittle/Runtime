@@ -1,4 +1,5 @@
-﻿using System.Dynamic;
+﻿using System;
+using System.Dynamic;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Tenancy.Specs.for_TenantManager
@@ -10,7 +11,7 @@ namespace Dolittle.Runtime.Tenancy.Specs.for_TenantManager
 
         Establish context = () =>
         {
-            tenant_id = "42";
+            tenant_id = Guid.NewGuid();
             tenant_id_resolver.Setup(t => t.Resolve()).Returns(tenant_id);
         };
 
