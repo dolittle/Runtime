@@ -39,10 +39,11 @@ message VersionedEventSourceMessage {
 } 
 
 message CommittedEventStreamParticleMessage {
-    VersionedEventSourceMessage source = 1;
-    uint64 sequence = 2;
-    bytes id = 3;
-    int64 timeStamp = 4;
-    bytes correlationId = 5;
-    repeated EventParticleMessage events = 6;
+    bytes tenant = 1;
+    VersionedEventSourceMessage source = 2;
+    uint64 sequence = 3;
+    bytes id = 4;
+    int64 timeStamp = 5;
+    bytes correlationId = 6;
+    repeated EventParticleMessage events = 7;
 }

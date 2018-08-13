@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
+using Dolittle.Runtime.Execution;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
@@ -21,27 +22,31 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly IEventHorizon _eventHorizon;
         readonly ISerializer _serializer;
         readonly ILogger _logger;
+        readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelServiceImplementation"/>
         /// </summary>
         /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with</param>
         /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization</param>
-        /// <param name="logger"></param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="IExecutionContext"/></param>
+        /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnelServiceImplementation(
             IEventHorizon eventHorizon,
             ISerializer serializer,
+            IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _eventHorizon = eventHorizon;
             _serializer = serializer;
+            _executionContextManager = executionContextManager;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public override async Task Open(OpenTunnelMessage request, IServerStreamWriter<CommittedEventStreamParticleMessage> responseStream, ServerCallContext context)
         {
-            var tunnel = new QuantumTunnel(_serializer, responseStream);
+            var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager);
             var application = (Application) new Guid(request.Application.ToByteArray());
             var boundedContext = (BoundedContext) new Guid(request.Application.ToByteArray());
             var events = request

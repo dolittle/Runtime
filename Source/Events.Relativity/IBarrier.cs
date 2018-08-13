@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
+using Dolittle.Applications;
 using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Relativity
@@ -18,8 +19,10 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Penetrate to a specific <see cref="IEventHorizon"/> with a given Url for specific <see cref="Artifact">events</see>
         /// </summary>
+        /// <param name="application">The <see cref="Application"/> in which to penetrate to</param>
+        /// <param name="boundedContext">The <see cref="BoundedContext"/> in which to penetrate to</param>
         /// <param name="url">Url to an <see cref="IEventHorizon"/> to penentrate to</param>
         /// <param name="events">For <see cref="IEnumerable{Artifact}">events</see></param>
-        void Penetrate(string url, IEnumerable<Artifact> events);
+        void Penetrate(Application application, BoundedContext boundedContext, string url, IEnumerable<Artifact> events);
     }
 }

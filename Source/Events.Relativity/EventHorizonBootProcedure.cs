@@ -16,9 +16,13 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly IBarrier _barrier;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="EventHorizonBootProcedure"/>
         /// </summary>
-        public EventHorizonBootProcedure(IEventHorizonsConfigurationManager configuration, IBarrier barrier, IEventHorizon eventHorizon)
+        /// <param name="configuration"><see cref="IEventHorizonsConfigurationManager">Configuration mananger</see></param>
+        /// <param name="barrier"><see cref="IBarrier">Barrier</see> to penetrate towards an <see cref="IEventHorizon"/></param>
+        public EventHorizonBootProcedure(
+            IEventHorizonsConfigurationManager configuration,
+            IBarrier barrier)
         {
             _configuration = configuration;
             _barrier = barrier;
@@ -27,7 +31,13 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public void Perform()
         {
-            _configuration.Current.EventHorizons.ForEach(eventHorizon => _barrier.Penetrate(eventHorizon.Url, eventHorizon.Events));
+            _configuration.Current.EventHorizons.ForEach(eventHorizon => 
+                _barrier.Penetrate(
+                    eventHorizon.Application,
+                    eventHorizon.BoundedContext,
+                    eventHorizon.Url,
+                    eventHorizon.Events)
+                );
         }
     }
 }

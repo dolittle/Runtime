@@ -18,25 +18,40 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly ILogger _logger;
         readonly Application _application;
         readonly BoundedContext _boundedContext;
+        readonly IGeodesics _geodesics;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Barrier"/>
         /// </summary>
         /// <param name="application">The current <see cref="Application"/></param>
         /// <param name="boundedContext">The current <see cref="BoundedContext"/></param>
+        /// <param name="geodesics">The <see cref="IGeodesics"/> for path offsetting</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes</param>
-        public Barrier(Application application, BoundedContext boundedContext, ILogger logger)
+        public Barrier(
+            Application application,
+            BoundedContext boundedContext,
+            IGeodesics geodesics,
+            ILogger logger)
         {
             _logger = logger;
             _application = application;
             _boundedContext = boundedContext;
+            _geodesics = geodesics;
         }
 
         /// <inheritdoc/>
-        public void Penetrate(string url, IEnumerable<Artifact> events)
+        public void Penetrate(Application destinationApplication, BoundedContext destinationBoundedContext, string url, IEnumerable<Artifact> events)
         {
             _logger.Information($"Penetrate barrier for quantum tunnel towards event horizon running at '{url}'");
-            new Connection(_application, _boundedContext, url, events, _logger);
+            new QuantumTunnelConnection(
+                _application,
+                _boundedContext,
+                destinationApplication,
+                destinationBoundedContext,
+                url,
+                events,
+                _geodesics,
+                _logger);
         }
     }
 

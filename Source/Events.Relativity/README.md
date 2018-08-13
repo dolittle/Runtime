@@ -40,3 +40,8 @@ A undefined process in Dolittle, but seems interesting is the [wave function ren
 
 Particles are small objects, and in Dolittle there is an event particle. This is the thing that passes through the event
 horizon into each singularity.
+
+### [Geodesics](https://vrs.amsi.org.au/geodesic-incompleteness-spacetime/)
+
+An observer travelling along a geodesic path may remain in motion forever, or the path may terminate after a finite amount of time. Paths that carry on indefinitely are called complete geodesics, and those that stop abruptly, incomplete geodesics.
+This relates to how far in the offset in which a singularity, in our case a bounded context has reached when connected to an event horizon.

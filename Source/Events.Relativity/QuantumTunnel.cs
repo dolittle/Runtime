@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
+using Dolittle.Runtime.Execution;
 using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
 using Grpc.Core;
@@ -20,16 +21,22 @@ namespace Dolittle.Runtime.Events.Relativity
     {
         readonly ISerializer _serializer;
         readonly IServerStreamWriter<CommittedEventStreamParticleMessage> _responseStream;
+        readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
         /// Initializes a new instance of <see cref="IQuantumTunnel"/>
         /// </summary>
         /// <param name="serializer"><see cref="ISerializer"/> to use</param>
         /// <param name="responseStream">The <see cref="IServerStreamWriter{EventParticleMessage}"/> to pass through</param>
-        public QuantumTunnel(ISerializer serializer, IServerStreamWriter<CommittedEventStreamParticleMessage> responseStream)
+        /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to get current context from</param>
+        public QuantumTunnel(
+            ISerializer serializer,
+            IServerStreamWriter<CommittedEventStreamParticleMessage> responseStream,
+            IExecutionContextManager executionContextManager)
         {
             _responseStream = responseStream;
             _serializer = serializer;
+            _executionContextManager = executionContextManager;
         }
         
         /// <inheritdoc/>
@@ -40,8 +47,11 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             try 
             {
+                var executionContext = _executionContextManager.Current;
+
                 var stream = new CommittedEventStreamParticleMessage
                 {
+                    Tenant = ByteString.CopyFrom(executionContext.Tenant.TenantId.Value.ToByteArray()),
                     Source = new VersionedEventSourceMessage
                     {
                         Version = new EventSourceVersionMessage

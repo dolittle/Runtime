@@ -6,6 +6,7 @@ using System;
 using Dolittle.Collections;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Runtime.Execution;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
@@ -22,21 +23,25 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly ILogger _logger;
         readonly IEventHorizonsConfigurationManager _configurationManager;
         readonly ISerializer _serializer;
+        readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
-        /// 
+        /// Initializes a new instance of <see cref="GravitationalLens"/>
         /// </summary>
-        /// <param name="configurationManager"></param>
-        /// <param name="serializer"></param>
-        /// <param name="logger"></param>
+        /// <param name="configurationManager"><see cref="IEventHorizonsConfigurationManager"/> for configuration</param>
+        /// <param name="serializer"><see cref="ISerializer"/> for serializing payloads</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="IExecutionContext"/></param>
+        /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public GravitationalLens(
             IEventHorizonsConfigurationManager configurationManager,
             ISerializer serializer,
+            IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _logger = logger;
             _configurationManager = configurationManager;
             _serializer = serializer;
+            _executionContextManager = executionContextManager;
         }
 
         /// <inheritdoc/>
@@ -46,11 +51,8 @@ namespace Dolittle.Runtime.Events.Relativity
             {
                 _server = new Server
                 {
-                    Services = { QuantumTunnelService.BindService(new QuantumTunnelServiceImplementation(eventHorizon, _serializer, _logger)) },
-                    Ports = {
-                    new ServerPort("localhost", _configurationManager.Current.Port, SslServerCredentials.Insecure)
-                    //new ServerPort($"unix:{configurationManager.Current.UnixSocket}", 0, SslServerCredentials.Insecure)
-                    }
+                    Services = { QuantumTunnelService.BindService(new QuantumTunnelServiceImplementation(eventHorizon, _serializer, _executionContextManager, _logger)) },
+                    Ports = { new ServerPort("localhost", _configurationManager.Current.Port, SslServerCredentials.Insecure) }
                 };
 
                 _server
