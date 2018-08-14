@@ -35,4 +35,22 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="offset">Offset into the path to set</param>
         void StorePathOffsetFor(Application application, BoundedContext BoundedContext, TenantId tenant, ulong offset);
     }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    public class Geodesics : IGeodesics
+    {
+        /// <inheritdoc/>
+        public ulong GetPathOffsetFor(Application application, BoundedContext BoundedContext, TenantId tenant)
+        {
+            return 0;
+        }
+
+        /// <inheritdoc/>
+        public void StorePathOffsetFor(Application application, BoundedContext BoundedContext, TenantId tenant, ulong offset)
+        {
+            
+        }
+    }
 }
