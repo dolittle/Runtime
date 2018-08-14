@@ -12,12 +12,12 @@ using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Logging;
+using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
-
 
     /// <summary>
     /// Represents a concrete connection through a <see cref="IBarrier"/>
@@ -34,6 +34,7 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly Application _destinationApplication;
         readonly BoundedContext _destinationBoundedContext;
         readonly IGeodesics _geodesics;
+        readonly ISerializer _serializer;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
@@ -45,42 +46,44 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="url">Url for the <see cref="IEventHorizon"/> we're connecting to</param>
         /// <param name="events"><see cref="IEnumerable{Artifact}">Events</see> to connect for</param>
         /// <param name="geodesics"><see cref="IGeodesics"/> for path offsetting</param>
+        /// <param name="serializer"><see cref="ISerializer"/> to use for deserializing content of commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes</param>
         public QuantumTunnelConnection(
-            Application application,
-            BoundedContext boundedContext,
-            Application destinationApplication,
-            BoundedContext destinationBoundedContext,
-            string url,
-            IEnumerable<Artifact> events,
-            IGeodesics geodesics,
-            ILogger logger)
-        {
-            _url = url;
-            _events = events;
-            _logger = logger;
-            _application = application;
-            _boundedContext = boundedContext;
-            _destinationApplication = destinationApplication;
-            _destinationBoundedContext = destinationBoundedContext;
-            _channel = new Channel(_url, ChannelCredentials.Insecure);
-            _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
+                Application application,
+                BoundedContext boundedContext,
+                Application destinationApplication,
+                BoundedContext destinationBoundedContext,
+                string url,
+                IEnumerable<Artifact> events,
+                IGeodesics geodesics,
+                ISerializer serializer,
+                ILogger logger)
+            {
+                _url = url;
+                _events = events;
+                _logger = logger;
+                _application = application;
+                _boundedContext = boundedContext;
+                _destinationApplication = destinationApplication;
+                _destinationBoundedContext = destinationBoundedContext;
+                _channel = new Channel(_url, ChannelCredentials.Insecure);
+                _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
 
-            Task.Run(() => Run());
-            _geodesics = geodesics;
+                Task.Run(() => Run());
+                _geodesics = geodesics;
 
-            AppDomain.CurrentDomain.ProcessExit += ProcessExit;
-            AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
-        }
+                AppDomain.CurrentDomain.ProcessExit += ProcessExit;
+                AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
+                _serializer = serializer;
+            }
 
-        
-        /// <summary>
-        /// Destructs the <see cref="QuantumTunnelConnection"/>
-        /// </summary>
-        ~QuantumTunnelConnection()
-        {  
-            Dispose();
-        }
+            /// <summary>
+            /// Destructs the <see cref="QuantumTunnelConnection"/>
+            /// </summary>
+            ~QuantumTunnelConnection()
+            {
+                Dispose();
+            }
 
         /// <inheritdoc/>
         public void Dispose()
@@ -101,13 +104,11 @@ namespace Dolittle.Runtime.Events.Relativity
             Close();
         }
 
-
         void Close()
         {
             _logger.Information("Collapsing quantum tunnel");
             _channel.ShutdownAsync();
         }
-
 
         void Run()
         {
@@ -121,7 +122,7 @@ namespace Dolittle.Runtime.Events.Relativity
                     {
                         await OpenAndHandleStream();
                     }
-                    catch( Exception ex )
+                    catch (Exception ex)
                     {
                         _logger.Error(ex, "Error occurred during establishing quantum tunnel");
                     }
@@ -133,8 +134,6 @@ namespace Dolittle.Runtime.Events.Relativity
 
             Close();
         }
-
-
 
         async Task OpenAndHandleStream()
         {
@@ -149,7 +148,7 @@ namespace Dolittle.Runtime.Events.Relativity
             _events.Select(_ => new EventArtifactMessage
             {
                 Event = ByteString.CopyFrom(_.Id.Value.ToByteArray()),
-                Generation = _.Generation
+                    Generation = _.Generation
             }).ForEach(openTunnelMessage.Events.Add);
 
             var stream = _client.Open(openTunnelMessage);
@@ -157,7 +156,18 @@ namespace Dolittle.Runtime.Events.Relativity
             {
                 _logger.Information("Commit received");
 
-                var current = stream.ResponseStream.Current;
+                try
+                {
+                    var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
+                    _logger.Information($"CorrelationId : {current.CorrelationId}");
+                    _logger.Information($"CommitId : {current.Id}");
+                    _logger.Information($"EventSourceId : {current.Source.EventSource}");
+                    _logger.Information($"EventSourceArtifact : {current.Source.Artifact}");
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Couldn't handle incoming commit");
+                }
             }
 
             _logger.Information("Done opening and handling the stream");
