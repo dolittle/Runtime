@@ -49,9 +49,11 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             try
             {
+
+                var service = new QuantumTunnelServiceImplementation(eventHorizon, _serializer, _executionContextManager, _logger);
                 _server = new Server
                 {
-                    Services = { QuantumTunnelService.BindService(new QuantumTunnelServiceImplementation(eventHorizon, _serializer, _executionContextManager, _logger)) },
+                    Services = { QuantumTunnelService.BindService(service) },
                     Ports = { new ServerPort("localhost", _configurationManager.Current.Port, SslServerCredentials.Insecure) }
                 };
 
