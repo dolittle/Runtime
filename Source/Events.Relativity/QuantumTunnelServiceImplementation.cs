@@ -62,7 +62,6 @@ namespace Dolittle.Runtime.Events.Relativity
             var subscription = new EventParticleSubscription(events);
 
             _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
-
             
             var singularity = new Singularity(application, boundedContext, tunnel, subscription);
             _eventHorizon.GravitateTowards(singularity);
@@ -72,23 +71,6 @@ namespace Dolittle.Runtime.Events.Relativity
 
             _logger.Information($"Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
             
-
-            // Create a quantum tunnel
-
-            // Create subscriptions
-
-            // Create location segment names from strings - proper type
-
-            // Create a singularity from application and location with the quantum tunnel and subscriptions
-
-            // Register the singularity with the event horizon
-
-            // When disconnected :
-            // - Set singularity in disconnected state
-            // - timeout after a while and then remove singularity - collapse
-            // - Disable the tunnel
-            // - If a singularity comes back before singularity is collapsed - establish a new tunnel for the singularity
-
             await Task.CompletedTask;
         }
     }
