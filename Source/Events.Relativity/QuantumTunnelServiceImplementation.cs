@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public override async Task Open(OpenTunnelMessage request, IServerStreamWriter<CommittedEventStreamParticleMessage> responseStream, ServerCallContext context)
         {
-            var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager);
+            var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _logger);
             var application = (Application) new Guid(request.Application.ToByteArray());
             var boundedContext = (BoundedContext) new Guid(request.Application.ToByteArray());
             var events = request
@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.Events.Relativity
 
             await tunnel.Open();
 
-            _logger.Information("Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
+            _logger.Information($"Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
             
 
             // Create a quantum tunnel
