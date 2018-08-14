@@ -74,6 +74,7 @@ namespace Dolittle.Runtime.Events.Relativity
 
                 AppDomain.CurrentDomain.ProcessExit += ProcessExit;
                 AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
+                Console.CancelKeyPress += (s,e) => Close();
                 _serializer = serializer;
             }
 
