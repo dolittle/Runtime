@@ -64,13 +64,21 @@ namespace Dolittle.Runtime.Events.Relativity
 
                 _server.Start();
 
-                _logger.Information("Server started");
+                _logger.Information("Gravitational lens for observing is running");
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Couldn't not establish an event horizon");
             }
+        }
 
+        
+        /// <summary>
+        /// Destruct the <see cref="GravitationalLens"/>
+        /// </summary>
+        ~GravitationalLens()
+        {
+            Dispose();
         }
 
         /// <inheritdoc/>
