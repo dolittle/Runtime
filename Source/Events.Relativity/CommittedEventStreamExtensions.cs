@@ -3,8 +3,11 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Linq;
+using Dolittle.Artifacts;
 using Dolittle.Collections;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
@@ -20,10 +23,10 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Convert from <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to <see cref="CommittedEventStreamParticleMessage"/>
         /// </summary>
-        /// <param name="committedEventStream"></param>
-        /// <param name="tenant"></param>
-        /// <param name="serializer"></param>
-        /// <returns></returns>
+        /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to convert from</param>
+        /// <param name="tenant"><see cref="TenantId"/> the message is for</param>
+        /// <param name="serializer"><see cref="ISerializer"/> to use for serializing content</param>
+        /// <returns>The converted <see cref="CommittedEventStreamParticleMessage"/></returns>
         public static CommittedEventStreamParticleMessage ToMessage(this Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream, TenantId tenant, ISerializer serializer)
         {
             var message = new CommittedEventStreamParticleMessage
@@ -53,6 +56,43 @@ namespace Dolittle.Runtime.Events.Relativity
             }).ForEach(message.Events.Add);
 
             return message;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <param name="serializer"></param>
+        /// <returns></returns>
+        public static Dolittle.Runtime.Events.Store.CommittedEventStream ToCommittedEventStream(this CommittedEventStreamParticleMessage message, ISerializer serializer)
+        {
+            var tenantId = (TenantId)new Guid(message.Tenant.ToByteArray());
+            var eventSourceId = (EventSourceId)new Guid(message.Source.EventSource.ToByteArray());
+            var artifactId = (ArtifactId)new Guid(message.Source.Artifact.ToByteArray());
+            var versionedEventSource = new VersionedEventSource(eventSourceId, artifactId);
+            var commitId = (CommitId)new Guid(message.Id.ToByteArray());
+            var correlationId = (CorrelationId)new Guid(message.CorrelationId.ToByteArray());
+            var timeStamp = DateTimeOffset.FromFileTime(message.TimeStamp);
+
+            /*
+            var events = message.Events.Select(_ =>                 
+                new Dolittle.Runtime.Events.Store.EventEnvelope(
+                    (EventId)new Guid(_.Id.ToByteArray()),
+                    
+
+                )
+            );
+            */
+            
+            return new Dolittle.Runtime.Events.Store.CommittedEventStream(
+                message.Sequence,
+                versionedEventSource,
+                commitId,
+                correlationId,
+                timeStamp,
+                new EventStream(new Dolittle.Runtime.Events.Store.EventEnvelope[0])
+            );
         }
     }
 }
