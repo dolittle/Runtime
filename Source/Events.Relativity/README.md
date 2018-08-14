@@ -41,10 +41,16 @@ A undefined process in Dolittle, but seems interesting is the [wave function ren
 Particles are small objects, and in Dolittle there is an event particle. This is the thing that passes through the event
 horizon into each singularity.
 
-### Barrier
+### [Barrier](https://en.wikipedia.org/wiki/Rectangular_potential_barrier)
 
 For quantum tunnels to be opened from a singularity towards an event horizon, it has to penetrate the barrier.
 This is the last line of defense for connecting - the barrier can refuse the opening of the tunnel.
+
+### [Gravitational Lens](https://en.wikipedia.org/wiki/Gravitational_lens)
+
+A gravitational lens is a distribution of matter between a distant light source and an observer, that is capable of bending the light from the source as the light travels towards the observer.
+In order to observe black holes and its event horizons, one can do so through observing the gravitational lens.
+Translated, this means the actual server that keeps the connection and observes (or in fact waits) for black holes with its quantum tunnels and singularities.
 
 ### [Geodesics](https://vrs.amsi.org.au/geodesic-incompleteness-spacetime/)
 
