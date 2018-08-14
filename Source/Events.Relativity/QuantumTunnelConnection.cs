@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Loader;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Applications;
@@ -67,18 +68,50 @@ namespace Dolittle.Runtime.Events.Relativity
 
             Task.Run(() => Run());
             _geodesics = geodesics;
+
+            AppDomain.CurrentDomain.ProcessExit += ProcessExit;
+            AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
+        }
+
+        
+        /// <summary>
+        /// Destructs the <see cref="QuantumTunnelConnection"/>
+        /// </summary>
+        ~QuantumTunnelConnection()
+        {  
+            Dispose();
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
+            AppDomain.CurrentDomain.ProcessExit -= ProcessExit;
+            AssemblyLoadContext.Default.Unloading -= AssemblyLoadContextUnloading;
+
+            Close();
+        }
+
+        void ProcessExit(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        void AssemblyLoadContextUnloading(AssemblyLoadContext context)
+        {
+            Close();
+        }
+
+
+        void Close()
+        {
+            _logger.Information("Collapsing quantum tunnel");
             _channel.ShutdownAsync();
         }
 
 
         void Run()
         {
-            _logger.Information($"Establishing connection towards event horizon at '{_url}'");
+            _logger.Information($"Establishing connection towards event horizon for application ('{_destinationApplication}') and bounded context ('{_destinationBoundedContext}') at '{_url}'");
 
             Task.Run(async() =>
             {
@@ -98,13 +131,14 @@ namespace Dolittle.Runtime.Events.Relativity
                 }
             }).Wait();
 
-            _channel.ShutdownAsync();
+            Close();
         }
 
 
 
         async Task OpenAndHandleStream()
         {
+            _logger.Information($"Opening tunnel towards application '{_application}' and bounded context '{_boundedContext}'");
 
             var openTunnelMessage = new OpenTunnelMessage
             {
