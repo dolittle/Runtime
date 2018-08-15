@@ -12,7 +12,11 @@ namespace Dolittle.Runtime.Commands.Validation.Specs.for_CommandValidators
         static CommandRequest   command;
         static CommandValidationResult result;
 
-        Establish context = () => command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+        Establish context = () => 
+        {
+            var artifact = Artifact.New();
+            command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+        };
 
         Because of = () => result = validators.Validate(command);
 
