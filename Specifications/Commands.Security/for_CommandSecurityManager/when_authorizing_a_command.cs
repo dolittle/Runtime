@@ -11,7 +11,11 @@ namespace Dolittle.Runtime.Commands.Security.Specs.for_CommandSecurityManager
     {
         static CommandRequest command;
 
-        Establish context = () => command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+        Establish context = () => 
+        {
+            var artifact = Artifact.New();
+            command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+        };
 
         Because of = () => command_security_manager.Authorize(command);
 

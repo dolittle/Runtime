@@ -14,16 +14,20 @@ namespace Dolittle.Runtime.Commands
     /// </summary>
     public class CommandRequest
     {
+            
+        //Temporarily split Artifact into ArtifactId and ArtifactGeneration until the Json Serializer can handle immutable complex types as a ctor param
+
         /// <summary>
         /// Initializes a new instance of <see cref="CommandRequest"/>
         /// </summary>
         /// <param name="correlationId"><see cref="TransactionCorrelationId"/> for the transaction</param>
-        /// <param name="type"><see cref="Artifact">Identifier</see> of the command</param>
+        /// <param name="artifactId"><see cref="ArtifactId">Identifier</see> of the command</param>
+        /// <param name="generation"><see cref="ArtifactGeneration">Generation</see> of the command</param>
         /// <param name="content">Content of the command</param>
-        public CommandRequest(TransactionCorrelationId correlationId, Artifact type, IDictionary<string, object> content)
+        public CommandRequest(TransactionCorrelationId correlationId, ArtifactId artifactId, ArtifactGeneration generation, IDictionary<string, object> content)
         {
             CorrelationId = correlationId;
-            Type = type;
+            Type = new Artifact(artifactId,generation);
             Content = content;
         }
 

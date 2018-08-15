@@ -15,7 +15,8 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextFactory
 
         Establish context = () =>
             {
-                command = new CommandRequest(TransactionCorrelationId.NotSet, Artifact.New(), new ExpandoObject());
+                var artifact = Artifact.New();
+                command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
             };
 
         Because of = () => command_context = factory.Build(command);
