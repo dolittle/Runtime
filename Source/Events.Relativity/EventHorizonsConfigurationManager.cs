@@ -21,13 +21,16 @@ namespace Dolittle.Runtime.Events.Relativity
     {
         const string _configurationFile = "event-horizons.json";
         readonly ILogger _logger;
+        readonly ISerializer _serializer;
 
         /// <summary>
         /// Initializes a new instance of <see cref="EventHorizonsConfigurationManager"/>
         /// </summary>
+        /// <param name="serializer"><see cref="ISerializer"/> to use for dealing with configuration as JSON</param>
         /// <param name="logger"><see cref="ILogger"/> to use for logging</param>
-        public EventHorizonsConfigurationManager(ILogger logger)
+        public EventHorizonsConfigurationManager(ISerializer serializer, ILogger logger)
         {
+            _serializer = serializer;
             _logger = logger;
             if (File.Exists(_configurationFile))
             {
@@ -47,17 +50,8 @@ namespace Dolittle.Runtime.Events.Relativity
 
         EventHorizonsConfiguration LoadConfig()
         {
-            var serializerSettings = new JsonSerializerSettings
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                Formatting = Formatting.Indented,
-                TypeNameAssemblyFormatHandling = TypeNameAssemblyFormatHandling.Simple
-            };
-            serializerSettings.Converters.Add(new ConceptConverter());
-            serializerSettings.Converters.Add(new ConceptDictionaryConverter());
-
             var json = File.ReadAllText(_configurationFile);
-            var current = JsonConvert.DeserializeObject<EventHorizonsConfiguration>(json, serializerSettings);
+            var current = _serializer.FromJson<EventHorizonsConfiguration>(json);
             _logger.Information($"EventHorizon will be exposed on TCP with port {current.Port}");
             _logger.Information($"EventHorizon will be exposed on Unix socket {current.UnixSocket}");
             current.EventHorizons.ForEach(eventHorizonConfig =>
