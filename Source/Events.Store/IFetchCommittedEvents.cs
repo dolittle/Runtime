@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="eventType">The <see cref="ArtifactId"> event type</see> to fetch</param>
         /// <returns>An ordered stream of events of the request type</returns>
-        EventStream FetchAllEventsOfType(ArtifactId eventType);
+        SingleEventTypeEventStream FetchAllEventsOfType(ArtifactId eventType);
 
         /// <summary>
         /// Fetches all the instances of a particular event type in order of occurrence that occurred in commits after the specified commit
@@ -42,6 +42,6 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="eventType">The <see cref="ArtifactId"> event type</see> to fetch</param>
         /// <param name="commit">The <see cref="CommitSequenceNumber" /> that the <see cref="CommittedEventStream" />s should be greater than</param>
         /// <returns>An ordered stream of events of the request type</returns>
-        EventStream FetchAllEventsOfTypeAfter(ArtifactId eventType, CommitSequenceNumber commit);
+        SingleEventTypeEventStream FetchAllEventsOfTypeAfter(ArtifactId eventType, CommitSequenceNumber commit);
     }
 }

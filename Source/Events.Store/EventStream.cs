@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store
 
         /// <summary>
         /// Instantiates a new instance of <see cref="EventStream" /> initialized with events.
-        /// Empty or null events 
+        /// Empty or null events throw an <see cref="InvalidEmptyEventStream" /> exception
         /// </summary>
         /// <param name="events"></param>
         public EventStream(IEnumerable<EventEnvelope> events)

@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="source">The <see cref="VersionedEventSource" /> that this stream applies to</param>
         /// <param name="id">The unique id in the form of a <see cref="CommitId" /></param>
         /// <param name="correlationId">A <see cref="CorrelationId" /> used to relate this event stream to other actions in the system</param>
-        /// <param name="timestamp">A timestamp in the form of a <see cref="DateTimeOffset" /> representing when the strwam was committed</param>
+        /// <param name="timestamp">A timestamp in the form of a <see cref="DateTimeOffset" /> representing when the stream was committed</param>
         /// <param name="events">An enumerable of <see cref="EventEnvelope" /> representing the events that are committed in this commit</param>
         public CommittedEventStream(CommitSequenceNumber sequence, VersionedEventSource source, CommitId id, CorrelationId correlationId, DateTimeOffset timestamp, EventStream events)
         {
