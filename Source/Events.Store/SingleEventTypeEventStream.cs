@@ -17,18 +17,17 @@ namespace Dolittle.Runtime.Events.Store
 
         /// <summary>
         /// Instantiates a new instance of <see cref="SingleEventTypeEventStream" /> initialized with events.
-        /// Empty or null events throws an <see cref="InvalidEmptyEventStream" /> exception
         /// Event instances of more than one <see cref="ArtifactId">type</see> throws a <see cref="MultipleEventTypesInSingleEventTypeEventStream" /> exception
         /// </summary>
         /// <param name="events"></param>
         public SingleEventTypeEventStream(IEnumerable<CommittedEventEnvelope> events)
         {
-            if(events == null || !events.Any())
-                throw new InvalidEmptyEventStream(events == null ? $"{nameof(events)} cannot be null" : $"{nameof(events)} cannot be empty");
-
-            var artifact = events.First().Metadata.Artifact.Id;
-            if(!events.All(e => e.Metadata.Artifact.Id == artifact))
-                throw new MultipleEventTypesInSingleEventTypeEventStream();
+            if(events != null && events.Any())
+            {
+                var artifact = events.First().Metadata.Artifact.Id;
+                if(!events.All(e => e.Metadata.Artifact.Id == artifact))
+                    throw new MultipleEventTypesInSingleEventTypeEventStream();
+            }
 
             _events = events != null ? new List<CommittedEventEnvelope>(events) : new List<CommittedEventEnvelope>();
         }
