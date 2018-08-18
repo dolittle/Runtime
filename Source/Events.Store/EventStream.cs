@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Artifacts;
 using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Store
@@ -79,6 +80,16 @@ namespace Dolittle.Runtime.Events.Store
         public static EventStream From(IEnumerable<EventEnvelope> events)
         {
             return events as EventStream ?? new EventStream(events);
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="EventStream" /> from the current but containing on the specified event types
+        /// </summary>
+        /// <param name="artifact"><see cref="ArtifactId" /> of the event type to return</param>
+        /// <returns>A new <see cref="EventStream" /> containing only instances of the specified event type</returns>
+        public EventStream FilteredByEventType(ArtifactId artifact)
+        {
+            return new EventStream(this.Where(e => e.Metadata.Artifact.Id == artifact));
         }
     }
 }
