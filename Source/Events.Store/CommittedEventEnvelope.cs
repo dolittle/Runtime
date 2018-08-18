@@ -60,5 +60,14 @@ namespace Dolittle.Runtime.Events.Store
 
             return this.Version.CompareTo(other.Version);
         }
+
+        /// <summary>
+        /// Convert a <see cref="CommittedEventEnvelope" /> to the corresponding <see cref="EventEnvelope" />
+        /// </summary>
+        /// <returns>An <see cref="EventEnvelope" /></returns>
+        public EventEnvelope ToEventEnvelope()
+        {
+            return new EventEnvelope(this.Id, this.Metadata, this.Event );
+        }
     }
 }
