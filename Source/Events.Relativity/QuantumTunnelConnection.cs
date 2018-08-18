@@ -146,11 +146,7 @@ namespace Dolittle.Runtime.Events.Relativity
                 BoundedContext = ByteString.CopyFrom(_boundedContext.Value.ToByteArray()),
             };
 
-            _events.Select(_ => new EventArtifactMessage
-            {
-                Event = ByteString.CopyFrom(_.Id.Value.ToByteArray()),
-                    Generation = _.Generation
-            }).ForEach(openTunnelMessage.Events.Add);
+            _events.Select(_ => _.ToMessage()).ForEach(openTunnelMessage.Events.Add);
 
             var stream = _client.Open(openTunnelMessage);
             while (await stream.ResponseStream.MoveNext(CancellationToken.None))
@@ -160,10 +156,10 @@ namespace Dolittle.Runtime.Events.Relativity
                 try
                 {
                     var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                    _logger.Information($"CorrelationId : {current.CorrelationId}");
-                    _logger.Information($"CommitId : {current.Id}");
-                    _logger.Information($"EventSourceId : {current.Source.EventSource}");
-                    _logger.Information($"EventSourceArtifact : {current.Source.Artifact}");
+                    //_logger.Information($"CorrelationId : {current.CorrelationId}");
+                    //_logger.Information($"CommitId : {current.Id}");
+                    //_logger.Information($"EventSourceId : {current.Source.EventSource}");
+                    //_logger.Information($"EventSourceArtifact : {current.Source.Artifact}");
                 }
                 catch (Exception ex)
                 {

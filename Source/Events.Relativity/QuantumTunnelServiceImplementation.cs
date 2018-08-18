@@ -51,12 +51,7 @@ namespace Dolittle.Runtime.Events.Relativity
             var boundedContext = (BoundedContext) new Guid(request.Application.ToByteArray());
             var events = request
                 .Events
-                .Select(@event =>
-                    new Artifact(
-                        new Guid(
-                            @event.Event.ToByteArray()),
-                            @event.Generation)
-                )
+                .Select(@event => @event.ToArtifact())
                 .ToArray();
 
             var subscription = new EventParticleSubscription(events);

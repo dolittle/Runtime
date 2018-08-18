@@ -4,13 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
+using Dolittle.Concepts;
+using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
+using Google.Protobuf.Collections;
+using Google.Protobuf.WellKnownTypes;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -32,16 +37,7 @@ namespace Dolittle.Runtime.Events.Relativity
             var message = new CommittedEventStreamParticleMessage
             {
                 Tenant = ByteString.CopyFrom(tenant.Value.ToByteArray()),
-                Source = new VersionedEventSourceMessage
-                {
-                    Version = new EventSourceVersionMessage
-                    {
-                        Commit = committedEventStream.Source.Version.Commit,
-                        Sequence = committedEventStream.Source.Version.Sequence,
-                    },
-                    EventSource = ByteString.CopyFrom(committedEventStream.Source.EventSource.Value.ToByteArray()),
-                    Artifact = ByteString.CopyFrom(committedEventStream.Source.Artifact.Value.ToByteArray())
-                },
+                Source = committedEventStream.Source.ToMessage(),
                 Sequence = committedEventStream.Sequence,
                 Id = ByteString.CopyFrom(committedEventStream.Id.Value.ToByteArray()),
                 TimeStamp = committedEventStream.Timestamp.ToFileTime(),
@@ -51,11 +47,136 @@ namespace Dolittle.Runtime.Events.Relativity
             committedEventStream.Events.Select(@event => new EventParticleMessage
             {
                 Id = ByteString.CopyFrom(@event.Id.Value.ToByteArray()),
-                    Metadata = ByteString.CopyFrom(serializer.ToProtobuf(@event.Metadata)),
-                    Event = ByteString.CopyFrom(serializer.ToProtobuf(@event.Metadata))
+                Metadata = @event.Metadata.ToMessage()
+                    
             }).ForEach(message.Events.Add);
 
             return message;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="versionedEventSource"></param>
+        /// <returns></returns>
+        public static VersionedEventSourceMessage ToMessage(this VersionedEventSource versionedEventSource)
+        {
+            var source = new VersionedEventSourceMessage {
+                Version = new EventSourceVersionMessage {
+                    Commit = versionedEventSource.Version.Commit,
+                    Sequence = versionedEventSource.Version.Sequence
+                },
+                EventSource = ByteString.CopyFrom(versionedEventSource.EventSource.Value.ToByteArray()),
+                Artifact = ByteString.CopyFrom(versionedEventSource.Artifact.Value.ToByteArray())
+            };
+            return source;
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="artifact"></param>
+        /// <returns></returns>
+        public static ArtifactMessage ToMessage(this Artifact artifact)
+        {
+            var message = new ArtifactMessage();
+            message.Id = ByteString.CopyFrom(artifact.Id.Value.ToByteArray());
+            message.Generation = artifact.Generation.Value;
+
+            return message;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <returns></returns>
+        public static ByteString ToByteString(this ConceptAs<Guid> guid)
+        {
+            return ByteString.CopyFrom(guid.Value.ToByteArray());
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="metadata"></param>
+        /// <returns></returns>
+        public static EventMetadataMessage ToMessage(this EventMetadata metadata)
+        {
+            var message = new EventMetadataMessage();
+            message.Source = metadata.VersionedEventSource.ToMessage();
+            message.CorrelationId = metadata.CorrelationId.ToByteString();
+            message.Artifact = metadata.Artifact.ToMessage();
+            message.CausedBy = metadata.CausedBy;
+            message.Occurred = metadata.Occurred.ToFileTime();
+            return message;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="byteString"></param>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        public static T ToGuidConcept<T>(this ByteString byteString) where T:class
+        {
+            return ConceptFactory.CreateConceptInstance(typeof(T), new Guid(byteString.ToByteArray())) as T;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static Dolittle.Runtime.Events.Store.EventSourceVersion ToEventSourceVersion(this EventSourceVersionMessage message)
+        {
+            return new Dolittle.Runtime.Events.Store.EventSourceVersion(message.Commit, message.Sequence);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static VersionedEventSource ToVersionedEventSource(this VersionedEventSourceMessage message)
+        {
+            return new VersionedEventSource(
+                message.Version.ToEventSourceVersion(),
+                message.EventSource.ToGuidConcept<EventSourceId>(),
+                message.Artifact.ToGuidConcept<ArtifactId>());
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static Artifact ToArtifact(this ArtifactMessage message)
+        {
+            return new Artifact(
+                message.Id.ToGuidConcept<ArtifactId>(),
+                message.Generation
+            );
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static EventMetadata ToEventMetadata(this EventMetadataMessage message)
+        {
+            var metadata = new EventMetadata(
+                message.Source.ToVersionedEventSource(),
+                message.CorrelationId.ToGuidConcept<CorrelationId>(),
+                message.Artifact.ToArtifact(),
+                message.CausedBy,
+                DateTimeOffset.FromFileTime(message.Occurred)
+            );
+            return metadata;
+            
         }
 
 
@@ -74,16 +195,14 @@ namespace Dolittle.Runtime.Events.Relativity
             var commitId = (CommitId)new Guid(message.Id.ToByteArray());
             var correlationId = (CorrelationId)new Guid(message.CorrelationId.ToByteArray());
             var timeStamp = DateTimeOffset.FromFileTime(message.TimeStamp);
-
-            /*
+            
             var events = message.Events.Select(_ =>                 
                 new Dolittle.Runtime.Events.Store.EventEnvelope(
                     (EventId)new Guid(_.Id.ToByteArray()),
-                    
-
+                    _.Metadata.ToEventMetadata(),
+                    new PropertyBag(new Dictionary<string, object>())
                 )
-            );
-            */
+            ).ToArray();
             
             return new Dolittle.Runtime.Events.Store.CommittedEventStream(
                 message.Sequence,
@@ -91,7 +210,7 @@ namespace Dolittle.Runtime.Events.Relativity
                 commitId,
                 correlationId,
                 timeStamp,
-                new EventStream(new Dolittle.Runtime.Events.Store.EventEnvelope[0])
+                new Dolittle.Runtime.Events.Store.EventStream(events)
             );
         }
     }

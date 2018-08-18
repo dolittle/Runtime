@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public async Task Open()
         {
-            await Task.Run(() =>
+            await Task.Run(async() =>
             {
                 for (;;)
                 {
@@ -81,16 +81,19 @@ namespace Dolittle.Runtime.Events.Relativity
                         if (_outbox.IsEmpty) continue;
 
                         CommittedEventStreamParticleMessage message;
-                        if (_outbox.TryDequeue(out message))
+                        while (!_outbox.IsEmpty)
                         {
-                            try
+                            if (_outbox.TryDequeue(out message))
                             {
-                                _responseStream.WriteAsync(message);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.Error(ex, "Error trying to send");
-                                break;
+                                try
+                                {
+                                    await _responseStream.WriteAsync(message);
+                                }
+                                catch (Exception ex)
+                                {
+                                    _logger.Error(ex, "Error trying to send");
+                                    break;
+                                }
                             }
                         }
                     }
