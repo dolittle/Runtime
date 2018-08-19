@@ -52,8 +52,6 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             var json = File.ReadAllText(_configurationFile);
             var current = _serializer.FromJson<EventHorizonsConfiguration>(json);
-            _logger.Information($"EventHorizon will be exposed on TCP with port {current.Port}");
-            _logger.Information($"EventHorizon will be exposed on Unix socket {current.UnixSocket}");
             current.EventHorizons.ForEach(eventHorizonConfig =>
             {
                 _logger.Information($"This singularity will be connected to event horizon at '{eventHorizonConfig.Url}' for application '{eventHorizonConfig.Application}' and bounded context '{eventHorizonConfig.BoundedContext}'");

@@ -2,14 +2,11 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Collections;
 using Dolittle.Execution;
 using Dolittle.Logging;
-using Dolittle.Serialization.Protobuf;
-using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -25,12 +22,10 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Initializes a new instance of <see cref="EventHorizon"/>
         /// </summary>
-        /// <param name="gravitationalLens">The <see cref="IGravitationalLens"/> used to observe</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
-        public EventHorizon(IGravitationalLens gravitationalLens, ILogger logger)
+        public EventHorizon(ILogger logger)
         {
             _logger = logger;
-            gravitationalLens.ObserveFor(this);
         }
 
         /// <inheritdoc/>

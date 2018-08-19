@@ -14,16 +14,6 @@ namespace Dolittle.Runtime.Events.Relativity
     public class EventHorizonsConfiguration
     {
         /// <summary>
-        /// The port to use for exposing the <see cref="IEventHorizon"/> on
-        /// </summary>
-        public int Port { get; set; } = 50051;
-
-        /// <summary>
-        /// The unix socket to use for exposing the <see cref="IEventHorizon"/> on
-        /// </summary>
-        public string UnixSocket { get; set; } = "/var/run/dolittle.sock";
-
-        /// <summary>
         /// Gets or sets <see cref="IEnumerable{EventHorizonConfiguration}">collection of <see cref="EventHorizonConfiguration"/></see>
         /// </summary>
         public IEnumerable<EventHorizonConfiguration>   EventHorizons { get; set; } = new EventHorizonConfiguration[0];
