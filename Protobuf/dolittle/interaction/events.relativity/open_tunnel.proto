@@ -1,0 +1,22 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Dolittle. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+syntax = "proto3";
+
+import "system/guid.proto";
+import "dolittle/interaction/events.relativity/artifact.proto";
+
+package dolittle.events.relativity;
+
+option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+
+// Open tunnel is the message sent when opening a tunnel from a singularity towards an event horizon
+message OpenTunnel {
+    guid application = 1;
+    guid boundedContext = 2;
+    guid clientId = 3;
+    uint64 offset = 4;
+    repeated Artifact   events = 5;
+}
