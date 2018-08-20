@@ -11,6 +11,7 @@ using Dolittle.Collections;
 using Dolittle.Logging;
 using Dolittle.Runtime.Execution;
 using Dolittle.Serialization.Protobuf;
+using Dolittle.Runtime.Events.Relativity.Protobuf;
 using Google.Protobuf;
 using Grpc.Core;
 
@@ -22,9 +23,9 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnel : IQuantumTunnel
     {
         readonly ISerializer _serializer;
-        readonly IServerStreamWriter<CommittedEventStreamParticleMessage> _responseStream;
+        readonly IServerStreamWriter<Protobuf.CommittedEventStream> _responseStream;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ConcurrentQueue<CommittedEventStreamParticleMessage> _outbox;
+        readonly ConcurrentQueue<Protobuf.CommittedEventStream> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
@@ -33,19 +34,19 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Initializes a new instance of <see cref="IQuantumTunnel"/>
         /// </summary>
         /// <param name="serializer"><see cref="ISerializer"/> to use</param>
-        /// <param name="responseStream">The <see cref="IServerStreamWriter{EventParticleMessage}"/> to pass through</param>
+        /// <param name="responseStream">The committed event stream to pass through</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to get current context from</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel(
             ISerializer serializer,
-            IServerStreamWriter<CommittedEventStreamParticleMessage> responseStream,
+            IServerStreamWriter<Protobuf.CommittedEventStream> responseStream,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
             _executionContextManager = executionContextManager;
-            _outbox = new ConcurrentQueue<CommittedEventStreamParticleMessage>();
+            _outbox = new ConcurrentQueue<Protobuf.CommittedEventStream>();
             _logger = logger;
             _waitHandle = new AutoResetEvent(false);
         }
@@ -80,7 +81,7 @@ namespace Dolittle.Runtime.Events.Relativity
                         _waitHandle.WaitOne(1000);
                         if (_outbox.IsEmpty) continue;
 
-                        CommittedEventStreamParticleMessage message;
+                        Protobuf.CommittedEventStream message;
                         while (!_outbox.IsEmpty)
                         {
                             if (_outbox.TryDequeue(out message))

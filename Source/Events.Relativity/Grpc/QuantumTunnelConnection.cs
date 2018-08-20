@@ -12,11 +12,12 @@ using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Relativity.Protobuf;
 using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Events.Relativity
+namespace Dolittle.Runtime.Events.Relativity.Grpc
 {
 
     /// <summary>
@@ -25,7 +26,7 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnelConnection : IDisposable
     {
         readonly string _url;
-        readonly IEnumerable<Artifact> _events;
+        readonly IEnumerable<Dolittle.Artifacts.Artifact> _events;
         readonly ILogger _logger;
         readonly Application _application;
         readonly BoundedContext _boundedContext;
@@ -54,7 +55,7 @@ namespace Dolittle.Runtime.Events.Relativity
                 Application destinationApplication,
                 BoundedContext destinationBoundedContext,
                 string url,
-                IEnumerable<Artifact> events,
+                IEnumerable<Dolittle.Artifacts.Artifact> events,
                 IGeodesics geodesics,
                 ISerializer serializer,
                 ILogger logger)
@@ -74,7 +75,7 @@ namespace Dolittle.Runtime.Events.Relativity
 
                 AppDomain.CurrentDomain.ProcessExit += ProcessExit;
                 AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
-                Console.CancelKeyPress += (s,e) => Close();
+                Console.CancelKeyPress += (s, e) => Close();
                 _serializer = serializer;
             }
 
@@ -140,31 +141,40 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             _logger.Information($"Opening tunnel towards application '{_application}' and bounded context '{_boundedContext}'");
 
-            var openTunnelMessage = new OpenTunnelMessage
+            var openTunnelMessage = new OpenTunnel
             {
-                Application = ByteString.CopyFrom(_application.Value.ToByteArray()),
-                BoundedContext = ByteString.CopyFrom(_boundedContext.Value.ToByteArray()),
+                Application = _application.ToProtobuf(),
+                BoundedContext = _boundedContext.ToProtobuf(),
+                ClientId = Guid.NewGuid().ToProtobuf()
             };
 
             _events.Select(_ => _.ToMessage()).ForEach(openTunnelMessage.Events.Add);
 
             var stream = _client.Open(openTunnelMessage);
-            while (await stream.ResponseStream.MoveNext(CancellationToken.None))
+            try
             {
-                _logger.Information("Commit received");
+                while (await stream.ResponseStream.MoveNext(CancellationToken.None))
+                {
+                    _logger.Information("Commit received");
 
-                try
-                {
-                    var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                    //_logger.Information($"CorrelationId : {current.CorrelationId}");
-                    //_logger.Information($"CommitId : {current.Id}");
-                    //_logger.Information($"EventSourceId : {current.Source.EventSource}");
-                    //_logger.Information($"EventSourceArtifact : {current.Source.Artifact}");
+                    try
+                    {
+                        var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
+                        //_logger.Information($"CorrelationId : {current.CorrelationId}");
+                        //_logger.Information($"CommitId : {current.Id}");
+                        //_logger.Information($"EventSourceId : {current.Source.EventSource}");
+                        //_logger.Information($"EventSourceArtifact : {current.Source.Artifact}");
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.Error(ex, "Couldn't handle incoming commit");
+                    }
                 }
-                catch (Exception ex)
-                {
-                    _logger.Error(ex, "Couldn't handle incoming commit");
-                }
+            }
+            catch (Exception moveException)
+            {
+                _logger.Error(moveException, "There was a problem moving to the next item in the stream");
+
             }
 
             _logger.Information("Done opening and handling the stream");

@@ -8,11 +8,12 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Relativity.Protobuf;
 using Dolittle.Runtime.Execution;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Events.Relativity
+namespace Dolittle.Runtime.Events.Relativity.Grpc
 {
     /// <summary>
     /// Represents an implementation of the <see cref="QuantumTunnelService.QuantumTunnelServiceBase"/>
@@ -44,28 +45,35 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public override async Task Open(OpenTunnelMessage request, IServerStreamWriter<CommittedEventStreamParticleMessage> responseStream, ServerCallContext context)
+        public override async Task Open(OpenTunnel request, IServerStreamWriter<Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStream> responseStream, ServerCallContext context)
         {
-            var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _logger);
-            var application = (Application) new Guid(request.Application.ToByteArray());
-            var boundedContext = (BoundedContext) new Guid(request.Application.ToByteArray());
-            var events = request
-                .Events
-                .Select(@event => @event.ToArtifact())
-                .ToArray();
+            try
+            {
+                var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _logger);
+                var application = request.Application.ToConcept<Application>();
+                var boundedContext = request.BoundedContext.ToConcept<BoundedContext>();
+                var events = request
+                    .Events
+                    .Select(@event => @event.ToArtifact())
+                    .ToArray();
 
-            var subscription = new EventParticleSubscription(events);
+                var subscription = new EventParticleSubscription(events);
 
-            _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
-            
-            var singularity = new Singularity(application, boundedContext, tunnel, subscription);
-            _eventHorizon.GravitateTowards(singularity);
-            tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
+                _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
 
-            await tunnel.Open();
+                var singularity = new Singularity(application, boundedContext, tunnel, subscription);
+                _eventHorizon.GravitateTowards(singularity);
+                tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
 
-            _logger.Information($"Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
-            
+                await tunnel.Open();
+
+                _logger.Information($"Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Problems opening tunnel");
+            }
+
             await Task.CompletedTask;
         }
     }

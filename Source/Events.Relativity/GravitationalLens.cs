@@ -10,6 +10,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Server;
 using Dolittle.Serialization.Protobuf;
+using Dolittle.Runtime.Events.Relativity.Grpc;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity
