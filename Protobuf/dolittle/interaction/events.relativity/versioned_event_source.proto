@@ -5,7 +5,7 @@
 
 syntax = "proto3";
 
-import "dolittle/interaction/guid.proto";
+import "system/guid.proto";
 import "dolittle/interaction/events.relativity/event_source_version.proto";
 
 package dolittle.events.relativity;
