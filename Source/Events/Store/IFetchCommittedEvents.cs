@@ -1,5 +1,6 @@
 ﻿using Dolittle.Runtime.Events;
 using Dolittle.Events;
+using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -27,5 +28,20 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="commit">The <see cref="CommitSequenceNumber" /> that the <see cref="CommittedEventStream" />s should be greater than</param>
         /// <returns>All <see cref="CommittedEventStream" />s great than specified <see cref="CommitSequenceNumber" /> in ascending order</returns>
         CommittedEvents FetchAllCommitsAfter(CommitSequenceNumber commit);
+
+        /// <summary>
+        /// Fetches all the instances of a particular event type in order of occurrence
+        /// </summary>
+        /// <param name="eventType">The <see cref="ArtifactId"> event type</see> to fetch</param>
+        /// <returns>An ordered stream of events of the request type</returns>
+        SingleEventTypeEventStream FetchAllEventsOfType(ArtifactId eventType);
+
+        /// <summary>
+        /// Fetches all the instances of a particular event type in order of occurrence that occurred in commits after the specified commit
+        /// </summary>
+        /// <param name="eventType">The <see cref="ArtifactId"> event type</see> to fetch</param>
+        /// <param name="commit">The <see cref="CommitSequenceNumber" /> that the <see cref="CommittedEventStream" />s should be greater than</param>
+        /// <returns>An ordered stream of events of the request type</returns>
+        SingleEventTypeEventStream FetchAllEventsOfTypeAfter(ArtifactId eventType, CommitSequenceNumber commit);
     }
 }
