@@ -2,7 +2,6 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Events;
 
@@ -27,9 +26,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Process an event 
         /// </summary>
-        /// <param name="envelope"><see cref="IEventEnvelope"/> for <see cref="IEvent"/> to process</param>
-        /// <param name="event"><see cref="IEvent"/> to process</param>
-        /// <returns><see cref="IEventProcessingResult">Result</see> from the processing</returns>
-        IEventProcessingResult Process(IEventEnvelope envelope, IEvent @event);
+        /// <param name="eventEnvelope"><see cref="Store.EventEnvelope"/> for event to process</param>
+        void Process(Store.EventEnvelope eventEnvelope);
     }
 }

@@ -12,14 +12,15 @@ using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity.Grpc
 {
-
     /// <summary>
     /// Represents a concrete connection through a <see cref="IBarrier"/>
     /// </summary>
@@ -36,6 +37,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly BoundedContext _destinationBoundedContext;
         readonly IGeodesics _geodesics;
         readonly ISerializer _serializer;
+        readonly IEventStore _eventStore;
+        readonly IEventProcessors _eventProcessors;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
@@ -47,6 +50,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         /// <param name="url">Url for the <see cref="IEventHorizon"/> we're connecting to</param>
         /// <param name="events"><see cref="IEnumerable{Artifact}">Events</see> to connect for</param>
         /// <param name="geodesics"><see cref="IGeodesics"/> for path offsetting</param>
+        /// <param name="eventStore"><see cref="IEventStore"/> to persist incoming events to</param>
+        /// <param name="eventProcessors"><see cref="IEventProcessors"/> for processing incoming events</param>
         /// <param name="serializer"><see cref="ISerializer"/> to use for deserializing content of commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes</param>
         public QuantumTunnelConnection(
@@ -57,35 +62,40 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 string url,
                 IEnumerable<Dolittle.Artifacts.Artifact> events,
                 IGeodesics geodesics,
+                IEventStore eventStore,
+                IEventProcessors eventProcessors,
                 ISerializer serializer,
                 ILogger logger)
-            {
-                _url = url;
-                _events = events;
-                _logger = logger;
-                _application = application;
-                _boundedContext = boundedContext;
-                _destinationApplication = destinationApplication;
-                _destinationBoundedContext = destinationBoundedContext;
-                _channel = new Channel(_url, ChannelCredentials.Insecure);
-                _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
+        {
+            _url = url;
+            _events = events;
+            _logger = logger;
+            _application = application;
+            _boundedContext = boundedContext;
+            _geodesics = geodesics;
+            _serializer = serializer;
+            _eventStore = eventStore;
+            _eventProcessors = eventProcessors;
+            _destinationApplication = destinationApplication;
+            _destinationBoundedContext = destinationBoundedContext;
+            _channel = new Channel(_url, ChannelCredentials.Insecure);
+            _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
 
-                Task.Run(() => Run());
-                _geodesics = geodesics;
+            Task.Run(() => Run());
 
-                AppDomain.CurrentDomain.ProcessExit += ProcessExit;
-                AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
-                Console.CancelKeyPress += (s, e) => Close();
-                _serializer = serializer;
-            }
+            AppDomain.CurrentDomain.ProcessExit += ProcessExit;
+            AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
+            Console.CancelKeyPress += (s, e) => Close();
+            
+        }
 
-            /// <summary>
-            /// Destructs the <see cref="QuantumTunnelConnection"/>
-            /// </summary>
-            ~QuantumTunnelConnection()
-            {
-                Dispose();
-            }
+        /// <summary>
+        /// Destructs the <see cref="QuantumTunnelConnection"/>
+        /// </summary>
+        ~QuantumTunnelConnection()
+        {
+            Dispose();
+        }
 
         /// <inheritdoc/>
         public void Dispose()
@@ -160,10 +170,19 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                     try
                     {
                         var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                        //_logger.Information($"CorrelationId : {current.CorrelationId}");
-                        //_logger.Information($"CommitId : {current.Id}");
-                        //_logger.Information($"EventSourceId : {current.Source.EventSource}");
-                        //_logger.Information($"EventSourceArtifact : {current.Source.Artifact}");
+                        var uncommittedEventStream = new Store.UncommittedEventStream(
+                            current.Id,
+                            current.CorrelationId,
+                            current.Source,
+                            current.Timestamp,
+                            current.Events
+                        );
+
+                        _logger.Information("Commit events to store");
+                        var committedEventStream = _eventStore.Commit(uncommittedEventStream);
+
+                        _logger.Information("Process committed events");
+                        _eventProcessors.Process(committedEventStream);
                     }
                     catch (Exception ex)
                     {
