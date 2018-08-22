@@ -11,6 +11,6 @@ namespace Dolittle.Runtime.Tenancy.Specs.for_DefaultTenantIdResolver
 
         Because of = () => result = resolver.Resolve();
 
-        It should_return_unknown_tenant = () => result.Value.ShouldEqual(DefaultTenantIdResolver.UnknownTenantId);
+        It should_return_unknown_tenant = () => result.ShouldEqual(TenantId.Unknown);
     }
 }

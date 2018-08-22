@@ -14,7 +14,7 @@
     <ProjectReference Include="..\Commands.Validation\Commands.Validation.csproj" />
     <ProjectReference Include="..\Execution\Execution.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
-    <ProjectReference Include="..\Events.Coordination\Events.Coordination.csproj" />
+    <ProjectReference Include="..\Events\Events.csproj" />
   </ItemGroup>
 
   <ItemGroup>
