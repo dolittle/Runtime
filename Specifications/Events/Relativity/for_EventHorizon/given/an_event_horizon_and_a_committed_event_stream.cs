@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
                 })
             );
 
-            event_horizon = new EventHorizon(lens.Object, logger.Object);
+            event_horizon = new EventHorizon(logger.Object);
         };
     }
 }
