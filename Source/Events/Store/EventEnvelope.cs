@@ -1,5 +1,4 @@
-﻿using System;
-using Dolittle.Concepts;
+﻿using Dolittle.Concepts;
 using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events;
 using Dolittle.Events;
