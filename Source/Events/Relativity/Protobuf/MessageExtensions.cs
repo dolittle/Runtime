@@ -54,10 +54,15 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 CorrelationId = committedEventStream.CorrelationId.ToProtobuf()
             };
 
-            committedEventStream.Events.Select(@event => new Protobuf.EventEnvelope
+            committedEventStream.Events.Select(@event =>
             {
-                Id = @event.Id.ToProtobuf(),
-                Metadata = @event.Metadata.ToMessage()
+                var envelope = new Protobuf.EventEnvelope
+                {
+                    Id = @event.Id.ToProtobuf(),
+                    Metadata = @event.Metadata.ToMessage()
+                };
+                
+                return envelope;
             }).ForEach(message.Events.Add);
 
             return message;
@@ -70,10 +75,12 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// <returns></returns>
         public static Protobuf.VersionedEventSource ToMessage(this Dolittle.Runtime.Events.Store.VersionedEventSource versionedEventSource)
         {
-            var source = new Protobuf.VersionedEventSource {
-                Version = new Protobuf.EventSourceVersion {
-                    Commit = versionedEventSource.Version.Commit,
-                    Sequence = versionedEventSource.Version.Sequence
+            var source = new Protobuf.VersionedEventSource
+            {
+                Version = new Protobuf.EventSourceVersion
+                {
+                Commit = versionedEventSource.Version.Commit,
+                Sequence = versionedEventSource.Version.Sequence
                 },
                 EventSource = versionedEventSource.EventSource.ToProtobuf(),
                 Artifact = versionedEventSource.Artifact.ToProtobuf()
@@ -116,7 +123,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             return concept.Value.ToProtobuf();
         }
 
-
         /// <summary>
         /// 
         /// </summary>
@@ -139,7 +145,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// <param name="byteString"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T ToGuidConcept<T>(this ByteString byteString) where T:class
+        public static T ToGuidConcept<T>(this ByteString byteString) where T : class
         {
             return ConceptFactory.CreateConceptInstance(typeof(T), new Guid(byteString.ToByteArray())) as T;
         }
@@ -150,11 +156,10 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// <param name="guid"></param>
         /// <typeparam name="T"></typeparam>
         /// <returns></returns>
-        public static T ToConcept<T>(this System.Protobuf.guid guid) where T:ConceptAs<Guid>
+        public static T ToConcept<T>(this System.Protobuf.guid guid) where T : ConceptAs<Guid>
         {
             return ConceptFactory.CreateConceptInstance(typeof(T), new Guid(guid.Value.ToByteArray())) as T;
         }
-
 
         /// <summary>
         /// 
@@ -207,9 +212,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 DateTimeOffset.FromFileTime(message.Occurred)
             );
             return metadata;
-            
-        }
 
+        }
 
         /// <summary>
         /// 
@@ -226,15 +230,15 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             var commitId = message.Id.ToConcept<CommitId>();
             var correlationId = message.CorrelationId.ToConcept<CorrelationId>();
             var timeStamp = DateTimeOffset.FromFileTime(message.TimeStamp);
-            
-            var events = message.Events.Select(_ =>                 
+
+            var events = message.Events.Select(_ =>
                 new Dolittle.Runtime.Events.Store.EventEnvelope(
                     _.Id.ToConcept<EventId>(),
                     _.Metadata.ToEventMetadata(),
                     new PropertyBag(new Dictionary<string, object>())
                 )
             ).ToArray();
-            
+
             return new Dolittle.Runtime.Events.Store.CommittedEventStream(
                 message.Sequence,
                 versionedEventSource,
