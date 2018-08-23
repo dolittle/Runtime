@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events
@@ -14,9 +15,7 @@ namespace Dolittle.Runtime.Events
     /// </summary>
     public class UncommittedEventStream : IEnumerable<IEvent>
     {
-        List<IEvent> _events = new List<IEvent>();
-        List<EventAndVersion> _eventsAndVersion = new List<EventAndVersion>();
-
+        List<VersionedEvent> _events = new List<VersionedEvent>();
 
         /// <summary>
         /// Initializes a new instance of <see cref="UncommittedEventStream">UncommittedEventStream</see>
@@ -40,7 +39,7 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Gets the <see cref="IEvent">events</see> and associated <see cref="EventSourceVersion">version</see>
         /// </summary>
-        public IEnumerable<EventAndVersion> EventsAndVersion => _eventsAndVersion;
+        public IEnumerable<VersionedEvent> Events => _events.ToArray();
 
         /// <summary>
         /// Indicates whether there are any events in the Stream.
@@ -66,14 +65,13 @@ namespace Dolittle.Runtime.Events
         public void Append(IEvent @event, EventSourceVersion version)
         {
             ThrowIfEventIsNull(@event);
-            _events.Add(@event);
-            _eventsAndVersion.Add(new EventAndVersion(@event, version));
+            _events.Add(new VersionedEvent(@event,version));
         }
 
         /// <inerhitdoc/>
         public IEnumerator<IEvent> GetEnumerator()
         {
-            return _events.GetEnumerator();
+            return _events.Select(e => e.Event).GetEnumerator();
         }
 
         /// <inerhitdoc/>

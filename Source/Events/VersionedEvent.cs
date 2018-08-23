@@ -9,14 +9,14 @@ namespace Dolittle.Runtime.Events
     /// <summary>
     /// Represents an <see cref="IEvent"/> and its <see cref="EventSourceVersion">version</see> on an <see cref="IEventSource"/>
     /// </summary>
-    public class EventAndVersion
+    public class VersionedEvent
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="EventAndVersion"/>
+        /// Initializes a new instance of <see cref="VersionedEvent"/>
         /// </summary>
         /// <param name="event">The <see cref="IEvent">Event</see></param>
         /// <param name="version">The <see cref="EventSourceVersion">version</see> of the <see cref="IEvent"/> on the <see cref="IEventSource"/></param>
-        public EventAndVersion(IEvent @event, EventSourceVersion version)
+        public VersionedEvent(IEvent @event, EventSourceVersion version)
         {
             Event = @event;
             Version = version;
