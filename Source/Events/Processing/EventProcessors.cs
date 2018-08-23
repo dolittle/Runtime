@@ -18,7 +18,8 @@ namespace Dolittle.Runtime.Events.Processing
     [Singleton]
     public class EventProcessors : IEventProcessors
     {
-        readonly Dictionary<Artifact, List<IEventProcessor>> _eventProcessorsByResourceIdentifier;
+        IInstancesOf<IKnowAboutEventProcessors> _systemsThatKnowsAboutEventProcessors;
+        Dictionary<Artifact, List<IEventProcessor>> _eventProcessorsByResourceIdentifier;
         readonly List<IEventProcessor> _eventProcessors = new List<IEventProcessor>();
         readonly ILogger _logger;
         readonly IObjectFactory _objectFactory;
@@ -35,7 +36,8 @@ namespace Dolittle.Runtime.Events.Processing
             IObjectFactory objectFactory,
             ILogger logger)
         {
-            _eventProcessorsByResourceIdentifier = GatherEventProcessorsFrom(systemsThatKnowsAboutEventProcessors);
+            _systemsThatKnowsAboutEventProcessors = systemsThatKnowsAboutEventProcessors;
+            GatherEventProcessors();
             _logger = logger;
             _objectFactory = objectFactory;
         }
@@ -48,15 +50,23 @@ namespace Dolittle.Runtime.Events.Processing
         {
             foreach( var eventEnvelope in committedEvents.Events )
             {
-                var processors = _eventProcessorsByResourceIdentifier[eventEnvelope.Metadata.Artifact];
-                processors.ForEach(_ => _.Process(eventEnvelope));
+                if( !_eventProcessorsByResourceIdentifier.ContainsKey(eventEnvelope.Metadata.Artifact)) GatherEventProcessors();
+                if( _eventProcessorsByResourceIdentifier.ContainsKey(eventEnvelope.Metadata.Artifact))
+                {
+                    var processors = _eventProcessorsByResourceIdentifier[eventEnvelope.Metadata.Artifact];
+                    processors.ForEach(_ => _.Process(eventEnvelope));
+                }
             }
         }
 
-        Dictionary<Artifact, List<IEventProcessor>> GatherEventProcessorsFrom(IEnumerable<IKnowAboutEventProcessors> systemsThatHasEventProcessors)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
+        public void GatherEventProcessors()
         {
             var eventProcessorsByArtifact = new Dictionary<Artifact, List<IEventProcessor>>();
-            systemsThatHasEventProcessors.ForEach(a => a.ForEach(e =>
+            _systemsThatKnowsAboutEventProcessors.ForEach(a => a.ForEach(e =>
             {
                 List<IEventProcessor> eventProcessors;
                 if (eventProcessorsByArtifact.ContainsKey(e.Event)) eventProcessors = eventProcessorsByArtifact[e.Event];
@@ -68,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing
                 eventProcessors.Add(e);
             }));
 
-            return eventProcessorsByArtifact;
+            _eventProcessorsByResourceIdentifier = eventProcessorsByArtifact;
         }
     }
 }
