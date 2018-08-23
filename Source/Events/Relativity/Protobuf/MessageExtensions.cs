@@ -13,6 +13,7 @@ using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
+using Dolittle.Execution;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Google.Protobuf.Reflection;

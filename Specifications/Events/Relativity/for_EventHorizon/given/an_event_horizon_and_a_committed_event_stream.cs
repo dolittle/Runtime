@@ -4,6 +4,7 @@ using Dolittle.Artifacts;
 using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
+using Dolittle.Execution;
 
 namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
 {
