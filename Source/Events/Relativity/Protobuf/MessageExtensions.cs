@@ -244,9 +244,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static Dolittle.Runtime.Events.Store.EventSourceVersion ToEventSourceVersion(this EventSourceVersion message)
+        public static Dolittle.Runtime.Events.EventSourceVersion ToEventSourceVersion(this EventSourceVersion message)
         {
-            return new Dolittle.Runtime.Events.Store.EventSourceVersion(message.Commit, message.Sequence);
+            return new Dolittle.Runtime.Events.EventSourceVersion(message.Commit, message.Sequence);
         }
 
         /// <summary>

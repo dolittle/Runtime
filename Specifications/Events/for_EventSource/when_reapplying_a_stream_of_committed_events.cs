@@ -40,8 +40,8 @@ namespace Dolittle.Events.Specs.for_EventSource
         Because of = () => event_source.ReApply(event_stream);
 
         It should_not_add_the_events_to_the_uncommited_events = () => event_source.UncommittedEvents.ShouldBeEmpty();
-        It should_increment_the_commit_of_the_version = () => event_source.Version.Commit.ShouldEqual(2);
-        It should_being_with_a_sequence_of_zero = () => event_source.Version.Sequence.ShouldEqual(0);
+        It should_increment_the_commit_of_the_version = () => event_source.Version.Commit.ShouldEqual(2UL);
+        It should_being_with_a_sequence_of_zero = () => event_source.Version.Sequence.ShouldEqual(0u);
         It should_have_applied_the_event = () => event_source.EventApplied.ShouldBeTrue();
     }
 }
