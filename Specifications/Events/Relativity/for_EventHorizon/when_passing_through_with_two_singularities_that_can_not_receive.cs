@@ -15,9 +15,9 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon
         Establish context = () =>
         {
             first_singularity = new Mock<ISingularity>();
-            first_singularity.Setup(_ => _.CanReceive(committed_event_stream)).Returns(false);
+            first_singularity.Setup(_ => _.CanPassThrough(committed_event_stream)).Returns(false);
             second_singularity = new Mock<ISingularity>();
-            second_singularity.Setup(_ => _.CanReceive(committed_event_stream)).Returns(false);
+            second_singularity.Setup(_ => _.CanPassThrough(committed_event_stream)).Returns(false);
             event_horizon.GravitateTowards(first_singularity.Object);
             event_horizon.GravitateTowards(second_singularity.Object);
 

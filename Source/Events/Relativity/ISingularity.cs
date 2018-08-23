@@ -39,6 +39,6 @@ namespace Dolittle.Runtime.Events.Relativity
         /// </summary>
         /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to ask for</param>
         /// <returns>True if it can, false if not</returns>
-        bool CanReceive(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
+        bool CanPassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
     }
 }
