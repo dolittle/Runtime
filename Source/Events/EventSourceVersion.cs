@@ -16,9 +16,9 @@ namespace Dolittle.Runtime.Events
         const float SEQUENCE_DIVISOR = 10000;
 
         /// <summary>
-        /// Zero/null version
+        /// Initial version
         /// </summary>
-        public static readonly EventSourceVersion Zero = new EventSourceVersion(0,0);
+        public static readonly EventSourceVersion Initial = new EventSourceVersion(1,0);
 
         /// <summary>
         /// Creates an <see cref="EventSourceVersion"/> from a combined floating point
@@ -83,15 +83,6 @@ namespace Dolittle.Runtime.Events
         {
             var previousCommit = new EventSourceVersion(Commit - 1, 0);
             return previousCommit;
-        }
-
-        /// <summary>
-        /// Returns an Initial version of the <see cref="IEventSource" /> with a Commit of 1 and a Sequence of 0
-        /// </summary>
-        /// <returns></returns>
-        public static EventSourceVersion Initial()
-        {
-            return new EventSourceVersion(1, 0);
         }
 
         /// <summary>

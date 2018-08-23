@@ -20,6 +20,7 @@ namespace Dolittle.Events
         {
             EventSourceId = id;
             UncommittedEvents = new UncommittedEventStream(this);
+            Version = EventSourceVersion.Initial;
         }
 
         /// <inheritdoc/>
@@ -110,7 +111,7 @@ namespace Dolittle.Events
 
         void ThrowIfNotInitialVersion()
         {
-            if (!Version.Equals(EventSourceVersion.Zero))
+            if (!Version.Equals(EventSourceVersion.Initial))
                 throw new InvalidFastForwardException("Cannot fast forward event source that is not an initial version");
         }
     }

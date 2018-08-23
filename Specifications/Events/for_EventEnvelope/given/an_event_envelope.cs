@@ -19,13 +19,13 @@ namespace Dolittle.Runtime.Events.Specs.for_EventEnvelope.given
             event_source_id = EventSourceId.New();
             event_identifier = Artifact.New();
             event_source_identifier = Artifact.New();
-            version = EventSourceVersion.Zero;
+            version = EventSourceVersion.Initial;
             event_envelope = new EventEnvelope(
                 CorrelationId.Empty,
                 EventId.New(),
                 EventSequenceNumber.Zero,
                 EventSequenceNumber.Zero,
-                EventGeneration.First,
+                Generation.Initial,
                 event_identifier,
                 event_source_id,
                 event_source_identifier,

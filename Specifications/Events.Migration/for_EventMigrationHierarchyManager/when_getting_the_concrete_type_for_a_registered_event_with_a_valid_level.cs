@@ -1,6 +1,7 @@
 ﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
 using Machine.Specifications;
 using System;
+using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
 {

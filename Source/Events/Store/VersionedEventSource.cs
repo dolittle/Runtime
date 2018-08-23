@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="eventSource">The <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" /></param>
         /// <param name="artifact">The <see cref="ArtifactId" /> that uniquely identifies the type of this event source</param>
         /// <returns></returns>
-        public VersionedEventSource(EventSourceId eventSource, ArtifactId artifact): this(EventSourceVersion.Initial(), eventSource, artifact) { }
+        public VersionedEventSource(EventSourceId eventSource, ArtifactId artifact): this(EventSourceVersion.Initial, eventSource, artifact) { }
 
         /// <summary>
         /// Instantiates a new instance of a <see cref="VersionedEventSource" /> set to the supplied version

@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Specs.for_UncommittedEventStream
         Establish context =
             () =>
                 {
-                    var version = EventSourceVersion.Zero;
+                    var version = EventSourceVersion.Initial;
                     events_and_envelopes = new List<EventAndVersion>();
                     for (var i = 0; i < 5; i++ )
                     {

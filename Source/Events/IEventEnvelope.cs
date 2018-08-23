@@ -37,9 +37,9 @@ namespace Dolittle.Runtime.Events
 
 
         /// <summary>
-        /// Gets the <see cref="EventGeneration"/> for the <see cref="IEvent"/>
+        /// Gets the <see cref="Generation"/> for the <see cref="IEvent"/>
         /// </summary>
-        EventGeneration Generation { get; }
+        Generation Generation { get; }
 
         /// <summary>
         /// Gets the <see cref="Artifact">identifier</see> identifying the <see cref="IEvent"/>

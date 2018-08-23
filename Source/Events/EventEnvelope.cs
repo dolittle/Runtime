@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events
         /// <param name="eventId"><see cref="EventId"/> for the <see cref="IEvent"/></param>
         /// <param name="sequenceNumber"></param>
         /// <param name="sequenceNumberForEventType"></param>
-        /// <param name="generation"><see cref="EventGeneration"/> for the <see cref="IEvent"/> </param>
+        /// <param name="generation"><see cref="Generation"/> for the <see cref="IEvent"/> </param>
         /// <param name="event"><see cref="Artifact"/> representing the <see cref="IEvent"/></param>
         /// <param name="eventSourceId"><see cref="EventSourceId"/> for the <see cref="IEventSource"/></param>
         /// <param name="eventSource"><see cref="Artifact"/> representing the <see cref="IEventSource"/></param>
@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events
             EventId eventId,
             EventSequenceNumber sequenceNumber,
             EventSequenceNumber sequenceNumberForEventType,
-            EventGeneration generation, 
+            Generation generation, 
             Artifact @event, 
             EventSourceId eventSourceId, 
             Artifact eventSource, 
@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Events
         public EventSequenceNumber SequenceNumberForEventType { get; }
 
         /// <inheritdoc/>
-        public EventGeneration Generation { get; }
+        public Generation Generation { get; }
 
         /// <inheritdoc/>
         public Artifact Event { get; }
