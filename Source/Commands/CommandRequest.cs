@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 
 namespace Dolittle.Runtime.Commands
 {
@@ -20,11 +21,11 @@ namespace Dolittle.Runtime.Commands
         /// <summary>
         /// Initializes a new instance of <see cref="CommandRequest"/>
         /// </summary>
-        /// <param name="correlationId"><see cref="TransactionCorrelationId"/> for the transaction</param>
+        /// <param name="correlationId"><see cref="CorrelationId"/> for the request</param>
         /// <param name="artifactId"><see cref="ArtifactId">Identifier</see> of the command</param>
         /// <param name="generation"><see cref="ArtifactGeneration">Generation</see> of the command</param>
         /// <param name="content">Content of the command</param>
-        public CommandRequest(TransactionCorrelationId correlationId, ArtifactId artifactId, ArtifactGeneration generation, IDictionary<string, object> content)
+        public CommandRequest(CorrelationId correlationId, ArtifactId artifactId, ArtifactGeneration generation, IDictionary<string, object> content)
         {
             CorrelationId = correlationId;
             Type = new Artifact(artifactId,generation);
@@ -32,10 +33,10 @@ namespace Dolittle.Runtime.Commands
         }
 
         /// <summary>
-        /// Gets the <see cref="TransactionCorrelationId"/> representing the transaction
+        /// Gets the <see cref="CorrelationId"/> representing the request
         /// </summary>
-        /// <returns>The <see cref="TransactionCorrelationId"/></returns>
-        public TransactionCorrelationId CorrelationId { get; }
+        /// <returns>The <see cref="CorrelationId"/></returns>
+        public CorrelationId CorrelationId { get; }
 
         /// <summary>
         /// Gets the <see cref="Artifact"/> representing the type of the Command

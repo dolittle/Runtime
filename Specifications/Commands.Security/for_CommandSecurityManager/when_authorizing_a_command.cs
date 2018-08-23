@@ -1,6 +1,6 @@
 ﻿using System.Dynamic;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Commands.Security.Specs.for_CommandSecurityManager
         Establish context = () => 
         {
             var artifact = Artifact.New();
-            command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+            command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());
         };
 
         Because of = () => command_security_manager.Authorize(command);

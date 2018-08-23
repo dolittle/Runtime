@@ -7,6 +7,7 @@ using Dolittle.Events;
 using Dolittle.Applications;
 using Dolittle.Runtime.Transactions;
 using Dolittle.Artifacts;
+using Dolittle.Execution;
 
 namespace Dolittle.Runtime.Events
 {
@@ -18,7 +19,7 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Initializes a new instance of <see cref="EventEnvelope"/>
         /// </summary>
-        /// <param name="correlationId"><see cref="TransactionCorrelationId"/> the <see cref="IEvent"/> is part of</param>
+        /// <param name="correlationId"><see cref="CorrelationId"/> the <see cref="IEvent"/> is part of</param>
         /// <param name="eventId"><see cref="EventId"/> for the <see cref="IEvent"/></param>
         /// <param name="sequenceNumber"></param>
         /// <param name="sequenceNumberForEventType"></param>
@@ -30,7 +31,7 @@ namespace Dolittle.Runtime.Events
         /// <param name="causedBy"><see cref="string"/> representing which person or what system caused the event</param>
         /// <param name="occurred"><see cref="DateTime">When</see> the event occured</param>
         public EventEnvelope(
-            TransactionCorrelationId correlationId,
+            CorrelationId correlationId,
             EventId eventId,
             EventSequenceNumber sequenceNumber,
             EventSequenceNumber sequenceNumberForEventType,
@@ -56,7 +57,7 @@ namespace Dolittle.Runtime.Events
         }
 
         /// <inheritdoc/>
-        public TransactionCorrelationId CorrelationId { get; }
+        public CorrelationId CorrelationId { get; }
 
         /// <inheritdoc/>
         public EventId EventId { get; }
@@ -101,7 +102,7 @@ namespace Dolittle.Runtime.Events
         }
 
         /// <inheritdoc/>
-        public IEventEnvelope WithTransactionCorrelationId(TransactionCorrelationId correlationId)
+        public IEventEnvelope WithTransactionCorrelationId(CorrelationId correlationId)
         {
             return new EventEnvelope(correlationId, EventId, SequenceNumber, SequenceNumberForEventType, Generation, Event, EventSourceId, EventSource, Version, CausedBy, Occurred);
         }

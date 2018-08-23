@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Logging;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 using Dolittle.Runtime.Events;
 using Dolittle.Events;
 using Dolittle.Runtime.Events.Coordination;
@@ -43,12 +43,12 @@ namespace Dolittle.Runtime.Commands.Coordination
             _logger = logger;
 
             // This should be exposed to the client somehow - maybe even coming from the client
-            TransactionCorrelationId = Guid.NewGuid();
+            CorrelationId = CorrelationId.New();
         }
 
 
         /// <inheritdoc/>
-        public TransactionCorrelationId TransactionCorrelationId { get; }
+        public CorrelationId CorrelationId { get; }
 
         /// <inheritdoc/>
         public CommandRequest Command { get; }
@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.Commands.Coordination
                 if (events.HasEvents)
                 {
                     _logger.Trace("Events present - send them to uncommitted eventstream coordinator");
-                    _uncommittedEventStreamCoordinator.Commit(TransactionCorrelationId, events);
+                    _uncommittedEventStreamCoordinator.Commit(CorrelationId, events);
                     _logger.Trace("Commit object");
                     trackedObject.Commit();
                 }

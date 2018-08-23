@@ -7,6 +7,7 @@ using Dolittle.Events;
 using Dolittle.Runtime.Commands;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Execution;
+using Dolittle.Execution;
 using Dolittle.Runtime.Transactions;
 
 namespace Dolittle.Runtime.Commands.Coordination
@@ -18,9 +19,9 @@ namespace Dolittle.Runtime.Commands.Coordination
     public interface ICommandContext : ITransaction
     {
         /// <summary>
-        /// Gets the <see cref="TransactionCorrelationId"/> for the <see cref="ICommandContext"/>
+        /// Gets the <see cref="CorrelationId"/> for the <see cref="ICommandContext"/>
         /// </summary>
-        TransactionCorrelationId TransactionCorrelationId { get; }
+        CorrelationId CorrelationId { get; }
 
         /// <summary>
         /// Gets the <see cref="CommandRequest">command</see> the context is for

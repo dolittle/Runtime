@@ -1,6 +1,6 @@
 ﻿using System;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Specs.for_EventEnvelope.given
             event_source_identifier = Artifact.New();
             version = EventSourceVersion.Zero;
             event_envelope = new EventEnvelope(
-                TransactionCorrelationId.NotSet,
+                CorrelationId.Empty,
                 EventId.New(),
                 EventSequenceNumber.Zero,
                 EventSequenceNumber.Zero,
