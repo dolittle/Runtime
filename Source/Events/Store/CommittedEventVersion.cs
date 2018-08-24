@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Indicates the Revision number (<see cref="EventSourceVersion" /> Sequence) associated with this event
         /// </summary>
-        public ulong Revision { get; }
+        public uint Revision { get; }
 
         /// <summary>
         /// Instantiates a new instance of <see cref="CommittedEventVersion" />
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="major">The Major number</param>
         /// <param name="minor">The Minor number</param>
         /// <param name="revision">The Revision number</param>
-        public CommittedEventVersion(ulong major, ulong minor, ulong revision)
+        public CommittedEventVersion(ulong major, ulong minor, uint revision)
         {
             Major = major;
             Minor = minor;
@@ -100,6 +100,15 @@ namespace Dolittle.Runtime.Events.Store
         public static bool operator <=  (CommittedEventVersion first, CommittedEventVersion second)
         {
             return first.CompareTo(second) <= 0;
+        }
+
+        /// <summary>
+        /// Converts this to an <see cref="EventSourceVersion" />
+        /// </summary>
+        /// <returns>An <see cref="EventSourceVersion" /> equivalent</returns>
+        public EventSourceVersion ToEventSourceVersion()
+        {
+            return new EventSourceVersion(this.Minor,this.Revision);
         }
     }
 }

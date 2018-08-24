@@ -17,7 +17,7 @@ namespace Dolittle.Events.Specs.for_EventSource
         Establish context =
             () =>
             {
-                var versioned_event_source = new VersionedEventSource(EventSourceId.New(),ArtifactId.New());
+                var versioned_event_source = a_versioned_event_source_for(event_source_id);
 
                 var first_event = new SimpleEvent();
                 var first_committed_event = build_committed_event(versioned_event_source, first_event, new CommittedEventVersion(1,1,0));

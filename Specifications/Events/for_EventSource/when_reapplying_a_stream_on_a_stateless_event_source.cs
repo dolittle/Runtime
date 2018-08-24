@@ -13,9 +13,10 @@ namespace Dolittle.Events.Specs.for_EventSource
 
         Establish context = () => 
         {
-            var events = new [] { build_committed_event(a_versioned_event_source, new SimpleEvent(), new Runtime.Events.Store.CommittedEventVersion(1,1,0)) };
-            event_stream = new CommittedEventStream(a_versioned_event_source.EventSource,events);
+            var events = new [] { build_committed_event(a_versioned_event_source_for(event_source_id), new SimpleEvent(), new Runtime.Events.Store.CommittedEventVersion(1,1,0)) };
+            event_stream = new CommittedEventStream(event_source_id,events);
         };
+
 
         Because of = () => exception = Catch.Exception(() => event_source.ReApply(event_stream));
 

@@ -22,5 +22,15 @@ namespace Dolittle.Events.Specs.for_EventSource.given
             var metadata = new EventMetadata(versionedEventSource,CorrelationId.New(),new Artifact(ArtifactId.New(),1),"test",DateTime.UtcNow);
             return new CommittedEvent(version,metadata,EventId.New(),@event);
         }
+
+        public static VersionedEventSource a_versioned_event_source_for(EventSourceId id)
+        {
+            return new VersionedEventSource(id,ArtifactId.New());
+        }
+
+        public static VersionedEventSource a_versioned_event_source_for(EventSourceId id, ArtifactId artifact)
+        {
+            return new VersionedEventSource(id, artifact);
+        }
     }
 }

@@ -48,7 +48,7 @@ namespace Dolittle.Events
             foreach (var committedEvent in eventStream)
             {
                 InvokeOnMethod(committedEvent.Event);
-                Version = committedEvent.Metadata.VersionedEventSource.Version;
+                Version = committedEvent.Version.ToEventSourceVersion();
             }
 
             Version = Version.NextCommit();
