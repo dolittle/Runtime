@@ -13,9 +13,8 @@ namespace Dolittle.Events.Specs.for_EventSource
 
         Establish context = () => 
         {
-            var envelope = new Mock<IEventEnvelope>();
-            envelope.SetupGet(e => e.Version).Returns(EventSourceVersion.Initial);
-            event_stream = new CommittedEventStream(event_source_id, new[] { new EventAndEnvelope(envelope.Object, new SimpleEvent()) });
+            var events = new [] { build_committed_event(a_versioned_event_source, new SimpleEvent(), new Runtime.Events.Store.CommittedEventVersion(1,1,0)) };
+            event_stream = new CommittedEventStream(a_versioned_event_source.EventSource,events);
         };
 
         Because of = () => exception = Catch.Exception(() => event_source.ReApply(event_stream));

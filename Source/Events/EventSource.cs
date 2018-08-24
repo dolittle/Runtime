@@ -45,10 +45,10 @@ namespace Dolittle.Events
         {
             ValidateEventStream(eventStream);
 
-            foreach (var eventAndEnvelope in eventStream)
+            foreach (var committedEvent in eventStream)
             {
-                InvokeOnMethod(eventAndEnvelope.Event);
-                Version = eventAndEnvelope.Envelope.Version;
+                InvokeOnMethod(committedEvent.Event);
+                Version = committedEvent.Metadata.VersionedEventSource.Version;
             }
 
             Version = Version.NextCommit();

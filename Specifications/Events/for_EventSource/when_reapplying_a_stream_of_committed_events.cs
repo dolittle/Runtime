@@ -3,37 +3,35 @@ using Moq;
 using It = Machine.Specifications.It;
 using Dolittle.Events;
 using Dolittle.Runtime.Events;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Execution;
+using Dolittle.Artifacts;
+using System;
 
 namespace Dolittle.Events.Specs.for_EventSource
 {
     [Subject(Subjects.reapplying_events)]
     public class when_reapplying_a_stream_of_committed_events : given.a_stateful_event_source
     {
-        static IEvent second_event;
-        static Mock<IEventEnvelope> second_event_envelope;
-        static IEvent third_event;
-        static Mock<IEventEnvelope> third_event_envelope;
-        static CommittedEventStream event_stream;
-
+        static Dolittle.Runtime.Events.CommittedEventStream event_stream;
         Establish context =
             () =>
             {
-                @event = new SimpleEvent();
-                event_envelope = new Mock<IEventEnvelope>();
-                event_envelope.SetupGet(e => e.Version).Returns(EventSourceVersion.Initial);
+                var versioned_event_source = new VersionedEventSource(EventSourceId.New(),ArtifactId.New());
 
-                second_event = new SimpleEvent();
-                second_event_envelope = new Mock<IEventEnvelope>();
-                second_event_envelope.SetupGet(e => e.Version).Returns(EventSourceVersion.Initial.NextSequence());
+                var first_event = new SimpleEvent();
+                var first_committed_event = build_committed_event(versioned_event_source, first_event, new CommittedEventVersion(1,1,0));
 
-                third_event = new SimpleEvent();
-                third_event_envelope = new Mock<IEventEnvelope>();
-                third_event_envelope.SetupGet(e => e.Version).Returns(EventSourceVersion.Initial.NextCommit().NextSequence());
+                var second_event = new SimpleEvent();
+                var second_committed_event = build_committed_event(versioned_event_source, second_event, new CommittedEventVersion(1,1,1));
 
-                event_stream = new CommittedEventStream(event_source_id,new[] {
-                    new EventAndEnvelope(event_envelope.Object, @event),
-                    new EventAndEnvelope(second_event_envelope.Object, second_event),
-                    new EventAndEnvelope(third_event_envelope.Object, third_event),
+                var third_event = new SimpleEvent();
+                var third_committed_event = build_committed_event(versioned_event_source, third_event, new CommittedEventVersion(2,2,0));
+
+                event_stream = new Dolittle.Runtime.Events.CommittedEventStream(event_source_id,new[] {
+                    first_committed_event,
+                    second_committed_event,
+                    third_committed_event
                 });
             };
 

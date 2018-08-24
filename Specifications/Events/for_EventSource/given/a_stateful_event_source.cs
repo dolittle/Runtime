@@ -5,7 +5,7 @@ using System;
 
 namespace Dolittle.Events.Specs.for_EventSource.given
 {
-    public class a_stateful_event_source
+    public class a_stateful_event_source : a_committed_event_builder
 	{
 		protected static StatefulEventSource event_source;
 		protected static EventSourceId event_source_id;
