@@ -207,7 +207,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// </summary>
         /// <param name="metadata"></param>
         /// <returns></returns>
-        public static Protobuf.EventMetadata ToMessage(this Dolittle.Runtime.Events.Store.EventMetadata metadata)
+        public static Protobuf.EventMetadata ToMessage(this Dolittle.Runtime.Events.EventMetadata metadata)
         {
             var message = new Protobuf.EventMetadata();
             message.Source = metadata.VersionedEventSource.ToMessage();
@@ -281,9 +281,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static Dolittle.Runtime.Events.Store.EventMetadata ToEventMetadata(this Protobuf.EventMetadata message)
+        public static Dolittle.Runtime.Events.EventMetadata ToEventMetadata(this Protobuf.EventMetadata message)
         {
-            var metadata = new Dolittle.Runtime.Events.Store.EventMetadata(
+            var metadata = new Dolittle.Runtime.Events.EventMetadata(
                 message.Source.ToVersionedEventSource(),
                 message.CorrelationId.ToConcept<CorrelationId>(),
                 message.Artifact.ToArtifact(),

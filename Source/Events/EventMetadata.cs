@@ -1,4 +1,4 @@
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events
 {
     using System;
     using Dolittle.Concepts;
