@@ -82,6 +82,7 @@ namespace Dolittle.Runtime.Events
 
         void ThrowIfEventIsNull(IEvent @event)
         {
+            //there's no need to check if the event "belongs" to this EventSource.  It's being applied to this one so that makes it belong.
             if (@event == null)
                 throw new ArgumentNullException("Cannot append a null event");
         }
