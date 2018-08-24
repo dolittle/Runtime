@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream
             committed_event = new CommittedEvent(new CommittedEventVersion(1,1,0),metadata,EventId.New(),@event);
         };
 
-        Because of = () => event_stream = new CommittedEventStream(event_source_id, new [] { committed_event });
+        Because of = () => event_stream = new CommittedEvents(event_source_id, new [] { committed_event });
 
         It should_have_events = () => event_stream.HasEvents.ShouldBeTrue();
         It should_have_an_event_count_of_1 = () => event_stream.Count.ShouldEqual(1);

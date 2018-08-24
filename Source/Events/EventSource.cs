@@ -19,7 +19,7 @@ namespace Dolittle.Events
         protected EventSource(EventSourceId id)
         {
             EventSourceId = id;
-            UncommittedEvents = new UncommittedEventStream(this);
+            UncommittedEvents = new UncommittedEvents(this);
             Version = EventSourceVersion.Initial;
         }
 
@@ -30,7 +30,7 @@ namespace Dolittle.Events
         public EventSourceVersion Version { get; private set; }
 
         /// <inheritdoc/>
-        public UncommittedEventStream UncommittedEvents { get; private set; }
+        public UncommittedEvents UncommittedEvents { get; private set; }
 
         /// <inheritdoc/>
         public void Apply(IEvent @event)
@@ -41,7 +41,7 @@ namespace Dolittle.Events
         }
 
         /// <inheritdoc/>
-        public virtual void ReApply(CommittedEventStream eventStream)
+        public virtual void ReApply(CommittedEvents eventStream)
         {
             ValidateEventStream(eventStream);
 
@@ -66,14 +66,14 @@ namespace Dolittle.Events
         /// <inheritdoc/>
         public virtual void Commit()
         {
-            UncommittedEvents = new UncommittedEventStream(this);
+            UncommittedEvents = new UncommittedEvents(this);
             Version = Version.NextCommit();
         }
 
         /// <inheritdoc/>
         public virtual void Rollback()
         {
-            UncommittedEvents = new UncommittedEventStream(this);
+            UncommittedEvents = new UncommittedEvents(this);
             Version = Version.PreviousCommit();
         }
 
@@ -91,7 +91,7 @@ namespace Dolittle.Events
         }
 
 
-        void ValidateEventStream(CommittedEventStream eventStream)
+        void ValidateEventStream(CommittedEvents eventStream)
         {
             if (!IsForThisEventSource(eventStream.EventSourceId))
                 throw new InvalidOperationException("Cannot apply an EventStream belonging to a different event source." +

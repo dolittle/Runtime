@@ -13,26 +13,26 @@ namespace Dolittle.Runtime.Events
     /// Represents a special version of an eventstream
     /// that holds committed <see cref="IEvent">events</see>
     /// </summary>
-    public class CommittedEventStream : IEnumerable<CommittedEvent>
+    public class CommittedEvents : IEnumerable<CommittedEvent>
     {
         List<CommittedEvent> _events = new List<CommittedEvent>();
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommittedEventStream">CommittedEventStream</see>
+        /// Initializes a new instance of <see cref="CommittedEvents">CommittedEventStream</see>
         /// </summary>
         /// <param name="eventSourceId">The <see cref="EventSourceId"/> of the <see cref="IEventSource"/></param>
-        public CommittedEventStream(EventSourceId eventSourceId)
+        public CommittedEvents(EventSourceId eventSourceId)
         {
             EventSourceId = eventSourceId;
         }
 
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommittedEventStream">CommittedEventStream</see>
+        /// Initializes a new instance of <see cref="CommittedEvents">CommittedEvents</see>
         /// </summary>
         /// <param name="eventSourceId">The <see cref="EventSourceId"/> of the <see cref="IEventSource"/></param>
         /// <param name="committedEvents">The <see cref="CommittedEvent">events</see></param>
-        public CommittedEventStream(EventSourceId eventSourceId, IEnumerable<CommittedEvent> committedEvents)
+        public CommittedEvents(EventSourceId eventSourceId, IEnumerable<CommittedEvent> committedEvents)
         {
             EventSourceId = eventSourceId;
             foreach (var committedEvent in committedEvents)
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events
         }
 
         /// <summary>
-        /// Gets the Id of the <see cref="IEventSource"/> that this <see cref="CommittedEventStream"/> relates to.
+        /// Gets the Id of the <see cref="IEventSource"/> that this <see cref="CommittedEvents"/> relates to.
         /// </summary>
         public EventSourceId EventSourceId { get; }
 

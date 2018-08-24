@@ -13,26 +13,26 @@ namespace Dolittle.Runtime.Events
     /// <summary>
     /// Represents a stream of events that are uncommitted
     /// </summary>
-    public class UncommittedEventStream : IEnumerable<IEvent>
+    public class UncommittedEvents : IEnumerable<IEvent>
     {
         List<VersionedEvent> _events = new List<VersionedEvent>();
 
         /// <summary>
-        /// Initializes a new instance of <see cref="UncommittedEventStream">UncommittedEventStream</see>
+        /// Initializes a new instance of <see cref="UncommittedEvents">UncommittedEvents</see>
         /// </summary>
         /// <param name="eventSource">The <see cref="IEventSource"/> </param>
-        public UncommittedEventStream(IEventSource eventSource)
+        public UncommittedEvents(IEventSource eventSource)
         {
             EventSource = eventSource;
         }
 
         /// <summary>
-        /// Gets the <see cref="IEventSource"/> for the <see cref="UncommittedEventStream"/>
+        /// Gets the <see cref="IEventSource"/> for the <see cref="UncommittedEvents"/>
         /// </summary>
         public IEventSource EventSource { get;  }
 
         /// <summary>
-        /// Gets the Id of the <see cref="IEventSource"/> that this <see cref="UncommittedEventStream"/> relates to.
+        /// Gets the Id of the <see cref="IEventSource"/> that this <see cref="UncommittedEvents"/> relates to.
         /// </summary>
         public EventSourceId EventSourceId => EventSource.EventSourceId;
 

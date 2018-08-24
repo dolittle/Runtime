@@ -13,7 +13,7 @@ namespace Dolittle.Events.Specs.for_EventSource
     [Subject(Subjects.reapplying_events)]
     public class when_reapplying_a_stream_of_committed_events : given.a_stateful_event_source
     {
-        static Dolittle.Runtime.Events.CommittedEventStream event_stream;
+        static Dolittle.Runtime.Events.CommittedEvents event_stream;
         Establish context =
             () =>
             {
@@ -28,7 +28,7 @@ namespace Dolittle.Events.Specs.for_EventSource
                 var third_event = new SimpleEvent();
                 var third_committed_event = build_committed_event(versioned_event_source, third_event, new CommittedEventVersion(2,2,0));
 
-                event_stream = new Dolittle.Runtime.Events.CommittedEventStream(event_source_id,new[] {
+                event_stream = new Dolittle.Runtime.Events.CommittedEvents(event_source_id,new[] {
                     first_committed_event,
                     second_committed_event,
                     third_committed_event
