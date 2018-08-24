@@ -10,6 +10,7 @@ using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Concepts;
 using Dolittle.PropertyBags;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
@@ -151,7 +152,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// </summary>
         /// <param name="versionedEventSource"></param>
         /// <returns></returns>
-        public static Protobuf.VersionedEventSource ToMessage(this Dolittle.Runtime.Events.Store.VersionedEventSource versionedEventSource)
+        public static Protobuf.VersionedEventSource ToMessage(this Dolittle.Runtime.Events.VersionedEventSource versionedEventSource)
         {
             var source = new Protobuf.VersionedEventSource
             {
@@ -254,9 +255,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
-        public static Dolittle.Runtime.Events.Store.VersionedEventSource ToVersionedEventSource(this VersionedEventSource message)
+        public static Dolittle.Runtime.Events.VersionedEventSource ToVersionedEventSource(this VersionedEventSource message)
         {
-            return new Dolittle.Runtime.Events.Store.VersionedEventSource(
+            return new Dolittle.Runtime.Events.VersionedEventSource(
                 message.Version.ToEventSourceVersion(),
                 message.EventSource.ToConcept<EventSourceId>(),
                 message.Artifact.ToConcept<ArtifactId>());
@@ -338,7 +339,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             var tenantId = message.Tenant.ToConcept<TenantId>();
             var eventSourceId = message.Source.EventSource.ToConcept<EventSourceId>();
             var artifactId = message.Source.Artifact.ToConcept<ArtifactId>();
-            var versionedEventSource = new Dolittle.Runtime.Events.Store.VersionedEventSource(eventSourceId, artifactId);
+            var versionedEventSource = new Dolittle.Runtime.Events.VersionedEventSource(eventSourceId, artifactId);
             var commitId = message.Id.ToConcept<CommitId>();
             var correlationId = message.CorrelationId.ToConcept<CorrelationId>();
             var timeStamp = DateTimeOffset.FromFileTime(message.TimeStamp);

@@ -4,7 +4,7 @@ using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Events;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events
 {
     /// <summary>
     /// A unique identifier of a particular EventSource (instance, type and version)
