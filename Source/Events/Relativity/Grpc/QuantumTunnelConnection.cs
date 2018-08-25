@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly IEventProcessors _eventProcessors;
         
         readonly CancellationTokenSource _runCancellationTokenSource;
-        readonly CancellationToken _runCancelletionToken;
+        readonly CancellationToken _runCancellationToken;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
@@ -85,9 +85,9 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
 
             _runCancellationTokenSource = new CancellationTokenSource();
-            _runCancelletionToken = _runCancellationTokenSource.Token;
+            _runCancellationToken = _runCancellationTokenSource.Token;
 
-            Task.Run(() => Run(), _runCancelletionToken);
+            Task.Run(() => Run(), _runCancellationToken);
 
             AppDomain.CurrentDomain.ProcessExit += ProcessExit;
             AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
@@ -137,7 +137,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             {
                 for(;;)
                 {
-                    _runCancelletionToken.ThrowIfCancellationRequested();
+                    _runCancellationToken.ThrowIfCancellationRequested();
 
                     try
                     {
@@ -172,7 +172,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             var stream = _client.Open(openTunnelMessage);
             try
             {
-                while (await stream.ResponseStream.MoveNext(CancellationToken.None))
+                while (await stream.ResponseStream.MoveNext(_runCancellationToken))
                 {
                     _logger.Information("Commit received");
 
