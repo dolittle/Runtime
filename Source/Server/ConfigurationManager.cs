@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Server
     /// </summary>
     public class ConfigurationManager : IConfigurationManager
     {
-        const string _configurationFile = ".dolittle/dolittle-server.json";
+        const string _configurationFile = ".dolittle/server.json";
 
         readonly ILogger _logger;
         readonly ISerializer _serializer;
