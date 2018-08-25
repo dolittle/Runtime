@@ -301,7 +301,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 var type = (Types)keyValue.Value.Type;
                 object value = null;
 
-                using( var stream = new CodedInputStream(keyValue.Value.ToByteArray()))
+                using( var stream = new CodedInputStream(keyValue.Value.Content.ToByteArray()))
                 {
                     switch( type )
                     {
