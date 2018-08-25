@@ -39,6 +39,9 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly ISerializer _serializer;
         readonly IEventStore _eventStore;
         readonly IEventProcessors _eventProcessors;
+        
+        readonly CancellationTokenSource _runCancellationTokenSource;
+        readonly CancellationToken _runCancelletionToken;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
@@ -81,7 +84,10 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             _channel = new Channel(_url, ChannelCredentials.Insecure);
             _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
 
-            Task.Run(() => Run());
+            _runCancellationTokenSource = new CancellationTokenSource();
+            _runCancelletionToken = _runCancellationTokenSource.Token;
+
+            Task.Run(() => Run(), _runCancelletionToken);
 
             AppDomain.CurrentDomain.ProcessExit += ProcessExit;
             AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
@@ -118,6 +124,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
         void Close()
         {
+            _runCancellationTokenSource.Cancel();
             _logger.Information("Collapsing quantum tunnel");
             _channel.ShutdownAsync();
         }
@@ -128,8 +135,10 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
             Task.Run(async() =>
             {
-                for (;;)
+                for(;;)
                 {
+                    _runCancelletionToken.ThrowIfCancellationRequested();
+
                     try
                     {
                         await OpenAndHandleStream();
