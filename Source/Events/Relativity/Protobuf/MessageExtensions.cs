@@ -295,7 +295,32 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// <returns></returns>
         public static PropertyBag ToPropertyBag(this MapField<string, System.Protobuf.Object> mapField)
         {
-            return new PropertyBag(new Dictionary<string,object>());
+            var dictionary = new Dictionary<string,object>();
+            mapField.ForEach(keyValue => 
+            {
+                var type = (Types)keyValue.Value.Type;
+                object value = null;
+
+                using( var stream = new CodedInputStream(keyValue.Value.ToByteArray()))
+                {
+                    switch( type )
+                    {
+                        case Types.String: value = stream.ReadString(); break;
+                        case Types.Int32: value = stream.ReadInt32(); break;
+                        case Types.Int64: value = stream.ReadInt64(); break;
+                        case Types.UInt32: value = stream.ReadUInt32(); break;
+                        case Types.UInt64: value = stream.ReadUInt64(); break;
+                        case Types.Float: value = stream.ReadFloat(); break;
+                        case Types.Double: value = stream.ReadDouble(); break;
+                        case Types.Boolean: value = stream.ReadBool(); break;
+                        case Types.DateTime: value = DateTime.FromFileTime(stream.ReadInt64()); break;
+                        case Types.DateTimeOffset: value = DateTimeOffset.FromFileTime(stream.ReadInt64()); break;
+                        case Types.Guid: value = new Guid(stream.ReadBytes().ToByteArray()); break;
+                    }
+                }
+                dictionary.Add(keyValue.Key, value);
+            });
+            return new PropertyBag(dictionary);
         }
 
         /// <summary>
