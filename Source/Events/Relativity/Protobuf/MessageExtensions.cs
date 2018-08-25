@@ -97,6 +97,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 using( var outputStream = new CodedOutputStream(stream) )
                 {
                     WriteObjectWithTypeTo(type, keyValue.Value, outputStream);
+                    outputStream.Flush();
+                    stream.Flush();
                     stream.Seek(0, SeekOrigin.Begin);
                     obj.Content = ByteString.CopyFrom(stream.ToArray());
                 }
