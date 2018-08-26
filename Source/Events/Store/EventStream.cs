@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Events;
+using Dolittle.Collections;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -13,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store
     public class EventStream : IEnumerable<EventEnvelope>, IEquatable<EventStream>
     {
         List<EventEnvelope> _events;
-        private static readonly EnumerableComparer<EventEnvelope> _comparer = new EnumerableComparer<EventEnvelope>();
+        private static readonly EnumerableEqualityComparer<EventEnvelope> _comparer = new EnumerableEqualityComparer<EventEnvelope>();
 
         /// <summary>
         /// Instantiates a new instance of <see cref="EventStream" /> initialized with events.
