@@ -127,7 +127,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         {
             _runCancellationTokenSource.Cancel();
 
-            if( _runThread != null ) _runThread.Abort();
+            //if( _runThread != null ) _runThread.Abort();
 
             _logger.Information("Collapsing quantum tunnel");
             _channel.ShutdownAsync();
@@ -185,12 +185,37 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                     try
                     {
                         var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
+                        var version = _eventStore.GetVersionFor(current.Source.EventSource);
+                        version = new Store.EventSourceVersion(version.Commit+1,0);
+
+                        var versionedEventSource = new Store.VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact);
+
+                        var eventEnvelopes = new List<Store.EventEnvelope>();
+
+                        current.Events.ForEach(_ => 
+                        {
+                            var envelope = new Store.EventEnvelope(
+                                _.Id, 
+                                new Store.EventMetadata(
+                                    new Store.VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact),
+                                    _.Metadata.CorrelationId,
+                                    _.Metadata.Artifact,
+                                    _.Metadata.CausedBy,
+                                    _.Metadata.Occurred
+                                ), 
+                                _.Event
+                            );
+                            eventEnvelopes.Add(envelope);
+
+                            version = version.IncrementSequence();
+                        });
+
                         var uncommittedEventStream = new Store.UncommittedEventStream(
                             current.Id,
                             current.CorrelationId,
-                            current.Source,
+                            versionedEventSource,
                             current.Timestamp,
-                            current.Events
+                            new Store.EventStream(eventEnvelopes)
                         );
 
                         _logger.Information("Commit events to store");
