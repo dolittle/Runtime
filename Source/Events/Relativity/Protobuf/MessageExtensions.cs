@@ -343,9 +343,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             var commitId = message.Id.ToConcept<CommitId>();
             var correlationId = message.CorrelationId.ToConcept<CorrelationId>();
             var timeStamp = DateTimeOffset.FromFileTime(message.TimeStamp);
-
-            var events = message.Events.Select(_ =>
-                new Dolittle.Runtime.Events.Store.EventEnvelope(
+            
+            var events = message.Events.Select(_ =>                 
+                new Dolittle.Runtime.Events.EventEnvelope(
                     _.Id.ToConcept<EventId>(),
                     _.Metadata.ToEventMetadata(),
                     _.Event.ToPropertyBag()

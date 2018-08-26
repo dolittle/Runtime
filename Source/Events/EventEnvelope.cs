@@ -3,7 +3,7 @@ using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events;
 using Dolittle.Events;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events
 {
     /// <summary>
     /// A combination of the <see cref="EventId" />,  <see cref="EventMetadata" /> and a <see cref="PropertyBag" /> that is the persisted version of an <see cref="IEvent" />
