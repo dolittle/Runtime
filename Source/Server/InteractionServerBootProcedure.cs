@@ -23,6 +23,10 @@ namespace Dolittle.Runtime.Server
         }
 
         /// <inheritdoc/>
+        public bool CanPerform() => true;
+
+
+        /// <inheritdoc/>
         public void Perform()
         {
             _interactionServer.Start();            

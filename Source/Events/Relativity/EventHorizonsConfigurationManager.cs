@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Relativity
     [Singleton]
     public class EventHorizonsConfigurationManager : IEventHorizonsConfigurationManager
     {
-        const string _configurationFile = "event-horizons.json";
+        const string _configurationFile = ".dolittle/event-horizons.json";
         readonly ILogger _logger;
         readonly ISerializer _serializer;
 

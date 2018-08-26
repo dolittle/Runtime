@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Relativity
             {
                 _logger.Information($"Passing committed events through {_singularities.Count} singularities");
                 _singularities
-                    .Where(_ => _.CanReceive(committedEventStream)).AsParallel()
+                    .Where(_ => _.CanPassThrough(committedEventStream)).AsParallel()
                     .ForEach(_ =>
                     {
                         _.PassThrough(committedEventStream);

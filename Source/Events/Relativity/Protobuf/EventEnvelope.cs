@@ -24,18 +24,18 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
           string.Concat(
             "Cjtkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9ldmVu",
             "dF9lbnZlbG9wZS5wcm90bxIaZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHka",
-            "EXN5c3RlbS9ndWlkLnByb3RvGjtkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVu",
-            "dHMucmVsYXRpdml0eS9ldmVudF9tZXRhZGF0YS5wcm90bxoZZ29vZ2xlL3By",
-            "b3RvYnVmL2FueS5wcm90byLxAQoNRXZlbnRFbnZlbG9wZRIaCgJpZBgBIAEo",
-            "CzIOLmRvbGl0dGxlLmd1aWQSOwoIbWV0YWRhdGEYAiABKAsyKS5kb2xpdHRs",
-            "ZS5ldmVudHMucmVsYXRpdml0eS5FdmVudE1ldGFkYXRhEkMKBWV2ZW50GAMg",
-            "AygLMjQuZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuRXZlbnRFbnZlbG9w",
-            "ZS5FdmVudEVudHJ5GkIKCkV2ZW50RW50cnkSCwoDa2V5GAEgASgJEiMKBXZh",
-            "bHVlGAIgASgLMhQuZ29vZ2xlLnByb3RvYnVmLkFueToCOAFCLqoCK0RvbGl0",
-            "dGxlLlJ1bnRpbWUuRXZlbnRzLlJlbGF0aXZpdHkuUHJvdG9idWZiBnByb3Rv",
-            "Mw=="));
+            "EXN5c3RlbS9ndWlkLnByb3RvGhNzeXN0ZW0vb2JqZWN0LnByb3RvGjtkb2xp",
+            "dHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9ldmVudF9tZXRh",
+            "ZGF0YS5wcm90byL/AQoNRXZlbnRFbnZlbG9wZRIaCgJpZBgBIAEoCzIOLmRv",
+            "bGl0dGxlLmd1aWQSOwoIbWV0YWRhdGEYAiABKAsyKS5kb2xpdHRsZS5ldmVu",
+            "dHMucmVsYXRpdml0eS5FdmVudE1ldGFkYXRhEkMKBWV2ZW50GAMgAygLMjQu",
+            "ZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuRXZlbnRFbnZlbG9wZS5FdmVu",
+            "dEVudHJ5GlAKCkV2ZW50RW50cnkSCwoDa2V5GAEgASgJEjEKBXZhbHVlGAIg",
+            "ASgLMiIuZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuT2JqZWN0OgI4AUIu",
+            "qgIrRG9saXR0bGUuUnVudGltZS5FdmVudHMuUmVsYXRpdml0eS5Qcm90b2J1",
+            "ZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadataReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.AnyReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::System.Protobuf.ObjectReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadataReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope.Parser, new[]{ "Id", "Metadata", "Event" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
           }));
@@ -105,11 +105,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     /// <summary>Field number for the "event" field.</summary>
     public const int EventFieldNumber = 3;
-    private static readonly pbc::MapField<string, global::Google.Protobuf.WellKnownTypes.Any>.Codec _map_event_codec
-        = new pbc::MapField<string, global::Google.Protobuf.WellKnownTypes.Any>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::Google.Protobuf.WellKnownTypes.Any.Parser), 26);
-    private readonly pbc::MapField<string, global::Google.Protobuf.WellKnownTypes.Any> event_ = new pbc::MapField<string, global::Google.Protobuf.WellKnownTypes.Any>();
+    private static readonly pbc::MapField<string, global::System.Protobuf.Object>.Codec _map_event_codec
+        = new pbc::MapField<string, global::System.Protobuf.Object>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::System.Protobuf.Object.Parser), 26);
+    private readonly pbc::MapField<string, global::System.Protobuf.Object> event_ = new pbc::MapField<string, global::System.Protobuf.Object>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<string, global::Google.Protobuf.WellKnownTypes.Any> Event {
+    public pbc::MapField<string, global::System.Protobuf.Object> Event {
       get { return event_; }
     }
 
