@@ -60,7 +60,7 @@ namespace Dolittle.Events
             ThrowIfStateful();
             ThrowIfNotInitialVersion();
 
-            Version = lastVersion.NextCommit();
+            Version = lastVersion == null ? EventSourceVersion.Initial : lastVersion.NextCommit();
         }
 
         /// <inheritdoc/>
