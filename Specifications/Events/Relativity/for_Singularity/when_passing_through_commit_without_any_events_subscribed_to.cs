@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using Dolittle.Artifacts;
 using Dolittle.PropertyBags;
 using Machine.Specifications;
+using Dolittle.Execution;
+using Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Events.Relativity.for_Singularity
 {
@@ -13,8 +15,8 @@ namespace Dolittle.Runtime.Events.Relativity.for_Singularity
 
         Establish context = () => 
         {
-            var versionedEventSource = new Store.VersionedEventSource(Guid.NewGuid(), ArtifactId.New());
-            var correlationId = Store.CorrelationId.New();
+            var versionedEventSource = new VersionedEventSource(Guid.NewGuid(), ArtifactId.New());
+            var correlationId = CorrelationId.New();
             stream = new Store.CommittedEventStream(
                 0L,
                 versionedEventSource,
@@ -22,9 +24,9 @@ namespace Dolittle.Runtime.Events.Relativity.for_Singularity
                 correlationId,
                 DateTimeOffset.UtcNow,
                 new Store.EventStream(new[] {
-                    new Store.EventEnvelope(
+                    new EventEnvelope(
                         EventId.New(),
-                        new Store.EventMetadata(versionedEventSource,correlationId, Artifact.New(), "", DateTimeOffset.UtcNow),
+                        new EventMetadata(versionedEventSource,correlationId, Artifact.New(), "", DateTimeOffset.UtcNow),
                         new PropertyBag(new Dictionary<string, object>())
                     )
                 })

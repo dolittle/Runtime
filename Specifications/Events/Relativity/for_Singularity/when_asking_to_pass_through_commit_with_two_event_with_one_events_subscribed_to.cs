@@ -2,7 +2,9 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Artifacts;
 using Dolittle.PropertyBags;
+using Dolittle.Execution;
 using Machine.Specifications;
+using Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Events.Relativity.for_Singularity
 {
@@ -13,8 +15,8 @@ namespace Dolittle.Runtime.Events.Relativity.for_Singularity
 
         Establish context = () => 
         {
-            var versionedEventSource = new Store.VersionedEventSource(Guid.NewGuid(), ArtifactId.New());
-            var correlationId = Store.CorrelationId.New();
+            var versionedEventSource = new VersionedEventSource(Guid.NewGuid(), ArtifactId.New());
+            var correlationId = CorrelationId.New();
             var firstEventArtifact = Artifact.New();
             var secondEventArtifact = Artifact.New();
             stream = new Store.CommittedEventStream(
@@ -24,14 +26,14 @@ namespace Dolittle.Runtime.Events.Relativity.for_Singularity
                 correlationId,
                 DateTimeOffset.UtcNow,
                 new Store.EventStream(new[] {
-                    new Store.EventEnvelope(
+                    new EventEnvelope(
                         EventId.New(),
-                        new Store.EventMetadata(versionedEventSource,correlationId, firstEventArtifact, "", DateTimeOffset.UtcNow),
+                        new EventMetadata(versionedEventSource,correlationId, firstEventArtifact, "", DateTimeOffset.UtcNow),
                         new PropertyBag(new Dictionary<string, object>())
                     ),
-                    new Store.EventEnvelope(
+                    new EventEnvelope(
                         EventId.New(),
-                        new Store.EventMetadata(versionedEventSource,correlationId, secondEventArtifact, "", DateTimeOffset.UtcNow),
+                        new EventMetadata(versionedEventSource,correlationId, secondEventArtifact, "", DateTimeOffset.UtcNow),
                         new PropertyBag(new Dictionary<string, object>())
                     )
                 })
