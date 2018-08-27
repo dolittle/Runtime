@@ -39,6 +39,10 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly ISerializer _serializer;
         readonly IEventStore _eventStore;
         readonly IEventProcessors _eventProcessors;
+        
+        readonly CancellationTokenSource _runCancellationTokenSource;
+        readonly CancellationToken _runCancellationToken;
+        Thread _runThread = null;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
@@ -81,7 +85,10 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             _channel = new Channel(_url, ChannelCredentials.Insecure);
             _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
 
-            Task.Run(() => Run());
+            _runCancellationTokenSource = new CancellationTokenSource();
+            _runCancellationToken = _runCancellationTokenSource.Token;
+
+            Task.Run(() => Run(), _runCancellationToken);
 
             AppDomain.CurrentDomain.ProcessExit += ProcessExit;
             AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
@@ -118,6 +125,10 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
         void Close()
         {
+            _runCancellationTokenSource.Cancel();
+
+            //if( _runThread != null ) _runThread.Abort();
+
             _logger.Information("Collapsing quantum tunnel");
             _channel.ShutdownAsync();
         }
@@ -128,8 +139,12 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
             Task.Run(async() =>
             {
-                for (;;)
+                _runThread = Thread.CurrentThread;
+                for(;;)
                 {
+                    
+                    _runCancellationToken.ThrowIfCancellationRequested();
+
                     try
                     {
                         await OpenAndHandleStream();
@@ -163,19 +178,44 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             var stream = _client.Open(openTunnelMessage);
             try
             {
-                while (await stream.ResponseStream.MoveNext(CancellationToken.None))
+                while (await stream.ResponseStream.MoveNext(_runCancellationToken))
                 {
                     _logger.Information("Commit received");
 
                     try
                     {
                         var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
+                        var version = _eventStore.GetVersionFor(current.Source.EventSource);
+                        version = new Store.EventSourceVersion(version.Commit+1,0);
+
+                        var versionedEventSource = new Store.VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact);
+
+                        var eventEnvelopes = new List<Store.EventEnvelope>();
+
+                        current.Events.ForEach(_ => 
+                        {
+                            var envelope = new Store.EventEnvelope(
+                                _.Id, 
+                                new Store.EventMetadata(
+                                    new Store.VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact),
+                                    _.Metadata.CorrelationId,
+                                    _.Metadata.Artifact,
+                                    _.Metadata.CausedBy,
+                                    _.Metadata.Occurred
+                                ), 
+                                _.Event
+                            );
+                            eventEnvelopes.Add(envelope);
+
+                            version = version.IncrementSequence();
+                        });
+
                         var uncommittedEventStream = new Store.UncommittedEventStream(
                             current.Id,
                             current.CorrelationId,
-                            current.Source,
+                            versionedEventSource,
                             current.Timestamp,
-                            current.Events
+                            new Store.EventStream(eventEnvelopes)
                         );
 
                         _logger.Information("Commit events to store");

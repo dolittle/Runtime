@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Applications;
 using Dolittle.Runtime.Events.Store;
 
@@ -38,15 +39,15 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public bool CanReceive(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
+        public bool CanPassThrough(Store.CommittedEventStream committedEventStream)
         {
-            return true;
+            return _subscription.Events.Any(_ => committedEventStream.Events.Any(e => e.Metadata.Artifact == _));
         }
 
         /// <inheritdoc/>
         public bool PassThrough(Store.CommittedEventStream committedEventStream)
         {
-            if( !CanReceive(committedEventStream)) return false;
+            if( !CanPassThrough(committedEventStream)) return false;
             _tunnel.PassThrough(committedEventStream);
 
             return true;

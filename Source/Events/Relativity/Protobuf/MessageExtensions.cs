@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
@@ -14,10 +15,12 @@ using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
+using Google.Protobuf.Reflection;
 using Google.Protobuf.WellKnownTypes;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf
 {
+
     /// <summary>
     /// Extension methods for working with conversion related to <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/>
     /// </summary>
@@ -33,6 +36,78 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             var protobufGuid = new System.Protobuf.guid();
             protobufGuid.Value = ByteString.CopyFrom(guid.ToByteArray());
             return protobufGuid;
+        }
+
+        static Types GetTypeFrom(object obj)
+        {
+            var type = obj.GetType();
+            if( type == typeof(string)) return Types.String;
+            if( type == typeof(int)) return Types.Int32;
+            if( type == typeof(long)) return Types.Int64;
+            if( type == typeof(uint)) return Types.UInt32;
+            if( type == typeof(long)) return Types.UInt64;
+            if( type == typeof(Int32)) return Types.Int32;
+            if( type == typeof(Int64)) return Types.Int64;
+            if( type == typeof(UInt32)) return Types.UInt32;
+            if( type == typeof(UInt64)) return Types.UInt64;
+            if( type == typeof(float)) return Types.Float;
+            if( type == typeof(double)) return Types.Double;
+            if( type == typeof(bool)) return Types.Boolean;
+            if( type == typeof(DateTime)) return Types.DateTime;
+            if( type == typeof(DateTimeOffset)) return Types.DateTimeOffset;
+            if( type == typeof(Guid)) return Types.Guid;
+
+            return Types.Unknown;
+        }
+
+        static void WriteObjectWithTypeTo(Types type, object obj, CodedOutputStream stream)
+        {
+            switch( type )
+            {
+                case Types.String: stream.WriteString(obj as string); break;
+                case Types.Int32: stream.WriteInt32((int)obj); break;
+                case Types.Int64: stream.WriteInt64((Int64)obj); break;
+                case Types.UInt32: stream.WriteUInt32((uint)obj); break;
+                case Types.UInt64: stream.WriteUInt64((UInt64)obj); break;
+                case Types.Float: stream.WriteFloat((float)obj); break;
+                case Types.Double: stream.WriteDouble((double)obj); break;
+                case Types.Boolean: stream.WriteBool((bool)obj); break;
+                case Types.DateTime: stream.WriteInt64((Int64)((DateTime)obj).ToFileTime()); break;
+                case Types.DateTimeOffset: stream.WriteInt64((Int64)((DateTimeOffset)obj).ToFileTime()); break;
+                case Types.Guid: stream.WriteBytes(ByteString.CopyFrom(((Guid)obj).ToByteArray())); break;
+            }
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="propertyBag"></param>
+        /// <returns></returns>
+        public static MapField<string, System.Protobuf.Object> ToProtobuf(this PropertyBag propertyBag)
+        {
+            var mapField = new MapField<string, System.Protobuf.Object>();
+            propertyBag.ForEach(keyValue => 
+            {
+                var obj = new System.Protobuf.Object();
+                var type = GetTypeFrom(keyValue.Value);;
+                obj.Type = (int)type;
+
+                var stream = new MemoryStream();
+                using( var outputStream = new CodedOutputStream(stream) )
+                {
+                    WriteObjectWithTypeTo(type, keyValue.Value, outputStream);
+                    outputStream.Flush();
+                    stream.Flush();
+                    stream.Seek(0, SeekOrigin.Begin);
+                    obj.Content = ByteString.CopyFrom(stream.ToArray());
+                }
+                
+                mapField.Add(keyValue.Key, obj);
+            });
+            
+
+            return mapField;
         }
 
         /// <summary>
@@ -59,8 +134,10 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 var envelope = new Protobuf.EventEnvelope
                 {
                     Id = @event.Id.ToProtobuf(),
-                    Metadata = @event.Metadata.ToMessage()
+                    Metadata = @event.Metadata.ToMessage(),
                 };
+
+                envelope.Event.Add(@event.Event.ToProtobuf());
                 
                 return envelope;
             }).ForEach(message.Events.Add);
@@ -212,7 +289,41 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 DateTimeOffset.FromFileTime(message.Occurred)
             );
             return metadata;
+        }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="mapField"></param>
+        /// <returns></returns>
+        public static PropertyBag ToPropertyBag(this MapField<string, System.Protobuf.Object> mapField)
+        {
+            var dictionary = new Dictionary<string,object>();
+            mapField.ForEach(keyValue => 
+            {
+                var type = (Types)keyValue.Value.Type;
+                object value = null;
+
+                using( var stream = new CodedInputStream(keyValue.Value.Content.ToByteArray()))
+                {
+                    switch( type )
+                    {
+                        case Types.String: value = stream.ReadString(); break;
+                        case Types.Int32: value = stream.ReadInt32(); break;
+                        case Types.Int64: value = stream.ReadInt64(); break;
+                        case Types.UInt32: value = stream.ReadUInt32(); break;
+                        case Types.UInt64: value = stream.ReadUInt64(); break;
+                        case Types.Float: value = stream.ReadFloat(); break;
+                        case Types.Double: value = stream.ReadDouble(); break;
+                        case Types.Boolean: value = stream.ReadBool(); break;
+                        case Types.DateTime: value = DateTime.FromFileTime(stream.ReadInt64()); break;
+                        case Types.DateTimeOffset: value = DateTimeOffset.FromFileTime(stream.ReadInt64()); break;
+                        case Types.Guid: value = new Guid(stream.ReadBytes().ToByteArray()); break;
+                    }
+                }
+                dictionary.Add(keyValue.Key, value);
+            });
+            return new PropertyBag(dictionary);
         }
 
         /// <summary>
@@ -235,7 +346,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 new Dolittle.Runtime.Events.Store.EventEnvelope(
                     _.Id.ToConcept<EventId>(),
                     _.Metadata.ToEventMetadata(),
-                    new PropertyBag(new Dictionary<string, object>())
+                    _.Event.ToPropertyBag()
                 )
             ).ToArray();
 
