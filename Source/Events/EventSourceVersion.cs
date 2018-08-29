@@ -16,6 +16,11 @@ namespace Dolittle.Runtime.Events
         const float SEQUENCE_DIVISOR = 10000;
 
         /// <summary>
+        /// No Version version
+        /// </summary>
+        public static readonly EventSourceVersion NoVersion = new EventSourceVersion(0,0);
+
+        /// <summary>
         /// Initial version
         /// </summary>
         public static readonly EventSourceVersion Initial = new EventSourceVersion(1,0);

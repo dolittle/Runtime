@@ -185,8 +185,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                     try
                     {
                         var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                        var version = _eventStore.GetVersionFor(current.Source.EventSource);
-                        version = new EventSourceVersion(version.Commit+1,0);
+                        var version = _eventStore.GetNextVersionFor(current.Source.EventSource);
 
                         var versionedEventSource = new VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact);
 
