@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Pass events through the <see cref="IEventHorizon"/>
         /// </summary>
-        /// <param name="committedEventStream"><see cref="CommittedEventStream"/> to pass through</param>
+        /// <param name="committedEventStream"><see cref="CommittedEvents"/> to pass through</param>
         void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
 
         /// <summary>

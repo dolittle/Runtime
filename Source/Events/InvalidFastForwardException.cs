@@ -10,13 +10,13 @@ namespace Dolittle.Runtime.Events
     /// Represents an exceptional situation where an event source is stateful 
     /// but there has been an attempt to retrieve it without restoring state by replaying events (fast-forwarding)
     /// </summary>
-    public class InvalidFastForwardException : Exception
+    public class InvalidFastForward : Exception
     {
         /// <summary>
-        /// Initializes an <see cref="InvalidFastForwardException">InvalidFastForwardException</see>
+        /// Initializes an <see cref="InvalidFastForward">InvalidFastForwardE</see>
         /// </summary>
         /// <param name="message">Error Message</param>
-        public InvalidFastForwardException(string message)
+        public InvalidFastForward(string message)
             : base(message)
         {
         }

@@ -1,10 +1,11 @@
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events
 {
     using System;
     using Dolittle.Concepts;
     using Dolittle.Runtime.Events;
     using Dolittle.Events;
     using Dolittle.Artifacts;
+    using Dolittle.Execution;
 
     /// <summary>
     /// Represents the metadata associated with a particular <see cref="IEvent" /> instance>

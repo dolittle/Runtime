@@ -19,7 +19,8 @@ namespace Dolittle.Events
         protected EventSource(EventSourceId id)
         {
             EventSourceId = id;
-            UncommittedEvents = new UncommittedEventStream(this);
+            UncommittedEvents = new UncommittedEvents(this);
+            Version = EventSourceVersion.Initial;
         }
 
         /// <inheritdoc/>
@@ -29,7 +30,7 @@ namespace Dolittle.Events
         public EventSourceVersion Version { get; private set; }
 
         /// <inheritdoc/>
-        public UncommittedEventStream UncommittedEvents { get; private set; }
+        public UncommittedEvents UncommittedEvents { get; private set; }
 
         /// <inheritdoc/>
         public void Apply(IEvent @event)
@@ -40,14 +41,14 @@ namespace Dolittle.Events
         }
 
         /// <inheritdoc/>
-        public virtual void ReApply(CommittedEventStream eventStream)
+        public virtual void ReApply(CommittedEvents eventStream)
         {
             ValidateEventStream(eventStream);
 
-            foreach (var eventAndEnvelope in eventStream)
+            foreach (var committedEvent in eventStream)
             {
-                InvokeOnMethod(eventAndEnvelope.Event);
-                Version = eventAndEnvelope.Envelope.Version;
+                InvokeOnMethod(committedEvent.Event);
+                Version = committedEvent.Version.ToEventSourceVersion();
             }
 
             Version = Version.NextCommit();
@@ -59,20 +60,20 @@ namespace Dolittle.Events
             ThrowIfStateful();
             ThrowIfNotInitialVersion();
 
-            Version = lastVersion.NextCommit();
+            Version = lastVersion == null ? EventSourceVersion.Initial : lastVersion.NextCommit();
         }
 
         /// <inheritdoc/>
         public virtual void Commit()
         {
-            UncommittedEvents = new UncommittedEventStream(this);
+            UncommittedEvents = new UncommittedEvents(this);
             Version = Version.NextCommit();
         }
 
         /// <inheritdoc/>
         public virtual void Rollback()
         {
-            UncommittedEvents = new UncommittedEventStream(this);
+            UncommittedEvents = new UncommittedEvents(this);
             Version = Version.PreviousCommit();
         }
 
@@ -90,7 +91,7 @@ namespace Dolittle.Events
         }
 
 
-        void ValidateEventStream(CommittedEventStream eventStream)
+        void ValidateEventStream(CommittedEvents eventStream)
         {
             if (!IsForThisEventSource(eventStream.EventSourceId))
                 throw new InvalidOperationException("Cannot apply an EventStream belonging to a different event source." +
@@ -105,13 +106,13 @@ namespace Dolittle.Events
         void ThrowIfStateful()
         {
             if (!this.IsStateless())
-                throw new InvalidFastForwardException("Cannot fast forward stateful event source");
+                throw new InvalidFastForward("Cannot fast forward stateful event source");
         }
 
         void ThrowIfNotInitialVersion()
         {
-            if (!Version.Equals(EventSourceVersion.Zero))
-                throw new InvalidFastForwardException("Cannot fast forward event source that is not an initial version");
+            if (!Version.Equals(EventSourceVersion.Initial))
+                throw new InvalidFastForward("Cannot fast forward event source that is not an initial version");
         }
     }
 }

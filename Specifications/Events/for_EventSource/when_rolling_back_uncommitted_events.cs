@@ -8,6 +8,6 @@ namespace Dolittle.Events.Specs.for_EventSource
         Because of = () => event_source.Rollback();
 
         It should_have_no_uncommitted_events = () => event_source.UncommittedEvents.ShouldBeEmpty();
-        It should_have_sequence_in_version_set_to_zero = () => event_source.Version.Sequence.ShouldEqual(0);
+        It should_have_sequence_in_version_set_to_zero = () => event_source.Version.Sequence.ShouldEqual(0u);
     }
 }

@@ -3,7 +3,7 @@ using System;
 
 namespace Dolittle.Events.Specs.for_EventSource.given
 {
-    public class a_stateless_event_source
+    public class a_stateless_event_source : a_committed_event_builder
     {
         protected static StatelessEventSource event_source;
         protected static Guid event_source_id;

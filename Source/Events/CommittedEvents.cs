@@ -13,39 +13,39 @@ namespace Dolittle.Runtime.Events
     /// Represents a special version of an eventstream
     /// that holds committed <see cref="IEvent">events</see>
     /// </summary>
-    public class CommittedEventStream : IEnumerable<EventAndEnvelope>
+    public class CommittedEvents : IEnumerable<CommittedEvent>
     {
-        List<EventAndEnvelope> _events = new List<EventAndEnvelope>();
+        List<CommittedEvent> _events = new List<CommittedEvent>();
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommittedEventStream">CommittedEventStream</see>
+        /// Initializes a new instance of <see cref="CommittedEvents">CommittedEventStream</see>
         /// </summary>
         /// <param name="eventSourceId">The <see cref="EventSourceId"/> of the <see cref="IEventSource"/></param>
-        public CommittedEventStream(EventSourceId eventSourceId)
+        public CommittedEvents(EventSourceId eventSourceId)
         {
             EventSourceId = eventSourceId;
         }
 
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommittedEventStream">CommittedEventStream</see>
+        /// Initializes a new instance of <see cref="CommittedEvents">CommittedEvents</see>
         /// </summary>
         /// <param name="eventSourceId">The <see cref="EventSourceId"/> of the <see cref="IEventSource"/></param>
-        /// <param name="eventsWithEnvelope">The <see cref="IEvent">events</see> with their <see cref="EventEnvelope">envelopes</see></param>
-        public CommittedEventStream(EventSourceId eventSourceId, IEnumerable<EventAndEnvelope> eventsWithEnvelope)
+        /// <param name="committedEvents">The <see cref="CommittedEvent">events</see></param>
+        public CommittedEvents(EventSourceId eventSourceId, IEnumerable<CommittedEvent> committedEvents)
         {
             EventSourceId = eventSourceId;
-            foreach (var eventAndEnvelope in eventsWithEnvelope)
+            foreach (var committedEvent in committedEvents)
             {
-                EnsureEventIsValid(eventAndEnvelope);
-                _events.Add(eventAndEnvelope);
+                EnsureEventIsValid(committedEvent);
+                _events.Add(committedEvent);
             }
         }
 
         /// <summary>
-        /// Gets the Id of the <see cref="IEventSource"/> that this <see cref="CommittedEventStream"/> relates to.
+        /// Gets the Id of the <see cref="IEventSource"/> that this <see cref="CommittedEvents"/> relates to.
         /// </summary>
-        public EventSourceId EventSourceId { get; private set; }
+        public EventSourceId EventSourceId { get; }
 
         /// <summary>
         /// Indicates whether there are any events in the Stream.
@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events
         /// Get a generic enumerator to iterate over the events
         /// </summary>
         /// <returns>Enumerator</returns>
-        public IEnumerator<EventAndEnvelope> GetEnumerator()
+        public IEnumerator<CommittedEvent> GetEnumerator()
         {
             return _events.GetEnumerator();
         }
@@ -77,10 +77,13 @@ namespace Dolittle.Runtime.Events
             return GetEnumerator();
         }
 
-        void EnsureEventIsValid(EventAndEnvelope eventAndEnvelope)
+        void EnsureEventIsValid(CommittedEvent committedEvent)
         {
-            if (eventAndEnvelope.Event == null)
+            if (committedEvent.Event == null)
                 throw new ArgumentNullException("Cannot append a null event");
+
+            if(committedEvent.Metadata.EventSourceId != this.EventSourceId)
+                throw new EventBelongsToOtherEventSource(committedEvent.Metadata?.EventSourceId ?? Guid.NewGuid(),this.EventSourceId);
         }
     }
 }

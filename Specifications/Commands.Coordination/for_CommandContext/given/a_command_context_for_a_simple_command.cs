@@ -1,5 +1,5 @@
 ﻿using Dolittle.Events;
-using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 using System.Dynamic;
@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
         Establish context = () =>
         {
             var artifact = Artifact.New();
-            command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+            command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());
             uncommitted_event_stream_coordinator = new Mock<IUncommittedEventStreamCoordinator>();
             logger = new Mock<ILogger>();
             command_context = new CommandContext(command, null, uncommitted_event_stream_coordinator.Object, logger.Object);

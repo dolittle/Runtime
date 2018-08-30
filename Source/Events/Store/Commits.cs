@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,14 +9,14 @@ namespace Dolittle.Runtime.Events.Store
     /// <summary>
     /// A read-only collection of <see cref="CommittedEventStream" />
     /// </summary>
-    public class CommittedEvents : IEnumerable<CommittedEventStream>, IEnumerable
+    public class Commits : IEnumerable<CommittedEventStream>, IEnumerable
     {
         readonly ReadOnlyCollection<CommittedEventStream> _commits;
         /// <summary>
-        /// Instantiates a new instance of <see cref="CommittedEvents" /> with 
+        /// Instantiates a new instance of <see cref="Commits" /> with 
         /// </summary>
         /// <param name="commits"></param>
-        public CommittedEvents(IEnumerable<CommittedEventStream> commits)
+        public Commits(IEnumerable<CommittedEventStream> commits)
         {
             _commits = new ReadOnlyCollection<CommittedEventStream>(commits.ToList() ?? new List<CommittedEventStream>());
         }

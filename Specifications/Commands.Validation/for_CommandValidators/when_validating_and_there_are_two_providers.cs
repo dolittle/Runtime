@@ -1,5 +1,6 @@
 ﻿using System.Dynamic;
 using Dolittle.Artifacts;
+using Dolittle.Execution;
 using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
 using Moq;
@@ -15,7 +16,7 @@ namespace Dolittle.Runtime.Commands.Validation.Specs.for_CommandValidators
         Establish context = () => 
         {
             var artifact = Artifact.New();
-            command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+            command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());
         };
 
         Because of = () => result = validators.Validate(command);

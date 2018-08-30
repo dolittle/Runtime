@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Commands.Coordination
         /// <summary>
         /// Initializes a new instance of <see cref="CommandContextFactory">CommandContextFactory</see>
         /// </summary>
-        /// <param name="uncommittedEventStreamCoordinator">A <see cref="IUncommittedEventStreamCoordinator"/> to use for coordinator an <see cref="UncommittedEventStream"/></param>
+        /// <param name="uncommittedEventStreamCoordinator">A <see cref="IUncommittedEventStreamCoordinator"/> to use for coordinator an <see cref="UncommittedEvents"/></param>
         /// <param name="executionContextManager">A <see cref="IExecutionContextManager"/> for getting execution context from</param>
         /// <param name="logger"><see cref="ILogger"/> to use for logging</param>
         public CommandContextFactory(

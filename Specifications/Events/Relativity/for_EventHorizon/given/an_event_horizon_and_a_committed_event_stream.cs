@@ -4,6 +4,8 @@ using Dolittle.Artifacts;
 using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
+using Dolittle.Execution;
+using Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
 {
@@ -16,7 +18,7 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
             var eventSource = new VersionedEventSource(Guid.NewGuid(), Guid.NewGuid());
             var correlationId = CorrelationId.New();
 
-            committed_event_stream = new Dolittle.Runtime.Events.Store.CommittedEventStream(
+            committed_event_stream = new Store.CommittedEventStream(
                 new CommitSequenceNumber(1),
                 eventSource,
                 CommitId.New(),
@@ -24,8 +26,8 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
                 DateTimeOffset.UtcNow,
                 new EventStream(new []
                 {
-                    new Dolittle.Runtime.Events.Store.EventEnvelope(
-                        new Dolittle.Runtime.Events.EventId(),
+                    new EventEnvelope(
+                        new EventId(),
                         new EventMetadata(
                             eventSource,
                             correlationId,

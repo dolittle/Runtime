@@ -5,7 +5,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Commands.Security;
 using Dolittle.Runtime.Commands.Validation;
-using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator.gi
         Establish context = ()=>
         {
             var artifact = Artifact.New();
-            command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+            command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());
             command_handler_manager_mock = new Mock<ICommandHandlerManager>();
             command_context_manager_mock = new Mock<ICommandContextManager>();
             command_validators_mock = new Mock<ICommandValidators>();

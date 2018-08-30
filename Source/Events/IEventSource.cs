@@ -26,7 +26,7 @@ namespace Dolittle.Events
 		/// <summary>
 		/// A stream of events that have been applied to the <seealso cref="EventSource">EventSource</seealso> but have not yet been committed to the EventStore.
 		/// </summary>
-		UncommittedEventStream UncommittedEvents { get; }
+		UncommittedEvents UncommittedEvents { get; }
 
 		/// <summary>
 		/// Apply a new event to the EventSource.  This will be applied and added to the <see cref="UncommittedEvents">UncommitedEvents</see>.
@@ -38,7 +38,7 @@ namespace Dolittle.Events
 		/// Reapply an event from a stream
 		/// </summary>
 		/// <param name="eventStream">Stream that contains the events to reapply</param>
-    	void ReApply(CommittedEventStream eventStream);
+    	void ReApply(CommittedEvents eventStream);
 
         /// <summary>
         /// Fast forward to the specified version of the <seealso cref="EventSource">EventSource</seealso>

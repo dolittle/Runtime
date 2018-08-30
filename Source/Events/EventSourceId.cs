@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Creates a new instance of an <see cref="EventSourceId"/> with an empty guid 
         /// </summary>
-        public EventSourceId() => Value = Guid.Empty;
+        public EventSourceId() => new EventSourceId(Guid.Empty);
 
         /// <summary>
         /// Instantiates a new instance of an <see cref="EventSourceId"/> with a unique id
