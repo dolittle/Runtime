@@ -16,6 +16,11 @@ namespace Dolittle.Runtime.Events
         const float SEQUENCE_DIVISOR = 10000;
 
         /// <summary>
+        /// No Version version
+        /// </summary>
+        public static readonly EventSourceVersion NoVersion = new EventSourceVersion(0,0);
+
+        /// <summary>
         /// Initial version
         /// </summary>
         public static readonly EventSourceVersion Initial = new EventSourceVersion(1,0);
@@ -70,6 +75,9 @@ namespace Dolittle.Runtime.Events
         /// <returns><see cref="EventSourceVersion"/> with the new version</returns>
         public EventSourceVersion NextSequence()
         {
+            if(Commit < 1)
+                throw new InvalidEventSourceVersion($"Cannot get the Next Sequence on Commit {Commit}");
+
             var nextSequence = new EventSourceVersion(Commit,Sequence+1);
             return nextSequence;
         }
@@ -81,6 +89,12 @@ namespace Dolittle.Runtime.Events
         /// <returns><see cref="EventSourceVersion"/> with the new version</returns>
         public EventSourceVersion PreviousCommit()
         {
+            if(Commit < 1)
+                throw new InvalidEventSourceVersion($"Cannot get the Previous Commit of Commit {Commit}");
+
+            if(Commit == 1)
+                return NoVersion;
+
             var previousCommit = new EventSourceVersion(Commit - 1, 0);
             return previousCommit;
         }
