@@ -8,13 +8,8 @@
   <Import Project="../../Build/MSBuild/default.props"/>
   
   <ItemGroup>
-    <PackageReference Include="System.Security.Claims" Version="4.3.0" />
-    <PackageReference Include="Dolittle.Concepts" Version="2.0.0-*" />
-    <PackageReference Include="Dolittle.Execution" Version="2.0.0-*" />
-    <PackageReference Include="Dolittle.DependencyInversion.Conventions" Version="2.0.0-*" />
-    <PackageReference Include="Dolittle.Dynamic" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Tenancy" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Types" Version="2.0.0-*" />
   </ItemGroup>
-
 
 </Project>
