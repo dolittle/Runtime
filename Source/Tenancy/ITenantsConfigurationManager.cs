@@ -2,27 +2,18 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Tenancy
 {
     /// <summary>
-    /// Represents a tenant
+    /// Defines the configuration manager for <see cref="TenantsConfiguration"/>
     /// </summary>
-    public class Tenant
+    public interface ITenantsConfigurationManager
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="Tenant"/>
+        /// Get the current <see cref="TenantsConfiguration"/>
         /// </summary>
-        /// <param name="id"></param>
-        public Tenant(TenantId id)
-        {
-            Id = id;
-        }
-        
-        /// <summary>
-        /// Gets the <see cref="TenantId"/>
-        /// </summary>
-        public TenantId Id { get; }
+        TenantsConfiguration Current { get; }
     }
+    
 }
