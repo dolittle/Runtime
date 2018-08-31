@@ -1,0 +1,21 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Dolittle. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+syntax = "proto3";
+
+package dolittle.events.relativity;
+
+import "system/guid.proto";
+
+option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+
+// Represents the execution context
+message ExecutionContext {
+    guid application = 1;
+    guid boundedContext = 2;
+    guid tenant = 3;
+    guid correlationId = 4;
+    Map<string,string> claims = 5;
+    string culture = 6;
+}
