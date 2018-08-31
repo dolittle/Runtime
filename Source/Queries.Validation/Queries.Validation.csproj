@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Rules" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Lifecycle" Version="2.0.0-*" />
   </ItemGroup>
 
   <ItemGroup>

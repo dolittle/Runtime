@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
-using Dolittle.Execution;
+using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.PropertyBags;
 using Dolittle.Types;

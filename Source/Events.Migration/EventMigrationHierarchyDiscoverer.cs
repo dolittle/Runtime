@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Dolittle.Execution;
+using Dolittle.Lifecycle;
 using Dolittle.Types;
 using Dolittle.Events;
 

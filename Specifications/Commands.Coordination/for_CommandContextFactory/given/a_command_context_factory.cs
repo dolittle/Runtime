@@ -4,7 +4,6 @@ using Moq;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Coordination;
-using Dolittle.Runtime.Execution;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextFactory.given
 {

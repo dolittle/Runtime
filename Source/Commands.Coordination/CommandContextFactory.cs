@@ -2,10 +2,10 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Coordination;
-using Dolittle.Runtime.Execution;
 
 namespace Dolittle.Runtime.Commands.Coordination
 {

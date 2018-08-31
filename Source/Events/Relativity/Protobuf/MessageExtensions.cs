@@ -10,15 +10,12 @@ using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Concepts;
 using Dolittle.PropertyBags;
-using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
 using Dolittle.Execution;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
-using Google.Protobuf.Reflection;
-using Google.Protobuf.WellKnownTypes;
+using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf
 {

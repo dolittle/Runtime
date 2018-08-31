@@ -4,16 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Collections;
 using Dolittle.Logging;
-using Dolittle.Runtime.Execution;
 using Dolittle.Serialization.Protobuf;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
-using Google.Protobuf;
 using Grpc.Core;
+using Dolittle.Execution;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -59,7 +56,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             try
             {
-                var message = committedEventStream.ToMessage(_executionContextManager.Current.Tenant.TenantId, _serializer);
+                var message = committedEventStream.ToMessage(_executionContextManager.Current.Tenant, _serializer);
                 _outbox.Enqueue(message);
                 _waitHandle.Set();
             }
