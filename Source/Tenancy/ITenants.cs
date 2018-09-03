@@ -2,27 +2,19 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System.Collections.Generic;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Tenancy
 {
     /// <summary>
-    /// Represents a tenant
+    /// Defines a system for working with <see cref="TenantId">tenants</see>
     /// </summary>
-    public class Tenant
+    public interface ITenants 
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="Tenant"/>
+        /// Gets all available tenants represented by their <see cref="TenantId"/>
         /// </summary>
-        /// <param name="id"></param>
-        public Tenant(TenantId id)
-        {
-            Id = id;
-        }
-        
-        /// <summary>
-        /// Gets the <see cref="TenantId"/>
-        /// </summary>
-        public TenantId Id { get; }
+        IEnumerable<TenantId>   All { get; }
     }
 }

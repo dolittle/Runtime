@@ -5,7 +5,7 @@
 using System;
 using System.Linq;
 using Dolittle.Collections;
-using Dolittle.Execution;
+using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Types;
 using grpc = Grpc.Core;

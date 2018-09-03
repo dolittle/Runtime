@@ -14,6 +14,7 @@
     <PackageReference Include="Dolittle.Collections" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Concepts" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Lifecycle" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.PropertyBags" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Serialization.Json" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="2.0.0-*" />
@@ -25,7 +26,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Execution\Execution.csproj" />
     <ProjectReference Include="..\Server\Server.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />

@@ -1,17 +1,19 @@
-﻿/*---------------------------------------------------------------------------------------------
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+
 namespace Dolittle.Runtime.Tenancy
 {
     /// <summary>
-    /// Defines a system that manages <see cref="ITenant"/>
+    /// Defines the configuration manager for <see cref="TenantsConfiguration"/>
     /// </summary>
-    public interface ITenantManager
+    public interface ITenantsConfigurationManager
     {
         /// <summary>
-        /// Gets the current <see cref="ITenant"/>
+        /// Get the current <see cref="TenantsConfiguration"/>
         /// </summary>
-        ITenant Current { get; }
+        TenantsConfiguration Current { get; }
     }
+    
 }

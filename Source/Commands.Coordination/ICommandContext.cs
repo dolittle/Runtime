@@ -4,9 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using Dolittle.Events;
-using Dolittle.Runtime.Commands;
-using Dolittle.Runtime.Events;
-using Dolittle.Runtime.Execution;
 using Dolittle.Execution;
 using Dolittle.Runtime.Transactions;
 
