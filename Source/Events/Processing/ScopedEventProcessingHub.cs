@@ -2,18 +2,14 @@ namespace Dolittle.Runtime.Events.Processing
 {
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Globalization;
     using System.Linq;
-    using System.Security.Claims;
     using System.Threading;
     using System;
-    using Dolittle.Applications;
     using Dolittle.Collections;
     using Dolittle.Execution;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Execution;
-    using Dolittle.Runtime.Tenancy;
 
     /// <summary>
     /// 
@@ -24,8 +20,8 @@ namespace Dolittle.Runtime.Events.Processing
     {
         object _lockObj = new object();
 
-        ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorIdentifier,ScopedEventProcessor>> _scopedProcessors 
-                            = new ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorIdentifier,ScopedEventProcessor>>();
+        ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorId,ScopedEventProcessor>> _scopedProcessors 
+                            = new ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorId,ScopedEventProcessor>>();
 
         BlockingCollection<CommittedEventStreamWithContext> _queue = new BlockingCollection<CommittedEventStreamWithContext>();
 
@@ -52,7 +48,7 @@ namespace Dolittle.Runtime.Events.Processing
         public void Register(ScopedEventProcessor processor)
         {
             _logger.Debug($"Adding ScopedEventProcessor  {processor.Key}");
-            _scopedProcessors.GetOrAdd(processor.Key, (key) => new ConcurrentDictionary<EventProcessorIdentifier,ScopedEventProcessor>())
+            _scopedProcessors.GetOrAdd(processor.Key, (key) => new ConcurrentDictionary<EventProcessorId,ScopedEventProcessor>())
                 .AddOrUpdate(processor.ProcessorId, processor, (k,v)=> processor);
             processor.CatchUp();
         }
@@ -85,11 +81,15 @@ namespace Dolittle.Runtime.Events.Processing
         /// <returns>The registered <see cref="IEnumerable{ScopedEventProcessor}" /> for the key or null if none is registered</returns>
         public IEnumerable<ScopedEventProcessor> GetProcessorsFor(ScopedEventProcessorKey key)
         {
-            ConcurrentDictionary<EventProcessorIdentifier,ScopedEventProcessor> processors;
+            ConcurrentDictionary<EventProcessorId,ScopedEventProcessor> processors;
             var dictionary = _scopedProcessors.TryGetValue(key, out processors) ? processors : null;
             return dictionary?.Values.ToArray() ?? Enumerable.Empty<ScopedEventProcessor>();
         }
 
+        /// <summary>
+        /// Adds the <see cref="CommittedEventStreamWithContext" /> to a queue for future processing
+        /// </summary>
+        /// <param name="committedEventStreamWithContext">the committed event stream with context to queue</param>
         protected virtual void Enqueue(CommittedEventStreamWithContext committedEventStreamWithContext)
         {
             lock(_lockObj)
@@ -99,6 +99,10 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
+        /// <summary>
+        ///  Processes the <see cref="CommittedEventStreamWithContext" /> 
+        /// </summary>
+        /// <param name="committedEventStreamWithContext">The <see cref="CommittedEventStream" /> to process</param>
         protected virtual void ProcessStream(CommittedEventStreamWithContext committedEventStreamWithContext)
         {
             var committedEventStream = committedEventStreamWithContext.EventStream;
@@ -108,7 +112,7 @@ namespace Dolittle.Runtime.Events.Processing
 
         void Process(CommittedEventEnvelope envelope, IExecutionContext executionContext)
         {
-            ConcurrentDictionary<EventProcessorIdentifier,ScopedEventProcessor> processors = null;
+            ConcurrentDictionary<EventProcessorId,ScopedEventProcessor> processors = null;
             var key = new ScopedEventProcessorKey(executionContext.Tenant,envelope.Metadata.Artifact);
             if (_scopedProcessors.TryGetValue(key, out processors))
             {
@@ -145,147 +149,5 @@ namespace Dolittle.Runtime.Events.Processing
                 _logger.Debug($"Processed committed event stream queue");
             }
         }
-    }
-
-    public class CommittedEventStreamWithContext
-    {
-        public CommittedEventStream EventStream { get; }
-        public IExecutionContext Context { get; }
-
-        public CommittedEventStreamWithContext(CommittedEventStream stream, IExecutionContext context)
-        {
-            EventStream = stream;
-            Context = context;
-        }
-    }    
-
-    public interface IExecutionContextManager
-    {
-        IExecutionContext Current { get; set; }
-
-        void SetConstants(Application application, BoundedContext boundedContext);
-
-        IExecutionContext CurrentFor(TenantId tenant);
-
-        IExecutionContext CurrentFor(TenantId tenant, CorrelationId correlationId, ClaimsPrincipal principal = null);
-    }
-
-    public class ExecutionContextManager : IExecutionContextManager
-    {
-        static AsyncLocal<IExecutionContext> _executionContext = new AsyncLocal<IExecutionContext>();
-
-        Application _application;
-        BoundedContext _boundedContext;
-
-        /// <inheritdoc/>
-        public IExecutionContext Current
-        {
-            get
-            {
-                var context = _executionContext.Value;
-                if (context == null)throw new Exception("Execution Context not set");
-                return context;
-            }
-            set { _executionContext.Value = value; }
-        }
-
-        /// <inheritdoc/>
-        public void SetConstants(Application application, BoundedContext boundedContext)
-        {
-            _application = application;
-            _boundedContext = boundedContext;
-        }
-
-        /// <inheritdoc/>
-        public IExecutionContext CurrentFor(TenantId tenant)
-        {
-            return CurrentFor(tenant, CorrelationId.New(), new ClaimsPrincipal());
-        }
-
-        /// <inheritdoc/>
-        public IExecutionContext CurrentFor(TenantId tenant, CorrelationId correlationId, ClaimsPrincipal principal = null)
-        {
-            var executionContext = new ExecutionContext(
-                _application,
-                _boundedContext,
-                tenant,
-                correlationId,
-                principal ?? new ClaimsPrincipal(),
-                CultureInfo.CurrentCulture);
-
-            Current = executionContext;
-
-            return executionContext;
-        }
-    }
-
-    public class ExecutionContext : IExecutionContext
-    {
-        public ExecutionContext(
-            Application application,
-            BoundedContext boundedContext,
-            TenantId tenant,
-            CorrelationId correlationId,
-            ClaimsPrincipal principal,
-            CultureInfo cultureInfo)
-        {
-            Application = application;
-            BoundedContext = boundedContext;
-            Tenant = tenant;
-            CorrelationId = correlationId;
-            Principal = principal;
-            Culture = cultureInfo;
-        }
-
-        /// <inheritdoc/>
-        public Application Application { get; }
-
-        /// <inheritdoc/>
-        public BoundedContext BoundedContext { get; }
-
-        /// <inheritdoc/>
-        public TenantId Tenant { get; }
-
-        /// <inheritdoc/>
-        public CorrelationId CorrelationId { get; }
-
-        /// <inheritdoc/>
-        public ClaimsPrincipal Principal { get; }
-
-        /// <inheritdoc/>
-        public CultureInfo Culture { get; }
-    }
-
-    public interface IExecutionContext
-    {
-        /// <summary>
-        /// Gets the <see cref="Application"/> for the <see cref="IExecutionContext">execution context</see>
-        /// </summary>
-        Application Application { get; }
-
-        /// <summary>
-        /// Gets the <see cref="BoundedContext"/> for the <see cref="IExecutionContext">execution context</see>
-        /// </summary>
-        BoundedContext BoundedContext { get; }
-
-        /// <summary>
-        /// Gets the <see cref="TenantId"/> for the <see cref="IExecutionContext">execution context</see>
-        /// </summary>
-        TenantId Tenant { get; }
-
-        /// <summary>
-        /// Gets the <see cref="CorrelationId"/> for the <see cref="IExecutionContext">execution context</see>
-        /// </summary>
-        CorrelationId CorrelationId { get; }
-
-        /// <summary>
-        /// Gets the <see cref="ClaimsPrincipal"/> for the <see cref="IExecutionContext">execution context</see>
-        /// </summary>
-        ClaimsPrincipal Principal { get; }
-
-        /// <summary>
-        /// Gets the <see cref="CultureInfo"/> for the <see cref="IExecutionContext">execution context</see>
-        /// </summary>
-        CultureInfo Culture { get; }
     }
 }

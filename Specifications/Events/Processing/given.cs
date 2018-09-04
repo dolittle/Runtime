@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing
 
     public class given
     {
-        public static TestEventProcessor a_test_processor_for(EventProcessorIdentifier identifier, Artifact artifact)
+        public static TestEventProcessor a_test_processor_for(EventProcessorId identifier, Artifact artifact)
         {
             return new TestEventProcessor(identifier,artifact);
         }
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing
         public static Mock<IEventProcessor> an_event_processor_mock()
         {
             Artifact artifact = Artifact.New();
-            EventProcessorIdentifier id = Guid.NewGuid().ToString();
+            EventProcessorId id = Guid.NewGuid().ToString();
             var mock = new Mock<IEventProcessor>();
             mock.SetupGet(_=>_.Event).Returns(artifact);
             mock.SetupGet(_=>_.Identifier).Returns(id);
@@ -40,13 +40,13 @@ namespace Dolittle.Runtime.Events.Specs.Processing
     {
         public List<CommittedEventEnvelope> Processed { get; }
 
-        public TestEventProcessor(EventProcessorIdentifier identifier, Artifact @event)
+        public TestEventProcessor(EventProcessorId identifier, Artifact @event)
         {
             Identifier = identifier;
             Event = @event;
             Processed = new List<CommittedEventEnvelope>();
         }
-        public EventProcessorIdentifier Identifier { get; }
+        public EventProcessorId Identifier { get; }
         public Artifact Event { get; }
 
         public void Process(CommittedEventEnvelope eventEnvelope)

@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the identifier for the <see cref="IEventProcessor"/>
         /// </summary>
-        EventProcessorIdentifier Identifier { get; }
+        EventProcessorId Identifier { get; }
 
         /// <summary>
         /// Gets the <see cref="Artifact"/> for the <see cref="IEvent">event type</see>

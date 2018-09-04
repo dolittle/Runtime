@@ -9,15 +9,15 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents a unqiue identifier for a <see cref="IEventProcessor"/>
     /// </summary>
-    public class EventProcessorIdentifier : ConceptAs<string>
+    public class EventProcessorId : ConceptAs<string>
     {
         /// <summary>
-        /// Implicitly convert from <see cref="string"/> to <see cref="EventProcessorIdentifier"/>
+        /// Implicitly convert from <see cref="string"/> to <see cref="EventProcessorId"/>
         /// </summary>
         /// <param name="identifier"><see cref="string"/> representation</param>
-        public static implicit operator EventProcessorIdentifier(string identifier)
+        public static implicit operator EventProcessorId(string identifier)
         {
-            return new EventProcessorIdentifier { Value = identifier };
+            return new EventProcessorId { Value = identifier };
         }
     }
 }

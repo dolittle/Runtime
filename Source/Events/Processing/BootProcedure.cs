@@ -25,6 +25,13 @@ namespace Dolittle.Runtime.Events.Processing
         IScopedEventProcessingHub _processingHub;
         ILogger _logger;
 
+        /// <summary>
+        /// Instantiates a new instance of <see cref="BootProcedure" />
+        /// </summary>
+        /// <param name="systemsThatKnowAboutEventProcessors">Provides <see cref="IEventProcessor">Event Processors</see></param>
+        /// <param name="tenants">A collection of all <see cref="ITenant">tenants</see></param>
+        /// <param name="processingHub">An instance of <see cref="IScopedEventProcessingHub" /> for processing <see cref="CommittedEventStream">Committed Event Streams</see></param>
+        /// <param name="logger">An instance of <see cref="ILogger" /> for logging</param>
         public BootProcedure(IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, ITenants tenants, IScopedEventProcessingHub processingHub, ILogger logger)
         {
             _processingHub = processingHub;
