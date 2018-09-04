@@ -3,6 +3,7 @@ using Dolittle.Concepts;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Events;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events
 {
@@ -46,5 +47,15 @@ namespace Dolittle.Runtime.Events
         /// </summary>
         /// <value></value>
         public ArtifactId Artifact { get; }
+
+        /// <summary>
+        /// Creates a <see cref="CommittedEventVersion" /> based upon this <see cref="VersionedEventSource" /> 
+        /// </summary>
+        /// <param name="commitSequence">the <see cref="CommitSequenceNumber" /></param>
+        /// <returns>The <see cref="CommittedEventVersion" /> based upon this <see cref="VersionedEventSource" /> </returns>
+        public CommittedEventVersion ToCommittedEventVersion(CommitSequenceNumber commitSequence)
+        {
+            return this.Version.ToCommittedEventVersion(commitSequence);
+        }
     }
 }
