@@ -26,16 +26,25 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<IScopedEventProcessingHub> processing_hub;
         static Exception exception;
         static int number_of_scoped_processors;
+        static Mock<IFetchUnprocessedEvents> unprocessed_events_fetcher = new Mock<IFetchUnprocessedEvents>();
+        static Mock<IEventProcessorOffsetRepository> offset_repository = new Mock<IEventProcessorOffsetRepository>();
 
         Establish context = () =>
         {
+            unprocessed_events_fetcher = new Mock<IFetchUnprocessedEvents>();
+            offset_repository = new Mock<IEventProcessorOffsetRepository>();
+
             I_know_about_event_processors = get_instances_of_I_know_about_event_processors();
             tenants = get_tenants();
             I_know_about_event_processors.Object.ForEach(_ => number_of_scoped_processors += _.Count());
             number_of_scoped_processors *= tenants.Object.Count();
             
             processing_hub = new Mock<IScopedEventProcessingHub>();
-            boot_procedure = new BootProcedure(I_know_about_event_processors.Object,tenants.Object,processing_hub.Object, mocks.a_logger().Object);
+            boot_procedure = new BootProcedure(I_know_about_event_processors.Object,
+                                                tenants.Object,processing_hub.Object, 
+                                                () => offset_repository.Object,
+                                                () => unprocessed_events_fetcher.Object,
+                                                mocks.a_logger().Object);
         };
 
         Because of = () => exception = Catch.Exception(() => boot_procedure.Perform());

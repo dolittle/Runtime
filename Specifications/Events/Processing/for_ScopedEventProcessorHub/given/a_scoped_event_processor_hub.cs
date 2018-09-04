@@ -20,7 +20,8 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
             mocked_execution_context_manager = mocks.an_execution_context_manager();
             var execution_context = specs.Contexts.get_execution_context();
             mocked_execution_context_manager.SetupGet(m => m.Current).Returns(execution_context);
-            hub = new ScopedEventProcessingHub(mocks.a_logger().Object,mocked_execution_context_manager.Object);
+            hub = new ScopedEventProcessingHub(mocks.a_logger().Object,
+                                                mocked_execution_context_manager.Object);
         }; 
     }
 }

@@ -32,19 +32,26 @@ namespace Dolittle.Runtime.Events.Processing
         TenantId _tenant;
         IEventProcessor _processor;
         ILogger _logger;
+        private readonly Func<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        private readonly Func<IEventProcessorOffsetRepository> _getOffsetProvider;
 
         /// <summary>
         /// Instantiates an instance of <see cref="ScopedEventProcessor" />
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" /> that this processor is scoped to.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event</param>
+        /// <param name="getOffsetProvider">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
+        /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages</param>
-        public ScopedEventProcessor(TenantId tenant, IEventProcessor processor, ILogger logger)
+        public ScopedEventProcessor(TenantId tenant, IEventProcessor processor,Func<IEventProcessorOffsetRepository> getOffsetProvider, 
+                                        Func<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,  ILogger logger)
         {
             _tenant = tenant;
             _processor = processor;
             _logger = logger;
             Key = new ScopedEventProcessorKey(tenant,processor.Event);
+            _getUnprocessedEventsFetcher = getUnprocessedEventsFetcher;
+            _getOffsetProvider = getOffsetProvider;
         }
 
         /// <summary>

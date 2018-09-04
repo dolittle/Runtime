@@ -10,6 +10,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Logging;
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Execution;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// 
@@ -105,18 +106,19 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="committedEventStreamWithContext">The <see cref="CommittedEventStream" /> to process</param>
         protected virtual void ProcessStream(CommittedEventStreamWithContext committedEventStreamWithContext)
         {
+            _executionContextManager.Current = committedEventStreamWithContext.Context;
             var committedEventStream = committedEventStreamWithContext.EventStream;
             _logger.Debug($"Processing  stream {committedEventStream.Sequence} {committedEventStream.Id} {committedEventStream.CorrelationId}");
             committedEventStream.Events.ForEach(e => Process(e.ToCommittedEventEnvelope(committedEventStream.Sequence),committedEventStreamWithContext.Context));
         }
 
         void Process(CommittedEventEnvelope envelope, IExecutionContext executionContext)
-        {
+        {        
             ConcurrentDictionary<EventProcessorId,ScopedEventProcessor> processors = null;
             var key = new ScopedEventProcessorKey(executionContext.Tenant,envelope.Metadata.Artifact);
             if (_scopedProcessors.TryGetValue(key, out processors))
             {
-                processors.Values.ForEach(_ => _.Process(envelope));
+                Parallel.ForEach(processors.Values, _ => _.Process(envelope));
             }
             _logger.Warning($"No Processor registered for {key}");
         }

@@ -33,7 +33,16 @@ namespace Dolittle.Runtime.Events.Specs.Processing
         
         public static Mock<ScopedEventProcessor> a_scoped_event_processor_mock(TenantId tenant, IEventProcessor eventProcessor, ILogger logger = null)
         {
-            return new Mock<ScopedEventProcessor>(tenant,eventProcessor,logger ?? mocks.a_logger().Object);
+            var offset_repository = new Mock<IEventProcessorOffsetRepository>();
+            var unprocessed_event_fetcher = new Mock<IFetchUnprocessedEvents>();
+
+            Func<IEventProcessorOffsetRepository> offset_provider = () => offset_repository.Object;
+            Func<IFetchUnprocessedEvents> unprocessed_provider = () => unprocessed_event_fetcher.Object;
+            return new Mock<ScopedEventProcessor>(tenant,
+                                                    eventProcessor,
+                                                    offset_provider,
+                                                    unprocessed_provider,
+                                                    logger ?? mocks.a_logger().Object);
         }
     }
     public class TestEventProcessor : IEventProcessor
