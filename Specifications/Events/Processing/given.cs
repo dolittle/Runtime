@@ -1,0 +1,57 @@
+namespace Dolittle.Runtime.Events.Specs.Processing
+{
+    using System;
+    using System.Collections.Generic;
+    using Dolittle.Artifacts;
+    using Dolittle.Logging;
+    using Dolittle.Runtime.Events.Processing;
+    using Dolittle.Runtime.Events.Store;
+    using Dolittle.Runtime.Tenancy;
+    using Moq;
+
+    public class given
+    {
+        public static TestEventProcessor a_test_processor_for(EventProcessorIdentifier identifier, Artifact artifact)
+        {
+            return new TestEventProcessor(identifier,artifact);
+        }
+
+        public static TestEventProcessor a_test_processor_for(Artifact artifact)
+        {
+            return a_test_processor_for(Guid.NewGuid().ToString(),artifact);
+        }
+
+        public static Mock<IEventProcessor> an_event_processor_mock()
+        {
+            Artifact artifact = Artifact.New();
+            EventProcessorIdentifier id = Guid.NewGuid().ToString();
+            var mock = new Mock<IEventProcessor>();
+            mock.SetupGet(_=>_.Event).Returns(artifact);
+            mock.SetupGet(_=>_.Identifier).Returns(id);
+            return mock;
+        }
+        
+        public static Mock<ScopedEventProcessor> a_scoped_event_processor_mock(TenantId tenant, IEventProcessor eventProcessor, ILogger logger = null)
+        {
+            return new Mock<ScopedEventProcessor>(tenant,eventProcessor,logger ?? mocks.a_logger().Object);
+        }
+    }
+    public class TestEventProcessor : IEventProcessor
+    {
+        public List<CommittedEventEnvelope> Processed { get; }
+
+        public TestEventProcessor(EventProcessorIdentifier identifier, Artifact @event)
+        {
+            Identifier = identifier;
+            Event = @event;
+            Processed = new List<CommittedEventEnvelope>();
+        }
+        public EventProcessorIdentifier Identifier { get; }
+        public Artifact Event { get; }
+
+        public void Process(CommittedEventEnvelope eventEnvelope)
+        {
+            Processed.Add(eventEnvelope);
+        }
+    }
+}

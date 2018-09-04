@@ -221,7 +221,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                         var committedEventStream = _eventStore.Commit(uncommittedEventStream);
 
                         _logger.Information("Process committed events");
-                        _eventProcessors.Process(committedEventStream);
+                        //TODO: add in the correct processor
+                        //_eventProcessors.Process(committedEventStream);
                     }
                     catch (Exception ex)
                     {

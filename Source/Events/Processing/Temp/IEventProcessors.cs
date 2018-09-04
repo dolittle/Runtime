@@ -16,11 +16,5 @@ namespace Dolittle.Runtime.Events.Processing
         /// Gets all the available <see cref="IEventProcessor">event processors</see>
         /// </summary>
         IEnumerable<IEventProcessor>    All { get; }
-
-        /// <summary>
-        /// Process an <see cref="IEvent">event</see>
-        /// </summary>
-        /// <param name="committedEvents">The <see cref="Store.CommittedEventStream"/> holding committed events</param>
-        void Process(Store.CommittedEventStream committedEvents);
     }
 }
