@@ -31,15 +31,15 @@ namespace Dolittle.Runtime.Events.Specs.Processing
 
         Establish context = () => 
         {
-            unprocessed_events_fetcher_for_tenant_simple = new Mock<IFetchUnprocessedEvents>();
-            unprocessed_events_fetcher_for_other_tenant_simple = new Mock<IFetchUnprocessedEvents>();
-            unprocessed_events_fetcher_for_tenant_another = new Mock<IFetchUnprocessedEvents>();
-            unprocessed_events_fetcher_for_other_tenant_another = new Mock<IFetchUnprocessedEvents>();
+            unprocessed_events_fetcher_for_tenant_simple = given.an_unprocessed_events_fetcher_mock();
+            unprocessed_events_fetcher_for_other_tenant_simple = given.an_unprocessed_events_fetcher_mock();
+            unprocessed_events_fetcher_for_tenant_another = given.an_unprocessed_events_fetcher_mock();
+            unprocessed_events_fetcher_for_other_tenant_another = given.an_unprocessed_events_fetcher_mock();
 
-            offset_repository_simple_tenant = new Mock<IEventProcessorOffsetRepository>();
-            offset_repository_another_tenant = new Mock<IEventProcessorOffsetRepository>();
-            offset_repository_simple_other = new Mock<IEventProcessorOffsetRepository>();
-            offset_repository_another_other = new Mock<IEventProcessorOffsetRepository>();
+            offset_repository_simple_tenant = given.an_event_processor_offset_repository_mock();
+            offset_repository_another_tenant = given.an_event_processor_offset_repository_mock();
+            offset_repository_simple_other = given.an_event_processor_offset_repository_mock();
+            offset_repository_another_other = given.an_event_processor_offset_repository_mock();
 
             simple_event_processor = processors.a_test_processor_for(specs.Artifacts.artifact_for_simple_event);
             another_event_processor = processors.a_test_processor_for(specs.Artifacts.artifact_for_another_event);
