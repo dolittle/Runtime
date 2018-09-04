@@ -18,19 +18,33 @@ namespace Dolittle.Runtime.Events.Specs.Processing
 
         public static TestEventProcessor a_test_processor_for(Artifact artifact)
         {
-            return a_test_processor_for(Guid.NewGuid().ToString(),artifact);
+            return a_test_processor_for(Guid.NewGuid(),artifact);
         }
 
         public static Mock<IEventProcessor> an_event_processor_mock()
         {
             Artifact artifact = Artifact.New();
-            EventProcessorId id = Guid.NewGuid().ToString();
+            EventProcessorId id = Guid.NewGuid();
             var mock = new Mock<IEventProcessor>();
             mock.SetupGet(_=>_.Event).Returns(artifact);
             mock.SetupGet(_=>_.Identifier).Returns(id);
             return mock;
         }
         
+        public static Mock<IEventProcessorOffsetRepository> an_event_processor_offset_repository_mock()
+        {
+            var mock = new Mock<IEventProcessorOffsetRepository>();
+            mock.Setup(_ => _.Get(Moq.It.IsAny<EventProcessorId>())).Returns(CommittedEventVersion.None);
+            return mock;
+        }
+
+        public static Mock<IFetchUnprocessedEvents> an_unprocessed_events_fetcher_mock()
+        {
+            var mock = new Mock<IFetchUnprocessedEvents>();
+            mock.Setup(_ => _.GetUnprocessedEvents(Moq.It.IsAny<ArtifactId>(),Moq.It.IsAny<CommittedEventVersion>())).Returns(new SingleEventTypeEventStream(null));
+            return mock;
+        }
+
         public static Mock<ScopedEventProcessor> a_scoped_event_processor_mock(TenantId tenant, IEventProcessor eventProcessor, ILogger logger = null)
         {
             var offset_repository = new Mock<IEventProcessorOffsetRepository>();

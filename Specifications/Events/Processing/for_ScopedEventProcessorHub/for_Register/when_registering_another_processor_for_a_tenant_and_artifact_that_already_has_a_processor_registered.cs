@@ -21,8 +21,8 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.f
         {
             tenant = Guid.NewGuid();
             var artifact = Artifact.New();
-            var first_processor = given.a_test_processor_for("first",artifact);
-            var second_processor = given.a_test_processor_for("second",artifact);
+            var first_processor = given.a_test_processor_for(Guid.NewGuid(),artifact);
+            var second_processor = given.a_test_processor_for(Guid.NewGuid(),artifact);
             already_registered = given.a_scoped_event_processor_mock(tenant,first_processor);
             registered_on_same_event = given.a_scoped_event_processor_mock(tenant,second_processor);
             hub.Register(already_registered.Object);

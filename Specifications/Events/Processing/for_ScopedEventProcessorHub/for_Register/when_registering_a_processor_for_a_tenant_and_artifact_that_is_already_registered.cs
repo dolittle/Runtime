@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.f
         Establish context = () => 
         {
             tenant = Guid.NewGuid();
-            processor = given.a_test_processor_for("test_processor",Artifact.New());
+            processor = given.a_test_processor_for(Guid.NewGuid(),Artifact.New());
             already_registered = given.a_scoped_event_processor_mock(tenant,processor);
             duplicate = given.a_scoped_event_processor_mock(tenant,processor);
             hub.Register(already_registered.Object);
