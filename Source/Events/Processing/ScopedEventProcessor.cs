@@ -6,6 +6,7 @@ namespace Dolittle.Runtime.Events.Processing
     using System.Threading.Tasks;
     using Dolittle.Artifacts;
     using Dolittle.Bootstrapping;
+    using Dolittle.Collections;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events;
     using Dolittle.Runtime.Events.Store;
@@ -17,7 +18,11 @@ namespace Dolittle.Runtime.Events.Processing
     /// </summary>
     public class ScopedEventProcessor
     {
-        CommittedEventVersion _lastVersionProcessed;
+        /// <summary>
+        /// Indicates the <see cref="CommittedEventVersion">version</see> of the last event that was processed
+        /// </summary>
+        /// <value></value>      
+        public CommittedEventVersion LastVersionProcessed { get; private set; }
 
         /// <summary>
         /// A <see cref="ScopedEventProcessorKey" /> to identity the <see cref="Artifact">Event</see> and <see cref="TenantId">Tenant</see> combination
@@ -46,6 +51,7 @@ namespace Dolittle.Runtime.Events.Processing
         public ScopedEventProcessor(TenantId tenant, IEventProcessor processor,Func<IEventProcessorOffsetRepository> getOffsetProvider, 
                                         Func<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,  ILogger logger)
         {
+            LastVersionProcessed = CommittedEventVersion.None;
             _tenant = tenant;
             _processor = processor;
             _logger = logger;
@@ -59,12 +65,18 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         public virtual void CatchUp()
         {
-            //SetIsCaughtUp(committedEventVersion);
-        }
+            LastVersionProcessed = _getOffsetProvider().Get(ProcessorId);
 
-        private void SetIsCaughtUp(CommittedEventVersion committedEventVersion)
-        {
-            _lastVersionProcessed = committedEventVersion;
+            SingleEventTypeEventStream eventStream = _getUnprocessedEventsFetcher().GetUnprocessedEvents(Key.Event.Id,LastVersionProcessed) ?? new SingleEventTypeEventStream(null);
+            do
+            {
+                if(!eventStream.IsEmpty)
+                {
+                    eventStream.ForEach(e => ProcessEvent(e));
+                    eventStream = _getUnprocessedEventsFetcher().GetUnprocessedEvents(Key.Event.Id,LastVersionProcessed);
+                }
+            }
+            while(!eventStream.IsEmpty);
             HasCaughtUp = true;
         }
 
@@ -80,8 +92,9 @@ namespace Dolittle.Runtime.Events.Processing
 
         void ProcessEvent(CommittedEventEnvelope envelope)
         {
-            _lastVersionProcessed = envelope.Version;
-            _logger.Debug($"Processing {envelope.Version}");
+            LastVersionProcessed = envelope.Version;
+            _logger.Debug($"Processing {envelope.Version.ToString()} of {Key.Event.Id}");
+            _processor.Process(envelope);
         }
 
         /// <summary>
@@ -97,7 +110,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <returns>True if the processor has caught up and the version is greater than the last processed version, otherwise false</returns>
         public bool CanProcess(CommittedEventVersion version)
         {
-            return HasCaughtUp && version > _lastVersionProcessed;
+            return HasCaughtUp && version > LastVersionProcessed;
         }
     }
 }

@@ -60,6 +60,16 @@
         {
             return new EventMetadata(versionedEventSource, correlationId, artifact, "A Test", committed);
         } 
+
+        static SingleEventTypeEventStream GetEventsFromCommits(IEnumerable<CommittedEventStream> commits, ArtifactId eventType)
+        {
+        var events = new List<CommittedEventEnvelope>();
+        foreach(var commit in commits)
+        {
+            events.AddRange(commit.Events.FilteredByEventType(eventType).Select(e => new CommittedEventEnvelope(commit.Sequence,e.Id,e.Metadata,e.Event)));
+        }
+        return new SingleEventTypeEventStream(events);
+        }
     }
 
 

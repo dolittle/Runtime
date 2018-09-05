@@ -33,14 +33,14 @@ namespace Dolittle.Runtime.Events.Specs.Processing
         
         public static Mock<IEventProcessorOffsetRepository> an_event_processor_offset_repository_mock()
         {
-            var mock = an_event_processor_offset_repository_mock();
+            var mock = new Mock<IEventProcessorOffsetRepository>();
             mock.Setup(_ => _.Get(Moq.It.IsAny<EventProcessorId>())).Returns(CommittedEventVersion.None);
             return mock;
         }
 
         public static Mock<IFetchUnprocessedEvents> an_unprocessed_events_fetcher_mock()
         {
-            var mock = an_unprocessed_events_fetcher_mock();
+            var mock = new Mock<IFetchUnprocessedEvents>();
             mock.Setup(_ => _.GetUnprocessedEvents(Moq.It.IsAny<ArtifactId>(),Moq.It.IsAny<CommittedEventVersion>())).Returns(new SingleEventTypeEventStream(null));
             return mock;
         }
