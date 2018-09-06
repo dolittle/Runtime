@@ -104,9 +104,9 @@ namespace Dolittle.Runtime.Events.Processing
                     _processor.Process(envelope);
                     _logger.Debug($"Processed {envelope.Version.ToString()} of {Key.Event.Id}");
                 }
-                catch(Exception)
+                catch(Exception ex)
                 {
-                    _logger.Error($"Error Processing {envelope.Version.ToString()} of {Key.Event.Id}.  Resetting to previous version.");
+                    _logger.Error($"Error Processing {envelope.Version.ToString()} of {Key.Event.Id}.  Resetting to previous version. {ex.Message}");
                     SetCurrentVersion(previousVersion);
                     throw;
                 }
