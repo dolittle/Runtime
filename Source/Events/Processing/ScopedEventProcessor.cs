@@ -18,6 +18,8 @@ namespace Dolittle.Runtime.Events.Processing
     /// </summary>
     public class ScopedEventProcessor
     {
+        object lockObject = new object();
+
         /// <summary>
         /// Indicates the <see cref="CommittedEventVersion">version</see> of the last event that was processed
         /// </summary>
@@ -91,10 +93,39 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         void ProcessEvent(CommittedEventEnvelope envelope)
-        {
-            LastVersionProcessed = envelope.Version;
+        { 
+            lock(lockObject)
+            {
+                _logger.Debug($"Processing {envelope.Version.ToString()} of {Key.Event.Id}");
+                var previousVersion = LastVersionProcessed;
+                try
+                {
+                    SetCurrentVersion(envelope.Version);
+                    _processor.Process(envelope);
+                    _logger.Debug($"Processed {envelope.Version.ToString()} of {Key.Event.Id}");
+                }
+                catch(Exception)
+                {
+                    _logger.Error($"Error Processing {envelope.Version.ToString()} of {Key.Event.Id}.  Resetting to previous version.");
+                    SetCurrentVersion(previousVersion);
+                    throw;
+                }
+            }
             _logger.Debug($"Processing {envelope.Version.ToString()} of {Key.Event.Id}");
-            _processor.Process(envelope);
+        }
+
+        void SetCurrentVersion(CommittedEventVersion committedEventVersion)
+        {
+            //the provider should accept the version and is responsible for transient errors and persisting it eventually
+            try
+            {
+                LastVersionProcessed = committedEventVersion;
+                _getOffsetProvider().Set(ProcessorId,LastVersionProcessed);
+            }
+            catch(Exception ex)
+            {
+                _logger.Error($"Error setting offset for '{ProcessorId}' : '{committedEventVersion}' - {ex.ToString()}");
+            }
         }
 
         /// <summary>

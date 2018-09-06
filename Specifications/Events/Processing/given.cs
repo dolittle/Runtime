@@ -11,26 +11,23 @@ namespace Dolittle.Runtime.Events.Specs.Processing
 
     public class given
     {
-        public static TestEventProcessor a_test_processor_for(EventProcessorId identifier, Artifact artifact)
+        public static Mock<IEventProcessor> an_event_processor_mock(Artifact artifact, EventProcessorId id)
         {
-            return new TestEventProcessor(identifier,artifact);
-        }
-
-        public static TestEventProcessor a_test_processor_for(Artifact artifact)
-        {
-            return a_test_processor_for(Guid.NewGuid(),artifact);
-        }
-
-        public static Mock<IEventProcessor> an_event_processor_mock()
-        {
-            Artifact artifact = Artifact.New();
-            EventProcessorId id = Guid.NewGuid();
             var mock = new Mock<IEventProcessor>();
             mock.SetupGet(_=>_.Event).Returns(artifact);
             mock.SetupGet(_=>_.Identifier).Returns(id);
             return mock;
         }
-        
+
+        public static Mock<IEventProcessor> an_event_processor_mock()
+        {
+            return an_event_processor_mock(Artifact.New(),Guid.NewGuid());
+        }  
+
+        public static Mock<IEventProcessor> an_event_processor_mock(Artifact artifact)
+        {
+            return an_event_processor_mock(artifact,Guid.NewGuid());
+        }       
         public static Mock<IEventProcessorOffsetRepository> an_event_processor_offset_repository_mock()
         {
             var mock = new Mock<IEventProcessorOffsetRepository>();
@@ -57,24 +54,6 @@ namespace Dolittle.Runtime.Events.Specs.Processing
                                                     offset_provider,
                                                     unprocessed_provider,
                                                     logger ?? mocks.a_logger().Object);
-        }
-    }
-    public class TestEventProcessor : IEventProcessor
-    {
-        public List<CommittedEventEnvelope> Processed { get; }
-
-        public TestEventProcessor(EventProcessorId identifier, Artifact @event)
-        {
-            Identifier = identifier;
-            Event = @event;
-            Processed = new List<CommittedEventEnvelope>();
-        }
-        public EventProcessorId Identifier { get; }
-        public Artifact Event { get; }
-
-        public void Process(CommittedEventEnvelope eventEnvelope)
-        {
-            Processed.Add(eventEnvelope);
         }
     }
 }

@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         {
             var I_know = new Mock<IKnowAboutEventProcessors>();
             var event_processors = new List<IEventProcessor>();
-            event_processors.AddRange(Enumerable.Range(0, 10).Select(_ => given.a_test_processor_for(Guid.NewGuid().ToString(),Artifact.New())));
+            event_processors.AddRange(Enumerable.Range(0, 10).Select(_ => given.an_event_processor_mock(Artifact.New()).Object));
             I_know.Setup(_ => _.GetEnumerator()).Returns(() => event_processors.GetEnumerator());
             return I_know;
         }

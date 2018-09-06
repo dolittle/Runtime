@@ -28,6 +28,7 @@ namespace Dolittle.Runtime.Processing.for_ScopedEventProcessor.when_processing
         Because of = () => simple_scoped_processor.Process(event_to_process);
 
         It should_have_the_version_set_from_the_last_event_it_processed = () => simple_scoped_processor.LastVersionProcessed.ShouldEqual(event_to_process.Version);
-        It should_not_have_passed_the_event_to_the_actual_event_processor_for_processing = () => simple_event_processor.Processed.Any().ShouldBeFalse();
+        It should_not_set_the_offset_with_the_repository = () => offset_repository_simple_tenant.Verify(r => r.Set(Moq.It.IsAny<EventProcessorId>(),Moq.It.IsAny<CommittedEventVersion>()),Times.Never());
+        It should_not_have_passed_the_event_to_the_actual_event_processor_for_processing = () => simple_event_processor.ShouldNotHaveProcessedAnyEvents();
     }
 }
