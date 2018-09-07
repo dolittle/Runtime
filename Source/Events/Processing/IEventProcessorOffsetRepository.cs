@@ -1,4 +1,5 @@
-﻿using Dolittle.Artifacts;
+﻿using System;
+using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 
