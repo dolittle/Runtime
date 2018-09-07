@@ -14,7 +14,6 @@
     public class and_the_event_processor_throws_an_exception : scoped_event_processors
     {
         static CommittedEventVersion original_version = new CommittedEventVersion(1,1,0);
-        static SingleEventTypeEventStream event_stream;
         static CommittedEventEnvelope event_to_process;
 
         static Exception exception;

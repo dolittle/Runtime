@@ -14,7 +14,6 @@ namespace Dolittle.Runtime.Processing.for_ScopedEventProcessor.when_processing
     public class and_the_processor_has_not_caught_up : scoped_event_processors
     {
         static CommittedEventVersion version = new CommittedEventVersion(1,1,0);
-        static SingleEventTypeEventStream event_stream;
         static CommittedEventEnvelope event_to_process;
 
         Establish context = () => 

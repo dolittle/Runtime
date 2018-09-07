@@ -7,6 +7,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
     using Dolittle.Runtime.Events.Processing;
     using Dolittle.Runtime.Events.Store;
     using specs = Dolittle.Runtime.Events.Specs.given;
+    using given = Dolittle.Runtime.Events.Specs.Processing.given;
     using Machine.Specifications;
     using Moq;
 
@@ -27,14 +28,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
                 .Returns(execution_context);
             mocked_execution_context_manager.SetupSet(ecm => ecm.Current = Moq.It.IsAny<IExecutionContext>()).Callback<IExecutionContext>(ec => {current_execution_context = ec; execution_context_sets++;});    
             hub = new TestScopedEventProcessingHub(mocks.a_logger().Object,mocked_execution_context_manager.Object);
-            commits = new List<CommittedEventStream>();
-            CommittedEventVersion version = null;
-            var first = Dolittle.Runtime.Events.Specs.given.Events.Build(version);
-            commits.Add(first);
-            var second = Dolittle.Runtime.Events.Specs.given.Events.Build(first.Source.ToCommittedEventVersion(first.Sequence));
-            commits.Add(second);
-            var third = Dolittle.Runtime.Events.Specs.given.Events.Build(first.Source.ToCommittedEventVersion(first.Sequence));
-            commits.Add(third);
+            commits = given.committed_event_streams();
         }; 
     }
 }

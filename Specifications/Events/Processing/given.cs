@@ -55,5 +55,18 @@ namespace Dolittle.Runtime.Events.Specs.Processing
                                                     unprocessed_provider,
                                                     logger ?? mocks.a_logger().Object);
         }
+
+        public static List<CommittedEventStream> committed_event_streams(CommittedEventVersion startingCommit = null, uint numberOfCommits = 3)
+        {
+            var commits = new List<CommittedEventStream>();
+            CommittedEventVersion version = startingCommit;
+            for(int i = 0; i < numberOfCommits;i++)
+            {
+                var commit = Dolittle.Runtime.Events.Specs.given.Events.Build(version);
+                commits.Add(commit);
+                version = commit.LastEventVersion;
+            }
+            return commits;
+        }
     }
 }

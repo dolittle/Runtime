@@ -13,7 +13,6 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessor.when
     public class and_there_are_new_events_on_several_requests : scoped_event_processors
     {
         static CommittedEventVersion version = new CommittedEventVersion(1,1,1);
-        static SingleEventTypeEventStream event_stream;
         static CommittedEventVersion version_after_first_batch;
         static CommittedEventVersion final_version;
 
