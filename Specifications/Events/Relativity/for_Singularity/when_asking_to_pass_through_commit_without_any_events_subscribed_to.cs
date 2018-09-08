@@ -5,6 +5,7 @@ using Dolittle.PropertyBags;
 using Machine.Specifications;
 using Dolittle.Execution;
 using Dolittle.Runtime.Events;
+using Dolittle.Collections;
 
 
 namespace Dolittle.Runtime.Events.Relativity.for_Singularity
@@ -28,7 +29,7 @@ namespace Dolittle.Runtime.Events.Relativity.for_Singularity
                     new EventEnvelope(
                         EventId.New(),
                         new EventMetadata(versionedEventSource,correlationId, Artifact.New(), "", DateTimeOffset.UtcNow),
-                        new PropertyBag(new Dictionary<string, object>())
+                        new PropertyBag(new NullFreeDictionary<string, object>())
                     )
                 })
             );
