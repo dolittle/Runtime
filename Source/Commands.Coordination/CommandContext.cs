@@ -25,12 +25,12 @@ namespace Dolittle.Runtime.Commands.Coordination
         /// Initializes a new <see cref="CommandContext">CommandContext</see>
         /// </summary>
         /// <param name="command">The <see cref="CommandRequest">command</see> the context is for</param>
-        /// <param name="executionContext">The <see cref="IExecutionContext"/> for the command</param>
+        /// <param name="executionContext">The <see cref="ExecutionContext"/> for the command</param>
         /// <param name="uncommittedEventStreamCoordinator">The <see cref="IUncommittedEventStreamCoordinator"/> to use for coordinating the committing of events</param>
         /// <param name="logger"><see cref="ILogger"/> to use for logging</param>
         public CommandContext(
             CommandRequest command,
-            IExecutionContext executionContext,
+            ExecutionContext executionContext,
             IUncommittedEventStreamCoordinator uncommittedEventStreamCoordinator,
             ILogger logger)
         {
@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Commands.Coordination
         public CommandRequest Command { get; }
 
         /// <inheritdoc/>
-        public IExecutionContext ExecutionContext { get; }
+        public ExecutionContext ExecutionContext { get; }
 
         /// <inheritdoc/>
         public void RegisterForTracking(IEventSource eventSource)

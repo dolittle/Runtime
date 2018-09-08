@@ -2,7 +2,7 @@ namespace Dolittle.Runtime.Events.Processing
 {
     using Dolittle.Artifacts;
     using Dolittle.Concepts;
-    using Dolittle.Runtime.Tenancy;
+    using Dolittle.Tenancy;
 
     /// <summary>
     /// A key to mark the <see cref="Artifact">Event Artifact</see> and <see cref="TenantId">Tenant</see> scope 

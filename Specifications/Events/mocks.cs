@@ -3,6 +3,7 @@
     using System;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events.Processing;
+    using Dolittle.Execution;
     using Moq;
 
     public class mocks

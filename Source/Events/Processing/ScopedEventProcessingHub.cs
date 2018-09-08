@@ -3,17 +3,16 @@ namespace Dolittle.Runtime.Events.Processing
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading;
     using System;
     using Dolittle.Collections;
     using Dolittle.Execution;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events.Store;
-    using Dolittle.Runtime.Execution;
+    using Dolittle.Lifecycle;
     using System.Threading.Tasks;
 
     /// <summary>
-    /// 
+    /// Tenant aware centalized Hub for processing events within the bounded context
     /// </summary>
     [Singleton]
 
@@ -26,7 +25,7 @@ namespace Dolittle.Runtime.Events.Processing
 
         BlockingCollection<CommittedEventStreamWithContext> _queue = new BlockingCollection<CommittedEventStreamWithContext>();
 
-        ManualResetEvent _canProcessEvents = new ManualResetEvent(false);
+        System.Threading.ManualResetEvent _canProcessEvents = new System.Threading.ManualResetEvent(false);
 
         ILogger _logger;
 
@@ -112,7 +111,7 @@ namespace Dolittle.Runtime.Events.Processing
             committedEventStream.Events.ForEach(e => Process(e.ToCommittedEventEnvelope(committedEventStream.Sequence),committedEventStreamWithContext.Context));
         }
 
-        void Process(CommittedEventEnvelope envelope, IExecutionContext executionContext)
+        void Process(CommittedEventEnvelope envelope, ExecutionContext executionContext)
         {        
             ConcurrentDictionary<EventProcessorId,ScopedEventProcessor> processors = null;
             var key = new ScopedEventProcessorKey(executionContext.Tenant,envelope.Metadata.Artifact);

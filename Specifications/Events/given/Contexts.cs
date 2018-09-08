@@ -11,6 +11,7 @@ namespace Dolittle.Runtime.Events.Specs.given
     using Dolittle.Runtime.Events.Processing;
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Tenancy;
+    using Dolittle.Tenancy;
 
     public static class Contexts
     {
@@ -19,9 +20,9 @@ namespace Dolittle.Runtime.Events.Specs.given
         public static readonly TenantId tenant = Guid.NewGuid();
         public static readonly TenantId another_tenant = Guid.NewGuid();
 
-        public static IExecutionContext get_execution_context()
+        public static ExecutionContext get_execution_context()
         {
-            return new ExecutionContext(application,bounded_context,tenant,CorrelationId.New(),new System.Security.Claims.ClaimsPrincipal(),System.Threading.Thread.CurrentThread.CurrentCulture);
+            return new ExecutionContext(application,bounded_context,tenant,"Development",CorrelationId.New(),new System.Security.Claims.ClaimsPrincipal(),System.Threading.Thread.CurrentThread.CurrentCulture);
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.f
     using Dolittle.Runtime.Events.Processing;
     using Dolittle.Runtime.Events.Specs.Processing;
     using Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given;
-    using Dolittle.Runtime.Tenancy;
+    using Dolittle.Tenancy;
     using Machine.Specifications;
     using Moq;
     using It = Machine.Specifications.It;

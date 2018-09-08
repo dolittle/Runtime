@@ -4,6 +4,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing
     using System.Collections.Generic;
     using Dolittle.Artifacts;
     using Dolittle.Logging;
+    using Dolittle.Tenancy;
     using Dolittle.Runtime.Events.Processing;
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Tenancy;

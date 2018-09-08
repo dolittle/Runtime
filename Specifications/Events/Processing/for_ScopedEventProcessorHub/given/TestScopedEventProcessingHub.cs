@@ -3,6 +3,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
     using System.Collections.Generic;
     using System.Globalization;
     using Dolittle.Applications;
+    using Dolittle.Execution;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events.Processing;
     using Dolittle.Runtime.Events.Store;

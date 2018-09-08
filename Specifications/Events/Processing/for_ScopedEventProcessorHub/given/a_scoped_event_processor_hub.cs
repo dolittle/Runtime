@@ -4,6 +4,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
     using System.Globalization;
     using Dolittle.Applications;
     using Dolittle.Logging;
+    using Dolittle.Execution;
     using Dolittle.Runtime.Events.Processing;
     using Dolittle.Runtime.Events.Store;
     using specs = Dolittle.Runtime.Events.Specs.given;

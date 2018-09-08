@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Tenancy;
     using Dolittle.Types;
+    using Dolittle.Tenancy;
 
     /// <summary>
     /// Processes an individiual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />

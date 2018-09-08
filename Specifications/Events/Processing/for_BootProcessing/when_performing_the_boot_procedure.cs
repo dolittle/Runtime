@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
     using Moq;
     using It = Machine.Specifications.It;
     using Dolittle.Runtime.Events.Specs;
+    using Dolittle.Tenancy;
     using Dolittle.Runtime.Tenancy;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events.Processing;
@@ -37,7 +38,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             I_know_about_event_processors = get_instances_of_I_know_about_event_processors();
             tenants = get_tenants();
             I_know_about_event_processors.Object.ForEach(_ => number_of_scoped_processors += _.Count());
-            number_of_scoped_processors *= tenants.Object.Count();
+            number_of_scoped_processors *= tenants.Object.All.Count();
             
             processing_hub = new Mock<IScopedEventProcessingHub>();
             boot_procedure = new BootProcedure(I_know_about_event_processors.Object,
@@ -58,7 +59,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             var list = new List<TenantId>();
             list.AddRange(Enumerable.Range(0, 10).Select(_ => (TenantId)Guid.NewGuid()));
             var tenants = new Mock<ITenants>();
-            tenants.Setup(_ => _.GetEnumerator()).Returns(() => list.GetEnumerator());
+            tenants.SetupGet(_ => _.All).Returns(() => list);
             return tenants;
         }
 

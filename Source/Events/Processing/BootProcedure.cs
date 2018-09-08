@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// Instantiates a new instance of <see cref="BootProcedure" />
         /// </summary>
         /// <param name="systemsThatKnowAboutEventProcessors">Provides <see cref="IEventProcessor">Event Processors</see></param>
-        /// <param name="tenants">A collection of all <see cref="ITenant">tenants</see></param>
+        /// <param name="tenants">A collection of all <see cref="ITenants">tenants</see></param>
         /// <param name="processingHub">An instance of <see cref="IScopedEventProcessingHub" /> for processing <see cref="CommittedEventStream">Committed Event Streams</see></param>
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events.Processing
             {
                 Parallel.ForEach(system.ToList(), (processor) =>
                 {
-                    Parallel.ForEach(_tenants.ToList(), (t) =>
+                    Parallel.ForEach(_tenants.All, (t) =>
                     {
                         _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
                     });
