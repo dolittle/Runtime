@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Defines how we get and set the Event Processor Offset (last event processed)
     /// </summary>
-    public interface IEventProcessorOffsetRepository
+    public interface IEventProcessorOffsetRepository : IDisposable
     {
         /// <summary>
         /// Gets the Offset (last event processed) for this <see cref="IEventProcessor" />

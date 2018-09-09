@@ -41,17 +41,17 @@ namespace Dolittle.Runtime.Events.Processing
         IEventProcessor _processor;
         ILogger _logger;
         private readonly Func<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
-        private readonly Func<IEventProcessorOffsetRepository> _getOffsetProvider;
+        private readonly Func<IEventProcessorOffsetRepository> _getOffsetRepository;
 
         /// <summary>
         /// Instantiates an instance of <see cref="ScopedEventProcessor" />
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" /> that this processor is scoped to.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event</param>
-        /// <param name="getOffsetProvider">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
+        /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages</param>
-        public ScopedEventProcessor(TenantId tenant, IEventProcessor processor,Func<IEventProcessorOffsetRepository> getOffsetProvider, 
+        public ScopedEventProcessor(TenantId tenant, IEventProcessor processor,Func<IEventProcessorOffsetRepository> getOffsetRepository, 
                                         Func<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,  ILogger logger)
         {
             LastVersionProcessed = CommittedEventVersion.None;
@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Processing
             _logger = logger;
             Key = new ScopedEventProcessorKey(tenant,processor.Event);
             _getUnprocessedEventsFetcher = getUnprocessedEventsFetcher;
-            _getOffsetProvider = getOffsetProvider;
+            _getOffsetRepository = getOffsetRepository;
         }
 
         /// <summary>
@@ -68,7 +68,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         public virtual void CatchUp()
         {
-            LastVersionProcessed = _getOffsetProvider().Get(ProcessorId);
+            using(var repository = _getOffsetRepository())
+            {
+                LastVersionProcessed = _getOffsetRepository().Get(ProcessorId);
+            }
 
             SingleEventTypeEventStream eventStream = _getUnprocessedEventsFetcher().GetUnprocessedEvents(Key.Event.Id,LastVersionProcessed) ?? new SingleEventTypeEventStream(null);
             do
@@ -121,7 +124,10 @@ namespace Dolittle.Runtime.Events.Processing
             try
             {
                 LastVersionProcessed = committedEventVersion;
-                _getOffsetProvider().Set(ProcessorId,LastVersionProcessed);
+                using(var repository = _getOffsetRepository())
+                {
+                    repository.Set(ProcessorId,LastVersionProcessed);
+                } 
             }
             catch(Exception ex)
             {
