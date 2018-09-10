@@ -12,6 +12,12 @@ namespace Dolittle.Runtime.Events.Store
     public class CommittedEventVersion : Value<CommittedEventVersion>, IComparable<CommittedEventVersion>
     {
         /// <summary>
+        /// Represents no committed event
+        /// </summary>
+        /// <returns></returns>
+        public readonly static CommittedEventVersion None = new CommittedEventVersion(0,0,0);    
+
+        /// <summary>
         /// Indicates the Major number (<see cref="CommitSequenceNumber" />) associated with this event
         /// </summary>
         public ulong Major { get; }

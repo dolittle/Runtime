@@ -26,9 +26,9 @@ namespace Dolittle.Runtime.Commands.Coordination
         CommandRequest Command { get; }
 
         /// <summary>
-        /// Gets the <see cref="IExecutionContext"/> for the command
+        /// Gets the <see cref="ExecutionContext"/> for the command
         /// </summary>
-        IExecutionContext ExecutionContext { get; }
+        ExecutionContext ExecutionContext { get; }
 
         /// <summary>
         /// Register an <see cref="IEventSource">event source</see> for tracking

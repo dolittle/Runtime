@@ -6,7 +6,6 @@ namespace Dolittle.Runtime.Events.for_EventSourceVersion.when_decrementing_the_c
     [Subject(typeof(EventSourceVersion),"PreviousCommit")]
     public class on_no_version
     {
-        static EventSourceVersion result;
         static Exception exception;
 
         Because of = () => exception = Catch.Exception(() => EventSourceVersion.NoVersion.PreviousCommit());

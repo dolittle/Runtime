@@ -6,6 +6,7 @@ using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 using Dolittle.Execution;
 using Dolittle.Runtime.Events;
+using Dolittle.Collections;
 
 namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
 {
@@ -34,7 +35,7 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
                             new Artifact(ArtifactId.New(), ArtifactGeneration.First),
                             new CausedBy { Value = "Someone" },
                             DateTimeOffset.UtcNow
-                        ), new PropertyBag(new Dictionary<string, object>())
+                        ), new PropertyBag(new NullFreeDictionary<string, object>())
                     )
                 })
             );

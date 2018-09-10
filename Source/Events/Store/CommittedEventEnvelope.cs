@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store
             Metadata = metadata;
             Event = @event;
             Id = eventId;
-            Version = new CommittedEventVersion(commitSequence,metadata.VersionedEventSource.Version.Commit,metadata.VersionedEventSource.Version.Sequence);
+            Version = metadata.VersionedEventSource.ToCommittedEventVersion(commitSequence);
         }
         /// <summary>
         /// The <see cref="EventMetadata" /> associated with this persisted <see cref="IEvent" />

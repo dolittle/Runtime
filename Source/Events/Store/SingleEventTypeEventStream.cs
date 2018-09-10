@@ -76,6 +76,11 @@ namespace Dolittle.Runtime.Events.Store
         {
             return _events.GetEnumerator() as IEnumerator;
         }
+
+        /// <summary>
+        /// Indicates if there are any events
+        /// </summary>
+        public bool IsEmpty => !_events.Any();
     }
 }
 
