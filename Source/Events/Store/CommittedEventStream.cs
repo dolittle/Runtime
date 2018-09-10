@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Dolittle.Runtime.Events;
 using Dolittle.Events;
+using Dolittle.Execution;
 
 namespace Dolittle.Runtime.Events.Store
 {

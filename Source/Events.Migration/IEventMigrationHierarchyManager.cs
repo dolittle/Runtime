@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using Dolittle.Events;
+using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Migration
 {
@@ -18,7 +19,7 @@ namespace Dolittle.Runtime.Events.Migration
         /// </summary>
         /// <param name="logicalEvent">The logical event (initial generation)</param>
         /// <returns>migration level</returns>
-        EventGeneration GetCurrentGenerationFor(Type logicalEvent);
+        Generation GetCurrentGenerationFor(Type logicalEvent);
 
         /// <summary>
         /// Gets the concrete type that the logical event took at the specified migration level
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Events.Migration
         /// <param name="logicalEvent">The logical event</param>
         /// <param name="level">The level we wish the concrete type for</param>
         /// <returns>The concrete type</returns>
-        Type GetTargetTypeForGeneration(Type logicalEvent, EventGeneration level);
+        Type GetTargetTypeForGeneration(Type logicalEvent, Generation level);
 
         /// <summary>
         /// Gets the logical event type of the migration hierarchy of which the passed in event is part

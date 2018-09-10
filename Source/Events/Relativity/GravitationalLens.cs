@@ -2,12 +2,9 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
 using System.Collections.Generic;
-using Dolittle.Collections;
 using Dolittle.Execution;
 using Dolittle.Logging;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Server;
 using Dolittle.Serialization.Protobuf;
 using Dolittle.Runtime.Events.Relativity.Grpc;

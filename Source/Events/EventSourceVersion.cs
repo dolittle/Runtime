@@ -3,20 +3,27 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
+using Dolittle.Events;
+using Dolittle.Concepts;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
     /// Represents the versioning for an event source
     /// </summary>
-    public struct EventSourceVersion : IComparable<EventSourceVersion>
+    public class EventSourceVersion : Value<EventSourceVersion>, IComparable<EventSourceVersion>
     {
         const float SEQUENCE_DIVISOR = 10000;
 
         /// <summary>
-        /// Zero/null version
+        /// No Version version
         /// </summary>
-        public static readonly EventSourceVersion Zero = new EventSourceVersion {Commit = 0, Sequence = 0};
+        public static readonly EventSourceVersion NoVersion = new EventSourceVersion(0,0);
+
+        /// <summary>
+        /// Initial version
+        /// </summary>
+        public static readonly EventSourceVersion Initial = new EventSourceVersion(1,0);
 
         /// <summary>
         /// Creates an <see cref="EventSourceVersion"/> from a combined floating point
@@ -25,9 +32,9 @@ namespace Dolittle.Runtime.Events
         /// <returns></returns>
         public static EventSourceVersion FromCombined(double combined)
         {
-            var commit = (int)combined;
-            var sequence = (int)Math.Round(((combined - (double)commit) * SEQUENCE_DIVISOR));
-            return new EventSourceVersion { Commit = commit, Sequence = sequence };
+            var commit = (ulong)combined;
+            var sequence = (uint)Math.Round(((combined - (double)commit) * SEQUENCE_DIVISOR));
+            return new EventSourceVersion(commit, sequence);
         }
 
         /// <summary>
@@ -35,7 +42,7 @@ namespace Dolittle.Runtime.Events
         /// </summary>
         /// <param name="commit">Commit part of the version (major)</param>
         /// <param name="sequence">Sequence part of the version, within the commit (minor) </param>
-        public EventSourceVersion(int commit, int sequence) : this()
+        public EventSourceVersion(ulong commit, uint sequence) 
         {
             Commit = commit;
             Sequence = sequence;
@@ -44,12 +51,12 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Gets the commit number of the version
         /// </summary>
-        public int Commit { get; set; }
+        public ulong Commit { get; set; }
 
         /// <summary>
         /// Gets the sequence number of the version
         /// </summary>
-        public int Sequence { get; set; }
+        public uint Sequence { get; set; }
 
 
         /// <summary>
@@ -58,7 +65,7 @@ namespace Dolittle.Runtime.Events
         /// <returns><see cref="EventSourceVersion"/> with the new version</returns>
         public EventSourceVersion NextCommit()
         {
-            var nextCommit = new EventSourceVersion {Commit = Commit + 1, Sequence = 0};
+            var nextCommit = new EventSourceVersion(Commit + 1,0);
             return nextCommit;
         }
 
@@ -68,7 +75,10 @@ namespace Dolittle.Runtime.Events
         /// <returns><see cref="EventSourceVersion"/> with the new version</returns>
         public EventSourceVersion NextSequence()
         {
-            var nextSequence = new EventSourceVersion { Commit = Commit, Sequence = Sequence+1 };
+            if(Commit < 1)
+                throw new InvalidEventSourceVersion($"Cannot get the Next Sequence on Commit {Commit}");
+
+            var nextSequence = new EventSourceVersion(Commit,Sequence+1);
             return nextSequence;
         }
 
@@ -79,10 +89,15 @@ namespace Dolittle.Runtime.Events
         /// <returns><see cref="EventSourceVersion"/> with the new version</returns>
         public EventSourceVersion PreviousCommit()
         {
-            var previousCommit = new EventSourceVersion { Commit = Commit - 1, Sequence = 0 };
+            if(Commit < 1)
+                throw new InvalidEventSourceVersion($"Cannot get the Previous Commit of Commit {Commit}");
+
+            if(Commit == 1)
+                return NoVersion;
+
+            var previousCommit = new EventSourceVersion(Commit - 1, 0);
             return previousCommit;
         }
-
 
         /// <summary>
         /// Compare this version with another version
@@ -112,7 +127,6 @@ namespace Dolittle.Runtime.Events
             var versionAsFloat = majorNumber + minorNumber;
             return versionAsFloat;
         }
-
 
 #pragma warning disable 1591 // Xml Comments
         public override string ToString()

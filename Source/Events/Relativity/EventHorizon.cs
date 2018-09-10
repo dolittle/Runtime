@@ -5,7 +5,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Collections;
-using Dolittle.Execution;
+using Dolittle.Lifecycle;
 using Dolittle.Logging;
 
 namespace Dolittle.Runtime.Events.Relativity

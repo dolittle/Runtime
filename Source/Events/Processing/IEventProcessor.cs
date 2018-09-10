@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Artifacts;
 using Dolittle.Events;
+using Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Process an event 
         /// </summary>
-        /// <param name="eventEnvelope"><see cref="Store.EventEnvelope"/> for event to process</param>
-        void Process(Store.EventEnvelope eventEnvelope);
+        /// <param name="eventEnvelope"><see cref="EventEnvelope"/> for event to process</param>
+        void Process(EventEnvelope eventEnvelope);
     }
 }

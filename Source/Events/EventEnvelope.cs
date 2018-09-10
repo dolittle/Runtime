@@ -1,109 +1,38 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-using System;
+﻿using Dolittle.Concepts;
+using Dolittle.PropertyBags;
+using Dolittle.Runtime.Events;
 using Dolittle.Events;
-using Dolittle.Applications;
-using Dolittle.Runtime.Transactions;
-using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IEventEnvelope"/>; the envelope for the event with all the metadata related to the event
+    /// A combination of the <see cref="EventId" />,  <see cref="EventMetadata" /> and a <see cref="PropertyBag" /> that is the persisted version of an <see cref="IEvent" />
     /// </summary>
-    public class EventEnvelope : IEventEnvelope
+    public class EventEnvelope : Value<EventEnvelope>
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="EventEnvelope"/>
+        /// Instantiates a new instance of an <see cref="EventEnvelope" />
         /// </summary>
-        /// <param name="correlationId"><see cref="TransactionCorrelationId"/> the <see cref="IEvent"/> is part of</param>
-        /// <param name="eventId"><see cref="EventId"/> for the <see cref="IEvent"/></param>
-        /// <param name="sequenceNumber"></param>
-        /// <param name="sequenceNumberForEventType"></param>
-        /// <param name="generation"><see cref="EventGeneration"/> for the <see cref="IEvent"/> </param>
-        /// <param name="event"><see cref="Artifact"/> representing the <see cref="IEvent"/></param>
-        /// <param name="eventSourceId"><see cref="EventSourceId"/> for the <see cref="IEventSource"/></param>
-        /// <param name="eventSource"><see cref="Artifact"/> representing the <see cref="IEventSource"/></param>
-        /// <param name="version"><see cref="EventSourceVersion">Version</see> of the event related to the <see cref="IEventSource"/></param>
-        /// <param name="causedBy"><see cref="string"/> representing which person or what system caused the event</param>
-        /// <param name="occurred"><see cref="DateTime">When</see> the event occured</param>
-        public EventEnvelope(
-            TransactionCorrelationId correlationId,
-            EventId eventId,
-            EventSequenceNumber sequenceNumber,
-            EventSequenceNumber sequenceNumberForEventType,
-            EventGeneration generation, 
-            Artifact @event, 
-            EventSourceId eventSourceId, 
-            Artifact eventSource, 
-            EventSourceVersion version, 
-            CausedBy causedBy, 
-            DateTimeOffset occurred)
+        public EventEnvelope(EventId eventId, EventMetadata metadata, PropertyBag @event)
         {
-            CorrelationId = correlationId;
-            EventId = eventId;
-            SequenceNumber = sequenceNumber;
-            SequenceNumberForEventType = sequenceNumberForEventType;
-            Generation = generation;
+            Metadata = metadata;
             Event = @event;
-            EventSourceId = eventSourceId;
-            EventSource = eventSource;
-            Version = version;
-            CausedBy = causedBy;
-            Occurred = occurred;
+            Id = eventId;
         }
-
-        /// <inheritdoc/>
-        public TransactionCorrelationId CorrelationId { get; }
-
-        /// <inheritdoc/>
-        public EventId EventId { get; }
-
-        /// <inheritdoc/>
-        public EventSequenceNumber SequenceNumber { get; }
-
-        /// <inheritdoc/>
-        public EventSequenceNumber SequenceNumberForEventType { get; }
-
-        /// <inheritdoc/>
-        public EventGeneration Generation { get; }
-
-        /// <inheritdoc/>
-        public Artifact Event { get; }
-
-        /// <inheritdoc/>
-        public EventSourceId EventSourceId { get; }
-
-        /// <inheritdoc/>
-        public Artifact EventSource { get; }
-
-        /// <inheritdoc/>
-        public EventSourceVersion Version { get; }
-
-        /// <inheritdoc/>
-        public CausedBy CausedBy { get; }
-
-        /// <inheritdoc/>
-        public DateTimeOffset Occurred { get; }
-
-        /// <inheritdoc/>
-        public IEventEnvelope WithSequenceNumber(EventSequenceNumber sequenceNumber)
-        {
-            return new EventEnvelope(CorrelationId, EventId, sequenceNumber, SequenceNumberForEventType, Generation, Event, EventSourceId, EventSource, Version, CausedBy, Occurred);
-        }
-
-        /// <inheritdoc/>
-        public IEventEnvelope WithSequenceNumberForEventType(EventSequenceNumber sequenceNumberForEventType)
-        {
-            return new EventEnvelope(CorrelationId, EventId, SequenceNumber, sequenceNumberForEventType, Generation, Event, EventSourceId, EventSource, Version, CausedBy, Occurred);
-        }
-
-        /// <inheritdoc/>
-        public IEventEnvelope WithTransactionCorrelationId(TransactionCorrelationId correlationId)
-        {
-            return new EventEnvelope(correlationId, EventId, SequenceNumber, SequenceNumberForEventType, Generation, Event, EventSourceId, EventSource, Version, CausedBy, Occurred);
-        }
+        /// <summary>
+        /// The <see cref="EventMetadata" /> associated with this persisted <see cref="IEvent" />
+        /// </summary>
+        /// <value></value>
+        public EventMetadata Metadata { get; }
+        /// <summary>
+        /// A <see cref="PropertyBag" /> of the values associated with this <see cref="IEvent" />
+        /// </summary>
+        /// <value></value>
+        public PropertyBag Event { get; }
+                /// <summary>
+        /// The <see cref="EventId" /> of this <see cref="IEvent" />
+        /// </summary>
+        /// <value></value>
+        public EventId Id { get; }
     }
 }

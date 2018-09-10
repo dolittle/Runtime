@@ -19,9 +19,9 @@ namespace Dolittle.Runtime.Events.Relativity
         event QuantumTunnelCollapsed    Collapsed;
 
         /// <summary>
-        /// Pass an <see cref="CommittedEventStream"/> through to the other side of the quantum tunnel
+        /// Pass an <see cref="CommittedEvents"/> through to the other side of the quantum tunnel
         /// </summary>
-        /// <param name="committedEventStream"><see cref="CommittedEventStream"/> to pass through</param>
+        /// <param name="committedEventStream"><see cref="CommittedEvents"/> to pass through</param>
         void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
     }
 }

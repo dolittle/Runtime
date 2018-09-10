@@ -1,6 +1,6 @@
 ﻿using System.Dynamic;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
         Because of = () =>
                          {
                              var artifact = Artifact.New();
-                             command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+                             command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());
                              commandContext = Manager.EstablishForCommand(command);
                          };
 

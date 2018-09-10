@@ -1,29 +1,28 @@
-﻿/*---------------------------------------------------------------------------------------------
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using Dolittle.DependencyInversion.Conventions;
+using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Tenancy
 {
     /// <summary>
-    /// Represents a <see cref="ITenant"/> in the system
+    /// Represents a tenant
     /// </summary>
-    public class Tenant : ITenant
+    public class Tenant
     {
         /// <summary>
         /// Initializes a new instance of <see cref="Tenant"/>
         /// </summary>
-        /// <param name="tenantId"><see cref="TenantId"/> of the tenant</param>
-        public Tenant(TenantId tenantId)
+        /// <param name="id"></param>
+        public Tenant(TenantId id)
         {
-            TenantId = tenantId;
+            Id = id;
         }
-
-        /// <inheritdoc/>
-        public TenantId TenantId { get; }
-
-        /// <inheritdoc/>
-        public dynamic Details { get; set; }
+        
+        /// <summary>
+        /// Gets the <see cref="TenantId"/>
+        /// </summary>
+        public TenantId Id { get; }
     }
 }

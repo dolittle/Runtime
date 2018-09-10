@@ -4,6 +4,7 @@ using System.Linq;
 using Dolittle.Concepts;
 using Dolittle.Runtime.Events;
 using Dolittle.Events;
+using Dolittle.Execution;
 
 namespace Dolittle.Runtime.Events.Store
 {

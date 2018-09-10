@@ -5,7 +5,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Execution;
+using Dolittle.Lifecycle;
+using Dolittle.Artifacts;
 
 namespace Dolittle.Runtime.Events.Migration
 {
@@ -34,13 +35,13 @@ namespace Dolittle.Runtime.Events.Migration
         }
 
 #pragma warning disable 1591 // Xml Comments
-        public EventGeneration GetCurrentGenerationFor(Type logicalEvent)
+        public Generation GetCurrentGenerationFor(Type logicalEvent)
         {
             var hierarchy = GetHierarchyForLogicalType(logicalEvent);
-            return hierarchy.MigrationLevel;
+            return (uint)hierarchy.MigrationLevel;
         }
 
-        public Type GetTargetTypeForGeneration(Type logicalEvent, EventGeneration level)
+        public Type GetTargetTypeForGeneration(Type logicalEvent, Generation level)
         {
             if(level < 0)
                 throw new MigrationLevelOutOfRangeException(string.Format("The lowest possible migration level is 0.  You asked for {0}",level));
@@ -50,7 +51,7 @@ namespace Dolittle.Runtime.Events.Migration
             Type type;
             try
             {
-                 type = hierarchy.GetConcreteTypeForLevel(level);
+                 type = hierarchy.GetConcreteTypeForLevel((int)level.Value);
             }
             catch (Exception)
             {

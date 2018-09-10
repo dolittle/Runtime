@@ -6,10 +6,9 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Applications;
-using Dolittle.Artifacts;
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
-using Dolittle.Runtime.Execution;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 

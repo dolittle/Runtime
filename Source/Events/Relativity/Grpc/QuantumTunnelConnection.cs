@@ -185,19 +185,18 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                     try
                     {
                         var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                        var version = _eventStore.GetVersionFor(current.Source.EventSource);
-                        version = new Store.EventSourceVersion(version.Commit+1,0);
+                        var version = _eventStore.GetNextVersionFor(current.Source.EventSource);
 
-                        var versionedEventSource = new Store.VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact);
+                        var versionedEventSource = new VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact);
 
-                        var eventEnvelopes = new List<Store.EventEnvelope>();
+                        var eventEnvelopes = new List<EventEnvelope>();
 
                         current.Events.ForEach(_ => 
                         {
-                            var envelope = new Store.EventEnvelope(
+                            var envelope = new EventEnvelope(
                                 _.Id, 
-                                new Store.EventMetadata(
-                                    new Store.VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact),
+                                new EventMetadata(
+                                    new VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact),
                                     _.Metadata.CorrelationId,
                                     _.Metadata.Artifact,
                                     _.Metadata.CausedBy,
@@ -207,7 +206,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                             );
                             eventEnvelopes.Add(envelope);
 
-                            version = version.IncrementSequence();
+                            version = version.NextSequence();
                         });
 
                         var uncommittedEventStream = new Store.UncommittedEventStream(

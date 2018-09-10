@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.DependencyInversion;
-using Dolittle.Execution;
 using Dolittle.Types;
 using Dolittle.ReadModels;
 

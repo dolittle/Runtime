@@ -2,7 +2,7 @@
 using System.Dynamic;
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Commands.Handling;
-using Dolittle.Runtime.Transactions;
+using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Commands.Specs.for_CommandHandlerManager
         Because of = () =>
                          {
                              var artifact = Artifact.New();
-                             handled_command = new CommandRequest(TransactionCorrelationId.NotSet, artifact.Id, artifact.Generation, new ExpandoObject());
+                             handled_command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());
                              thrown_exception = Catch.Exception(() => manager.Handle(handled_command));
                          };
 
