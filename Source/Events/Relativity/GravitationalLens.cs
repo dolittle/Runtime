@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// </summary>
         /// <param name="eventHorizon"></param>
         /// <param name="serializer"><see cref="ISerializer"/> for serializing payloads</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="IExecutionContext"/></param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="ExecutionContext"/></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public GravitationalLens(
             IEventHorizon eventHorizon,

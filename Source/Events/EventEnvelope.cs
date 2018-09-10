@@ -2,6 +2,7 @@
 using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events;
 using Dolittle.Events;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events
 {
@@ -34,5 +35,15 @@ namespace Dolittle.Runtime.Events
         /// </summary>
         /// <value></value>
         public EventId Id { get; }
+
+        /// <summary>
+        /// Converts the <see cref="EventEnvelope"/> into the <see cref="CommittedEventEnvelope">Committed version</see> with the supplied <see cref="CommitSequenceNumber"/>
+        /// </summary>
+        /// <param name="commitSequenceNumber"></param>
+        /// <returns>The <see cref="CommittedEventEnvelope" /></returns>
+        public CommittedEventEnvelope ToCommittedEventEnvelope(CommitSequenceNumber commitSequenceNumber)
+        {
+            return new CommittedEventEnvelope(commitSequenceNumber,this.Id,this.Metadata,this.Event);
+        }
     }
 }

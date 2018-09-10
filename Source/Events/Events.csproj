@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dolittle.Runtime.Events</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Events</RootNamespace>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />

@@ -54,15 +54,12 @@ namespace Dolittle.Runtime.Events.Processing
                 if( _eventProcessorsByResourceIdentifier.ContainsKey(eventEnvelope.Metadata.Artifact))
                 {
                     var processors = _eventProcessorsByResourceIdentifier[eventEnvelope.Metadata.Artifact];
-                    processors.ForEach(_ => _.Process(eventEnvelope));
+                    processors.ForEach(_ => _.Process(eventEnvelope.ToCommittedEventEnvelope(committedEvents.Sequence)));
                 }
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc />
         public void GatherEventProcessors()
         {
             var eventProcessorsByArtifact = new Dictionary<Artifact, List<IEventProcessor>>();
@@ -79,6 +76,12 @@ namespace Dolittle.Runtime.Events.Processing
             }));
 
             _eventProcessorsByResourceIdentifier = eventProcessorsByArtifact;
+        }
+
+        /// <inheritdoc />
+        public void Add(IEventProcessor eventProcessor)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

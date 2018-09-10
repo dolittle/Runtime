@@ -297,7 +297,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// <returns></returns>
         public static PropertyBag ToPropertyBag(this MapField<string, System.Protobuf.Object> mapField)
         {
-            var dictionary = new Dictionary<string,object>();
+            var dictionary = new NullFreeDictionary<string,object>();
             mapField.ForEach(keyValue => 
             {
                 var type = (Types)keyValue.Value.Type;
@@ -320,7 +320,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                         case Types.Guid: value = new Guid(stream.ReadBytes().ToByteArray()); break;
                     }
                 }
-                dictionary.Add(keyValue.Key, value);
+                if(value != null)
+                    dictionary.Add(keyValue.Key, value);
             });
             return new PropertyBag(dictionary);
         }
