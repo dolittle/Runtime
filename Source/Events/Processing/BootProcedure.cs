@@ -13,6 +13,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Tenancy;
     using Dolittle.Types;
+    using Dolittle.DependencyInversion;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
@@ -24,8 +25,8 @@ namespace Dolittle.Runtime.Events.Processing
 
         IScopedEventProcessingHub _processingHub;
         ILogger _logger;
-        private readonly Func<IEventProcessorOffsetRepository> _getOffsetRepository;
-        private readonly Func<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        private readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
+        private readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
 
         /// <summary>
         /// Instantiates a new instance of <see cref="BootProcedure" />
@@ -39,8 +40,8 @@ namespace Dolittle.Runtime.Events.Processing
         public BootProcedure(IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
                                 ITenants tenants, 
                                 IScopedEventProcessingHub processingHub, 
-                                Func<IEventProcessorOffsetRepository> getOffsetRepository, 
-                                Func<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
+                                FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository, 
+                                FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
                                 ILogger logger)
         {
             _processingHub = processingHub;

@@ -13,6 +13,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Runtime.Tenancy;
     using Dolittle.Types;
     using Dolittle.Tenancy;
+    using Dolittle.DependencyInversion;
 
     /// <summary>
     /// Processes an individiual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />
@@ -40,8 +41,8 @@ namespace Dolittle.Runtime.Events.Processing
         TenantId _tenant;
         IEventProcessor _processor;
         ILogger _logger;
-        private readonly Func<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
-        private readonly Func<IEventProcessorOffsetRepository> _getOffsetRepository;
+        private readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        private readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
 
         /// <summary>
         /// Instantiates an instance of <see cref="ScopedEventProcessor" />
@@ -51,8 +52,8 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages</param>
-        public ScopedEventProcessor(TenantId tenant, IEventProcessor processor,Func<IEventProcessorOffsetRepository> getOffsetRepository, 
-                                        Func<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,  ILogger logger)
+        public ScopedEventProcessor(TenantId tenant, IEventProcessor processor,FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository, 
+                                        FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,  ILogger logger)
         {
             LastVersionProcessed = CommittedEventVersion.None;
             _tenant = tenant;
