@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Specs.given
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Tenancy;
     using Dolittle.Tenancy;
+    using Dolittle.Security;
 
     public static class Contexts
     {
@@ -22,7 +23,7 @@ namespace Dolittle.Runtime.Events.Specs.given
 
         public static ExecutionContext get_execution_context()
         {
-            return new ExecutionContext(application,bounded_context,tenant,"Development",CorrelationId.New(),new System.Security.Claims.ClaimsPrincipal(),System.Threading.Thread.CurrentThread.CurrentCulture);
+            return new ExecutionContext(application,bounded_context,tenant,"Development",CorrelationId.New(),new Claims(new List<Claim>()),System.Threading.Thread.CurrentThread.CurrentCulture);
         }
     }
 }
