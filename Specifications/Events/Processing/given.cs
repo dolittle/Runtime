@@ -8,6 +8,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing
     using Dolittle.Runtime.Events.Processing;
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Runtime.Tenancy;
+    using Dolittle.DependencyInversion;
     using Moq;
 
     public class given
@@ -48,8 +49,8 @@ namespace Dolittle.Runtime.Events.Specs.Processing
             var offset_repository = new Mock<IEventProcessorOffsetRepository>();
             var unprocessed_event_fetcher = new Mock<IFetchUnprocessedEvents>();
 
-            Func<IEventProcessorOffsetRepository> offset_provider = () => offset_repository.Object;
-            Func<IFetchUnprocessedEvents> unprocessed_provider = () => unprocessed_event_fetcher.Object;
+            FactoryFor<IEventProcessorOffsetRepository> offset_provider = () => offset_repository.Object;
+            FactoryFor<IFetchUnprocessedEvents> unprocessed_provider = () => unprocessed_event_fetcher.Object;
             return new Mock<ScopedEventProcessor>(tenant,
                                                     eventProcessor,
                                                     offset_provider,

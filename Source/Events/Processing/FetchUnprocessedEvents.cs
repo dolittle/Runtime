@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using Dolittle.Artifacts;
+using Dolittle.DependencyInversion;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 
@@ -12,13 +13,13 @@ namespace Dolittle.Runtime.Events.Processing
     /// </summary>
     public class FetchUnprocessedEvents : IFetchUnprocessedEvents
     {
-        Func<IEventStore> _getEventStore;
+        FactoryFor<IEventStore> _getEventStore;
 
         /// <summary>
         /// Instantiates an instance of <see cref="FetchUnprocessedEvents" />
         /// </summary>
         /// <param name="getEventStore"></param>
-        public FetchUnprocessedEvents(Func<IEventStore> getEventStore)
+        public FetchUnprocessedEvents(FactoryFor<IEventStore> getEventStore)
         {
             _getEventStore = getEventStore;
         }
