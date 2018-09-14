@@ -46,7 +46,7 @@ Dolittle provides a base class *AggregateRoot* that implements functionality tha
 
 ## State
 
-In Bifrost, an *Aggregate* is a purely *WRITE* concern. The aggregate plays no role in reading or presentation. As such, an *Aggregate* **MUST NOT** expose any public state, via variables or properties. Neither should the *Aggregate* return any of its internal entities or values objects, even in a transient state. The *Aggregate* is only required to keep such internal state that it requires to maintain its invariants.  Since no public state is exposed by the *Aggregate* it does not need to keep in state values that are not part of its internal structure. 
+In Dolittle, an *Aggregate* is a purely *WRITE* concern. The aggregate plays no role in reading or presentation. As such, an *Aggregate* **MUST NOT** expose any public state, via variables or properties. Neither should the *Aggregate* return any of its internal entities or values objects, even in a transient state. The *Aggregate* is only required to keep such internal state that it requires to maintain its invariants.  Since no public state is exposed by the *Aggregate* it does not need to keep in state values that are not part of its internal structure. 
 
 This is the natural conclusion of all actions on the *Aggregate* springing from the *Aggregate Root*. If the root were to allow access to its internal entities or value-objects they could be stored past the lifetime of the *Aggregate Root* or even changed without running through the gatekeeper that is the root.
 

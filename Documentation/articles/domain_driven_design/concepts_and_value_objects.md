@@ -1,6 +1,6 @@
 ---
 title: About Concepts and Value Objects
-description: Learn about Concepts and Value Objects in Bifrost
+description: Learn about Concepts and Value Objects in Dolittle
 keywords: domain-driven-design
 author: einari, smithmx, tomasekeli
 ---
