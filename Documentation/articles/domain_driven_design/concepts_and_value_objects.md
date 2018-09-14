@@ -50,12 +50,12 @@ comparisons and the result of *GetHashCode()*.
 
 Bifrost provides two different artifacts to support the creation of objects with value-identity semantics.
 
-# ConceptAs<T>
+# ConceptAs\<T>
 
-*ConceptAs<T>* is intended as a direct replacement for where you would use a single primitive to represent a concept in the domain.  As well as
-implementing equality checks, and producing hash codes, *ConceptAs<T>* allows an (almost) seamless transformation between the underlying primitive
+*ConceptAs\<T>* is intended as a direct replacement for where you would use a single primitive to represent a concept in the domain.  As well as
+implementing equality checks, and producing hash codes, *ConceptAs\<T>* allows an (almost) seamless transformation between the underlying primitive
 and the domain concept.  This proves to be very useful at the boundaries of your application, where you may be receiving primitives.  It can also aid 
-in serialization and integration with other systems. *ConceptAs<T>* implements an implicit casting between the ConceptAs<T> and the primitive T.
+in serialization and integration with other systems. *ConceptAs\<T>* implements an implicit casting between the *ConceptAs\<T>* and the primitive *T*.
 
 A typical implementation of a ConceptAs might be
 
@@ -76,9 +76,10 @@ It is **not recommended** to enforce *correctness* of a ConceptAs<T> by throwing
 state.  It is the preferred strategy in Bifrost to capture invalid state through the mechanism of [input validation](./validation). This allows a more
 graceful and information handling of the invalid state.
 
-> [!Note]  
+{{% notice tip %}}  
 > Use of ConceptAs<T> can lead to loss of type inference in e.g. lambda functions.  It can also require a little more work on the part of the developer
 > when serializing.  We do not consider this too heavy a price to pay given the explicitness and expressiveness it brings to your domain.
+{{% /notice %}}  
 
 # Value<T>
 
@@ -90,10 +91,11 @@ A `Point : Value<Point>` might have properties for the X, Y and Z axis.
 It is *recommended* and *encouraged* to use ConceptAs<T> as properties within Value<T>.  It is *discouraged* but *not prohibited* from using *Value<T>* 
 with a single property.
 
-> [!Note]  
+{{% notice tip %}}  
 > Value objects within Bifrost consider the *System Type* to be integral to their identity.  While it is permissible to inherit from a Value<T> 
 > or ConceptAs<T> that you have created, a type of the base class and a type of subclass **WILL NOT** be considered equal, even if they have 
 > all properties identical.  A value object can only be equal to itself or another object of the same type.
+{{% /notice %}}  
 
 
 

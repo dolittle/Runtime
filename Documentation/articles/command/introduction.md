@@ -2,15 +2,16 @@
 title: About Commands
 description: Learn about Commands and how to leverage them in the frontend
 keywords: JavaScript
-author: einari, smithmx, tomase
+author: einari, smithmx, tomasekeli
 ---
 
 # Commands
 
-A Command is a typed representation of the user's intent in performing an action.  As such, it is a simple Data Transfer Object and performs no logic or calculations.  It is an instruction to the system to do something. This is a central part of the CQRS pattern, which separates the **Command** and **Query** parts of a system.
+A Command is a typed representation of the *user's* intent in performing an action.  As such, it is a simple Data Transfer Object and performs no logic or calculations.  It is an instruction to the system to do something. This is a central part of the CQRS pattern, which separates the **Command** and **Query** parts of a system.
 
-> [!Note]  
-> A user does not have to be a person.  Another system can issue commands to our system and is considered a user.
+{{% notice tip %}} 
+A user does not have to be a person.  Another system can issue commands to our system and will the be considered a user.
+{{% /notice %}}
 
 Traditional N-tier systems often rely on **CRUD** when modelling the interactions with the system. This is an acronym for **C**reate, **R**ead, **U**pdate and **D**elete; which are the available actions on the data in the system. A command-driven system models different interactions users have with the system in terms of the intents of the users. The change is not just the changes to the data. A CRUD-system will only tell you the state of some entity. A command-driven system will try to capture why the entity is in that state as well.
 
@@ -29,10 +30,11 @@ A command is a transaction. There is no concept of a partially successful comman
 
 ## Structure
 
-A command **MUST** include all necessary information to perform the action.  These **should** be in the form of parameters on the command object. You **may** include optional parameters, though it is **recommended** that you create multiple commands that represent the different states associated with the optional parameters.  It is **recommended** that you use [Concepts](../concepts_and_value_objects.md) and [Value Objects](../concepts_and_value_objects.md) on your commands rather than primitives. This gives a more expressive command and aids in validation.
+A command **MUST** include all necessary information to perform the action.  These **SHOULD** be in the form of parameters on the command object. You **MAY** include optional parameters, though it is **recommended** that you create multiple commands that represent the different states associated with the optional parameters.  It is **RECOMMENDED** that you use [Concepts](../concepts_and_value_objects.md) and [Value Objects](../concepts_and_value_objects.md) on your commands rather than primitives. This gives a more expressive command and aids in validation.
 
-> [!Note]  
+{{% notice tip %}}
 > For JavaScript, proxy representations can be used for the commands, read more about the mechanism [here](../../Frontend/JavaScript/proxy_generation.md).
+{{% /notice %}}
 
 ## Relation to Events
 

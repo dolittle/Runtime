@@ -1,7 +1,7 @@
 ---
 title: Aggregates and Aggregate Roots
 description: About Aggregates and Aggregate Roots
-keywords: 
+keywords: domain-driven-design
 author: einari, smithmx
 ---
 
@@ -39,12 +39,13 @@ The *Aggregate* maintains only internal invariants.  It is not responsible for m
 is not the responsiblity of the individual *Aggregate* to ensure that a *Username* is unique.  It is the responsibility of the **System as a whole**
 to maintain these system invariants.  The exact mechanism it uses will depend on the invariant and the consequences of breaking them.
 
-> [!Note]
+{{% notice tip %}}  
 > What you must learn is that these rules are no different that the rules of a computer system. Some of them can be bent. Others can be broken.
 > Morpheus, The Matrix
 >
 > All rules are not created equal.  Business Rules are essentially business problems, not primarily technical problems.  It may be simpler and cheaper
 > to break a rule and then clean it up later in a compensating transaction, than to expend a lot of time, energy and money ensuring the rule is not broken.
+{{% /notice %}}  
 
 # Aggregate Roots in Bifrost
 
