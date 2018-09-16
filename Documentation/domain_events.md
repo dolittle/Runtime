@@ -51,7 +51,13 @@ You should consider the serialisable nature of the Domain Event and let this gui
 
 Events can be either “thin” (containing the absolute minimum information required) or “fat” (containing additional contextual information that would be useful for the consumer of the Event).  Using our example of an OrderPlaced event, a thin event would basically tells us which order had been placed and when.  It would rely on other previous events such as OrderLineAdded to create the state of the Order that was being placed.  On the other hand, a “fat” event could contain a collection of OrderLine DTOs as part of the Event so that the consumer can see that an order with the included state was placed.
 
-In general, you should prefer thin over fat events within a bounded context.  Extra contextual information can create couplings and versioning issues.
+In general, you should prefer thin over fat events within a bounded context.  Extra contextual information can create couplings and versioning issues.  For events that are primarily intended for integration with other bounded context, fat events may be more suitable and create a more robust interface.
+
+### Integration Events
+
+Integration events are Domain Events like internal Domain Events.  However, they differ in that their primary purpose is less about indicating a particular state change within the Bounded Context, as it is in communicating the change to other Bounded Contexts, Applications and Systems.  This can influence how we model and shape our events.  Within a Bounded Context, we are always striving to catch the *why* of a state change. That is, we are not only interested in the fact that a user has been deactivated (*UserAccountDeactivated*) but for what reason (e.g. *SuspectedFraudAccountDetected*, *UserDeactivatedAccount*, etc.)  In another Bounded Context, where we are only interested in keeping a list of currently active accounts, we do not want to have to handle a number of specific events which result in the same effective state change (toggling user active / deactive).
+
+When designing events, you should consider the purpose of the event, particularly with regard to the internal / external dichotomy.  Internal events tend to be thinner and more descriptive of the why.  Integration (external) events tend to be fatter and more broader in their description. The two types of events also have different trajectories in terms of their volatility and how often you can and should change them.  It is easier to evolve and adapt an internal event than an integration event.
 
 ### Metadata
 
