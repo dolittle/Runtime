@@ -5,6 +5,7 @@
 using System;
 using Dolittle.Events;
 using Dolittle.Concepts;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events
 {
@@ -134,5 +135,15 @@ namespace Dolittle.Runtime.Events
             return string.Format("[ Version : {0}.{1} ]",Commit,Sequence);
         }
 #pragma warning restore 1591 // Xml Comments
+
+        /// <summary>
+        /// Creates a <see cref="CommittedEventVersion" /> based upon this <see cref="EventSourceVersion" /> and the provided <see cref="CommitSequenceNumber" />
+        /// </summary>
+        /// <param name="commitSequenceNumber">The <see cref="CommitSequenceNumber" >sequence number</see> for the commit</param>
+        /// <returns>The <see cref="CommittedEventVersion" /> based on this <see cref="EventSourceVersion" /></returns>
+        public CommittedEventVersion ToCommittedEventVersion(CommitSequenceNumber commitSequenceNumber)
+        {
+            return new CommittedEventVersion(commitSequenceNumber,this.Commit, this.Sequence);
+        }
     }
 }

@@ -5,6 +5,7 @@
 using Dolittle.Artifacts;
 using Dolittle.Events;
 using Dolittle.Runtime.Events;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the identifier for the <see cref="IEventProcessor"/>
         /// </summary>
-        EventProcessorIdentifier Identifier { get; }
+        EventProcessorId Identifier { get; }
 
         /// <summary>
         /// Gets the <see cref="Artifact"/> for the <see cref="IEvent">event type</see>
@@ -27,7 +28,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Process an event 
         /// </summary>
-        /// <param name="eventEnvelope"><see cref="EventEnvelope"/> for event to process</param>
-        void Process(EventEnvelope eventEnvelope);
+        /// <param name="eventEnvelope"><see cref="CommittedEventEnvelope"/> for event to process</param>
+        void Process(CommittedEventEnvelope eventEnvelope);
     }
 }

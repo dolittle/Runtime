@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         /// </summary>
         /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with</param>
         /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="IExecutionContext"/></param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="ExecutionContext"/></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnelServiceImplementation(
             IEventHorizon eventHorizon,

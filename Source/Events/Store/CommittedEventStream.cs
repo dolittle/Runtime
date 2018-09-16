@@ -29,6 +29,7 @@ namespace Dolittle.Runtime.Events.Store
             Timestamp = timestamp;
             CorrelationId = correlationId;
             Events = events;
+            LastEventVersion = source.ToCommittedEventVersion(sequence);
 
         }
         /// <summary>
@@ -62,5 +63,11 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <value></value>
         public CorrelationId CorrelationId { get; }
+
+        /// <summary>
+        /// The <see cref="CommittedEventVersion">Version</see> of the last event in this commit
+        /// </summary>
+        /// <value></value>
+        public CommittedEventVersion LastEventVersion { get; }
     }
 }

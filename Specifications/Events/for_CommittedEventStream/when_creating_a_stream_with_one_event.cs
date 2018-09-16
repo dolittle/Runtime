@@ -6,6 +6,8 @@ using Dolittle.Events;
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Execution;
+using Dolittle.Runtime.Events.Specs;
+using Dolittle.Runtime.Events.Specs.given;
 
 namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream
 {
