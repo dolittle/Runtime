@@ -1,6 +1,6 @@
 ---
-title: Dolittle Runtime
-description: Learn about the Dolittle Runtime
+title: Overview
+description: Get an overview over the Dolittle platform
 keywords: Runtime, Overview
 author: woksin
 ---
@@ -9,4 +9,4 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
 
-This page will contain content about the Dolittle Runtime
+This page will contain content about the overview of the Dolittle platform and important concepts when building products on the Dolittle platform.

@@ -52,7 +52,7 @@ Bounded Contexts **MUST NOT** have a dependency on another *Bounded Context* as 
 
 ##### Topology; Modules and Features
 The *Bounded Context* is an essential concept in DDD, but by now you should also have the impression that the *Bounded Context* is something very specific and concrete in the Dolittle platform. All Bounded Contexts has, for example, a very concrete structure. We want developers to think of Bounded Contexts as its own, stand alone, project. How you actually structure this is dependent on the programming language you're using, but in terms of C# we would suggest that you structure an *Application* this way:
-![Application C# Structure](/overview/ApplicationStructure.png)
+![Application C# Structure](/overview/images/ApplicationStructure.png)
 
 Here you can see how we in Dolittle would structure an *Application*. The *Application* would, for example, be a Github repository and it would typically have Bounded Contexts sitting inside its Source. Each *Bounded Context* is a folder with a solution (.sln) file and contains all the necessary domain areas; Concepts, Domain, Events, Read and an optional interaction layer called, in this case, Web.
 
