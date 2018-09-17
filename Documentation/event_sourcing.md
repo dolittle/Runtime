@@ -33,15 +33,40 @@ By capturing all changes in the forms of deltas (persisted Events) and modelling
 
 The oft-cited example of this is in the e-shopping domain and the theory that a user who has an item in their shopping cart but does not proceed to buy it will be more likely to buy this item in the future.  The traditional approach that, at best, captures only the state of the shopping cart and at worst only captures orders, cannot test this hypothesis at all.  If we do not know how the shopping cart changed, we do not know who added the item then removed it.  We do not know who emptied their cart of all items.  We might be able to tell what was in a cart that failed to convert to an order.
 
-On the other hand, in an Event Sourced system where we have **ItemAddedToCart** and **ItemRemovedFromCart** events, we can look back in time and check exactly how many people who had an item in their cart at some point and did not buy it, subsequently did.  This requires no change to the production system and no time to wait to gather sufficicent data.
+On the other hand, in an Event Sourced system where we have *ItemAddedToCart* and *ItemRemovedFromCart* events, we can look back in time and check exactly how many people who had an item in their cart at some point and did not buy it, subsequently did.  This requires no change to the production system and no time to wait to gather sufficicent data.
 
 An Event Sourced system does not assume that we know the business value of all the data that the system generates for now and all time or that we always make well informed decisions for what data to keep and what to discard.
 
 Of course, if the data is not captured in an Event or if several distinct things we would like to know are captured and folded into a single event, then that data may be lost (or only inferred rather than explicitly known).
+
+[Diagram showing the state of the Shopping Cart]
 
 ## Single source of truth, multiple views
 
 The append only log of events is the single source of truth in an Event Sourced system. The events are persisted in serialized form.
 
 The Event Store defines how the events are written in the system, it does not define or prescribe how things are read or interpreted.  Events will be published from the Event Store and can be handled by subscribers to these events.  These subscribers can then process the events in any way they require.  A typical scenario will involve updating a materialized (cached) view in a CQRS system.  Another will be to populate the data for a Machine Learning algorithm or to feed data to an OLAP cube.  It might feed into a relational database or a graph database.  The subscribers and what they do will be determined by the requirements of the system.  The Event Sourced nature of the system imposes no limits on the subscribers / read side of the system beyond that the Event Store is the single source of truth.
+
+## Saving events
+
+In a traditional state-based system, the persisting of an object or a graph of objects (an aggregate) can be a complex and involved process.  The impedance-mismatch between the object and relational realms and the complexity of ORM (Object Relational Mappers) is well known.  A common pattern with a sophisticated ORM such as NHibernate or Entity Framework is to utilize the Unit of Work pattern where a session is opened, various objects are tracked and changed and the tool then figures out what has changed and how to update the database.  This makes the concepts of state changes / deltas implicit and hidden from the developer.  By contrast, since an Event Sourced System is based on making state changes explicit, you have a single method of persisting changes.  You write a series of events (deltas) that constitute a transaction in a single commit.  The transaction is explicit, the changes are explicit and there is no need to derive the changes by comparing a before and after object graph.  This is orders of magnitude simpler.
+
+## Rehydrating objects from events
+
+Likewise when loading an object, an Event Sourced system is simpler than a state based system (with or without tooling support in the form of an ORM).  When using Event Sourcing, events are associated with a particular Aggregate (see Aggregates and Aggregate Roots) and the appropriate events are simply loaded and then replayed in the order that they happened.  When the system is using the CQRS division between the read side and the write side (and based on DDD principles of an Aggregate Root) then you have a single method of retrieving an aggregate.  Since the Aggregate does not expose any state and is not used for any read purposes, there is no need to consider lazy or eager loading that is required in an ORM single-model system.
+
+### Stateless objects
+
+An aggregate only have to hold state that it requires to main invariants and ensure transactional integrity within the aggregate.  If information from an event is not involved in this process, it is not necessary for an aggregate to hold this information in state.  Where an aggregate does not hold any state, it is not necessary to replay events to get back to the *current* state and this step can be optimized away.  Dolittle will check that an aggregate is not effectively stateless (i.e. that it has methods to reapply events) before retrieving the events from the event store.
+
+### Snapshots
+
+While retrieving events to replay is a simple process, since events are a cumulative process, the number of events to be retrieved will grow and grow.  This can have obvious performance implications for aggregates that have a large number of events.
+
+{{% notice note %}} An Event Sourced System, as it is fundamentally sharded on Aggregate Id, is more suited to partition and scale than a traditional relational database system
+
+To improve the performance of an individual aggregate, it is *recommended* to implement the memento pattern through the medium of rolling snapshots.  In effect, a snapshot captures the state at a particular time and store this.  To rehydrate your object, you load the snapshot then reapply all the events that have occurred since the snapshot was made.  There are many strategies that can be used to decide when to snapshot state. Snapshots can also be discarded and rebuilt as required.
+
+
+
 
