@@ -14,8 +14,8 @@ The query or read side of the CQRS pattern is all about exposing the current sta
 {{% notice note %}}
 Dolittle exposes read data through two different mechanisms:
  
- - [Read Models](https://github.com/dolittle/Runtime/tree/master/Documentation/read/read_models.md)
- - [Queries](https://github.com/dolittle/Runtime/tree/master/Documentation/read/queries.md)
+ - [Read Models](https://github.com/dolittle/Runtime/tree/master/Documentation/read/read_model.md)
+ - [Queries](https://github.com/dolittle/Runtime/tree/master/Documentation/read/query.md)
 {{% /notice %}}
 
 ### Updating Read Data

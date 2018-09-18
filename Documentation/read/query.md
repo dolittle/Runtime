@@ -1,11 +1,11 @@
 ---
-title: Queries
+title: Query
 description: About Queries
 keywords: query, ddd, read, queryfor, 
-author: einari
+author: einari, smithmx
 ---
 
-# Queries
+# Query
 Looking up collections of data to be presented to users in a view is a common scenario in applications. Dolittle formalizes this through `Query`-types. These types become the contract for your query capabilities. Queries can be optimized for the datasource as you see fit for the feature they're being used in.
 
 ## QueryFor
