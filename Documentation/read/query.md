@@ -9,10 +9,14 @@ author: einari, smithmx
 Looking up collections of data to be presented to users in a view is a common scenario in applications. Dolittle formalizes this through `Query`-types. These types become the contract for your query capabilities. Queries can be optimized for the datasource as you see fit for the feature they're being used in.
 
 ## QueryFor
-To implement a query, you need to implement the interface `IQueryFor<>` with the generic type argument of a [read model](read_model.md). By convention the query expects a public property with a getter named `Query` with a return type of `IQueryable<>`., which can be expanded based on your specific needs. 
-returns is recognized by Bifrost and Bifrost will look for a [query provider](query_providers.md)
+To implement a query, you basically need to implement the interface `IQueryFor<>`.
+The generic type argument should point to a [read model](read_model.md).
+This is a marker interface and does not require you implement anything specific.
+Instead it is relying on a convention; its looking for a property called `Query`.
+This property needs a getter and can effectively return any type. The type that it
+returns is recognized by Dolittle and Dolittle will look for a [query provider](query_providers.md)
 for the type returned. By default you could be returning an `IQueryable<>` - something
-Bifrost has a [query provider](query_providers.md) for.
+Dolittle has a [query provider](query_providers.md) for.
 
 ```csharp
 using Dolittle.Queries;
@@ -27,7 +31,7 @@ public class AllEmployees : IQueryFor<Employee>
 The implementation of the query can be anything you want it to be. Use whatever underlying datastore and technique to get to the data. The only rule is that there
 must be a [query provider](../../Extending/Read/query_providers.md) for the return type.
 
-Bifrost has a very simple [repository for read models](read_model_repository.md) that can be used. You don't have to use it, as you decide entirely what you use internally - the query sits there as a contract and can also then be changed to accommodate a change in storage strategy.
+Dolittle has a very simple [repository for read models](read_model_repository.md) that can be used. You don't have to use it, as you decide entirely what you use internally - the query sits there as a contract and can also then be changed to accommodate a change in storage strategy.
 
 ### Arguments
 
@@ -37,7 +41,7 @@ a getter and a setter is considered an argument for the query.
 These can then be part of your query.
 
 ```csharp
-using Bifrost.Read;
+using Dolittle.Read;
 
 public class EmployeesHiredAfter : IQueryFor<Employee>
 {
@@ -62,8 +66,8 @@ that inherits from `QueryValidationDescriptorFor<>` and point the generic argume
 query type.
 
 ```csharp
-using Bifrost.Validation;
-using Bifrost.Read.Validation;
+using Dolittle.Validation;
+using Dolittle.Read.Validation;
 
 public class EmployeeHiredAfterValidator : QueryValidationDescriptorFor<EmployeesHiredAfter>
 {
@@ -88,12 +92,12 @@ Some features require filtering the read models on a model level. This could for
 row level security with complex scenarios making it easier to do it as a post process after
 data has been received from the datasource.
 
-Bifrost has a global mechanism for filtering.
+Dolittle has a global mechanism for filtering.
 
 ```csharp
 using System.Collections.Generic;
 using System.Linq;
-using Bifrost.Read;
+using Dolittle.Read;
 
 public class MyReadModelFilter : ICanFilterReadModels
 {
@@ -111,7 +115,7 @@ public class MyReadModelFilter : ICanFilterReadModels
 ```
 
 > [!Note]
-> This solution is not optimal and will be implemented differently as described [here](https://github.com/dolittle/Bifrost/issues/784).
+> This solution is not optimal and will be implemented differently as described [here](https://github.com/dolittle/Dolittle/issues/784).
 
 ## Security
 
@@ -119,7 +123,7 @@ You secure the read models by adding a security descriptor, similar to how one d
 a fluent way.
 
 ```csharp
-using Bifrost.Security;
+using Dolittle.Security;
 
 public class QuerySecurity : BaseSecurityDescriptor
 {
