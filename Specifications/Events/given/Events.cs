@@ -47,7 +47,7 @@
             events.ForEach(e => 
             {
                 vsn = vsn == null ? version : new VersionedEventSource(vsn.Version.NextSequence(),vsn.EventSource,vsn.Artifact);
-                var envelope = e.ToEnvelope(EventId.New(),BuildEventMetadata(vsn, e is SimpleEvent ? Artifacts.artifact_for_simple_event : Artifacts.artifact_for_another_event, correlationId, DateTimeOffset.UtcNow));
+                var envelope = e.ToEnvelope(BuildEventMetadata(EventId.New(),vsn, e is SimpleEvent ? Artifacts.artifact_for_simple_event : Artifacts.artifact_for_another_event, correlationId, DateTimeOffset.UtcNow));
                 envelopes.Add(envelope);
             });
 
@@ -56,9 +56,9 @@
             return EventStream.From(envelopes);
         }
 
-        static EventMetadata BuildEventMetadata(VersionedEventSource versionedEventSource, Artifact artifact, CorrelationId correlationId, DateTimeOffset committed)
+        static EventMetadata BuildEventMetadata(EventId id, VersionedEventSource versionedEventSource, Artifact artifact, CorrelationId correlationId, DateTimeOffset committed)
         {
-            return new EventMetadata(versionedEventSource, correlationId, artifact, "A Test", committed);
+            return new EventMetadata(id, versionedEventSource, correlationId, artifact, "A Test", committed);
         } 
 
         static SingleEventTypeEventStream GetEventsFromCommits(IEnumerable<CommittedEventStream> commits, ArtifactId eventType)
@@ -66,7 +66,7 @@
         var events = new List<CommittedEventEnvelope>();
         foreach(var commit in commits)
         {
-            events.AddRange(commit.Events.FilteredByEventType(eventType).Select(e => new CommittedEventEnvelope(commit.Sequence,e.Id,e.Metadata,e.Event)));
+            events.AddRange(commit.Events.FilteredByEventType(eventType).Select(e => new CommittedEventEnvelope(commit.Sequence,e.Metadata,e.Event)));
         }
         return new SingleEventTypeEventStream(events);
         }

@@ -6,7 +6,7 @@ using Dolittle.Events;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// A combination of the <see cref="EventId" />,  <see cref="EventMetadata" /> and a <see cref="PropertyBag" /> that is the persisted version of an <see cref="IEvent" />
+    /// A combination of the <see cref="EventMetadata" /> and a <see cref="PropertyBag" /> that is the persisted version of an <see cref="IEvent" />
     /// with the <see cref="CommitSequenceNumber" />
     /// </summary>
     public class CommittedEventEnvelope : Value<CommittedEventEnvelope>, IComparable<CommittedEventEnvelope>
@@ -14,11 +14,10 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Instantiates a new instance of an <see cref="CommittedEventEnvelope" />
         /// </summary>
-        public CommittedEventEnvelope(CommitSequenceNumber commitSequence, EventId eventId, EventMetadata metadata, PropertyBag @event)
+        public CommittedEventEnvelope(CommitSequenceNumber commitSequence, EventMetadata metadata, PropertyBag @event)
         {
             Metadata = metadata;
             Event = @event;
-            Id = eventId;
             Version = metadata.VersionedEventSource.ToCommittedEventVersion(commitSequence);
         }
         /// <summary>
@@ -35,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store
         /// The <see cref="EventId" /> of this <see cref="IEvent" />
         /// </summary>
         /// <value></value>
-        public EventId Id { get; }
+        public EventId Id => Metadata.Id;
         /// <summary>
         /// The <see cref="CommittedEventVersion" /> of this Event
         /// </summary>
@@ -67,7 +66,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <returns>An <see cref="EventEnvelope" /></returns>
         public EventEnvelope ToEventEnvelope()
         {
-            return new EventEnvelope(this.Id, this.Metadata, this.Event );
+            return new EventEnvelope(this.Metadata, this.Event );
         }
     }
 }

@@ -19,8 +19,8 @@ namespace Dolittle.Events.Specs.for_EventSource.given
 
         public static CommittedEvent build_committed_event(VersionedEventSource versionedEventSource, IEvent @event, CommittedEventVersion version)
         {
-            var metadata = new EventMetadata(versionedEventSource,CorrelationId.New(),new Artifact(ArtifactId.New(),1),"test",DateTime.UtcNow);
-            return new CommittedEvent(version,metadata,EventId.New(),@event);
+            var metadata = new EventMetadata(EventId.New(),versionedEventSource,CorrelationId.New(),new Artifact(ArtifactId.New(),1),"test",DateTime.UtcNow);
+            return new CommittedEvent(version,metadata,@event);
         }
 
         public static VersionedEventSource a_versioned_event_source_for(EventSourceId id)

@@ -19,8 +19,8 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream
         Establish context = () =>
         {
             @event = new SimpleEvent();
-            var metadata = new EventMetadata(new VersionedEventSource(event_source_id,ArtifactId.New()),CorrelationId.New(),new Artifact(ArtifactId.New(),1),"test",DateTime.UtcNow);
-            committed_event = new CommittedEvent(new CommittedEventVersion(1,1,0),metadata,EventId.New(),@event);
+            var metadata = new EventMetadata(EventId.New(),new VersionedEventSource(event_source_id,ArtifactId.New()),CorrelationId.New(),new Artifact(ArtifactId.New(),1),"test",DateTime.UtcNow);
+            committed_event = new CommittedEvent(new CommittedEventVersion(1,1,0),metadata,@event);
         };
 
         Because of = () => event_stream = new CommittedEvents(event_source_id, new [] { committed_event });

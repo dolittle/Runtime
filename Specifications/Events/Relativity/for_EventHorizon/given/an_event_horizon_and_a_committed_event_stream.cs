@@ -28,8 +28,8 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
                 new EventStream(new []
                 {
                     new EventEnvelope(
-                        new EventId(),
                         new EventMetadata(
+                            EventId.New(),
                             eventSource,
                             correlationId,
                             new Artifact(ArtifactId.New(), ArtifactGeneration.First),

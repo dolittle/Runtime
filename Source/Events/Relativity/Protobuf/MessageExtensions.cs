@@ -281,6 +281,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         public static Dolittle.Runtime.Events.EventMetadata ToEventMetadata(this Protobuf.EventMetadata message)
         {
             var metadata = new Dolittle.Runtime.Events.EventMetadata(
+                message.Id.ToConcept<EventId>(),
                 message.Source.ToVersionedEventSource(),
                 message.CorrelationId.ToConcept<CorrelationId>(),
                 message.Artifact.ToArtifact(),
@@ -344,7 +345,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             
             var events = message.Events.Select(_ =>                 
                 new Dolittle.Runtime.Events.EventEnvelope(
-                    _.Id.ToConcept<EventId>(),
                     _.Metadata.ToEventMetadata(),
                     _.Event.ToPropertyBag()
                 )
