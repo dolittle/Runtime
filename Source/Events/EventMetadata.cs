@@ -20,16 +20,16 @@ namespace Dolittle.Runtime.Events
         /// <param name="versionedEventSource">The <see cref="VersionedEventSource" /> that this event applies to.</param>
         /// <param name="correlationId">A <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system</param>
         /// <param name="artifact">The <see cref="Artifact" /> that represents this event</param>
-        /// <param name="causedBy">The <see cref="CausedBy" /> instance that caused this <see cref="IEvent" /></param>
         /// <param name="occurred">A timestamp in the form of a <see cref="DateTimeOffset" /> recording when the <see cref="IEvent" /> occurred.</param>
-        public EventMetadata(EventId eventId, VersionedEventSource versionedEventSource, CorrelationId correlationId, Artifact artifact, CausedBy causedBy, DateTimeOffset occurred)
+        /// <param name="originalContext">The <see cref="OriginalContext" /> of the <see cref="IEvent" /></param>
+        public EventMetadata(EventId eventId, VersionedEventSource versionedEventSource, CorrelationId correlationId, Artifact artifact, DateTimeOffset occurred, OriginalContext originalContext)
         {
             Id = eventId;
             VersionedEventSource = versionedEventSource;
             CorrelationId = correlationId;
             Artifact = artifact;
-            CausedBy = causedBy;
             Occurred = occurred;
+            OriginalContext = originalContext;
         }
         /// <summary>
         /// The <see cref="EventId" /> that uniquely identifies this Event
@@ -56,10 +56,10 @@ namespace Dolittle.Runtime.Events
         /// </summary>
         public EventSourceId EventSourceId => VersionedEventSource != null ? VersionedEventSource.EventSource : EventSourceId.Empty;
         /// <summary>
-        /// The <see cref="CausedBy" /> instance that caused this <see cref="IEvent" />
+        /// The <see cref="OriginalContext" /> derived from the <see cref="ExecutionContext" /> when this <see cref="IEvent" /> occurred
         /// </summary>
         /// <value></value>
-        public CausedBy CausedBy { get; }
+        public OriginalContext OriginalContext { get; }
         /// <summary>
         /// A timestamp in the form of a <see cref="DateTimeOffset" /> recording when the <see cref="IEvent" /> occurred.
         /// </summary>

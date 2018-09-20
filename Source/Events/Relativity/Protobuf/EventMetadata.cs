@@ -27,17 +27,20 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             "EXN5c3RlbS9ndWlkLnByb3RvGjVkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVu",
             "dHMucmVsYXRpdml0eS9hcnRpZmFjdC5wcm90bxpDZG9saXR0bGUvaW50ZXJh",
             "Y3Rpb24vZXZlbnRzLnJlbGF0aXZpdHkvdmVyc2lvbmVkX2V2ZW50X3NvdXJj",
-            "ZS5wcm90byL1AQoNRXZlbnRNZXRhZGF0YRIfCgdldmVudElkGAEgASgLMg4u",
-            "ZG9saXR0bGUuZ3VpZBJACgZzb3VyY2UYAiABKAsyMC5kb2xpdHRsZS5ldmVu",
-            "dHMucmVsYXRpdml0eS5WZXJzaW9uZWRFdmVudFNvdXJjZRIlCg1jb3JyZWxh",
-            "dGlvbklkGAMgASgLMg4uZG9saXR0bGUuZ3VpZBI2CghhcnRpZmFjdBgEIAEo",
-            "CzIkLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkFydGlmYWN0EhAKCGNh",
-            "dXNlZEJ5GAUgASgJEhAKCG9jY3VycmVkGAYgASgDQi6qAitEb2xpdHRsZS5S",
-            "dW50aW1lLkV2ZW50cy5SZWxhdGl2aXR5LlByb3RvYnVmYgZwcm90bzM="));
+            "ZS5wcm90bxo9ZG9saXR0bGUvaW50ZXJhY3Rpb24vZXZlbnRzLnJlbGF0aXZp",
+            "dHkvb3JpZ2luYWxfY29udGV4dC5wcm90byKpAgoNRXZlbnRNZXRhZGF0YRIf",
+            "CgdldmVudElkGAEgASgLMg4uZG9saXR0bGUuZ3VpZBJACgZzb3VyY2UYAiAB",
+            "KAsyMC5kb2xpdHRsZS5ldmVudHMucmVsYXRpdml0eS5WZXJzaW9uZWRFdmVu",
+            "dFNvdXJjZRIlCg1jb3JyZWxhdGlvbklkGAMgASgLMg4uZG9saXR0bGUuZ3Vp",
+            "ZBI2CghhcnRpZmFjdBgEIAEoCzIkLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2",
+            "aXR5LkFydGlmYWN0EhAKCG9jY3VycmVkGAUgASgDEkQKD29yaWdpbmFsQ29u",
+            "dGV4dBgGIAEoCzIrLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5Lk9yaWdp",
+            "bmFsQ29udGV4dEIuqgIrRG9saXR0bGUuUnVudGltZS5FdmVudHMuUmVsYXRp",
+            "dml0eS5Qcm90b2J1ZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSourceReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSourceReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContextReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata.Parser, new[]{ "EventId", "Source", "CorrelationId", "Artifact", "CausedBy", "Occurred" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata.Parser, new[]{ "EventId", "Source", "CorrelationId", "Artifact", "Occurred", "OriginalContext" }, null, null, null)
           }));
     }
     #endregion
@@ -75,8 +78,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       Source = other.source_ != null ? other.Source.Clone() : null;
       CorrelationId = other.correlationId_ != null ? other.CorrelationId.Clone() : null;
       Artifact = other.artifact_ != null ? other.Artifact.Clone() : null;
-      causedBy_ = other.causedBy_;
       occurred_ = other.occurred_;
+      OriginalContext = other.originalContext_ != null ? other.OriginalContext.Clone() : null;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -128,25 +131,25 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       }
     }
 
-    /// <summary>Field number for the "causedBy" field.</summary>
-    public const int CausedByFieldNumber = 5;
-    private string causedBy_ = "";
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string CausedBy {
-      get { return causedBy_; }
-      set {
-        causedBy_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-
     /// <summary>Field number for the "occurred" field.</summary>
-    public const int OccurredFieldNumber = 6;
+    public const int OccurredFieldNumber = 5;
     private long occurred_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long Occurred {
       get { return occurred_; }
       set {
         occurred_ = value;
+      }
+    }
+
+    /// <summary>Field number for the "originalContext" field.</summary>
+    public const int OriginalContextFieldNumber = 6;
+    private global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext originalContext_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext OriginalContext {
+      get { return originalContext_; }
+      set {
+        originalContext_ = value;
       }
     }
 
@@ -167,8 +170,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (!object.Equals(Source, other.Source)) return false;
       if (!object.Equals(CorrelationId, other.CorrelationId)) return false;
       if (!object.Equals(Artifact, other.Artifact)) return false;
-      if (CausedBy != other.CausedBy) return false;
       if (Occurred != other.Occurred) return false;
+      if (!object.Equals(OriginalContext, other.OriginalContext)) return false;
       return true;
     }
 
@@ -179,8 +182,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (source_ != null) hash ^= Source.GetHashCode();
       if (correlationId_ != null) hash ^= CorrelationId.GetHashCode();
       if (artifact_ != null) hash ^= Artifact.GetHashCode();
-      if (CausedBy.Length != 0) hash ^= CausedBy.GetHashCode();
       if (Occurred != 0L) hash ^= Occurred.GetHashCode();
+      if (originalContext_ != null) hash ^= OriginalContext.GetHashCode();
       return hash;
     }
 
@@ -207,13 +210,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         output.WriteRawTag(34);
         output.WriteMessage(Artifact);
       }
-      if (CausedBy.Length != 0) {
-        output.WriteRawTag(42);
-        output.WriteString(CausedBy);
-      }
       if (Occurred != 0L) {
-        output.WriteRawTag(48);
+        output.WriteRawTag(40);
         output.WriteInt64(Occurred);
+      }
+      if (originalContext_ != null) {
+        output.WriteRawTag(50);
+        output.WriteMessage(OriginalContext);
       }
     }
 
@@ -232,11 +235,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (artifact_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Artifact);
       }
-      if (CausedBy.Length != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(CausedBy);
-      }
       if (Occurred != 0L) {
         size += 1 + pb::CodedOutputStream.ComputeInt64Size(Occurred);
+      }
+      if (originalContext_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(OriginalContext);
       }
       return size;
     }
@@ -270,11 +273,14 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         }
         Artifact.MergeFrom(other.Artifact);
       }
-      if (other.CausedBy.Length != 0) {
-        CausedBy = other.CausedBy;
-      }
       if (other.Occurred != 0L) {
         Occurred = other.Occurred;
+      }
+      if (other.originalContext_ != null) {
+        if (originalContext_ == null) {
+          originalContext_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext();
+        }
+        OriginalContext.MergeFrom(other.OriginalContext);
       }
     }
 
@@ -314,12 +320,15 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             input.ReadMessage(artifact_);
             break;
           }
-          case 42: {
-            CausedBy = input.ReadString();
+          case 40: {
+            Occurred = input.ReadInt64();
             break;
           }
-          case 48: {
-            Occurred = input.ReadInt64();
+          case 50: {
+            if (originalContext_ == null) {
+              originalContext_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext();
+            }
+            input.ReadMessage(originalContext_);
             break;
           }
         }

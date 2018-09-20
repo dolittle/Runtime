@@ -8,6 +8,7 @@ syntax = "proto3";
 import "system/guid.proto";
 import "dolittle/interaction/events.relativity/artifact.proto";
 import "dolittle/interaction/events.relativity/versioned_event_source.proto";
+import "dolittle/interaction/events.relativity/original_context.proto";
 
 package dolittle.events.relativity;
 
@@ -19,6 +20,6 @@ message EventMetadata {
     VersionedEventSource source = 2;
     guid correlationId = 3;
     Artifact artifact = 4;
-    string causedBy = 5;
-    int64 occurred = 6;
+    int64 occurred = 5;
+    OriginalContext originalContext = 6;
 }

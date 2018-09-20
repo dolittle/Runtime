@@ -16,6 +16,7 @@ using Dolittle.Execution;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Dolittle.Tenancy;
+using Dolittle.Applications;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf
 {
@@ -181,6 +182,38 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="originalContext"></param>
+        /// <returns></returns>
+        public static Protobuf.OriginalContext ToMessage(this Dolittle.Runtime.Events.OriginalContext originalContext)
+        {
+            var message = new Protobuf.OriginalContext();
+            message.Application = originalContext.Application.ToProtobuf();
+            message.Tenant = originalContext.Tenant.ToProtobuf();
+            message.BoundedContext = originalContext.BoundedContext.ToProtobuf();
+            message.Environment = originalContext.Environment.Value;
+            message.Claims.AddRange(originalContext.Claims.Select(c => c.ToMessage()));
+
+            return message;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="claim"></param>
+        /// <returns></returns>
+        public static Protobuf.Claim ToMessage(this Dolittle.Security.Claim claim)
+        {
+            var message = new Protobuf.Claim();
+            message.Name = claim.Name;
+            message.Value = claim.Value;
+            message.ValueType = claim.ValueType;
+
+            return message;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="guid"></param>
         /// <returns></returns>
         public static ByteString ToByteString(this ConceptAs<Guid> guid)
@@ -210,8 +243,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             message.Source = metadata.VersionedEventSource.ToMessage();
             message.CorrelationId = metadata.CorrelationId.ToProtobuf();
             message.Artifact = metadata.Artifact.ToMessage();
-            message.CausedBy = metadata.CausedBy;
             message.Occurred = metadata.Occurred.ToFileTime();
+            message.OriginalContext = metadata.OriginalContext.ToMessage();
             return message;
         }
 
@@ -285,10 +318,26 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 message.Source.ToVersionedEventSource(),
                 message.CorrelationId.ToConcept<CorrelationId>(),
                 message.Artifact.ToArtifact(),
-                message.CausedBy,
-                DateTimeOffset.FromFileTime(message.Occurred)
+                DateTimeOffset.FromFileTime(message.Occurred),
+                message.OriginalContext.ToOriginalContext()
             );
             return metadata;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static Dolittle.Runtime.Events.OriginalContext ToOriginalContext(this OriginalContext message)
+        {
+            return new  Dolittle.Runtime.Events.OriginalContext(
+                message.Application.ToConcept<Application>(),
+                message.BoundedContext.ToConcept<BoundedContext>(),
+                message.Tenant.ToConcept<TenantId>(),
+                message.Environment,
+                message.Claims.ToClaims()
+            );
         }
 
         /// <summary>
@@ -359,5 +408,15 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 new Dolittle.Runtime.Events.Store.EventStream(events)
             );
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="claims"></param>
+        /// <returns></returns>
+        public static Dolittle.Security.Claims ToClaims(this RepeatedField<Claim> claims)
+        {
+            return new Dolittle.Security.Claims(claims.Select(c => new Dolittle.Security.Claim(c.Name,c.Value,c.ValueType)).ToList());
+        }        
     }
 }
