@@ -42,7 +42,7 @@ Independent of whatever perception you might have of bounded contexts, we in Dol
 {{% /notice %}}
 #### Application
 The *Application* is the top-level building block of the software built upon the Dolittle platform. It bundles the subsystems that make up for the intended functionality of the application / software.
-An *Application* is essentially a collection of Bounded Contexts, represented simply as a [GUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), the behaviour of the *Application* is defined by the collective behaviour of its Bounded Contexts. It's what the tenants register as an application in their *Application Registry* **(PUT LINK TO STUDIO STUFF HERE?)** and the thing that actually gets deployed.
+An *Application* is essentially a collection of Bounded Contexts, represented simply as a [GUID](https://en.wikipedia.org/wiki/Universally_unique_identifier), the behaviour of the *Application* is defined by the collective behaviour of its Bounded Contexts. It's what the tenants register as an application in their *Application Registry* and the thing that actually gets deployed.
 A deployed application is observing change in each of the individual Bounded Contexts that form the application, a change in either of these Bounded Contexts will then implicitly change the version of the *Application*. Each [combination](https://en.wikipedia.org/wiki/Combination) of the set of the *Application's* Bounded Contexts corresponds to its own unique *Application* version. 
 
 #### Bounded Context
@@ -97,7 +97,7 @@ So for example if you've enabled the option to structure the topology with modul
 ```
 
 ##### Artifacts
-A *Bounded Context* will eventually consist of a set of [*Artifacts*]**(LINK TO ARTIFACTS DOCS)**, they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [events]**(LINK TO EVENT DOC)**, [event processors]**(LINK TO EVENTPROCESSOR DOC)**, [commands]**(LINK TO COMMANDS DOC)**, [command handlers]**(LINK TO COMMAND HANDLER DOCS)**, [aggregate roots]**(LINK TO AGGREGATE ROOT DOCS)**, [queries]**(LINK TO QUERY DOCS)** and [read models]**(LINK TO READ MODEL DOCS)**. You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
+A *Bounded Context* will eventually consist of a set of [*Artifacts*]**(LINK TO ARTIFACTS DOCS)**, they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [Events]**(LINK TO EVENT DOC)**, [Commands](../../command/introduction), [Command Handlers](../../command/command_handler), [Aggregate Roots](../aggregate_root), [Queries](../../../read/query) and [Read Models](../../../read/read_model). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
 Each *Artifact* is an entity in the *Application*, uniquely identified throughout the *Application* in which the *Bounded Context* belongs. An *Artifact* belongs to a single Feature. 
 
 ## The configuration
