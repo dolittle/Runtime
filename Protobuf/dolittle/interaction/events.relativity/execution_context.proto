@@ -16,6 +16,6 @@ message ExecutionContext {
     guid boundedContext = 2;
     guid tenant = 3;
     guid correlationId = 4;
-    Map<string,string> claims = 5;
+    map<string,string> claims = 5;
     string culture = 6;
 }

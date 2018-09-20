@@ -27,17 +27,17 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             "EXN5c3RlbS9ndWlkLnByb3RvGjVkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVu",
             "dHMucmVsYXRpdml0eS9hcnRpZmFjdC5wcm90bxpDZG9saXR0bGUvaW50ZXJh",
             "Y3Rpb24vZXZlbnRzLnJlbGF0aXZpdHkvdmVyc2lvbmVkX2V2ZW50X3NvdXJj",
-            "ZS5wcm90byLUAQoNRXZlbnRNZXRhZGF0YRJACgZzb3VyY2UYASABKAsyMC5k",
-            "b2xpdHRsZS5ldmVudHMucmVsYXRpdml0eS5WZXJzaW9uZWRFdmVudFNvdXJj",
-            "ZRIlCg1jb3JyZWxhdGlvbklkGAIgASgLMg4uZG9saXR0bGUuZ3VpZBI2Cghh",
-            "cnRpZmFjdBgDIAEoCzIkLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkFy",
-            "dGlmYWN0EhAKCGNhdXNlZEJ5GAQgASgJEhAKCG9jY3VycmVkGAUgASgDQi6q",
-            "AitEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5SZWxhdGl2aXR5LlByb3RvYnVm",
-            "YgZwcm90bzM="));
+            "ZS5wcm90byL1AQoNRXZlbnRNZXRhZGF0YRIfCgdldmVudElkGAEgASgLMg4u",
+            "ZG9saXR0bGUuZ3VpZBJACgZzb3VyY2UYAiABKAsyMC5kb2xpdHRsZS5ldmVu",
+            "dHMucmVsYXRpdml0eS5WZXJzaW9uZWRFdmVudFNvdXJjZRIlCg1jb3JyZWxh",
+            "dGlvbklkGAMgASgLMg4uZG9saXR0bGUuZ3VpZBI2CghhcnRpZmFjdBgEIAEo",
+            "CzIkLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkFydGlmYWN0EhAKCGNh",
+            "dXNlZEJ5GAUgASgJEhAKCG9jY3VycmVkGAYgASgDQi6qAitEb2xpdHRsZS5S",
+            "dW50aW1lLkV2ZW50cy5SZWxhdGl2aXR5LlByb3RvYnVmYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSourceReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata.Parser, new[]{ "Source", "CorrelationId", "Artifact", "CausedBy", "Occurred" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata.Parser, new[]{ "EventId", "Source", "CorrelationId", "Artifact", "CausedBy", "Occurred" }, null, null, null)
           }));
     }
     #endregion
@@ -71,6 +71,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public EventMetadata(EventMetadata other) : this() {
+      EventId = other.eventId_ != null ? other.EventId.Clone() : null;
       Source = other.source_ != null ? other.Source.Clone() : null;
       CorrelationId = other.correlationId_ != null ? other.CorrelationId.Clone() : null;
       Artifact = other.artifact_ != null ? other.Artifact.Clone() : null;
@@ -83,8 +84,19 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       return new EventMetadata(this);
     }
 
+    /// <summary>Field number for the "eventId" field.</summary>
+    public const int EventIdFieldNumber = 1;
+    private global::System.Protobuf.guid eventId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::System.Protobuf.guid EventId {
+      get { return eventId_; }
+      set {
+        eventId_ = value;
+      }
+    }
+
     /// <summary>Field number for the "source" field.</summary>
-    public const int SourceFieldNumber = 1;
+    public const int SourceFieldNumber = 2;
     private global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSource source_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSource Source {
@@ -95,7 +107,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "correlationId" field.</summary>
-    public const int CorrelationIdFieldNumber = 2;
+    public const int CorrelationIdFieldNumber = 3;
     private global::System.Protobuf.guid correlationId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::System.Protobuf.guid CorrelationId {
@@ -106,7 +118,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "artifact" field.</summary>
-    public const int ArtifactFieldNumber = 3;
+    public const int ArtifactFieldNumber = 4;
     private global::Dolittle.Runtime.Events.Relativity.Protobuf.Artifact artifact_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Dolittle.Runtime.Events.Relativity.Protobuf.Artifact Artifact {
@@ -117,7 +129,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "causedBy" field.</summary>
-    public const int CausedByFieldNumber = 4;
+    public const int CausedByFieldNumber = 5;
     private string causedBy_ = "";
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public string CausedBy {
@@ -128,7 +140,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "occurred" field.</summary>
-    public const int OccurredFieldNumber = 5;
+    public const int OccurredFieldNumber = 6;
     private long occurred_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long Occurred {
@@ -151,6 +163,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (ReferenceEquals(other, this)) {
         return true;
       }
+      if (!object.Equals(EventId, other.EventId)) return false;
       if (!object.Equals(Source, other.Source)) return false;
       if (!object.Equals(CorrelationId, other.CorrelationId)) return false;
       if (!object.Equals(Artifact, other.Artifact)) return false;
@@ -162,6 +175,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
+      if (eventId_ != null) hash ^= EventId.GetHashCode();
       if (source_ != null) hash ^= Source.GetHashCode();
       if (correlationId_ != null) hash ^= CorrelationId.GetHashCode();
       if (artifact_ != null) hash ^= Artifact.GetHashCode();
@@ -177,24 +191,28 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (source_ != null) {
+      if (eventId_ != null) {
         output.WriteRawTag(10);
+        output.WriteMessage(EventId);
+      }
+      if (source_ != null) {
+        output.WriteRawTag(18);
         output.WriteMessage(Source);
       }
       if (correlationId_ != null) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(26);
         output.WriteMessage(CorrelationId);
       }
       if (artifact_ != null) {
-        output.WriteRawTag(26);
+        output.WriteRawTag(34);
         output.WriteMessage(Artifact);
       }
       if (CausedBy.Length != 0) {
-        output.WriteRawTag(34);
+        output.WriteRawTag(42);
         output.WriteString(CausedBy);
       }
       if (Occurred != 0L) {
-        output.WriteRawTag(40);
+        output.WriteRawTag(48);
         output.WriteInt64(Occurred);
       }
     }
@@ -202,6 +220,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
+      if (eventId_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(EventId);
+      }
       if (source_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Source);
       }
@@ -224,6 +245,12 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     public void MergeFrom(EventMetadata other) {
       if (other == null) {
         return;
+      }
+      if (other.eventId_ != null) {
+        if (eventId_ == null) {
+          eventId_ = new global::System.Protobuf.guid();
+        }
+        EventId.MergeFrom(other.EventId);
       }
       if (other.source_ != null) {
         if (source_ == null) {
@@ -260,31 +287,38 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             input.SkipLastField();
             break;
           case 10: {
+            if (eventId_ == null) {
+              eventId_ = new global::System.Protobuf.guid();
+            }
+            input.ReadMessage(eventId_);
+            break;
+          }
+          case 18: {
             if (source_ == null) {
               source_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSource();
             }
             input.ReadMessage(source_);
             break;
           }
-          case 18: {
+          case 26: {
             if (correlationId_ == null) {
               correlationId_ = new global::System.Protobuf.guid();
             }
             input.ReadMessage(correlationId_);
             break;
           }
-          case 26: {
+          case 34: {
             if (artifact_ == null) {
               artifact_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.Artifact();
             }
             input.ReadMessage(artifact_);
             break;
           }
-          case 34: {
+          case 42: {
             CausedBy = input.ReadString();
             break;
           }
-          case 40: {
+          case 48: {
             Occurred = input.ReadInt64();
             break;
           }

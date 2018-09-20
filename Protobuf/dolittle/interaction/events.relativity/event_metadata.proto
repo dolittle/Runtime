@@ -15,9 +15,10 @@ option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
 
 // Represents the metadata related to an event
 message EventMetadata {
-    VersionedEventSource source = 1;
-    guid correlationId = 2;
-    Artifact artifact = 3;
-    string causedBy = 4;
-    int64 occurred = 5;
+    guid eventId = 1;
+    VersionedEventSource source = 2;
+    guid correlationId = 3;
+    Artifact artifact = 4;
+    string causedBy = 5;
+    int64 occurred = 6;
 }
