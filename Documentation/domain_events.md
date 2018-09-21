@@ -118,7 +118,7 @@ var added = new ItemAddedToCart(Guid.NewGuid(),1,"500 EUR", "500 EUR")
 
 ```
 
-You should consider the serialisable nature of the Domain Event and let this guide the shape and content of your Event.  You should also consider the impact on versioning (see Migration).  This may seem like a departure from the principles of Domain Driven Design and the wish to capture meaning in value objects but it is in fact a recognition that an Event is primarily about communication (within and outside the Bounded Context) and persistence (in the Event Store).
+You should consider the serialisable nature of the Domain Event and let this guide the shape and content of your Event.  You should also consider the impact on versioning (see Migration) and any logic (e.g. parsing as in the above example).  This may seem like a departure from the principles of Domain Driven Design and the wish to capture meaning in value objects but it is in fact a recognition that an Event is primarily about communication (within and outside the Bounded Context) and persistence (in the Event Store).
 
 
 ### Fat Events and Thin Events
