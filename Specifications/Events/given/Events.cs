@@ -58,7 +58,7 @@
 
         static EventMetadata BuildEventMetadata(EventId id, VersionedEventSource versionedEventSource, Artifact artifact, CorrelationId correlationId, DateTimeOffset committed)
         {
-            return new EventMetadata(id, versionedEventSource, correlationId, artifact, "A Test", committed);
+            return new EventMetadata(id, versionedEventSource, correlationId, artifact, committed, an_original_context());
         } 
 
         static SingleEventTypeEventStream GetEventsFromCommits(IEnumerable<CommittedEventStream> commits, ArtifactId eventType)
@@ -69,6 +69,11 @@
             events.AddRange(commit.Events.FilteredByEventType(eventType).Select(e => new CommittedEventEnvelope(commit.Sequence,e.Metadata,e.Event)));
         }
         return new SingleEventTypeEventStream(events);
+        }
+
+        public static OriginalContext an_original_context()
+        {
+            return new OriginalContext(Guid.NewGuid(),Guid.NewGuid(),Guid.NewGuid(),"specs", new Dolittle.Security.Claims(new Dolittle.Security.Claim[0]));
         }
     }
 

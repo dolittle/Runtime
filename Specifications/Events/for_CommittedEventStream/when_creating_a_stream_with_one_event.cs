@@ -7,7 +7,7 @@ using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Execution;
 using Dolittle.Runtime.Events.Specs;
-using Dolittle.Runtime.Events.Specs.given;
+using specs = Dolittle.Runtime.Events.Specs.given;
 
 namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream
 {
@@ -18,8 +18,8 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedEventStream
 
         Establish context = () =>
         {
-            @event = new SimpleEvent();
-            var metadata = new EventMetadata(EventId.New(),new VersionedEventSource(event_source_id,ArtifactId.New()),CorrelationId.New(),new Artifact(ArtifactId.New(),1),"test",DateTime.UtcNow);
+            @event = new specs.SimpleEvent();
+            var metadata = new EventMetadata(EventId.New(),new VersionedEventSource(event_source_id,ArtifactId.New()),CorrelationId.New(),new Artifact(ArtifactId.New(),1),DateTime.UtcNow,specs.Events.an_original_context());
             committed_event = new CommittedEvent(new CommittedEventVersion(1,1,0),metadata,@event);
         };
 

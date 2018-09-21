@@ -6,6 +6,7 @@ using Machine.Specifications;
 using Dolittle.Execution;
 using Dolittle.Runtime.Events;
 using Dolittle.Collections;
+using specs = Dolittle.Runtime.Events.Specs.given;
 
 namespace Dolittle.Runtime.Events.Relativity.for_Singularity
 {
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Events.Relativity.for_Singularity
                 DateTimeOffset.UtcNow,
                 new Store.EventStream(new[] {
                     new EventEnvelope(
-                        new EventMetadata(EventId.New(),versionedEventSource,correlationId, Artifact.New(), "", DateTimeOffset.UtcNow),
+                        new EventMetadata(EventId.New(),versionedEventSource,correlationId, Artifact.New(), DateTimeOffset.UtcNow, specs.Events.an_original_context()),
                         new PropertyBag(new NullFreeDictionary<string, object>())
                     )
                 })
