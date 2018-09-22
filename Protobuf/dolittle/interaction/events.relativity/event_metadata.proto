@@ -8,6 +8,7 @@ syntax = "proto3";
 import "system/guid.proto";
 import "dolittle/interaction/events.relativity/artifact.proto";
 import "dolittle/interaction/events.relativity/versioned_event_source.proto";
+import "dolittle/interaction/events.relativity/original_context.proto";
 
 package dolittle.events.relativity;
 
@@ -15,9 +16,10 @@ option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
 
 // Represents the metadata related to an event
 message EventMetadata {
-    VersionedEventSource source = 1;
-    guid correlationId = 2;
-    Artifact artifact = 3;
-    string causedBy = 4;
+    guid eventId = 1;
+    VersionedEventSource source = 2;
+    guid correlationId = 3;
+    Artifact artifact = 4;
     int64 occurred = 5;
+    OriginalContext originalContext = 6;
 }

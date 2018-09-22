@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Runtime.Tenancy;
     using Dolittle.Types;
     using Dolittle.DependencyInversion;
+    using Dolittle.Execution;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
@@ -27,6 +28,7 @@ namespace Dolittle.Runtime.Events.Processing
         ILogger _logger;
         private readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
         private readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        private readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
         /// Instantiates a new instance of <see cref="BootProcedure" />
@@ -36,12 +38,14 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="processingHub">An instance of <see cref="IScopedEventProcessingHub" /> for processing <see cref="CommittedEventStream">Committed Event Streams</see></param>
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
+        /// <param name="executionContextManager">The <see cref="ExecutionContextManager" /> for setting the correct execution context for the Event Processors </param>
         /// <param name="logger">An instance of <see cref="ILogger" /> for logging</param>
         public BootProcedure(IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
                                 ITenants tenants, 
                                 IScopedEventProcessingHub processingHub, 
                                 FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository, 
                                 FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
+                                IExecutionContextManager executionContextManager,                                
                                 ILogger logger)
         {
             _processingHub = processingHub;
@@ -50,6 +54,7 @@ namespace Dolittle.Runtime.Events.Processing
             _systemsThatKnowAboutEventProcessors = systemsThatKnowAboutEventProcessors;
             _getOffsetRepository = getOffsetRepository;
             _getUnprocessedEventsFetcher = getUnprocessedEventsFetcher;
+            _executionContextManager = executionContextManager;
         }
 
         /// <inheritdoc />
@@ -70,6 +75,7 @@ namespace Dolittle.Runtime.Events.Processing
                 {
                     Parallel.ForEach(_tenants.All, (t) =>
                     {
+                        _executionContextManager.CurrentFor(t);
                         _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
                     });
                 });

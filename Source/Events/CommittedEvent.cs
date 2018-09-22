@@ -13,13 +13,11 @@ namespace Dolittle.Runtime.Events
         /// </summary>
         /// <param name="version">The committed event version</param>
         /// <param name="metadata">Metadata describing the event</param>
-        /// <param name="id">The Id of the event</param>
         /// <param name="event">The <see cref="IEvent">event</see> instance</param>
-        public CommittedEvent(CommittedEventVersion version, EventMetadata metadata, EventId id, IEvent @event)
+        public CommittedEvent(CommittedEventVersion version, EventMetadata metadata, IEvent @event)
         {
             Version = version;
             Metadata = metadata;
-            Id = id;
             Event = @event;
         }
 
@@ -39,7 +37,7 @@ namespace Dolittle.Runtime.Events
         /// The Id of the Event
         /// </summary>
         /// <value></value>
-        public EventId Id { get; }
+        public EventId Id => Metadata.Id;
         /// <summary>
         /// The instance of the <see cref="IEvent">event</see> that was committed
         /// </summary>

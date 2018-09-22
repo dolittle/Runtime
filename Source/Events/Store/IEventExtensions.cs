@@ -12,11 +12,11 @@ namespace Dolittle.Runtime.Events.Store
     public static class IEventExtensions
     {
         /// <summary>
-        /// Creates an instance of <see cref="EventEnvelope" /> for this event with the provided <see cref="EventId" /> and <see cref="EventMetadata" />
+        /// Creates an instance of <see cref="EventEnvelope" /> for this event with the provided <see cref="EventMetadata" />
         /// </summary>
-        public static EventEnvelope ToEnvelope(this IEvent @event, EventId eventId, EventMetadata metatdata)
+        public static EventEnvelope ToEnvelope(this IEvent @event,  EventMetadata metatdata)
         {
-            return new EventEnvelope(eventId, metatdata, @event.ToPropertyBag());
+            return new EventEnvelope(metatdata, @event.ToPropertyBag());
         }
     }
 }

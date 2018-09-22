@@ -15,7 +15,6 @@ option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
 
 // Represents an event
 message EventEnvelope {
-    guid id = 1;
-    EventMetadata metadata = 2;
-    map<string, Object> event = 3;
+    EventMetadata metadata = 1;
+    map<string, Object> event = 2;
 }
