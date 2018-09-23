@@ -8,7 +8,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in
 [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
-## Event Store
+# Event Store
 
 An Event Store is the mechanism by which a stream of events are persisted to durable storage.  It is the storage mechanism for an Event Sourced system (see Event Sourcing).
 
@@ -35,19 +35,19 @@ In addition to the event itself, metadata associated with the Commit and with th
 
 The event metadata consists of 
 
-####Event Id.  
+### Event Id.  
 A unique guid for the event.
-###Versioned Event Source.  
+### Versioned Event Source.  
 Identifies which Event Source (guid as the Id and the Artifact Id which identifies the type) and which version the Event Source is.  An Event Source is versioned individually, where each commit represents the Major Version and each event in the Commit is the minor Version.
 The first commit for an Event Source is number 1.  The first event in a commit is numbered 0.
 The Event Version is instrumental in supporting **optimistic concurrency**.  
-####Correlation Id
+### Correlation Id
 A unique identifier (guid) that can trace a single transaction through the system.  The correlation id identifies which transaction resulted in this commit.
-####Artifact
+### Artifact
 A unique identifier for the type of the Event.  As events are long living and can evolve, they are separated from any particular system type.  An artifact identifies the concept of this event separated from any particular code representation (e.g. class).
-####Original Context 
+### Original Context 
 The original context contains information about the Application, Bounded Context, Tenant and Environment in which the Event was generated.  Events can be broadcast from one bounded context to another, though only one bounded context (identified by the Original Context) can own an Event.
-####Occurrred
+### Occurrred
 Indicates when the event occurred - when it was persisted - in UTC.
 
 ### Commit Metadata
@@ -69,7 +69,20 @@ Events are serialized for persistence.  As an Event can and will have numerous c
 The *Property Bag* is a simple, write-once dictionary like structure that stores the content of an Event and that can be used to rehydrate the Event.  The PropertyBag only supports getters and all values are set through the constructor.
 
 {{% notice Tip %}}
-An Object Factory is used to create populated instances of the type from a Property Bag.  Read-only event types are supported but properties must be passed in through the constructor with the convention that the Property must be named in PascalCase and the constructor parameter should have exactly the same name but ion Camel Case.
+An *Object Factory* is used to create populated instances of the type from a Property Bag.  Read-only event types are supported but properties must be passed in through the constructor with the convention that the Property must be named in PascalCase and the constructor parameter should have exactly the same name but in Camel Case.
+
+'''csharp
+public event MyEvent : IEvent
+{
+  public MyEvent(int myIntProperty, string aStringProperty)
+  {
+    MyIntProperty = myIntProperty;
+    AStringProperty = aStringProperty;
+  }
+  public int MyIntProperty { get; }
+  public string AStringProperty { get; }
+}
+'''
 
 The Object Factory will always use the Constructor with the greatest number of parameters to try to populate the values.  Where there are more than one constructor with the greatest number of parameters, the constructor used is indeterminate.  This situation *SHOULD* be avoided. 
 {{% /notice %}}
@@ -84,7 +97,7 @@ The most common requirement to query an Event Store is to re-populate an Event S
 
 ### Catching up an Event Processor
 
-An event processor operates at the Event rather than the Commit level.  When an event processor is instantiated it has to check if there have been any events of the type that is handles since the last one it handled (in the case of a new event processor this would typically be since the beginning of time).  The Event Store can be asked to provide all instance of a particular event type since a particular **Committed Event Version **.
+An event processor operates at the Event rather than the Commit level.  When an event processor is instantiated it has to check if there have been any events of the type that is handles since the last one it handled (in the case of a new event processor this would typically be since the beginning of time).  The Event Store can be asked to provide all instance of a particular event type since a particular **Committed Event Version**.
 
 ### Catching up Event Horizons
 
