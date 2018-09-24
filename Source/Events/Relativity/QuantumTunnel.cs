@@ -20,9 +20,9 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnel : IQuantumTunnel
     {
         readonly ISerializer _serializer;
-        readonly IServerStreamWriter<Protobuf.CommittedEventStream> _responseStream;
+        readonly IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> _responseStream;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ConcurrentQueue<Protobuf.CommittedEventStream> _outbox;
+        readonly ConcurrentQueue<Protobuf.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
@@ -36,14 +36,14 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel(
             ISerializer serializer,
-            IServerStreamWriter<Protobuf.CommittedEventStream> responseStream,
+            IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> responseStream,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
             _executionContextManager = executionContextManager;
-            _outbox = new ConcurrentQueue<Protobuf.CommittedEventStream>();
+            _outbox = new ConcurrentQueue<Protobuf.CommittedEventStreamWithContext>();
             _logger = logger;
             _waitHandle = new AutoResetEvent(false);
         }
@@ -52,11 +52,11 @@ namespace Dolittle.Runtime.Events.Relativity
         public event QuantumTunnelCollapsed Collapsed = (q) => { };
 
         /// <inheritdoc/>
-        public void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
+        public void PassThrough(Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext contextualEventStream)
         {
             try
             {
-                var message = committedEventStream.ToMessage(_executionContextManager.Current.Tenant, _serializer);
+                var message = contextualEventStream.ToMessage();
                 _outbox.Enqueue(message);
                 _waitHandle.Set();
             }
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Relativity
                         _waitHandle.WaitOne(1000);
                         if (_outbox.IsEmpty) continue;
 
-                        Protobuf.CommittedEventStream message;
+                        Protobuf.CommittedEventStreamWithContext message;
                         while (!_outbox.IsEmpty)
                         {
                             if (_outbox.TryDequeue(out message))

@@ -11,6 +11,8 @@ using Dolittle.Serialization.Protobuf;
 using Dolittle.Runtime.Events.Relativity.Grpc;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Processing;
+using Dolittle.DependencyInversion;
+using Dolittle.Execution;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -22,37 +24,41 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly ILogger _logger;
         readonly Application _application;
         readonly BoundedContext _boundedContext;
-        readonly IGeodesics _geodesics;
+        readonly FactoryFor<IGeodesics> _getGeodesics;
         readonly ISerializer _serializer;
-        readonly IEventStore _eventStore;
-        private readonly IEventProcessors _eventProcessors;
+        readonly FactoryFor<IEventStore> _getEventStore;
+        readonly IScopedEventProcessingHub _eventProcessingHub;
+        readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Barrier"/>
         /// </summary>
         /// <param name="application">The current <see cref="Application"/></param>
         /// <param name="boundedContext">The current <see cref="BoundedContext"/></param>
-        /// <param name="geodesics">The <see cref="IGeodesics"/> for path offsetting</param>
+        /// <param name="getGeodesics">A <see cref="FactoryFor{IGeodesics}"/> to get the correctly scoped geodesics for path offsetting</param>
         /// <param name="serializer"><see cref="ISerializer"/> used for serialization</param>
-        /// <param name="eventStore"><see cref="IEventStore"/> to persist incoming events to</param>
-        /// <param name="eventProcessors"><see cref="IEventProcessors"/> for processing incoming events</param>
+        /// <param name="getEventStore">A <see cref="FactoryFor{IEventStore}"/> to get the correctly scoped EventStore to persist incoming events to</param>
+        /// <param name="eventProcessingHub"><see cref="IScopedEventProcessingHub"/> for processing incoming events</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> to set the correct context for processing events</param>
         public Barrier(
             Application application,
             BoundedContext boundedContext,
-            IGeodesics geodesics,
+            FactoryFor<IGeodesics> getGeodesics,
             ISerializer serializer,
-            IEventStore eventStore,
-            IEventProcessors eventProcessors,
-            ILogger logger)
+            FactoryFor<IEventStore> getEventStore,
+            IScopedEventProcessingHub eventProcessingHub,
+            ILogger logger,
+            IExecutionContextManager executionContextManager)
         {
             _logger = logger;
             _application = application;
             _boundedContext = boundedContext;
-            _geodesics = geodesics;
+            _getGeodesics = getGeodesics;
             _serializer = serializer;
-            _eventStore = eventStore;
-            _eventProcessors = eventProcessors;
+            _getEventStore = getEventStore;
+            _eventProcessingHub = eventProcessingHub;
+            _executionContextManager = executionContextManager;
         }
 
         /// <inheritdoc/>
@@ -66,11 +72,12 @@ namespace Dolittle.Runtime.Events.Relativity
                 destinationBoundedContext,
                 url,
                 events,
-                _geodesics,
-                _eventStore,
-                _eventProcessors,
+                _getGeodesics,
+                _getEventStore,
+                _eventProcessingHub,
                 _serializer,
-                _logger);
+                _logger,
+                _executionContextManager);
         }
     }
 

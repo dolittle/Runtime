@@ -23,20 +23,21 @@ namespace Dolittle.Runtime.Events
         /// <param name="tenant"><see cref="TenantId"/> that is related to the source of the event</param>
         /// <param name="environment"><see cref="Dolittle.Execution.Environment"/> for the original <see cref="ExecutionContext"/></param>
         /// <param name="claims"><see cref="Claims"/> for the user who initiated the event</param>
-        /// <param name="commitSequenceNumber"><see cref="CommitSequenceNumber"/> for the commit of which this event is part.null  May not be populated in the source Bounded Context.</param>
+        /// <param name="commitSequenceNumber"><see cref="CommitSequenceNumber"/> for the commit of which this event is part.  May not be populated in the source Bounded Context.</param>
         public OriginalContext(
             Application application,
             BoundedContext boundedContext,
             TenantId tenant,
             Dolittle.Execution.Environment environment,
             Claims claims,
-            CommitSequenceNumber commitSequenceNumber)
+            CommitSequenceNumber commitSequenceNumber = null)
         {
             Application = application;
             BoundedContext = boundedContext;
             Tenant = tenant;
             Environment = environment;
             Claims = claims;
+            CommitInOrigin = commitSequenceNumber ?? 0;
         }
 
         /// <summary>
@@ -81,8 +82,7 @@ namespace Dolittle.Runtime.Events
                 executionContext.BoundedContext ?? Guid.Empty,
                 executionContext.Tenant ?? Guid.Empty,
                 executionContext.Environment ?? string.Empty,
-                executionContext.Claims ?? new Claims(Enumerable.Empty<Dolittle.Security.Claim>()),
-                0
+                executionContext.Claims ?? new Claims(Enumerable.Empty<Dolittle.Security.Claim>())
             );
         }
     }

@@ -24,21 +24,21 @@ namespace Dolittle.Runtime.Events.Relativity
         BoundedContext BoundedContext { get; }
 
         /// <summary>
-        /// Pass an <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> through
+        /// Pass an <see cref="Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext"/> through
         /// </summary>
-        /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to pass through</param>
+        /// <param name="committedEventStreamWithContext"><see cref="Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext"/> to pass through</param>
         /// <returns>True if it could pass through, false if not</returns>
         /// <remarks>
-        /// Not all singularities will be interested in events in a <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/>
+        /// Not all singularities will be interested in events in a <see cref="Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext"/>
         /// If a singularity is not interested, it won't pass through and won't then do that
         /// </remarks>
-        bool PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
+        bool PassThrough(Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext committedEventStreamWithContext);
 
         /// <summary>
-        /// Determines wether or not the <see cref="ISingularity"/> is capable of receiving a <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/>
+        /// Determines wether or not the <see cref="ISingularity"/> is capable of receiving a <see cref="Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext"/>
         /// </summary>
-        /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to ask for</param>
+        /// <param name="committedEventStreamWithContext"><see cref="Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext"/> to ask for</param>
         /// <returns>True if it can, false if not</returns>
-        bool CanPassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
+        bool CanPassThrough(Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext committedEventStreamWithContext);
     }
 }

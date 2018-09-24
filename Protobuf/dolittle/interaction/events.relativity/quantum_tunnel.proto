@@ -8,12 +8,12 @@ syntax = "proto3";
 package dolittle.events.relativity;
 
 import "dolittle/interaction/events.relativity/open_tunnel.proto";
-import "dolittle/interaction/events.relativity/committed_event_stream.proto";
+import "dolittle/interaction/events.relativity/committed_event_stream_with_context.proto";
 
 option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Grpc";
 
 // Represents the service for working with quantum tunnel
 service QuantumTunnelService {
-    rpc Open(OpenTunnel) returns (stream CommittedEventStream) {}
+    rpc Open(OpenTunnel) returns (stream CommittedEventStreamWithContext) {}
     
 }

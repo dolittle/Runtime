@@ -25,17 +25,17 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             "Cj1kb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9vcmln",
             "aW5hbF9jb250ZXh0LnByb3RvEhpkb2xpdHRsZS5ldmVudHMucmVsYXRpdml0",
             "eRoRc3lzdGVtL2d1aWQucHJvdG8aMmRvbGl0dGxlL2ludGVyYWN0aW9uL2V2",
-            "ZW50cy5yZWxhdGl2aXR5L2NsYWltLnByb3RvIsYBCg9PcmlnaW5hbENvbnRl",
+            "ZW50cy5yZWxhdGl2aXR5L2NsYWltLnByb3RvIt4BCg9PcmlnaW5hbENvbnRl",
             "eHQSIwoLYXBwbGljYXRpb24YASABKAsyDi5kb2xpdHRsZS5ndWlkEiYKDmJv",
             "dW5kZWRDb250ZXh0GAIgASgLMg4uZG9saXR0bGUuZ3VpZBIeCgZ0ZW5hbnQY",
             "AyABKAsyDi5kb2xpdHRsZS5ndWlkEhMKC2Vudmlyb25tZW50GAQgASgJEjEK",
             "BmNsYWltcxgFIAMoCzIhLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkNs",
-            "YWltQi6qAitEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5SZWxhdGl2aXR5LlBy",
-            "b3RvYnVmYgZwcm90bzM="));
+            "YWltEhYKDmNvbW1pdEluT3JpZ2luGAYgASgEQi6qAitEb2xpdHRsZS5SdW50",
+            "aW1lLkV2ZW50cy5SZWxhdGl2aXR5LlByb3RvYnVmYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.ClaimReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext), global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext.Parser, new[]{ "Application", "BoundedContext", "Tenant", "Environment", "Claims" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext), global::Dolittle.Runtime.Events.Relativity.Protobuf.OriginalContext.Parser, new[]{ "Application", "BoundedContext", "Tenant", "Environment", "Claims", "CommitInOrigin" }, null, null, null)
           }));
     }
     #endregion
@@ -74,6 +74,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       Tenant = other.tenant_ != null ? other.Tenant.Clone() : null;
       environment_ = other.environment_;
       claims_ = other.claims_.Clone();
+      commitInOrigin_ = other.commitInOrigin_;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -135,6 +136,17 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       get { return claims_; }
     }
 
+    /// <summary>Field number for the "commitInOrigin" field.</summary>
+    public const int CommitInOriginFieldNumber = 6;
+    private ulong commitInOrigin_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ulong CommitInOrigin {
+      get { return commitInOrigin_; }
+      set {
+        commitInOrigin_ = value;
+      }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as OriginalContext);
@@ -153,6 +165,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (!object.Equals(Tenant, other.Tenant)) return false;
       if (Environment != other.Environment) return false;
       if(!claims_.Equals(other.claims_)) return false;
+      if (CommitInOrigin != other.CommitInOrigin) return false;
       return true;
     }
 
@@ -164,6 +177,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (tenant_ != null) hash ^= Tenant.GetHashCode();
       if (Environment.Length != 0) hash ^= Environment.GetHashCode();
       hash ^= claims_.GetHashCode();
+      if (CommitInOrigin != 0UL) hash ^= CommitInOrigin.GetHashCode();
       return hash;
     }
 
@@ -191,6 +205,10 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         output.WriteString(Environment);
       }
       claims_.WriteTo(output, _repeated_claims_codec);
+      if (CommitInOrigin != 0UL) {
+        output.WriteRawTag(48);
+        output.WriteUInt64(CommitInOrigin);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -209,6 +227,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Environment);
       }
       size += claims_.CalculateSize(_repeated_claims_codec);
+      if (CommitInOrigin != 0UL) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(CommitInOrigin);
+      }
       return size;
     }
 
@@ -239,6 +260,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         Environment = other.Environment;
       }
       claims_.Add(other.claims_);
+      if (other.CommitInOrigin != 0UL) {
+        CommitInOrigin = other.CommitInOrigin;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -276,6 +300,10 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
           }
           case 42: {
             claims_.AddEntriesFrom(input, _repeated_claims_codec);
+            break;
+          }
+          case 48: {
+            CommitInOrigin = input.ReadUInt64();
             break;
           }
         }

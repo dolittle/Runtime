@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly QuantumTunnelService.QuantumTunnelServiceClient _client;
         readonly Application _destinationApplication;
         readonly BoundedContext _destinationBoundedContext;
-        readonly IGeodesics _geodesics;
+        readonly FactoryFor<IGeodesics> _getGeodesics;
         readonly ISerializer _serializer;
         readonly FactoryFor<IEventStore> _getEventStore;
         readonly IScopedEventProcessingHub _eventProcessingHub;
@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         /// <param name="destinationBoundedContext">The destination <see cref="BoundedContext"/></param>
         /// <param name="url">Url for the <see cref="IEventHorizon"/> we're connecting to</param>
         /// <param name="events"><see cref="IEnumerable{Artifact}">Events</see> to connect for</param>
-        /// <param name="geodesics"><see cref="IGeodesics"/> for path offsetting</param>
+        /// <param name="getGeodesics">A <see cref="FactoryFor{IGeodesics}"/> to provide the correctly scoped geodesics instance for path offsetting</param>
         /// <param name="getEventStore">A factory to provide the correctly scoped <see cref="IEventStore"/> to persist incoming events to</param>
         /// <param name="eventProcessingHub"><see cref="IScopedEventProcessingHub"/> for processing incoming events</param>
         /// <param name="serializer"><see cref="ISerializer"/> to use for deserializing content of commits</param>
@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 BoundedContext destinationBoundedContext,
                 string url,
                 IEnumerable<Dolittle.Artifacts.Artifact> events,
-                IGeodesics geodesics,
+                FactoryFor<IGeodesics> getGeodesics,
                 FactoryFor<IEventStore> getEventStore,
                 IScopedEventProcessingHub eventProcessingHub,
                 ISerializer serializer,
@@ -81,7 +81,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             _logger = logger;
             _application = application;
             _boundedContext = boundedContext;
-            _geodesics = geodesics;
+            _getGeodesics = getGeodesics;
             _serializer = serializer;
             _getEventStore = getEventStore;
             _eventProcessingHub = eventProcessingHub;
@@ -189,8 +189,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
                     try
                     {
-                        var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                        _executionContextManager.CurrentFor(current.Events.First().Metadata.OriginalContext.Tenant);
+                        var current = stream.ResponseStream.Current.Commit.ToCommittedEventStream();
+                        _executionContextManager.Current = stream.ResponseStream.Current.Context.ToExecutionContext();
                         EventSourceVersion version = null;
                         using(var _ = _getEventStore())
                         {
@@ -252,6 +252,5 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
             _logger.Information("Done opening and handling the stream");
         }
-
     }
 }

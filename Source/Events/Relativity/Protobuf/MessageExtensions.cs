@@ -17,6 +17,7 @@ using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Dolittle.Tenancy;
 using Dolittle.Applications;
+using System.Globalization;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf
 {
@@ -114,14 +115,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// Convert from <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to <see cref="Protobuf.CommittedEventStream"/>
         /// </summary>
         /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to convert from</param>
-        /// <param name="tenant"><see cref="TenantId"/> the message is for</param>
-        /// <param name="serializer"><see cref="ISerializer"/> to use for serializing content</param>
         /// <returns>The converted <see cref="Protobuf.CommittedEventStream"/></returns>
-        public static Protobuf.CommittedEventStream ToMessage(this Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream, TenantId tenant, ISerializer serializer)
+        public static Protobuf.CommittedEventStream ToMessage(this Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
         {
             var message = new Protobuf.CommittedEventStream
             {
-                Tenant = tenant.ToProtobuf(),
                 Source = committedEventStream.Source.ToMessage(),
                 Sequence = committedEventStream.Sequence,
                 Id = committedEventStream.Id.ToProtobuf(),
@@ -133,7 +131,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             {
                 var envelope = new Protobuf.EventEnvelope
                 {
-                    Metadata = @event.Metadata.ToMessage(),
+                    Metadata = @event.Metadata.ToMessage()
                 };
 
                 envelope.Event.Add(@event.Event.ToProtobuf());
@@ -143,6 +141,34 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
 
             return message;
         }
+
+        /// <summary>
+        /// Convert from <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to <see cref="Protobuf.CommittedEventStream"/>
+        /// </summary>
+        /// <param name="contextualEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to convert from</param>
+        /// <returns>The converted <see cref="Protobuf.CommittedEventStream"/></returns>
+        public static Protobuf.CommittedEventStreamWithContext ToMessage(this Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext contextualEventStream)
+        {
+            var message = new Protobuf.CommittedEventStreamWithContext
+            {
+                Commit = contextualEventStream.EventStream.ToMessage(),
+                Context = contextualEventStream.Context.ToMessage()
+            };
+
+            contextualEventStream.EventStream.Events.Select(@event =>
+            {
+                var envelope = new Protobuf.EventEnvelope
+                {
+                    Metadata = @event.Metadata.ToMessage(),
+                };
+
+                envelope.Event.Add(@event.Event.ToProtobuf());
+                
+                return envelope;
+            }).ForEach(message.Commit.Events.Add);
+
+            return message;
+        }        
 
         /// <summary>
         /// 
@@ -194,6 +220,27 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
             message.Claims.AddRange(originalContext.Claims.Select(c => c.ToMessage()));
 
             return message;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="executionContext"></param>
+        /// <returns></returns>
+        public static Protobuf.ExecutionContext ToMessage(this Dolittle.Execution.ExecutionContext executionContext)
+        {
+            var source = new Protobuf.ExecutionContext
+            {
+                Application = executionContext.Application.ToProtobuf(),
+                BoundedContext = executionContext.BoundedContext.ToProtobuf(),
+                Tenant = executionContext.Tenant.ToProtobuf(),
+                CorrelationId = executionContext.CorrelationId.ToProtobuf(),
+                Environment = executionContext.Environment.Value,
+                Culture = executionContext.Culture?.Name ?? CultureInfo.InvariantCulture.Name
+            };
+            executionContext.Claims.ToProtobuf().ForEach(source.Claims.Add);
+            return source;
+
         }
 
         /// <summary>
@@ -336,9 +383,28 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 message.BoundedContext.ToConcept<BoundedContext>(),
                 message.Tenant.ToConcept<TenantId>(),
                 message.Environment,
-                message.Claims.ToClaims()
+                message.Claims.ToClaims(),
+                message.CommitInOrigin
             );
         }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="message"></param>
+        /// <returns></returns>
+        public static Dolittle.Execution.ExecutionContext ToExecutionContext(this ExecutionContext message)
+        {
+            return new  Dolittle.Execution.ExecutionContext(
+                message.Application.ToConcept<Application>(),
+                message.BoundedContext.ToConcept<BoundedContext>(),
+                message.Tenant.ToConcept<TenantId>(),
+                message.Environment,
+                message.CorrelationId.ToConcept<CorrelationId>(),
+                message.Claims.ToClaims(),
+                CultureInfo.GetCultureInfo(message.Culture)
+            );
+        }        
 
         /// <summary>
         /// 
@@ -380,9 +446,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// 
         /// </summary>
         /// <param name="message"></param>
-        /// <param name="serializer"></param>
         /// <returns></returns>
-        public static Dolittle.Runtime.Events.Store.CommittedEventStream ToCommittedEventStream(this Protobuf.CommittedEventStream message, ISerializer serializer)
+        public static Dolittle.Runtime.Events.Store.CommittedEventStream ToCommittedEventStream(this Protobuf.CommittedEventStream message)
         {
             var tenantId = message.Tenant.ToConcept<TenantId>();
             var eventSourceId = message.Source.EventSource.ToConcept<EventSourceId>();
@@ -417,6 +482,16 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         public static Dolittle.Security.Claims ToClaims(this RepeatedField<Claim> claims)
         {
             return new Dolittle.Security.Claims(claims.Select(c => new Dolittle.Security.Claim(c.Name,c.Value,c.ValueType)).ToList());
-        }        
+        }  
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="claims"></param>
+        /// <returns></returns>
+        public static IEnumerable<Claim> ToProtobuf(this Dolittle.Security.Claims claims)
+        {
+            return claims.Select(c => new Claim { Name = c.Name, Value = c.Value, ValueType = c.ValueType }).ToList();
+        }      
     }
 }

@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
+        public void PassThrough(Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext committedEventStream)
         {
             lock(_singularities)
             {

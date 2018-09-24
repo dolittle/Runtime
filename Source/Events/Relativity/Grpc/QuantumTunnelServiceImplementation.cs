@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         }
 
         /// <inheritdoc/>
-        public override async Task Open(OpenTunnel request, IServerStreamWriter<Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStream> responseStream, ServerCallContext context)
+        public override async Task Open(OpenTunnel request, IServerStreamWriter<Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStreamWithContext> responseStream, ServerCallContext context)
         {
             try
             {
