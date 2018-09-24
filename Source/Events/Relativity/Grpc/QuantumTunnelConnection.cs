@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
+using Dolittle.DependencyInversion;
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
@@ -37,12 +39,13 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly BoundedContext _destinationBoundedContext;
         readonly IGeodesics _geodesics;
         readonly ISerializer _serializer;
-        readonly IEventStore _eventStore;
-        readonly IEventProcessors _eventProcessors;
-        
+        readonly FactoryFor<IEventStore> _getEventStore;
+        readonly IScopedEventProcessingHub _eventProcessingHub;
         readonly CancellationTokenSource _runCancellationTokenSource;
         readonly CancellationToken _runCancellationToken;
+        readonly IExecutionContextManager _executionContextManager;
         Thread _runThread = null;
+        
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
@@ -54,10 +57,11 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         /// <param name="url">Url for the <see cref="IEventHorizon"/> we're connecting to</param>
         /// <param name="events"><see cref="IEnumerable{Artifact}">Events</see> to connect for</param>
         /// <param name="geodesics"><see cref="IGeodesics"/> for path offsetting</param>
-        /// <param name="eventStore"><see cref="IEventStore"/> to persist incoming events to</param>
-        /// <param name="eventProcessors"><see cref="IEventProcessors"/> for processing incoming events</param>
+        /// <param name="getEventStore">A factory to provide the correctly scoped <see cref="IEventStore"/> to persist incoming events to</param>
+        /// <param name="eventProcessingHub"><see cref="IScopedEventProcessingHub"/> for processing incoming events</param>
         /// <param name="serializer"><see cref="ISerializer"/> to use for deserializing content of commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> so we can set the correct context for the processing of the Events</param>
         public QuantumTunnelConnection(
                 Application application,
                 BoundedContext boundedContext,
@@ -66,10 +70,11 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 string url,
                 IEnumerable<Dolittle.Artifacts.Artifact> events,
                 IGeodesics geodesics,
-                IEventStore eventStore,
-                IEventProcessors eventProcessors,
+                FactoryFor<IEventStore> getEventStore,
+                IScopedEventProcessingHub eventProcessingHub,
                 ISerializer serializer,
-                ILogger logger)
+                ILogger logger,
+                IExecutionContextManager executionContextManager)
         {
             _url = url;
             _events = events;
@@ -78,8 +83,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             _boundedContext = boundedContext;
             _geodesics = geodesics;
             _serializer = serializer;
-            _eventStore = eventStore;
-            _eventProcessors = eventProcessors;
+            _getEventStore = getEventStore;
+            _eventProcessingHub = eventProcessingHub;
             _destinationApplication = destinationApplication;
             _destinationBoundedContext = destinationBoundedContext;
             _channel = new Channel(_url, ChannelCredentials.Insecure);
@@ -93,7 +98,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             AppDomain.CurrentDomain.ProcessExit += ProcessExit;
             AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
             Console.CancelKeyPress += (s, e) => Close();
-            
+            _executionContextManager = executionContextManager;
         }
 
         /// <summary>
@@ -185,7 +190,12 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                     try
                     {
                         var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                        var version = _eventStore.GetNextVersionFor(current.Source.EventSource);
+                        _executionContextManager.CurrentFor(current.Events.First().Metadata.OriginalContext.Tenant);
+                        EventSourceVersion version = null;
+                        using(var _ = _getEventStore())
+                        {
+                            version = _.GetNextVersionFor(current.Source.EventSource);
+                        }
 
                         var versionedEventSource = new VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact);
 
@@ -193,6 +203,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
                         current.Events.ForEach(_ => 
                         {
+                            _.Metadata.OriginalContext.CommitInOrigin = current.Sequence;
                             var envelope = new EventEnvelope(
                                 new EventMetadata(
                                     _.Id,
@@ -218,11 +229,14 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                         );
 
                         _logger.Information("Commit events to store");
-                        var committedEventStream = _eventStore.Commit(uncommittedEventStream);
+                        Store.CommittedEventStream committedEventStream = null;
+                        using(var _ = _getEventStore())
+                        {
+                            committedEventStream = _.Commit(uncommittedEventStream);
+                        }
 
                         _logger.Information("Process committed events");
-                        //TODO: add in the correct processor
-                        //_eventProcessors.Process(committedEventStream);
+                        _eventProcessingHub.Process(committedEventStream);
                     }
                     catch (Exception ex)
                     {
