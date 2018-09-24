@@ -194,13 +194,13 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                         current.Events.ForEach(_ => 
                         {
                             var envelope = new EventEnvelope(
-                                _.Id, 
                                 new EventMetadata(
+                                    _.Id,
                                     new VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact),
                                     _.Metadata.CorrelationId,
                                     _.Metadata.Artifact,
-                                    _.Metadata.CausedBy,
-                                    _.Metadata.Occurred
+                                    _.Metadata.Occurred,
+                                    _.Metadata.OriginalContext
                                 ), 
                                 _.Event
                             );

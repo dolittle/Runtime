@@ -11,13 +11,11 @@ import "dolittle/interaction/events.relativity/claim.proto";
 
 option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
 
-// Represents the execution context
-message ExecutionContext {
+// Represents the original context
+message OriginalContext {
     guid application = 1;
     guid boundedContext = 2;
     guid tenant = 3;
-    guid correlationId = 4;
-    string environment = 5;
-    repeated Claim claims = 6;
-    string culture = 7;
+    string environment = 4;
+    repeated Claim claims = 5;
 }
