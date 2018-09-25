@@ -25,6 +25,7 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly ISerializer _serializer;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
+        private readonly IFetchUnprocessedCommits _fetchUnprocessedCommits;
 
         /// <summary>
         /// Initializes a new instance of <see cref="GravitationalLens"/>
@@ -32,23 +33,26 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="eventHorizon"></param>
         /// <param name="serializer"><see cref="ISerializer"/> for serializing payloads</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="ExecutionContext"/></param>
+        /// <param name="fetchUnprocessedCommits">An <see cref="IFetchUnprocessedCommits" /> to fetch unprocessed commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public GravitationalLens(
             IEventHorizon eventHorizon,
             ISerializer serializer,
             IExecutionContextManager executionContextManager,
+            IFetchUnprocessedCommits fetchUnprocessedCommits,
             ILogger logger)
         {
             _serializer = serializer;
             _executionContextManager = executionContextManager;
             _logger = logger;
             _eventHorizon = eventHorizon;
+            _fetchUnprocessedCommits = fetchUnprocessedCommits;
         }
 
         /// <inheritdoc/>
         public IEnumerable<ServerServiceDefinition> BindServices()
         {
-            var service = new QuantumTunnelServiceImplementation(_eventHorizon, _serializer, _executionContextManager, _logger);
+            var service = new QuantumTunnelServiceImplementation(_eventHorizon, _serializer, _executionContextManager, _fetchUnprocessedCommits, _logger);
             return new ServerServiceDefinition[] {
                 QuantumTunnelService.BindService(service)
             };

@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="serializer"><see cref="ISerializer"/> to use</param>
         /// <param name="responseStream">The committed event stream to pass through</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to get current context from</param>
-        /// <param name="unprocessedCommitFetcher">An <see cref="IFetchUnprocessedCommits" /> to fet</param>
+        /// <param name="unprocessedCommitFetcher">An <see cref="IFetchUnprocessedCommits" /> to fetch unprocessed commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel(
             ISerializer serializer,

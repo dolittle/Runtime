@@ -506,6 +506,16 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         public static IEnumerable<Claim> ToProtobuf(this Dolittle.Security.Claims claims)
         {
             return claims.Select(c => new Claim { Name = c.Name, Value = c.Value, ValueType = c.ValueType }).ToList();
-        }      
+        } 
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="offsets"></param>
+        /// <returns></returns>
+        public static IEnumerable<Dolittle.Runtime.Events.Relativity.TenantOffset> ToTenantOffsets(this IEnumerable<TenantOffset> offsets)
+        {
+            return offsets.Select(_ => new Dolittle.Runtime.Events.Relativity.TenantOffset(_.Tenant.ToConcept<TenantId>(),_.Offset)).ToList();
+        }     
     }
 }
