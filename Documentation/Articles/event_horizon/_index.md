@@ -1,5 +1,5 @@
 ---
-title: Introduction
+title: Event Horizon
 description: Learn about what an event horizon is and how it works in Dolittle
 keywords: Runtime
 author: einari
