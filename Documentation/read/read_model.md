@@ -27,8 +27,7 @@ public class Employee : IReadModel
 Read models are usually lightweight structures with a minimal amount of hierarchy to avoid complex queries and data structures required to populate the models.
 
 ## Single Responsibility Models
-The intent of a read model is to provide a dat strcutre for a specific use case. When you need to provide a similar, but not same, data in another part of your application, the preferred approach in Dolittle is to create a new *Read Model* with it's own optimized storage.
-
+The intent of a read model is to provide a data structure for a specific use case. When you need to provide a similar, but not same, data in another part of your application, the preferred approach in Dolittle is to create a new *Read Model* with it's own optimized storage.
 
 ## Concepts / Value Types
 It's recommended to use [*Concepts* and *Value Objects*](../articles/domain_driven_design/concepts_and_value_objects) when defining properties in your read models.
