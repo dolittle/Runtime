@@ -59,6 +59,5 @@ namespace Dolittle.Runtime.Events.Relativity
 
             return current;
         }
-
     }
 }
