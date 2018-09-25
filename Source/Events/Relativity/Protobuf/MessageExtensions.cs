@@ -208,6 +208,20 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
         /// <summary>
         /// 
         /// </summary>
+        /// <param name="tenantOffset"></param>
+        /// <returns></returns>
+        public static Protobuf.TenantOffset ToMessage(this Dolittle.Runtime.Events.Relativity.TenantOffset tenantOffset)
+        {
+            var message = new Protobuf.TenantOffset();
+            message.Tenant = tenantOffset.Tenant.ToProtobuf();
+            message.Offset = tenantOffset.Offset;
+            return message;
+        }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
         /// <param name="originalContext"></param>
         /// <returns></returns>
         public static Protobuf.OriginalContext ToMessage(this Dolittle.Runtime.Events.OriginalContext originalContext)

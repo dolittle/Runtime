@@ -7,6 +7,7 @@ syntax = "proto3";
 
 import "system/guid.proto";
 import "dolittle/interaction/events.relativity/artifact.proto";
+import "dolittle/interaction/events.relativity/tenant_offset.proto";
 
 package dolittle.events.relativity;
 
@@ -17,6 +18,6 @@ message OpenTunnel {
     guid application = 1;
     guid boundedContext = 2;
     guid clientId = 3;
-    uint64 offset = 4;
-    repeated Artifact   events = 5;
+    repeated TenantOffset offsets = 4;
+    repeated Artifact events = 5;
 }

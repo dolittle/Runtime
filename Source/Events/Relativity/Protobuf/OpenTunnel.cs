@@ -25,17 +25,20 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             "Cjhkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9vcGVu",
             "X3R1bm5lbC5wcm90bxIaZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkaEXN5",
             "c3RlbS9ndWlkLnByb3RvGjVkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMu",
-            "cmVsYXRpdml0eS9hcnRpZmFjdC5wcm90byLBAQoKT3BlblR1bm5lbBIjCgth",
-            "cHBsaWNhdGlvbhgBIAEoCzIOLmRvbGl0dGxlLmd1aWQSJgoOYm91bmRlZENv",
-            "bnRleHQYAiABKAsyDi5kb2xpdHRsZS5ndWlkEiAKCGNsaWVudElkGAMgASgL",
-            "Mg4uZG9saXR0bGUuZ3VpZBIOCgZvZmZzZXQYBCABKAQSNAoGZXZlbnRzGAUg",
-            "AygLMiQuZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuQXJ0aWZhY3RCLqoC",
-            "K0RvbGl0dGxlLlJ1bnRpbWUuRXZlbnRzLlJlbGF0aXZpdHkuUHJvdG9idWZi",
-            "BnByb3RvMw=="));
+            "cmVsYXRpdml0eS9hcnRpZmFjdC5wcm90bxo6ZG9saXR0bGUvaW50ZXJhY3Rp",
+            "b24vZXZlbnRzLnJlbGF0aXZpdHkvdGVuYW50X29mZnNldC5wcm90byKNAgoK",
+            "T3BlblR1bm5lbBIjCgthcHBsaWNhdGlvbhgBIAEoCzIOLmRvbGl0dGxlLmd1",
+            "aWQSJgoOYm91bmRlZENvbnRleHQYAiABKAsyDi5kb2xpdHRsZS5ndWlkEiAK",
+            "CGNsaWVudElkGAMgASgLMg4uZG9saXR0bGUuZ3VpZBI5CgdvZmZzZXRzGAQg",
+            "AygLMiguZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuVGVuYW50T2Zmc2V0",
+            "EjQKBmV2ZW50cxgFIAMoCzIkLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5",
+            "LkFydGlmYWN0Eh8KB3RlbmFudHMYBiADKAsyDi5kb2xpdHRsZS5ndWlkQi6q",
+            "AitEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5SZWxhdGl2aXR5LlByb3RvYnVm",
+            "YgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.ArtifactReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.TenantOffsetReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.OpenTunnel), global::Dolittle.Runtime.Events.Relativity.Protobuf.OpenTunnel.Parser, new[]{ "Application", "BoundedContext", "ClientId", "Offset", "Events" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.OpenTunnel), global::Dolittle.Runtime.Events.Relativity.Protobuf.OpenTunnel.Parser, new[]{ "Application", "BoundedContext", "ClientId", "Offsets", "Events", "Tenants" }, null, null, null)
           }));
     }
     #endregion
@@ -72,8 +75,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       Application = other.application_ != null ? other.Application.Clone() : null;
       BoundedContext = other.boundedContext_ != null ? other.BoundedContext.Clone() : null;
       ClientId = other.clientId_ != null ? other.ClientId.Clone() : null;
-      offset_ = other.offset_;
+      offsets_ = other.offsets_.Clone();
       events_ = other.events_.Clone();
+      tenants_ = other.tenants_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -114,15 +118,14 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       }
     }
 
-    /// <summary>Field number for the "offset" field.</summary>
-    public const int OffsetFieldNumber = 4;
-    private ulong offset_;
+    /// <summary>Field number for the "offsets" field.</summary>
+    public const int OffsetsFieldNumber = 4;
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Events.Relativity.Protobuf.TenantOffset> _repeated_offsets_codec
+        = pb::FieldCodec.ForMessage(34, global::Dolittle.Runtime.Events.Relativity.Protobuf.TenantOffset.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.Protobuf.TenantOffset> offsets_ = new pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.Protobuf.TenantOffset>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ulong Offset {
-      get { return offset_; }
-      set {
-        offset_ = value;
-      }
+    public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.Protobuf.TenantOffset> Offsets {
+      get { return offsets_; }
     }
 
     /// <summary>Field number for the "events" field.</summary>
@@ -133,6 +136,16 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.Protobuf.Artifact> Events {
       get { return events_; }
+    }
+
+    /// <summary>Field number for the "tenants" field.</summary>
+    public const int TenantsFieldNumber = 6;
+    private static readonly pb::FieldCodec<global::System.Protobuf.guid> _repeated_tenants_codec
+        = pb::FieldCodec.ForMessage(50, global::System.Protobuf.guid.Parser);
+    private readonly pbc::RepeatedField<global::System.Protobuf.guid> tenants_ = new pbc::RepeatedField<global::System.Protobuf.guid>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::System.Protobuf.guid> Tenants {
+      get { return tenants_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -151,8 +164,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (!object.Equals(Application, other.Application)) return false;
       if (!object.Equals(BoundedContext, other.BoundedContext)) return false;
       if (!object.Equals(ClientId, other.ClientId)) return false;
-      if (Offset != other.Offset) return false;
+      if(!offsets_.Equals(other.offsets_)) return false;
       if(!events_.Equals(other.events_)) return false;
+      if(!tenants_.Equals(other.tenants_)) return false;
       return true;
     }
 
@@ -162,8 +176,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (application_ != null) hash ^= Application.GetHashCode();
       if (boundedContext_ != null) hash ^= BoundedContext.GetHashCode();
       if (clientId_ != null) hash ^= ClientId.GetHashCode();
-      if (Offset != 0UL) hash ^= Offset.GetHashCode();
+      hash ^= offsets_.GetHashCode();
       hash ^= events_.GetHashCode();
+      hash ^= tenants_.GetHashCode();
       return hash;
     }
 
@@ -186,11 +201,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         output.WriteRawTag(26);
         output.WriteMessage(ClientId);
       }
-      if (Offset != 0UL) {
-        output.WriteRawTag(32);
-        output.WriteUInt64(Offset);
-      }
+      offsets_.WriteTo(output, _repeated_offsets_codec);
       events_.WriteTo(output, _repeated_events_codec);
+      tenants_.WriteTo(output, _repeated_tenants_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -205,10 +218,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (clientId_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(ClientId);
       }
-      if (Offset != 0UL) {
-        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(Offset);
-      }
+      size += offsets_.CalculateSize(_repeated_offsets_codec);
       size += events_.CalculateSize(_repeated_events_codec);
+      size += tenants_.CalculateSize(_repeated_tenants_codec);
       return size;
     }
 
@@ -235,10 +247,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         }
         ClientId.MergeFrom(other.ClientId);
       }
-      if (other.Offset != 0UL) {
-        Offset = other.Offset;
-      }
+      offsets_.Add(other.offsets_);
       events_.Add(other.events_);
+      tenants_.Add(other.tenants_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -270,12 +281,16 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             input.ReadMessage(clientId_);
             break;
           }
-          case 32: {
-            Offset = input.ReadUInt64();
+          case 34: {
+            offsets_.AddEntriesFrom(input, _repeated_offsets_codec);
             break;
           }
           case 42: {
             events_.AddEntriesFrom(input, _repeated_events_codec);
+            break;
+          }
+          case 50: {
+            tenants_.AddEntriesFrom(input, _repeated_tenants_codec);
             break;
           }
         }
