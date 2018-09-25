@@ -26,18 +26,17 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             "dF9lbnZlbG9wZS5wcm90bxIaZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHka",
             "EXN5c3RlbS9ndWlkLnByb3RvGhNzeXN0ZW0vb2JqZWN0LnByb3RvGjtkb2xp",
             "dHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9ldmVudF9tZXRh",
-            "ZGF0YS5wcm90byL/AQoNRXZlbnRFbnZlbG9wZRIaCgJpZBgBIAEoCzIOLmRv",
-            "bGl0dGxlLmd1aWQSOwoIbWV0YWRhdGEYAiABKAsyKS5kb2xpdHRsZS5ldmVu",
-            "dHMucmVsYXRpdml0eS5FdmVudE1ldGFkYXRhEkMKBWV2ZW50GAMgAygLMjQu",
-            "ZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuRXZlbnRFbnZlbG9wZS5FdmVu",
-            "dEVudHJ5GlAKCkV2ZW50RW50cnkSCwoDa2V5GAEgASgJEjEKBXZhbHVlGAIg",
-            "ASgLMiIuZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuT2JqZWN0OgI4AUIu",
-            "qgIrRG9saXR0bGUuUnVudGltZS5FdmVudHMuUmVsYXRpdml0eS5Qcm90b2J1",
-            "ZmIGcHJvdG8z"));
+            "ZGF0YS5wcm90byLjAQoNRXZlbnRFbnZlbG9wZRI7CghtZXRhZGF0YRgBIAEo",
+            "CzIpLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkV2ZW50TWV0YWRhdGES",
+            "QwoFZXZlbnQYAiADKAsyNC5kb2xpdHRsZS5ldmVudHMucmVsYXRpdml0eS5F",
+            "dmVudEVudmVsb3BlLkV2ZW50RW50cnkaUAoKRXZlbnRFbnRyeRILCgNrZXkY",
+            "ASABKAkSMQoFdmFsdWUYAiABKAsyIi5kb2xpdHRsZS5ldmVudHMucmVsYXRp",
+            "dml0eS5PYmplY3Q6AjgBQi6qAitEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5S",
+            "ZWxhdGl2aXR5LlByb3RvYnVmYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::System.Protobuf.ObjectReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadataReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope.Parser, new[]{ "Id", "Metadata", "Event" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope.Parser, new[]{ "Metadata", "Event" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
           }));
     }
     #endregion
@@ -71,7 +70,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public EventEnvelope(EventEnvelope other) : this() {
-      Id = other.id_ != null ? other.Id.Clone() : null;
       Metadata = other.metadata_ != null ? other.Metadata.Clone() : null;
       event_ = other.event_.Clone();
     }
@@ -81,19 +79,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       return new EventEnvelope(this);
     }
 
-    /// <summary>Field number for the "id" field.</summary>
-    public const int IdFieldNumber = 1;
-    private global::System.Protobuf.guid id_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::System.Protobuf.guid Id {
-      get { return id_; }
-      set {
-        id_ = value;
-      }
-    }
-
     /// <summary>Field number for the "metadata" field.</summary>
-    public const int MetadataFieldNumber = 2;
+    public const int MetadataFieldNumber = 1;
     private global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata metadata_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata Metadata {
@@ -104,9 +91,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "event" field.</summary>
-    public const int EventFieldNumber = 3;
+    public const int EventFieldNumber = 2;
     private static readonly pbc::MapField<string, global::System.Protobuf.Object>.Codec _map_event_codec
-        = new pbc::MapField<string, global::System.Protobuf.Object>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::System.Protobuf.Object.Parser), 26);
+        = new pbc::MapField<string, global::System.Protobuf.Object>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::System.Protobuf.Object.Parser), 18);
     private readonly pbc::MapField<string, global::System.Protobuf.Object> event_ = new pbc::MapField<string, global::System.Protobuf.Object>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::MapField<string, global::System.Protobuf.Object> Event {
@@ -126,7 +113,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!object.Equals(Id, other.Id)) return false;
       if (!object.Equals(Metadata, other.Metadata)) return false;
       if (!Event.Equals(other.Event)) return false;
       return true;
@@ -135,7 +121,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (id_ != null) hash ^= Id.GetHashCode();
       if (metadata_ != null) hash ^= Metadata.GetHashCode();
       hash ^= Event.GetHashCode();
       return hash;
@@ -148,12 +133,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (id_ != null) {
-        output.WriteRawTag(10);
-        output.WriteMessage(Id);
-      }
       if (metadata_ != null) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(10);
         output.WriteMessage(Metadata);
       }
       event_.WriteTo(output, _map_event_codec);
@@ -162,9 +143,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (id_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Id);
-      }
       if (metadata_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Metadata);
       }
@@ -176,12 +154,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     public void MergeFrom(EventEnvelope other) {
       if (other == null) {
         return;
-      }
-      if (other.id_ != null) {
-        if (id_ == null) {
-          id_ = new global::System.Protobuf.guid();
-        }
-        Id.MergeFrom(other.Id);
       }
       if (other.metadata_ != null) {
         if (metadata_ == null) {
@@ -201,20 +173,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             input.SkipLastField();
             break;
           case 10: {
-            if (id_ == null) {
-              id_ = new global::System.Protobuf.guid();
-            }
-            input.ReadMessage(id_);
-            break;
-          }
-          case 18: {
             if (metadata_ == null) {
               metadata_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadata();
             }
             input.ReadMessage(metadata_);
             break;
           }
-          case 26: {
+          case 18: {
             event_.AddEntriesFrom(input, _map_event_codec);
             break;
           }
