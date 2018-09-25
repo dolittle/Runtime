@@ -34,12 +34,11 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public void Perform()
         {
-            _configuration.Current.EventHorizons.ForEach(eventHorizon => 
+            _configuration.Current.EventHorizons.ForEach(_ => 
                 _barrier.Penetrate(
-                    eventHorizon.Application,
-                    eventHorizon.BoundedContext,
-                    eventHorizon.Url,
-                    eventHorizon.Events)
+                    new EventHorizonKey(_.Application,_.BoundedContext),
+                    _.Url,
+                    _.Events)
                 );
         }
     }
