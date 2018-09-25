@@ -30,9 +30,19 @@ namespace Dolittle.Runtime.Events.Store
             return _commits.GetEnumerator();
         }
 
+        /// <summary>
+        /// Indicates if the Commits is empty or not
+        /// </summary>
+        public bool IsEmpty => _commits.Count == 0;
+
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _commits.GetEnumerator();
+        }
+
+        internal void ForEach()
+        {
+            throw new NotImplementedException();
         }
     }
 }

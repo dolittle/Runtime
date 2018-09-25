@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using Dolittle.Applications;
 using Dolittle.Concepts;
@@ -84,6 +85,16 @@ namespace Dolittle.Runtime.Events
                 executionContext.Environment ?? string.Empty,
                 executionContext.Claims ?? new Claims(Enumerable.Empty<Dolittle.Security.Claim>())
             );
+        }
+
+        /// <summary>
+        /// Converts this into an <see cref="ExecutionContext" />
+        /// </summary>
+        /// <param name="correlationId">The correlation Id for this ExecutionContext</param>
+        /// <returns></returns>
+        public ExecutionContext ToExecutionContext(CorrelationId correlationId)
+        {
+            return new ExecutionContext(Application,BoundedContext,Tenant,Environment,correlationId,Claims,CultureInfo.CurrentCulture);
         }
     }
 }
