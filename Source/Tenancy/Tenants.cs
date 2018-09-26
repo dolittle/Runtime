@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Lifecycle;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Tenancy
@@ -11,6 +12,7 @@ namespace Dolittle.Runtime.Tenancy
     /// <summary>
     /// Represents an implementation of <see cref="ITenants"/>
     /// </summary>
+    [Singleton]
     public class Tenants : ITenants
     {
         readonly Dictionary<TenantId, Tenant> _tenants = new Dictionary<TenantId, Tenant>();
@@ -22,11 +24,16 @@ namespace Dolittle.Runtime.Tenancy
         /// <param name="tenantsConfigurationManager"></param>
         public Tenants(ITenantsConfigurationManager tenantsConfigurationManager)
         {
+            
             _tenantsConfigurationManager = tenantsConfigurationManager;
+            /*
             _tenants = tenantsConfigurationManager.Current.Tenants.ToDictionary(
                 _ => _.Key,
                 _ => new Tenant(_.Key)
             );
+            */
+
+            _tenants[TenantId.Unknown] = new Tenant(TenantId.Unknown);
         }
 
         /// <inheritdoc/>
