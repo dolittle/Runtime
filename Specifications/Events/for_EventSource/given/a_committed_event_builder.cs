@@ -19,8 +19,8 @@ namespace Dolittle.Events.Specs.for_EventSource.given
 
         public static CommittedEvent build_committed_event(VersionedEventSource versionedEventSource, IEvent @event, CommittedEventVersion version)
         {
-            var metadata = new EventMetadata(versionedEventSource,CorrelationId.New(),new Artifact(ArtifactId.New(),1),"test",DateTime.UtcNow);
-            return new CommittedEvent(version,metadata,EventId.New(),@event);
+            var metadata = new EventMetadata(EventId.New(),versionedEventSource,CorrelationId.New(),new Artifact(ArtifactId.New(),1),DateTime.UtcNow,GetOriginalContext());
+            return new CommittedEvent(version,metadata,@event);
         }
 
         public static VersionedEventSource a_versioned_event_source_for(EventSourceId id)
@@ -31,6 +31,11 @@ namespace Dolittle.Events.Specs.for_EventSource.given
         public static VersionedEventSource a_versioned_event_source_for(EventSourceId id, ArtifactId artifact)
         {
             return new VersionedEventSource(id, artifact);
+        }
+
+        public static OriginalContext GetOriginalContext()
+        {
+            return new OriginalContext(Guid.NewGuid(),Guid.NewGuid(),Guid.NewGuid(),"specs", new Dolittle.Security.Claims(new Dolittle.Security.Claim[0]));
         }
     }
 }
