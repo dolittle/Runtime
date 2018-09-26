@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.IO;
 using Dolittle.Serialization.Json;
+using Newtonsoft.Json;
 
 namespace Dolittle.Runtime.Tenancy
 {
@@ -13,6 +14,15 @@ namespace Dolittle.Runtime.Tenancy
     public class TenantsConfigurationManager : ITenantsConfigurationManager
     {
         const string _configurationFile = ".dolittle/tenants.json";
+
+        readonly ISerializationOptions _serializationOptions = SerializationOptions.Custom(callback:
+            serializer =>
+            {
+                serializer.ContractResolver = new CamelCaseExceptDictionaryKeyResolver();
+                serializer.Formatting = Formatting.Indented;
+            }
+        );
+
         readonly ISerializer _serializer;
 
         /// <summary>
@@ -33,7 +43,10 @@ namespace Dolittle.Runtime.Tenancy
             if( !File.Exists(_configurationFile)) return new TenantsConfiguration();
 
             var json = File.ReadAllText(_configurationFile);
-            var config = _serializer.FromJson<TenantsConfiguration>(json);
+            var config = _serializer.FromJson<TenantsConfiguration>(json, _serializationOptions);
+
+
+            
             return config;
         }
     }
