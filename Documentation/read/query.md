@@ -9,14 +9,13 @@ author: einari, smithmx
 Looking up collections of data to be presented to users in a view is a common scenario in applications. Dolittle formalizes this through `Query`-types. These types become the contract for your query capabilities. Queries can be optimized for the datasource as you see fit for the feature they're being used in.
 
 ## QueryFor
-To implement a query, you basically need to implement the interface `IQueryFor<>`.
+To implement a query, you need to implement the interface `IQueryFor<>`.
 The generic type argument should point to a [read model](read_model.md).
 This is a marker interface and does not require you implement anything specific.
-Instead it is relying on a convention; its looking for a property called `Query`.
-This property needs a getter and can effectively return any type. The type that it
-returns is recognized by Dolittle and Dolittle will look for a [query provider](query_providers.md)
-for the type returned. By default you could be returning an `IQueryable<>` - something
-Dolittle has a [query provider](query_providers.md) for.
+Instead it is relying on a default convention; its looking for a public property called `Query` with a return type of `IQueryable<T> where T : IReadModel`. 
+
+Dolittle recognizes the return types and will look for a [query provider](query_providers.md)
+for the type returned.
 
 ```csharp
 using Dolittle.Queries;
@@ -81,10 +80,14 @@ public class EmployeeHiredAfterValidator : QueryValidationDescriptorFor<Employee
 
 ## Paging
 
-Paging is not something you need to think about. This is what the [query provider](query_provider.md)
+Paging can be supported through the [query provider](query_provider.md)
 deals with. Paging is a frontend concern and should not something you need to think about.
 In fact, paging is ideally a view concern, something decided as part of the interaction design.
 The client representations of queries has functionality related to paging.
+
+{{% notice info %}}
+The QueryProvider model for IQueryable only works with paging if there is a Linq provider that supports deferred execution and no-one in the chain has called ToList or ToArray.
+{{% /notice %}}
 
 ## Filtering
 
@@ -157,7 +160,7 @@ At the top of the pipeline sits the `QueryCoordinator`, this will execute the qu
 | ---------------- | ----------------------- | --------------------------------------------------- |
 | Items            | `IEnumerable`           | Contains the items                                  |
 | TotalItems       | `Integer`               | Total number of items returned                      |
-| QueryName        | `Boolean`               | Name of the query                                   |
+| QueryName        | `String`                | Name of the query                                   |
 | Exception        | `Exception`             | If there was an exception, this holds the exception |
 | SecurityMessages | `IEnumerable<string>`   | Contains any messages from volated security rules   |
 | Validation       | `QueryValidationResult` | Validation details related to the query             |
