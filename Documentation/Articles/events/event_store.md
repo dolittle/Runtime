@@ -25,7 +25,7 @@ An Event Source is any Entity that can generate events that are persisted in a s
 
 A *Commit* is most closely associated with the concept of a *Command* and a *Command Handler* which form a *Transaction*.  A transaction operates against a single Event Source (Aggregate).  There is no explicit concept of a **Unit of Work** whereby multiple Event Streams are generated for multiple Event Sources, or where Events for multiple event sources are persisted in a single commit.  A Commit is a series of one or more events that belong to a single Event Source that are persisted in an atomic manner i.e. all events are persisted successfully or none of them are.  By focusing on the commit as the atomic unit for persistence, we avoid the need for distributed transactions or two-phase commits and enable a wider variety or storage engines for our Event Store.
 
-A *Stream* is the sequence of events that have been applied against the Event Source (e.g Aggregate Root).  By re-applying each event in order, we rehydrate an Event Source and return it to its current state.  The fact that streams are persisted against a particular Event Source allows for a basic sharding along the Event Source Id, giving greater options for scaling and performance.
+A *Stream* is the sequence of Commits (and therefore of all the Events that make up these commits) that have been applied against the Event Source (e.g Aggregate Root).  By reapplying each commit and therefore each event within that commit in order, we can rehydrate an Event Source and return it to its current state.  The fact that streams are persisted against a particular Event Source allows for a basic sharding along the Event Source Id, giving greater options for scaling and performance.
 
 ## “Metadata” 
 
@@ -63,7 +63,7 @@ The CommittedEventVersion is like the EventSourceVersion mentioned above but wit
 
 ## Event Persistence
 
-Events are serialized for persistence.  As an Event can and may have numerous code-representations over its lifetime, the Event is separated from its particular code representation and persisted as a combination of the Artifact (conceptual identification of the Event), the Generation (a number indicating which version of the Event it is) and a Property Bag that is a generic persistence mechanism for DTO like structures like the Event.  Events are intended to be serialized for persistence and communication, therefore they should be designed with this in mind (see Domain Events). You shoudl regard the serialised version of an event as the canonical expression of it. Any run-time representation will be a reflection of this canonical version, subject to the idiosyncrasies of the particular current runtime.
+Events are serialized for persistence.  As an Event will have numerous code-representations over its lifetime, the Event is separated from its particular code representation and persisted as a combination of the Artifact (conceptual identification of the Event), the Generation (a number indicating which version of the Event it is) and a Property Bag that is a generic persistence mechanism for DTO like structures like the Event.  Events are intended to be serialized for persistence and communication, therefore they should be designed with this in mind (see Domain Events). You should regard the serialised version of an event as the canonical expression of it. Any run-time representation will be a reflection of this canonical version, subject to the idiosyncrasies of the particular current runtime.
 
 ### Property Bag
 The *Property Bag* is a simple, write-once dictionary like structure that stores the content of an Event and that can be used to rehydrate the Event.  The PropertyBag only supports getters and all values are set through the constructor. Once constructed the event is immutable, and cannot change.
@@ -111,7 +111,3 @@ Similar to Event Processors, Event Horizons have to catch up since the last vers
 ## Event Migration
 
 [to be added]
-
-
-
-
