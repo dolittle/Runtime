@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         It should_not_have_any_errors = () => exception.ShouldBeNull();
         It should_register_a_scoped_event_processor_for_each_processor_tenant_combination = () => processing_hub.Verify(_ => _.Register(Moq.It.IsAny<ScopedEventProcessor>()),Times.Exactly(number_of_scoped_processors));
 
-        It should_set_the_event_context_for_each_processor_for_each_tenant = () => tenants.Object.All.ForEach(t => execution_context_manager.Verify(_ => _.CurrentFor(t),Times.Exactly(number_of_processors_per_tenant)));
+        It should_set_the_event_context_for_each_processor_for_each_tenant = () => tenants.Object.All.ForEach(t => execution_context_manager.Verify(_ => _.CurrentFor(t,"",0,""),Times.Exactly(number_of_processors_per_tenant)));
         It should_tell_the_hub_to_begin_processing = () => processing_hub.Verify(_ => _.BeginProcessingEvents(),Times.Once()); 
 
         static Mock<ITenants> get_tenants()
