@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Relativity
     /// <summary>
     /// Implementation of <see cref="ITenantOffsetRepository" />
     /// </summary>
-    public class TenantOffsetRepository
+    public class TenantOffsetRepository : ITenantOffsetRepository
     {
         FactoryFor<IGeodesics> _getGeodesics;
         IExecutionContextManager _executionContextManager;
