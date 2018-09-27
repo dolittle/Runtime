@@ -13,6 +13,7 @@ using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Serialization.Protobuf;
 using Dolittle.Execution;
+using Dolittle.Reflection;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 using Dolittle.Tenancy;
@@ -73,8 +74,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf
                 case Types.Float: stream.WriteFloat((float)obj); break;
                 case Types.Double: stream.WriteDouble((double)obj); break;
                 case Types.Boolean: stream.WriteBool((bool)obj); break;
-                case Types.DateTime: stream.WriteInt64((Int64)((DateTime)obj).ToFileTime()); break;
-                case Types.DateTimeOffset: stream.WriteInt64((Int64)((DateTimeOffset)obj).ToFileTime()); break;
+                case Types.DateTime: stream.WriteInt64((Int64)((DateTime)obj).ToUnixTimeMilliseconds()); break;
+                case Types.DateTimeOffset: stream.WriteInt64((Int64)((DateTimeOffset)obj).ToUnixTimeMilliseconds()); break;
                 case Types.Guid: stream.WriteBytes(ByteString.CopyFrom(((Guid)obj).ToByteArray())); break;
             }
         }
