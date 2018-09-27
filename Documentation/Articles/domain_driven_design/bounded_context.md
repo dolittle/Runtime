@@ -63,11 +63,13 @@ The *Bounded Context* is an essential concept in DDD, but by now you should also
 
 Here you can see how we in Dolittle would structure an *Application*. The *Application* would, for example, be a Github repository and it would typically have Bounded Contexts sitting inside its Source. Each *Bounded Context* is a folder with a solution (.sln) file and contains all the necessary domain areas; Concepts, Domain, Events, Read and an optional interaction layer called, in this case, Web.
 
-Anyway, how you structure your actual *Application* is not that important, however, the internal structure of the *Bounded Context* and its domain areas is what's important. When you create a *Bounded Context* based on the Dolittle platform, and you have a reference to the Dolittle Build tool, what will happen when you compile the *Bounded Context* is that we'll look at the structure of your *Bounded Context* project and create a topology object that defines the topology of the *Bounded Context* and put it inside the bounded-context.json configuration file (configuration file is described later on). The topology will essentially be a recursive structure with features (or modules and features if modules is enabled, described later on). A feature, in terms of the Dolittle platform, is essentially just a way to group [*Artifacts*]**(LINK TO ARTIFACTS)**. *Features* are uniquely identified throughout the *Application* by a GUID (explained later). We group *Artifacts* together by *Feature*, this is to preserve a strong cohesion between the components that belongs together while at the same time we can also cross cut a lot of other concerns i.e. defining a user's access of the *Bounded Context* / *Application* based on which *Modules* / *Features* / *Artifacts* the user has authorization to read, write and/or execute. 
+Anyway, how you structure your actual *Application* is not that important, however, the internal structure of the *Bounded Context* and its domain areas is what's important. When you create a *Bounded Context* based on the Dolittle platform, and you have a reference to the Dolittle Build tool, what will happen when you compile the *Bounded Context* is that we'll look at the structure of your *Bounded Context* project and create a topology object that defines the topology of the *Bounded Context* and put it inside a topology.json configuration file (configuration file is described later on). The topology will essentially be a recursive structure with features (or modules and features if modules is enabled, described later on). A feature, in terms of the Dolittle platform, is essentially just a way to group [*Artifacts*](https://dolittle.io/overview/articles/artifacts/). *Features* are uniquely identified throughout the *Application* by a GUID (explained later). We group *Artifacts* together by *Feature*, this is to preserve a strong cohesion between the components that belongs together while at the same time we can also cross cut a lot of other concerns i.e. defining a user's access of the *Bounded Context* / *Application* based on which *Modules* / *Features* / *Artifacts* the user has authorization to read, write and/or execute. 
 
 So for example if you've enabled the option to structure the topology with modules, the "Domain" area **SHOULD** look something like this if:
 ```
 +-- Bounded Context 1
+|   +-- BoundedContextName.sln
+|   +-- bounded-context.json
 |   +-- Domain
 |   |   Domain.csproj
 |   |   +-- Module 1
@@ -104,7 +106,7 @@ So for example if you've enabled the option to structure the topology with modul
 ```
 
 ##### Artifacts
-A *Bounded Context* will eventually consist of a set of [*Artifacts*]**(LINK TO ARTIFACTS DOCS)**, they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [Events]**(LINK TO EVENT DOC)**, [Commands](../../command/introduction), [Command Handlers](../../command/command_handler), [Aggregate Roots](../aggregate_root), [Queries](../../../read/query) and [Read Models](../../../read/read_model). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
+A *Bounded Context* will eventually consist of a set of [*Artifacts*](https://dolittle.io/overview/articles/artifacts/), they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [Events]**(LINK TO EVENT DOC)**, [Commands](../../command/introduction), [Command Handlers](../../command/command_handler), [Aggregate Roots](../aggregate_root), [Queries](../../../read/query) and [Read Models](../../../read/read_model). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
 Each *Artifact* is an entity in the *Application*, uniquely identified throughout the *Application* in which the *Bounded Context* belongs. An *Artifact* belongs to a single Feature. 
 
 ## The configuration
@@ -117,58 +119,13 @@ When you create a new *Bounded Context* there are some configuration that needs 
   "application": "0d577eb8-a70b-4e38-aca8-f85b3166bdc2",
   "boundedContext": "f660966d-3a74-44e6-8268-a9aefbae6115",
   "boundedContextName": "Shop",
-  "useModules": true,
-  "generateProxies": true,
-  "proxiesBasePath": "Features",
-  "namespaceSegmentsToStrip": {
-    "Events": [
-      "Warehouse"
-    ]
-  },
-  "topology": {
-    "modules": [
-      {
-        "module": "8d5a724b-84eb-4085-a766-8d28e681743e",
-        "name": "Carts",
-        "features": [
-          {
-            "feature": "80f5e1a2-a2bc-4403-b7ec-8bd90920cf2a",
-            "name": "Shopping",
-            "subFeatures": []
-          }
-        ]
-      },
-      {
-        "module": "c020195d-5675-4c17-9cc5-1a7539ce4680",
-        "name": "SomeModule",
-        "features": [
-          {
-            "feature": "728459c2-fab1-40c1-9ead-7122a1a890ea",
-            "name": "SomeFeature",
-            "subFeatures": []
-          }
-        ]
-      },
-      {
-        "module": "9291da5e-a5ad-4dc7-9037-5c97fad04046",
-        "name": "Catalog",
-        "features": [
-          {
-            "feature": "05b89f06-19c3-4502-b349-873ef7761a21",
-            "name": "Listing",
-            "subFeatures": []
-          }
-        ]
-      }
-    ],
-    "features": []
+  "backend": {
+    "language": "csharp"
   }
 }
 ```
 * application - The GUID of the *Application* that this *Bounded Context* belongs to
 * boundedContext - The GUID of the *Bounded Context*
-* useModules - Whether or not the *Bounded Context* topology structure is Module-based or Feature-based. If it's Module-based then the Topology will consist of a list of *Modules* with a list of *Features*. If it's Feature-based it'll consist of just a list of *Features*.
-* generateProxies - Whether or not we should generate, at the moment, ReadModel and Query proxy classes for the web interaction layer.
-* proxiesBasePath - The base path relative to the path where the build is performed from where the proxies will be created.
-* namespaceSegmentsToStrip - A dictionary of where the *Value* is a list of namespace-segments to strip from the namespace when creating the *Artifacts* when the first segment of the namespace is equal to the *Key*.
-* topology: The topology structure object. This is automatically generated when you build the *Bounded Context*, given that you've already provided the other information described above.
+* boundedContextName - The name of the *Bounded Context*
+* backend - The backend configuration
+* backend.language - The backend language used for the *Bounded Context* 

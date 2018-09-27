@@ -17,7 +17,7 @@ We have a [Github repository](https://github.com/dolittle-tools/) where our publ
 {{% /alert %}}
 
 ## Tools
-* [**DotNET Build Tool**]**(ADD LINK TO THE dolittle/DotNET.SDK BUILD TOOL)**
+* [**DotNET Build Tool**](https://dolittle.io/dotnet-sdk/tooling/)
 * [**CLI Tool**](https://dolittle.io/cli-tool/) 
 
 ## Languages we currently support
