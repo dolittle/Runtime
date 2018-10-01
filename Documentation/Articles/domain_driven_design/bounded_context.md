@@ -59,7 +59,7 @@ According to DDD, you can have some shared code between bounded contexts. They c
 
 ##### Topology; Modules and Features
 The *Bounded Context* is an essential concept in DDD, but by now you should also have the impression that the *Bounded Context* is something very specific and concrete in the Dolittle platform. All Bounded Contexts has, for example, a very concrete structure. We want developers to think of Bounded Contexts as its own, stand alone, project. How you actually structure this is dependent on the programming language you're using, but in terms of C# we would suggest that you structure an *Application* this way:
-![Application C# Structure](../ApplicationStructure.png)
+![Application C# Structure](https://github.com/dolittle/Runtime/raw/master/Documentation/Articles/domain_driven_design/ApplicationStructure.png)
 
 Here you can see how we in Dolittle would structure an *Application*. The *Application* would, for example, be a Github repository and it would typically have Bounded Contexts sitting inside its Source. Each *Bounded Context* is a folder with a solution (.sln) file and contains all the necessary domain areas; Concepts, Domain, Events, Read and an optional interaction layer called, in this case, Web.
 
@@ -106,7 +106,7 @@ So for example if you've enabled the option to structure the topology with modul
 ```
 
 ##### Artifacts
-A *Bounded Context* will eventually consist of a set of [*Artifacts*](https://dolittle.io/overview/articles/artifacts/), they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [Events]**(LINK TO EVENT DOC)**, [Commands](../../command/introduction), [Command Handlers](../../command/command_handler), [Aggregate Roots](../aggregate_root), [Queries](../../../read/query) and [Read Models](../../../read/read_model). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
+A *Bounded Context* will eventually consist of a set of [*Artifacts*](https://dolittle.io/overview/articles/artifacts/), they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [*Events*](https://dolittle.io/overview/articles/events/domain_events/), [Commands](https://dolittle.io/overview/articles/command/introduction/), [Command Handlers](https://dolittle.io/overview/articles/command/command_handler/), [Aggregate Roots](https://dolittle.io/overview/articles/domain_driven_design/aggregate_root/), [Queries](https://dolittle.io/overview/articles/read/query/) and [Read Models](https://dolittle.io/overview/articles/read/read_model/). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
 Each *Artifact* is an entity in the *Application*, uniquely identified throughout the *Application* in which the *Bounded Context* belongs. An *Artifact* belongs to a single Feature. 
 
 ## The configuration
