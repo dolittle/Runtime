@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using Dolittle.Applications;
 using Dolittle.Concepts;
 using Dolittle.Execution;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Security;
 using Dolittle.Tenancy;
 
@@ -22,18 +24,21 @@ namespace Dolittle.Runtime.Events
         /// <param name="tenant"><see cref="TenantId"/> that is related to the source of the event</param>
         /// <param name="environment"><see cref="Dolittle.Execution.Environment"/> for the original <see cref="ExecutionContext"/></param>
         /// <param name="claims"><see cref="Claims"/> for the user who initiated the event</param>
+        /// <param name="commitSequenceNumber"><see cref="CommitSequenceNumber"/> for the commit of which this event is part.  May not be populated in the source Bounded Context.</param>
         public OriginalContext(
             Application application,
             BoundedContext boundedContext,
             TenantId tenant,
             Dolittle.Execution.Environment environment,
-            Claims claims)
+            Claims claims,
+            CommitSequenceNumber commitSequenceNumber = null)
         {
             Application = application;
             BoundedContext = boundedContext;
             Tenant = tenant;
             Environment = environment;
             Claims = claims;
+            CommitInOrigin = commitSequenceNumber ?? 0;
         }
 
         /// <summary>
@@ -62,6 +67,12 @@ namespace Dolittle.Runtime.Events
         public Claims Claims { get; }
 
         /// <summary>
+        /// Add the Commit so we can populate it when sending events to another Bounded Context;
+        /// </summary>
+        /// <value></value>
+        public CommitSequenceNumber CommitInOrigin { get; set; }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="executionContext"></param>
@@ -74,6 +85,16 @@ namespace Dolittle.Runtime.Events
                 executionContext.Environment ?? string.Empty,
                 executionContext.Claims ?? new Claims(Enumerable.Empty<Dolittle.Security.Claim>())
             );
+        }
+
+        /// <summary>
+        /// Converts this into an <see cref="ExecutionContext" />
+        /// </summary>
+        /// <param name="correlationId">The correlation Id for this ExecutionContext</param>
+        /// <returns></returns>
+        public ExecutionContext ToExecutionContext(CorrelationId correlationId)
+        {
+            return new ExecutionContext(Application,BoundedContext,Tenant,Environment,correlationId,Claims,CultureInfo.CurrentCulture);
         }
     }
 }

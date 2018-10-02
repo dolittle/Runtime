@@ -18,4 +18,5 @@ message OriginalContext {
     guid tenant = 3;
     string environment = 4;
     repeated Claim claims = 5;
+    uint64 commitInOrigin = 6;
 }

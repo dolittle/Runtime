@@ -11,6 +11,10 @@ using Dolittle.Serialization.Protobuf;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
 using Grpc.Core;
 using Dolittle.Execution;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Collections;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -20,12 +24,13 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnel : IQuantumTunnel
     {
         readonly ISerializer _serializer;
-        readonly IServerStreamWriter<Protobuf.CommittedEventStream> _responseStream;
+        readonly IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> _responseStream;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ConcurrentQueue<Protobuf.CommittedEventStream> _outbox;
+        readonly ConcurrentQueue<Protobuf.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
+        private readonly IFetchUnprocessedCommits _unprocessedCommitFetcher;
 
         /// <summary>
         /// Initializes a new instance of <see cref="IQuantumTunnel"/>
@@ -33,30 +38,33 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="serializer"><see cref="ISerializer"/> to use</param>
         /// <param name="responseStream">The committed event stream to pass through</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to get current context from</param>
+        /// <param name="unprocessedCommitFetcher">An <see cref="IFetchUnprocessedCommits" /> to fetch unprocessed commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel(
             ISerializer serializer,
-            IServerStreamWriter<Protobuf.CommittedEventStream> responseStream,
+            IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> responseStream,
             IExecutionContextManager executionContextManager,
+            IFetchUnprocessedCommits unprocessedCommitFetcher,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
             _executionContextManager = executionContextManager;
-            _outbox = new ConcurrentQueue<Protobuf.CommittedEventStream>();
+            _outbox = new ConcurrentQueue<Protobuf.CommittedEventStreamWithContext>();
             _logger = logger;
             _waitHandle = new AutoResetEvent(false);
+            _unprocessedCommitFetcher = unprocessedCommitFetcher;
         }
 
         /// <inheritdoc/>
         public event QuantumTunnelCollapsed Collapsed = (q) => { };
 
         /// <inheritdoc/>
-        public void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
+        public void PassThrough(Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext contextualEventStream)
         {
             try
             {
-                var message = committedEventStream.ToMessage(_executionContextManager.Current.Tenant, _serializer);
+                var message = contextualEventStream.ToMessage();
                 _outbox.Enqueue(message);
                 _waitHandle.Set();
             }
@@ -67,8 +75,9 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public async Task Open()
+        public async Task Open(IEnumerable<TenantOffset> tenantOffsets)
         {
+            FetchAndQueueCommits(tenantOffsets);
             await Task.Run(async() =>
             {
                 for (;;)
@@ -78,7 +87,7 @@ namespace Dolittle.Runtime.Events.Relativity
                         _waitHandle.WaitOne(1000);
                         if (_outbox.IsEmpty) continue;
 
-                        Protobuf.CommittedEventStream message;
+                        Protobuf.CommittedEventStreamWithContext message;
                         while (!_outbox.IsEmpty)
                         {
                             if (_outbox.TryDequeue(out message))
@@ -103,6 +112,37 @@ namespace Dolittle.Runtime.Events.Relativity
             });
 
             Collapsed(this);
+        }
+
+        void FetchAndQueueCommits(IEnumerable<TenantOffset> tenantOffsets)
+        {
+            var commits = GetCommits(tenantOffsets);
+            AddToQueue(commits);
+        }
+
+        IEnumerable<Commits> GetCommits(IEnumerable<TenantOffset> tenantOffsets)
+        {
+            List<Commits> commits = new List<Commits>();
+            Parallel.ForEach(tenantOffsets,(_) => {
+                commits.Add(_unprocessedCommitFetcher.GetUnprocessedCommits(_.Offset));
+            });
+            return commits;
+        }
+
+        void AddToQueue(IEnumerable<Commits> commits)
+        {
+            commits.ForEach(_ => AddToQueue(_));
+        }
+
+        void AddToQueue(Commits commits)
+        {
+            commits.ForEach(_ => AddToQueue(_));
+        }
+
+        void AddToQueue(Store.CommittedEventStream committedEventStream)
+        {
+            var originalContext = committedEventStream.Events.First().Metadata.OriginalContext;
+            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream,originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToMessage());
         }
     }
 }

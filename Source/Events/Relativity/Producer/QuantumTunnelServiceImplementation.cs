@@ -23,6 +23,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly ISerializer _serializer;
         readonly ILogger _logger;
         readonly IExecutionContextManager _executionContextManager;
+        readonly IFetchUnprocessedCommits _fetchUnprocessedCommits;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelServiceImplementation"/>
@@ -30,25 +31,28 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with</param>
         /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="ExecutionContext"/></param>
+        /// <param name="fetchUnprocessedCommits"><see cref="IFetchUnprocessedCommits"/> for fetching unprocessed commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnelServiceImplementation(
             IEventHorizon eventHorizon,
             ISerializer serializer,
             IExecutionContextManager executionContextManager,
+            IFetchUnprocessedCommits fetchUnprocessedCommits,
             ILogger logger)
         {
             _eventHorizon = eventHorizon;
             _serializer = serializer;
             _executionContextManager = executionContextManager;
             _logger = logger;
+            _fetchUnprocessedCommits = fetchUnprocessedCommits;
         }
 
         /// <inheritdoc/>
-        public override async Task Open(OpenTunnel request, IServerStreamWriter<Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStream> responseStream, ServerCallContext context)
+        public override async Task Open(OpenTunnel request, IServerStreamWriter<Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStreamWithContext> responseStream, ServerCallContext context)
         {
             try
             {
-                var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _logger);
+                var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _fetchUnprocessedCommits, _logger);
                 var application = request.Application.ToConcept<Application>();
                 var boundedContext = request.BoundedContext.ToConcept<BoundedContext>();
                 var events = request
@@ -64,7 +68,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 _eventHorizon.GravitateTowards(singularity);
                 tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
 
-                await tunnel.Open();
+                await tunnel.Open(request.Offsets.ToTenantOffsets());
 
                 _logger.Information($"Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
             }

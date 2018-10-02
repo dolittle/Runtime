@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Events;
 using Dolittle.Events;
 using Dolittle.Execution;
+using System.Linq;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -30,7 +31,6 @@ namespace Dolittle.Runtime.Events.Store
             CorrelationId = correlationId;
             Events = events;
             LastEventVersion = source.ToCommittedEventVersion(sequence);
-
         }
         /// <summary>
         /// The <see cref="CommitSequenceNumber" /> for this committed event stream

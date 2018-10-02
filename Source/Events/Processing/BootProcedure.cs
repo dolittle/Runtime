@@ -15,6 +15,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Types;
     using Dolittle.DependencyInversion;
     using Dolittle.Execution;
+    using Dolittle.Security;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
@@ -23,6 +24,8 @@ namespace Dolittle.Runtime.Events.Processing
     {
         IInstancesOf<IKnowAboutEventProcessors> _systemsThatKnowAboutEventProcessors;
         ITenants _tenants;
+
+        int _canPerformCount = 10;
 
         IScopedEventProcessingHub _processingHub;
         ILogger _logger;
@@ -55,10 +58,16 @@ namespace Dolittle.Runtime.Events.Processing
             _getOffsetRepository = getOffsetRepository;
             _getUnprocessedEventsFetcher = getUnprocessedEventsFetcher;
             _executionContextManager = executionContextManager;
+            _logger = logger;
         }
 
         /// <inheritdoc />
-        public bool CanPerform() => true;
+        public bool CanPerform()
+        {
+            var hasAny = _systemsThatKnowAboutEventProcessors.SelectMany(_ => _.ToList()).Any();
+            if( hasAny || _canPerformCount-- == 0 ) return true;
+            return false;
+        }
 
         /// <inheritdoc />
         public void Perform()
@@ -69,13 +78,14 @@ namespace Dolittle.Runtime.Events.Processing
 
         void ProcessInParallel()
         {
+            //_logger.Information("Process")
             Parallel.ForEach(_systemsThatKnowAboutEventProcessors.ToList(), (system) =>
             {
                 Parallel.ForEach(system.ToList(), (processor) =>
                 {
                     Parallel.ForEach(_tenants.All, (t) =>
                     {
-                        _executionContextManager.CurrentFor(t);
+                        _executionContextManager.CurrentFor(t, CorrelationId.New(), Claims.Empty);
                         _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
                     });
                 });

@@ -19,10 +19,9 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Penetrate to a specific <see cref="IEventHorizon"/> with a given Url for specific <see cref="Artifact">events</see>
         /// </summary>
-        /// <param name="application">The <see cref="Application"/> in which to penetrate to</param>
-        /// <param name="boundedContext">The <see cref="BoundedContext"/> in which to penetrate to</param>
+        /// <param name="destination">The <see cref="EventHorizonKey"/> in which to penetrate to</param>
         /// <param name="url">Url to an <see cref="IEventHorizon"/> to penentrate to</param>
         /// <param name="events">For <see cref="IEnumerable{Artifact}">events</see></param>
-        void Penetrate(Application application, BoundedContext boundedContext, string url, IEnumerable<Artifact> events);
+        void Penetrate(EventHorizonKey destination, string url, IEnumerable<Artifact> events);
     }
 }

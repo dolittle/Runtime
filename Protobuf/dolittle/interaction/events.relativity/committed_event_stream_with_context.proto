@@ -5,19 +5,15 @@
 
 syntax = "proto3";
 
-import "system/guid.proto";
-import "dolittle/interaction/events.relativity/artifact.proto";
-import "dolittle/interaction/events.relativity/tenant_offset.proto";
+import "dolittle/interaction/events.relativity/committed_event_stream.proto";
+import "dolittle/interaction/events.relativity/execution_context.proto";
 
 package dolittle.events.relativity;
 
 option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
 
-// Open tunnel is the message sent when opening a tunnel from a singularity towards an event horizon
-message OpenTunnel {
-    guid application = 1;
-    guid boundedContext = 2;
-    guid clientId = 3;
-    repeated TenantOffset offsets = 4;
-    repeated Artifact events = 5;
+// Represents a committed event stream with the Execution Context
+message CommittedEventStreamWithContext {
+    CommittedEventStream commit = 1;
+    ExecutionContext context = 2;
 }

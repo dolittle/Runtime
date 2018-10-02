@@ -11,10 +11,13 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
+using Dolittle.DependencyInversion;
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
 using Grpc.Core;
@@ -29,71 +32,76 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly string _url;
         readonly IEnumerable<Dolittle.Artifacts.Artifact> _events;
         readonly ILogger _logger;
-        readonly Application _application;
-        readonly BoundedContext _boundedContext;
+        readonly EventHorizonKey _horizonKey;
+        readonly EventHorizonKey _destinationKey;
         readonly Channel _channel;
         readonly QuantumTunnelService.QuantumTunnelServiceClient _client;
-        readonly Application _destinationApplication;
-        readonly BoundedContext _destinationBoundedContext;
-        readonly IGeodesics _geodesics;
+        readonly FactoryFor<IGeodesics> _getGeodesics;
         readonly ISerializer _serializer;
-        readonly IEventStore _eventStore;
-        readonly IEventProcessors _eventProcessors;
-        
+        readonly FactoryFor<IEventStore> _getEventStore;
+        readonly IScopedEventProcessingHub _eventProcessingHub;
         readonly CancellationTokenSource _runCancellationTokenSource;
         readonly CancellationToken _runCancellationToken;
+        readonly IExecutionContextManager _executionContextManager;
+        readonly ITenants _tenants;
+        readonly ITenantOffsetRepository _tenantOffsetRepository;
         Thread _runThread = null;
+
+        ParticleStreamProcessor _processor;
+        
+
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
         /// </summary>
-        /// <param name="application">The current <see cref="Application"/></param>
-        /// <param name="boundedContext">The current <see cref="BoundedContext"/></param>
-        /// <param name="destinationApplication">The destination <see cref="Application"/></param>
-        /// <param name="destinationBoundedContext">The destination <see cref="BoundedContext"/></param>
+        /// <param name="horizonKey">The key for the connection</param>
+        /// <param name="destinationKey">The key for the destination</param>
         /// <param name="url">Url for the <see cref="IEventHorizon"/> we're connecting to</param>
         /// <param name="events"><see cref="IEnumerable{Artifact}">Events</see> to connect for</param>
-        /// <param name="geodesics"><see cref="IGeodesics"/> for path offsetting</param>
-        /// <param name="eventStore"><see cref="IEventStore"/> to persist incoming events to</param>
-        /// <param name="eventProcessors"><see cref="IEventProcessors"/> for processing incoming events</param>
+        /// <param name="getGeodesics">A <see cref="FactoryFor{IGeodesics}"/> to provide the correctly scoped geodesics instance for path offsetting</param>
+        /// <param name="getEventStore">A factory to provide the correctly scoped <see cref="IEventStore"/> to persist incoming events to</param>
+        /// <param name="eventProcessingHub"><see cref="IScopedEventProcessingHub"/> for processing incoming events</param>
         /// <param name="serializer"><see cref="ISerializer"/> to use for deserializing content of commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> so we can set the correct context for the processing of the Events</param>
+        /// <param name="tenants"><see cref="ITenants"/> the tenants that we need to be aware of from the other bounded contexts</param>
+        /// <param name="tenantOffsetRepository"></param>
         public QuantumTunnelConnection(
-                Application application,
-                BoundedContext boundedContext,
-                Application destinationApplication,
-                BoundedContext destinationBoundedContext,
+                EventHorizonKey horizonKey,
+                EventHorizonKey destinationKey,
                 string url,
                 IEnumerable<Dolittle.Artifacts.Artifact> events,
-                IGeodesics geodesics,
-                IEventStore eventStore,
-                IEventProcessors eventProcessors,
+                FactoryFor<IGeodesics> getGeodesics,
+                FactoryFor<IEventStore> getEventStore,
+                IScopedEventProcessingHub eventProcessingHub,
                 ISerializer serializer,
-                ILogger logger)
+                ILogger logger,
+                IExecutionContextManager executionContextManager,
+                ITenants tenants,
+                ITenantOffsetRepository tenantOffsetRepository)
         {
             _url = url;
             _events = events;
             _logger = logger;
-            _application = application;
-            _boundedContext = boundedContext;
-            _geodesics = geodesics;
+            _horizonKey = horizonKey;
+            _destinationKey = destinationKey;
+            _getGeodesics = getGeodesics;
             _serializer = serializer;
-            _eventStore = eventStore;
-            _eventProcessors = eventProcessors;
-            _destinationApplication = destinationApplication;
-            _destinationBoundedContext = destinationBoundedContext;
+            _getEventStore = getEventStore;
+            _eventProcessingHub = eventProcessingHub;
             _channel = new Channel(_url, ChannelCredentials.Insecure);
             _client = new QuantumTunnelService.QuantumTunnelServiceClient(_channel);
-
             _runCancellationTokenSource = new CancellationTokenSource();
             _runCancellationToken = _runCancellationTokenSource.Token;
-
-            Task.Run(() => Run(), _runCancellationToken);
+            _executionContextManager = executionContextManager;
+            _processor = new ParticleStreamProcessor(getEventStore,getGeodesics,_horizonKey,eventProcessingHub,logger);
+            _tenantOffsetRepository = tenantOffsetRepository;
+            _tenants = tenants;
 
             AppDomain.CurrentDomain.ProcessExit += ProcessExit;
             AssemblyLoadContext.Default.Unloading += AssemblyLoadContextUnloading;
+            Task.Run(() => Run(), _runCancellationToken);
             Console.CancelKeyPress += (s, e) => Close();
-            
         }
 
         /// <summary>
@@ -135,7 +143,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
         void Run()
         {
-            _logger.Information($"Establishing connection towards event horizon for application ('{_destinationApplication}') and bounded context ('{_destinationBoundedContext}') at '{_url}'");
+            _logger.Information($"Establishing connection towards event horizon for application ('{_destinationKey.Application}') and bounded context ('{_destinationKey.BoundedContext}') at '{_url}'");
 
             Task.Run(async() =>
             {
@@ -162,72 +170,32 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             Close();
         }
 
-        async Task OpenAndHandleStream()
+        AsyncServerStreamingCall<Protobuf.CommittedEventStreamWithContext> GetOpenTunnel()
         {
-            _logger.Information($"Opening tunnel towards application '{_application}' and bounded context '{_boundedContext}'");
-
-            var openTunnelMessage = new OpenTunnel
+            var tunnel = new OpenTunnel
             {
-                Application = _application.ToProtobuf(),
-                BoundedContext = _boundedContext.ToProtobuf(),
+                Application = _horizonKey.Application.ToProtobuf(),
+                BoundedContext = _horizonKey.BoundedContext.ToProtobuf(),
                 ClientId = Guid.NewGuid().ToProtobuf()
             };
+            tunnel.Offsets.AddRange(_tenantOffsetRepository.Get(_tenants.All, _horizonKey).Select(_ => _.ToMessage()));
+            tunnel.Events.AddRange(_events.Select(_ => _.ToMessage()));
+            return _client.Open(tunnel);
+        }
 
-            _events.Select(_ => _.ToMessage()).ForEach(openTunnelMessage.Events.Add);
+        async Task OpenAndHandleStream()
+        {
+            _logger.Information($"Opening tunnel towards application '{_horizonKey.Application}' and bounded context '{_horizonKey.BoundedContext}'");
 
-            var stream = _client.Open(openTunnelMessage);
+            var stream = GetOpenTunnel();
             try
             {
                 while (await stream.ResponseStream.MoveNext(_runCancellationToken))
                 {
                     _logger.Information("Commit received");
 
-                    try
-                    {
-                        var current = stream.ResponseStream.Current.ToCommittedEventStream(_serializer);
-                        var version = _eventStore.GetNextVersionFor(current.Source.EventSource);
-
-                        var versionedEventSource = new VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact);
-
-                        var eventEnvelopes = new List<EventEnvelope>();
-
-                        current.Events.ForEach(_ => 
-                        {
-                            var envelope = new EventEnvelope(
-                                new EventMetadata(
-                                    _.Id,
-                                    new VersionedEventSource(version, current.Source.EventSource, current.Source.Artifact),
-                                    _.Metadata.CorrelationId,
-                                    _.Metadata.Artifact,
-                                    _.Metadata.Occurred,
-                                    _.Metadata.OriginalContext
-                                ), 
-                                _.Event
-                            );
-                            eventEnvelopes.Add(envelope);
-
-                            version = version.NextSequence();
-                        });
-
-                        var uncommittedEventStream = new Store.UncommittedEventStream(
-                            current.Id,
-                            current.CorrelationId,
-                            versionedEventSource,
-                            current.Timestamp,
-                            new Store.EventStream(eventEnvelopes)
-                        );
-
-                        _logger.Information("Commit events to store");
-                        var committedEventStream = _eventStore.Commit(uncommittedEventStream);
-
-                        _logger.Information("Process committed events");
-                        //TODO: add in the correct processor
-                        //_eventProcessors.Process(committedEventStream);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.Error(ex, "Couldn't handle incoming commit");
-                    }
+                    var seq = await _processor.Process(stream.ResponseStream.Current.Commit.ToCommittedEventStream());
+                    _logger.Information($"Committed {seq}");
                 }
             }
             catch (Exception moveException)
@@ -238,6 +206,5 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
             _logger.Information("Done opening and handling the stream");
         }
-
     }
 }

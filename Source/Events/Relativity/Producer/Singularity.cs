@@ -39,13 +39,13 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public bool CanPassThrough(Store.CommittedEventStream committedEventStream)
+        public bool CanPassThrough(Processing.CommittedEventStreamWithContext committedEventStream)
         {
-            return _subscription.Events.Any(_ => committedEventStream.Events.Any(e => e.Metadata.Artifact == _));
+            return _subscription.Events.Any(_ => committedEventStream.EventStream.Events.Any(e => e.Metadata.Artifact == _));
         }
 
         /// <inheritdoc/>
-        public bool PassThrough(Store.CommittedEventStream committedEventStream)
+        public bool PassThrough(Processing.CommittedEventStreamWithContext committedEventStream)
         {
             if( !CanPassThrough(committedEventStream)) return false;
             _tunnel.PassThrough(committedEventStream);

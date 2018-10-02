@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Processing;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -19,9 +20,9 @@ namespace Dolittle.Runtime.Events.Relativity
         event QuantumTunnelCollapsed    Collapsed;
 
         /// <summary>
-        /// Pass an <see cref="CommittedEvents"/> through to the other side of the quantum tunnel
+        /// Pass a <see cref="CommittedEventStreamWithContext"/> through to the other side of the quantum tunnel
         /// </summary>
-        /// <param name="committedEventStream"><see cref="CommittedEvents"/> to pass through</param>
-        void PassThrough(Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream);
+        /// <param name="contextualizedCommittedEventStream"><see cref="CommittedEventStreamWithContext"/> to pass through</param>
+        void PassThrough(CommittedEventStreamWithContext contextualizedCommittedEventStream);
     }
 }

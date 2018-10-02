@@ -3,6 +3,7 @@ title: Overview
 description: Get an overview over the Dolittle platform
 keywords: Runtime, Overview
 author: einari, smithmx, woksin, pavsaund, tomasekeli
+weight: 1
 ---
 The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”,
 “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in

@@ -105,7 +105,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="committedEventStreamWithContext">The <see cref="CommittedEventStream" /> to process</param>
         protected virtual void ProcessStream(CommittedEventStreamWithContext committedEventStreamWithContext)
         {
-            _executionContextManager.Current = committedEventStreamWithContext.Context;
+            _executionContextManager.CurrentFor(committedEventStreamWithContext.Context);
             var committedEventStream = committedEventStreamWithContext.EventStream;
             _logger.Debug($"Processing  stream {committedEventStream.Sequence} {committedEventStream.Id} {committedEventStream.CorrelationId}");
             committedEventStream.Events.ForEach(e => Process(e.ToCommittedEventEnvelope(committedEventStream.Sequence),committedEventStreamWithContext.Context));

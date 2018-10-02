@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
             mocked_execution_context_manager = mocks.an_execution_context_manager();
             mocked_execution_context_manager.SetupGet(m => m.Current)
                 .Returns(execution_context);
-            mocked_execution_context_manager.SetupSet(ecm => ecm.Current = Moq.It.IsAny<ExecutionContext>()).Callback<ExecutionContext>(ec => {current_execution_context = ec; execution_context_sets++;});    
+            //mocked_execution_context_manager.SetupSet(ecm => ecm.Current = Moq.It.IsAny<ExecutionContext>()).Callback<ExecutionContext>(ec => {current_execution_context = ec; execution_context_sets++;});    
             hub = new TestScopedEventProcessingHub(mocks.a_logger().Object,mocked_execution_context_manager.Object);
             commits = given.committed_event_streams();
         }; 
