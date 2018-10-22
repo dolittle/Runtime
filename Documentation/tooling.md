@@ -25,7 +25,7 @@ We have a [Github repository](https://github.com/dolittle-tools/) where our publ
 Note that these are the languages that we currently are supporting on our platform and will eventually have tools for. The tools will be extended to support more languages when new SDKs for other programming languages are developed.
 {{% /notice %}}
 
-* Backend
+* Core (Backend)
     * C#
 
 * Frontend

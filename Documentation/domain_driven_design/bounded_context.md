@@ -119,7 +119,7 @@ When you create a new *Bounded Context* there are some configuration that needs 
   "application": "0d577eb8-a70b-4e38-aca8-f85b3166bdc2",
   "boundedContext": "f660966d-3a74-44e6-8268-a9aefbae6115",
   "boundedContextName": "Shop",
-  "backend": {
+  "core": {
     "language": "csharp"
   }
 }
@@ -127,5 +127,5 @@ When you create a new *Bounded Context* there are some configuration that needs 
 * application - The GUID of the *Application* that this *Bounded Context* belongs to
 * boundedContext - The GUID of the *Bounded Context*
 * boundedContextName - The name of the *Bounded Context*
-* backend - The backend configuration
-* backend.language - The backend language used for the *Bounded Context* 
+* core - The core configuration
+* core.language - The core language used for the *Bounded Context* 
