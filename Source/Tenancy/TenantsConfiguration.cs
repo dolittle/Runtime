@@ -16,6 +16,6 @@ namespace Dolittle.Runtime.Tenancy
         /// <summary>
         /// Get the <see cref="TenantConfiguration"/> per <see cref="TenantId"/>
         /// </summary>
-        public Dictionary<TenantId, TenantConfiguration> Tenants { get; } = new Dictionary<TenantId, TenantConfiguration>();
+        public Dictionary<TenantId, TenantConfiguration> Tenants { get; set; } = new Dictionary<TenantId, TenantConfiguration>();
     }
 }

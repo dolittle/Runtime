@@ -26,12 +26,12 @@ namespace Dolittle.Runtime.Tenancy
         {
             
             _tenantsConfigurationManager = tenantsConfigurationManager;
-            /*
+            
             _tenants = tenantsConfigurationManager.Current.Tenants.ToDictionary(
                 _ => _.Key,
                 _ => new Tenant(_.Key)
             );
-            */
+            
 
             _tenants[TenantId.Unknown] = new Tenant(TenantId.Unknown);
         }
