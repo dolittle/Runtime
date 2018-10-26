@@ -119,7 +119,8 @@ namespace Dolittle.Runtime.Events.Processing
             {
                 Parallel.ForEach(processors.Values, _ => _.Process(envelope));
             }
-            _logger.Warning($"No Processor registered for {key}");
+            if (processors.Count == 0)
+                _logger.Warning($"No Processor registered for {key}");
         }
 
         /// <summary>
