@@ -15,14 +15,6 @@ namespace Dolittle.Runtime.Tenancy
     {
         const string _configurationFile = ".dolittle/tenants.json";
 
-        readonly ISerializationOptions _serializationOptions = SerializationOptions.Custom(callback:
-            serializer =>
-            {
-                serializer.ContractResolver = new CamelCaseExceptDictionaryKeyResolver();
-                serializer.Formatting = Formatting.Indented;
-            }
-        );
-
         readonly ISerializer _serializer;
 
         /// <summary>
@@ -43,9 +35,7 @@ namespace Dolittle.Runtime.Tenancy
             if( !File.Exists(_configurationFile)) return new TenantsConfiguration();
 
             var json = File.ReadAllText(_configurationFile);
-            var config = _serializer.FromJson<TenantsConfiguration>(json, _serializationOptions);
-
-
+            var config = _serializer.FromJson<TenantsConfiguration>(json);
             
             return config;
         }
