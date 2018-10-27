@@ -38,20 +38,10 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 
 
         /// <summary>
-        /// 
+        /// Convert a <see cref="ConceptAs{T}">Guid concept</see> to <see cref="System.Protobuf.guid"/>
         /// </summary>
-        /// <param name="guid"></param>
-        /// <returns></returns>
-        public static ByteString ToByteString(this ConceptAs<Guid> guid)
-        {
-            return ByteString.CopyFrom(guid.Value.ToByteArray());
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="concept"></param>
-        /// <returns></returns>
+        /// <param name="concept"><see cref="ConceptAs{T}"/> to convert from</param>
+        /// <returns>Converted <see cref="System.Protobuf.guid"/></returns>
         public static System.Protobuf.guid ToProtobuf(this ConceptAs<Guid> concept)
         {
             return concept.Value.ToProtobuf();
@@ -59,22 +49,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 
 
         /// <summary>
-        /// 
+        /// Convert a <see cref="System.Protobuf.guid"/> to <see cref="ConceptAs{T}">Guid concept</see>
         /// </summary>
-        /// <param name="byteString"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
-        public static T ToGuidConcept<T>(this ByteString byteString) where T : class
-        {
-            return ConceptFactory.CreateConceptInstance(typeof(T), new Guid(byteString.ToByteArray())) as T;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="guid"></param>
-        /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <param name="guid"><see cref="System.Protobuf.guid"/> to convert from</param>
+        /// <typeparam name="T">Type of <see cref="ConceptAs{T}"/> to convert to</typeparam>
+        /// <returns>Converted instance - matching the type given</returns>
         public static T ToConcept<T>(this System.Protobuf.guid guid) where T : ConceptAs<Guid>
         {
             return ConceptFactory.CreateConceptInstance(typeof(T), new Guid(guid.Value.ToByteArray())) as T;
@@ -109,11 +88,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// 
+        /// Write an <see cref="object"/> with <see cref="Types">type information</see> to a <see cref="CodedOutputStream"/>
         /// </summary>
-        /// <param name="type"></param>
-        /// <param name="obj"></param>
-        /// <param name="stream"></param>
+        /// <param name="obj"><see cref="object"/> to write</param>
+        /// <param name="type"><see cref="Types">Type</see> to write</param>
+        /// <param name="stream"><see cref="CodedOutputStream"/> to write to</param>
         public static void WriteWithTypeTo(this object obj, Types type, CodedOutputStream stream)
         {
             switch( type )
@@ -137,7 +116,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// </summary>
         /// <param name="obj"><see cref="System.Protobuf.Object"/> to read from</param>
         /// <returns>Value in the correct type - null if not capable of converting</returns>
-        public static object ConvertToCLR(this System.Protobuf.Object obj)
+        public static object ToCLR(this System.Protobuf.Object obj)
         {
             var type = (Types)obj.Type;
             object value = null;
