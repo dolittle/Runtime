@@ -3,19 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using System.Collections.Generic;
-using System.IO;
-using Dolittle.Applications;
-using Dolittle.Artifacts;
-using Dolittle.Collections;
 using Dolittle.Concepts;
-using Dolittle.PropertyBags;
-using Dolittle.Reflection;
-using Dolittle.Serialization.Protobuf;
 using Dolittle.Time;
 using Google.Protobuf;
-using Google.Protobuf.Collections;
-using System.Globalization;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 {
