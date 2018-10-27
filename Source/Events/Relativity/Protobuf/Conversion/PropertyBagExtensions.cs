@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             var dictionary = new NullFreeDictionary<string,object>();
             mapField.ForEach(keyValue => 
             {
-                var value = keyValue.Value.ConvertToCLR();
+                var value = keyValue.Value.ToCLR();
                 if(value != null) dictionary.Add(keyValue.Key, value);
             });
             return new PropertyBag(dictionary);
