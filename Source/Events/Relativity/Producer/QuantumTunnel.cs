@@ -15,6 +15,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Collections;
 using System.Linq;
 using System.Collections.Generic;
+using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -64,7 +65,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             try
             {
-                var message = contextualEventStream.ToMessage();
+                var message = contextualEventStream.ToProtobuf();
                 _outbox.Enqueue(message);
                 _waitHandle.Set();
             }
@@ -142,7 +143,7 @@ namespace Dolittle.Runtime.Events.Relativity
         void AddToQueue(Store.CommittedEventStream committedEventStream)
         {
             var originalContext = committedEventStream.Events.First().Metadata.OriginalContext;
-            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream,originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToMessage());
+            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream,originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToProtobuf());
         }
     }
 }

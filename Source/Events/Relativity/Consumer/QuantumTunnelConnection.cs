@@ -16,6 +16,7 @@ using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
+using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
@@ -178,8 +179,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 BoundedContext = _horizonKey.BoundedContext.ToProtobuf(),
                 ClientId = Guid.NewGuid().ToProtobuf()
             };
-            tunnel.Offsets.AddRange(_tenantOffsetRepository.Get(_tenants.All, _horizonKey).Select(_ => _.ToMessage()));
-            tunnel.Events.AddRange(_events.Select(_ => _.ToMessage()));
+            tunnel.Offsets.AddRange(_tenantOffsetRepository.Get(_tenants.All, _horizonKey).Select(_ => _.ToProtobuf()));
+            tunnel.Events.AddRange(_events.Select(_ => _.ToProtobuf()));
             return _client.Open(tunnel);
         }
 
