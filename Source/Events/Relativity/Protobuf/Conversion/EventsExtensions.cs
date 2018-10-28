@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using Dolittle.Execution;
+using Dolittle.Time;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 {
@@ -24,7 +25,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                 protobuf.Source.ToVersionedEventSource(),
                 protobuf.CorrelationId.ToConcept<CorrelationId>(),
                 protobuf.Artifact.ToArtifact(),
-                DateTimeOffset.FromFileTime(protobuf.Occurred),
+                protobuf.Occurred.ToDateTimeOffset(),
                 protobuf.OriginalContext.ToOriginalContext()
             );
             return metadata;
@@ -42,7 +43,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                 Source = metadata.VersionedEventSource.ToProtobuf(),
                 CorrelationId = metadata.CorrelationId.ToProtobuf(),
                 Artifact = metadata.Artifact.ToProtobuf(),
-                Occurred = metadata.Occurred.ToFileTime(),
+                Occurred = metadata.Occurred.ToUnixTimeMilliseconds(),
                 OriginalContext = metadata.OriginalContext.ToProtobuf()
             };
         }
