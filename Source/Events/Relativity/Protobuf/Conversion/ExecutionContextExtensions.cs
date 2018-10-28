@@ -34,6 +34,26 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
+        /// Convert from <see cref="Dolittle.Runtime.Events.OriginalContext"/> to <see cref="OriginalContext"/>
+        /// </summary>
+        /// <param name="originalContext"></param>
+        /// <returns></returns>
+        public static OriginalContext ToProtobuf(this Dolittle.Runtime.Events.OriginalContext originalContext)
+        {
+            var protobuf = new OriginalContext 
+            {
+                Application = originalContext.Application.ToProtobuf(),
+                Tenant = originalContext.Tenant.ToProtobuf(),
+                BoundedContext = originalContext.BoundedContext.ToProtobuf(),
+                Environment = originalContext.Environment.Value,
+                CommitInOrigin = originalContext.CommitInOrigin.Value
+            };
+            protobuf.Claims.AddRange(originalContext.Claims.Select(c => c.ToProtobuf()));
+            return protobuf;
+        }
+
+
+        /// <summary>
         /// Convert from <see cref="ExecutionContext"/> to <see cref="Dolittle.Execution.ExecutionContext"/>
         /// </summary>
         /// <param name="protobuf"><see cref="ExecutionContext"/> to convert from</param>
@@ -52,23 +72,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }    
 
 
-        /// <summary>
-        /// Convert from <see cref="Dolittle.Runtime.Events.OriginalContext"/> to <see cref="OriginalContext"/>
-        /// </summary>
-        /// <param name="originalContext"></param>
-        /// <returns></returns>
-        public static OriginalContext ToProtobuf(this Dolittle.Runtime.Events.OriginalContext originalContext)
-        {
-            var protobuf = new OriginalContext 
-            {
-                Application = originalContext.Application.ToProtobuf(),
-                Tenant = originalContext.Tenant.ToProtobuf(),
-                BoundedContext = originalContext.BoundedContext.ToProtobuf(),
-                Environment = originalContext.Environment.Value
-            };
-            protobuf.Claims.AddRange(originalContext.Claims.Select(c => c.ToProtobuf()));
-            return protobuf;
-        }
 
         /// <summary>
         /// Convert from <see cref="Dolittle.Execution.ExecutionContext"/> to <see cref="ExecutionContext"/>
