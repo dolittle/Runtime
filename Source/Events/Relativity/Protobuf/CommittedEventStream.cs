@@ -27,19 +27,18 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             "YXRpdml0eRoRc3lzdGVtL2d1aWQucHJvdG8aQ2RvbGl0dGxlL2ludGVyYWN0",
             "aW9uL2V2ZW50cy5yZWxhdGl2aXR5L3ZlcnNpb25lZF9ldmVudF9zb3VyY2Uu",
             "cHJvdG8aO2RvbGl0dGxlL2ludGVyYWN0aW9uL2V2ZW50cy5yZWxhdGl2aXR5",
-            "L2V2ZW50X2VudmVsb3BlLnByb3RvIpsCChRDb21taXR0ZWRFdmVudFN0cmVh",
-            "bRIeCgZ0ZW5hbnQYASABKAsyDi5kb2xpdHRsZS5ndWlkEkAKBnNvdXJjZRgC",
-            "IAEoCzIwLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LlZlcnNpb25lZEV2",
-            "ZW50U291cmNlEhAKCHNlcXVlbmNlGAMgASgEEhoKAmlkGAQgASgLMg4uZG9s",
-            "aXR0bGUuZ3VpZBIRCgl0aW1lU3RhbXAYBSABKAMSJQoNY29ycmVsYXRpb25J",
-            "ZBgGIAEoCzIOLmRvbGl0dGxlLmd1aWQSOQoGZXZlbnRzGAcgAygLMikuZG9s",
-            "aXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuRXZlbnRFbnZlbG9wZUIuqgIrRG9s",
-            "aXR0bGUuUnVudGltZS5FdmVudHMuUmVsYXRpdml0eS5Qcm90b2J1ZmIGcHJv",
-            "dG8z"));
+            "L2V2ZW50X2VudmVsb3BlLnByb3RvIvsBChRDb21taXR0ZWRFdmVudFN0cmVh",
+            "bRJACgZzb3VyY2UYASABKAsyMC5kb2xpdHRsZS5ldmVudHMucmVsYXRpdml0",
+            "eS5WZXJzaW9uZWRFdmVudFNvdXJjZRIQCghzZXF1ZW5jZRgCIAEoBBIaCgJp",
+            "ZBgDIAEoCzIOLmRvbGl0dGxlLmd1aWQSEQoJdGltZVN0YW1wGAQgASgDEiUK",
+            "DWNvcnJlbGF0aW9uSWQYBSABKAsyDi5kb2xpdHRsZS5ndWlkEjkKBmV2ZW50",
+            "cxgGIAMoCzIpLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkV2ZW50RW52",
+            "ZWxvcGVCLqoCK0RvbGl0dGxlLlJ1bnRpbWUuRXZlbnRzLlJlbGF0aXZpdHku",
+            "UHJvdG9idWZiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSourceReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelopeReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStream), global::Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStream.Parser, new[]{ "Tenant", "Source", "Sequence", "Id", "TimeStamp", "CorrelationId", "Events" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStream), global::Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStream.Parser, new[]{ "Source", "Sequence", "Id", "TimeStamp", "CorrelationId", "Events" }, null, null, null)
           }));
     }
     #endregion
@@ -73,7 +72,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public CommittedEventStream(CommittedEventStream other) : this() {
-      Tenant = other.tenant_ != null ? other.Tenant.Clone() : null;
       Source = other.source_ != null ? other.Source.Clone() : null;
       sequence_ = other.sequence_;
       Id = other.id_ != null ? other.Id.Clone() : null;
@@ -87,19 +85,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       return new CommittedEventStream(this);
     }
 
-    /// <summary>Field number for the "tenant" field.</summary>
-    public const int TenantFieldNumber = 1;
-    private global::System.Protobuf.guid tenant_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::System.Protobuf.guid Tenant {
-      get { return tenant_; }
-      set {
-        tenant_ = value;
-      }
-    }
-
     /// <summary>Field number for the "source" field.</summary>
-    public const int SourceFieldNumber = 2;
+    public const int SourceFieldNumber = 1;
     private global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSource source_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSource Source {
@@ -110,7 +97,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "sequence" field.</summary>
-    public const int SequenceFieldNumber = 3;
+    public const int SequenceFieldNumber = 2;
     private ulong sequence_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ulong Sequence {
@@ -121,7 +108,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "id" field.</summary>
-    public const int IdFieldNumber = 4;
+    public const int IdFieldNumber = 3;
     private global::System.Protobuf.guid id_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::System.Protobuf.guid Id {
@@ -132,7 +119,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "timeStamp" field.</summary>
-    public const int TimeStampFieldNumber = 5;
+    public const int TimeStampFieldNumber = 4;
     private long timeStamp_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public long TimeStamp {
@@ -143,7 +130,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "correlationId" field.</summary>
-    public const int CorrelationIdFieldNumber = 6;
+    public const int CorrelationIdFieldNumber = 5;
     private global::System.Protobuf.guid correlationId_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::System.Protobuf.guid CorrelationId {
@@ -154,9 +141,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     }
 
     /// <summary>Field number for the "events" field.</summary>
-    public const int EventsFieldNumber = 7;
+    public const int EventsFieldNumber = 6;
     private static readonly pb::FieldCodec<global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope> _repeated_events_codec
-        = pb::FieldCodec.ForMessage(58, global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope.Parser);
+        = pb::FieldCodec.ForMessage(50, global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope.Parser);
     private readonly pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope> events_ = new pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope> Events {
@@ -176,7 +163,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!object.Equals(Tenant, other.Tenant)) return false;
       if (!object.Equals(Source, other.Source)) return false;
       if (Sequence != other.Sequence) return false;
       if (!object.Equals(Id, other.Id)) return false;
@@ -189,7 +175,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (tenant_ != null) hash ^= Tenant.GetHashCode();
       if (source_ != null) hash ^= Source.GetHashCode();
       if (Sequence != 0UL) hash ^= Sequence.GetHashCode();
       if (id_ != null) hash ^= Id.GetHashCode();
@@ -206,28 +191,24 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (tenant_ != null) {
-        output.WriteRawTag(10);
-        output.WriteMessage(Tenant);
-      }
       if (source_ != null) {
-        output.WriteRawTag(18);
+        output.WriteRawTag(10);
         output.WriteMessage(Source);
       }
       if (Sequence != 0UL) {
-        output.WriteRawTag(24);
+        output.WriteRawTag(16);
         output.WriteUInt64(Sequence);
       }
       if (id_ != null) {
-        output.WriteRawTag(34);
+        output.WriteRawTag(26);
         output.WriteMessage(Id);
       }
       if (TimeStamp != 0L) {
-        output.WriteRawTag(40);
+        output.WriteRawTag(32);
         output.WriteInt64(TimeStamp);
       }
       if (correlationId_ != null) {
-        output.WriteRawTag(50);
+        output.WriteRawTag(42);
         output.WriteMessage(CorrelationId);
       }
       events_.WriteTo(output, _repeated_events_codec);
@@ -236,9 +217,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (tenant_ != null) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Tenant);
-      }
       if (source_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Source);
       }
@@ -262,12 +240,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     public void MergeFrom(CommittedEventStream other) {
       if (other == null) {
         return;
-      }
-      if (other.tenant_ != null) {
-        if (tenant_ == null) {
-          tenant_ = new global::System.Protobuf.guid();
-        }
-        Tenant.MergeFrom(other.Tenant);
       }
       if (other.source_ != null) {
         if (source_ == null) {
@@ -305,42 +277,35 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             input.SkipLastField();
             break;
           case 10: {
-            if (tenant_ == null) {
-              tenant_ = new global::System.Protobuf.guid();
-            }
-            input.ReadMessage(tenant_);
-            break;
-          }
-          case 18: {
             if (source_ == null) {
               source_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.VersionedEventSource();
             }
             input.ReadMessage(source_);
             break;
           }
-          case 24: {
+          case 16: {
             Sequence = input.ReadUInt64();
             break;
           }
-          case 34: {
+          case 26: {
             if (id_ == null) {
               id_ = new global::System.Protobuf.guid();
             }
             input.ReadMessage(id_);
             break;
           }
-          case 40: {
+          case 32: {
             TimeStamp = input.ReadInt64();
             break;
           }
-          case 50: {
+          case 42: {
             if (correlationId_ == null) {
               correlationId_ = new global::System.Protobuf.guid();
             }
             input.ReadMessage(correlationId_);
             break;
           }
-          case 58: {
+          case 50: {
             events_.AddEntriesFrom(input, _repeated_events_codec);
             break;
           }

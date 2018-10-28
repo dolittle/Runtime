@@ -15,11 +15,10 @@ option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
 
 // Represents a committed event stream
 message CommittedEventStream {
-    guid tenant = 1;
-    VersionedEventSource source = 2;
-    uint64 sequence = 3;
-    guid id = 4;
-    int64 timeStamp = 5;
-    guid correlationId = 6;
-    repeated EventEnvelope events = 7;
+    VersionedEventSource source = 1;
+    uint64 sequence = 2;
+    guid id = 3;
+    int64 timeStamp = 4;
+    guid correlationId = 5;
+    repeated EventEnvelope events = 6;
 }
