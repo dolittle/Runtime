@@ -26,6 +26,15 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             return protobufGuid;
         }
 
+        /// <summary>
+        /// Convert from a <see cref="System.Protobuf.guid"/> to a <see cref="System.Guid"/>
+        /// </summary>
+        /// <param name="protobuf"><see cref="System.Protobuf.guid"/> to convert</param>
+        /// <returns>A <see cref="System.Guid"/></returns>
+        public static System.Guid ToGuid(this System.Protobuf.guid protobuf)
+        {
+            return new Guid(protobuf.Value.ToByteArray());
+        }
 
         /// <summary>
         /// Convert a <see cref="ConceptAs{T}">Guid concept</see> to <see cref="System.Protobuf.guid"/>
@@ -37,7 +46,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             return concept.Value.ToProtobuf();
         }
 
-
         /// <summary>
         /// Convert a <see cref="System.Protobuf.guid"/> to <see cref="ConceptAs{T}">Guid concept</see>
         /// </summary>
@@ -48,7 +56,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         {
             return ConceptFactory.CreateConceptInstance(typeof(T), new Guid(guid.Value.ToByteArray())) as T;
         }
-
 
         /// <summary>
         /// Get the protobuf <see cref="Types"/> representation of the <see cref="object">instances type</see>
@@ -62,7 +69,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             if( type == typeof(int)) return Types.Int32;
             if( type == typeof(long)) return Types.Int64;
             if( type == typeof(uint)) return Types.UInt32;
-            if( type == typeof(long)) return Types.UInt64;
+            if( type == typeof(ulong)) return Types.UInt64;
             if( type == typeof(Int32)) return Types.Int32;
             if( type == typeof(Int64)) return Types.Int64;
             if( type == typeof(UInt32)) return Types.UInt32;
@@ -123,8 +130,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                     case Types.Float: value = stream.ReadFloat(); break;
                     case Types.Double: value = stream.ReadDouble(); break;
                     case Types.Boolean: value = stream.ReadBool(); break;
-                    case Types.DateTime: value = DateTime.FromFileTime(stream.ReadInt64()); break;
-                    case Types.DateTimeOffset: value = DateTimeOffset.FromFileTime(stream.ReadInt64()); break;
+                    case Types.DateTime: value = stream.ReadInt64().ToDateTime(); break;
+                    case Types.DateTimeOffset: value = stream.ReadInt64().ToDateTimeOffset(); break;
                     case Types.Guid: value = new Guid(stream.ReadBytes().ToByteArray()); break;
                 }
             }
