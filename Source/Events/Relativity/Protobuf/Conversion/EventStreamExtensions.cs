@@ -9,6 +9,7 @@ using Dolittle.Collections;
 using Dolittle.Execution;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
+using Dolittle.Time;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 {
@@ -24,13 +25,12 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// <returns>Converted <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/></returns>
         public static Dolittle.Runtime.Events.Store.CommittedEventStream ToCommittedEventStream(this CommittedEventStream protobuf)
         {
-            var tenantId = protobuf.Tenant.ToConcept<TenantId>();
             var eventSourceId = protobuf.Source.EventSource.ToConcept<EventSourceId>();
             var artifactId = protobuf.Source.Artifact.ToConcept<ArtifactId>();
             var versionedEventSource = new Dolittle.Runtime.Events.VersionedEventSource(eventSourceId, artifactId);
             var commitId = protobuf.Id.ToConcept<CommitId>();
             var correlationId = protobuf.CorrelationId.ToConcept<CorrelationId>();
-            var timeStamp = DateTimeOffset.FromFileTime(protobuf.TimeStamp);
+            var timeStamp = protobuf.TimeStamp.ToDateTimeOffset();
             
             var events = protobuf.Events.Select(_ =>                 
                 new Dolittle.Runtime.Events.EventEnvelope(
@@ -48,6 +48,37 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                 new Dolittle.Runtime.Events.Store.EventStream(events)
             );
         }
+
+        /// <summary>
+        /// Convert from <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to <see cref="Protobuf.CommittedEventStream"/>
+        /// </summary>
+        /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to convert from</param>
+        /// <returns>The converted <see cref="Protobuf.CommittedEventStream"/></returns>
+        public static CommittedEventStream ToProtobuf(this Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
+        {
+            var protobuf = new Protobuf.CommittedEventStream
+            {
+                Sequence = committedEventStream.Sequence,
+                Source = committedEventStream.Source.ToProtobuf(),
+                Id = committedEventStream.Id.ToProtobuf(),
+                CorrelationId = committedEventStream.CorrelationId.ToProtobuf(),
+                TimeStamp = committedEventStream.Timestamp.ToUnixTimeMilliseconds()
+            };
+
+            committedEventStream.Events.Select(@event =>
+            {
+                var envelope = new EventEnvelope
+                {
+                    Metadata = @event.Metadata.ToProtobuf()
+                };
+                envelope.Event.Add(@event.Event.ToProtobuf());
+                
+                return envelope;
+            }).ForEach(protobuf.Events.Add);
+
+            return protobuf;
+        }
+
 
         /// <summary>
         /// Convert from <see cref="Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext"/> to <see cref="Protobuf.CommittedEventStream"/>
@@ -76,36 +107,5 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 
             return protobuf;
         }        
-
-        /// <summary>
-        /// Convert from <see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to <see cref="Protobuf.CommittedEventStream"/>
-        /// </summary>
-        /// <param name="committedEventStream"><see cref="Dolittle.Runtime.Events.Store.CommittedEventStream"/> to convert from</param>
-        /// <returns>The converted <see cref="Protobuf.CommittedEventStream"/></returns>
-        public static CommittedEventStream ToProtobuf(this Dolittle.Runtime.Events.Store.CommittedEventStream committedEventStream)
-        {
-            var protobuf = new Protobuf.CommittedEventStream
-            {
-                Source = committedEventStream.Source.ToProtobuf(),
-                Sequence = committedEventStream.Sequence,
-                Id = committedEventStream.Id.ToProtobuf(),
-                TimeStamp = committedEventStream.Timestamp.ToFileTime(),
-                CorrelationId = committedEventStream.CorrelationId.ToProtobuf()
-            };
-
-            committedEventStream.Events.Select(@event =>
-            {
-                var envelope = new EventEnvelope
-                {
-                    Metadata = @event.Metadata.ToProtobuf()
-                };
-
-                envelope.Event.Add(@event.Event.ToProtobuf());
-                
-                return envelope;
-            }).ForEach(protobuf.Events.Add);
-
-            return protobuf;
-        }
     }
 }
