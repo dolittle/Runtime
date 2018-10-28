@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// <returns>Converted <see cref="Dolittle.Security.Claims"/></returns>
         public static Dolittle.Security.Claims ToClaims(this RepeatedField<Claim> claims)
         {
-            return new Dolittle.Security.Claims(claims.Select(c => new Dolittle.Security.Claim(c.Name,c.Value,c.ValueType)).ToList());
+            return new Dolittle.Security.Claims(claims.Select(_ => _.ToClaim()).ToArray());
         }  
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         public static RepeatedField<Claim> ToProtobuf(this Dolittle.Security.Claims claims)
         {
             var protobufClaims = new RepeatedField<Claim>();
-            protobufClaims.Add(claims.Select(c => new Claim { Name = c.Name, Value = c.Value, ValueType = c.ValueType }));
+            protobufClaims.Add(claims.Select(_ => _.ToProtobuf()));
             return protobufClaims;
         } 
 
@@ -47,6 +47,16 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                 Value = claim.Value,
                 ValueType = claim.ValueType
             };
+        }
+
+        /// <summary>
+        /// Convert from <see cref="Claim"/> to <see cref="Dolittle.Security.Claim"/>
+        /// </summary>
+        /// <param name="claim"><see cref="Claim"/> to convert from</param>
+        /// <returns>Converted <see cref="Dolittle.Security.Claim"/></returns>
+        public static Dolittle.Security.Claim ToClaim(this Claim claim)
+        {
+            return new Dolittle.Security.Claim(claim.Name, claim.Value, claim.ValueType);
         }
     }
 }
