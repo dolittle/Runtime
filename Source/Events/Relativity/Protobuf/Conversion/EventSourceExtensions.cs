@@ -22,6 +22,20 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
+        /// Convert from <see cref="Dolittle.Runtime.Events.EventSourceVersion"/> to <see cref="EventSourceVersion"/>
+        /// </summary>
+        /// <param name="version"><see cref="Dolittle.Runtime.Events.EventSourceVersion"/> to convert from</param>
+        /// <returns>Converted <see cref="EventSourceVersion"/></returns>
+        public static EventSourceVersion ToProtobuf(this Dolittle.Runtime.Events.EventSourceVersion version)
+        {
+            return new EventSourceVersion
+            {
+                Commit = version.Commit,
+                Sequence = version.Sequence
+            };
+        }
+
+        /// <summary>
         /// Convert from <see cref="VersionedEventSource"/> to <see cref="Dolittle.Runtime.Events.VersionedEventSource"/>
         /// </summary>
         /// <param name="protobuf"><see cref="VersionedEventSource"/> to convert from</param>
@@ -43,11 +57,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         {
             var source = new VersionedEventSource
             {
-                Version = new EventSourceVersion
-                {
-                    Commit = versionedEventSource.Version.Commit,
-                    Sequence = versionedEventSource.Version.Sequence
-                },
+                Version = versionedEventSource.Version.ToProtobuf(),
                 EventSource = versionedEventSource.EventSource.ToProtobuf(),
                 Artifact = versionedEventSource.Artifact.ToProtobuf()
             };
