@@ -9,6 +9,7 @@ using Dolittle.Applications;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Protobuf;
+using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
