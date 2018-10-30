@@ -87,6 +87,7 @@ namespace Dolittle.Runtime.Events.Processing
                     {
                         _executionContextManager.CurrentFor(t, CorrelationId.New(), Claims.Empty);
                         _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
+                        
                     });
                 });
             });
