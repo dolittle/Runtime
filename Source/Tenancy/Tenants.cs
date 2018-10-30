@@ -15,7 +15,6 @@ namespace Dolittle.Runtime.Tenancy
     [Singleton]
     public class Tenants : ITenants
     {
-        bool _isInitialized;
         readonly Dictionary<TenantId, Tenant> _tenants = new Dictionary<TenantId, Tenant>();
         readonly ITenantsConfigurationManager _tenantsConfigurationManager;
 
@@ -31,19 +30,9 @@ namespace Dolittle.Runtime.Tenancy
                 _ => _.Key,
                 _ => new Tenant(_.Key)
             );
-            RegisterDefaultTenants();
         }
 
         /// <inheritdoc/>
         public IEnumerable<TenantId> All => _tenants.Keys;
-
-        void RegisterDefaultTenants()
-        {
-            if (_isInitialized) return;
-            _isInitialized = true;
-
-            _tenants[TenantId.Unknown] = new Tenant(TenantId.Unknown);
-            _tenants[TenantId.System] = new Tenant(TenantId.System);
-        }
     }   
 }
