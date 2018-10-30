@@ -16,6 +16,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.DependencyInversion;
     using Dolittle.Execution;
     using Dolittle.Security;
+    using Dolittle.Tenancy;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
@@ -85,8 +86,11 @@ namespace Dolittle.Runtime.Events.Processing
                 {
                     Parallel.ForEach(_tenants.All, (t) =>
                     {
-                        _executionContextManager.CurrentFor(t, CorrelationId.New(), Claims.Empty);
-                        _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
+                        if (t != TenantId.System && t != TenantId.Unknown) 
+                        {
+                            _executionContextManager.CurrentFor(t, CorrelationId.New(), Claims.Empty);
+                            _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
+                        }
                     });
                 });
             });
