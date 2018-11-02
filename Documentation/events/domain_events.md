@@ -42,6 +42,12 @@ A Domain Event should be expressed in the Ubiquitous Language of the Domain.  As
 
 The concept of serialisation is inextricably linked to the concept of a Domain Event and this imposes further restrictions on the shape, form and content of our events.  The shape of your Events should be kept as simple as possible utilising only primitives or, if necessary, other DTO structures.  Events cannot contain any Entities or Aggregates.  Where required, these can be referenced by Id.  It is also strongly advised to avoid structures and types that require versioning.  You should not include anything declared within your Domain (e.g. Concepts or Value Objects) on your event as these are Type definitions that can change over time.  Similarly structures within C# such as Enums should not be included directly.  Instead the underlying primitive value should be included on the Event.  
 
+{{% notice tip %}}
+Dolittle requires that the event properties are read-only and match the name of constructor-parameters. The constructor-parameter names must start with a small letter, while the property-names must start with a capital letter.
+
+Thus, if you have a property "UnitPrice" it must match a constructor-parameter "unitPrice" of the same type.
+{{% /notice %}}
+
 ```csharp
 public class ItemAddedToCart(AddRecommendationToCart cmd)
 {
