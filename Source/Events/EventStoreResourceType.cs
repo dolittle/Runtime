@@ -15,7 +15,7 @@ namespace Dolittle.Events
     /// <inheritdoc/>
     public class EventStoreResourceType : IAmAResourceType
     {
-        readonly IEnumerable<Type> _services = new []{typeof(IEventStore), typeof(IGeodesics), typeof(IEventProcessorOffsetRepository)};
+        readonly IEnumerable<Type> _services = new []{typeof(IEventStore), typeof(IGeodesics), typeof(IEventProcessorOffsetRepository), typeof(ITenantOffsetRepository)};
         
         /// <inheritdoc/>
         public ResourceType Name => "eventStore";
