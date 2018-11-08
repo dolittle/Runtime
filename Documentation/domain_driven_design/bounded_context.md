@@ -106,7 +106,7 @@ So for example if you've enabled the option to structure the topology with modul
 ```
 
 ##### Artifacts
-A *Bounded Context* will eventually consist of a set of [*Artifacts*](https://dolittle.io/overview/articles/artifacts/), they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [*Events*](https://dolittle.io/overview/articles/events/domain_events/), [Commands](https://dolittle.io/overview/articles/command/introduction/), [Command Handlers](https://dolittle.io/overview/articles/command/command_handler/), [Aggregate Roots](https://dolittle.io/overview/articles/domain_driven_design/aggregate_root/), [Queries](https://dolittle.io/overview/articles/read/query/) and [Read Models](https://dolittle.io/overview/articles/read/read_model/). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
+A *Bounded Context* will eventually consist of a set of [*Artifacts*](https://dolittle.io/overview/articles/artifacts/), they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [*Events*](https://dolittle.io/overview/articles/events/domain_events/), [Commands](https://dolittle.io/overview/articles/command/introduction/), [Event Sources](https://dolittle.io/overview/articles/domain_driven_design/aggregate_root/), [Queries](https://dolittle.io/overview/articles/read/query/) and [Read Models](https://dolittle.io/overview/articles/read/read_model/). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
 Each *Artifact* is an entity in the *Application*, uniquely identified throughout the *Application* in which the *Bounded Context* belongs. An *Artifact* belongs to a single Feature. 
 
 ## The configuration
@@ -119,6 +119,16 @@ When you create a new *Bounded Context* there are some configuration that needs 
   "application": "0d577eb8-a70b-4e38-aca8-f85b3166bdc2",
   "boundedContext": "f660966d-3a74-44e6-8268-a9aefbae6115",
   "boundedContextName": "Shop",
+  "resources": {
+    "readModels": {
+      "production": "MongoDB",
+      "development": "MongoDB"
+    },
+    "eventStore": {
+      "production": "MongoDB",
+      "development": "MongoDB"
+    }
+  },
   "core": {
     "language": "csharp"
   }
@@ -127,5 +137,6 @@ When you create a new *Bounded Context* there are some configuration that needs 
 * application - The GUID of the *Application* that this *Bounded Context* belongs to
 * boundedContext - The GUID of the *Bounded Context*
 * boundedContextName - The name of the *Bounded Context*
+* resources - A configuration telling the Dolittle Runtime which implementations of the Read model and Event Store database to use for which environment
 * core - The core configuration
 * core.language - The core language used for the *Bounded Context* 
