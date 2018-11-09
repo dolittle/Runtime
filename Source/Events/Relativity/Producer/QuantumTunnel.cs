@@ -125,6 +125,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             List<Commits> commits = new List<Commits>();
             Parallel.ForEach(tenantOffsets,(_) => {
+                _executionContextManager.CurrentFor(_.Tenant);
                 commits.Add(_unprocessedCommitFetcher.GetUnprocessedCommits(_.Offset));
             });
             return commits;
