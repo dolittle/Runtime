@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Bootstrapping;
 using Dolittle.Collections;
+using Dolittle.Resources.Configuration;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -12,24 +13,30 @@ namespace Dolittle.Runtime.Events.Relativity
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
+
+        int _canPerformCount = 10;
         readonly IEventHorizonsConfigurationManager _configuration;
         readonly IBarrier _barrier;
+        readonly IResourceConfiguration _resourceConfiguration;
 
         /// <summary>
         /// Initializes a new instance of <see cref="BootProcedure"/>
         /// </summary>
         /// <param name="configuration"><see cref="IEventHorizonsConfigurationManager">Configuration mananger</see></param>
         /// <param name="barrier"><see cref="IBarrier">Barrier</see> to penetrate towards an <see cref="IEventHorizon"/></param>
+        /// <param name="resourceConfiguration"></param>
         public BootProcedure(
             IEventHorizonsConfigurationManager configuration,
-            IBarrier barrier)
+            IBarrier barrier,
+            IResourceConfiguration resourceConfiguration)
         {
             _configuration = configuration;
             _barrier = barrier;
+            _resourceConfiguration = resourceConfiguration;
         }
 
         /// <inheritdoc/>
-        public bool CanPerform() => true;
+        public bool CanPerform() => _resourceConfiguration.IsConfigured || _canPerformCount-- == 0;
 
         /// <inheritdoc/>
         public void Perform()

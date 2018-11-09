@@ -16,6 +16,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.DependencyInversion;
     using Dolittle.Execution;
     using Dolittle.Security;
+    using Dolittle.Resources.Configuration;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
@@ -29,9 +30,11 @@ namespace Dolittle.Runtime.Events.Processing
 
         IScopedEventProcessingHub _processingHub;
         ILogger _logger;
-        private readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
-        private readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
-        private readonly IExecutionContextManager _executionContextManager;
+        
+        readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
+        readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        readonly IExecutionContextManager _executionContextManager;
+        readonly IResourceConfiguration _resourceConfiguration;
 
         /// <summary>
         /// Instantiates a new instance of <see cref="BootProcedure" />
@@ -42,13 +45,15 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
         /// <param name="executionContextManager">The <see cref="ExecutionContextManager" /> for setting the correct execution context for the Event Processors </param>
+        /// <param name="resourceConfiguration"></param>
         /// <param name="logger">An instance of <see cref="ILogger" /> for logging</param>
         public BootProcedure(IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
                                 ITenants tenants, 
                                 IScopedEventProcessingHub processingHub, 
                                 FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository, 
                                 FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
-                                IExecutionContextManager executionContextManager,                                
+                                IExecutionContextManager executionContextManager,
+                                IResourceConfiguration resourceConfiguration,                                
                                 ILogger logger)
         {
             _processingHub = processingHub;
@@ -58,6 +63,7 @@ namespace Dolittle.Runtime.Events.Processing
             _getOffsetRepository = getOffsetRepository;
             _getUnprocessedEventsFetcher = getUnprocessedEventsFetcher;
             _executionContextManager = executionContextManager;
+            _resourceConfiguration = resourceConfiguration;
             _logger = logger;
         }
 
@@ -65,7 +71,7 @@ namespace Dolittle.Runtime.Events.Processing
         public bool CanPerform()
         {
             var hasAny = _systemsThatKnowAboutEventProcessors.SelectMany(_ => _.ToList()).Any();
-            if( hasAny || _canPerformCount-- == 0 ) return true;
+            if( (hasAny && _resourceConfiguration.IsConfigured) || _canPerformCount-- == 0 ) return true;
             return false;
         }
 
