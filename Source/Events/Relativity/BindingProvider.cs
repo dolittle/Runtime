@@ -6,8 +6,12 @@ using Dolittle.DependencyInversion;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
+    /// <summary>
+    /// Provides bindings for Events relativity
+    /// </summary>
     public class BindingProvider : ICanProvideBindings
     {
+        /// <inheritdoc/>
         public void Provide(IBindingProviderBuilder builder)
         {
             builder.Bind<ITenantOffsetRepository>().To<TenantOffsetRepository>();
