@@ -25,27 +25,31 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc />
         public Commits GetUnprocessedCommits(CommitSequenceNumber commitSequenceNumber)
         {
-            Commits commits;
-            Commits newCommits;
+            List<CommittedEventStream> commits;
+            List<CommittedEventStream> newCommits;
+
             using(var eventStore = _getEventStore())
             {
-                commits = eventStore.FetchAllCommitsAfter(commitSequenceNumber);
+                commits = eventStore.FetchAllCommitsAfter(commitSequenceNumber).ToList();
             }
+
+            if (! commits.Any()) return new Commits(new CommittedEventStream[]{});
             do
             {
-                if(!commits.IsEmpty)
-                {
-                    using(var eventStore = _getEventStore())
-                    {
-                        newCommits = eventStore.FetchAllCommitsAfter(commitSequenceNumber);
-                    }
-                    var list = new List<CommittedEventStream>(commits.ToList());
-                    list.AddRange(newCommits.ToList());
-                }
-            }
-            while(!commits.IsEmpty);
+                newCommits = new List<CommittedEventStream>();
+                var lastCommitSequenceNumber = commits.OrderByDescending(_ => _.Sequence).First().Sequence;
 
-            return commits;
+                using(var eventStore = _getEventStore())
+                {
+                    newCommits.AddRange(eventStore.FetchAllCommitsAfter(lastCommitSequenceNumber));
+                }
+
+                if (newCommits.Any()) commits.AddRange(newCommits); 
+                
+            }
+            while(newCommits.Any());
+
+            return new Commits(commits);
         }
     }
 }
