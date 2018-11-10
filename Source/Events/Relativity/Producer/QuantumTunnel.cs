@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
-        private readonly IFetchUnprocessedCommits _unprocessedCommitFetcher;
+        readonly IFetchUnprocessedCommits _unprocessedCommitFetcher;
 
         /// <summary>
         /// Initializes a new instance of <see cref="IQuantumTunnel"/>
@@ -95,7 +95,6 @@ namespace Dolittle.Runtime.Events.Relativity
                             {
                                 try
                                 {
-                                    
                                     await _responseStream.WriteAsync(message);
                                 }
                                 catch (Exception ex)
@@ -125,7 +124,7 @@ namespace Dolittle.Runtime.Events.Relativity
         IEnumerable<Commits> GetCommits(IEnumerable<TenantOffset> tenantOffsets)
         {
             List<Commits> commits = new List<Commits>();
-            Parallel.ForEach(tenantOffsets,(_) => {
+            Parallel.ForEach(tenantOffsets, (_) => {
                 _executionContextManager.CurrentFor(_.Tenant);
                 commits.Add(_unprocessedCommitFetcher.GetUnprocessedCommits(_.Offset));
             });
@@ -145,7 +144,7 @@ namespace Dolittle.Runtime.Events.Relativity
         void AddToQueue(Store.CommittedEventStream committedEventStream)
         {
             var originalContext = committedEventStream.Events.First().Metadata.OriginalContext;
-            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream,originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToProtobuf());
+            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream, originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToProtobuf());
         }
     }
 }
