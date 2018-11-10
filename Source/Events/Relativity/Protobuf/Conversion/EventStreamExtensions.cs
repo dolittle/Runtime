@@ -93,18 +93,6 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                 Context = contextualEventStream.Context.ToProtobuf()
             };
 
-            contextualEventStream.EventStream.Events.Select(@event =>
-            {
-                var envelope = new EventEnvelope
-                {
-                    Metadata = @event.Metadata.ToProtobuf(),
-                };
-
-                envelope.Event.Add(@event.Event.ToProtobuf());
-                
-                return envelope;
-            }).ForEach(protobuf.Commit.Events.Add);
-
             return protobuf;
         }      
         /// <summary>
