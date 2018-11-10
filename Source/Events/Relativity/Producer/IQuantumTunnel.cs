@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Event that gets fired when a <see cref="IQuantumTunnel"/> collapses
         /// </summary>
-        event QuantumTunnelCollapsed    Collapsed;
+        event QuantumTunnelCollapsed Collapsed;
 
         /// <summary>
         /// Pass a <see cref="CommittedEventStreamWithContext"/> through to the other side of the quantum tunnel
