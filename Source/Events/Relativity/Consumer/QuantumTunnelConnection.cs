@@ -194,7 +194,9 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 while (await stream.ResponseStream.MoveNext(_runCancellationToken))
                 {
                     _logger.Information("Commit received");
+                    
 
+                    _executionContextManager.CurrentFor(context.Tenant);
                     var seq = await _processor.Process(stream.ResponseStream.Current.Commit.ToCommittedEventStream());
                     _logger.Information($"Committed {seq}");
                 }

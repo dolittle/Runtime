@@ -40,6 +40,12 @@ namespace Dolittle.Applications.Configuration
         }
 
         /// <inheritdoc/>
+        public BoundedContextConfiguration Load()
+        {
+            return Load(Path.Combine("..", "bounded-context.json"));
+        }
+
+        /// <inheritdoc/>
         public BoundedContextConfiguration Load(string relativePath)
         {
             if (_instance != null) return _instance;
@@ -52,7 +58,7 @@ namespace Dolittle.Applications.Configuration
             _instance = configuration;
             return configuration;
         }
-        
+
         string GetPath(string relativePath)
         {
             return Path.Combine(Directory.GetCurrentDirectory(), relativePath);

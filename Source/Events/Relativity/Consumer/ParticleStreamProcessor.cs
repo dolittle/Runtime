@@ -52,10 +52,11 @@ namespace Dolittle.Runtime.Events.Relativity
         /// </summary>
         /// <param name="particleStream"></param>
         /// <returns></returns>
-        public Task<CommitSequenceNumber> Process(CommittedEventStream particleStream)
+        public Task<CommitSequenceNumber> Process(CommittedEventStreamWithContext particleStream)
         {
             try
             {
+                var context = particleStream.Context;
                 EventSourceVersion version = null;
                 using(var _ = _getEventStore())
                 {

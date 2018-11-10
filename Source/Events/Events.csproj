@@ -31,6 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
     <ProjectReference Include="..\Server\Server.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />

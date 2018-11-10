@@ -95,6 +95,7 @@ namespace Dolittle.Runtime.Events.Relativity
                             {
                                 try
                                 {
+                                    
                                     await _responseStream.WriteAsync(message);
                                 }
                                 catch (Exception ex)

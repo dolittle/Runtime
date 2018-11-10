@@ -106,6 +106,15 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             }).ForEach(protobuf.Commit.Events.Add);
 
             return protobuf;
-        }        
+        }      
+
+        public static Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext ToCommitedEventStreamWithContext(this Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStreamWithContext protobuf)
+        {
+            var application = protobuf.Context.Application.ToConcept<Dolittle.Applications.Application>();
+            var boundedContext = protobuf.Context.BoundedContext.ToConcept<Dolittle.Applications.BoundedContext>();
+            var claims = protobuf.Context.Claims.ToClaims();
+            var correlationId = protobuf.Context.CorrelationId.ToGuid();
+            protobuf
+        }
     }
 }

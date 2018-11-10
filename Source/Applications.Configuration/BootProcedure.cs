@@ -38,9 +38,10 @@ namespace Dolittle.Applications.Configuration
         /// <inheritdoc/>
         public void Perform()
         {
-            var boundedContextConfig = _boundedContextLoader.Load(Path.Combine("..", "bounded-context.json"));
+            var boundedContextConfig = _boundedContextLoader.Load();
             var environment = _executionContextManager.Current.Environment;
-            
+
+            _executionContextManager.SetConstants(boundedContextConfig.Application, boundedContextConfig.BoundedContext, environment);
             _resourceConfiguration.ConfigureResourceTypes(boundedContextConfig.Resources.ToDictionary(kvp => kvp.Key, kvp => environment == "Production"? kvp.Value.Production : kvp.Value.Development));
         }
     }

@@ -2,8 +2,11 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using Dolittle.Applications.Configuration;
 using Dolittle.Bootstrapping;
 using Dolittle.Collections;
+using Dolittle.DependencyInversion;
+using Dolittle.Execution;
 using Dolittle.Resources.Configuration;
 
 namespace Dolittle.Runtime.Events.Relativity
@@ -13,7 +16,6 @@ namespace Dolittle.Runtime.Events.Relativity
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
-
         int _canPerformCount = 10;
         readonly IEventHorizonsConfigurationManager _configuration;
         readonly IBarrier _barrier;

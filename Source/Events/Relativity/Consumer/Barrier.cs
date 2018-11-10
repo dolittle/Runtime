@@ -14,12 +14,15 @@ using Dolittle.Runtime.Events.Processing;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Runtime.Tenancy;
+using Dolittle.Lifecycle;
+using Dolittle.Applications.Configuration;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
     /// Represents an implementation of <see cref="IBarrier"/>
     /// </summary>
+    [SingletonPerTenant]
     public class Barrier : IBarrier
     {
         readonly ILogger _logger;
@@ -31,11 +34,11 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
         readonly ITenantOffsetRepository _tenantOffsetRepository;
+        readonly IBoundedContextLoader _boundedContextLoader;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Barrier"/>
         /// </summary>
-        /// <param name="key">The key for this end of the Barrier</param>
         /// <param name="getGeodesics">A <see cref="FactoryFor{IGeodesics}"/> to get the correctly scoped geodesics for path offsetting</param>
         /// <param name="serializer"><see cref="ISerializer"/> used for serialization</param>
         /// <param name="getEventStore">A <see cref="FactoryFor{IEventStore}"/> to get the correctly scoped EventStore to persist incoming events to</param>
@@ -44,8 +47,8 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> to set the correct context for processing events</param>
         /// <param name="tenants"><see cref="ITenants"/> all the tenants that we will process events for</param>
         /// <param name="tenantOffsetRepository"></param>
+        /// <param name="boundedContextLoader"></param>
         public Barrier(
-            EventHorizonKey key,
             FactoryFor<IGeodesics> getGeodesics,
             ISerializer serializer,
             FactoryFor<IEventStore> getEventStore,
@@ -53,10 +56,10 @@ namespace Dolittle.Runtime.Events.Relativity
             ILogger logger,
             IExecutionContextManager executionContextManager,
             ITenants tenants,
-            ITenantOffsetRepository tenantOffsetRepository)
+            ITenantOffsetRepository tenantOffsetRepository,
+            IBoundedContextLoader boundedContextLoader)
         {
             _logger = logger;
-            _key = key;
             _getGeodesics = getGeodesics;
             _serializer = serializer;
             _getEventStore = getEventStore;
@@ -64,6 +67,11 @@ namespace Dolittle.Runtime.Events.Relativity
             _executionContextManager = executionContextManager;
             _tenants = tenants;
             _tenantOffsetRepository = tenantOffsetRepository;
+            _boundedContextLoader = boundedContextLoader;
+
+            var boundedContextConfig = _boundedContextLoader.Load();
+            
+            _key = new EventHorizonKey(boundedContextConfig.Application, boundedContextConfig.BoundedContext);
         }
 
         /// <inheritdoc/>

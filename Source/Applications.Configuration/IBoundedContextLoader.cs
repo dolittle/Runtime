@@ -13,6 +13,10 @@ namespace Dolittle.Applications.Configuration
     {
         /// <summary>
         /// Loads the <see cref="BoundedContextConfiguration"/> from disk
+        /// </summary>
+        BoundedContextConfiguration Load();
+        /// <summary>
+        /// Loads the <see cref="BoundedContextConfiguration"/> from disk
         /// <param name="relativePath">The relative path to the bounded-context.json file</param>
         /// </summary>
         BoundedContextConfiguration Load(string relativePath);
