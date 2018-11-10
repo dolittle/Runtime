@@ -95,7 +95,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             _runCancellationTokenSource = new CancellationTokenSource();
             _runCancellationToken = _runCancellationTokenSource.Token;
             _executionContextManager = executionContextManager;
-            _processor = new ParticleStreamProcessor(getEventStore,getGeodesics,_horizonKey,eventProcessingHub,logger);
+            _processor = new ParticleStreamProcessor(getEventStore, getGeodesics, _horizonKey, eventProcessingHub, _executionContextManager, logger);
             _tenantOffsetRepository = tenantOffsetRepository;
             _tenants = tenants;
 
@@ -194,10 +194,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 while (await stream.ResponseStream.MoveNext(_runCancellationToken))
                 {
                     _logger.Information("Commit received");
-                    
 
-                    _executionContextManager.CurrentFor(context.Tenant);
-                    var seq = await _processor.Process(stream.ResponseStream.Current.Commit.ToCommittedEventStream());
+                    var seq = await _processor.Process(stream.ResponseStream.Current.ToCommittedEventStreamWithContext());
                     _logger.Information($"Committed {seq}");
                 }
             }

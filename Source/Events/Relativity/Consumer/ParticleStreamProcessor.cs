@@ -11,6 +11,7 @@ using Dolittle.Applications;
 using Dolittle.Collections;
 using Dolittle.Concepts;
 using Dolittle.DependencyInversion;
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Events.Processing;
@@ -28,6 +29,7 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly IScopedEventProcessingHub _processingHub;
         readonly ILogger _logger;
         readonly EventHorizonKey _eventHorizonKey;
+        readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
         /// Instantiates an instance of ParticleStreamConsumer
@@ -37,27 +39,38 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="getGeodesics"><see cref="FactoryFor{IGeodesics}" /> factory function that returns a correctly scoped <see cref="IGeodesics" /></param>
         /// <param name="key">The <see cref="EventHorizonKey" /> to identify the Event Horizon</param>
         /// <param name="processingHub"><see cref="IScopedEventProcessingHub" /> for processing events from the <see cref="CommittedEventStream" /></param>
+        /// <param name="executionContextManager"></param>
         /// <param name="logger"><see cref="ILogger" /> for logging</param>
-        public ParticleStreamProcessor(FactoryFor<IEventStore> getEventStore, FactoryFor<IGeodesics> getGeodesics, EventHorizonKey key, IScopedEventProcessingHub processingHub, ILogger logger)
+        public ParticleStreamProcessor(
+            FactoryFor<IEventStore> getEventStore,
+            FactoryFor<IGeodesics> getGeodesics, 
+            EventHorizonKey key, 
+            IScopedEventProcessingHub processingHub, 
+            IExecutionContextManager executionContextManager, 
+            ILogger logger)
         {
             _getEventStore = getEventStore;
             _getGeodesics = getGeodesics;
             _processingHub = processingHub;
-            _logger = logger;
             _eventHorizonKey = key;
+            _executionContextManager = executionContextManager;
+            _logger = logger;
         }
 
         /// <summary>
         /// Processes
         /// </summary>
-        /// <param name="particleStream"></param>
+        /// <param name="committedEventStreamWithContext"></param>
         /// <returns></returns>
-        public Task<CommitSequenceNumber> Process(CommittedEventStreamWithContext particleStream)
+        public Task<CommitSequenceNumber> Process(CommittedEventStreamWithContext committedEventStreamWithContext)
         {
             try
             {
-                var context = particleStream.Context;
+                var context = committedEventStreamWithContext.Context;
+                var particleStream = committedEventStreamWithContext.EventStream;
                 EventSourceVersion version = null;
+                
+                _executionContextManager.CurrentFor(context);
                 using(var _ = _getEventStore())
                 {
                     version = _.GetNextVersionFor(particleStream.Source.EventSource);

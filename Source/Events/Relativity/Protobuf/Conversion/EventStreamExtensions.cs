@@ -107,14 +107,17 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 
             return protobuf;
         }      
-
-        public static Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext ToCommitedEventStreamWithContext(this Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStreamWithContext protobuf)
+        /// <summary>
+        /// Convert from <see cref="Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStreamWithContext"/> to <see cref="Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext"/>
+        /// </summary>
+        /// <param name="protobuf"></param>
+        /// <returns></returns>
+        public static Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext ToCommittedEventStreamWithContext(this Dolittle.Runtime.Events.Relativity.Protobuf.CommittedEventStreamWithContext protobuf)
         {
-            var application = protobuf.Context.Application.ToConcept<Dolittle.Applications.Application>();
-            var boundedContext = protobuf.Context.BoundedContext.ToConcept<Dolittle.Applications.BoundedContext>();
-            var claims = protobuf.Context.Claims.ToClaims();
-            var correlationId = protobuf.Context.CorrelationId.ToGuid();
-            protobuf
+            var context = protobuf.Context.ToExecutionContext();
+            var committedEventStream = protobuf.Commit.ToCommittedEventStream();
+
+            return new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream, context);
         }
     }
 }
