@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Relativity
             do
             {
                 newCommits = new List<CommittedEventStream>();
-                var lastCommitSequenceNumber = commits.OrderByDescending(_ => _.Sequence).First().Sequence;
+                var lastCommitSequenceNumber = commits.OrderByDescending(_ => _.Sequence).First().Sequence; // This could potentially become an endless loop of fetching new commits if N is big enough
 
                 using(var eventStore = _getEventStore())
                 {
