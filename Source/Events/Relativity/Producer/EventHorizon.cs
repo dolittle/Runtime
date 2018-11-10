@@ -33,11 +33,12 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             lock(_singularities)
             {
-                _logger.Information($"Passing committed events through {_singularities.Count} singularities");
+                _logger.Information($"Committed eventstream entering event horizon with {_singularities.Count} singularities");
                 _singularities
                     .Where(_ => _.CanPassThrough(committedEventStream)).AsParallel()
                     .ForEach(_ =>
                     {
+                        _logger.Information($"Passing committed eventstream through singularity identified with bounded context '{_.BoundedContext}' in application '{_.Application}'");
                         _.PassThrough(committedEventStream);
                     });
             }
