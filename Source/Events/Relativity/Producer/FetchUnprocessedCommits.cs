@@ -7,7 +7,7 @@ using Dolittle.Runtime.Events.Store;
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Implemenation of <see cref="IFetchUnprocessedEvents" />
+    /// Implementation of <see cref="IFetchUnprocessedEvents" />
     /// </summary>
     public class FetchUnprocessedCommits : IFetchUnprocessedCommits
     {
