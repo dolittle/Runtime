@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         {
             try
             {
-                var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _fetchUnprocessedCommits, _logger);
+                var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _fetchUnprocessedCommits, context.CancellationToken, _logger);
                 var application = request.Application.ToConcept<Application>();
                 var boundedContext = request.BoundedContext.ToConcept<BoundedContext>();
                 var events = request
@@ -80,5 +80,6 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
             await Task.CompletedTask;
         }
+
     }
 }

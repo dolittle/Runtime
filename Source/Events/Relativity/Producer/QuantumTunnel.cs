@@ -32,6 +32,7 @@ namespace Dolittle.Runtime.Events.Relativity
 
         readonly AutoResetEvent _waitHandle;
         readonly IFetchUnprocessedCommits _unprocessedCommitFetcher;
+        readonly CancellationToken _cancelationToken;
 
         /// <summary>
         /// Initializes a new instance of <see cref="IQuantumTunnel"/>
@@ -40,21 +41,24 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="responseStream">The committed event stream to pass through</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to get current context from</param>
         /// <param name="unprocessedCommitFetcher">An <see cref="IFetchUnprocessedCommits" /> to fetch unprocessed commits</param>
+        /// <param name="cancellationToken"></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel(
             ISerializer serializer,
             IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> responseStream,
             IExecutionContextManager executionContextManager,
             IFetchUnprocessedCommits unprocessedCommitFetcher,
+            CancellationToken cancellationToken,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
             _executionContextManager = executionContextManager;
             _outbox = new ConcurrentQueue<Protobuf.CommittedEventStreamWithContext>();
-            _logger = logger;
             _waitHandle = new AutoResetEvent(false);
             _unprocessedCommitFetcher = unprocessedCommitFetcher;
+            _cancelationToken = cancellationToken;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -83,6 +87,7 @@ namespace Dolittle.Runtime.Events.Relativity
             {
                 for (;;)
                 {
+                    if (_cancelationToken.IsCancellationRequested) break;
                     try
                     {
                         _waitHandle.WaitOne(1000);
