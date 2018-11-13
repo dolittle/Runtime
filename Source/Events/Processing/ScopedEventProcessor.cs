@@ -93,8 +93,15 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="envelope">The <see cref="CommittedEventEnvelope" />to process</param>
         public virtual void Process(CommittedEventEnvelope envelope)
         {
-            if(CanProcess(envelope.Version))
-                ProcessEvent(envelope);
+            lock(lockObject)
+            {
+                Console.WriteLine($"Event Processor: {_processor.Identifier.Value} Checking if can process: {envelope.Version.Major}.{envelope.Version.Minor}.{envelope.Version.Revision} - {envelope.Metadata.Artifact.Id} : {CanProcess(envelope.Version)}");
+                if(CanProcess(envelope.Version))
+                {
+                    Console.WriteLine($"Event Processor: {_processor.Identifier.Value} Processing: {envelope.Version.Major}.{envelope.Version.Minor}.{envelope.Version.Revision} - {envelope.Metadata.Artifact.Id}");
+                    ProcessEvent(envelope);
+                } 
+            }  
         }
 
         void ProcessEvent(CommittedEventEnvelope envelope)
