@@ -60,13 +60,14 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                     .Events
                     .Select(@event => @event.ToArtifact())
                     .ToArray();
+                var tenantOffsets = request.Offsets.ToTenantOffsets();
 
                 var subscription = new EventParticleSubscription(events);
 
                 _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
 
                 var singularity = new Singularity(application, boundedContext, tunnel, subscription);
-                _eventHorizon.GravitateTowards(singularity);
+                _eventHorizon.GravitateTowards(singularity, tenantOffsets);
                 tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
 
                 await tunnel.Open(request.Offsets.ToTenantOffsets());

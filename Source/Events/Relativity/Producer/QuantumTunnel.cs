@@ -120,22 +120,6 @@ namespace Dolittle.Runtime.Events.Relativity
             Collapsed(this);
         }
 
-        void FetchAndQueueCommits(IEnumerable<TenantOffset> tenantOffsets)
-        {
-            var commits = GetCommits(tenantOffsets);
-            AddToQueue(commits);
-        }
-
-        IEnumerable<Commits> GetCommits(IEnumerable<TenantOffset> tenantOffsets)
-        {
-            List<Commits> commits = new List<Commits>();
-            Parallel.ForEach(tenantOffsets, (_) => {
-                _executionContextManager.CurrentFor(_.Tenant);
-                commits.Add(_unprocessedCommitFetcher.GetUnprocessedCommits(_.Offset));
-            });
-            return commits;
-        }
-
         void AddToQueue(IEnumerable<Commits> commits)
         {
             commits.ForEach(_ => AddToQueue(_));

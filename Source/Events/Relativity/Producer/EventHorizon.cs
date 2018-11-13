@@ -2,11 +2,14 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dolittle.Collections;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -23,7 +26,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Initializes a new instance of <see cref="EventHorizon"/>
         /// </summary>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
-        public EventHorizon(ILogger logger)
+        public EventHorizon(IExectionContextManagerILogger logger)
         {
             _logger = logger;
         }
@@ -55,12 +58,13 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public void GravitateTowards(ISingularity singularity)
+        public void GravitateTowards(ISingularity singularity, IEnumerable<TenantOffset> tenantOffsets)
         {
             lock(_singularities)
             {
                 _logger.Information($"Gravitate events in the event horizon towards singularity identified with bounded context '{singularity.BoundedContext}' in application '{singularity.Application}'");
                 _singularities.Add(singularity);
+
             }
         }
 
@@ -72,5 +76,29 @@ namespace Dolittle.Runtime.Events.Relativity
                 lock(_singularities) return _singularities;
             }
         }
+
+
+        void FetchAndQueueCommits(IEnumerable<TenantOffset> tenantOffsets)
+        {
+            var commits = GetCommits(tenantOffsets);
+            PassThroughSingularity(commits);
+        }
+
+
+        IEnumerable<Commits> GetCommits(IEnumerable<TenantOffset> tenantOffsets)
+        {
+            List<Commits> commits = new List<Commits>();
+            Parallel.ForEach(tenantOffsets, (_) => {
+                _executionContextManager.CurrentFor(_.Tenant);
+                commits.Add(_unprocessedCommitFetcher.GetUnprocessedCommits(_.Offset));
+            });
+            return commits;
+        }
+
+        void PassThroughSingularity(IEnumerable<Commits> commits)
+        {
+            throw new NotImplementedException();
+        }
+        
     }
 }
