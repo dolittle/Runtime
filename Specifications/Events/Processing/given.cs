@@ -10,6 +10,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing
     using Dolittle.Runtime.Tenancy;
     using Dolittle.DependencyInversion;
     using Moq;
+    using System.Collections.Concurrent;
 
     public class given
     {
@@ -32,8 +33,10 @@ namespace Dolittle.Runtime.Events.Specs.Processing
         }       
         public static Mock<IEventProcessorOffsetRepository> an_event_processor_offset_repository_mock()
         {
+            var inMemory = new InMemoryEventProcessorOffsetRepository();
             var mock = new Mock<IEventProcessorOffsetRepository>();
-            mock.Setup(_ => _.Get(Moq.It.IsAny<EventProcessorId>())).Returns(CommittedEventVersion.None);
+            mock.Setup(_ => _.Get(Moq.It.IsAny<EventProcessorId>())).Returns<EventProcessorId>((id) => inMemory.Get(id));
+            mock.Setup(_ => _.Set(Moq.It.IsAny<EventProcessorId>(), Moq.It.IsAny<CommittedEventVersion>())).Callback<EventProcessorId,CommittedEventVersion>((id,vsn) => inMemory.Set(id,vsn));
             return mock;
         }
 
@@ -69,6 +72,26 @@ namespace Dolittle.Runtime.Events.Specs.Processing
                 version = commit.LastEventVersion;
             }
             return commits;
+        }
+
+        public class InMemoryEventProcessorOffsetRepository : IEventProcessorOffsetRepository
+        {
+            ConcurrentDictionary<EventProcessorId,CommittedEventVersion> _offsets = new ConcurrentDictionary<EventProcessorId,CommittedEventVersion>();
+
+            public void Dispose()
+            {
+                
+            }
+
+            public CommittedEventVersion Get(EventProcessorId eventProcessorId)
+            {
+                return _offsets.GetValueOrDefault(eventProcessorId) ?? CommittedEventVersion.None;
+            }
+
+            public void Set(EventProcessorId eventProcessorId, CommittedEventVersion committedEventVersion)
+            {
+               _offsets.AddOrUpdate(eventProcessorId, committedEventVersion, (id, vsn) => committedEventVersion);
+            }
         }
     }
 }

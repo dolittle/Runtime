@@ -121,7 +121,11 @@ namespace Dolittle.Runtime.Events.Processing
             var key = new ScopedEventProcessorKey(executionContext.Tenant,envelope.Metadata.Artifact);
             if (_scopedProcessors.TryGetValue(key, out processors))
             {
-                Parallel.ForEach(processors.Values, _ => _.Process(envelope));
+                if(processors.Values.Any())
+                {
+                    processors.Values.ForEach(_ => _.Process(envelope));
+                }
+                //Parallel.ForEach(processors.Values, _ => _.Process(envelope));
             }
             if (processors.Count == 0)
                 _logger.Warning($"No Processor registered for {key}");
