@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -8,13 +10,15 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon
     {
         static Mock<ISingularity>   first_singularity;
         static Mock<ISingularity>   second_singularity;
+        static IEnumerable<TenantOffset> tenant_offsets;
 
         Establish context = () =>
         {
             first_singularity = new Mock<ISingularity>();
             second_singularity = new Mock<ISingularity>();
-            event_horizon.GravitateTowards(first_singularity.Object);
-            event_horizon.GravitateTowards(second_singularity.Object);
+            tenant_offsets = new TenantOffset[]{};
+            event_horizon.GravitateTowards(first_singularity.Object, tenant_offsets);
+            event_horizon.GravitateTowards(second_singularity.Object, tenant_offsets);
         };
 
 

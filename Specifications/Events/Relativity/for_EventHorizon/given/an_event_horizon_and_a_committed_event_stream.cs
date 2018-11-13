@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
                 })
             );
 
-            event_horizon = new EventHorizon(logger.Object);
+            event_horizon = new EventHorizon(execution_context_manager.Object, unproccessed_commits_fetcher.Object, logger.Object);
         };
     }
 }
