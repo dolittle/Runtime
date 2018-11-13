@@ -26,12 +26,10 @@ namespace Dolittle.Runtime.Events.Relativity
     {
         readonly ISerializer _serializer;
         readonly IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> _responseStream;
-        readonly IExecutionContextManager _executionContextManager;
         readonly ConcurrentQueue<Protobuf.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
-        readonly IFetchUnprocessedCommits _unprocessedCommitFetcher;
         readonly CancellationToken _cancelationToken;
 
         /// <summary>
@@ -39,24 +37,18 @@ namespace Dolittle.Runtime.Events.Relativity
         /// </summary>
         /// <param name="serializer"><see cref="ISerializer"/> to use</param>
         /// <param name="responseStream">The committed event stream to pass through</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to get current context from</param>
-        /// <param name="unprocessedCommitFetcher">An <see cref="IFetchUnprocessedCommits" /> to fetch unprocessed commits</param>
         /// <param name="cancellationToken"></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel(
             ISerializer serializer,
             IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> responseStream,
-            IExecutionContextManager executionContextManager,
-            IFetchUnprocessedCommits unprocessedCommitFetcher,
             CancellationToken cancellationToken,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
-            _executionContextManager = executionContextManager;
             _outbox = new ConcurrentQueue<Protobuf.CommittedEventStreamWithContext>();
             _waitHandle = new AutoResetEvent(false);
-            _unprocessedCommitFetcher = unprocessedCommitFetcher;
             _cancelationToken = cancellationToken;
             _logger = logger;
         }
@@ -82,7 +74,6 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public async Task Open(IEnumerable<TenantOffset> tenantOffsets)
         {
-            FetchAndQueueCommits(tenantOffsets);
             await Task.Run(async() =>
             {
                 for (;;)
