@@ -71,16 +71,16 @@ namespace Dolittle.Runtime.Events.Processing
         {
             using(var repository = _getOffsetRepository())
             {
-                LastVersionProcessed = _getOffsetRepository().Get(ProcessorId);
+                LastVersionProcessed = repository.Get(ProcessorId);
             }
-
-            SingleEventTypeEventStream eventStream = _getUnprocessedEventsFetcher().GetUnprocessedEvents(Key.Event.Id,LastVersionProcessed) ?? new SingleEventTypeEventStream(null);
+            var unprocessedEventsFetcher = _getUnprocessedEventsFetcher();
+            SingleEventTypeEventStream eventStream = unprocessedEventsFetcher.GetUnprocessedEvents(Key.Event.Id,LastVersionProcessed) ?? new SingleEventTypeEventStream(null);
             do
             {
                 if(!eventStream.IsEmpty)
                 {
                     eventStream.ForEach(e => ProcessEvent(e));
-                    eventStream = _getUnprocessedEventsFetcher().GetUnprocessedEvents(Key.Event.Id,LastVersionProcessed);
+                    eventStream = unprocessedEventsFetcher.GetUnprocessedEvents(Key.Event.Id,LastVersionProcessed);
                 }
             }
             while(!eventStream.IsEmpty);

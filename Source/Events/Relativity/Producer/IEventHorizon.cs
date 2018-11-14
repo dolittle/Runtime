@@ -23,7 +23,8 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Gravitate towards <see cref="ISingularity"/>
         /// </summary>
         /// <param name="singularity"><see cref="ISingularity"/> that will get gravitated towards</param>
-        void GravitateTowards(ISingularity singularity);
+        /// <param name="tenantOffsets">The offsets of processed commits from another bounded context</param>
+        void GravitateTowards(ISingularity singularity, IEnumerable<TenantOffset> tenantOffsets);
 
         /// <summary>
         /// When a singularity collapses, this method is called to let the <see cref="IEventHorizon"/> know
@@ -34,6 +35,6 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Get the collection of <see cref="ISingularity">singularities</see> in the system
         /// </summary>
-        IEnumerable<ISingularity>  Singularities { get; }
+        IEnumerable<ISingularity> Singularities { get; }
     }
 }

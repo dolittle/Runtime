@@ -48,10 +48,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly ITenantOffsetRepository _tenantOffsetRepository;
         Thread _runThread = null;
 
-        ParticleStreamProcessor _processor;
+        readonly ParticleStreamProcessor _processor;
         
-
-
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelConnection"/>
         /// </summary>
@@ -95,7 +93,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             _runCancellationTokenSource = new CancellationTokenSource();
             _runCancellationToken = _runCancellationTokenSource.Token;
             _executionContextManager = executionContextManager;
-            _processor = new ParticleStreamProcessor(getEventStore,getGeodesics,_horizonKey,eventProcessingHub,logger);
+            _processor = new ParticleStreamProcessor(getEventStore, getGeodesics, _destinationKey, eventProcessingHub, _executionContextManager, logger);
             _tenantOffsetRepository = tenantOffsetRepository;
             _tenants = tenants;
 
@@ -175,18 +173,18 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         {
             var tunnel = new OpenTunnel
             {
-                Application = _horizonKey.Application.ToProtobuf(),
-                BoundedContext = _horizonKey.BoundedContext.ToProtobuf(),
+                Application = _destinationKey.Application.ToProtobuf(),
+                BoundedContext = _destinationKey.BoundedContext.ToProtobuf(),
                 ClientId = Guid.NewGuid().ToProtobuf()
             };
-            tunnel.Offsets.AddRange(_tenantOffsetRepository.Get(_tenants.All, _horizonKey).Select(_ => _.ToProtobuf()));
+            tunnel.Offsets.AddRange(_tenantOffsetRepository.Get(_tenants.All, _destinationKey).Select(_ => _.ToProtobuf()));
             tunnel.Events.AddRange(_events.Select(_ => _.ToProtobuf()));
             return _client.Open(tunnel);
         }
 
         async Task OpenAndHandleStream()
         {
-            _logger.Information($"Opening tunnel towards application '{_horizonKey.Application}' and bounded context '{_horizonKey.BoundedContext}'");
+            _logger.Information($"Opening tunnel towards application '{_destinationKey.Application}' and bounded context '{_destinationKey.BoundedContext}'");
 
             var stream = GetOpenTunnel();
             try
@@ -195,7 +193,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
                 {
                     _logger.Information("Commit received");
 
-                    var seq = await _processor.Process(stream.ResponseStream.Current.Commit.ToCommittedEventStream());
+                    var seq = await _processor.Process(stream.ResponseStream.Current.ToCommittedEventStreamWithContext());
                     _logger.Information($"Committed {seq}");
                 }
             }

@@ -23,8 +23,6 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly IEventHorizon _eventHorizon;
         readonly ISerializer _serializer;
         readonly ILogger _logger;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly IFetchUnprocessedCommits _fetchUnprocessedCommits;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QuantumTunnelServiceImplementation"/>
@@ -43,9 +41,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         {
             _eventHorizon = eventHorizon;
             _serializer = serializer;
-            _executionContextManager = executionContextManager;
             _logger = logger;
-            _fetchUnprocessedCommits = fetchUnprocessedCommits;
         }
 
         /// <inheritdoc/>
@@ -53,20 +49,21 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         {
             try
             {
-                var tunnel = new QuantumTunnel(_serializer, responseStream, _executionContextManager, _fetchUnprocessedCommits, _logger);
+                var tunnel = new QuantumTunnel(_serializer, responseStream, context.CancellationToken, _logger);
                 var application = request.Application.ToConcept<Application>();
                 var boundedContext = request.BoundedContext.ToConcept<BoundedContext>();
                 var events = request
                     .Events
                     .Select(@event => @event.ToArtifact())
                     .ToArray();
+                var tenantOffsets = request.Offsets.ToTenantOffsets();
 
                 var subscription = new EventParticleSubscription(events);
 
                 _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
 
                 var singularity = new Singularity(application, boundedContext, tunnel, subscription);
-                _eventHorizon.GravitateTowards(singularity);
+                _eventHorizon.GravitateTowards(singularity, tenantOffsets);
                 tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
 
                 await tunnel.Open(request.Offsets.ToTenantOffsets());
@@ -80,5 +77,6 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
 
             await Task.CompletedTask;
         }
+
     }
 }
