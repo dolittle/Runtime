@@ -1,12 +1,16 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Dolittle. All rights reserved.
+ *  Licensed under the MIT License. See LICENSE in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+using System;
+using Dolittle.Concepts;
+using Dolittle.Runtime.Events;
+using Dolittle.Events;
+using Dolittle.Artifacts;
+using Dolittle.Execution;
+using Dolittle.Time;
 namespace Dolittle.Runtime.Events
 {
-    using System;
-    using Dolittle.Concepts;
-    using Dolittle.Runtime.Events;
-    using Dolittle.Events;
-    using Dolittle.Artifacts;
-    using Dolittle.Execution;
-
     /// <summary>
     /// Represents the metadata associated with a particular <see cref="IEvent" /> instance>
     /// Exhibits value equality semantics
@@ -65,5 +69,19 @@ namespace Dolittle.Runtime.Events
         /// </summary>
         /// <value></value>
         public DateTimeOffset Occurred { get; }
+
+        /// <inheritdoc/>
+        public override bool Equals(EventMetadata other) 
+        {
+            return 
+                    Id.Equals(other.Id) 
+                &&  Artifact.Equals(other.Artifact)
+                &&  CorrelationId.Equals(other.CorrelationId)
+                &&  EventSourceId.Equals(other.EventSourceId)
+                &&  Occurred.LossyEquals(other.Occurred)
+                &&  OriginalContext.Equals(other.OriginalContext)
+                &&  VersionedEventSource.Equals(other.VersionedEventSource);
+        }
+
     }
 }
