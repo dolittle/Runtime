@@ -12,6 +12,11 @@ namespace Dolittle.Applications.Configuration
     public interface IBoundedContextLoader
     {
         /// <summary>
+        /// Gets whether or not the configuration has been loaded and the <see cref="Application"/> and <see cref="BoundedContext"/> has been bound on the <see cref="Dolittle.DependencyInversion.IContainer"/>
+        /// </summary>
+        /// <value></value>
+        bool ConfigurationIsLoaded {get;}
+        /// <summary>
         /// Loads the <see cref="BoundedContextConfiguration"/> from disk
         /// </summary>
         BoundedContextConfiguration Load();

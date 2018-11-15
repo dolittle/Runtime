@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly IEventHorizonsConfigurationManager _configuration;
         readonly IBarrier _barrier;
         readonly IResourceConfiguration _resourceConfiguration;
+        readonly IBoundedContextLoader _boundedContextLoader;
 
         /// <summary>
         /// Initializes a new instance of <see cref="BootProcedure"/>
@@ -27,18 +28,21 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="configuration"><see cref="IEventHorizonsConfigurationManager">Configuration mananger</see></param>
         /// <param name="barrier"><see cref="IBarrier">Barrier</see> to penetrate towards an <see cref="IEventHorizon"/></param>
         /// <param name="resourceConfiguration"></param>
+        /// <param name="boundedContextLoader"></param>
         public BootProcedure(
             IEventHorizonsConfigurationManager configuration,
             IBarrier barrier,
-            IResourceConfiguration resourceConfiguration)
+            IResourceConfiguration resourceConfiguration,
+            IBoundedContextLoader boundedContextLoader)
         {
             _configuration = configuration;
             _barrier = barrier;
             _resourceConfiguration = resourceConfiguration;
+            _boundedContextLoader = boundedContextLoader;
         }
 
         /// <inheritdoc/>
-        public bool CanPerform() => _resourceConfiguration.IsConfigured || _canPerformCount-- == 0;
+        public bool CanPerform() => (_resourceConfiguration.IsConfigured && _boundedContextLoader.ConfigurationIsLoaded) || _canPerformCount-- == 0;
 
         /// <inheritdoc/>
         public void Perform()
