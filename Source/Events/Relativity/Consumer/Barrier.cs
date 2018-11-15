@@ -34,7 +34,6 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
         readonly ITenantOffsetRepository _tenantOffsetRepository;
-        readonly IBoundedContextLoader _boundedContextLoader;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Barrier"/>
@@ -57,7 +56,7 @@ namespace Dolittle.Runtime.Events.Relativity
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             ITenantOffsetRepository tenantOffsetRepository,
-            IBoundedContextLoader boundedContextLoader)
+            IBoundedContextLoader boundedContextLoader )
         {
             _logger = logger;
             _getGeodesics = getGeodesics;
@@ -67,10 +66,8 @@ namespace Dolittle.Runtime.Events.Relativity
             _executionContextManager = executionContextManager;
             _tenants = tenants;
             _tenantOffsetRepository = tenantOffsetRepository;
-            _boundedContextLoader = boundedContextLoader;
 
-            var boundedContextConfig = _boundedContextLoader.Load();
-            
+            var boundedContextConfig = boundedContextLoader.Load();
             _key = new EventHorizonKey(boundedContextConfig.Application, boundedContextConfig.BoundedContext);
         }
 

@@ -30,6 +30,8 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<ITenants> tenants;
         static Mock<IScopedEventProcessingHub> processing_hub;
         static Mock<ITypeFinder> type_finder;
+        static Mock<Applications.Configuration.IBoundedContextLoader> bounded_context_loader;
+        readonly static Execution.Environment environment = Execution.Environment.Undetermined;
         static ResourceConfiguration resource_configuration;
         static Exception exception;
         static int number_of_scoped_processors;
@@ -44,7 +46,13 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             unprocessed_events_fetcher = new Mock<IFetchUnprocessedEvents>();
             offset_repository = new Mock<IEventProcessorOffsetRepository>();
             type_finder = new Mock<ITypeFinder>();
-
+            bounded_context_loader = new Mock<Dolittle.Applications.Configuration.IBoundedContextLoader>();
+            bounded_context_loader.Setup(_ => _.Load())
+                .Returns(new Dolittle.Applications.Configuration.BoundedContextConfiguration()
+                {
+                    Application = Dolittle.Applications.Application.NotSet,
+                    BoundedContext = Dolittle.Applications.BoundedContext.NotSet
+                });
             resource_configuration = new ResourceConfiguration(type_finder.Object);
             resource_configuration.ConfigureResourceTypes(new Dictionary<ResourceType, ResourceTypeImplementation>{});
             
@@ -60,6 +68,8 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
                                                 () => unprocessed_events_fetcher.Object,
                                                 execution_context_manager.Object,
                                                 resource_configuration,
+                                                bounded_context_loader.Object,
+                                                environment,
                                                 mocks.a_logger().Object);
         };
 
