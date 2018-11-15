@@ -15,6 +15,7 @@ using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Lifecycle;
+using Dolittle.Applications.Configuration;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -45,8 +46,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> to set the correct context for processing events</param>
         /// <param name="tenants"><see cref="ITenants"/> all the tenants that we will process events for</param>
         /// <param name="tenantOffsetRepository"></param>
-        /// <param name="application"></param>
-        /// <param name="boundedContext"></param>
+        /// <param name="boundedContextLoader"></param>
         public Barrier(
             FactoryFor<IGeodesics> getGeodesics,
             ISerializer serializer,
@@ -56,8 +56,7 @@ namespace Dolittle.Runtime.Events.Relativity
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             ITenantOffsetRepository tenantOffsetRepository,
-            Application application,
-            BoundedContext boundedContext)
+            IBoundedContextLoader boundedContextLoader )
         {
             _logger = logger;
             _getGeodesics = getGeodesics;
@@ -68,7 +67,8 @@ namespace Dolittle.Runtime.Events.Relativity
             _tenants = tenants;
             _tenantOffsetRepository = tenantOffsetRepository;
 
-            _key = new EventHorizonKey(application, boundedContext);
+            var boundedContextConfig = boundedContextLoader.Load();
+            _key = new EventHorizonKey(boundedContextConfig.Application, boundedContextConfig.BoundedContext);
         }
 
         /// <inheritdoc/>
