@@ -28,5 +28,5 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
             hub.Register(simple_scoped_processor_for_other_tenant);
             hub.Register(another_scoped_processor_for_other_tenant);
         }; 
-    }    
+    }
 }
