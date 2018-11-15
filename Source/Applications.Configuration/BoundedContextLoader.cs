@@ -17,7 +17,6 @@ namespace Dolittle.Applications.Configuration
     {
         readonly ISerializer _serializer;
         readonly ILogger _logger;
-
         readonly ISerializationOptions _serializationOptions = SerializationOptions.Custom(callback:
             serializer =>
             {
@@ -56,7 +55,7 @@ namespace Dolittle.Applications.Configuration
             var json = File.ReadAllText(path);
             var configuration = _serializer.FromJson<BoundedContextConfiguration>(json, _serializationOptions);
             _instance = configuration;
-            return configuration;
+            return _instance;
         }
 
         string GetPath(string relativePath)
