@@ -15,7 +15,6 @@ using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Lifecycle;
-using Dolittle.Applications.Configuration;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -34,7 +33,6 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
         readonly ITenantOffsetRepository _tenantOffsetRepository;
-        readonly IBoundedContextLoader _boundedContextLoader;
 
         /// <summary>
         /// Initializes a new instance of <see cref="Barrier"/>
@@ -47,7 +45,8 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> to set the correct context for processing events</param>
         /// <param name="tenants"><see cref="ITenants"/> all the tenants that we will process events for</param>
         /// <param name="tenantOffsetRepository"></param>
-        /// <param name="boundedContextLoader"></param>
+        /// <param name="application"></param>
+        /// <param name="boundedContext"></param>
         public Barrier(
             FactoryFor<IGeodesics> getGeodesics,
             ISerializer serializer,
@@ -57,7 +56,8 @@ namespace Dolittle.Runtime.Events.Relativity
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             ITenantOffsetRepository tenantOffsetRepository,
-            IBoundedContextLoader boundedContextLoader)
+            Application application,
+            BoundedContext boundedContext)
         {
             _logger = logger;
             _getGeodesics = getGeodesics;
@@ -67,11 +67,8 @@ namespace Dolittle.Runtime.Events.Relativity
             _executionContextManager = executionContextManager;
             _tenants = tenants;
             _tenantOffsetRepository = tenantOffsetRepository;
-            _boundedContextLoader = boundedContextLoader;
 
-            var boundedContextConfig = _boundedContextLoader.Load();
-            
-            _key = new EventHorizonKey(boundedContextConfig.Application, boundedContextConfig.BoundedContext);
+            _key = new EventHorizonKey(application, boundedContext);
         }
 
         /// <inheritdoc/>
