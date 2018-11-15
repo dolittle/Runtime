@@ -16,9 +16,9 @@ namespace Dolittle.Applications.Configuration
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
-        IBoundedContextLoader _boundedContextLoader;
-        IExecutionContextManager _executionContextManager;
-        IResourceConfiguration _resourceConfiguration;
+        readonly IBoundedContextLoader _boundedContextLoader;
+        readonly IExecutionContextManager _executionContextManager;
+        readonly IResourceConfiguration _resourceConfiguration;
         /// <summary>
         /// Instantiates an instance of <see cref="BootProcedure"/>
         /// </summary>
@@ -40,9 +40,12 @@ namespace Dolittle.Applications.Configuration
         {
             var boundedContextConfig = _boundedContextLoader.Load();
             var environment = _executionContextManager.Current.Environment;
+            
+            ApplicationBindings.Application = boundedContextConfig.Application;
+            ApplicationBindings.BoundedContext = boundedContextConfig.BoundedContext;
+            ApplicationBindings.Environment = environment;
 
-            _executionContextManager.SetConstants(boundedContextConfig.Application, boundedContextConfig.BoundedContext, environment);
-            _resourceConfiguration.ConfigureResourceTypes(boundedContextConfig.Resources.ToDictionary(kvp => kvp.Key, kvp => environment == "Production"? kvp.Value.Production : kvp.Value.Development));
+            _resourceConfiguration.ConfigureResourceTypes(boundedContextConfig.Resources.ToDictionary(kvp => kvp.Key, kvp => environment == Environment.Production? kvp.Value.Production : kvp.Value.Development));
         }
     }
 }
