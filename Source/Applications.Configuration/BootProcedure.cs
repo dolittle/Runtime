@@ -43,7 +43,6 @@ namespace Dolittle.Applications.Configuration
             
             ApplicationBindings.Application = boundedContextConfig.Application;
             ApplicationBindings.BoundedContext = boundedContextConfig.BoundedContext;
-            ApplicationBindings.Environment = environment;
 
             _resourceConfiguration.ConfigureResourceTypes(boundedContextConfig.Resources.ToDictionary(kvp => kvp.Key, kvp => environment == Environment.Production? kvp.Value.Production : kvp.Value.Development));
         }

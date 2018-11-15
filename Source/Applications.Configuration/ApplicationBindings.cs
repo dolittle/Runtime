@@ -11,14 +11,12 @@ namespace Dolittle.Applications.Configuration
     {
         internal static Application Application = Application.NotSet;
         internal static BoundedContext BoundedContext = BoundedContext.NotSet;
-        internal static Environment Environment = Environment.Undetermined;
 
         /// <inheritdoc/>
         public void Provide(IBindingProviderBuilder builder)
         {
             builder.Bind<Application>().To( () => Application);
             builder.Bind<BoundedContext>().To( () => BoundedContext);
-            builder.Bind<Environment>().To( () => Environment);
         }
     }
 }
