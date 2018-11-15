@@ -29,20 +29,27 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="barrier"><see cref="IBarrier">Barrier</see> to penetrate towards an <see cref="IEventHorizon"/></param>
         /// <param name="resourceConfiguration"></param>
         /// <param name="boundedContextLoader"></param>
+        /// <param name="executionContextManager"></param>
+        /// <param name="environment">The running environment</param>
         public BootProcedure(
             IEventHorizonsConfigurationManager configuration,
             IBarrier barrier,
             IResourceConfiguration resourceConfiguration,
-            IBoundedContextLoader boundedContextLoader)
+            IBoundedContextLoader boundedContextLoader,
+            IExecutionContextManager executionContextManager,
+            Environment environment)
         {
             _configuration = configuration;
             _barrier = barrier;
             _resourceConfiguration = resourceConfiguration;
             _boundedContextLoader = boundedContextLoader;
+
+            var boundedContextConfig = boundedContextLoader.Load();
+            executionContextManager.SetConstants(boundedContextConfig.Application, boundedContextConfig.BoundedContext, environment);
         }
 
         /// <inheritdoc/>
-        public bool CanPerform() => (_resourceConfiguration.IsConfigured && _boundedContextLoader.ConfigurationIsLoaded) || _canPerformCount-- == 0;
+        public bool CanPerform() => _resourceConfiguration.IsConfigured || _canPerformCount-- == 0;
 
         /// <inheritdoc/>
         public void Perform()
