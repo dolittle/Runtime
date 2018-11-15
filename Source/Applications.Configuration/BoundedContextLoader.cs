@@ -15,7 +15,6 @@ namespace Dolittle.Applications.Configuration
     [Singleton]
     public class BoundedContextLoader : IBoundedContextLoader
     {
-        internal static bool IsLoaded = false;
         readonly ISerializer _serializer;
         readonly ILogger _logger;
         readonly ISerializationOptions _serializationOptions = SerializationOptions.Custom(callback:
@@ -37,9 +36,6 @@ namespace Dolittle.Applications.Configuration
             _serializer = serializer;
             _logger = logger;
         }
-
-        /// <inheritdoc/>
-        public bool ConfigurationIsLoaded => IsLoaded;
 
         /// <inheritdoc/>
         public BoundedContextConfiguration Load()
