@@ -5,7 +5,6 @@
 
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Tenancy;

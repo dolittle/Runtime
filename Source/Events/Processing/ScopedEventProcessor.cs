@@ -3,7 +3,6 @@ namespace Dolittle.Runtime.Events.Processing
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using Dolittle.Artifacts;
     using Dolittle.Bootstrapping;
     using Dolittle.Collections;
