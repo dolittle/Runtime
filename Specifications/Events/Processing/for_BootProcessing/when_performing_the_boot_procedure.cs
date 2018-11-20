@@ -19,6 +19,8 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
     using Dolittle.Runtime.Events.Specs.Processing;
     using Dolittle.Execution;
     using Dolittle.Security;
+    using Dolittle.Resources.Configuration;
+    using Dolittle.Resources;
 
     [Subject(typeof(BootProcedure), nameof(BootProcedure.Perform))]
     public class when_performing_the_boot_procedure
@@ -27,6 +29,10 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<IInstancesOf<IKnowAboutEventProcessors>> I_know_about_event_processors;
         static Mock<ITenants> tenants;
         static Mock<IScopedEventProcessingHub> processing_hub;
+        static Mock<ITypeFinder> type_finder;
+        static Mock<Applications.Configuration.IBoundedContextLoader> bounded_context_loader;
+        readonly static Execution.Environment environment = Execution.Environment.Undetermined;
+        static ResourceConfiguration resource_configuration;
         static Exception exception;
         static int number_of_scoped_processors;
         static int number_of_processors_per_tenant;
@@ -39,6 +45,17 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             execution_context_manager = new Mock<IExecutionContextManager>();
             unprocessed_events_fetcher = new Mock<IFetchUnprocessedEvents>();
             offset_repository = new Mock<IEventProcessorOffsetRepository>();
+            type_finder = new Mock<ITypeFinder>();
+            bounded_context_loader = new Mock<Dolittle.Applications.Configuration.IBoundedContextLoader>();
+            bounded_context_loader.Setup(_ => _.Load())
+                .Returns(new Dolittle.Applications.Configuration.BoundedContextConfiguration()
+                {
+                    Application = Dolittle.Applications.Application.NotSet,
+                    BoundedContext = Dolittle.Applications.BoundedContext.NotSet
+                });
+            resource_configuration = new ResourceConfiguration(type_finder.Object);
+            resource_configuration.ConfigureResourceTypes(new Dictionary<ResourceType, ResourceTypeImplementation>{});
+            
 
             I_know_about_event_processors = get_instances_of_I_know_about_event_processors();
             I_know_about_event_processors.Object.ForEach(_ => number_of_processors_per_tenant += _.Count()); 
@@ -50,6 +67,9 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
                                                 () => offset_repository.Object,
                                                 () => unprocessed_events_fetcher.Object,
                                                 execution_context_manager.Object,
+                                                resource_configuration,
+                                                bounded_context_loader.Object,
+                                                environment,
                                                 mocks.a_logger().Object);
         };
 

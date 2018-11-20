@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_PropertyBag
                 {"uint64", (UInt64)42L},
                 {"float", 42f},
                 {"double", 42d},
+                {"decimal", 42d},
                 {"bool", true},
                 {"dateTime", DateTimeOffset.FromUnixTimeMilliseconds(1540715532995).UtcDateTime},
                 {"dateTimeOffset", DateTimeOffset.FromUnixTimeMilliseconds(1540715541241) },

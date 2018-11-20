@@ -38,6 +38,8 @@
             yield return new AnotherEvent { Content = "Second" };
             yield return new SimpleEvent { Content = "Third" };
             yield return new AnotherEvent { Content = "Fourth" };
+            yield return new AnotherEvent { Content = "Fifth" };
+            yield return new AnotherEvent { Content = "Six" };
         }
 
         static EventStream BuildEventStreamFrom(VersionedEventSource version, DateTimeOffset committed, CorrelationId correlationId, IEnumerable<IEvent> events)

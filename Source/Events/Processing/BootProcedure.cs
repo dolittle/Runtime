@@ -20,22 +20,26 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.DependencyInversion;
     using Dolittle.Execution;
     using Dolittle.Security;
+    using Dolittle.Resources.Configuration;
+    using Dolittle.Applications.Configuration;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
-        IInstancesOf<IKnowAboutEventProcessors> _systemsThatKnowAboutEventProcessors;
-        ITenants _tenants;
 
         int _canPerformCount = 10;
 
-        IScopedEventProcessingHub _processingHub;
-        ILogger _logger;
-        private readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
-        private readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
-        private readonly IExecutionContextManager _executionContextManager;
+        readonly IInstancesOf<IKnowAboutEventProcessors> _systemsThatKnowAboutEventProcessors;
+        readonly ITenants _tenants;
+        readonly IScopedEventProcessingHub _processingHub;
+        readonly ILogger _logger;
+        readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
+        readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        readonly IExecutionContextManager _executionContextManager;
+        readonly IResourceConfiguration _resourceConfiguration;
+
 
         /// <summary>
         /// Instantiates a new instance of <see cref="BootProcedure" />
@@ -46,14 +50,21 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
         /// <param name="executionContextManager">The <see cref="ExecutionContextManager" /> for setting the correct execution context for the Event Processors </param>
+        /// <param name="resourceConfiguration"></param>
+        /// <param name="boundedContextLoader"></param>
+        /// <param name="environment"></param>
         /// <param name="logger">An instance of <see cref="ILogger" /> for logging</param>
-        public BootProcedure(IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
-                                ITenants tenants, 
-                                IScopedEventProcessingHub processingHub, 
-                                FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository, 
-                                FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
-                                IExecutionContextManager executionContextManager,                                
-                                ILogger logger)
+        public BootProcedure(
+            IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
+            ITenants tenants, 
+            IScopedEventProcessingHub processingHub, 
+            FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository, 
+            FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
+            IExecutionContextManager executionContextManager,
+            IResourceConfiguration resourceConfiguration,
+            IBoundedContextLoader boundedContextLoader,
+            Execution.Environment environment,                          
+            ILogger logger)
         {
             _processingHub = processingHub;
             _logger = logger;
@@ -62,14 +73,19 @@ namespace Dolittle.Runtime.Events.Processing
             _getOffsetRepository = getOffsetRepository;
             _getUnprocessedEventsFetcher = getUnprocessedEventsFetcher;
             _executionContextManager = executionContextManager;
+            _resourceConfiguration = resourceConfiguration;
             _logger = logger;
+
+            var boundedContextConfig = boundedContextLoader.Load();
+            _executionContextManager.SetConstants(boundedContextConfig.Application, boundedContextConfig.BoundedContext, environment);
+
         }
 
         /// <inheritdoc />
         public bool CanPerform()
         {
             var hasAny = _systemsThatKnowAboutEventProcessors.SelectMany(_ => _.ToList()).Any();
-            if( hasAny || _canPerformCount-- == 0 ) return true;
+            if( (hasAny && _resourceConfiguration.IsConfigured) || _canPerformCount-- == 0 ) return true;
             return false;
         }
 

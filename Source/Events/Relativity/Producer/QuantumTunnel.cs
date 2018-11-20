@@ -26,35 +26,31 @@ namespace Dolittle.Runtime.Events.Relativity
     {
         readonly ISerializer _serializer;
         readonly IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> _responseStream;
-        readonly IExecutionContextManager _executionContextManager;
         readonly ConcurrentQueue<Protobuf.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
-        private readonly IFetchUnprocessedCommits _unprocessedCommitFetcher;
+        readonly CancellationToken _cancelationToken;
 
         /// <summary>
         /// Initializes a new instance of <see cref="IQuantumTunnel"/>
         /// </summary>
         /// <param name="serializer"><see cref="ISerializer"/> to use</param>
         /// <param name="responseStream">The committed event stream to pass through</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to get current context from</param>
-        /// <param name="unprocessedCommitFetcher">An <see cref="IFetchUnprocessedCommits" /> to fetch unprocessed commits</param>
+        /// <param name="cancellationToken"></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel(
             ISerializer serializer,
             IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> responseStream,
-            IExecutionContextManager executionContextManager,
-            IFetchUnprocessedCommits unprocessedCommitFetcher,
+            CancellationToken cancellationToken,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
-            _executionContextManager = executionContextManager;
             _outbox = new ConcurrentQueue<Protobuf.CommittedEventStreamWithContext>();
-            _logger = logger;
             _waitHandle = new AutoResetEvent(false);
-            _unprocessedCommitFetcher = unprocessedCommitFetcher;
+            _cancelationToken = cancellationToken;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -78,11 +74,11 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public async Task Open(IEnumerable<TenantOffset> tenantOffsets)
         {
-            FetchAndQueueCommits(tenantOffsets);
             await Task.Run(async() =>
             {
                 for (;;)
                 {
+                    if (_cancelationToken.IsCancellationRequested) break;
                     try
                     {
                         _waitHandle.WaitOne(1000);
@@ -115,21 +111,6 @@ namespace Dolittle.Runtime.Events.Relativity
             Collapsed(this);
         }
 
-        void FetchAndQueueCommits(IEnumerable<TenantOffset> tenantOffsets)
-        {
-            var commits = GetCommits(tenantOffsets);
-            AddToQueue(commits);
-        }
-
-        IEnumerable<Commits> GetCommits(IEnumerable<TenantOffset> tenantOffsets)
-        {
-            List<Commits> commits = new List<Commits>();
-            Parallel.ForEach(tenantOffsets,(_) => {
-                commits.Add(_unprocessedCommitFetcher.GetUnprocessedCommits(_.Offset));
-            });
-            return commits;
-        }
-
         void AddToQueue(IEnumerable<Commits> commits)
         {
             commits.ForEach(_ => AddToQueue(_));
@@ -143,7 +124,7 @@ namespace Dolittle.Runtime.Events.Relativity
         void AddToQueue(Store.CommittedEventStream committedEventStream)
         {
             var originalContext = committedEventStream.Events.First().Metadata.OriginalContext;
-            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream,originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToProtobuf());
+            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream, originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToProtobuf());
         }
     }
 }
