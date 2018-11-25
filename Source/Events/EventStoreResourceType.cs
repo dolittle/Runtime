@@ -5,7 +5,7 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Resources;
+using Dolittle.ResourceTypes;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity;
 using Dolittle.Runtime.Events.Store;

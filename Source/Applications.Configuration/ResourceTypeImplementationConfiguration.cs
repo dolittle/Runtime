@@ -1,5 +1,5 @@
 
-using Dolittle.Resources;
+using Dolittle.ResourceTypes;
 
 namespace Dolittle.Applications.Configuration
 {
