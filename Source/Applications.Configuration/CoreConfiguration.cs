@@ -10,9 +10,10 @@ namespace Dolittle.Applications.Configuration
     public class CoreConfiguration
     {
         /// <summary>
-        /// The core programming language used in the
+        /// The core programming language used
         /// </summary>
         public string Language {get; set;}
+        
         /// <summary>
         /// The entrypoint of the <see cref="BoundedContext"/>
         /// </summary>
