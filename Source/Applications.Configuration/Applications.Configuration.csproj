@@ -10,9 +10,10 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Bootstrapping" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Configuration" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Execution" Version="2.0.0-*" />
-    <PackageReference Include="Dolittle.Resources.Configuration" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Serialization.Json" Version="2.0.0-*" />
 
   </ItemGroup>
