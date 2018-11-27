@@ -5,15 +5,13 @@
 
 syntax = "proto3";
 
-import "dolittle/interaction/events.relativity/event_metadata.proto";
-import "dolittle/interaction/events.relativity/property_bag.proto";
+import "system/value.proto";
 
 package dolittle.events.relativity;
 
 option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
 
-// Represents an event
-message EventEnvelope {
-    EventMetadata metadata = 1;
-    PropertyBag event = 2;
+// Represents the artifact
+message PropertyBag {
+    map<string, Value> propertyBag = 1;
 }

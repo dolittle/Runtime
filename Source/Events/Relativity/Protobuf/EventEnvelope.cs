@@ -24,19 +24,17 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
           string.Concat(
             "Cjtkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9ldmVu",
             "dF9lbnZlbG9wZS5wcm90bxIaZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHka",
-            "EXN5c3RlbS9ndWlkLnByb3RvGhNzeXN0ZW0vb2JqZWN0LnByb3RvGjtkb2xp",
-            "dHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9ldmVudF9tZXRh",
-            "ZGF0YS5wcm90byLjAQoNRXZlbnRFbnZlbG9wZRI7CghtZXRhZGF0YRgBIAEo",
-            "CzIpLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkV2ZW50TWV0YWRhdGES",
-            "QwoFZXZlbnQYAiADKAsyNC5kb2xpdHRsZS5ldmVudHMucmVsYXRpdml0eS5F",
-            "dmVudEVudmVsb3BlLkV2ZW50RW50cnkaUAoKRXZlbnRFbnRyeRILCgNrZXkY",
-            "ASABKAkSMQoFdmFsdWUYAiABKAsyIi5kb2xpdHRsZS5ldmVudHMucmVsYXRp",
-            "dml0eS5PYmplY3Q6AjgBQi6qAitEb2xpdHRsZS5SdW50aW1lLkV2ZW50cy5S",
-            "ZWxhdGl2aXR5LlByb3RvYnVmYgZwcm90bzM="));
+            "O2RvbGl0dGxlL2ludGVyYWN0aW9uL2V2ZW50cy5yZWxhdGl2aXR5L2V2ZW50",
+            "X21ldGFkYXRhLnByb3RvGjlkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMu",
+            "cmVsYXRpdml0eS9wcm9wZXJ0eV9iYWcucHJvdG8ihAEKDUV2ZW50RW52ZWxv",
+            "cGUSOwoIbWV0YWRhdGEYASABKAsyKS5kb2xpdHRsZS5ldmVudHMucmVsYXRp",
+            "dml0eS5FdmVudE1ldGFkYXRhEjYKBWV2ZW50GAIgASgLMicuZG9saXR0bGUu",
+            "ZXZlbnRzLnJlbGF0aXZpdHkuUHJvcGVydHlCYWdCLqoCK0RvbGl0dGxlLlJ1",
+            "bnRpbWUuRXZlbnRzLlJlbGF0aXZpdHkuUHJvdG9idWZiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::System.Protobuf.ObjectReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadataReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Dolittle.Runtime.Events.Relativity.Protobuf.EventMetadataReflection.Descriptor, global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBagReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope.Parser, new[]{ "Metadata", "Event" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope), global::Dolittle.Runtime.Events.Relativity.Protobuf.EventEnvelope.Parser, new[]{ "Metadata", "Event" }, null, null, null)
           }));
     }
     #endregion
@@ -71,7 +69,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public EventEnvelope(EventEnvelope other) : this() {
       Metadata = other.metadata_ != null ? other.Metadata.Clone() : null;
-      event_ = other.event_.Clone();
+      Event = other.event_ != null ? other.Event.Clone() : null;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -92,12 +90,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     /// <summary>Field number for the "event" field.</summary>
     public const int EventFieldNumber = 2;
-    private static readonly pbc::MapField<string, global::System.Protobuf.Object>.Codec _map_event_codec
-        = new pbc::MapField<string, global::System.Protobuf.Object>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::System.Protobuf.Object.Parser), 18);
-    private readonly pbc::MapField<string, global::System.Protobuf.Object> event_ = new pbc::MapField<string, global::System.Protobuf.Object>();
+    private global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag event_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<string, global::System.Protobuf.Object> Event {
+    public global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag Event {
       get { return event_; }
+      set {
+        event_ = value;
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -114,7 +113,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         return true;
       }
       if (!object.Equals(Metadata, other.Metadata)) return false;
-      if (!Event.Equals(other.Event)) return false;
+      if (!object.Equals(Event, other.Event)) return false;
       return true;
     }
 
@@ -122,7 +121,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
     public override int GetHashCode() {
       int hash = 1;
       if (metadata_ != null) hash ^= Metadata.GetHashCode();
-      hash ^= Event.GetHashCode();
+      if (event_ != null) hash ^= Event.GetHashCode();
       return hash;
     }
 
@@ -137,7 +136,10 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         output.WriteRawTag(10);
         output.WriteMessage(Metadata);
       }
-      event_.WriteTo(output, _map_event_codec);
+      if (event_ != null) {
+        output.WriteRawTag(18);
+        output.WriteMessage(Event);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -146,7 +148,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (metadata_ != null) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Metadata);
       }
-      size += event_.CalculateSize(_map_event_codec);
+      if (event_ != null) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Event);
+      }
       return size;
     }
 
@@ -161,7 +165,12 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
         }
         Metadata.MergeFrom(other.Metadata);
       }
-      event_.Add(other.event_);
+      if (other.event_ != null) {
+        if (event_ == null) {
+          event_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag();
+        }
+        Event.MergeFrom(other.Event);
+      }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -180,7 +189,10 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             break;
           }
           case 18: {
-            event_.AddEntriesFrom(input, _map_event_codec);
+            if (event_ == null) {
+              event_ = new global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag();
+            }
+            input.ReadMessage(event_);
             break;
           }
         }
