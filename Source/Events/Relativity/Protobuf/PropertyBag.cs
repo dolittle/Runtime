@@ -24,16 +24,16 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
           string.Concat(
             "Cjlkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9wcm9w",
             "ZXJ0eV9iYWcucHJvdG8SGmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5GhJz",
-            "eXN0ZW0vdmFsdWUucHJvdG8iswEKC1Byb3BlcnR5QmFnEk0KC3Byb3BlcnR5",
-            "QmFnGAEgAygLMjguZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuUHJvcGVy",
-            "dHlCYWcuUHJvcGVydHlCYWdFbnRyeRpVChBQcm9wZXJ0eUJhZ0VudHJ5EgsK",
-            "A2tleRgBIAEoCRIwCgV2YWx1ZRgCIAEoCzIhLmRvbGl0dGxlLmV2ZW50cy5y",
-            "ZWxhdGl2aXR5LlZhbHVlOgI4AUIuqgIrRG9saXR0bGUuUnVudGltZS5FdmVu",
-            "dHMuUmVsYXRpdml0eS5Qcm90b2J1ZmIGcHJvdG8z"));
+            "eXN0ZW0vdmFsdWUucHJvdG8ipAEKC1Byb3BlcnR5QmFnEkMKBnZhbHVlcxgB",
+            "IAMoCzIzLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LlByb3BlcnR5QmFn",
+            "LlZhbHVlc0VudHJ5GlAKC1ZhbHVlc0VudHJ5EgsKA2tleRgBIAEoCRIwCgV2",
+            "YWx1ZRgCIAEoCzIhLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LlZhbHVl",
+            "OgI4AUIuqgIrRG9saXR0bGUuUnVudGltZS5FdmVudHMuUmVsYXRpdml0eS5Q",
+            "cm90b2J1ZmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.ValueReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag), global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag.Parser, new[]{ "PropertyBag_" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag), global::Dolittle.Runtime.Events.Relativity.Protobuf.PropertyBag.Parser, new[]{ "Values" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
           }));
     }
     #endregion
@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public PropertyBag(PropertyBag other) : this() {
-      propertyBag_ = other.propertyBag_.Clone();
+      values_ = other.values_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -75,14 +75,14 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       return new PropertyBag(this);
     }
 
-    /// <summary>Field number for the "propertyBag" field.</summary>
-    public const int PropertyBag_FieldNumber = 1;
-    private static readonly pbc::MapField<string, global::System.Protobuf.Value>.Codec _map_propertyBag_codec
+    /// <summary>Field number for the "values" field.</summary>
+    public const int ValuesFieldNumber = 1;
+    private static readonly pbc::MapField<string, global::System.Protobuf.Value>.Codec _map_values_codec
         = new pbc::MapField<string, global::System.Protobuf.Value>.Codec(pb::FieldCodec.ForString(10), pb::FieldCodec.ForMessage(18, global::System.Protobuf.Value.Parser), 10);
-    private readonly pbc::MapField<string, global::System.Protobuf.Value> propertyBag_ = new pbc::MapField<string, global::System.Protobuf.Value>();
+    private readonly pbc::MapField<string, global::System.Protobuf.Value> values_ = new pbc::MapField<string, global::System.Protobuf.Value>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::MapField<string, global::System.Protobuf.Value> PropertyBag_ {
-      get { return propertyBag_; }
+    public pbc::MapField<string, global::System.Protobuf.Value> Values {
+      get { return values_; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -98,14 +98,14 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!PropertyBag_.Equals(other.PropertyBag_)) return false;
+      if (!Values.Equals(other.Values)) return false;
       return true;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      hash ^= PropertyBag_.GetHashCode();
+      hash ^= Values.GetHashCode();
       return hash;
     }
 
@@ -116,13 +116,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      propertyBag_.WriteTo(output, _map_propertyBag_codec);
+      values_.WriteTo(output, _map_values_codec);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      size += propertyBag_.CalculateSize(_map_propertyBag_codec);
+      size += values_.CalculateSize(_map_values_codec);
       return size;
     }
 
@@ -131,7 +131,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
       if (other == null) {
         return;
       }
-      propertyBag_.Add(other.propertyBag_);
+      values_.Add(other.values_);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -143,7 +143,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf {
             input.SkipLastField();
             break;
           case 10: {
-            propertyBag_.AddEntriesFrom(input, _map_propertyBag_codec);
+            values_.AddEntriesFrom(input, _map_values_codec);
             break;
           }
         }

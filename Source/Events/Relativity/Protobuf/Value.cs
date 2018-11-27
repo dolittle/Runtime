@@ -23,23 +23,24 @@ namespace System.Protobuf {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChJzeXN0ZW0vdmFsdWUucHJvdG8SGmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2",
-            "aXR5GhNzeXN0ZW0vb2JqZWN0LnByb3RvIskBCgVWYWx1ZRI5CgtieXRlc192",
-            "YWx1ZRgBIAEoCzIiLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5Lk9iamVj",
-            "dEgAEjwKCmxpc3RfdmFsdWUYAiABKAsyJi5kb2xpdHRsZS5ldmVudHMucmVs",
-            "YXRpdml0eS5BcnJheVZhbHVlSAASPwoMb2JqZWN0X3ZhbHVlGAMgASgLMicu",
-            "ZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuT2JqZWN0VmFsdWVIAEIGCgRr",
-            "aW5kIj8KCkFycmF5VmFsdWUSMQoGdmFsdWVzGAEgAygLMiEuZG9saXR0bGUu",
-            "ZXZlbnRzLnJlbGF0aXZpdHkuVmFsdWUipAEKC09iamVjdFZhbHVlEkMKBm9i",
-            "amVjdBgBIAMoCzIzLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5Lk9iamVj",
-            "dFZhbHVlLk9iamVjdEVudHJ5GlAKC09iamVjdEVudHJ5EgsKA2tleRgBIAEo",
-            "CRIwCgV2YWx1ZRgCIAEoCzIhLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5",
-            "LlZhbHVlOgI4AUISqgIPU3lzdGVtLlByb3RvYnVmYgZwcm90bzM="));
+            "aXR5GhNzeXN0ZW0vb2JqZWN0LnByb3RvItIBCgVWYWx1ZRI6CgxvYmplY3Rf",
+            "dmFsdWUYASABKAsyIi5kb2xpdHRsZS5ldmVudHMucmVsYXRpdml0eS5PYmpl",
+            "Y3RIABI8CgpsaXN0X3ZhbHVlGAIgASgLMiYuZG9saXR0bGUuZXZlbnRzLnJl",
+            "bGF0aXZpdHkuQXJyYXlWYWx1ZUgAEkcKEGRpY3Rpb25hcnlfdmFsdWUYAyAB",
+            "KAsyKy5kb2xpdHRsZS5ldmVudHMucmVsYXRpdml0eS5EaWN0aW9uYXJ5VmFs",
+            "dWVIAEIGCgRraW5kIj8KCkFycmF5VmFsdWUSMQoGdmFsdWVzGAEgAygLMiEu",
+            "ZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuVmFsdWUirAEKD0RpY3Rpb25h",
+            "cnlWYWx1ZRJHCgZvYmplY3QYASADKAsyNy5kb2xpdHRsZS5ldmVudHMucmVs",
+            "YXRpdml0eS5EaWN0aW9uYXJ5VmFsdWUuT2JqZWN0RW50cnkaUAoLT2JqZWN0",
+            "RW50cnkSCwoDa2V5GAEgASgJEjAKBXZhbHVlGAIgASgLMiEuZG9saXR0bGUu",
+            "ZXZlbnRzLnJlbGF0aXZpdHkuVmFsdWU6AjgBQhKqAg9TeXN0ZW0uUHJvdG9i",
+            "dWZiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.ObjectReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::System.Protobuf.Value), global::System.Protobuf.Value.Parser, new[]{ "BytesValue", "ListValue", "ObjectValue" }, new[]{ "Kind" }, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::System.Protobuf.Value), global::System.Protobuf.Value.Parser, new[]{ "ObjectValue", "ListValue", "DictionaryValue" }, new[]{ "Kind" }, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::System.Protobuf.ArrayValue), global::System.Protobuf.ArrayValue.Parser, new[]{ "Values" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::System.Protobuf.ObjectValue), global::System.Protobuf.ObjectValue.Parser, new[]{ "Object" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
+            new pbr::GeneratedClrTypeInfo(typeof(global::System.Protobuf.DictionaryValue), global::System.Protobuf.DictionaryValue.Parser, new[]{ "Object" }, null, null, new pbr::GeneratedClrTypeInfo[] { null, })
           }));
     }
     #endregion
@@ -71,14 +72,14 @@ namespace System.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public Value(Value other) : this() {
       switch (other.KindCase) {
-        case KindOneofCase.BytesValue:
-          BytesValue = other.BytesValue.Clone();
+        case KindOneofCase.ObjectValue:
+          ObjectValue = other.ObjectValue.Clone();
           break;
         case KindOneofCase.ListValue:
           ListValue = other.ListValue.Clone();
           break;
-        case KindOneofCase.ObjectValue:
-          ObjectValue = other.ObjectValue.Clone();
+        case KindOneofCase.DictionaryValue:
+          DictionaryValue = other.DictionaryValue.Clone();
           break;
       }
 
@@ -89,14 +90,14 @@ namespace System.Protobuf {
       return new Value(this);
     }
 
-    /// <summary>Field number for the "bytes_value" field.</summary>
-    public const int BytesValueFieldNumber = 1;
+    /// <summary>Field number for the "object_value" field.</summary>
+    public const int ObjectValueFieldNumber = 1;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::System.Protobuf.Object BytesValue {
-      get { return kindCase_ == KindOneofCase.BytesValue ? (global::System.Protobuf.Object) kind_ : null; }
+    public global::System.Protobuf.Object ObjectValue {
+      get { return kindCase_ == KindOneofCase.ObjectValue ? (global::System.Protobuf.Object) kind_ : null; }
       set {
         kind_ = value;
-        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.BytesValue;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.ObjectValue;
       }
     }
 
@@ -111,14 +112,14 @@ namespace System.Protobuf {
       }
     }
 
-    /// <summary>Field number for the "object_value" field.</summary>
-    public const int ObjectValueFieldNumber = 3;
+    /// <summary>Field number for the "dictionary_value" field.</summary>
+    public const int DictionaryValueFieldNumber = 3;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::System.Protobuf.ObjectValue ObjectValue {
-      get { return kindCase_ == KindOneofCase.ObjectValue ? (global::System.Protobuf.ObjectValue) kind_ : null; }
+    public global::System.Protobuf.DictionaryValue DictionaryValue {
+      get { return kindCase_ == KindOneofCase.DictionaryValue ? (global::System.Protobuf.DictionaryValue) kind_ : null; }
       set {
         kind_ = value;
-        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.ObjectValue;
+        kindCase_ = value == null ? KindOneofCase.None : KindOneofCase.DictionaryValue;
       }
     }
 
@@ -126,9 +127,9 @@ namespace System.Protobuf {
     /// <summary>Enum of possible cases for the "kind" oneof.</summary>
     public enum KindOneofCase {
       None = 0,
-      BytesValue = 1,
+      ObjectValue = 1,
       ListValue = 2,
-      ObjectValue = 3,
+      DictionaryValue = 3,
     }
     private KindOneofCase kindCase_ = KindOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -155,9 +156,9 @@ namespace System.Protobuf {
       if (ReferenceEquals(other, this)) {
         return true;
       }
-      if (!object.Equals(BytesValue, other.BytesValue)) return false;
-      if (!object.Equals(ListValue, other.ListValue)) return false;
       if (!object.Equals(ObjectValue, other.ObjectValue)) return false;
+      if (!object.Equals(ListValue, other.ListValue)) return false;
+      if (!object.Equals(DictionaryValue, other.DictionaryValue)) return false;
       if (KindCase != other.KindCase) return false;
       return true;
     }
@@ -165,9 +166,9 @@ namespace System.Protobuf {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override int GetHashCode() {
       int hash = 1;
-      if (kindCase_ == KindOneofCase.BytesValue) hash ^= BytesValue.GetHashCode();
-      if (kindCase_ == KindOneofCase.ListValue) hash ^= ListValue.GetHashCode();
       if (kindCase_ == KindOneofCase.ObjectValue) hash ^= ObjectValue.GetHashCode();
+      if (kindCase_ == KindOneofCase.ListValue) hash ^= ListValue.GetHashCode();
+      if (kindCase_ == KindOneofCase.DictionaryValue) hash ^= DictionaryValue.GetHashCode();
       hash ^= (int) kindCase_;
       return hash;
     }
@@ -179,31 +180,31 @@ namespace System.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void WriteTo(pb::CodedOutputStream output) {
-      if (kindCase_ == KindOneofCase.BytesValue) {
+      if (kindCase_ == KindOneofCase.ObjectValue) {
         output.WriteRawTag(10);
-        output.WriteMessage(BytesValue);
+        output.WriteMessage(ObjectValue);
       }
       if (kindCase_ == KindOneofCase.ListValue) {
         output.WriteRawTag(18);
         output.WriteMessage(ListValue);
       }
-      if (kindCase_ == KindOneofCase.ObjectValue) {
+      if (kindCase_ == KindOneofCase.DictionaryValue) {
         output.WriteRawTag(26);
-        output.WriteMessage(ObjectValue);
+        output.WriteMessage(DictionaryValue);
       }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public int CalculateSize() {
       int size = 0;
-      if (kindCase_ == KindOneofCase.BytesValue) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(BytesValue);
+      if (kindCase_ == KindOneofCase.ObjectValue) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ObjectValue);
       }
       if (kindCase_ == KindOneofCase.ListValue) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(ListValue);
       }
-      if (kindCase_ == KindOneofCase.ObjectValue) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ObjectValue);
+      if (kindCase_ == KindOneofCase.DictionaryValue) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(DictionaryValue);
       }
       return size;
     }
@@ -214,11 +215,11 @@ namespace System.Protobuf {
         return;
       }
       switch (other.KindCase) {
-        case KindOneofCase.BytesValue:
-          if (BytesValue == null) {
-            BytesValue = new global::System.Protobuf.Object();
+        case KindOneofCase.ObjectValue:
+          if (ObjectValue == null) {
+            ObjectValue = new global::System.Protobuf.Object();
           }
-          BytesValue.MergeFrom(other.BytesValue);
+          ObjectValue.MergeFrom(other.ObjectValue);
           break;
         case KindOneofCase.ListValue:
           if (ListValue == null) {
@@ -226,11 +227,11 @@ namespace System.Protobuf {
           }
           ListValue.MergeFrom(other.ListValue);
           break;
-        case KindOneofCase.ObjectValue:
-          if (ObjectValue == null) {
-            ObjectValue = new global::System.Protobuf.ObjectValue();
+        case KindOneofCase.DictionaryValue:
+          if (DictionaryValue == null) {
+            DictionaryValue = new global::System.Protobuf.DictionaryValue();
           }
-          ObjectValue.MergeFrom(other.ObjectValue);
+          DictionaryValue.MergeFrom(other.DictionaryValue);
           break;
       }
 
@@ -246,11 +247,11 @@ namespace System.Protobuf {
             break;
           case 10: {
             global::System.Protobuf.Object subBuilder = new global::System.Protobuf.Object();
-            if (kindCase_ == KindOneofCase.BytesValue) {
-              subBuilder.MergeFrom(BytesValue);
+            if (kindCase_ == KindOneofCase.ObjectValue) {
+              subBuilder.MergeFrom(ObjectValue);
             }
             input.ReadMessage(subBuilder);
-            BytesValue = subBuilder;
+            ObjectValue = subBuilder;
             break;
           }
           case 18: {
@@ -263,12 +264,12 @@ namespace System.Protobuf {
             break;
           }
           case 26: {
-            global::System.Protobuf.ObjectValue subBuilder = new global::System.Protobuf.ObjectValue();
-            if (kindCase_ == KindOneofCase.ObjectValue) {
-              subBuilder.MergeFrom(ObjectValue);
+            global::System.Protobuf.DictionaryValue subBuilder = new global::System.Protobuf.DictionaryValue();
+            if (kindCase_ == KindOneofCase.DictionaryValue) {
+              subBuilder.MergeFrom(DictionaryValue);
             }
             input.ReadMessage(subBuilder);
-            ObjectValue = subBuilder;
+            DictionaryValue = subBuilder;
             break;
           }
         }
@@ -389,10 +390,10 @@ namespace System.Protobuf {
 
   }
 
-  public sealed partial class ObjectValue : pb::IMessage<ObjectValue> {
-    private static readonly pb::MessageParser<ObjectValue> _parser = new pb::MessageParser<ObjectValue>(() => new ObjectValue());
+  public sealed partial class DictionaryValue : pb::IMessage<DictionaryValue> {
+    private static readonly pb::MessageParser<DictionaryValue> _parser = new pb::MessageParser<DictionaryValue>(() => new DictionaryValue());
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<ObjectValue> Parser { get { return _parser; } }
+    public static pb::MessageParser<DictionaryValue> Parser { get { return _parser; } }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
@@ -405,20 +406,20 @@ namespace System.Protobuf {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ObjectValue() {
+    public DictionaryValue() {
       OnConstruction();
     }
 
     partial void OnConstruction();
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ObjectValue(ObjectValue other) : this() {
+    public DictionaryValue(DictionaryValue other) : this() {
       object_ = other.object_.Clone();
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public ObjectValue Clone() {
-      return new ObjectValue(this);
+    public DictionaryValue Clone() {
+      return new DictionaryValue(this);
     }
 
     /// <summary>Field number for the "object" field.</summary>
@@ -433,11 +434,11 @@ namespace System.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
-      return Equals(other as ObjectValue);
+      return Equals(other as DictionaryValue);
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(ObjectValue other) {
+    public bool Equals(DictionaryValue other) {
       if (ReferenceEquals(other, null)) {
         return false;
       }
@@ -473,7 +474,7 @@ namespace System.Protobuf {
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(ObjectValue other) {
+    public void MergeFrom(DictionaryValue other) {
       if (other == null) {
         return;
       }

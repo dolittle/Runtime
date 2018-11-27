@@ -16,9 +16,9 @@ option csharp_namespace = "System.Protobuf";
 message Value {
   // The kind of value.
   oneof kind {
-    Object bytes_value = 1;
+    Object object_value = 1;
     ArrayValue list_value = 2;
-    ObjectValue object_value = 3;
+    DictionaryValue dictionary_value = 3;
   }
 }
 
@@ -26,6 +26,6 @@ message ArrayValue {
   // Repeated field of dynamically typed values.
   repeated Value values = 1;
 }
-message ObjectValue {
+message DictionaryValue {
     map<string, Value> object = 1;
 }
