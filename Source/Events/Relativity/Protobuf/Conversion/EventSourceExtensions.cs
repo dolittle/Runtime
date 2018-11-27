@@ -44,8 +44,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         {
             return new Dolittle.Runtime.Events.VersionedEventSource(
                 protobuf.Version.ToEventSourceVersion(),
-                protobuf.EventSource.ToConcept<EventSourceId>(),
-                protobuf.Artifact.ToConcept<ArtifactId>());
+                new EventSourceKey(protobuf.EventSource.ToConcept<EventSourceId>(),protobuf.Artifact.ToConcept<ArtifactId>()));
         }
 
         /// <summary>

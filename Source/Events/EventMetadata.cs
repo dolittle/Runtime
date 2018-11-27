@@ -87,7 +87,7 @@ namespace Dolittle.Runtime.Events
         /// Gets the <see cref="EventSourceKey" /> from this EventMetadata
         /// </summary>
         /// <returns>the <see cref="EventSourceKey" /></returns>
-        public EventSourceKey EventSourceKey => new EventSourceKey(EventSourceId,Artifact.Id);
+        public EventSourceKey EventSourceKey => VersionedEventSource.Key;
 
     }
 }

@@ -5,11 +5,13 @@
 using System;
 using Dolittle.Artifacts;
 using Dolittle.Concepts;
+using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
     /// Represents the key for an event source (the <see cref="EventSourceId">id </see> and <see cref="ArtifactId">artifact</see>)
+    /// NB:  An <see cref="EventSourceId" /> for an <see cref="IEventSource" /> is not unique.  Multiples event sources can share the same Id, given they are different artifact types (aggregates).
     /// </summary>
     public class EventSourceKey : Value<EventSourceKey>
     {
