@@ -83,5 +83,11 @@ namespace Dolittle.Runtime.Events
                 &&  VersionedEventSource.Equals(other.VersionedEventSource);
         }
 
+        /// <summary>
+        /// Gets the <see cref="EventSourceKey" /> from this EventMetadata
+        /// </summary>
+        /// <returns>the <see cref="EventSourceKey" /></returns>
+        public EventSourceKey EventSourceKey => VersionedEventSource.Key;
+
     }
 }

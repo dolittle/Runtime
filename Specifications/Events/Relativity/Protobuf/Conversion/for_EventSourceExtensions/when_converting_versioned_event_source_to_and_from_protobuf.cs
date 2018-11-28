@@ -15,8 +15,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_EventSource
 
         Establish context = () => original = new Dolittle.Runtime.Events.VersionedEventSource(
             new Dolittle.Runtime.Events.EventSourceVersion(42,43),
-            EventSourceId.New(),
-            ArtifactId.New()
+            new EventSourceKey(EventSourceId.New(),ArtifactId.New())
         );
 
         Because of = () => 

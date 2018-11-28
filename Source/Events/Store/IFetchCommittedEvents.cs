@@ -12,16 +12,16 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Fetches all <see cref="CommittedEventStream" />s for an <see cref="IEventSource" />
         /// </summary>
-        /// <param name="eventSourceId">The Id of the <see cref="IEventSource" /></param>
+        /// <param name="eventSourceKey">The Key of the <see cref="IEventSource" /></param>
         /// <returns>All <see cref="CommittedEventStream" />s for the <see cref="IEventSource" /> in ascending order</returns>
-        Commits Fetch(EventSourceId eventSourceId);
+        Commits Fetch(EventSourceKey eventSourceKey);
         /// <summary>
         /// Fetches all <see cref="CommittedEventStream" />s for an <see cref="IEventSource" /> from the specified version
         /// </summary>
-        /// <param name="eventSourceId">The Id of the <see cref="IEventSource" /></param>
+        /// <param name="eventSourceKey">The Key for the <see cref="IEventSource" /></param>
         /// <param name="commitVersion">The <see cref="CommitVersion" /> to fetch events from</param>
         /// <returns>All <see cref="CommittedEventStream" />s for the <see cref="IEventSource" /> from the specified <see cref="CommitVersion" /> in ascending order</returns>
-        Commits FetchFrom(EventSourceId eventSourceId, CommitVersion commitVersion);
+        Commits FetchFrom(EventSourceKey eventSourceKey, CommitVersion commitVersion);
         /// <summary>
         /// Fetches all <see cref="CommittedEventStream" />s for all <see cref="IEventSource" />s greater than the specified <see cref="CommitSequenceNumber" />
         /// </summary>

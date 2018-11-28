@@ -25,7 +25,7 @@
                 version = new CommittedEventVersion(1,1,0);
             }
 
-            var versionedEventSource = new VersionedEventSource(new EventSourceVersion(version.Minor,version.Revision),event_source_id,Artifacts.artifact_for_event_source.Id);
+            var versionedEventSource = new VersionedEventSource(new EventSourceVersion(version.Minor,version.Revision),new EventSourceKey(event_source_id,Artifacts.artifact_for_event_source.Id));
             var now = DateTimeOffset.UtcNow;
             var correlationId = CorrelationId.New();
             var eventStream = BuildEventStreamFrom(versionedEventSource,now,correlationId,BuildEvents());
@@ -48,7 +48,7 @@
             VersionedEventSource vsn = null;
             events.ForEach(e => 
             {
-                vsn = vsn == null ? version : new VersionedEventSource(vsn.Version.NextSequence(),vsn.EventSource,vsn.Artifact);
+                vsn = vsn == null ? version : new VersionedEventSource(vsn.Version.NextSequence(),new EventSourceKey(vsn.EventSource,vsn.Artifact));
                 var envelope = e.ToEnvelope(BuildEventMetadata(EventId.New(),vsn, e is SimpleEvent ? Artifacts.artifact_for_simple_event : Artifacts.artifact_for_another_event, correlationId, DateTimeOffset.UtcNow));
                 envelopes.Add(envelope);
             });
