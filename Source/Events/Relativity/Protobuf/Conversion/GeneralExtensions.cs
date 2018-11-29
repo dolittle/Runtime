@@ -21,8 +21,12 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
     public static class GeneralExtensions
     {
         /// <summary>
-        /// Converts a <see cref="object"/> to <see cref="System.Protobuf.Value"/>
+        /// Converts a <see cref="object"/> to <see cref="System.Protobuf.Value"/>.
         /// </summary>
+        /// <remarks>
+        /// This is primarily used when converting propertybags to protobuf messages and scenarios when we don't
+        /// know the actual type of obj. 
+        /// </remarks>
         /// <param name="obj"></param>
         /// <returns></returns>
         public static System.Protobuf.Value ToProtobuf(this object obj)
@@ -30,7 +34,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             var value = new System.Protobuf.Value();
             var objType = obj.GetType();
 
-            if (objType.IsEnumerable()) value.ListValue = ((System.Collections.IEnumerable)obj).ToProtobuf();
+            if (objType.IsEnumerable() && !objType.IsDictionary()) value.ListValue = ((System.Collections.IEnumerable)obj).ToProtobuf();
             else if (objType == typeof(Dolittle.PropertyBags.PropertyBag)) value.DictionaryValue = ((Dolittle.PropertyBags.PropertyBag)obj).ToProtobuf().AsDictionaryValue();
             else 
             {
