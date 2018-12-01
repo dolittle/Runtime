@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using Dolittle.Collections;
 using Dolittle.PropertyBags;
+using Dolittle.Reflection;
 using Google.Protobuf;
 using Google.Protobuf.Collections;
 
@@ -22,45 +23,41 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// </summary>
         /// <param name="propertyBag"><see cref="PropertyBag"/> to convert from</param>
         /// <returns>Converted <see cref="MapField{key,value}"/></returns>
-        public static MapField<string, System.Protobuf.Object> ToProtobuf(this PropertyBag propertyBag)
+        public static Events.Relativity.Protobuf.PropertyBag ToProtobuf(this Dolittle.PropertyBags.PropertyBag propertyBag)
         {
-            var mapField = new MapField<string, System.Protobuf.Object>();
-            propertyBag.ForEach(keyValue => 
-            {
-                var obj = new System.Protobuf.Object();
-                var type = keyValue.Value.GetProtobufType();
-                obj.Type = (int)type;
-
-                var stream = new MemoryStream();
-                using( var outputStream = new CodedOutputStream(stream) )
-                {
-                    keyValue.Value.WriteWithTypeTo(type, outputStream);
-                    outputStream.Flush();
-                    stream.Flush();
-                    stream.Seek(0, SeekOrigin.Begin);
-                    obj.Content = ByteString.CopyFrom(stream.ToArray());
-                }
-                
-                mapField.Add(keyValue.Key, obj);
-            });
-
-            return mapField;
+            var protobufPropertyBag = new Events.Relativity.Protobuf.PropertyBag();
+            propertyBag.ForEach(kvp => protobufPropertyBag.Values.Add(kvp.Key, kvp.Value.ToProtobuf()));
+            return protobufPropertyBag;
         }
 
         /// <summary>
-        /// Convert from <see cref="MapField{key,value}"/> to <see cref="PropertyBag"/>
+        /// Convert from <see cref="Events.Relativity.Protobuf.PropertyBag"/> to <see cref="Dolittle.PropertyBags.PropertyBag"/>
         /// </summary>
-        /// <param name="mapField"><see cref="MapField{key,value}"/> to convert from</param>
+        /// <param name="propertyBag"><see cref="Events.Relativity.Protobuf.PropertyBag"/> to convert from</param>
         /// <returns>Converted <see cref="PropertyBag"/></returns>
-        public static PropertyBag ToPropertyBag(this MapField<string, System.Protobuf.Object> mapField)
+        public static Dolittle.PropertyBags.PropertyBag ToPropertyBag(this Events.Relativity.Protobuf.PropertyBag propertyBag) => propertyBag.Values.ToCLR();
+        /// <summary>
+        /// Convert from <see cref="Events.Relativity.Protobuf.PropertyBag"/> to <see cref="System.Protobuf.DictionaryValue"/>
+        /// </summary>
+        /// <param name="propertyBag"></param>
+        /// <returns></returns>
+        public static System.Protobuf.DictionaryValue AsDictionaryValue(this Events.Relativity.Protobuf.PropertyBag propertyBag)
         {
-            var dictionary = new NullFreeDictionary<string,object>();
-            mapField.ForEach(keyValue => 
-            {
-                var value = keyValue.Value.ToCLR();
-                if(value != null) dictionary.Add(keyValue.Key, value);
-            });
-            return new PropertyBag(dictionary);
+            var dictionaryValue = new System.Protobuf.DictionaryValue();
+            propertyBag.Values.ForEach(kvp => dictionaryValue.Object.Add(kvp.Key, kvp.Value));
+            return dictionaryValue;
         }
+        /// <summary>
+        /// Convert from <see cref="System.Protobuf.DictionaryValue"/> to <see cref="Events.Relativity.Protobuf.PropertyBag"/>
+        /// </summary>
+        /// <param name="dictionaryValue"></param>
+        /// <returns></returns>
+        public static Events.Relativity.Protobuf.PropertyBag AsPropertyBag(this System.Protobuf.DictionaryValue dictionaryValue)
+        {
+            var propertyBag = new Events.Relativity.Protobuf.PropertyBag();
+            dictionaryValue.Object.ForEach(kvp => propertyBag.Values.Add(kvp.Key, kvp.Value));
+            return propertyBag;
+        }
+
     }
 }

@@ -13,11 +13,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_PropertyBag
 {
     public class when_converting_property_bag_with_all_supported_types_to_and_from_protobuf
     {
-        static PropertyBag original;
-        static MapField<string, System.Protobuf.Object> protobuf;
-        static PropertyBag result;
+        static Dolittle.PropertyBags.PropertyBag original;
+        static Events.Relativity.Protobuf.PropertyBag protobuf;
+        static Dolittle.PropertyBags.PropertyBag result;
 
-        Establish context = () => original = new PropertyBag(
+        Establish context = () => original = new Dolittle.PropertyBags.PropertyBag(
             new NullFreeDictionary<string, object> {
                 {"string","a string"},
                 {"int", 42},

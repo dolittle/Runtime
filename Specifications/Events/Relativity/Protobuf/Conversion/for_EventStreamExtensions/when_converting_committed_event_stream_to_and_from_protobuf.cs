@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_ArtifactExt
                 new Dolittle.Runtime.Events.Store.EventStream(new[] {
                     new Dolittle.Runtime.Events.EventEnvelope(
                         eventMetadata,
-                        new PropertyBag(
+                        new Dolittle.PropertyBags.PropertyBag(
                             new NullFreeDictionary<string, object> {
                                 {"string","a string"},
                                 {"int", 42},
