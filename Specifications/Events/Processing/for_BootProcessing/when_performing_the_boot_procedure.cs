@@ -21,6 +21,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
     using Dolittle.Security;
     using Dolittle.Resources.Configuration;
     using Dolittle.Resources;
+    using Dolittle.Scheduling;
 
     [Subject(typeof(BootProcedure), nameof(BootProcedure.Perform))]
     public class when_performing_the_boot_procedure
@@ -32,6 +33,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<ITypeFinder> type_finder;
         static Mock<Applications.Configuration.IBoundedContextLoader> bounded_context_loader;
         readonly static Execution.Environment environment = Execution.Environment.Undetermined;
+        static IScheduler scheduler; 
         static ResourceConfiguration resource_configuration;
         static Exception exception;
         static int number_of_scoped_processors;
@@ -56,6 +58,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             resource_configuration = new ResourceConfiguration(type_finder.Object);
             resource_configuration.ConfigureResourceTypes(new Dictionary<ResourceType, ResourceTypeImplementation>{});
             
+            scheduler = new SyncScheduler();
 
             I_know_about_event_processors = get_instances_of_I_know_about_event_processors();
             I_know_about_event_processors.Object.ForEach(_ => number_of_processors_per_tenant += _.Count()); 
@@ -70,6 +73,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
                                                 resource_configuration,
                                                 bounded_context_loader.Object,
                                                 environment,
+                                                scheduler,
                                                 mocks.a_logger().Object);
         };
 

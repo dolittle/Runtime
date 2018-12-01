@@ -5,10 +5,8 @@
 namespace Dolittle.Runtime.Events.Processing
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Dolittle.Bootstrapping;
     using Dolittle.Collections;
     using Dolittle.Logging;
@@ -22,6 +20,7 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Security;
     using Dolittle.Resources.Configuration;
     using Dolittle.Applications.Configuration;
+    using Dolittle.Scheduling;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
@@ -39,6 +38,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly IResourceConfiguration _resourceConfiguration;
+        readonly IScheduler _scheduler;
 
 
         /// <summary>
@@ -53,6 +53,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="resourceConfiguration"></param>
         /// <param name="boundedContextLoader"></param>
         /// <param name="environment"></param>
+        /// <param name="scheduler"></param>
         /// <param name="logger">An instance of <see cref="ILogger" /> for logging</param>
         public BootProcedure(
             IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
@@ -63,7 +64,8 @@ namespace Dolittle.Runtime.Events.Processing
             IExecutionContextManager executionContextManager,
             IResourceConfiguration resourceConfiguration,
             IBoundedContextLoader boundedContextLoader,
-            Execution.Environment environment,                          
+            Execution.Environment environment,          
+            IScheduler scheduler,                
             ILogger logger)
         {
             _processingHub = processingHub;
@@ -75,6 +77,7 @@ namespace Dolittle.Runtime.Events.Processing
             _executionContextManager = executionContextManager;
             _resourceConfiguration = resourceConfiguration;
             _logger = logger;
+            _scheduler = scheduler;
 
             var boundedContextConfig = boundedContextLoader.Load();
             _executionContextManager.SetConstants(boundedContextConfig.Application, boundedContextConfig.BoundedContext, environment);
@@ -99,11 +102,11 @@ namespace Dolittle.Runtime.Events.Processing
         void ProcessInParallel()
         {
             //_logger.Information("Process")
-            Parallel.ForEach(_systemsThatKnowAboutEventProcessors.ToList(), (system) =>
+            _scheduler.PerformForEach(_systemsThatKnowAboutEventProcessors.ToList(), (system) =>
             {
-                Parallel.ForEach(system.ToList(), (processor) =>
+                _scheduler.PerformForEach(system.ToList(), (processor) =>
                 {
-                    Parallel.ForEach(_tenants.All, (t) =>
+                    _scheduler.PerformForEach(_tenants.All, (t) =>
                     {
                         _executionContextManager.CurrentFor(t, CorrelationId.New(), Claims.Empty);
                         _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
