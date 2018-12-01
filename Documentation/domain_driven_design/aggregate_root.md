@@ -58,6 +58,29 @@ All *AggregateRoot* classes must have a *Guid* key. It is permissible to include
 
 *Aggregate Roots* are [Event Sources](./Events/event_sourcing.md) and their internal state is rehydrated from the persistance store by replaying the events associated with this instance.  Dolittle distinguishes between *Committed Event Streams*, which are persisted to the [Event Store](./Events/event_store.md) and *Uncommitted Event Stream*s which are not persisted.  A *Committed Event Stream* can be replayed against an *Aggregate Root* and each [Event](./Events/introduction.md) re-applied.  Since the [Event](./Events/introduction.md) is the necessary and sufficient data needed for setting an internal state, the *Aggregate Root* will be returned to its actual state when all [Events](./Events/introduction.md) are re-applied.  The *Committed Event Stream* is a perfect audit record of all changes of the *Aggregate Root*.
 
+In practical terms you do this by implementing an "On" method that takes the event and set the Aggregate Root's state in that method. In the following example we have a comment aggregate root that is called when a comment is added to a system. This comment will then be available for voting, once it has been created. To set the local state of the Aggregate Root to allow for voting you could do something like:
+
+```csharp
+public class Comment : AggregateRoot
+{
+    bool _is_available_for_votes = false;
+
+    public void Create(string comment_text)
+    {
+        var comment_created = new comment_created_event(EventSourceId, comment_text);
+
+        Apply(comment_created);
+    }
+
+    void On(comment_created_event evt)
+    {
+        _is_available_for_votes = true;
+    }
+}
+```
+
+The Aggregate Root can now use this state for its own internal logic, as it will have the On -method called whenever it is re-created from the AggregateRootRepository.
+
 
 
 
