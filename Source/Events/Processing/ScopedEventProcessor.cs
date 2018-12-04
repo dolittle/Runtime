@@ -5,7 +5,7 @@ namespace Dolittle.Runtime.Events.Processing
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Dolittle.Artifacts;
-    using Dolittle.Bootstrapping;
+    using Dolittle.Booting;
     using Dolittle.Collections;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events;
