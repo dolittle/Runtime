@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Applications" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Artifacts" Version="2.0.0-*" />
-    <PackageReference Include="Dolittle.Bootstrapping" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.Booting" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Collections" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Concepts" Version="2.0.0-*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="2.0.0-*" />
