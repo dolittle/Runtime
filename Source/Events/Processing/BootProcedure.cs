@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Processing
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Dolittle.Bootstrapping;
+    using Dolittle.Booting;
     using Dolittle.Collections;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events;
