@@ -42,38 +42,31 @@ namespace Dolittle.Applications.Configuration
         /// <summary>
         /// Gets or sets the <see cref="Application"/>
         /// </summary>
-        public BoundedContextConfiguration(Application application, BoundedContextName boundedContextName, CoreConfiguration core) 
-        {
-            this.Application = application;
-                this.BoundedContextName = boundedContextName;
-                this.Core = core;
-               
-        }
-                public Application Application { get; }
+        public Application Application { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="BoundedContext"/>
+        /// Gets the <see cref="BoundedContext"/>
         /// </summary>
         public BoundedContext BoundedContext {  get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="BoundedContextName"/> 
+        /// Gets the <see cref="BoundedContextName"/> 
         /// </summary>
         public BoundedContextName BoundedContextName { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="CoreConfiguration"/>
+        /// Gets the <see cref="CoreConfiguration"/>
         /// </summary>
         public CoreConfiguration Core { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="InteractionLayerConfiguration"/> list
+        /// Gets the <see cref="InteractionLayerConfiguration"/> list
         /// </summary>
-        public IEnumerable<InteractionLayerConfiguration> Interaction { get; } = new InteractionLayerConfiguration[0];
+        public IEnumerable<InteractionLayerConfiguration> Interaction { get; }
 
         /// <summary>
-        /// Gets or sets the Resource configurations
+        /// Gets the Resource configurations
         /// </summary>
-        public IDictionary<ResourceType, ResourceTypeImplementationConfiguration> Resources { get; } = new Dictionary<ResourceType, ResourceTypeImplementationConfiguration>();
+        public IDictionary<ResourceType, ResourceTypeImplementationConfiguration> Resources { get; }
     }
 }
