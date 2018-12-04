@@ -19,8 +19,9 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
     using Dolittle.Runtime.Events.Specs.Processing;
     using Dolittle.Execution;
     using Dolittle.Security;
-    using Dolittle.Resources.Configuration;
-    using Dolittle.Resources;
+    using Dolittle.ResourceTypes.Configuration;
+    using Dolittle.ResourceTypes;
+    using Dolittle.Scheduling;
 
     [Subject(typeof(BootProcedure), nameof(BootProcedure.Perform))]
     public class when_performing_the_boot_procedure
@@ -30,7 +31,6 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<ITenants> tenants;
         static Mock<IScopedEventProcessingHub> processing_hub;
         static Mock<ITypeFinder> type_finder;
-        static Mock<Applications.Configuration.IBoundedContextLoader> bounded_context_loader;
         readonly static Execution.Environment environment = Execution.Environment.Undetermined;
         static ResourceConfiguration resource_configuration;
         static Exception exception;
@@ -39,6 +39,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<IFetchUnprocessedEvents> unprocessed_events_fetcher = new Mock<IFetchUnprocessedEvents>();
         static Mock<IEventProcessorOffsetRepository> offset_repository = new Mock<IEventProcessorOffsetRepository>();
         static Mock<IExecutionContextManager> execution_context_manager;
+        
 
         Establish context = () =>
         {
@@ -46,14 +47,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             unprocessed_events_fetcher = new Mock<IFetchUnprocessedEvents>();
             offset_repository = new Mock<IEventProcessorOffsetRepository>();
             type_finder = new Mock<ITypeFinder>();
-            bounded_context_loader = new Mock<Dolittle.Applications.Configuration.IBoundedContextLoader>();
-            bounded_context_loader.Setup(_ => _.Load())
-                .Returns(new Dolittle.Applications.Configuration.BoundedContextConfiguration()
-                {
-                    Application = Dolittle.Applications.Application.NotSet,
-                    BoundedContext = Dolittle.Applications.BoundedContext.NotSet
-                });
-            resource_configuration = new ResourceConfiguration(type_finder.Object);
+            resource_configuration = new ResourceConfiguration(type_finder.Object, mocks.a_logger().Object);
             resource_configuration.ConfigureResourceTypes(new Dictionary<ResourceType, ResourceTypeImplementation>{});
             
 
@@ -61,14 +55,18 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             I_know_about_event_processors.Object.ForEach(_ => number_of_processors_per_tenant += _.Count()); 
             tenants = get_tenants();
             number_of_scoped_processors = tenants.Object.All.Count() * number_of_processors_per_tenant;
+            
             processing_hub = new Mock<IScopedEventProcessingHub>();
             boot_procedure = new BootProcedure(I_know_about_event_processors.Object,
-                                                tenants.Object,processing_hub.Object, 
+                                                tenants.Object,
+                                                processing_hub.Object, 
                                                 () => offset_repository.Object,
                                                 () => unprocessed_events_fetcher.Object,
                                                 execution_context_manager.Object,
                                                 resource_configuration,
-                                                bounded_context_loader.Object,
+                                                new SyncScheduler(),
+                                                Dolittle.Applications.Application.NotSet,
+                                                Dolittle.Applications.BoundedContext.NotSet,
                                                 environment,
                                                 mocks.a_logger().Object);
         };
