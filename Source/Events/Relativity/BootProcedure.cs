@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Applications;
 using Dolittle.Applications.Configuration;
-using Dolittle.Bootstrapping;
+using Dolittle.Booting;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
@@ -18,14 +18,14 @@ namespace Dolittle.Runtime.Events.Relativity
     public class BootProcedure : ICanPerformBootProcedure
     {
         int _canPerformCount = 10;
-        readonly IEventHorizonsConfigurationManager _configuration;
+        readonly EventHorizonsConfiguration _configuration;
         readonly IBarrier _barrier;
         readonly IResourceConfiguration _resourceConfiguration;
 
         /// <summary>
         /// Initializes a new instance of <see cref="BootProcedure"/>
         /// </summary>
-        /// <param name="configuration"><see cref="IEventHorizonsConfigurationManager">Configuration mananger</see></param>
+        /// <param name="configuration"><see cref="EventHorizonsConfiguration">Configuration</see></param>
         /// <param name="barrier"><see cref="IBarrier">Barrier</see> to penetrate towards an <see cref="IEventHorizon"/></param>
         /// <param name="resourceConfiguration"></param>
         /// <param name="executionContextManager"></param>
@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="boundedContext"></param>
         /// <param name="environment">The running environment</param>
         public BootProcedure(
-            IEventHorizonsConfigurationManager configuration,
+            EventHorizonsConfiguration configuration,
             IBarrier barrier,
             IResourceConfiguration resourceConfiguration,
             IExecutionContextManager executionContextManager,
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public void Perform()
         {
-            _configuration.Current.EventHorizons.ForEach(_ => 
+            _configuration.EventHorizons.ForEach(_ => 
                 _barrier.Penetrate(
                     new EventHorizonKey(_.Application,_.BoundedContext),
                     _.Url,

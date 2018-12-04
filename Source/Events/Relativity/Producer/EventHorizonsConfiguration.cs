@@ -2,8 +2,8 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
 using System.Collections.Generic;
+using Dolittle.Configuration;
 using Dolittle.DependencyInversion;
 
 namespace Dolittle.Runtime.Events.Relativity
@@ -11,11 +11,21 @@ namespace Dolittle.Runtime.Events.Relativity
     /// <summary>
     /// Represents the configuration that specifies tunnels to known <see cref="IEventHorizon">event horizons</see>
     /// </summary>
-    public class EventHorizonsConfiguration
+    [Name("event-horizons")]
+    public class EventHorizonsConfiguration : IConfigurationObject
     {
         /// <summary>
-        /// Gets or sets <see cref="IEnumerable{EventHorizonConfiguration}">collection of <see cref="EventHorizonConfiguration"/></see>
+        /// Initializes a new instance of <see cref="EventHorizonsConfiguration"/>
         /// </summary>
-        public IEnumerable<EventHorizonConfiguration>   EventHorizons { get; set; } = new EventHorizonConfiguration[0];
+        /// <param name="eventHorizons">Collection of <see cref="EventHorizonConfiguration"/></param>
+        public EventHorizonsConfiguration(IEnumerable<EventHorizonConfiguration> eventHorizons)
+        {
+            EventHorizons = eventHorizons;
+        }
+
+        /// <summary>
+        /// Gets <see cref="IEnumerable{EventHorizonConfiguration}">collection of <see cref="EventHorizonConfiguration"/></see>
+        /// </summary>
+        public IEnumerable<EventHorizonConfiguration>   EventHorizons { get; }
     }
 }
