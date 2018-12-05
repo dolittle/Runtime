@@ -22,6 +22,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
     using Dolittle.ResourceTypes.Configuration;
     using Dolittle.ResourceTypes;
     using Dolittle.Scheduling;
+    using Dolittle.DependencyInversion;
 
     [Subject(typeof(BootProcedure), nameof(BootProcedure.Perform))]
     public class when_performing_the_boot_procedure
@@ -31,6 +32,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<ITenants> tenants;
         static Mock<IScopedEventProcessingHub> processing_hub;
         static Mock<ITypeFinder> type_finder;
+        static Mock<IContainer> container;
         readonly static Execution.Environment environment = Execution.Environment.Undetermined;
         static ResourceConfiguration resource_configuration;
         static Exception exception;
@@ -47,7 +49,8 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             unprocessed_events_fetcher = new Mock<IFetchUnprocessedEvents>();
             offset_repository = new Mock<IEventProcessorOffsetRepository>();
             type_finder = new Mock<ITypeFinder>();
-            resource_configuration = new ResourceConfiguration(type_finder.Object, mocks.a_logger().Object);
+            container = new Mock<IContainer>();
+            resource_configuration = new ResourceConfiguration(type_finder.Object, container.Object, mocks.a_logger().Object);
             resource_configuration.ConfigureResourceTypes(new Dictionary<ResourceType, ResourceTypeImplementation>{});
             
 
