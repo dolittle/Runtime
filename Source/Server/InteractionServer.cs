@@ -21,22 +21,22 @@ namespace Dolittle.Runtime.Server
         readonly IInstancesOf<ICanBindInteractionServices> _services;
         readonly grpc::Server _server;
         readonly ILogger _logger;
-        readonly IConfigurationManager _configurationManager;
+        readonly Configuration _configuration;
 
         /// <summary>
         /// Initializes a new instance of <see cref="InteractionServer"/>
         /// </summary>
         /// <param name="services"><see cref="IInstancesOf{ICanBindInteractionServices}">Binders of interaction services</see></param>
-        /// <param name="configurationManager"><see cref="IConfigurationManager"/> for <see cref="Configuration"/></param>
+        /// <param name="configuration"><see cref="Configuration"/> for <see cref="Configuration"/></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public InteractionServer(
                 IInstancesOf<ICanBindInteractionServices> services,
-                IConfigurationManager configurationManager,
+                Configuration configuration,
                 ILogger logger)
         {
             _services = services;
             _logger = logger;
-            _configurationManager = configurationManager;
+            _configuration = configuration;
             _server = CreateServer();
         }
 
@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.Server
             var server = new grpc::Server
             {
                 Ports = {
-                    new grpc.ServerPort("localhost", _configurationManager.Current.Interaction.Port, grpc::SslServerCredentials.Insecure)//,
+                    new grpc.ServerPort("localhost", _configuration.Interaction.Port, grpc::SslServerCredentials.Insecure)//,
                     //new grpc.ServerPort($"unix:{_configurationManager.Current.Interaction.UnixSocket}", 0, grpc::SslServerCredentials.Insecure)
                 }
             };

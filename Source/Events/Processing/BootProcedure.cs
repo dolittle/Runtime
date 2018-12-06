@@ -7,7 +7,7 @@ namespace Dolittle.Runtime.Events.Processing
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Dolittle.Bootstrapping;
+    using Dolittle.Booting;
     using Dolittle.Collections;
     using Dolittle.Logging;
     using Dolittle.Runtime.Events;
@@ -18,9 +18,10 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.DependencyInversion;
     using Dolittle.Execution;
     using Dolittle.Security;
-    using Dolittle.Resources.Configuration;
+    using Dolittle.ResourceTypes.Configuration;
     using Dolittle.Applications.Configuration;
     using Dolittle.Scheduling;
+    using Dolittle.Applications;
 
     /// <summary>
     /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
@@ -50,10 +51,11 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
         /// <param name="executionContextManager">The <see cref="ExecutionContextManager" /> for setting the correct execution context for the Event Processors </param>
-        /// <param name="resourceConfiguration"></param>
-        /// <param name="boundedContextLoader"></param>
-        /// <param name="environment"></param>
-        /// <param name="scheduler"></param>
+        /// <param name="resourceConfiguration"><see cref="IResourceConfiguration"/> for resources</param>
+        /// <param name="environment">Current <see cref="Execution.Environment">execution environment</see></param>
+        /// <param name="scheduler"><see cref="IScheduler"/> to use for scheduling</param>
+        /// <param name="application">Current <see cref="Application"/></param>
+        /// <param name="boundedContext">Current <see cref="BoundedContext"/></param>
         /// <param name="logger">An instance of <see cref="ILogger" /> for logging</param>
         public BootProcedure(
             IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
@@ -63,12 +65,14 @@ namespace Dolittle.Runtime.Events.Processing
             FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
             IExecutionContextManager executionContextManager,
             IResourceConfiguration resourceConfiguration,
-            IBoundedContextLoader boundedContextLoader,
-            Execution.Environment environment,          
-            IScheduler scheduler,                
+            IScheduler scheduler,
+            Application application,
+            BoundedContext boundedContext,
+            Execution.Environment environment,
             ILogger logger)
         {
             _processingHub = processingHub;
+            _scheduler = scheduler;
             _logger = logger;
             _tenants = tenants;
             _systemsThatKnowAboutEventProcessors = systemsThatKnowAboutEventProcessors;
@@ -79,9 +83,7 @@ namespace Dolittle.Runtime.Events.Processing
             _logger = logger;
             _scheduler = scheduler;
 
-            var boundedContextConfig = boundedContextLoader.Load();
-            _executionContextManager.SetConstants(boundedContextConfig.Application, boundedContextConfig.BoundedContext, environment);
-
+            _executionContextManager.SetConstants(application, boundedContext, environment);
         }
 
         /// <inheritdoc />
@@ -95,22 +97,27 @@ namespace Dolittle.Runtime.Events.Processing
         /// <inheritdoc />
         public void Perform()
         {
-            ProcessInParallel();
+            GatherAllEventProcessors();
             _processingHub.BeginProcessingEvents();
         }
 
-        void ProcessInParallel()
+        void GatherAllEventProcessors()
         {
-            //_logger.Information("Process")
-            _scheduler.PerformForEach(_systemsThatKnowAboutEventProcessors.ToList(), (system) =>
+            _logger.Information("Gather all event processors");
+            
+            _scheduler.PerformForEach(_systemsThatKnowAboutEventProcessors, (system) =>
             {
-                _scheduler.PerformForEach(system.ToList(), (processor) =>
+                _logger.Information($"System that knows about event processors : {system.GetType().AssemblyQualifiedName}");
+
+                _scheduler.PerformForEach(system, (processor) =>
                 {
+                    _logger.Information($"Processor : {processor.GetType().AssemblyQualifiedName}");
+
                     _scheduler.PerformForEach(_tenants.All, (t) =>
                     {
+                        _logger.Information($"Register scoped event processor for tenant : {t}");
                         _executionContextManager.CurrentFor(t, CorrelationId.New(), Claims.Empty);
                         _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
-                        
                     });
                 });
             });

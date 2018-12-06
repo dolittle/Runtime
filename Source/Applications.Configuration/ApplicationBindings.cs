@@ -9,14 +9,22 @@ namespace Dolittle.Applications.Configuration
     /// </summary>
     public class ApplicationBindings : ICanProvideBindings
     {
-        internal static Application Application = Application.NotSet;
-        internal static BoundedContext BoundedContext = BoundedContext.NotSet;
+        readonly BoundedContextConfiguration _boundedContextConfiguration;
+
+        /// <summary>
+        /// Initializes a new instance of <see cref="ApplicationBindings"/>
+        /// </summary>
+        /// <param name="boundedContextConfiguration"></param>
+        public ApplicationBindings(BoundedContextConfiguration boundedContextConfiguration)
+        {
+            _boundedContextConfiguration = boundedContextConfiguration;
+        }
 
         /// <inheritdoc/>
         public void Provide(IBindingProviderBuilder builder)
         {
-            builder.Bind<Application>().To( () => Application);
-            builder.Bind<BoundedContext>().To( () => BoundedContext);
+            builder.Bind<Application>().To( () => _boundedContextConfiguration.Application);
+            builder.Bind<BoundedContext>().To( () => _boundedContextConfiguration.BoundedContext);
         }
     }
 }

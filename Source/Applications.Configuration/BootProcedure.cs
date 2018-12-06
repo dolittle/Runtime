@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 using System.IO;
 using System.Linq;
-using Dolittle.Bootstrapping;
+using Dolittle.Booting;
 using Dolittle.Collections;
 using Dolittle.Execution;
-using Dolittle.Resources.Configuration;
+using Dolittle.ResourceTypes.Configuration;
 
 namespace Dolittle.Applications.Configuration
 {
@@ -16,20 +16,24 @@ namespace Dolittle.Applications.Configuration
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
-        readonly IBoundedContextLoader _boundedContextLoader;
         readonly IExecutionContextManager _executionContextManager;
         readonly IResourceConfiguration _resourceConfiguration;
+        readonly BoundedContextConfiguration _boundedContextConfiguration;
+
         /// <summary>
         /// Instantiates an instance of <see cref="BootProcedure"/>
         /// </summary>
-        /// <param name="boundedContextLoader"></param>
+        /// <param name="boundedContextConfiguration"><see cref="BoundedContextConfiguration"/> to use</param>
         /// <param name="executionContextManager"></param>
         /// <param name="resourceConfiguration"></param>
-        public BootProcedure(IBoundedContextLoader boundedContextLoader, IExecutionContextManager executionContextManager, IResourceConfiguration resourceConfiguration )
+        public BootProcedure(
+            BoundedContextConfiguration boundedContextConfiguration,
+            IExecutionContextManager executionContextManager,
+            IResourceConfiguration resourceConfiguration )
         {
-            _boundedContextLoader = boundedContextLoader;
             _executionContextManager = executionContextManager;
             _resourceConfiguration = resourceConfiguration;
+            _boundedContextConfiguration = boundedContextConfiguration;
         }
 
         /// <inheritdoc/>
@@ -38,13 +42,12 @@ namespace Dolittle.Applications.Configuration
         /// <inheritdoc/>
         public void Perform()
         {
-            var boundedContextConfig = _boundedContextLoader.Load();
             var environment = _executionContextManager.Current.Environment;
-            
-            ApplicationBindings.Application = boundedContextConfig.Application;
-            ApplicationBindings.BoundedContext = boundedContextConfig.BoundedContext;
 
-            _resourceConfiguration.ConfigureResourceTypes(boundedContextConfig.Resources.ToDictionary(kvp => kvp.Key, kvp => environment == Environment.Production? kvp.Value.Production : kvp.Value.Development));
+            _resourceConfiguration.ConfigureResourceTypes(
+                _boundedContextConfiguration.Resources.ToDictionary(
+                    kvp => kvp.Key, 
+                    kvp => environment == Environment.Production? kvp.Value.Production : kvp.Value.Development));
         }
     }
 }
