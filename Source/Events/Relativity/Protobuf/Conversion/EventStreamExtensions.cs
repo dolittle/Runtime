@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                 {
                     Metadata = @event.Metadata.ToProtobuf()
                 };
-                envelope.Event.Add(@event.Event.ToProtobuf());
+                envelope.Event = @event.Event.ToProtobuf();
                 
                 return envelope;
             }).ForEach(protobuf.Events.Add);

@@ -18,19 +18,18 @@ namespace Dolittle.Runtime.Events
         /// <param name="eventSource">The <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" /></param>
         /// <param name="artifact">The <see cref="ArtifactId" /> that uniquely identifies the type of this event source</param>
         /// <returns></returns>
-        public VersionedEventSource(EventSourceId eventSource, ArtifactId artifact): this(EventSourceVersion.Initial, eventSource, artifact) { }
+        public VersionedEventSource(EventSourceId eventSource, ArtifactId artifact): this(EventSourceVersion.Initial, new EventSourceKey(eventSource, artifact))
+        {}
 
         /// <summary>
         /// Instantiates a new instance of a <see cref="VersionedEventSource" /> set to the supplied version
         /// </summary>
         /// <param name="version">The <see cref="EventSourceVersion" /> of this instance</param>
-        /// <param name="eventSource">The <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" /></param>
-        /// <param name="artifact">The <see cref="ArtifactId" /> that uniquely identifies the type of this event source</param>
-        public VersionedEventSource(EventSourceVersion version, EventSourceId eventSource, ArtifactId artifact)
+        /// <param name="key">The <see cref="EventSourceKey">Key</see> for this particular <see cref="IEventSource" /></param>
+        public VersionedEventSource(EventSourceVersion version, EventSourceKey key)
         {
             Version = version;
-            EventSource = eventSource;
-            Artifact = artifact;
+            Key = key;
         }
         /// <summary>
         /// The <see cref="EventSourceVersion" /> of this instance
@@ -41,12 +40,18 @@ namespace Dolittle.Runtime.Events
         /// The <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" />
         /// </summary>
         /// <value></value>
-        public EventSourceId EventSource { get; }
+        public EventSourceId EventSource => Key.Id;
         /// <summary>
         /// The <see cref="ArtifactId" /> that uniquely identifies the type of this event source
         /// </summary>
         /// <value></value>
-        public ArtifactId Artifact { get; }
+        public ArtifactId Artifact => Key.Artifact;
+        /// <summary>
+        /// The <see cref="EventSourceKey" /> that uniquely identifies this event source
+        /// </summary>
+        /// <value></value>
+        public EventSourceKey Key { get; }
+
 
         /// <summary>
         /// Creates a <see cref="CommittedEventVersion" /> based upon this <see cref="VersionedEventSource" /> 

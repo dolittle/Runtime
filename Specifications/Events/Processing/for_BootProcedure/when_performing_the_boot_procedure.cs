@@ -34,6 +34,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static Mock<ITypeFinder> type_finder;
         static Mock<IContainer> container;
         readonly static Execution.Environment environment = Execution.Environment.Undetermined;
+        static IScheduler scheduler; 
         static ResourceConfiguration resource_configuration;
         static Exception exception;
         static int number_of_scoped_processors;
@@ -53,6 +54,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             resource_configuration = new ResourceConfiguration(type_finder.Object, container.Object, mocks.a_logger().Object);
             resource_configuration.ConfigureResourceTypes(new Dictionary<ResourceType, ResourceTypeImplementation>{});
             
+            scheduler = new SyncScheduler();
 
             I_know_about_event_processors = get_instances_of_I_know_about_event_processors();
             I_know_about_event_processors.Object.ForEach(_ => number_of_processors_per_tenant += _.Count()); 

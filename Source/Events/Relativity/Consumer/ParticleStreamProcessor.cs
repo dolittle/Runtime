@@ -73,10 +73,10 @@ namespace Dolittle.Runtime.Events.Relativity
                 _executionContextManager.CurrentFor(context);
                 using(var _ = _getEventStore())
                 {
-                    version = _.GetNextVersionFor(particleStream.Source.EventSource);
+                    version = _.GetNextVersionFor(particleStream.Source.Key);
                 }
 
-                var versionedEventSource = new VersionedEventSource(version, particleStream.Source.EventSource, particleStream.Source.Artifact);
+                var versionedEventSource = new VersionedEventSource(version, new EventSourceKey(particleStream.Source.EventSource, particleStream.Source.Artifact));
 
                 var eventEnvelopes = new List<EventEnvelope>();
 
@@ -86,7 +86,7 @@ namespace Dolittle.Runtime.Events.Relativity
                     var envelope = new EventEnvelope(
                         new EventMetadata(
                             _.Id,
-                            new VersionedEventSource(version, particleStream.Source.EventSource, particleStream.Source.Artifact),
+                            new VersionedEventSource(version, new EventSourceKey(particleStream.Source.EventSource, particleStream.Source.Artifact)),
                             _.Metadata.CorrelationId,
                             _.Metadata.Artifact,
                             _.Metadata.Occurred,

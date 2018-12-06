@@ -5,10 +5,8 @@
 namespace Dolittle.Runtime.Events.Processing
 {
     using System;
-    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Threading.Tasks;
     using Dolittle.Booting;
     using Dolittle.Collections;
     using Dolittle.Logging;
@@ -83,6 +81,7 @@ namespace Dolittle.Runtime.Events.Processing
             _executionContextManager = executionContextManager;
             _resourceConfiguration = resourceConfiguration;
             _logger = logger;
+            _scheduler = scheduler;
 
             _executionContextManager.SetConstants(application, boundedContext, environment);
         }
@@ -113,6 +112,7 @@ namespace Dolittle.Runtime.Events.Processing
                 _scheduler.PerformForEach(system, (processor) =>
                 {
                     _logger.Information($"Processor : {processor.GetType().AssemblyQualifiedName}");
+
                     _scheduler.PerformForEach(_tenants.All, (t) =>
                     {
                         _logger.Information($"Register scoped event processor for tenant : {t}");

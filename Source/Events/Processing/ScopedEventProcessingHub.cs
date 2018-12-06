@@ -13,7 +13,6 @@ namespace Dolittle.Runtime.Events.Processing
     using Dolittle.Logging;
     using Dolittle.Runtime.Events.Store;
     using Dolittle.Lifecycle;
-    using System.Threading.Tasks;
 
     /// <summary>
     /// Tenant aware centalized Hub for processing events within the bounded context
