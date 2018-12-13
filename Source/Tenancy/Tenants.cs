@@ -15,7 +15,6 @@ namespace Dolittle.Runtime.Tenancy
     [Singleton]
     public class Tenants : ITenants
     {
-        readonly Dictionary<TenantId, Tenant> _tenants = new Dictionary<TenantId, Tenant>();
         readonly TenantsConfiguration _tenantsConfiguration;
 
         /// <summary>
@@ -24,14 +23,10 @@ namespace Dolittle.Runtime.Tenancy
         /// <param name="tenantsConfiguration">The <see cref="TenantsConfiguration">configuration</see> for tenants</param>
         public Tenants(TenantsConfiguration tenantsConfiguration)
         {
-            _tenants = tenantsConfiguration.Tenants.ToDictionary(
-                _ => _.Key,
-                _ => new Tenant(_.Key)
-            );
             _tenantsConfiguration = tenantsConfiguration;
         }
 
         /// <inheritdoc/>
-        public IEnumerable<TenantId> All => _tenants.Keys;
+        public IEnumerable<TenantId> All => _tenantsConfiguration.Keys;
     }   
 }
