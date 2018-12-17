@@ -8,7 +8,7 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.ResourceTypes" Version="2.0.0-*" />
+    <PackageReference Include="Dolittle.ResourceTypes" Version="2.*" />
   </ItemGroup>
 
   <ItemGroup>
