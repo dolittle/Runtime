@@ -11,6 +11,11 @@ namespace Dolittle.Runtime.Server
     public class InteractionConfiguration
     {
         /// <summary>
+        /// Gets or sets whether or not the interaction server is enabled
+        /// </summary>
+        public bool Enabled { get; set; } = true;
+
+        /// <summary>
         /// The port to use for exposing the <see cref="IInteractionServer"/> on
         /// </summary>
         public int Port { get; set; } = 50051;

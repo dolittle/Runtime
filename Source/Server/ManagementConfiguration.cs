@@ -11,6 +11,10 @@ namespace Dolittle.Runtime.Server
     public class ManagementConfiguration
     {
         /// <summary>
+        /// Gets or sets whether or not the interaction server is enabled
+        /// </summary>
+
+        /// <summary>
         /// The port to use for exposing the <see cref="IInteractionServer"/> on
         /// </summary>
         public int Port { get; set; } = 50052;

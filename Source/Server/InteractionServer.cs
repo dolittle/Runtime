@@ -59,6 +59,8 @@ namespace Dolittle.Runtime.Server
         {
             try
             {
+                if( !_configuration.Interaction.Enabled ) return;
+
                 _server
                     .Ports
                     .ForEach(_ =>
@@ -76,6 +78,8 @@ namespace Dolittle.Runtime.Server
 
         grpc::Server CreateServer()
         {
+            if( !_configuration.Interaction.Enabled ) return null;
+            
             var serviceDefinitions = _services.SelectMany(_ => _.BindServices());
             var server = new grpc::Server
             {
