@@ -16,9 +16,7 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
             paging = new PagingInfo();
         };
 
-        Because of = async () => {
-            result = await coordinator.Execute(query, paging);
-        };
+        Because of = async () => result = await coordinator.Execute(query, paging);
 
         It should_throw_missing_query_provider = () => result.Exception.ShouldBeOfExactType<MissingQueryProvider>();
     }
