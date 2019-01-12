@@ -32,7 +32,7 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
             query_provider_mock.Setup(c => c.Execute(actual_query, paging)).Returns(result);
         };
 
-        Because of = () => coordinator.Execute(query, paging);
+        Because of = () => coordinator.Execute(query, paging).Wait();
 
         It should_forward_query_with_clause_to_provider = () => query_provider_mock.Verify(q => q.Execute(actual_query, paging), Moq.Times.Once());
         It should_filter_result = () => read_model_filters.Verify(r => r.Filter(items),Times.Once());
