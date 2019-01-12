@@ -6,11 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Dolittle.Types;
+using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
-using Dolittle.ReadModels;
+using Dolittle.Logging;
 using Dolittle.Queries.Security;
 using Dolittle.Queries.Validation;
+using Dolittle.ReadModels;
+using Dolittle.Types;
 
 namespace Dolittle.Queries.Coordination
 {
@@ -28,6 +30,7 @@ namespace Dolittle.Queries.Coordination
         readonly IFetchingSecurityManager _fetchingSecurityManager;
         readonly IQueryValidator _validator;
         readonly IReadModelFilters _filters;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of <see cref="QueryCoordinator"/>
@@ -37,111 +40,154 @@ namespace Dolittle.Queries.Coordination
         /// <param name="fetchingSecurityManager"><see cref="IFetchingSecurityManager"/> to use for securing <see cref="IQuery">queries</see></param>
         /// <param name="validator"><see cref="IQueryValidator"/> to use for validating <see cref="IQuery">queries</see></param>
         /// <param name="filters"><see cref="IReadModelFilters">Filters</see> used to filter any of the read models coming back after a query</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QueryCoordinator(
-            ITypeFinder typeFinder, 
-            IContainer container, 
+            ITypeFinder typeFinder,
+            IContainer container,
             IFetchingSecurityManager fetchingSecurityManager,
             IQueryValidator validator,
-            IReadModelFilters filters)
+            IReadModelFilters filters,
+            ILogger logger)
         {
             _typeFinder = typeFinder;
             _container = container;
             _fetchingSecurityManager = fetchingSecurityManager;
             _validator = validator;
             _filters = filters;
+            _logger = logger;
             DiscoverQueryTypesPerTargetType();
         }
 
-
         /// <inheritdoc/>
-        public QueryResult Execute(IQuery query, PagingInfo paging)
+        public Task<QueryResult> Execute(IQuery query, PagingInfo paging)
         {
-            ThrowIfNoQueryPropertyOnQuery(query);
-
+            var queryType = query.GetType();
+            _logger.Information($"Executing query of type '{queryType.AssemblyQualifiedName}'");
+            
+            var taskCompletionSource = new TaskCompletionSource<QueryResult>();
             var result = QueryResult.For(query);
 
             try
             {
+                ThrowIfNoQueryPropertyOnQuery(queryType);
+
                 var authorizationResult = _fetchingSecurityManager.Authorize(query);
                 if (!authorizationResult.IsAuthorized)
                 {
                     result.SecurityMessages = authorizationResult.BuildFailedAuthorizationMessages();
                     result.Items = new object[0];
-                    return result;
+                    taskCompletionSource.SetResult(result);
+                    return taskCompletionSource.Task;
                 }
                 var validation = _validator.Validate(query);
                 result.BrokenRules = validation.BrokenRules;
                 if (!validation.Success)
                 {
                     result.Items = new object[0];
-                    return result;
+                    taskCompletionSource.SetResult(result);
+                    return taskCompletionSource.Task;
                 }
 
-                var property = GetQueryPropertyFromQuery(query);
+                var property = GetQueryPropertyFromQuery(queryType);
                 var actualQuery = property.GetValue(query, null);
-                var provider = GetQueryProvider(query, property, actualQuery);
-                var providerResult = ExecuteOnProvider(provider, actualQuery, paging);
-                result.TotalItems = providerResult.TotalItems;
-                var readModels = providerResult.Items as IEnumerable<IReadModel>;
-                result.Items = readModels != null ? _filters.Filter(readModels) : providerResult.Items;
+                var queryReturnType = actualQuery.GetType();
+                if (actualQuery is Task && queryReturnType.IsGenericType)
+                {
+                    var task = actualQuery as Task;
+                    task.ContinueWith(tr =>
+                    {
+                        var resultProperty = tr.GetType().GetProperty("Result");
+                        queryReturnType = queryReturnType.GetGenericArguments()[0];
+                        actualQuery = resultProperty.GetValue(tr);
+                        HandleActualQuery(queryType, actualQuery, queryReturnType, result, paging);
+
+                        taskCompletionSource.SetResult(result);
+                    });
+                }
+                else
+                {
+                    HandleActualQuery(queryType, actualQuery, queryReturnType, result, paging);
+                    taskCompletionSource.SetResult(result);
+                }
             }
             catch (TargetInvocationException ex)
             {
                 result.Exception = ex.InnerException;
+                taskCompletionSource.SetResult(result);
             }
             catch (Exception ex)
             {
                 result.Exception = ex;
+
+                switch( ex )
+                {
+                    case MissingQueryProperty missingQueryProperty:{
+                        taskCompletionSource.SetException(ex);
+                        throw ex;
+                    };
+                        
+                    default: {
+                        taskCompletionSource.SetResult(result);
+                    } break;
+                }
             }
 
-            return result;
+            return taskCompletionSource.Task;
         }
 
-
-        void ThrowIfNoQueryPropertyOnQuery(IQuery query)
+        void HandleActualQuery(Type queryType, object actualQuery, Type resultType, QueryResult result, PagingInfo paging)
         {
-            var property = GetQueryPropertyFromQuery(query);
+            var provider = GetQueryProvider(queryType, resultType, actualQuery);
+            var providerResult = ExecuteOnProvider(provider, actualQuery, paging);
+            result.TotalItems = providerResult.TotalItems;
+            var readModels = providerResult.Items as IEnumerable<IReadModel>;
+            result.Items = readModels != null ? _filters.Filter(readModels) : providerResult.Items;
+
+            _logger.Trace($"Query resulted in {result.TotalItems} items");
+        }
+
+        void ThrowIfNoQueryPropertyOnQuery(Type queryType)
+        {
+            var property = GetQueryPropertyFromQuery(queryType);
             if (property == null)
-                throw new NoQueryPropertyException(query);
+                throw new MissingQueryProperty(queryType);
         }
 
-        void ThrowIfUnknownQueryType(Type queryProviderType, IQuery query, PropertyInfo property)
+        void ThrowIfMissingQueryProvider(Type queryProviderType, Type queryType, Type resultType)
         {
-            if (queryProviderType == null) throw new UnknownQueryTypeException(query, property.PropertyType);
+            if (queryProviderType == null) throw new MissingQueryProvider(queryType, resultType);
         }
 
-
-        PropertyInfo GetQueryPropertyFromQuery(IQuery query)
+        PropertyInfo GetQueryPropertyFromQuery(Type queryType)
         {
-            var property = query.GetType().GetTypeInfo().GetProperty(QueryPropertyName, BindingFlags.Public | BindingFlags.Instance);
+            var property = queryType.GetTypeInfo().GetProperty(QueryPropertyName, BindingFlags.Public | BindingFlags.Instance);
             return property;
         }
 
-        object GetQueryProvider(IQuery query, PropertyInfo property, object actualQuery)
+        object GetQueryProvider(Type queryType, Type resultType, object actualQuery)
         {
             Type queryProviderType = null;
-            if (actualQuery != null && actualQuery.GetType() != property.PropertyType)
+            if (actualQuery != null && actualQuery.GetType() != resultType)
                 queryProviderType = GetActualProviderTypeFrom(actualQuery.GetType());
 
             if (queryProviderType == null)
-                queryProviderType = GetActualProviderTypeFrom(property.PropertyType);
-            ThrowIfUnknownQueryType(queryProviderType, query, property);
+                queryProviderType = GetActualProviderTypeFrom(resultType);
+            ThrowIfMissingQueryProvider(queryProviderType, queryType, resultType);
             var provider = _container.Get(queryProviderType);
             return provider;
         }
 
-
         QueryProviderResult ExecuteOnProvider(object provider, object query, PagingInfo paging)
         {
             var method = provider.GetType().GetTypeInfo().GetMethod(ExecuteMethodName);
-            var result = method.Invoke(provider, new[] { query, paging }) as QueryProviderResult;
+            var result = method.Invoke(provider, new [] { query, paging }) as QueryProviderResult;
             return result;
         }
 
         Type GetQueryTypeFrom(Type type)
         {
             var queryProviderForType = type.GetTypeInfo().GetInterface(typeof(IQueryProviderFor<>).FullName);
-            var queryType = queryProviderForType.GetTypeInfo().GetGenericArguments()[0];
+            var queryType = queryProviderForType.GetTypeInfo().GetGenericArguments() [0];
             return queryType;
         }
 
@@ -169,7 +215,7 @@ namespace Dolittle.Queries.Coordination
             _queryProviderTypesPerTargetType = queryTypes.Select(t => new
             {
                 TargetType = GetQueryTypeFrom(t),
-                QueryProviderType = t
+                    QueryProviderType = t
             }).ToDictionary(t => t.TargetType, t => t.QueryProviderType);
         }
     }
