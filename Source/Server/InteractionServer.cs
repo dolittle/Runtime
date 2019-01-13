@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.Server
             var server = new grpc::Server
             {
                 Ports = {
-                    new grpc.ServerPort("localhost", _configuration.Interaction.Port, grpc::SslServerCredentials.Insecure)//,
+                    new grpc.ServerPort("0.0.0.0", _configuration.Interaction.Port, grpc::SslServerCredentials.Insecure)//,
                     //new grpc.ServerPort($"unix:{_configurationManager.Current.Interaction.UnixSocket}", 0, grpc::SslServerCredentials.Insecure)
                 }
             };
