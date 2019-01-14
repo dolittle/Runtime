@@ -1,4 +1,5 @@
 ﻿using Dolittle.DependencyInversion;
+using Dolittle.Logging;
 using Dolittle.Queries.Security;
 using Dolittle.Queries.Validation;
 using Dolittle.Types;
@@ -14,6 +15,7 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator.given
         protected static Mock<IFetchingSecurityManager> fetching_security_manager;
         protected static Mock<IReadModelFilters> read_model_filters;
         protected static Mock<IQueryValidator> query_validator;
+        protected static ILogger logger;
 
         Establish context = () =>
         {
@@ -22,6 +24,7 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator.given
             fetching_security_manager = new Mock<IFetchingSecurityManager>();
             read_model_filters = new Mock<IReadModelFilters>();
             query_validator = new Mock<IQueryValidator>();
+            logger = Mock.Of<ILogger>();
         };
     }
 }

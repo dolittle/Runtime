@@ -20,7 +20,7 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
             query_validator.Setup(c => c.Validate(query)).Returns(validation_result);
         };
 
-        Because of = () => result = coordinator.Execute(query, paging);
+        Because of = async () => result = await coordinator.Execute(query, paging);
 
         It should_not_be_executing_query = () => query.QueryPropertyCalled.ShouldBeFalse();
         It should_have_hold_an_empty_items_array = () => result.Items.ShouldBeEmpty();

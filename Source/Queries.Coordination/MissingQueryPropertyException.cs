@@ -9,14 +9,14 @@ namespace Dolittle.Queries.Coordination
     /// <summary>
     /// The exception that is thrown when a well known query does not have the query property on it
     /// </summary>
-    public class NoQueryPropertyException : ArgumentException
+    public class MissingQueryProperty : ArgumentException
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="NoQueryPropertyException"/>
+        /// Initializes a new instance of <see cref="MissingQueryProperty"/>
         /// </summary>
-        /// <param name="query"><see cref="IQuery"/> that does not have the property on it</param>
-        public NoQueryPropertyException(IQuery query)
-            : base(string.Format("No query property for {0}. Hint: It should be a public instance property with a get on it.", query.GetType().FullName))
+        /// <param name="queryType">Type of <see cref="IQuery"/> that does not have the property on it</param>
+        public MissingQueryProperty(Type queryType)
+            : base(string.Format("No query property for {0}. Hint: It should be a public instance property with a get on it.", queryType.FullName))
         {
         }
     }
