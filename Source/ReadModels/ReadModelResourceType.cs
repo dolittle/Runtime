@@ -12,8 +12,12 @@ namespace Dolittle.ReadModels
     /// <inheritdoc/>
     public class ReadModelResourceType : IAmAResourceType
     {
-        readonly IEnumerable<Type> _services = new []{typeof(IReadModelRepositoryFor<>)};
-        
+        readonly IEnumerable<Type> _services = new []
+        {
+            typeof(IReadModelRepositoryFor<>),
+            typeof(IAsyncReadModelRepositoryFor<>)
+        };
+
         /// <inheritdoc/>
         public ResourceType Name => "readModels";
         /// <inheritdoc/>
