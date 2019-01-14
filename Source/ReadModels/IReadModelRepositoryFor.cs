@@ -43,7 +43,7 @@ namespace Dolittle.ReadModels
         /// Get a <see cref="IReadModel"/> by its id
         /// </summary>
         /// <param name="id">Id to lookup</param>
-        /// <returns></returns>
+        /// <returns>A <see cref="IReadModel"/> instance</returns>
         T GetById(object id);
     }
 }
