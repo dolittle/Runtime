@@ -17,6 +17,6 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 
         Because of = () => exception = Catch.Exception(() => coordinator.Execute(query, paging));
 
-        It should_throw_the_no_query_property_exception = () => exception.ShouldBeOfExactType<NoQueryPropertyException>();
+        It should_throw_missing_query_property = () => exception.ShouldBeOfExactType<MissingQueryProperty>();
     }
 }
