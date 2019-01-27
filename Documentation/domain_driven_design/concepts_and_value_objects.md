@@ -52,7 +52,7 @@ public class TelephoneNumber : ConceptAs<string>
 
 While the underlying ConceptAs\<T> class can handle the implicit conversion to a string, it is not possible to implement the conversion to the specific type (i.e. TelephoneNumber) in a generic manner in the base class. ConceptAs\<T> does support IComparable\<ConceptAs\<T>> and IComparable and also has overloaded comparison operators (`< > <= >=`). This makes it quite easy to replace the primitive with a ConceptAs\<T> while keeping code using the concept the same. You may, however, get compile-errors if you are misusing the power of primitives (for example by multiplying telephone numbers together).
 
-It is **NOT RECOMMENDED** to enforce *correctness* of a ConceptAs\<T> by throwing an exception if there is an attempt to create an instance in an invalid state.  It is the preferred strategy in Dolittle to capture invalid state through the mechanism of [input validation](./validation). This allows a more graceful and  informative handling of the invalid state.
+It is **NOT RECOMMENDED** to enforce *correctness* of a ConceptAs\<T> by throwing an exception if there is an attempt to create an instance in an invalid state.  It is the preferred strategy in Dolittle to capture invalid state through the mechanism of input validation. This allows a more graceful and  informative handling of the invalid state.
 
 {{% notice tip %}}  
 Use of ConceptAs\<T> can lead to loss of type inference in e.g. lambda functions.  It can also require a little more work on the part of the developer when serializing.  We consider this a good trade-off given the explicitness and expressiveness it brings to your domain.
