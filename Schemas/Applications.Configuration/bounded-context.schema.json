@@ -62,7 +62,8 @@
                 "entryPoint": {
                     "$comment": "This property is optional. The default value is \"Core\"",
                     "description": "The entry point of the bounded context's Core.  A relative path to the folder",
-                    "type": "string"
+                    "type": "string",
+                    "format": "uri-reference"
                 }
             },
             "required": ["language"]
@@ -83,7 +84,8 @@
                 },
                 "entryPoint": {
                     "description": "The entry point of the interaction layer. A relative path to the folder",
-                    "type": "string"
+                    "type": "string",
+                    "format": "uri-reference"
                 },
                 "framework": {
                     "$comment": "This schema definition allows only a set of frameworks by hard coding it here in the enum property. Can probably be done better",
