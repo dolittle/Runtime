@@ -30,15 +30,10 @@ A command is a transaction. There is no concept of a partially successful comman
 
 ## Structure
 
-A command **MUST** include all necessary information to perform the action.  These **SHOULD** be in the form of parameters on the command object. You **MAY** include optional parameters, though it is **recommended** that you create multiple commands that represent the different states associated with the optional parameters.  It is **RECOMMENDED** that you use [Concepts](../concepts_and_value_objects.md) and [Value Objects](../concepts_and_value_objects.md) on your commands rather than primitives. This gives a more expressive command and aids in validation.
-
-{{% notice tip %}}
-> For JavaScript, proxy representations can be used for the commands, read more about the mechanism [here](../../Frontend/JavaScript/proxy_generation.md).
-{{% /notice %}}
+A command **MUST** include all necessary information to perform the action.  These **SHOULD** be in the form of parameters on the command object. You **MAY** include optional parameters, though it is **recommended** that you create multiple commands that represent the different states associated with the optional parameters.  It is **RECOMMENDED** that you use [Concepts  and Value Objects](/overview/domain_driven_design/concepts_and_value_objects/) on your commands rather than primitives. This gives a more expressive command and aids in validation.
 
 ## Relation to Events
 
 An important point about commands is that while it is an imperative, it can fail. Once the command has clears validation it will cause actions to happen in the system that lead to events. These capture the changes in the system and cannot fail.
 
 This is one important difference between these to central concepts. Commands capture intent but can fail. Events capture changes in the system and are immutable and are the truth about the system's state.
-

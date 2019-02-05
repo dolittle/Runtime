@@ -25,7 +25,7 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
             query_provider_mock.Setup(q => q.Execute(actual_query, paging)).Throws(exception_thrown);
         };
 
-        Because of = () => result = coordinator.Execute(query, paging);
+        Because of = async () => result = await coordinator.Execute(query, paging);
 
         It should_set_the_exception_on_the_result = () => result.Exception.ShouldEqual(exception_thrown);
     }

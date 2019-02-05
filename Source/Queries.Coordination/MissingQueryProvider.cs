@@ -9,15 +9,15 @@ namespace Dolittle.Queries.Coordination
     /// <summary>
     /// The exception that is thrown when a well known query does not have the query property on it
     /// </summary>
-    public class UnknownQueryTypeException : ArgumentException
+    public class MissingQueryProvider : ArgumentException
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="UnknownQueryTypeException"/>
+        /// Initializes a new instance of <see cref="MissingQueryProvider"/>
         /// </summary>
-        /// <param name="query"><see cref="IQuery"/> that does not have the property on it</param>
+        /// <param name="queryType">Type of <see cref="IQuery"/> that we can't find a <see cref="IQueryProviderFor{T}"/></param>
         /// <param name="type"><see cref="Type"/> of the expected query returned from the Query property</param>
-        public UnknownQueryTypeException(IQuery query, Type type)
-            : base(string.Format("Unable to find a query provider of type '{0}' for the query '{1}'. Hint: Are you sure the query return type has a known query provider for it?", type.FullName, query.GetType().FullName))
+        public MissingQueryProvider(Type queryType, Type type)
+            : base(string.Format("Unable to find a query provider of type '{0}' for the query '{1}'. Hint: Are you sure the query return type has a known query provider for it?", type.FullName, queryType.GetType().FullName))
         {
         }
     }

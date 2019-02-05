@@ -29,7 +29,8 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator.given
                 container.Object,
                 fetching_security_manager.Object,
                 query_validator.Object,
-                read_model_filters.Object);
+                read_model_filters.Object,
+                logger);
         };
     }
 }
