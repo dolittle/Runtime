@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "dolittle.io/schemas/Runtime/Applications.Configuration/bounded-context.schema.json",
+    "$id": "dolittle.io/schemas/Runtime/Applications.Configuration/bounded-context.json",
     "title": "Bounded Context Configuration",
     "description": "The bounded context configuration",
     "type": "object",

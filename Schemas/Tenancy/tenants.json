@@ -1,6 +1,6 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema#",
-    "$id": "dolittle.io/schemas/Runtime/Tenancy/tenants.schema.json",
+    "$id": "dolittle.io/schemas/Runtime/Tenancy/tenants.json",
     "title": "Tenants Configuration",
     "description": "The tenants configuration",
     "type": "object",
