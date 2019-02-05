@@ -23,7 +23,7 @@
                 "url": {
                     "description": "The url where the other bounded context's event horizon lives",
                     "type": "string",
-                    "format": "uri"
+                    "format": "uri-reference"
                 },
                 "events": {
                     "description": "An array of event artifacts that this bounded context is interested in",
