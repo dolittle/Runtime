@@ -3,6 +3,8 @@ title: About Commands
 description: Learn about Commands and how to leverage them in the frontend
 keywords: JavaScript
 author: einari, smithmx, tomasekeli
+aliases:
+    - /backend/overview/command/introduction
 ---
 
 # Commands
