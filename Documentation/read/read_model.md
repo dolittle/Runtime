@@ -10,7 +10,7 @@ author: pavsaund, tomasekeli
 A read model is a structure that is used to expose data to clients in an optimized way. The guiding principle is to have the *Read Model* pre-generated. Any query should be a simple lookup. As a consequence the *User* does not wait for work by the system when they need data.
 
 ## Structure
-To create a *Read Model* mark your class with the marker interface `IReadModel`. *Read Models* exist only to be exposed through [*Queries*](/overview/read/query/), just like the *Queries* exist only to expose *Read.
+To create a *Read Model* mark your class with the marker interface `IReadModel`. *Read Models* exist only to be exposed through [*Queries*]({{% relref query %}}), just like the *Queries* exist only to expose *Read.
 
 ```csharp
 using Dolittle.Read;
@@ -32,7 +32,7 @@ Avoid complex queries and data structures required to populate the models. We re
 The `ShoppingCartPreview` *Read Model* above could very well be backed by some deeper model of Carts, Items, Products, Discounts, etc; but this is not surfaced to the *Read Model* as it is not needed by the *View* this *Read Model* is created for. The *Read Model* could be created whenever an event from the write-side occurs so no logic or aggregation is needed when querying.  
 
 ### Concepts / Value Types
-The *Read Models* should speak in the language of the domain (*Ubiquitous Langauge*). You should therefor use [*Concepts* and *Value Objects*](/overview/domain_driven_design/concepts_and_value_objects/) when defining properties in your *Read Models*. *Read Models* with primitive properties can be considered a code smell.
+The *Read Models* should speak in the language of the domain (*Ubiquitous Langauge*). You should therefor use [*Concepts* and *Value Objects*]({{% relref concepts_and_value_objects %}}) when defining properties in your *Read Models*. *Read Models* with primitive properties can be considered a code smell.
 
 ## Single Responsibility Models
 The intent of a *Read Model* is to provide a data structure for a specific use case. When you need to provide a similar, but not same, data in another part of your application, the preferred approach in Dolittle is to create a new *Read Model* with it's own optimized storage. In fact, even if the needs of different use case are covered by an existing *Read Model* you should not re-use the *Read Model*. Doing so would introduce coupling between the use-cases in unintended and surprising ways.

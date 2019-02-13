@@ -6,7 +6,7 @@ author: woksin
 ---
 
 # Resource
-In this context when we're talking about resources, we're talking about the data resources of each *Bounded Context*. This included the [**Event Store**](/overview/events/event_store/) and the Read models database.
+In this context when we're talking about resources, we're talking about the data resources of each *Bounded Context*. This included the [**Event Store**]({{% relref event_store %}}) and the Read models database.
 
 ## Resource System
 We're providing a system that automatically hooks up the previously mentioned data stores up with the correct configurations on our implementations of the stores based on a small set of configurations in the bounded-context.json file and a resources.json file found inside the .dolittle folder. With the help of the Dolittle Execution Context management system, the Resource System plays an important role in enabling the Runtime to behave in a multi tenant context.

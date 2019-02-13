@@ -8,7 +8,7 @@ weight: 50
 
 # The problem
 
-When breaking up systems into smaller more digestible pieces using guidance such as [bounded contexts](/overview/domain_driven_design/bounded_context/),
+When breaking up systems into smaller more digestible pieces using guidance such as [bounded contexts]({{% relref bounded_context %}}),
 you need to compose these systems back together. One of the goals when breaking things up is that the individual parts
 become as autonomous as possible. This is to remove friction in development and deployment. Part of bringing it back together
 often requires some communication between the running parts. With Dolittle being oriented around event sourcing and all state
