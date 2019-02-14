@@ -10,7 +10,7 @@ Looking up collections of data to be presented to users in a view is a common sc
 
 ## QueryFor
 To implement a query, you need to implement the interface `IQueryFor<>`.
-The generic type argument should point to a [read model](/overview/read/read_model/).
+The generic type argument should point to a [read model]({{< relref read_model >}}).
 This is a marker interface and does not require you implement anything specific.
 Instead it is relying on a default convention; its looking for a public property called `Query` with a return type of `IQueryable<T> where T : IReadModel`. 
 

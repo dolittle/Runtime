@@ -8,7 +8,7 @@ The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL 
 “RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in
 [RFC 2119](https://tools.ietf.org/html/rfc2119).
 
-Here in Dolittle, one of our greatest visions is to enable developers to become highly productive while building products that are scalable and easy to maintain. We want the process of building software to be as easy and enjoyable as possible. In order for us to give the developers using our platform an enjoyable experience when building software on Dolittle we'll provide a set of tools that will increase productivity and automatically generate vital information of the [*Application*, *Bounded Context*](/overview/domain_driven_design/bounded_context/) and [*Artifacts*](/overview/artifacts/) for the platform.
+Here in Dolittle, one of our greatest visions is to enable developers to become highly productive while building products that are scalable and easy to maintain. We want the process of building software to be as easy and enjoyable as possible. In order for us to give the developers using our platform an enjoyable experience when building software on Dolittle we'll provide a set of tools that will increase productivity and automatically generate vital information of the [*Application*, *Bounded Context*]({{< relref bounded_context >}}) and [*Artifacts*]({{< relref artifacts >}}) for the platform.
 
 Currently we are only supporting a small set of programming languages for our tools, but the idea is that we want to have tools for every language that we have SDKs for. And for the tools that are related to the Web interaction layer we want to add support for more languages and frameworks (Typescript, Vue, React, Aurelia, ...).
 
