@@ -32,7 +32,7 @@ A command is a transaction. There is no concept of a partially successful comman
 
 ## Structure
 
-A command **MUST** include all necessary information to perform the action.  These **SHOULD** be in the form of parameters on the command object. You **MAY** include optional parameters, though it is **recommended** that you create multiple commands that represent the different states associated with the optional parameters.  It is **RECOMMENDED** that you use [Concepts and Value Objects]({{% relref concepts_and_value_objects %}}) on your commands rather than primitives. This gives a more expressive command and aids in validation.
+A command **MUST** include all necessary information to perform the action.  These **SHOULD** be in the form of parameters on the command object. You **MAY** include optional parameters, though it is **recommended** that you create multiple commands that represent the different states associated with the optional parameters.  It is **RECOMMENDED** that you use [Concepts and Value Objects]({{< relref concepts_and_value_objects >}}) on your commands rather than primitives. This gives a more expressive command and aids in validation.
 
 ## Relation to Events
 
