@@ -42,7 +42,7 @@ to break a rule and then clean it up later in a compensating transaction, than t
 
 # Aggregate Roots in Dolittle
 
-Dolittle provides a base class *AggregateRoot* that implements functionality that makes it easier to rehydrate Aggregate Roots, generate events and persist these to the Event Store.  The *AggregateRoot* is an implementation of an [Event Source](./Events/event_sourcing).  It is **RECOMMENDED** that all your *Aggregate Root* classes inherit from this class.
+Dolittle provides a base class *AggregateRoot* that implements functionality that makes it easier to rehydrate Aggregate Roots, generate events and persist these to the Event Store.  The *AggregateRoot* is an implementation of an [Event Source]({{< relref event_sourcing >}}).  It is **RECOMMENDED** that all your *Aggregate Root* classes inherit from this class.
 
 ## State
 
@@ -56,7 +56,7 @@ All *AggregateRoot* classes must have a *Guid* key. It is permissible to include
 
 ## Rehydration
 
-*Aggregate Roots* are [Event Sources](./Events/event_sourcing.md) and their internal state is rehydrated from the persistance store by replaying the events associated with this instance.  Dolittle distinguishes between *Committed Event Streams*, which are persisted to the [Event Store](./Events/event_store.md) and *Uncommitted Event Stream*s which are not persisted.  A *Committed Event Stream* can be replayed against an *Aggregate Root* and each [Event](./Events/introduction.md) re-applied.  Since the [Event](./Events/introduction.md) is the necessary and sufficient data needed for setting an internal state, the *Aggregate Root* will be returned to its actual state when all [Events](./Events/introduction.md) are re-applied.  The *Committed Event Stream* is a perfect audit record of all changes of the *Aggregate Root*.
+*Aggregate Roots* are [Event Sources]({{< relref event_sourcing >}}) and their internal state is rehydrated from the persistance store by replaying the events associated with this instance.  Dolittle distinguishes between *Committed Event Streams*, which are persisted to the [Event Store]({{< relref event_store >}}) and *Uncommitted Event Stream*s which are not persisted.  A *Committed Event Stream* can be replayed against an *Aggregate Root* and each [Event]({{< relref domain_events >}}) re-applied. Since the [Event]({{< relref domain_events >}}) is the necessary and sufficient data needed for setting an internal state, the *Aggregate Root* will be returned to its actual state when all [Events]({{< relref domain_events >}}) are re-applied.  The *Committed Event Stream* is a perfect audit record of all changes of the *Aggregate Root*.
 
 In practical terms you do this by implementing an "On" method that takes the event and set the Aggregate Root's state in that method. In the following example we have a comment aggregate root that is called when a comment is added to a system. This comment will then be available for voting, once it has been created. To set the local state of the Aggregate Root to allow for voting you could do something like:
 

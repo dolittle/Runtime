@@ -4,9 +4,6 @@ description: Learn about Bounded Context
 keywords: Runtime, Overview, Bounded Context
 author: woksin
 ---
-The key words “MUST”, “MUST NOT”, “REQUIRED”, “SHALL”, “SHALL NOT”, “SHOULD”, “SHOULD NOT”,
-“RECOMMENDED”, “MAY”, and “OPTIONAL” in this document are to be interpreted as described in
-[RFC 2119](https://tools.ietf.org/html/rfc2119).
 
 ## DDD Bounded Context Definition
 A bounded context defines the boundaries within which a Domain Model and Ubiquitous Language are valid
@@ -59,11 +56,11 @@ According to DDD, you can have some shared code between bounded contexts. They c
 
 ##### Topology; Modules and Features
 The *Bounded Context* is an essential concept in DDD, but by now you should also have the impression that the *Bounded Context* is something very specific and concrete in the Dolittle platform. All Bounded Contexts has, for example, a very concrete structure. We want developers to think of Bounded Contexts as its own, stand alone, project. How you actually structure this is dependent on the programming language you're using, but in terms of C# we would suggest that you structure an *Application* this way:
-![Application C# Structure](https://github.com/dolittle/Runtime/raw/master/Documentation/Articles/domain_driven_design/ApplicationStructure.png)
+![Application C# Structure](https://raw.githubusercontent.com/dolittle/Runtime/master/Documentation/domain_driven_design/ApplicationStructure.png)
 
 Here you can see how we in Dolittle would structure an *Application*. The *Application* would, for example, be a Github repository and it would typically have Bounded Contexts sitting inside its Source. Each *Bounded Context* is a folder with a solution (.sln) file and contains all the necessary domain areas; Concepts, Domain, Events, Read and an optional interaction layer called, in this case, Web.
 
-Anyway, how you structure your actual *Application* is not that important, however, the internal structure of the *Bounded Context* and its domain areas is what's important. When you create a *Bounded Context* based on the Dolittle platform, and you have a reference to the Dolittle Build tool, what will happen when you compile the *Bounded Context* is that we'll look at the structure of your *Bounded Context* project and create a topology object that defines the topology of the *Bounded Context* and put it inside a topology.json configuration file (configuration file is described later on). The topology will essentially be a recursive structure with features (or modules and features if modules is enabled, described later on). A feature, in terms of the Dolittle platform, is essentially just a way to group [*Artifacts*](https://dolittle.io/overview/articles/artifacts/). *Features* are uniquely identified throughout the *Application* by a GUID (explained later). We group *Artifacts* together by *Feature*, this is to preserve a strong cohesion between the components that belongs together while at the same time we can also cross cut a lot of other concerns i.e. defining a user's access of the *Bounded Context* / *Application* based on which *Modules* / *Features* / *Artifacts* the user has authorization to read, write and/or execute. 
+Anyway, how you structure your actual *Application* is not that important, however, the internal structure of the *Bounded Context* and its domain areas is what's important. When you create a *Bounded Context* based on the Dolittle platform, and you have a reference to the Dolittle Build tool, what will happen when you compile the *Bounded Context* is that we'll look at the structure of your *Bounded Context* project and create a topology object that defines the topology of the *Bounded Context* and put it inside a topology.json configuration file (configuration file is described later on). The topology will essentially be a recursive structure with features (or modules and features if modules is enabled, described later on). A feature, in terms of the Dolittle platform, is essentially just a way to group [*Artifacts*]({{< relref artifacts >}}). *Features* are uniquely identified throughout the *Application* by a GUID (explained later). We group *Artifacts* together by *Feature*, this is to preserve a strong cohesion between the components that belongs together while at the same time we can also cross cut a lot of other concerns i.e. defining a user's access of the *Bounded Context* / *Application* based on which *Modules* / *Features* / *Artifacts* the user has authorization to read, write and/or execute. 
 
 So for example if you've enabled the option to structure the topology with modules, the "Domain" area **SHOULD** look something like this if:
 ```
@@ -106,7 +103,7 @@ So for example if you've enabled the option to structure the topology with modul
 ```
 
 ##### Artifacts
-A *Bounded Context* will eventually consist of a set of [*Artifacts*](https://dolittle.io/overview/articles/artifacts/), they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [*Events*](https://dolittle.io/overview/articles/events/domain_events/), [Commands](https://dolittle.io/overview/articles/command/introduction/), [Event Sources](https://dolittle.io/overview/articles/domain_driven_design/aggregate_root/), [Queries](https://dolittle.io/overview/articles/read/query/) and [Read Models](https://dolittle.io/overview/articles/read/read_model/). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
+A *Bounded Context* will eventually consist of a set of [*Artifacts*]({{< relref artifacts >}}), they are what actually defines the behaviour and functionality of the *Bounded Context*. The *Artifacts* will be [*Events*]({{< relref domain_events >}}), [Commands]({{< relref about_commands >}}), [Event Sources]({{< relref event_sourcing >}}), [Queries]({{< relref query >}}) and [Read Models]({{< relref read_model >}}). You should read about the different types of *Artifacts* to gain an understanding of how they'll impact the *Application* / *Bounded Context*.
 Each *Artifact* is an entity in the *Application*, uniquely identified throughout the *Application* in which the *Bounded Context* belongs. An *Artifact* belongs to a single Feature. 
 
 ## The configuration

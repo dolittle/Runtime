@@ -1,0 +1,1 @@
+There are json schema structures defined in multiple of the "definitions" properties in the defined schemas that should become their own versioned schemas. This must be done after we've managed to store these schemas in a store.

@@ -10,12 +10,11 @@ Looking up collections of data to be presented to users in a view is a common sc
 
 ## QueryFor
 To implement a query, you need to implement the interface `IQueryFor<>`.
-The generic type argument should point to a [read model](read_model.md).
+The generic type argument should point to a [read model]({{< relref read_model >}}).
 This is a marker interface and does not require you implement anything specific.
 Instead it is relying on a default convention; its looking for a public property called `Query` with a return type of `IQueryable<T> where T : IReadModel`. 
 
-Dolittle recognizes the return types and will look for a [query provider](query_providers.md)
-for the type returned.
+Dolittle recognizes the return types and will look for a query provider for the type returned.
 
 ```csharp
 using Dolittle.Queries;
@@ -28,9 +27,9 @@ public class AllEmployees : IQueryFor<Employee>
 
 
 The implementation of the query can be anything you want it to be. Use whatever underlying datastore and technique to get to the data. The only rule is that there
-must be a [query provider](../../Extending/Read/query_providers.md) for the return type.
+must be a query provider for the return type.
 
-Dolittle has a very simple [repository for read models](read_model_repository.md) that can be used. You don't have to use it, as you decide entirely what you use internally - the query sits there as a contract and can also then be changed to accommodate a change in storage strategy.
+Dolittle has a very simple repository for read models that can be used. You don't have to use it, as you decide entirely what you use internally - the query sits there as a contract and can also then be changed to accommodate a change in storage strategy.
 
 ### Arguments
 
@@ -80,8 +79,7 @@ public class EmployeeHiredAfterValidator : QueryValidationDescriptorFor<Employee
 
 ## Paging
 
-Paging can be supported through the [query provider](query_provider.md)
-deals with. Paging is a frontend concern and should not something you need to think about.
+Paging can be supported through the query provider deals with. Paging is a frontend concern and should not something you need to think about.
 In fact, paging is ideally a view concern, something decided as part of the interaction design.
 The client representations of queries has functionality related to paging.
 
@@ -149,7 +147,6 @@ public class QuerySecurity : BaseSecurityDescriptor
 ## Proxy Generation
 
 All queries written in C# has a JavaScript counterpart when using the proxying.
-Read more about proxy generation [here](../../Frontend/proxy_generation.md).
 
 ## QueryResult
 
