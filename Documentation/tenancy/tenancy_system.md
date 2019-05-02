@@ -22,7 +22,7 @@ A single json file called tenant-map.json is used to configure the Tenant Resolv
 ```
 This is the standard skeleton for every tenant-map.json configuration, the content of the configuration is dependent on the actual strategy that's in use.
 
-For example, in our AspNetCore implementation we have defined a strategy for resolving the tenant by hostname (You can find this strategy [here](https://github.com/dolittle-interaction/AspNetCore/tree/master/Source/Tenancy/Strategies/Hostname))
+For example, in our AspNetCore implementation we have defined a strategy for resolving the tenant by hostname ([You can find this strategy here](https://github.com/dolittle-interaction/AspNetCore/tree/master/Source/Tenancy/Strategies/Hostname))
 
 For this particular strategy the actual configuration of the tenant-map.json configuration could looks like this:
 
@@ -40,5 +40,5 @@ For this particular strategy the actual configuration of the tenant-map.json con
  }
 ```
 {{% notice info %}}
-The definition of this particular configuration can be found [here](https://github.com/dolittle-interaction/AspNetCore/blob/master/Source/Tenancy/Strategies/Hostname/HostnameStrategyResource.cs)
+[The definition of this particular configuration can be found here](https://github.com/dolittle-interaction/AspNetCore/blob/master/Source/Tenancy/Strategies/Hostname/HostnameStrategyResource.cs)
 {{% /notice %}}
