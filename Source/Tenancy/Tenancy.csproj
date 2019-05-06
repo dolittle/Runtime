@@ -8,11 +8,11 @@
   <Import Project="../../Build/MSBuild/default.props"/>
   
   <ItemGroup>
-    <PackageReference Include="Dolittle.Configuration" Version="2.*" />
-    <PackageReference Include="Dolittle.Tenancy" Version="2.*" />
-    <PackageReference Include="Dolittle.Types" Version="2.*" />
-    <PackageReference Include="Dolittle.Serialization.Json" Version="2.*" />
-    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="2.*" />
+    <PackageReference Include="Dolittle.Configuration" Version="3.*" />
+    <PackageReference Include="Dolittle.Tenancy" Version="3.*" />
+    <PackageReference Include="Dolittle.Types" Version="3.*" />
+    <PackageReference Include="Dolittle.Serialization.Json" Version="3.*" />
+    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="3.*" />
   </ItemGroup>
 
 </Project>
