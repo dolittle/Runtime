@@ -63,3 +63,4 @@ To learn more about the projects of Dolittle and how to contribute, please go [h
 Go to our [documentation site](http://www.dolittle.io) and learn more about the project and how to get started.
 Samples can also be found [here](https://github.com/Dolittle-Samples).
 You can find entropy projects [here](https://github.com/Dolittle-Entropy).
+
