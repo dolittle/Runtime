@@ -66,6 +66,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             try
             {
+                var originatingSequence = committedEventStreamWithContext.EventStream.Sequence;
                 var context = committedEventStreamWithContext.Context;
                 var particleStream = committedEventStreamWithContext.EventStream;
                 EventSourceVersion version = null;
@@ -113,7 +114,7 @@ namespace Dolittle.Runtime.Events.Relativity
                 {
                     committedEventStream = _.Commit(uncommittedEventStream);
                 }
-                SetOffset(_eventHorizonKey, committedEventStream.Sequence);
+                SetOffset(_eventHorizonKey, originatingSequence);
                 _logger.Information("Process committed events");
                 _processingHub.Process(committedEventStream);
                 return Task.FromResult(committedEventStream.Sequence);
