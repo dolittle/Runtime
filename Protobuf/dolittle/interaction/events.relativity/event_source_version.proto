@@ -7,7 +7,7 @@ syntax = "proto3";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
 
 // Represents the version of an event source
 message EventSourceVersion {

@@ -9,7 +9,7 @@ import "system/value.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
 
 // Represents the property bag
 message PropertyBag {

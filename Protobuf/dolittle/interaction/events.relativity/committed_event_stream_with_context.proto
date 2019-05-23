@@ -10,7 +10,7 @@ import "dolittle/interaction/events.relativity/execution_context.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
 
 // Represents a committed event stream with the Execution Context
 message CommittedEventStreamWithContext {

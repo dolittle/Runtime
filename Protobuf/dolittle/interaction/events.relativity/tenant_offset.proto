@@ -9,7 +9,7 @@ import "system/guid.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
 
 // Represents the TenantOffset
 message TenantOffset {

@@ -11,7 +11,7 @@ import "dolittle/interaction/events.relativity/tenant_offset.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
 
 // Open tunnel is the message sent when opening a tunnel from a singularity towards an event horizon
 message OpenTunnel {

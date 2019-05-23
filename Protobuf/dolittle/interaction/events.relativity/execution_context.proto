@@ -9,7 +9,7 @@ package dolittle.events.relativity;
 import "system/guid.proto";
 import "dolittle/interaction/events.relativity/claim.proto";
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
 
 // Represents the execution context
 message ExecutionContext {

@@ -12,7 +12,7 @@ import "dolittle/interaction/events.relativity/original_context.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
 
 // Represents the metadata related to an event
 message EventMetadata {
