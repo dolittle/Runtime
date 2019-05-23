@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf
+namespace Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion
 {
     /// <summary>
     /// Represents the allowed types in an object type
