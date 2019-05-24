@@ -1,6 +1,6 @@
 {
-    "name": "@dolittle/grpc",
-    "description": "A system for dolittle tooling for commands",
+    "name": "@dolittle/runtime.grpc.interaction",
+    "description": "Grpc services for the runtime interaction",
     "version": "3.0.0",
     "publishConfig": {
         "access": "public"
