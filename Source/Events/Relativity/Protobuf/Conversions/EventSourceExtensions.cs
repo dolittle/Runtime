@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// </summary>
         /// <param name="versionedEventSource"><see cref="VersionedEventSource"/> to convert from</param>
         /// <returns>Converted <see cref="Runtime.Grpc.Interaction.Protobuf.VersionedEventSource"/></returns>
-        public static Runtime.Grpc.Interaction.Protobuf.VersionedEventSource ToProtobuf(this Dolittle.Runtime.Events.VersionedEventSource versionedEventSource)
+        public static Runtime.Grpc.Interaction.Protobuf.VersionedEventSource ToProtobuf(this VersionedEventSource versionedEventSource)
         {
             var source = new Runtime.Grpc.Interaction.Protobuf.VersionedEventSource
             {
