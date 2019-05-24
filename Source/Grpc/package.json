@@ -1,5 +1,5 @@
 {
-    "name": "@dolittle/grpc.interaction",
+    "name": "@dolittle/grpc",
     "description": "A system for dolittle tooling for commands",
     "version": "3.0.0",
     "publishConfig": {

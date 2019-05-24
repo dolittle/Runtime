@@ -23,11 +23,10 @@ namespace System.Protobuf {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "ChNzeXN0ZW0vb2JqZWN0LnByb3RvEhpkb2xpdHRsZS5ldmVudHMucmVsYXRp",
-            "dml0eRoRc3lzdGVtL2d1aWQucHJvdG8iJwoGT2JqZWN0EgwKBHR5cGUYASAB",
-            "KAUSDwoHY29udGVudBgCIAEoDEISqgIPU3lzdGVtLlByb3RvYnVmYgZwcm90",
-            "bzM="));
+            "dml0eSInCgZPYmplY3QSDAoEdHlwZRgBIAEoBRIPCgdjb250ZW50GAIgASgM",
+            "QhKqAg9TeXN0ZW0uUHJvdG9idWZiBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, },
+          new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::System.Protobuf.Object), global::System.Protobuf.Object.Parser, new[]{ "Type", "Content" }, null, null, null)
           }));

@@ -2,13 +2,11 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Dolittle.Runtime.Grpc.Interacation</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Grpc</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />
   <ItemGroup>
-
-
     <PackageReference Include="Dolittle.Applications" Version="3.*" />
     <PackageReference Include="Dolittle.Artifacts" Version="3.*" />
     <PackageReference Include="Dolittle.Booting" Version="3.*" />
@@ -26,7 +24,5 @@
     <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
     <PackageReference Include="Grpc" Version="1.8.0" />
     <PackageReference Include="Grpc.Tools" Version="1.8.0" />
-
   </ItemGroup>
-  
 </Project>
