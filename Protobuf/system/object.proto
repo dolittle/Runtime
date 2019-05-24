@@ -7,7 +7,6 @@ syntax = "proto3";
 
 package dolittle.events.relativity;
 
-import "system/guid.proto";
 
 option csharp_namespace = "System.Protobuf";
 
