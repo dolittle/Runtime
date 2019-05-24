@@ -11,13 +11,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_TenantOffse
 {
     public class when_converting_tenant_offsets_to_and_from_protobuf
     {
-        static IEnumerable<Dolittle.Runtime.Events.Relativity.TenantOffset> original;
-        static RepeatedField<TenantOffset> protobuf;
-        static IEnumerable<Dolittle.Runtime.Events.Relativity.TenantOffset> result;
+        static IEnumerable<TenantOffset> original;
+        static RepeatedField<Runtime.Grpc.Interaction.Protobuf.TenantOffset> protobuf;
+        static IEnumerable<TenantOffset> result;
 
         Establish context = () => original = new[] {
-            new Dolittle.Runtime.Events.Relativity.TenantOffset(Guid.NewGuid(),42),
-            new Dolittle.Runtime.Events.Relativity.TenantOffset(Guid.NewGuid(),43)
+            new TenantOffset(Guid.NewGuid(),42),
+            new TenantOffset(Guid.NewGuid(),43)
         };
 
         Because of = () => 

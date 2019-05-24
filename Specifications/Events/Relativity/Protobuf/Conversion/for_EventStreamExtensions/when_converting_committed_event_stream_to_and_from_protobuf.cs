@@ -16,21 +16,21 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_ArtifactExt
 {
     public class when_converting_committed_event_stream_to_and_from_protobuf
     {
-        static Dolittle.Runtime.Events.Store.CommittedEventStream original;
-        static CommittedEventStream protobuf;
-        static Dolittle.Runtime.Events.Store.CommittedEventStream result;
+        static CommittedEventStream original;
+        static Runtime.Grpc.Interaction.Protobuf.CommittedEventStream protobuf;
+        static CommittedEventStream result;
 
         Establish context = () => 
         {
             var artifactId = ArtifactId.New();
-            var eventSource = new Dolittle.Runtime.Events.VersionedEventSource(EventSourceId.New(), artifactId);
-            var eventMetadata = new Dolittle.Runtime.Events.EventMetadata(
+            var eventSource = new VersionedEventSource(EventSourceId.New(), artifactId);
+            var eventMetadata = new EventMetadata(
                 EventId.New(),
                 eventSource,
                 CorrelationId.New(),
                 new Dolittle.Artifacts.Artifact(artifactId, ArtifactGeneration.First),
                 DateTimeOffset.FromUnixTimeMilliseconds(1540715541241),
-                new Dolittle.Runtime.Events.OriginalContext(
+                new OriginalContext(
                     Application.New(), 
                     BoundedContext.New(), 
                     Guid.NewGuid(),
@@ -44,14 +44,14 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_ArtifactExt
                     new CommitSequenceNumber(42))
             );
 
-            original = new Dolittle.Runtime.Events.Store.CommittedEventStream(
+            original = new CommittedEventStream(
                 new CommitSequenceNumber(42),
                 eventSource,
                 CommitId.New(),
                 CorrelationId.New(),
                 DateTimeOffset.FromUnixTimeMilliseconds(1540715541241),
-                new Dolittle.Runtime.Events.Store.EventStream(new[] {
-                    new Dolittle.Runtime.Events.EventEnvelope(
+                new EventStream(new[] {
+                    new EventEnvelope(
                         eventMetadata,
                         new Dolittle.PropertyBags.PropertyBag(
                             new NullFreeDictionary<string, object> {
@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_ArtifactExt
         };
 
         It should_be_equal_to_the_original = () => 
-            typeof(Dolittle.Runtime.Events.Store.CommittedEventStream)
+            typeof(CommittedEventStream)
                 .GetProperties(BindingFlags.Instance|BindingFlags.Public)
                 .ForEach(_ => 
                     _.GetValue(result).ShouldEqual(_.GetValue(original)));
