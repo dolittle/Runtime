@@ -52,46 +52,5 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             protobuf.Claims.AddRange(originalContext.Claims.Select(c => c.ToProtobuf()));
             return protobuf;
         }
-
-
-        /// <summary>
-        /// Convert from <see cref="Runtime.Grpc.Interaction.Protobuf.ExecutionContext"/> to <see cref="ExecutionContext"/>
-        /// </summary>
-        /// <param name="protobuf"><see cref="ExecutionContext"/> to convert from</param>
-        /// <returns>Converted <see cref="Dolittle.Execution.ExecutionContext"/></returns>
-        public static ExecutionContext ToExecutionContext(this Runtime.Grpc.Interaction.Protobuf.ExecutionContext protobuf)
-        {
-            return new ExecutionContext(
-                protobuf.Application.ToConcept<Application>(),
-                protobuf.BoundedContext.ToConcept<BoundedContext>(),
-                protobuf.Tenant.ToConcept<TenantId>(),
-                protobuf.Environment,
-                protobuf.CorrelationId.ToConcept<CorrelationId>(),
-                protobuf.Claims.ToClaims(),
-                CultureInfo.GetCultureInfo(protobuf.Culture)
-            );
-        }    
-
-
-
-        /// <summary>
-        /// Convert from <see cref="ExecutionContext"/> to <see cref="Runtime.Grpc.Interaction.Protobuf.ExecutionContext"/>
-        /// </summary>
-        /// <param name="executionContext"><see cref="ExecutionContext"/> to convert from</param>
-        /// <returns>Converted <see cref="Runtime.Grpc.Interaction.Protobuf.ExecutionContext"/></returns>
-        public static Runtime.Grpc.Interaction.Protobuf.ExecutionContext ToProtobuf(this ExecutionContext executionContext)
-        {
-            var protobuf = new Runtime.Grpc.Interaction.Protobuf.ExecutionContext
-            {
-                Application = executionContext.Application.ToProtobuf(),
-                BoundedContext = executionContext.BoundedContext.ToProtobuf(),
-                Tenant = executionContext.Tenant.ToProtobuf(),
-                CorrelationId = executionContext.CorrelationId.ToProtobuf(),
-                Environment = executionContext.Environment.Value,
-                Culture = executionContext.Culture?.Name ?? CultureInfo.InvariantCulture.Name
-            };
-            executionContext.Claims.ToProtobuf().ForEach(protobuf.Claims.Add);
-            return protobuf;
-        }
     }
 }
