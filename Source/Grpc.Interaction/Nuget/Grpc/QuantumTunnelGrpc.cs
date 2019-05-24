@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using grpc = global::Grpc.Core;
 
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction.Grpc {
   /// <summary>
   /// Represents the service for working with quantum tunnel
   /// </summary>
@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
     {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.QuantumTunnelReflection.Descriptor.Services[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.Grpc.QuantumTunnelReflection.Descriptor.Services[0]; }
     }
 
     /// <summary>Base class for server-side implementations of QuantumTunnelService</summary>
