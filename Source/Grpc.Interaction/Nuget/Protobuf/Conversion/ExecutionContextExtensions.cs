@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion
     public static class ExecutionContextExtensions
     {
         /// <summary>
-        /// Convert from <see cref="Runtime.Grpc.Interaction.Protobuf.ExecutionContext"/> to <see cref="ExecutionContext"/>
+        /// Convert from <see cref="ExecutionContext"/> to <see cref="Dolittle.Execution.ExecutionContext"/>
         /// </summary>
         /// <param name="protobuf"><see cref="ExecutionContext"/> to convert from</param>
         /// <returns>Converted <see cref="Dolittle.Execution.ExecutionContext"/></returns>
@@ -34,10 +34,10 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion
         }    
 
         /// <summary>
-        /// Convert from <see cref="ExecutionContext"/> to <see cref="Runtime.Grpc.Interaction.Protobuf.ExecutionContext"/>
+        /// Convert from <see cref="Dolittle.Execution.ExecutionContext"/> to <see cref="ExecutionContext"/>
         /// </summary>
-        /// <param name="executionContext"><see cref="ExecutionContext"/> to convert from</param>
-        /// <returns>Converted <see cref="Runtime.Grpc.Interaction.Protobuf.ExecutionContext"/></returns>
+        /// <param name="executionContext"><see cref="Dolittle.Execution.ExecutionContext"/> to convert from</param>
+        /// <returns>Converted <see cref="ExecutionContext"/></returns>
         public static ExecutionContext ToProtobuf(this Dolittle.Execution.ExecutionContext executionContext)
         {
             var protobuf = new ExecutionContext
