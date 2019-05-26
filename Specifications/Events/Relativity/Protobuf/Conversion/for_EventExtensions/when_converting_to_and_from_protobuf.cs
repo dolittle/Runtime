@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_EventExtens
     public class when_converting_to_and_from_protobuf
     {
         static EventMetadata original;
-        static Runtime.Grpc.Interaction.Protobuf.EventMetadata protobuf;
+        static Runtime.Grpc.Interaction.EventMetadata protobuf;
         static Dolittle.Runtime.Events.EventMetadata result;
 
         Establish context = () => 

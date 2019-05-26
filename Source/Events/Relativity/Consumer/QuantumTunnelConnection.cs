@@ -17,7 +17,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Grpc.Interaction.Grpc;
+using Dolittle.Runtime.Grpc.Interaction;
 using Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
@@ -170,9 +170,9 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             Close ();
         }
 
-        AsyncServerStreamingCall<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> GetOpenTunnel ()
+        AsyncServerStreamingCall<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> GetOpenTunnel ()
         {
-            var tunnel = new Runtime.Grpc.Interaction.Protobuf.OpenTunnel
+            var tunnel = new Runtime.Grpc.Interaction.OpenTunnel
             {
                 Application = _destinationKey.Application.ToProtobuf (),
                 BoundedContext = _destinationKey.BoundedContext.ToProtobuf (),

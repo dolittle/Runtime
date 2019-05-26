@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_EventSource
     public class when_converting_versioned_event_source_to_and_from_protobuf
     {
         static VersionedEventSource original;
-        static Runtime.Grpc.Interaction.Protobuf.VersionedEventSource protobuf;
+        static Runtime.Grpc.Interaction.VersionedEventSource protobuf;
         static VersionedEventSource result;
 
         Establish context = () => original = new VersionedEventSource(

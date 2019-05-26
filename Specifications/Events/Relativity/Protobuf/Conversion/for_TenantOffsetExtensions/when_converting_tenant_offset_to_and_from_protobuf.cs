@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_TenantOffse
     public class when_converting_tenant_offset_to_and_from_protobuf
     {
         static TenantOffset original;
-        static Runtime.Grpc.Interaction.Protobuf.TenantOffset protobuf;
+        static Runtime.Grpc.Interaction.TenantOffset protobuf;
         static TenantOffset result;
 
         Establish context = () => original = new TenantOffset(Guid.NewGuid(),42);

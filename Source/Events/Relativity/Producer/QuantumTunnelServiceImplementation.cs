@@ -16,9 +16,9 @@ using Grpc.Core;
 namespace Dolittle.Runtime.Events.Relativity.Grpc
 {
     /// <summary>
-    /// Represents an implementation of the <see cref="Runtime.Grpc.Interaction.Grpc.QuantumTunnelService.QuantumTunnelServiceBase"/>
+    /// Represents an implementation of the <see cref="Runtime.Grpc.Interaction.QuantumTunnelService.QuantumTunnelServiceBase"/>
     /// </summary>
-    public class QuantumTunnelServiceImplementation : Runtime.Grpc.Interaction.Grpc.QuantumTunnelService.QuantumTunnelServiceBase
+    public class QuantumTunnelServiceImplementation : Runtime.Grpc.Interaction.QuantumTunnelService.QuantumTunnelServiceBase
     {
         readonly IEventHorizon _eventHorizon;
         readonly ISerializer _serializer;
@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         }
 
         /// <inheritdoc/>
-        public override async Task Open(Runtime.Grpc.Interaction.Protobuf.OpenTunnel request, IServerStreamWriter<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> responseStream, ServerCallContext context)
+        public override async Task Open(Runtime.Grpc.Interaction.OpenTunnel request, IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream, ServerCallContext context)
         {
             try
             {

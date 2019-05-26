@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_ArtifactExt
     public class when_converting_committed_event_stream_to_and_from_protobuf
     {
         static CommittedEventStream original;
-        static Runtime.Grpc.Interaction.Protobuf.CommittedEventStream protobuf;
+        static Runtime.Grpc.Interaction.CommittedEventStream protobuf;
         static CommittedEventStream result;
 
         Establish context = () => 

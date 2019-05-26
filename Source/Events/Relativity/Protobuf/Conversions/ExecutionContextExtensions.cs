@@ -18,11 +18,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
     public static class ExecutionContextExtensions
     {
         /// <summary>
-        /// Convert from <see cref="Runtime.Grpc.Interaction.Protobuf.OriginalContext"/> to <see cref="OriginalContext"/>
+        /// Convert from <see cref="Runtime.Grpc.Interaction.OriginalContext"/> to <see cref="OriginalContext"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="Runtime.Grpc.Interaction.Protobuf.OriginalContext"/> to convert from</param>
+        /// <param name="protobuf"><see cref="Runtime.Grpc.Interaction.OriginalContext"/> to convert from</param>
         /// <returns>Converted <see cref="OriginalContext"/></returns>
-        public static OriginalContext ToOriginalContext(this Runtime.Grpc.Interaction.Protobuf.OriginalContext protobuf)
+        public static OriginalContext ToOriginalContext(this Runtime.Grpc.Interaction.OriginalContext protobuf)
         {
             return new OriginalContext(
                 protobuf.Application.ToConcept<Application>(),
@@ -35,13 +35,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from <see cref="OriginalContext"/> to <see cref="Runtime.Grpc.Interaction.Protobuf.OriginalContext"/>
+        /// Convert from <see cref="OriginalContext"/> to <see cref="Runtime.Grpc.Interaction.OriginalContext"/>
         /// </summary>
         /// <param name="originalContext"></param>
         /// <returns></returns>
-        public static Runtime.Grpc.Interaction.Protobuf.OriginalContext ToProtobuf(this OriginalContext originalContext)
+        public static Runtime.Grpc.Interaction.OriginalContext ToProtobuf(this OriginalContext originalContext)
         {
-            var protobuf = new Runtime.Grpc.Interaction.Protobuf.OriginalContext 
+            var protobuf = new Runtime.Grpc.Interaction.OriginalContext 
             {
                 Application = originalContext.Application.ToProtobuf(),
                 Tenant = originalContext.Tenant.ToProtobuf(),

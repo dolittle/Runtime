@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_TenantOffse
     public class when_converting_tenant_offsets_to_and_from_protobuf
     {
         static IEnumerable<TenantOffset> original;
-        static RepeatedField<Runtime.Grpc.Interaction.Protobuf.TenantOffset> protobuf;
+        static RepeatedField<Runtime.Grpc.Interaction.TenantOffset> protobuf;
         static IEnumerable<TenantOffset> result;
 
         Establish context = () => original = new[] {

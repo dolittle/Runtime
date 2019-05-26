@@ -19,21 +19,21 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// Convert from <see cref="TenantOffset"/> to <see cref="TenantOffset"/>
         /// </summary>
         /// /// <param name="tenantOffset"><see cref="TenantOffset"/> to convert from</param>
-        /// <returns>Converted <see cref="Runtime.Grpc.Interaction.Protobuf.TenantOffset"/></returns>
-        public static Runtime.Grpc.Interaction.Protobuf.TenantOffset ToProtobuf(this TenantOffset tenantOffset)
+        /// <returns>Converted <see cref="Runtime.Grpc.Interaction.TenantOffset"/></returns>
+        public static Runtime.Grpc.Interaction.TenantOffset ToProtobuf(this TenantOffset tenantOffset)
         {
-            var message = new Runtime.Grpc.Interaction.Protobuf.TenantOffset();
+            var message = new Runtime.Grpc.Interaction.TenantOffset();
             message.Tenant = tenantOffset.Tenant.ToProtobuf();
             message.Offset = tenantOffset.Offset;
             return message;
         }
 
         /// <summary>
-        /// Convert from <see cref="Runtime.Grpc.Interaction.Protobuf.TenantOffset"/> to <see cref="TenantOffset"/>
+        /// Convert from <see cref="Runtime.Grpc.Interaction.TenantOffset"/> to <see cref="TenantOffset"/>
         /// </summary>
-        /// <param name="tenantOffset"><see cref="Runtime.Grpc.Interaction.Protobuf.TenantOffset"/> to convert from</param>
+        /// <param name="tenantOffset"><see cref="Runtime.Grpc.Interaction.TenantOffset"/> to convert from</param>
         /// <returns>Converted <see cref="TenantOffset"/></returns>
-        public static TenantOffset ToTenantOffset(this Runtime.Grpc.Interaction.Protobuf.TenantOffset tenantOffset)
+        public static TenantOffset ToTenantOffset(this Runtime.Grpc.Interaction.TenantOffset tenantOffset)
         {
             return new TenantOffset(
                 tenantOffset.Tenant.ToConcept<TenantId>(), 
@@ -41,24 +41,24 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from collection of <see cref="TenantOffset"/> to collection of <see cref="Runtime.Grpc.Interaction.Protobuf.TenantOffset"/>
+        /// Convert from collection of <see cref="TenantOffset"/> to collection of <see cref="Runtime.Grpc.Interaction.TenantOffset"/>
         /// </summary>
         /// <param name="offsets">Collection of <see cref="TenantOffset">Offsets</see> to convert from</param>
-        /// <returns>Collection of <see cref="Runtime.Grpc.Interaction.Protobuf.TenantOffset"/></returns>
-        public static RepeatedField<Runtime.Grpc.Interaction.Protobuf.TenantOffset> ToProtobuf(this IEnumerable<TenantOffset> offsets)
+        /// <returns>Collection of <see cref="Runtime.Grpc.Interaction.TenantOffset"/></returns>
+        public static RepeatedField<Runtime.Grpc.Interaction.TenantOffset> ToProtobuf(this IEnumerable<TenantOffset> offsets)
         {
-            var protobuf = new RepeatedField<Runtime.Grpc.Interaction.Protobuf.TenantOffset>();
+            var protobuf = new RepeatedField<Runtime.Grpc.Interaction.TenantOffset>();
             protobuf.Add(offsets.Select(_ => _.ToProtobuf()));
             return protobuf;
         }     
 
 
         /// <summary>
-        /// Convert from <see cref="IEnumerable{TenantOffset}"/> to collection of <see cref="Dolittle.Runtime.Events.Relativity.TenantOffset"/>
+        /// Convert from  collection of <see cref="Runtime.Grpc.Interaction.TenantOffset"/> to collection of <see cref="TenantOffset"/>
         /// </summary>
-        /// <param name="offsets"><see cref="TenantOffset">Offsets</see> to convert from</param>
-        /// <returns>Converted <see cref="Dolittle.Runtime.Events.Relativity.TenantOffset">offsets</see></returns>
-        public static IEnumerable<TenantOffset> ToTenantOffsets(this IEnumerable<Runtime.Grpc.Interaction.Protobuf.TenantOffset> offsets)
+        /// <param name="offsets"><see cref="Runtime.Grpc.Interaction.TenantOffset">Offsets</see> to convert from</param>
+        /// <returns>Converted <see cref="TenantOffset">offsets</see></returns>
+        public static IEnumerable<TenantOffset> ToTenantOffsets(this IEnumerable<Runtime.Grpc.Interaction.TenantOffset> offsets)
         {
             return offsets.Select(_ => _.ToTenantOffset()).ToArray();
         }     

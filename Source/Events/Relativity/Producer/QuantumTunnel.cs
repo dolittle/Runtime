@@ -25,8 +25,8 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnel : IQuantumTunnel
     {
         readonly ISerializer _serializer;
-        readonly IServerStreamWriter<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> _responseStream;
-        readonly ConcurrentQueue<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> _outbox;
+        readonly IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _responseStream;
+        readonly ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
@@ -41,13 +41,13 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel (
             ISerializer serializer,
-            IServerStreamWriter<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> responseStream,
+            IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream,
             CancellationToken cancellationToken,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
-            _outbox = new ConcurrentQueue<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> ();
+            _outbox = new ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> ();
             _waitHandle = new AutoResetEvent (false);
             _cancelationToken = cancellationToken;
             _logger = logger;
@@ -84,7 +84,7 @@ namespace Dolittle.Runtime.Events.Relativity
                         _waitHandle.WaitOne (1000);
                         if (_outbox.IsEmpty) continue;
 
-                        Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext message;
+                        Runtime.Grpc.Interaction.CommittedEventStreamWithContext message;
                         while (!_outbox.IsEmpty)
                         {
                             if (_outbox.TryDequeue (out message))
