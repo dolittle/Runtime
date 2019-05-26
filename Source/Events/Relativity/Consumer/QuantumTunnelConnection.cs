@@ -24,11 +24,13 @@ using Dolittle.Serialization.Protobuf;
 using Google.Protobuf;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Events.Relativity.Grpc {
+namespace Dolittle.Runtime.Events.Relativity.Grpc
+{
     /// <summary>
     /// Represents a concrete connection through a <see cref="IBarrier"/>
     /// </summary>
-    public class QuantumTunnelConnection : IDisposable {
+    public class QuantumTunnelConnection : IDisposable
+    {
         readonly string _url;
         readonly IEnumerable<Dolittle.Artifacts.Artifact> _events;
         readonly ILogger _logger;
@@ -76,7 +78,8 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc {
             ILogger logger,
             IExecutionContextManager executionContextManager,
             ITenants tenants,
-            ITenantOffsetRepository tenantOffsetRepository) {
+            ITenantOffsetRepository tenantOffsetRepository)
+        {
             _url = url;
             _events = events;
             _logger = logger;
@@ -104,27 +107,32 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc {
         /// <summary>
         /// Destructs the <see cref="QuantumTunnelConnection"/>
         /// </summary>
-        ~QuantumTunnelConnection () {
+        ~QuantumTunnelConnection ()
+        {
             Dispose ();
         }
 
         /// <inheritdoc/>
-        public void Dispose () {
+        public void Dispose ()
+        {
             AppDomain.CurrentDomain.ProcessExit -= ProcessExit;
             AssemblyLoadContext.Default.Unloading -= AssemblyLoadContextUnloading;
 
             Close ();
         }
 
-        void ProcessExit (object sender, EventArgs e) {
+        void ProcessExit (object sender, EventArgs e)
+        {
             Close ();
         }
 
-        void AssemblyLoadContextUnloading (AssemblyLoadContext context) {
+        void AssemblyLoadContextUnloading (AssemblyLoadContext context)
+        {
             Close ();
         }
 
-        void Close () {
+        void Close ()
+        {
             _runCancellationTokenSource.Cancel ();
 
             //if( _runThread != null ) _runThread.Abort();
@@ -133,18 +141,24 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc {
             _channel.ShutdownAsync ();
         }
 
-        void Run () {
+        void Run ()
+        {
             _logger.Information ($"Establishing connection towards event horizon for application ('{_destinationKey.Application}') and bounded context ('{_destinationKey.BoundedContext}') at '{_url}'");
 
-            Task.Run (async () => {
+            Task.Run (async () =>
+            {
                 _runThread = Thread.CurrentThread;
-                for (;;) {
+                for (;;)
+                {
 
                     _runCancellationToken.ThrowIfCancellationRequested ();
 
-                    try {
+                    try
+                    {
                         await OpenAndHandleStream ();
-                    } catch (Exception ex) {
+                    }
+                    catch (Exception ex)
+                    {
                         _logger.Error (ex, "Error occurred during establishing quantum tunnel");
                     }
                     _logger.Warning ("Connection broken - backing off for a second");
@@ -156,29 +170,36 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc {
             Close ();
         }
 
-        AsyncServerStreamingCall<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> GetOpenTunnel () {
-            var tunnel = new Runtime.Grpc.Interaction.Protobuf.OpenTunnel {
+        AsyncServerStreamingCall<Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> GetOpenTunnel ()
+        {
+            var tunnel = new Runtime.Grpc.Interaction.Protobuf.OpenTunnel
+            {
                 Application = _destinationKey.Application.ToProtobuf (),
                 BoundedContext = _destinationKey.BoundedContext.ToProtobuf (),
                 ClientId = Guid.NewGuid ().ToProtobuf ()
             };
-            tunnel.Offsets.AddRange (_tenantOffsetRepository.Get (_tenants.All, _destinationKey).Select (_ => _.ToProtobuf()));
+            tunnel.Offsets.AddRange (_tenantOffsetRepository.Get (_tenants.All, _destinationKey).Select (_ => _.ToProtobuf ()));
             tunnel.Events.AddRange (_events.Select (_ => _.ToProtobuf ()));
             return _client.Open (tunnel);
         }
 
-        async Task OpenAndHandleStream () {
+        async Task OpenAndHandleStream ()
+        {
             _logger.Information ($"Opening tunnel towards application '{_destinationKey.Application}' and bounded context '{_destinationKey.BoundedContext}'");
 
             var stream = GetOpenTunnel ();
-            try {
-                while (await stream.ResponseStream.MoveNext (_runCancellationToken)) {
+            try
+            {
+                while (await stream.ResponseStream.MoveNext (_runCancellationToken))
+                {
                     _logger.Information ("Commit received");
 
-                    var seq = await _processor.Process (stream.ResponseStream.Current.ToCommittedEventStreamWithContext());
+                    var seq = await _processor.Process (stream.ResponseStream.Current.ToCommittedEventStreamWithContext ());
                     _logger.Information ($"Committed {seq}");
                 }
-            } catch (Exception moveException) {
+            }
+            catch (Exception moveException)
+            {
                 _logger.Error (moveException, "There was a problem moving to the next item in the stream");
 
             }
