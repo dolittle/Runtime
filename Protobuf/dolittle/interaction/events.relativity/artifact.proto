@@ -9,7 +9,7 @@ package dolittle.events.relativity;
 
 import "system/guid.proto";
 
-option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction";
 
 // Represents the artifact
 message Artifact {
