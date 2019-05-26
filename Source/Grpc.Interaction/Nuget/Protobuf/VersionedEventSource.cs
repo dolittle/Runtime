@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/versioned_event_source.proto</summary>
   public static partial class VersionedEventSourceReflection {
@@ -29,12 +29,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "b3RvIp4BChRWZXJzaW9uZWRFdmVudFNvdXJjZRI/Cgd2ZXJzaW9uGAEgASgL",
             "Mi4uZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuRXZlbnRTb3VyY2VWZXJz",
             "aW9uEiMKC2V2ZW50U291cmNlGAIgASgLMg4uZG9saXR0bGUuZ3VpZBIgCghh",
-            "cnRpZmFjdBgDIAEoCzIOLmRvbGl0dGxlLmd1aWRCLaoCKkRvbGl0dGxlLlJ1",
-            "bnRpbWUuR3JwYy5JbnRlcmFjdGlvbi5Qcm90b2J1ZmIGcHJvdG8z"));
+            "cnRpZmFjdBgDIAEoCzIOLmRvbGl0dGxlLmd1aWRCJKoCIURvbGl0dGxlLlJ1",
+            "bnRpbWUuR3JwYy5JbnRlcmFjdGlvbmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersionReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersionReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource.Parser, new[]{ "Version", "EventSource", "Artifact" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource), global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource.Parser, new[]{ "Version", "EventSource", "Artifact" }, null, null, null)
           }));
     }
     #endregion
@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSourceReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSourceReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -80,9 +80,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "version" field.</summary>
     public const int VersionFieldNumber = 1;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersion version_;
+    private global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersion version_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersion Version {
+    public global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersion Version {
       get { return version_; }
       set {
         version_ = value;
@@ -182,7 +182,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
       }
       if (other.version_ != null) {
         if (version_ == null) {
-          version_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersion();
+          version_ = new global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersion();
         }
         Version.MergeFrom(other.Version);
       }
@@ -210,7 +210,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             break;
           case 10: {
             if (version_ == null) {
-              version_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersion();
+              version_ = new global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersion();
             }
             input.ReadMessage(version_);
             break;

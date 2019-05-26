@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/event_envelope.proto</summary>
   public static partial class EventEnvelopeReflection {
@@ -29,12 +29,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "cmVsYXRpdml0eS9wcm9wZXJ0eV9iYWcucHJvdG8ihAEKDUV2ZW50RW52ZWxv",
             "cGUSOwoIbWV0YWRhdGEYASABKAsyKS5kb2xpdHRsZS5ldmVudHMucmVsYXRp",
             "dml0eS5FdmVudE1ldGFkYXRhEjYKBWV2ZW50GAIgASgLMicuZG9saXR0bGUu",
-            "ZXZlbnRzLnJlbGF0aXZpdHkuUHJvcGVydHlCYWdCLaoCKkRvbGl0dGxlLlJ1",
-            "bnRpbWUuR3JwYy5JbnRlcmFjdGlvbi5Qcm90b2J1ZmIGcHJvdG8z"));
+            "ZXZlbnRzLnJlbGF0aXZpdHkuUHJvcGVydHlCYWdCJKoCIURvbGl0dGxlLlJ1",
+            "bnRpbWUuR3JwYy5JbnRlcmFjdGlvbmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadataReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.PropertyBagReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Dolittle.Runtime.Grpc.Interaction.EventMetadataReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.PropertyBagReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelope), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelope.Parser, new[]{ "Metadata", "Event" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.EventEnvelope), global::Dolittle.Runtime.Grpc.Interaction.EventEnvelope.Parser, new[]{ "Metadata", "Event" }, null, null, null)
           }));
     }
     #endregion
@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelopeReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.EventEnvelopeReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -79,9 +79,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "metadata" field.</summary>
     public const int MetadataFieldNumber = 1;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadata metadata_;
+    private global::Dolittle.Runtime.Grpc.Interaction.EventMetadata metadata_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadata Metadata {
+    public global::Dolittle.Runtime.Grpc.Interaction.EventMetadata Metadata {
       get { return metadata_; }
       set {
         metadata_ = value;
@@ -90,9 +90,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "event" field.</summary>
     public const int EventFieldNumber = 2;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.PropertyBag event_;
+    private global::Dolittle.Runtime.Grpc.Interaction.PropertyBag event_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.PropertyBag Event {
+    public global::Dolittle.Runtime.Grpc.Interaction.PropertyBag Event {
       get { return event_; }
       set {
         event_ = value;
@@ -161,13 +161,13 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
       }
       if (other.metadata_ != null) {
         if (metadata_ == null) {
-          metadata_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadata();
+          metadata_ = new global::Dolittle.Runtime.Grpc.Interaction.EventMetadata();
         }
         Metadata.MergeFrom(other.Metadata);
       }
       if (other.event_ != null) {
         if (event_ == null) {
-          event_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.PropertyBag();
+          event_ = new global::Dolittle.Runtime.Grpc.Interaction.PropertyBag();
         }
         Event.MergeFrom(other.Event);
       }
@@ -183,14 +183,14 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             break;
           case 10: {
             if (metadata_ == null) {
-              metadata_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadata();
+              metadata_ = new global::Dolittle.Runtime.Grpc.Interaction.EventMetadata();
             }
             input.ReadMessage(metadata_);
             break;
           }
           case 18: {
             if (event_ == null) {
-              event_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.PropertyBag();
+              event_ = new global::Dolittle.Runtime.Grpc.Interaction.PropertyBag();
             }
             input.ReadMessage(event_);
             break;

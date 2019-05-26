@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/artifact.proto</summary>
   public static partial class ArtifactReflection {
@@ -25,12 +25,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "CjVkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9hcnRp",
             "ZmFjdC5wcm90bxIaZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkaEXN5c3Rl",
             "bS9ndWlkLnByb3RvIjoKCEFydGlmYWN0EhoKAmlkGAEgASgLMg4uZG9saXR0",
-            "bGUuZ3VpZBISCgpnZW5lcmF0aW9uGAIgASgFQi2qAipEb2xpdHRsZS5SdW50",
-            "aW1lLkdycGMuSW50ZXJhY3Rpb24uUHJvdG9idWZiBnByb3RvMw=="));
+            "bGUuZ3VpZBISCgpnZW5lcmF0aW9uGAIgASgFQiSqAiFEb2xpdHRsZS5SdW50",
+            "aW1lLkdycGMuSW50ZXJhY3Rpb25iBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact.Parser, new[]{ "Id", "Generation" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Artifact), global::Dolittle.Runtime.Grpc.Interaction.Artifact.Parser, new[]{ "Id", "Generation" }, null, null, null)
           }));
     }
     #endregion
@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ArtifactReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.ArtifactReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

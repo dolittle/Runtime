@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using grpc = global::Grpc.Core;
 
-namespace Dolittle.Runtime.Grpc.Interaction.Grpc {
+namespace Dolittle.Runtime.Grpc.Interaction {
   /// <summary>
   /// Represents the service for working with quantum tunnel
   /// </summary>
@@ -22,10 +22,10 @@ namespace Dolittle.Runtime.Grpc.Interaction.Grpc {
   {
     static readonly string __ServiceName = "dolittle.events.relativity.QuantumTunnelService";
 
-    static readonly grpc::Marshaller<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel> __Marshaller_OpenTunnel = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel.Parser.ParseFrom);
-    static readonly grpc::Marshaller<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> __Marshaller_CommittedEventStreamWithContext = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel> __Marshaller_OpenTunnel = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext> __Marshaller_CommittedEventStreamWithContext = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext.Parser.ParseFrom);
 
-    static readonly grpc::Method<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> __Method_Open = new grpc::Method<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext>(
+    static readonly grpc::Method<global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel, global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext> __Method_Open = new grpc::Method<global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel, global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext>(
         grpc::MethodType.ServerStreaming,
         __ServiceName,
         "Open",
@@ -35,13 +35,13 @@ namespace Dolittle.Runtime.Grpc.Interaction.Grpc {
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor
     {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Grpc.QuantumTunnelReflection.Descriptor.Services[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.QuantumTunnelReflection.Descriptor.Services[0]; }
     }
 
     /// <summary>Base class for server-side implementations of QuantumTunnelService</summary>
     public abstract partial class QuantumTunnelServiceBase
     {
-      public virtual global::System.Threading.Tasks.Task Open(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel request, grpc::IServerStreamWriter<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> responseStream, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task Open(global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel request, grpc::IServerStreamWriter<global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -71,11 +71,11 @@ namespace Dolittle.Runtime.Grpc.Interaction.Grpc {
       {
       }
 
-      public virtual grpc::AsyncServerStreamingCall<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> Open(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel request, grpc::Metadata headers = null, DateTime? deadline = null, CancellationToken cancellationToken = default(CancellationToken))
+      public virtual grpc::AsyncServerStreamingCall<global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext> Open(global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel request, grpc::Metadata headers = null, DateTime? deadline = null, CancellationToken cancellationToken = default(CancellationToken))
       {
         return Open(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual grpc::AsyncServerStreamingCall<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext> Open(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel request, grpc::CallOptions options)
+      public virtual grpc::AsyncServerStreamingCall<global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext> Open(global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel request, grpc::CallOptions options)
       {
         return CallInvoker.AsyncServerStreamingCall(__Method_Open, null, options, request);
       }

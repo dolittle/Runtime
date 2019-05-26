@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/open_tunnel.proto</summary>
   public static partial class OpenTunnelReflection {
@@ -32,12 +32,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "CGNsaWVudElkGAMgASgLMg4uZG9saXR0bGUuZ3VpZBI5CgdvZmZzZXRzGAQg",
             "AygLMiguZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuVGVuYW50T2Zmc2V0",
             "EjQKBmV2ZW50cxgFIAMoCzIkLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5",
-            "LkFydGlmYWN0Qi2qAipEb2xpdHRsZS5SdW50aW1lLkdycGMuSW50ZXJhY3Rp",
-            "b24uUHJvdG9idWZiBnByb3RvMw=="));
+            "LkFydGlmYWN0QiSqAiFEb2xpdHRsZS5SdW50aW1lLkdycGMuSW50ZXJhY3Rp",
+            "b25iBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffsetReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.TenantOffsetReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnel.Parser, new[]{ "Application", "BoundedContext", "ClientId", "Offsets", "Events" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel), global::Dolittle.Runtime.Grpc.Interaction.OpenTunnel.Parser, new[]{ "Application", "BoundedContext", "ClientId", "Offsets", "Events" }, null, null, null)
           }));
     }
     #endregion
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OpenTunnelReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.OpenTunnelReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -118,21 +118,21 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "offsets" field.</summary>
     public const int OffsetsFieldNumber = 4;
-    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffset> _repeated_offsets_codec
-        = pb::FieldCodec.ForMessage(34, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffset.Parser);
-    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffset> offsets_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffset>();
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.TenantOffset> _repeated_offsets_codec
+        = pb::FieldCodec.ForMessage(34, global::Dolittle.Runtime.Grpc.Interaction.TenantOffset.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.TenantOffset> offsets_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.TenantOffset>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffset> Offsets {
+    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.TenantOffset> Offsets {
       get { return offsets_; }
     }
 
     /// <summary>Field number for the "events" field.</summary>
     public const int EventsFieldNumber = 5;
-    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact> _repeated_events_codec
-        = pb::FieldCodec.ForMessage(42, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact.Parser);
-    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact> events_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact>();
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.Artifact> _repeated_events_codec
+        = pb::FieldCodec.ForMessage(42, global::Dolittle.Runtime.Grpc.Interaction.Artifact.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Artifact> events_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Artifact>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact> Events {
+    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Artifact> Events {
       get { return events_; }
     }
 

@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/committed_event_stream.proto</summary>
   public static partial class CommittedEventStreamReflection {
@@ -33,12 +33,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "ZBgDIAEoCzIOLmRvbGl0dGxlLmd1aWQSEQoJdGltZVN0YW1wGAQgASgDEiUK",
             "DWNvcnJlbGF0aW9uSWQYBSABKAsyDi5kb2xpdHRsZS5ndWlkEjkKBmV2ZW50",
             "cxgGIAMoCzIpLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5LkV2ZW50RW52",
-            "ZWxvcGVCLaoCKkRvbGl0dGxlLlJ1bnRpbWUuR3JwYy5JbnRlcmFjdGlvbi5Q",
-            "cm90b2J1ZmIGcHJvdG8z"));
+            "ZWxvcGVCJKoCIURvbGl0dGxlLlJ1bnRpbWUuR3JwYy5JbnRlcmFjdGlvbmIG",
+            "cHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSourceReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelopeReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSourceReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.EventEnvelopeReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStream), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStream.Parser, new[]{ "Source", "Sequence", "Id", "TimeStamp", "CorrelationId", "Events" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStream), global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStream.Parser, new[]{ "Source", "Sequence", "Id", "TimeStamp", "CorrelationId", "Events" }, null, null, null)
           }));
     }
     #endregion
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -87,9 +87,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "source" field.</summary>
     public const int SourceFieldNumber = 1;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource source_;
+    private global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource source_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource Source {
+    public global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource Source {
       get { return source_; }
       set {
         source_ = value;
@@ -142,11 +142,11 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "events" field.</summary>
     public const int EventsFieldNumber = 6;
-    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelope> _repeated_events_codec
-        = pb::FieldCodec.ForMessage(50, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelope.Parser);
-    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelope> events_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelope>();
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.EventEnvelope> _repeated_events_codec
+        = pb::FieldCodec.ForMessage(50, global::Dolittle.Runtime.Grpc.Interaction.EventEnvelope.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.EventEnvelope> events_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.EventEnvelope>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventEnvelope> Events {
+    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.EventEnvelope> Events {
       get { return events_; }
     }
 
@@ -243,7 +243,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
       }
       if (other.source_ != null) {
         if (source_ == null) {
-          source_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource();
+          source_ = new global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource();
         }
         Source.MergeFrom(other.Source);
       }
@@ -278,7 +278,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             break;
           case 10: {
             if (source_ == null) {
-              source_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource();
+              source_ = new global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource();
             }
             input.ReadMessage(source_);
             break;

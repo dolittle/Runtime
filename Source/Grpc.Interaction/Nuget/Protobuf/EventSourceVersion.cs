@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/event_source_version.proto</summary>
   public static partial class EventSourceVersionReflection {
@@ -25,12 +25,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "CkFkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS9ldmVu",
             "dF9zb3VyY2VfdmVyc2lvbi5wcm90bxIaZG9saXR0bGUuZXZlbnRzLnJlbGF0",
             "aXZpdHkiNgoSRXZlbnRTb3VyY2VWZXJzaW9uEg4KBmNvbW1pdBgBIAEoBBIQ",
-            "CghzZXF1ZW5jZRgCIAEoDUItqgIqRG9saXR0bGUuUnVudGltZS5HcnBjLklu",
-            "dGVyYWN0aW9uLlByb3RvYnVmYgZwcm90bzM="));
+            "CghzZXF1ZW5jZRgCIAEoDUIkqgIhRG9saXR0bGUuUnVudGltZS5HcnBjLklu",
+            "dGVyYWN0aW9uYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersion), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersion.Parser, new[]{ "Commit", "Sequence" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersion), global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersion.Parser, new[]{ "Commit", "Sequence" }, null, null, null)
           }));
     }
     #endregion
@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventSourceVersionReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.EventSourceVersionReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

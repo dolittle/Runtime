@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/execution_context.proto</summary>
   public static partial class ExecutionContextReflection {
@@ -31,12 +31,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "dBgDIAEoCzIOLmRvbGl0dGxlLmd1aWQSJQoNY29ycmVsYXRpb25JZBgEIAEo",
             "CzIOLmRvbGl0dGxlLmd1aWQSEwoLZW52aXJvbm1lbnQYBSABKAkSMQoGY2xh",
             "aW1zGAYgAygLMiEuZG9saXR0bGUuZXZlbnRzLnJlbGF0aXZpdHkuQ2xhaW0S",
-            "DwoHY3VsdHVyZRgHIAEoCUItqgIqRG9saXR0bGUuUnVudGltZS5HcnBjLklu",
-            "dGVyYWN0aW9uLlByb3RvYnVmYgZwcm90bzM="));
+            "DwoHY3VsdHVyZRgHIAEoCUIkqgIhRG9saXR0bGUuUnVudGltZS5HcnBjLklu",
+            "dGVyYWN0aW9uYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ClaimReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.ClaimReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContext), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContext.Parser, new[]{ "Application", "BoundedContext", "Tenant", "CorrelationId", "Environment", "Claims", "Culture" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.ExecutionContext), global::Dolittle.Runtime.Grpc.Interaction.ExecutionContext.Parser, new[]{ "Application", "BoundedContext", "Tenant", "CorrelationId", "Environment", "Claims", "Culture" }, null, null, null)
           }));
     }
     #endregion
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContextReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.ExecutionContextReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -141,11 +141,11 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "claims" field.</summary>
     public const int ClaimsFieldNumber = 6;
-    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Claim> _repeated_claims_codec
-        = pb::FieldCodec.ForMessage(50, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Claim.Parser);
-    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Claim> claims_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Claim>();
+    private static readonly pb::FieldCodec<global::Dolittle.Runtime.Grpc.Interaction.Claim> _repeated_claims_codec
+        = pb::FieldCodec.ForMessage(50, global::Dolittle.Runtime.Grpc.Interaction.Claim.Parser);
+    private readonly pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Claim> claims_ = new pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Claim>();
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Claim> Claims {
+    public pbc::RepeatedField<global::Dolittle.Runtime.Grpc.Interaction.Claim> Claims {
       get { return claims_; }
     }
 

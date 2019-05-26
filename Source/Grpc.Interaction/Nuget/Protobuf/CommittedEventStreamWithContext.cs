@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/committed_event_stream_with_context.proto</summary>
   public static partial class CommittedEventStreamWithContextReflection {
@@ -31,12 +31,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "dGhDb250ZXh0EkAKBmNvbW1pdBgBIAEoCzIwLmRvbGl0dGxlLmV2ZW50cy5y",
             "ZWxhdGl2aXR5LkNvbW1pdHRlZEV2ZW50U3RyZWFtEj0KB2NvbnRleHQYAiAB",
             "KAsyLC5kb2xpdHRsZS5ldmVudHMucmVsYXRpdml0eS5FeGVjdXRpb25Db250",
-            "ZXh0Qi2qAipEb2xpdHRsZS5SdW50aW1lLkdycGMuSW50ZXJhY3Rpb24uUHJv",
-            "dG9idWZiBnByb3RvMw=="));
+            "ZXh0QiSqAiFEb2xpdHRsZS5SdW50aW1lLkdycGMuSW50ZXJhY3Rpb25iBnBy",
+            "b3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContextReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.ExecutionContextReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContext.Parser, new[]{ "Commit", "Context" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext), global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContext.Parser, new[]{ "Commit", "Context" }, null, null, null)
           }));
     }
     #endregion
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStreamWithContextReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStreamWithContextReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -81,9 +81,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "commit" field.</summary>
     public const int CommitFieldNumber = 1;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStream commit_;
+    private global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStream commit_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStream Commit {
+    public global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStream Commit {
       get { return commit_; }
       set {
         commit_ = value;
@@ -92,9 +92,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "context" field.</summary>
     public const int ContextFieldNumber = 2;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContext context_;
+    private global::Dolittle.Runtime.Grpc.Interaction.ExecutionContext context_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContext Context {
+    public global::Dolittle.Runtime.Grpc.Interaction.ExecutionContext Context {
       get { return context_; }
       set {
         context_ = value;
@@ -163,13 +163,13 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
       }
       if (other.commit_ != null) {
         if (commit_ == null) {
-          commit_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStream();
+          commit_ = new global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStream();
         }
         Commit.MergeFrom(other.Commit);
       }
       if (other.context_ != null) {
         if (context_ == null) {
-          context_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContext();
+          context_ = new global::Dolittle.Runtime.Grpc.Interaction.ExecutionContext();
         }
         Context.MergeFrom(other.Context);
       }
@@ -185,14 +185,14 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             break;
           case 10: {
             if (commit_ == null) {
-              commit_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.CommittedEventStream();
+              commit_ = new global::Dolittle.Runtime.Grpc.Interaction.CommittedEventStream();
             }
             input.ReadMessage(commit_);
             break;
           }
           case 18: {
             if (context_ == null) {
-              context_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ExecutionContext();
+              context_ = new global::Dolittle.Runtime.Grpc.Interaction.ExecutionContext();
             }
             input.ReadMessage(context_);
             break;

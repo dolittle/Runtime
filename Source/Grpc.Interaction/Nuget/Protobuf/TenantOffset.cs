@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/tenant_offset.proto</summary>
   public static partial class TenantOffsetReflection {
@@ -25,13 +25,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "Cjpkb2xpdHRsZS9pbnRlcmFjdGlvbi9ldmVudHMucmVsYXRpdml0eS90ZW5h",
             "bnRfb2Zmc2V0LnByb3RvEhpkb2xpdHRsZS5ldmVudHMucmVsYXRpdml0eRoR",
             "c3lzdGVtL2d1aWQucHJvdG8iPgoMVGVuYW50T2Zmc2V0Eh4KBnRlbmFudBgB",
-            "IAEoCzIOLmRvbGl0dGxlLmd1aWQSDgoGb2Zmc2V0GAIgASgEQi2qAipEb2xp",
-            "dHRsZS5SdW50aW1lLkdycGMuSW50ZXJhY3Rpb24uUHJvdG9idWZiBnByb3Rv",
-            "Mw=="));
+            "IAEoCzIOLmRvbGl0dGxlLmd1aWQSDgoGb2Zmc2V0GAIgASgEQiSqAiFEb2xp",
+            "dHRsZS5SdW50aW1lLkdycGMuSW50ZXJhY3Rpb25iBnByb3RvMw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffset), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffset.Parser, new[]{ "Tenant", "Offset" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.TenantOffset), global::Dolittle.Runtime.Grpc.Interaction.TenantOffset.Parser, new[]{ "Tenant", "Offset" }, null, null, null)
           }));
     }
     #endregion
@@ -48,7 +47,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.TenantOffsetReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.TenantOffsetReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

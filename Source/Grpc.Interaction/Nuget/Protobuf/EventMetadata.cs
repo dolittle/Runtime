@@ -7,7 +7,7 @@ using pb = global::Google.Protobuf;
 using pbc = global::Google.Protobuf.Collections;
 using pbr = global::Google.Protobuf.Reflection;
 using scg = global::System.Collections.Generic;
-namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
+namespace Dolittle.Runtime.Grpc.Interaction {
 
   /// <summary>Holder for reflection information generated from dolittle/interaction/events.relativity/event_metadata.proto</summary>
   public static partial class EventMetadataReflection {
@@ -35,12 +35,12 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
             "ZBI2CghhcnRpZmFjdBgEIAEoCzIkLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2",
             "aXR5LkFydGlmYWN0EhAKCG9jY3VycmVkGAUgASgDEkQKD29yaWdpbmFsQ29u",
             "dGV4dBgGIAEoCzIrLmRvbGl0dGxlLmV2ZW50cy5yZWxhdGl2aXR5Lk9yaWdp",
-            "bmFsQ29udGV4dEItqgIqRG9saXR0bGUuUnVudGltZS5HcnBjLkludGVyYWN0",
-            "aW9uLlByb3RvYnVmYgZwcm90bzM="));
+            "bmFsQ29udGV4dEIkqgIhRG9saXR0bGUuUnVudGltZS5HcnBjLkludGVyYWN0",
+            "aW9uYgZwcm90bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSourceReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OriginalContextReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.ArtifactReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSourceReflection.Descriptor, global::Dolittle.Runtime.Grpc.Interaction.OriginalContextReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadata), global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadata.Parser, new[]{ "EventId", "Source", "CorrelationId", "Artifact", "Occurred", "OriginalContext" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Grpc.Interaction.EventMetadata), global::Dolittle.Runtime.Grpc.Interaction.EventMetadata.Parser, new[]{ "EventId", "Source", "CorrelationId", "Artifact", "Occurred", "OriginalContext" }, null, null, null)
           }));
     }
     #endregion
@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Dolittle.Runtime.Grpc.Interaction.Protobuf.EventMetadataReflection.Descriptor.MessageTypes[0]; }
+      get { return global::Dolittle.Runtime.Grpc.Interaction.EventMetadataReflection.Descriptor.MessageTypes[0]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -100,9 +100,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "source" field.</summary>
     public const int SourceFieldNumber = 2;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource source_;
+    private global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource source_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource Source {
+    public global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource Source {
       get { return source_; }
       set {
         source_ = value;
@@ -122,9 +122,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "artifact" field.</summary>
     public const int ArtifactFieldNumber = 4;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact artifact_;
+    private global::Dolittle.Runtime.Grpc.Interaction.Artifact artifact_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact Artifact {
+    public global::Dolittle.Runtime.Grpc.Interaction.Artifact Artifact {
       get { return artifact_; }
       set {
         artifact_ = value;
@@ -144,9 +144,9 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
 
     /// <summary>Field number for the "originalContext" field.</summary>
     public const int OriginalContextFieldNumber = 6;
-    private global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OriginalContext originalContext_;
+    private global::Dolittle.Runtime.Grpc.Interaction.OriginalContext originalContext_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OriginalContext OriginalContext {
+    public global::Dolittle.Runtime.Grpc.Interaction.OriginalContext OriginalContext {
       get { return originalContext_; }
       set {
         originalContext_ = value;
@@ -257,7 +257,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
       }
       if (other.source_ != null) {
         if (source_ == null) {
-          source_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource();
+          source_ = new global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource();
         }
         Source.MergeFrom(other.Source);
       }
@@ -269,7 +269,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
       }
       if (other.artifact_ != null) {
         if (artifact_ == null) {
-          artifact_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact();
+          artifact_ = new global::Dolittle.Runtime.Grpc.Interaction.Artifact();
         }
         Artifact.MergeFrom(other.Artifact);
       }
@@ -278,7 +278,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
       }
       if (other.originalContext_ != null) {
         if (originalContext_ == null) {
-          originalContext_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OriginalContext();
+          originalContext_ = new global::Dolittle.Runtime.Grpc.Interaction.OriginalContext();
         }
         OriginalContext.MergeFrom(other.OriginalContext);
       }
@@ -301,7 +301,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
           }
           case 18: {
             if (source_ == null) {
-              source_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.VersionedEventSource();
+              source_ = new global::Dolittle.Runtime.Grpc.Interaction.VersionedEventSource();
             }
             input.ReadMessage(source_);
             break;
@@ -315,7 +315,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
           }
           case 34: {
             if (artifact_ == null) {
-              artifact_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.Artifact();
+              artifact_ = new global::Dolittle.Runtime.Grpc.Interaction.Artifact();
             }
             input.ReadMessage(artifact_);
             break;
@@ -326,7 +326,7 @@ namespace Dolittle.Runtime.Grpc.Interaction.Protobuf {
           }
           case 50: {
             if (originalContext_ == null) {
-              originalContext_ = new global::Dolittle.Runtime.Grpc.Interaction.Protobuf.OriginalContext();
+              originalContext_ = new global::Dolittle.Runtime.Grpc.Interaction.OriginalContext();
             }
             input.ReadMessage(originalContext_);
             break;
