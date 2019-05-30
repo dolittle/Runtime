@@ -9,6 +9,6 @@ resources:
       endpoint: dolittle-tools
 
 jobs:
-- template: dotnet.yml@templates
+- template: dotnet-framework.yml@templates
   parameters:
     CASCADES: dolittle-runtime/DotNET.SDK
