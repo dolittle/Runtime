@@ -5,10 +5,10 @@ resources:
   repositories:
     - repository: templates
       type: github
-      name: dolittle-tools/Build
+      name: dolittle-tools/AzureDevOps
       endpoint: dolittle-tools
 
 jobs:
-- template: dotnet-framework.yml@templates
+- template: Source/DotNet/framework.yml@templates
   parameters:
     CASCADES: dolittle-runtime/DotNET.SDK
