@@ -1,0 +1,14 @@
+trigger:
+- master
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: dolittle-tools/Build
+      endpoint: dolittle-tools
+
+jobs:
+- template: dotnet.yml@templates
+  parameters:
+    CASCADES: dolittle-runtime/DotNET.SDK
