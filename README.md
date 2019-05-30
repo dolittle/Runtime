@@ -1,5 +1,7 @@
 # Runtime
 
+[![Build Status](https://dolittle.visualstudio.com/Dolittle%20open-source%20repositories/_apis/build/status/dolittle-runtime.Runtime?branchName=master)](https://dolittle.visualstudio.com/Dolittle%20open-source%20repositories/_build/latest?definitionId=9&branchName=master)
+
 ## Cloning
 
 This repository has sub modules, clone it with:
@@ -36,12 +38,6 @@ $ Build\build.sh
 | Platform | Production   | From CI  |
 | ------- | ------- | ------ |
 | .NET Runtime | [![NuGet](https://img.shields.io/nuget/v/dolittle.Runtime.Events.svg)](https://www.nuget.org/packages?q=dolittle.Runtime) | [![MyGet](https://img.shields.io/myget/dolittle/vpre/dolittle.Runtime.Events.svg)](https://www.myget.org/gallery/dolittle) |
-
-## Build Status
-
-| Project | Windows | Linux / macOS |
-| -------- | ------ | ------------- |
-| .NET Runtime | [![AppVeyor Build Status](https://ci.appveyor.com/api/projects/status/83b4tlt2euskb582?svg=true)](https://ci.appveyor.com/project/Dolittle/dotnet-runtime) [![AppVeyor tests](https://img.shields.io/appveyor/tests/Dolittle/dotnet-runtime.svg)]() | [![Travis Build Status](https://travis-ci.org/dolittle/DotNET.Runtime.svg?branch=master)](https://travis-ci.org/dolittle/DotNET.Runtime) |
 
 ## Visual Studio
 
