@@ -8,11 +8,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_EventSource
 {
     public class when_converting_event_source_version_to_and_from_protobuf
     {
-        static Dolittle.Runtime.Events.EventSourceVersion original;
-        static EventSourceVersion protobuf;
-        static Dolittle.Runtime.Events.EventSourceVersion result;
+        static EventSourceVersion original;
+        static Runtime.Grpc.Interaction.EventSourceVersion protobuf;
+        static EventSourceVersion result;
 
-        Establish context = () => original = new Dolittle.Runtime.Events.EventSourceVersion(42,43);
+        Establish context = () => original = new EventSourceVersion(42,43);
 
         Because of = () => 
         {

@@ -14,20 +14,20 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_EventExtens
 {
     public class when_converting_to_and_from_protobuf
     {
-        static Dolittle.Runtime.Events.EventMetadata original;
-        static EventMetadata protobuf;
+        static EventMetadata original;
+        static Runtime.Grpc.Interaction.EventMetadata protobuf;
         static Dolittle.Runtime.Events.EventMetadata result;
 
         Establish context = () => 
         {
             var artifactId = ArtifactId.New();
-            original = new Dolittle.Runtime.Events.EventMetadata(
+            original = new EventMetadata(
                 EventId.New(),
-                new Dolittle.Runtime.Events.VersionedEventSource(EventSourceId.New(), artifactId),
+                new VersionedEventSource(EventSourceId.New(), artifactId),
                 CorrelationId.New(),
                 new Dolittle.Artifacts.Artifact(artifactId, ArtifactGeneration.First),
                 DateTimeOffset.FromUnixTimeMilliseconds(1540715541241),
-                new Dolittle.Runtime.Events.OriginalContext(
+                new OriginalContext(
                     Application.New(), 
                     BoundedContext.New(), 
                     Guid.NewGuid(),

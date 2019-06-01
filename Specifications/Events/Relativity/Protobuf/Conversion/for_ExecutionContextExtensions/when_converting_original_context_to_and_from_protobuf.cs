@@ -11,11 +11,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_ArtifactExt
 {
     public class when_converting_original_context_to_and_from_protobuf
     {
-        static Dolittle.Runtime.Events.OriginalContext original;
-        static OriginalContext protobuf;
-        static Dolittle.Runtime.Events.OriginalContext result;
+        static OriginalContext original;
+        static Runtime.Grpc.Interaction.OriginalContext protobuf;
+        static OriginalContext result;
 
-        Establish context = () => original = new Dolittle.Runtime.Events.OriginalContext(
+        Establish context = () => original = new OriginalContext(
             Application.New(),
             BoundedContext.New(),
             Guid.NewGuid(),

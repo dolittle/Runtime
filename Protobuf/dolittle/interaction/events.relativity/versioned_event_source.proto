@@ -10,7 +10,7 @@ import "dolittle/interaction/events.relativity/event_source_version.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction";
 
 // Represents a versioned event source
 message VersionedEventSource {

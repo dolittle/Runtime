@@ -5,15 +5,15 @@
 using System.Collections.Generic;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Relativity.Grpc;
 using Dolittle.Runtime.Server;
 using Dolittle.Serialization.Protobuf;
-using Dolittle.Runtime.Events.Relativity.Grpc;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Represents the binder that gives us the <see cref="QuantumTunnelService"/>
+    /// Represents the binder that gives us the <see cref="Runtime.Grpc.Interaction.QuantumTunnelService"/>
     /// </summary>
     /// <remarks>
     /// In order to observe black holes and its event horizons, one can do so through observing the gravitational lens.
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             var service = new QuantumTunnelServiceImplementation(_eventHorizon, _serializer, _executionContextManager, _fetchUnprocessedCommits, _logger);
             return new ServerServiceDefinition[] {
-                QuantumTunnelService.BindService(service)
+                Runtime.Grpc.Interaction.QuantumTunnelService.BindService(service)
             };
         }
     }

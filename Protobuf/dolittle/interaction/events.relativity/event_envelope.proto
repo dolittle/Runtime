@@ -10,7 +10,7 @@ import "dolittle/interaction/events.relativity/property_bag.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction";
 
 // Represents an event
 message EventEnvelope {

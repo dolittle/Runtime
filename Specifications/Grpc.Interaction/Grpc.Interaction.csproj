@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Dolittle.Runtime.Grpc.Interaction.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/specs.props"></Import>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\Grpc.Interaction\Grpc.Interaction.csproj" />
+  </ItemGroup>
+
+
+</Project>

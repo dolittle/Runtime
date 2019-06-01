@@ -4,18 +4,18 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
-using Dolittle.Serialization.Protobuf;
-using Dolittle.Runtime.Events.Relativity.Protobuf;
-using Grpc.Core;
-using Dolittle.Execution;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Collections;
-using System.Linq;
-using System.Collections.Generic;
+using Dolittle.Execution;
+using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Grpc.Interaction;
+using Dolittle.Serialization.Protobuf;
+using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -25,8 +25,8 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnel : IQuantumTunnel
     {
         readonly ISerializer _serializer;
-        readonly IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> _responseStream;
-        readonly ConcurrentQueue<Protobuf.CommittedEventStreamWithContext> _outbox;
+        readonly IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _responseStream;
+        readonly ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
@@ -35,20 +35,20 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Initializes a new instance of <see cref="IQuantumTunnel"/>
         /// </summary>
-        /// <param name="serializer"><see cref="ISerializer"/> to use</param>
+        /// /// <param name="serializer"><see cref="ISerializer"/> to use</param>
         /// <param name="responseStream">The committed event stream to pass through</param>
         /// <param name="cancellationToken"></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
-        public QuantumTunnel(
+        public QuantumTunnel (
             ISerializer serializer,
-            IServerStreamWriter<Protobuf.CommittedEventStreamWithContext> responseStream,
+            IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream,
             CancellationToken cancellationToken,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
-            _outbox = new ConcurrentQueue<Protobuf.CommittedEventStreamWithContext>();
-            _waitHandle = new AutoResetEvent(false);
+            _outbox = new ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> ();
+            _waitHandle = new AutoResetEvent (false);
             _cancelationToken = cancellationToken;
             _logger = logger;
         }
@@ -57,45 +57,45 @@ namespace Dolittle.Runtime.Events.Relativity
         public event QuantumTunnelCollapsed Collapsed = (q) => { };
 
         /// <inheritdoc/>
-        public void PassThrough(Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext contextualEventStream)
+        public void PassThrough (Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext contextualEventStream)
         {
             try
             {
-                var message = contextualEventStream.ToProtobuf();
-                _outbox.Enqueue(message);
-                _waitHandle.Set();
+                var message = contextualEventStream.ToProtobuf ();
+                _outbox.Enqueue (message);
+                _waitHandle.Set ();
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Error creating and enqueueing committed event stream");
+                _logger.Error (ex, "Error creating and enqueueing committed event stream");
             }
         }
 
         /// <inheritdoc/>
-        public async Task Open(IEnumerable<TenantOffset> tenantOffsets)
+        public async Task Open (IEnumerable<TenantOffset> tenantOffsets)
         {
-            await Task.Run(async() =>
+            await Task.Run (async () =>
             {
                 for (;;)
                 {
                     if (_cancelationToken.IsCancellationRequested) break;
                     try
                     {
-                        _waitHandle.WaitOne(1000);
+                        _waitHandle.WaitOne (1000);
                         if (_outbox.IsEmpty) continue;
 
-                        Protobuf.CommittedEventStreamWithContext message;
+                        Runtime.Grpc.Interaction.CommittedEventStreamWithContext message;
                         while (!_outbox.IsEmpty)
                         {
-                            if (_outbox.TryDequeue(out message))
+                            if (_outbox.TryDequeue (out message))
                             {
                                 try
                                 {
-                                    await _responseStream.WriteAsync(message);
+                                    await _responseStream.WriteAsync (message);
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.Error(ex, "Error trying to send");
+                                    _logger.Error (ex, "Error trying to send");
                                     break;
                                 }
                             }
@@ -103,28 +103,28 @@ namespace Dolittle.Runtime.Events.Relativity
                     }
                     catch (Exception outerException)
                     {
-                        _logger.Error(outerException, "Error during emptying of outbox");
+                        _logger.Error (outerException, "Error during emptying of outbox");
                     }
                 }
             });
 
-            Collapsed(this);
+            Collapsed (this);
         }
 
-        void AddToQueue(IEnumerable<Commits> commits)
+        void AddToQueue (IEnumerable<Commits> commits)
         {
-            commits.ForEach(_ => AddToQueue(_));
+            commits.ForEach (_ => AddToQueue (_));
         }
 
-        void AddToQueue(Commits commits)
+        void AddToQueue (Commits commits)
         {
-            commits.ForEach(_ => AddToQueue(_));
+            commits.ForEach (_ => AddToQueue (_));
         }
 
-        void AddToQueue(Store.CommittedEventStream committedEventStream)
+        void AddToQueue (Store.CommittedEventStream committedEventStream)
         {
-            var originalContext = committedEventStream.Events.First().Metadata.OriginalContext;
-            _outbox.Enqueue(new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext(committedEventStream, originalContext.ToExecutionContext(committedEventStream.CorrelationId)).ToProtobuf());
+            var originalContext = committedEventStream.Events.First ().Metadata.OriginalContext;
+            _outbox.Enqueue (new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext (committedEventStream, originalContext.ToExecutionContext (committedEventStream.CorrelationId)).ToProtobuf ());
         }
     }
 }

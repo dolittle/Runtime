@@ -36,5 +36,6 @@
     <ProjectReference Include="..\Server\Server.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
+    <ProjectReference Include="..\Grpc.Interaction\Grpc.Interaction.csproj" />
   </ItemGroup>
 </Project>

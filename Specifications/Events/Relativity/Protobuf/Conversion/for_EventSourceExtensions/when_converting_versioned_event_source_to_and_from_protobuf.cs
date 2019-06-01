@@ -9,12 +9,12 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_EventSource
 {
     public class when_converting_versioned_event_source_to_and_from_protobuf
     {
-        static Dolittle.Runtime.Events.VersionedEventSource original;
-        static VersionedEventSource protobuf;
-        static Dolittle.Runtime.Events.VersionedEventSource result;
+        static VersionedEventSource original;
+        static Runtime.Grpc.Interaction.VersionedEventSource protobuf;
+        static VersionedEventSource result;
 
-        Establish context = () => original = new Dolittle.Runtime.Events.VersionedEventSource(
-            new Dolittle.Runtime.Events.EventSourceVersion(42,43),
+        Establish context = () => original = new VersionedEventSource(
+            new EventSourceVersion(42,43),
             new EventSourceKey(EventSourceId.New(),ArtifactId.New())
         );
 

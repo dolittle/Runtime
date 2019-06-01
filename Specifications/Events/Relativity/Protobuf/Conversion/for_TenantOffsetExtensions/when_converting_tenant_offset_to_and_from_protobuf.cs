@@ -9,11 +9,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_TenantOffse
 {
     public class when_converting_tenant_offset_to_and_from_protobuf
     {
-        static Dolittle.Runtime.Events.Relativity.TenantOffset original;
-        static TenantOffset protobuf;
-        static Dolittle.Runtime.Events.Relativity.TenantOffset result;
+        static TenantOffset original;
+        static Runtime.Grpc.Interaction.TenantOffset protobuf;
+        static TenantOffset result;
 
-        Establish context = () => original = new Dolittle.Runtime.Events.Relativity.TenantOffset(Guid.NewGuid(),42);
+        Establish context = () => original = new TenantOffset(Guid.NewGuid(),42);
 
         Because of = () => 
         {

@@ -11,7 +11,7 @@ import "dolittle/interaction/events.relativity/event_envelope.proto";
 
 package dolittle.events.relativity;
 
-option csharp_namespace = "Dolittle.Runtime.Events.Relativity.Protobuf";
+option csharp_namespace = "Dolittle.Runtime.Grpc.Interaction";
 
 // Represents a committed event stream
 message CommittedEventStream {
