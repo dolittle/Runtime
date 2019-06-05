@@ -1,0 +1,50 @@
+{
+  "name": "@dolittle/tooling.plugin.runtime",
+  "description": "A dolittle tooling plugin for the runtime",
+  "version": "0.0.1-alpha.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "homepage": "https://dolittle.io",
+  "author": "Dolittle",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dolittle-runtime/runtime.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dolittle-runtime/runtime/issues"
+  },
+  "engines": {
+    "node": ">=8.0.0"
+  },
+  "files": [
+    "lib",
+    "package.json",
+    "**/*.d.ts"
+  ],
+  "main": "lib/index.js",
+  "types": "index.d.ts",
+  "typings": "index.d.ts",
+  "scripts": {
+    "ts:cjs": "tsc -p tsconfig.json --declaration false",
+    "ts:typedefs": "tsc --outDir . --emitDeclarationOnly",
+    "ts:all": "yarn ts:cjs && yarn ts:typedefs",
+    "ts:clean": "del './*.d.ts' '**/*.d.ts' '!node_modules/**/*' lib ",
+    "build": "yarn clean && yarn ts:all",
+    "clean": "del dist && yarn ts:clean",
+    "prepublishOnly": "yarn build"
+  },
+  "dependencies": {
+    "@dolittle/tooling.common.boilerplates": "alpha",
+    "@dolittle/tooling.common.configurations": "alpha",
+    "@dolittle/tooling.common.commands": "alpha",
+    "@dolittle/tooling.common.plugins": "alpha",
+    "@dolittle/tooling.common.utilities": "alpha"
+  },
+  "devDependencies": {
+    "@types/node": "12.0.0",
+    "del-cli": "^2.0.0",
+    "typescript": "^3.4.5"
+  }
+}
