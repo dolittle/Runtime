@@ -19,17 +19,13 @@ export const applicationBoilerplateType = 'application';
  * @class ArtifactsManager
  */
 export class ApplicationsManager implements IApplicationsManager {
-    private _loadedBoilerplates: ContentBoilerplate[];
-
     /**
      * Instantiates an instance of {ApplicationsManager}.
      * @param {IContentBoilerplates} _boilerplates
      * @param {FileSystem} _fileSystem
      * @param {Logger} _logger
      */
-    constructor(private _boilerplates: IContentBoilerplates, private _fileSystem: FileSystem, private _logger: Logger) {
-        this._loadedBoilerplates = []
-    }
+    constructor(private _boilerplates: IContentBoilerplates, private _fileSystem: FileSystem, private _logger: Logger) {}
 
     get boilerplates() {
         return this._boilerplates.byType(applicationBoilerplateType);
