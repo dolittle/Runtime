@@ -1,7 +1,7 @@
 {
   "name": "@dolittle/tooling.plugin.runtime",
   "description": "A dolittle tooling plugin for the runtime",
-  "version": "0.0.0-alpha.2",
+  "version": "0.0.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },
@@ -15,7 +15,7 @@
   "bugs": {
     "url": "https://github.com/dolittle-runtime/runtime/issues"
   },
-  "keywords": ["dolittle", "tooling", "boilerplates", "bounded-context", "adornment", "veracity"],
+  "keywords": ["dolittle", "tooling", "plugin"],
   "dolittle": {
     "tooling": "5.1.*"
   },
