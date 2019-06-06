@@ -20,4 +20,4 @@ export let defaultCommandGroupsProvider: ICanProvideDefaultCommandGroups = new D
 
 export let defaultCommandsProvider: ICanProvideDefaultCommands = new DefaultCommandsProvider([]);
 
-export let defaultNamespaceProvider: ICanProvideNamespaces = new NamespaceProvider([]);
+export let namespaceProvider: ICanProvideNamespaces = new NamespaceProvider([]);

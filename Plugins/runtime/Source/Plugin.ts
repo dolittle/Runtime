@@ -3,7 +3,7 @@
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 import {IPlugin} from '@dolittle/tooling.common.plugins';
-import { DefaultCommandsProvider, DefaultCommandGroupsProvider, NamespaceProvider } from './index';
+import { ICanProvideDefaultCommands, ICanProvideDefaultCommandGroups, ICanProvideNamespaces } from '@dolittle/tooling.common.commands';
 
 /**
  * Represents an implementation of {IPlugin} that provides the dolittle runtime plugin
@@ -14,8 +14,16 @@ import { DefaultCommandsProvider, DefaultCommandGroupsProvider, NamespaceProvide
  */
 export class Plugin implements IPlugin {
 
-    readonly defaultCommandsProvider = new DefaultCommandsProvider([]);
-    readonly defaultCommandGroupsProvider = new DefaultCommandGroupsProvider([]);
-    readonly namespaceProvider = new NamespaceProvider([]);
+    constructor(defaultCommandsProvider: ICanProvideDefaultCommands, defaultCommandGroupsProvider: ICanProvideDefaultCommandGroups, namespaceProvider: ICanProvideNamespaces) {
+        this.defaultCommandsProvider = defaultCommandsProvider;
+        this.defaultCommandGroupsProvider = defaultCommandGroupsProvider;
+        this.namespaceProvider = namespaceProvider;
+    }
+
+    readonly defaultCommandsProvider: ICanProvideDefaultCommands;
+
+    readonly defaultCommandGroupsProvider: ICanProvideDefaultCommandGroups;
+    
+    readonly namespaceProvider: ICanProvideNamespaces;
 
 }
