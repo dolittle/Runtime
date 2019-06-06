@@ -1,7 +1,7 @@
 {
   "name": "@dolittle/tooling.plugin.runtime",
   "description": "A dolittle tooling plugin for the runtime",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
