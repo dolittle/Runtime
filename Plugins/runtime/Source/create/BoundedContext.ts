@@ -2,37 +2,37 @@
 *  Copyright (c) Dolittle. All rights reserved.
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
-import { chooseBoilerplate, IContentBoilerplate, IScriptRunner, Script } from "@dolittle/tooling.common.boilerplates";
-import { ICommand } from "@dolittle/tooling.common.commands";
+import { chooseBoilerplate, IContentBoilerplate, IScriptRunner } from "@dolittle/tooling.common.boilerplates";
+import { Command } from "@dolittle/tooling.common.commands";
 import { IDependencyResolvers } from "@dolittle/tooling.common.dependencies";
-import { ICanOutputMessages } from "@dolittle/tooling.common.utilities";
+import { ICanOutputMessages, NullMessageOutputter, IBusyIndicator, NullBusyIndicator } from "@dolittle/tooling.common.utilities";
 import { Logger } from "@dolittle/tooling.common.logging";
 
 import { IBoundedContextsManager } from "../index";
+
+const name = 'boundedcontext';
+const description = 'Scaffolds a Dolittle bounded context';
 
 /**
  * Represents an implementation of {ICommand} for creating a dolittle bounded context
  *
  * @export
  * @class BoundedContext
- * @implements {ICommand}
+ * @extends {Command}
  */
-export class BoundedContext implements ICommand {
+export class BoundedContext extends Command {
     
-    readonly name = 'boundedcontext';
-    readonly description = 'Scaffolds a Dolittle bounded context';
-    readonly shortDescription = 'Scaffolds a Dolittle bounded context';
-    readonly group? = 'create';
-
     /**
      * Instantiates an instance of {BoundedContext}.
      * @param {IBoundedContextsManager} _boundedContextsManager
      * @param {IDependencyResolvers} _dependencyResolvers
      */
-    constructor(private _boundedContextsManager: IBoundedContextsManager, private _dependencyResolvers: IDependencyResolvers, private _scriptRunner: IScriptRunner, private _logger: Logger) { }
+    constructor(private _boundedContextsManager: IBoundedContextsManager, private _dependencyResolvers: IDependencyResolvers, private _scriptRunner: IScriptRunner, private _logger: Logger) { 
+        super(name, description);
+    }
     
-    async action(cwd: string, coreLanguage: string, outputter: ICanOutputMessages, commandArguments?: string[], namespace?: string) {;
-        
+    async action(cwd: string, coreLanguage: string, commandArguments?: string[], namespace?: string, 
+                outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace);
         if (!boilerplates.length || boilerplates.length < 1) {
             this._logger.warn(`No bounded context boilerplates found for language '${coreLanguage}'${namespace? ' under namespace \'' + namespace + '\'' : ''} `);

@@ -3,33 +3,35 @@
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 import { chooseBoilerplate, IContentBoilerplate } from "@dolittle/tooling.common.boilerplates";
-import { ICommand } from "@dolittle/tooling.common.commands";
+import { Command } from "@dolittle/tooling.common.commands";
 import { IDependencyResolvers } from "@dolittle/tooling.common.dependencies";
 import { Logger } from "@dolittle/tooling.common.logging";
-import { ICanOutputMessages } from "@dolittle/tooling.common.utilities";
+import { ICanOutputMessages, NullMessageOutputter, IBusyIndicator, NullBusyIndicator } from "@dolittle/tooling.common.utilities";
 import { IApplicationsManager } from "../index";
+
+const name = 'application';
+const description = 'Scaffolds a Dolittle application';
+
 /**
  * Represents an implementation of {ICommand} for creating a dolittle application
  *
  * @export
  * @class Application
- * @implements {ICommand}
+ * @extends {Command}
  */
-export class Application implements ICommand {
+export class Application extends Command {
     
-    readonly name = 'application';
-    readonly description = 'Scaffolds a Dolittle application';
-    readonly shortDescription = 'Scaffolds a Dolittle application';
-    readonly group? = 'create';
-
     /**
      * Instantiates an instance of {Application}.
      * @param {IApplicationsManager} _applicationsManager
      * @param {IDependencyResolvers} _dependencyResolvers
      */
-    constructor(private _applicationsManager: IApplicationsManager, private _dependencyResolvers: IDependencyResolvers, private _logger: Logger) { }
+    constructor(private _applicationsManager: IApplicationsManager, private _dependencyResolvers: IDependencyResolvers, private _logger: Logger) {
+        super(name, description);
+    }
     
-    async action(cwd: string, coreLanguage: string, outputter: ICanOutputMessages, commandArguments?: string[], namespace?: string) {
+    async action(cwd: string, coreLanguage: string, commandArguments?: string[], namespace?: string, 
+                outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._applicationsManager.boilerplatesByLanguage(coreLanguage, namespace);
         
         if (!boilerplates.length || boilerplates.length < 1) {
