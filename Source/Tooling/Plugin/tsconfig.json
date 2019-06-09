@@ -15,13 +15,13 @@
         "inlineSourceMap": true,
         "inlineSources": true,
         "experimentalDecorators": true,
-        "baseUrl": "./Source",
-        "rootDir": "./Source",
+        "baseUrl": "./",
+        "rootDir": "./",
         "outDir": "lib",
         "paths": {
-            "@dolittle/tooling.plugin.runtime": ["Source/index.ts"]
+            "@dolittle/tooling.plugin.runtime": ["index.ts"]
         },
-        "sourceRoot": "./Source"
+        "sourceRoot": "./"
     },
     "exclude": ["**/*.d.ts", "**/for_*", "node_modules"]
 }
