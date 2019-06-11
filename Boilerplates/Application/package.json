@@ -1,0 +1,22 @@
+{
+  "name": "@dolittle/boilerplates.application",
+  "version": "2.1.1",
+  "description": "Application boilerplate for the Dolittle platform",
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dolittle-boilerplates/ApplicationTemplate.git"
+  },
+  "keywords": ["dolittle", "tooling", "boilerplates", "application"],
+  "dolittle": {
+    "tooling": "6.0.*"
+  },
+  "author": "Dolittle",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dolittle-boilerplates/ApplicationTemplate/issues"
+  },
+  "homepage": "https://dolittle.io"
+}
