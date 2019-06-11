@@ -51,4 +51,10 @@ export class ApplicationCommand extends Command {
         let boilerplateContext = await this._dependencyResolvers.resolve({}, dependencies, cwd, coreLanguage, commandArguments)
         this._applicationsManager.create(boilerplateContext, cwd, boilerplate as IContentBoilerplate);
     }
+
+    getAllDependencies(cwd: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, string>, namespace?: string) {
+        let boilerplate = this._applicationsManager.boilerplatesByLanguage(coreLanguage, namespace)[0];
+        let dependencies = boilerplate? boilerplate.dependencies : [];
+        return this.dependencies.concat(dependencies);
+    }
 }

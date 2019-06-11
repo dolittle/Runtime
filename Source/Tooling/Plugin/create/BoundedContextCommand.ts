@@ -69,4 +69,10 @@ export class BoundedContextCommand extends Command {
             }
         });
     }
+    
+    getAllDependencies(cwd: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, string>, namespace?: string) {
+        let boilerplate = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace)[0];
+        let dependencies = boilerplate? boilerplate.dependencies : [];
+        return this.dependencies.concat(dependencies);
+    }
 }
