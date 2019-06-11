@@ -16,13 +16,13 @@ const description = 'Scaffolds a Dolittle application';
  * Represents an implementation of {ICommand} for creating a dolittle application
  *
  * @export
- * @class Application
+ * @class ApplicationCommand
  * @extends {Command}
  */
-export class Application extends Command {
+export class ApplicationCommand extends Command {
     
     /**
-     * Instantiates an instance of {Application}.
+     * Instantiates an instance of {ApplicationCommand}.
      * @param {IApplicationsManager} _applicationsManager
      * @param {IDependencyResolvers} _dependencyResolvers
      */
@@ -30,7 +30,7 @@ export class Application extends Command {
         super(name, description);
     }
     
-    async action(cwd: string, coreLanguage: string, commandArguments?: string[], namespace?: string, 
+    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, string>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._applicationsManager.boilerplatesByLanguage(coreLanguage, namespace);
         

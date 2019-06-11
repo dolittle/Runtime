@@ -83,6 +83,7 @@ export class BoundedContextsManager implements IBoundedContextsManager {
             `Choose bounded context adornment`,
             chooseOneUserInputType,
             `Choose bounded context adornment`,
+            false,
             adornments.map(_ => _.name).concat('None')
         );
 
@@ -98,6 +99,7 @@ export class BoundedContextsManager implements IBoundedContextsManager {
                 `Choose ${target} interaction layer`,
                 chooseOneUserInputType,
                 `Choose ${target} interaction layer`,
+                false,
                 interactionLayers.map(_ => _.name).concat('None')
             ));
     }

@@ -17,13 +17,13 @@ const description = 'Scaffolds a Dolittle bounded context';
  * Represents an implementation of {ICommand} for creating a dolittle bounded context
  *
  * @export
- * @class BoundedContext
+ * @class BoundedContextCommand
  * @extends {Command}
  */
-export class BoundedContext extends Command {
+export class BoundedContextCommand extends Command {
     
     /**
-     * Instantiates an instance of {BoundedContext}.
+     * Instantiates an instance of {BoundedContextCommand}.
      * @param {IBoundedContextsManager} _boundedContextsManager
      * @param {IDependencyResolvers} _dependencyResolvers
      */
@@ -31,7 +31,7 @@ export class BoundedContext extends Command {
         super(name, description);
     }
     
-    async action(cwd: string, coreLanguage: string, commandArguments?: string[], namespace?: string, 
+    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, string>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace);
         if (!boilerplates.length || boilerplates.length < 1) {
