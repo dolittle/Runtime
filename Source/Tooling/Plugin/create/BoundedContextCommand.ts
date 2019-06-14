@@ -31,7 +31,7 @@ export class BoundedContextCommand extends Command {
         super(name, description);
     }
     
-    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, string>, namespace?: string, 
+    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace);
         if (!boilerplates.length || boilerplates.length < 1) {
@@ -70,7 +70,7 @@ export class BoundedContextCommand extends Command {
         });
     }
     
-    getAllDependencies(cwd: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, string>, namespace?: string) {
+    getAllDependencies(cwd: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, any>, namespace?: string) {
         let boilerplate = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace)[0];
         let dependencies = boilerplate? boilerplate.dependencies : [];
         return this.dependencies.concat(dependencies);

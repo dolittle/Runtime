@@ -30,7 +30,7 @@ export class ApplicationCommand extends Command {
         super(name, description);
     }
     
-    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, string>, namespace?: string, 
+    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._applicationsManager.boilerplatesByLanguage(coreLanguage, namespace);
         
@@ -52,7 +52,7 @@ export class ApplicationCommand extends Command {
         this._applicationsManager.create(boilerplateContext, cwd, boilerplate as IContentBoilerplate);
     }
 
-    getAllDependencies(cwd: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, string>, namespace?: string) {
+    getAllDependencies(cwd: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, any>, namespace?: string) {
         let boilerplate = this._applicationsManager.boilerplatesByLanguage(coreLanguage, namespace)[0];
         let dependencies = boilerplate? boilerplate.dependencies : [];
         return this.dependencies.concat(dependencies);
