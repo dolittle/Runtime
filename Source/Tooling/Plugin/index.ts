@@ -9,6 +9,7 @@ export * from './NamespaceProvider';
 
 export * from './applications/index';
 export * from './boundedContexts/index';
+export * from './add/index';
 export * from './create/index';
 export * from './globals';
 
