@@ -4,10 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import { contentBoilerplates, scriptRunner, templatesBoilerplates } from "@dolittle/tooling.common.boilerplates";
 import { fileSystem, folders } from "@dolittle/tooling.common.files";
-import { logger } from "@dolittle/tooling.common.logging";
+import { logger, turnOffLogging } from "@dolittle/tooling.common.logging";
 import { dependencyResolvers } from "@dolittle/tooling.common.dependencies";
 import { CreateCommandGroup, ApplicationCommand, ApplicationsManager, BoundedContextsManager, BoundedContextCommand, DefaultCommandGroupsProvider, DefaultCommandsProvider, NamespaceProvider, AddCommandGroup } from "./index";
 import { dolittleConfig } from "@dolittle/tooling.common.configurations";
+
+turnOffLogging();
 
 let applicationsManager = new ApplicationsManager(contentBoilerplates, fileSystem, logger);
 let boundedContextsManager = new BoundedContextsManager(contentBoilerplates, applicationsManager, folders, fileSystem, logger);
