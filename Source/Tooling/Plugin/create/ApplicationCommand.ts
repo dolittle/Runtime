@@ -30,7 +30,7 @@ export class ApplicationCommand extends Command {
         super(name, description);
     }
     
-    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
+    async action(dependencyResolvers: IDependencyResolvers, cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._applicationsManager.boilerplatesByLanguage(coreLanguage, namespace);
         

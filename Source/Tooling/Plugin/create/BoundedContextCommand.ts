@@ -27,11 +27,11 @@ export class BoundedContextCommand extends Command {
      * @param {IBoundedContextsManager} _boundedContextsManager
      * @param {IDependencyResolvers} _dependencyResolvers
      */
-    constructor(private _boundedContextsManager: IBoundedContextsManager, private _dependencyResolvers: IDependencyResolvers, private _scriptRunner: IScriptRunner, private _logger: Logger) { 
+    constructor(private _boundedContextsManager: IBoundedContextsManager, private _scriptRunner: IScriptRunner, private _logger: Logger) { 
         super(name, description);
     }
     
-    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
+    async action(dependencyResolvers: IDependencyResolvers, cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
         let boilerplates = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace);
         if (!boilerplates.length || boilerplates.length < 1) {
@@ -42,7 +42,7 @@ export class BoundedContextCommand extends Command {
         let boilerplate: IContentBoilerplate | null = null;
         if (boilerplates.length > 1) {
             do {
-                boilerplate = <IContentBoilerplate | null> await chooseBoilerplate(boilerplates, this._dependencyResolvers);
+                boilerplate = <IContentBoilerplate | null> await chooseBoilerplate(boilerplates, dependencyResolvers);
             } while(!boilerplate)
 
         }
@@ -54,7 +54,7 @@ export class BoundedContextCommand extends Command {
                 ...this._boundedContextsManager.createInteractionDependencies(boilerplate.language, boilerplate.name, namespace)
             ];
 
-        let boilerplateContext = await this._dependencyResolvers.resolve({}, dependencies, cwd, coreLanguage, commandArguments);
+        let boilerplateContext = await dependencyResolvers.resolve({}, dependencies, cwd, coreLanguage, commandArguments);
 
         let createdDetails = this._boundedContextsManager.create(boilerplateContext, boilerplate, cwd, namespace);
        

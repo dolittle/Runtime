@@ -14,7 +14,6 @@ export class AddCommand extends Command {
     private _templates: ITemplate[];
     private _templatesBoilerplate: ITemplatesBoilerplate;
     private _templatesBoilerplates: ITemplatesBoilerplates;
-    private _dependencyResolvers: IDependencyResolvers;
     private _boundedContextsManager: IBoundedContextsManager;
     private _folders: Folders;
     private _dolittleConfig: any;
@@ -25,21 +24,20 @@ export class AddCommand extends Command {
      * @param {ITemplate[]} artifactTemplates
      * @memberof Installed
      */
-    constructor(templatesBoilerplate: ITemplatesBoilerplate, templateType: string, templates: ITemplate[], templatesBoilerplates: ITemplatesBoilerplates, dependencyResolvers: IDependencyResolvers, 
+    constructor(templatesBoilerplate: ITemplatesBoilerplate, templateType: string, templates: ITemplate[], templatesBoilerplates: ITemplatesBoilerplates, 
                 boundedContextsManager: IBoundedContextsManager, folders: Folders, dolittleConfig: any) {
         if (!templates || templates.length === 0) throw new Error('No templates given to add command');
         super(templateType, templates[0].description, undefined, [templatesBoilerplate.nameDependency, ...templatesBoilerplate.dependencies]);
 
         this._templates = templates;
         this._templatesBoilerplate = templatesBoilerplate;
-        this._dependencyResolvers = dependencyResolvers;
         this._boundedContextsManager = boundedContextsManager;
         this._dolittleConfig = dolittleConfig;
         this._folders = folders;
         this._templatesBoilerplates = templatesBoilerplates;
     }
 
-    async action(cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
+    async action(dependencyResolvers: IDependencyResolvers, cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
        
         let templatesWithLanguage = this._templates.filter(_ => this._templatesBoilerplate.namespace === namespace && this._templatesBoilerplate.language === coreLanguage);
@@ -53,7 +51,7 @@ export class AddCommand extends Command {
 
         if (templatesWithLanguage.length > 1) {
             do {
-                template = await chooseTemplate(templatesWithLanguage, this._dependencyResolvers); 
+                template = await chooseTemplate(templatesWithLanguage, dependencyResolvers); 
             } while(!template)
         }
 
@@ -64,10 +62,10 @@ export class AddCommand extends Command {
 
         let nameDependency = this._templatesBoilerplate.nameDependency;
         
-        let context = await this._dependencyResolvers.resolve({}, [nameDependency], undefined, undefined, commandArguments);
+        let context = await dependencyResolvers.resolve({}, [nameDependency], undefined, undefined, commandArguments);
         let destinationAndName = determineDestination(template.area, this._templatesBoilerplate.language, context[nameDependency.name], cwd, boundedContext.path, this._dolittleConfig);
         this._folders.makeFolderIfNotExists(destinationAndName.destination);
-        context = await this._dependencyResolvers.resolve(context, dependencies, destinationAndName.destination, coreLanguage, commandArguments, options);
+        context = await dependencyResolvers.resolve(context, dependencies, destinationAndName.destination, coreLanguage, commandArguments, options);
         context[nameDependency.name] = destinationAndName.name;
         
         this._templatesBoilerplates.create(context, template, this._templatesBoilerplate, destinationAndName.destination);

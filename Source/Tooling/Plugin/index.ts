@@ -7,6 +7,7 @@ export * from './DefaultCommandGroupsProvider';
 export * from './DefaultCommandsProvider';
 export * from './NamespaceProvider';
 
+export * from './namespaces/index';
 export * from './applications/index';
 export * from './boundedContexts/index';
 export * from './add/index';
