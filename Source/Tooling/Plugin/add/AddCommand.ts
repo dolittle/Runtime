@@ -27,7 +27,7 @@ export class AddCommand extends Command {
     constructor(templatesBoilerplate: ITemplatesBoilerplate, templateType: string, templates: ITemplate[], templatesBoilerplates: ITemplatesBoilerplates, 
                 boundedContextsManager: IBoundedContextsManager, folders: Folders, dolittleConfig: any) {
         if (!templates || templates.length === 0) throw new Error('No templates given to add command');
-        super(templateType, templates[0].description, undefined, [templatesBoilerplate.nameDependency, ...templatesBoilerplate.dependencies]);
+        super(templateType, templates[0].description, true,  undefined, [templatesBoilerplate.nameDependency, ...templatesBoilerplate.dependencies]);
 
         this._templates = templates;
         this._templatesBoilerplate = templatesBoilerplate;

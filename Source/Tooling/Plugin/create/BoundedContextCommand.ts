@@ -28,7 +28,7 @@ export class BoundedContextCommand extends Command {
      * @param {IDependencyResolvers} _dependencyResolvers
      */
     constructor(private _boundedContextsManager: IBoundedContextsManager, private _scriptRunner: IScriptRunner, private _logger: Logger) { 
-        super(name, description);
+        super(name, description, true);
     }
     
     async action(dependencyResolvers: IDependencyResolvers, cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 

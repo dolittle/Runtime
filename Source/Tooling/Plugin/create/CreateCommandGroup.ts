@@ -25,6 +25,6 @@ export class CreateCommandGroup extends CommandGroup {
      * @param {ICommand[]} commands
      */
     constructor(commands: ICommand[]) {
-        super(name, commands, description, shortDescription);
+        super(name, commands, description, true, shortDescription);
     }
 }

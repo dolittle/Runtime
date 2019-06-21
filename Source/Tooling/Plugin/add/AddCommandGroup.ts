@@ -26,7 +26,7 @@ export class AddCommandGroup extends DiscoverableCommandGroup {
 
     constructor(private _templatesBoilerplates: ITemplatesBoilerplates, 
                 private _boundedContextsManager: IBoundedContextsManager, private _folders: Folders, private _dolittleConfig: any) {
-        super(name, description, 'Adds basic building blocks to an existing bounded context');
+        super(name, description, true, 'Adds basic building blocks to an existing bounded context');
     }
 
     get commands() {
