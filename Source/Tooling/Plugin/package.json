@@ -1,7 +1,7 @@
 {
   "name": "@dolittle/tooling.plugin.runtime",
   "description": "A dolittle tooling plugin for the runtime",
-  "version": "1.0.13",
+  "version": "1.0.16",
   "publishConfig": {
     "access": "public"
   },
@@ -37,11 +37,11 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@dolittle/tooling.common.boilerplates": "alpha",
-    "@dolittle/tooling.common.configurations": "alpha",
-    "@dolittle/tooling.common.commands": "alpha",
-    "@dolittle/tooling.common.plugins": "alpha",
-    "@dolittle/tooling.common.utilities": "alpha"
+    "@dolittle/tooling.common.boilerplates": "6.0.*",
+    "@dolittle/tooling.common.configurations": "6.0.*",
+    "@dolittle/tooling.common.commands": "6.0.*",
+    "@dolittle/tooling.common.plugins": "6.0.*",
+    "@dolittle/tooling.common.utilities": "6.0.*"
   },
   "devDependencies": {
     "@types/node": "12.0.0",

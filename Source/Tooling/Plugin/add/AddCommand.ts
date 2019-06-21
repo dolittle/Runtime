@@ -40,7 +40,10 @@ export class AddCommand extends Command {
     async action(dependencyResolvers: IDependencyResolvers, cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
                 outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
        
-        let templatesWithLanguage = this._templates.filter(_ => this._templatesBoilerplate.namespace === namespace && this._templatesBoilerplate.language === coreLanguage);
+        let templatesWithLanguage = this._templates.filter(_ => {
+            if (this._templatesBoilerplate.namespace) return this._templatesBoilerplate.namespace === namespace && this._templatesBoilerplate.language === coreLanguage;
+            return this._templatesBoilerplate.language === coreLanguage;
+        });
 
         if (!templatesWithLanguage.length || templatesWithLanguage.length < 1) {
             outputter.warn(`There are no artifact templates of type '${this.name}' with language '${coreLanguage}'${namespace? ' under namespace \'' + namespace + '\'' : ''}`);
