@@ -1,6 +1,6 @@
 {
   "name": "@dolittle/boilerplates.application",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Application boilerplate for the Dolittle platform",
   "publishConfig": {
     "access": "public"
@@ -11,7 +11,7 @@
   },
   "keywords": ["dolittle", "tooling", "boilerplates", "application"],
   "dolittle": {
-    "tooling": "6.0.*"
+    "tooling": "6.*"
   },
   "author": "Dolittle",
   "license": "MIT",
