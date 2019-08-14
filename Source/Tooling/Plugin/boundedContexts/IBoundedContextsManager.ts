@@ -26,14 +26,14 @@ export interface IBoundedContextsManager {
      * @param {string} startPath to search from
      * @returns {BoundedContext | null} the bounded context
      */
-    getNearestBoundedContextConfig(startPath: string): BoundedContext | null
+    getNearestBoundedContextConfig(startPath: string): Promise<BoundedContext | null>
 
     /**
      * Check if a bounded context configuration can be found in the given directory.
      * @param {string} folder The directory path to search
      * @returns {boolean} Whether or not the bounded context configuration was found
      */
-    hasBoundedContext(folder: string): boolean
+    hasBoundedContext(folder: string): Promise<boolean>
 
     /**
      * Retrieves the boilerplate configurations for bounded context with the given language
@@ -94,7 +94,7 @@ export interface IBoundedContextsManager {
      * @param {string} [namespace=undefined]
      * @returns {CreatedContentBoilerplateDetails[]} Returns the created boilerplates with destination
      */
-    create(context: any, boilerplate: IContentBoilerplate, destinationPath: string, namespace?: string): CreatedContentBoilerplateDetails[]
+    create(context: any, boilerplate: IContentBoilerplate, destinationPath: string, namespace?: string): Promise<CreatedContentBoilerplateDetails[]>
 
     /**
      * Creates an interaction layer and adds it to the bounded context by finding it in the folder.
@@ -106,7 +106,7 @@ export interface IBoundedContextsManager {
      * @param {string} boundedContextFolder
      * @param {string} entryPoint
      */
-    addInteractionLayer(context: any, boilerplate: IContentBoilerplate, boundedContextFolder: string, entryPoint: string): void
+    addInteractionLayer(context: any, boilerplate: IContentBoilerplate, boundedContextFolder: string, entryPoint: string): Promise<void>
 
     /**
      * Creates an interaction layer, adds it to the bounded context and returns the bounded context object
@@ -117,6 +117,6 @@ export interface IBoundedContextsManager {
      * @param {string} entryPoint
      * @returns {BoundedContext}
      */
-    addInteractionLayerToBoundedContext(context: any, boilerplate: IContentBoilerplate, boundedContext: BoundedContext, entryPoint: string): BoundedContext
+    addInteractionLayerToBoundedContext(context: any, boilerplate: IContentBoilerplate, boundedContext: BoundedContext, entryPoint: string): Promise<BoundedContext>
     
 }

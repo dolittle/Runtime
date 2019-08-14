@@ -6,7 +6,7 @@ import { DiscoverableCommandGroup, ICommand } from "@dolittle/tooling.common.com
 import { ITemplatesBoilerplates, ITemplate } from "@dolittle/tooling.common.boilerplates";
 import { groupBy } from "@dolittle/tooling.common.utilities";
 import { AddCommand, IBoundedContextsManager } from "../index";
-import { Folders } from "@dolittle/tooling.common.files";
+import { IFolders } from "@dolittle/tooling.common.files";
 
 const name = 'add';
 const description = `Adds basic building blocks to an existing bounded context.
@@ -25,7 +25,7 @@ export class AddCommandGroup extends DiscoverableCommandGroup {
     private _commands!: ICommand[];
 
     constructor(private _templatesBoilerplates: ITemplatesBoilerplates, 
-                private _boundedContextsManager: IBoundedContextsManager, private _folders: Folders, private _dolittleConfig: any) {
+                private _boundedContextsManager: IBoundedContextsManager, private _folders: IFolders, private _dolittleConfig: any) {
         super(name, description, true, 'Adds basic building blocks to an existing bounded context');
     }
 
