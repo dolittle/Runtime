@@ -10,12 +10,7 @@ namespace Dolittle.Runtime.Server
     /// <summary>
     /// Defines a system that can bind a gRPC service for management purpose
     /// </summary>
-    public interface ICanBindManagementServices
+    public interface ICanBindManagementServices : ICanBindServices
     {
-        /// <summary>
-        /// Binds the services and returns the <see cref="ServerServiceDefinition"/>
-        /// </summary>
-        /// <returns><see cref="IEnumerable{ServerServiceDefinition}">Collection of </see></returns>
-        IEnumerable<ServerServiceDefinition> BindServices();
     }
 }

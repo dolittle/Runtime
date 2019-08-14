@@ -7,19 +7,19 @@ using Dolittle.Booting;
 namespace Dolittle.Runtime.Server
 {
     /// <summary>
-    /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="IInteractionServer"/>
+    /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="IHosts"/>
     /// </summary>
-    public class InteractionServerBootProcedure : ICanPerformBootProcedure
+    public class HostsBootProcedure : ICanPerformBootProcedure
     {
-        readonly IInteractionServer _interactionServer;
+        readonly IHosts _hosts;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="InteractionServerBootProcedure"/>
+        /// Initializes a new instance of <see cref="HostsBootProcedure"/>
         /// </summary>
-        /// <param name="interactionServer">Instance of <see cref="IInteractionServer"/> to boot</param>
-        public InteractionServerBootProcedure(IInteractionServer interactionServer)
+        /// <param name="hosts">Instance of <see cref="IHosts"/> to boot</param>
+        public HostsBootProcedure(IHosts hosts)
         {
-            _interactionServer = interactionServer;
+            _hosts = hosts;
         }
 
         /// <inheritdoc/>
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Server
         /// <inheritdoc/>
         public void Perform()
         {
-            _interactionServer.Start();            
+            _hosts.Start();
         }
     }
 }

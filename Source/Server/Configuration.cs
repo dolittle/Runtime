@@ -15,20 +15,27 @@ namespace Dolittle.Runtime.Server
         /// <summary>
         /// Initializes a new instance of <see cref="Configuration"/>
         /// </summary>
-        public Configuration(InteractionConfiguration interaction, ManagementConfiguration management)
+        public Configuration(HostConfiguration application, HostConfiguration interaction, HostConfiguration management)
         {
+            Application = application;
             Interaction = interaction;
             Management = management;
         }
 
         /// <summary>
-        /// Gets or sets the configuration for <see cref="IInteractionServer"/>
+        /// Gets or sets the configuration for application <see cref="IHost"/>
         /// </summary>
-        public InteractionConfiguration Interaction { get; }
+        public HostConfiguration Application { get; }
+
 
         /// <summary>
-        /// Gets or sets the configuration for <see cref="IManagementServer"/>
+        /// Gets or sets the configuration for interaction <see cref="IHost"/>
         /// </summary>
-        public ManagementConfiguration Management { get; }
+        public HostConfiguration Interaction { get; }
+
+        /// <summary>
+        /// Gets or sets the configuration for management <see cref="IHost"/>
+        /// </summary>
+        public HostConfiguration Management { get; }
     }
 }

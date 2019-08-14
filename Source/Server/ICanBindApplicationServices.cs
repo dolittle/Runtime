@@ -5,11 +5,10 @@
 
 namespace Dolittle.Runtime.Server
 {
-
     /// <summary>
-    /// Defines a system that can bind a gRPC service for interaction purpose
+    /// Defines a system that can bind a gRPC service for application purpose
     /// </summary>
-    public interface ICanBindInteractionServices : ICanBindServices
+    public interface ICanBindApplicationServices : ICanBindServices
     {
-    }
+    }    
 }

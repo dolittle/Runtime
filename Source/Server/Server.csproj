@@ -12,6 +12,7 @@
     <PackageReference Include="Dolittle.Configuration" Version="3.*" />
     <PackageReference Include="Dolittle.Serialization.Json" Version="3.*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="3.*" />
+    <PackageReference Include="Dolittle.Types" Version="3.*" />
     <PackageReference Include="Google.Protobuf" Version="3.5.1" />
     <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
     <PackageReference Include="Grpc" Version="1.8.0" />
