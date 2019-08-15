@@ -3,7 +3,7 @@
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 import { DiscoverableCommandGroup, ICommand } from "@dolittle/tooling.common.commands";
-import { ITemplatesBoilerplates, ITemplate } from "@dolittle/tooling.common.boilerplates";
+import { ITemplatesBoilerplates, ITemplate, IBoilerplatesLoader } from "@dolittle/tooling.common.boilerplates";
 import { groupBy } from "@dolittle/tooling.common.utilities";
 import { AddCommand, IBoundedContextsManager } from "../index";
 import { IFolders } from "@dolittle/tooling.common.files";
@@ -24,18 +24,19 @@ export class AddCommandGroup extends DiscoverableCommandGroup {
 
     private _commands!: ICommand[];
 
-    constructor(private _templatesBoilerplates: ITemplatesBoilerplates, 
+    constructor(private _boilerplatesLoader: IBoilerplatesLoader, private _templatesBoilerplates: ITemplatesBoilerplates, 
                 private _boundedContextsManager: IBoundedContextsManager, private _folders: IFolders, private _dolittleConfig: any) {
         super(name, description, true, 'Adds basic building blocks to an existing bounded context');
     }
 
-    get commands() {
-        if (!this._commands) this.loadCommands();
+    async getCommands() {
+        if (!this._commands) await this.loadCommands();
         return this._commands;
     }
     
-    loadCommands(): void {
+    async loadCommands() {
         this._commands = [];
+        if (this._boilerplatesLoader.needsReload) await this._boilerplatesLoader.load()
         let boilerplates = this._templatesBoilerplates.boilerplates;
         boilerplates.forEach(boilerplate => {
             let templates: ITemplate[] = [];

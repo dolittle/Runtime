@@ -2,7 +2,7 @@
 *  Copyright (c) Dolittle. All rights reserved.
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
-import { contentBoilerplates, scriptRunner, templatesBoilerplates } from "@dolittle/tooling.common.boilerplates";
+import { contentBoilerplates, scriptRunner, templatesBoilerplates, boilerplatesLoader } from "@dolittle/tooling.common.boilerplates";
 import { fileSystem, folders } from "@dolittle/tooling.common.files";
 import { loggers } from "@dolittle/tooling.common.logging";
 import { dependencyResolvers } from "@dolittle/tooling.common.dependencies";
@@ -13,7 +13,7 @@ let applicationsManager = new ApplicationsManager(contentBoilerplates, fileSyste
 let boundedContextsManager = new BoundedContextsManager(contentBoilerplates, applicationsManager, folders, fileSystem, loggers);
 
 export let defaultCommandGroupsProvider = new DefaultCommandGroupsProvider([
-    new AddCommandGroup(templatesBoilerplates, boundedContextsManager, folders, dolittleConfig),
+    new AddCommandGroup(boilerplatesLoader, templatesBoilerplates, boundedContextsManager, folders, dolittleConfig),
     new CreateCommandGroup([
         new ApplicationCommand(applicationsManager, dependencyResolvers, loggers),
         new BoundedContextCommand(boundedContextsManager, scriptRunner, loggers)

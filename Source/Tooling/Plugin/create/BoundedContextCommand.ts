@@ -75,7 +75,7 @@ export class BoundedContextCommand extends Command {
             outputter.warn(message);
             return null;
         }
-        let boilerplate: IContentBoilerplate | null = null;
+        let boilerplate: IContentBoilerplate | null = boilerplates[0];
         if (boilerplates.length > 1) {
             do {
                 boilerplate = <IContentBoilerplate | null> await chooseBoilerplate(boilerplates, dependencyResolvers);
