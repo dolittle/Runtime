@@ -37,12 +37,12 @@
     "prepublishOnly": "yarn build"
   },
   "dependencies": {
-    "@dolittle/tooling.common.boilerplates": "alpha",
-    "@dolittle/tooling.common.configurations": "alpha",
-    "@dolittle/tooling.common.commands": "alpha",
-    "@dolittle/tooling.common.plugins": "alpha",
-    "@dolittle/tooling.common.logging": "alpha",
-    "@dolittle/tooling.common.utilities": "alpha"
+    "@dolittle/tooling.common.boilerplates": "7.*",
+    "@dolittle/tooling.common.configurations": "7.*",
+    "@dolittle/tooling.common.commands": "7.*",
+    "@dolittle/tooling.common.plugins": "7.*",
+    "@dolittle/tooling.common.logging": "7.*",
+    "@dolittle/tooling.common.utilities": "7.*"
   },
   "devDependencies": {
     "@types/node": "12.0.0",
