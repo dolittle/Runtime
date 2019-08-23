@@ -24,16 +24,16 @@ export interface IApplicationsManager {
     /**
      * Gets the application configuration from the given folder
      * @param {string} folder path 
-     * @returns {Application | null} application config or null if not found
+     * @returns {Promise<Application | null>} application config or null if not found
      */
-    getApplicationFrom(folder: string): Application | null
+    getApplicationFrom(folder: string): Promise<Application | null>
 
     /**
      * Check if an application has been setup in the given folder.
      * @param {string} folder path
-     * @returns {boolean} whether or not the application configuration is set up
+     * @returns {Promise<boolean>} whether or not the application configuration is set up
      */
-    hasApplication(folder: string): boolean
+    hasApplication(folder: string): Promise<boolean>
 
     /**
      * Retrieves the boilerplate configurations for application with the given language
@@ -49,7 +49,7 @@ export interface IApplicationsManager {
      * @param {any} context The template context 
      * @param {string} destinationPath The absolute path of the destination of the application
      * @param {IContentBoilerplate} boilerplate The boilerplate to create the application from
-     * @returns {CreatedContentBoilerplateDetails[]}
+     * @returns {Promise<CreatedContentBoilerplateDetails[]>}
      */
-    create(context: any, destinationPath: string, boilerplate: IContentBoilerplate): CreatedContentBoilerplateDetails[]
+    create(context: any, destinationPath: string, boilerplate: IContentBoilerplate): Promise<CreatedContentBoilerplateDetails[]>
 }

@@ -4,11 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 import { BoundedContext, boundedContextFileName, Core, InteractionLayer, Resources } from '@dolittle/tooling.common.configurations';
 import { PromptDependency, chooseOneUserInputType } from '@dolittle/tooling.common.dependencies';
-import { Folders, getFileDirPath, FileSystem} from '@dolittle/tooling.common.files';
+import { getFileDirPath, IFolders, IFileSystem} from '@dolittle/tooling.common.files';
 import { groupBy } from '@dolittle/tooling.common.utilities';
-import { Logger } from '@dolittle/tooling.common.logging';
+import { ILoggers } from '@dolittle/tooling.common.logging';
 import path from 'path';
-import { ContentBoilerplate, IContentBoilerplates, IContentBoilerplate, CreatedContentBoilerplateDetails } from '@dolittle/tooling.common.boilerplates';
+import { IContentBoilerplates, IContentBoilerplate, CreatedContentBoilerplateDetails } from '@dolittle/tooling.common.boilerplates';
 import { IBoundedContextsManager, IApplicationsManager, ApplicationConfigurationNotFound } from '../index';
 
 
@@ -29,24 +29,27 @@ export class BoundedContextsManager implements IBoundedContextsManager {
      * @param {IContentBoilerplates} _boilerplates
      * @param {IBoilerplatesCreator} _boilerplatesCreator
      * @param {IApplicationsManager} _applicationsManager
-     * @param {Folders} _folders
-     * @param {FileSystem} _fileSystem
-     * @param {Logger} _logger
+     * @param {IFolders} _folders
+     * @param {IFileSystem} _fileSystem
+     * @param {ILoggers} _logger
      */
     constructor(private _boilerplates: IContentBoilerplates, private _applicationsManager: IApplicationsManager,
-        private _folders: Folders, private _filesystem: FileSystem, private _logger: Logger) {}
+        private _folders: IFolders, private _filesystem: IFileSystem, private _logger: ILoggers) {}
     
     get boilerplates() {
         return this._boilerplates.byType(boundedContextBoilerplateType) as IContentBoilerplate[];
     }
 
-    getNearestBoundedContextConfig(startPath: string) {
+    async getNearestBoundedContextConfig(startPath: string) {
         let regex =  new RegExp('\\b'+boundedContextFileName+'\\b');
-        const boundedContextConfigPath = this._folders.getNearestFileSearchingUpwards(startPath, regex);
-        if (boundedContextConfigPath === undefined || boundedContextConfigPath === '') return null;
+        let boundedContextConfigPaths = await this._folders.getNearestFilesSearchingUpwards(startPath, regex);
+
+        if (boundedContextConfigPaths.length === 0 || boundedContextConfigPaths[0] === '') return null;
+
+        const boundedContextConfigPath = boundedContextConfigPaths[0];
         this._logger.info(`Found bounded context configuration at path '${boundedContextConfigPath}'`);
 
-        let boundedContextObj = JSON.parse(this._filesystem.readFileSync(boundedContextConfigPath, 'utf8'));
+        let boundedContextObj = await this._filesystem.readJson(boundedContextConfigPath);
         let boundedContext = BoundedContext.fromJson(boundedContextObj, boundedContextConfigPath);
         
         return boundedContext;
@@ -54,7 +57,7 @@ export class BoundedContextsManager implements IBoundedContextsManager {
 
     hasBoundedContext(folder: string) {
         const filePath = path.join(folder, boundedContextFileName);
-        return this._filesystem.existsSync(filePath);
+        return this._filesystem.exists(filePath);
     }
 
     boilerplatesByLanguage(language: string, namespace?: string) {
@@ -104,24 +107,45 @@ export class BoundedContextsManager implements IBoundedContextsManager {
             ));
     }
 
-    create(context: any, boilerplate: ContentBoilerplate, destinationPath: string, namespace?: string) {
-
+    async create(context: any, boilerplate: IContentBoilerplate, destinationPath: string, namespace?: string) {
         let createdDetails: CreatedContentBoilerplateDetails[] = [];
 
-        let application = this._applicationsManager.getApplicationFrom(destinationPath);
+        let application = await this._applicationsManager.getApplicationFrom(destinationPath);
         if (!application) throw new ApplicationConfigurationNotFound(destinationPath);
         context.applicationId = application.id;
         
         const boundedContextPath = path.join(destinationPath, context.name);
-        const boundedContextConfigPath = path.join(boundedContextPath, boundedContextFileName);
 
-        
         createdDetails.push(
-            this._boilerplates.create(boilerplate, boundedContextPath, context)
+            await this._boilerplates.create(boilerplate, boundedContextPath, context)
         );
+        
+        await this.createAdornments(context, boilerplate, namespace, boundedContextPath, createdDetails)
+        
+        let interactionLayers = await this.createInteractionLayers(context, boilerplate, namespace, boundedContextPath, createdDetails);
+        
+        if (interactionLayers.length > 0) this.addInteractionLayersToBoundedContextConfigurationFile(boundedContextPath, interactionLayers);
 
-        let boundedContextJson = this._filesystem.readJsonSync(boundedContextConfigPath);
+        return createdDetails;
+    }
 
+    async addInteractionLayer(context: any , boilerplate: IContentBoilerplate, boundedContextFolder: string, entryPoint: string) {
+        let boundedContext = await this.getNearestBoundedContextConfig(boundedContextFolder);
+        if (!boundedContext) throw new Error('Could not discover the bounded context');
+        this._boilerplates.create(boilerplate, path.join(getFileDirPath(boundedContext.path), entryPoint), context);
+        boundedContext.addInteractionLayer(new InteractionLayer(boilerplate.type, boilerplate.language, boilerplate.framework, entryPoint));
+        await this._filesystem.writeJsonSync(boundedContext.path, boundedContext.toJson(), {spaces: 4});
+    }
+    
+   async addInteractionLayerToBoundedContext(context: any, boilerplate: IContentBoilerplate, boundedContext: BoundedContext, entryPoint: string) {
+        this._boilerplates.create(boilerplate, path.join(getFileDirPath(boundedContext.path), entryPoint), context);
+        boundedContext.addInteractionLayer(new InteractionLayer(boilerplate.type, boilerplate.language, boilerplate.framework, entryPoint));
+        await this._filesystem.writeJson(boundedContext.path, boundedContext.toJson(), {spaces: 4});
+
+        return boundedContext;
+    }
+
+    private async createAdornments(context: any, boilerplate: IContentBoilerplate, namespace: string | undefined, boundedContextPath: string, createdDetails: CreatedContentBoilerplateDetails[]) {
         const hasAdornment = context[boundedContextAdornmentDependencyName] !== undefined;
 
         if (hasAdornment) {
@@ -129,10 +153,14 @@ export class BoundedContextsManager implements IBoundedContextsManager {
             let adornmentBoilerplate = this.getAdornments(boilerplate.language, boilerplate.name, namespace).find(_ => _.name === adornmentBoilerplateName);
             if (adornmentBoilerplate) {
                 createdDetails.push(
-                    this._boilerplates.create(adornmentBoilerplate, boundedContextPath, context)
+                    await this._boilerplates.create(adornmentBoilerplate, boundedContextPath, context)
                 );
             }
         }
+
+    }
+
+    private async createInteractionLayers(context: any, boilerplate: IContentBoilerplate, namespace: string | undefined, boundedContextPath: string, createdDetails: CreatedContentBoilerplateDetails[]) {
 
         let interactionLayers: InteractionLayer[] = [];
         let interactionLayerChoices = Object.keys(context).filter(_ => _.startsWith('interaction'));
@@ -141,37 +169,27 @@ export class BoundedContextsManager implements IBoundedContextsManager {
             let interactionLayerNames = interactionLayerChoices.map(prop => context[prop]);
             let interactionLayerBoilerplates = this.getInteractionLayers(boilerplate.language, boilerplate.name, namespace);
             interactionLayerBoilerplates = interactionLayerBoilerplates.filter(boilerplate => interactionLayerNames.includes(boilerplate.name));
-            interactionLayerBoilerplates.forEach(boilerplate => {
+            
+            await Promise.all(interactionLayerBoilerplates.map(async boilerplate => {
                 let entryPoint = `${boilerplate.target[0].toUpperCase()}${boilerplate.target.slice(1)}`;
                 interactionLayers.push(
                     new InteractionLayer(boilerplate.type, boilerplate.language, boilerplate.framework, entryPoint)
                 );
                 createdDetails.push(
-                    this._boilerplates.create(boilerplate, path.join(boundedContextPath, entryPoint), context)
+                    await this._boilerplates.create(boilerplate, path.join(boundedContextPath, entryPoint), context)
                 );
-            });
+            }));
         }
+        return interactionLayers;
+    }
+
+    private async addInteractionLayersToBoundedContextConfigurationFile(boundedContextPath: string, interactionLayers: InteractionLayer[]) {
+
+        const boundedContextConfigPath = path.join(boundedContextPath, boundedContextFileName);
+        let boundedContextJson = await this._filesystem.readJson(boundedContextConfigPath);
         let boundedContext = new BoundedContext(boundedContextJson.application, boundedContextJson.boundedContext, boundedContextJson.boundedContextName, 
             Resources.fromJson(boundedContextJson.resources), Core.fromJson(boundedContextJson.core), interactionLayers, boundedContextPath);
 
-        this._filesystem.writeJsonSync(boundedContextConfigPath, boundedContext.toJson(), {spaces: 4});
-
-        return createdDetails;
-    }
-
-    addInteractionLayer(context: any , boilerplate: ContentBoilerplate, boundedContextFolder: string, entryPoint: string) {
-        let boundedContext = this.getNearestBoundedContextConfig(boundedContextFolder);
-        if (!boundedContext) throw new Error('Could not discover the bounded context');
-        this._boilerplates.create(boilerplate, path.join(getFileDirPath(boundedContext.path), entryPoint), context);
-        boundedContext.addInteractionLayer(new InteractionLayer(boilerplate.type, boilerplate.language, boilerplate.framework, entryPoint));
-        this._filesystem.writeJsonSync(boundedContext.path, boundedContext.toJson(), {spaces: 4});
-    }
-    
-    addInteractionLayerToBoundedContext(context: any, boilerplate: ContentBoilerplate, boundedContext: BoundedContext, entryPoint: string): BoundedContext {
-        this._boilerplates.create(boilerplate, path.join(getFileDirPath(boundedContext.path), entryPoint), context);
-        boundedContext.addInteractionLayer(new InteractionLayer(boilerplate.type, boilerplate.language, boilerplate.framework, entryPoint));
-        this._filesystem.writeJsonSync(boundedContext.path, boundedContext.toJson(), {spaces: 4});
-
-        return boundedContext;
+        return this._filesystem.writeJson(boundedContextConfigPath, boundedContext.toJson(), {spaces: 4});
     }
 }
