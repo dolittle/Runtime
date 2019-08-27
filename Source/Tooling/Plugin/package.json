@@ -15,7 +15,12 @@
   "bugs": {
     "url": "https://github.com/dolittle-runtime/runtime/issues"
   },
-  "keywords": ["dolittle", "tooling", "plugin", "runtime"],
+  "keywords": [
+    "dolittle",
+    "tooling",
+    "plugin",
+    "runtime"
+  ],
   "dolittle": {
     "tooling": "7.*"
   },
@@ -40,6 +45,8 @@
     "@dolittle/tooling.common.boilerplates": "7.*",
     "@dolittle/tooling.common.configurations": "7.*",
     "@dolittle/tooling.common.commands": "7.*",
+    "@dolittle/tooling.common.dependencies": "7.*",
+    "@dolittle/tooling.common.files": "7.*",
     "@dolittle/tooling.common.plugins": "7.*",
     "@dolittle/tooling.common.logging": "7.*",
     "@dolittle/tooling.common.utilities": "7.*"
