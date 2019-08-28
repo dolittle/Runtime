@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Lifecycle;
@@ -71,13 +72,15 @@ namespace Dolittle.Runtime.Server
             {
                 if (hostInfo.Configuration.Enabled)
                 {
-                    _logger.Information($"Starting {hostInfo.Identifier} host");
+                    _logger.Information($"Preparing host for {hostInfo.Identifier}");
                     
                     var binders = _typeFinder.FindMultiple(type);
                     binders.ForEach(_ =>
                     {
                         var binder = _container.Get(_) as ICanBindServices;
+                        _logger.Information($"Bind services from {_.AssemblyQualifiedName}");
                         var services = binder.BindServices();
+                        _logger.Information($"  {services.Count()} will be added");
                         var host = _container.Get<IHost>();
                         host.Start(hostInfo.Identifier, hostInfo.Configuration, services);
                         _hosts.Add(host);

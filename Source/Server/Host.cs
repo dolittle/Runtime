@@ -47,11 +47,6 @@ namespace Dolittle.Runtime.Server
         {
             try
             {
-                _server
-                    .Ports
-                    .ForEach(_ =>
-                        _logger.Information($"Starting {identifier} host on {_.Host}" + (_.Port > 0 ? $" for port {_.Port}" : string.Empty)));
-
                 _server = new grpc::Server
                 {
                     Ports = {
@@ -59,7 +54,14 @@ namespace Dolittle.Runtime.Server
                     }
                 };
 
+                _server
+                    .Ports
+                    .ForEach(_ =>
+                        _logger.Information($"Starting {identifier} host on {_.Host}" + (_.Port > 0 ? $" for port {_.Port}" : string.Empty)));
+
                 services.ForEach(_server.Services.Add);
+
+                _server.Start();
             }
             catch (Exception ex)
             {
