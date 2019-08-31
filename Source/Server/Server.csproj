@@ -8,15 +8,18 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
+    <ProjectReference Include="../Grpc/Grpc.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Dolittle.Booting" Version="3.*" />
-    <PackageReference Include="Dolittle.Configuration" Version="3.*" />
-    <PackageReference Include="Dolittle.Serialization.Json" Version="3.*" />
+    <PackageReference Include="Dolittle.Configuration.Files" Version="3.*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="3.*" />
-    <PackageReference Include="Dolittle.Types" Version="3.*" />
-    <PackageReference Include="Google.Protobuf" Version="3.5.1" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
-    <PackageReference Include="Grpc" Version="1.8.0" />
-    <PackageReference Include="Grpc.Tools" Version="1.8.0" />
+    <PackageReference Include="Dolittle.DependencyInversion.Booting" Version="3.*" />
+    <PackageReference Include="Dolittle.DependencyInversion.Autofac" Version="3.*" />
+    <PackageReference Include="Dolittle.Resilience" Version="3.*" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
   </ItemGroup>
 
 </Project>

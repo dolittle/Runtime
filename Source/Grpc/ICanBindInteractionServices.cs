@@ -2,19 +2,15 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using Dolittle.Grpc;
 
-using System;
-
-namespace Dolittle.Runtime.Server
+namespace Dolittle.Runtime.Grpc
 {
+
     /// <summary>
-    /// Defines a system that manages all the <see cref="IHost">hosts</see>
+    /// Defines a system that can bind a gRPC service for interaction purpose
     /// </summary>
-    public interface IHosts : IDisposable
+    public interface ICanBindInteractionServices : ICanBindServices
     {
-        /// <summary>
-        /// Start all the hosts
-        /// </summary>
-        void Start();
     }
 }

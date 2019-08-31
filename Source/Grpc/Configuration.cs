@@ -3,8 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Configuration;
+using Dolittle.Grpc;
 
-namespace Dolittle.Runtime.Server
+namespace Dolittle.Runtime.Grpc
 {
     /// <summary>
     /// Represents the configuration of the server
@@ -25,17 +26,16 @@ namespace Dolittle.Runtime.Server
         /// <summary>
         /// Gets or sets the configuration for application <see cref="IHost"/>
         /// </summary>
-        public HostConfiguration Application { get; }
-
+        public HostConfiguration Application {  get; }
 
         /// <summary>
         /// Gets or sets the configuration for interaction <see cref="IHost"/>
         /// </summary>
-        public HostConfiguration Interaction { get; }
+        public HostConfiguration Interaction {  get; }
 
         /// <summary>
         /// Gets or sets the configuration for management <see cref="IHost"/>
         /// </summary>
-        public HostConfiguration Management { get; }
+        public HostConfiguration Management {  get; }
     }
 }
