@@ -33,6 +33,6 @@ namespace Dolittle.Runtime.Grpc
         public Type BindingInterface => typeof(ICanBindInteractionServices);
 
         /// <inheritdoc/>
-        public HostConfiguration Configuration => _configuration.Application;
+        public HostConfiguration Configuration => _configuration.Interaction;
     }
 }

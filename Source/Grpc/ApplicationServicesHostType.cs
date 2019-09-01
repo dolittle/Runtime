@@ -16,15 +16,14 @@ namespace Dolittle.Runtime.Grpc
     /// </remarks>
     public class ApplicationServicesHostType : IRepresentHostType
     {
-        readonly Configuration _configuration;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ApplicationServicesHostType"/>
         /// </summary>
-        /// <param name="configuration"><see cref="Configuration"/> containing the <see cref="HostConfiguration"/> for the host type</param>
-        public ApplicationServicesHostType(Configuration configuration)
+        /// <param name="configuration"><see cref="HostsConfiguration"/> containing the <see cref="HostConfiguration"/> for the host type</param>
+        public ApplicationServicesHostType(HostsConfiguration configuration)
         {
-            _configuration = configuration;
+            Configuration = configuration.ContainsKey(Identifier)?configuration[Identifier]:new HostConfiguration(50053);
         }
 
         /// <inheritdoc/>
@@ -34,6 +33,6 @@ namespace Dolittle.Runtime.Grpc
         public Type BindingInterface => typeof(ICanBindApplicationServices);
 
         /// <inheritdoc/>
-        public HostConfiguration Configuration => _configuration.Application;
+        public HostConfiguration Configuration { get; }
     }
 }

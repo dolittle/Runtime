@@ -16,17 +16,11 @@ namespace Dolittle.Runtime.Grpc
         /// <summary>
         /// Initializes a new instance of <see cref="Configuration"/>
         /// </summary>
-        public Configuration(HostConfiguration application, HostConfiguration interaction, HostConfiguration management)
+        public Configuration(HostConfiguration interaction, HostConfiguration management)
         {
-            Application = application;
             Interaction = interaction;
             Management = management;
         }
-
-        /// <summary>
-        /// Gets or sets the configuration for application <see cref="IHost"/>
-        /// </summary>
-        public HostConfiguration Application {  get; }
 
         /// <summary>
         /// Gets or sets the configuration for interaction <see cref="IHost"/>
