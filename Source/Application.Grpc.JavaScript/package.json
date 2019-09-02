@@ -1,0 +1,21 @@
+{
+    "name": "@dolittle/timeseries.runtime.connectors.grpc",
+    "description": "Grpc services for the Runtime application services",
+    "version": "1.0.0",
+    "publishConfig": {
+        "access": "public"
+    },
+    "scripts": {
+        "prepublish": "cp -R ../../Protobuf/dolittle/application proto && npx protoc -I./ -I../../Protobuf/ --js_out=import_style=commonjs,binary:./ ../../Protobuf/dolittle/application/**/*.proto ../../Protobuf/system/**/*.proto --plugin=protoc-gen-grpc=$PLUGIN",
+        "postpublish": "rm -rf ./proto"
+    },
+    "homepage": "https://dolittle.io",
+    "author": "Dolittle",
+    "license": "MIT",
+    "dependencies": {
+        "grpc": "^1.23.2"
+    },
+    "devDependencies": {
+        "grpc-tools": "^1.7.3"
+    }
+}
