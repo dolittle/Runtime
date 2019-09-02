@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Dolittle.Runtime.Application.Management</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/default.props"/>
+  
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Management" Version="3.*"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Application/Application.csproj"/>
+    <ProjectReference Include="../Application.Grpc.CSharp/Application.Grpc.CSharp.csproj"/>
+  </ItemGroup>
+
+</Project>
