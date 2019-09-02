@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="tunnel"><see cref="IQuantumTunnel"/> used to pass through to <see cref="Singularity"/></param>
         /// <param name="subscription"><see cref="EventParticleSubscription"/></param>
         public Singularity(
-            Application application,
+            Dolittle.Applications.Application application,
             BoundedContext boundedContext,
             IQuantumTunnel tunnel,
             EventParticleSubscription subscription)
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public Application Application { get; }
+        public Dolittle.Applications.Application Application { get; }
 
         /// <inheritdoc/>
         public BoundedContext BoundedContext { get; }

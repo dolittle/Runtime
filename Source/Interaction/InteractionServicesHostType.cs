@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using Dolittle.Grpc;
+using Dolittle.Hosting;
 
-namespace Dolittle.Runtime.Grpc
+namespace Dolittle.Runtime.Interaction
 {
     /// <summary>
     /// Represents a <see cref="IRepresentHostType">host type</see> that is for interaction communication

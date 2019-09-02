@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         public static OriginalContext ToOriginalContext(this Runtime.Grpc.Interaction.OriginalContext protobuf)
         {
             return new OriginalContext(
-                protobuf.Application.ToConcept<Application>(),
+                protobuf.Application.ToConcept<Dolittle.Applications.Application>(),
                 protobuf.BoundedContext.ToConcept<BoundedContext>(),
                 protobuf.Tenant.ToConcept<TenantId>(),
                 protobuf.Environment,

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Grpc;
-using Dolittle.Runtime.Server;
+using Dolittle.Runtime.Interaction;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 

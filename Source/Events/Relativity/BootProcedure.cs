@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Relativity
             IBarrier barrier,
             IResourceConfiguration resourceConfiguration,
             IExecutionContextManager executionContextManager,
-            Application application,
+            Dolittle.Applications.Application application,
             BoundedContext boundedContext,
             Environment environment)
         {

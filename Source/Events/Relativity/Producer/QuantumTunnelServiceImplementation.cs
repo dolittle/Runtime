@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             try
             {
                 var tunnel = new QuantumTunnel(_serializer, responseStream, context.CancellationToken, _logger);
-                var application = request.Application.ToConcept<Application>();
+                var application = request.Application.ToConcept<Dolittle.Applications.Application>();
                 var boundedContext = request.BoundedContext.ToConcept<BoundedContext>();
                 var events = request
                     .Events

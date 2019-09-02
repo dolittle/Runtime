@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// Returns the Application
         /// </summary>
         /// <value></value>
-        public Application Application { get; }
+        public Dolittle.Applications.Application Application { get; }
         /// <summary>
         /// Returns the BoundedContext
         /// </summary>
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// </summary>
         /// <param name="application"></param>
         /// <param name="boundedContext"></param>
-        public EventHorizonKey(Application application, BoundedContext boundedContext)
+        public EventHorizonKey(Dolittle.Applications.Application application, BoundedContext boundedContext)
         {
             Application = application;
             BoundedContext = boundedContext;

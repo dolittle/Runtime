@@ -19,14 +19,14 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Initializes an instance of <see cref="OriginalContext"/>
         /// </summary>
-        /// <param name="application"><see cref="Application"/> that is the source of the event</param>
+        /// <param name="application"><see cref="Dolittle.Applications.Application"/> that is the source of the event</param>
         /// <param name="boundedContext"><see cref="BoundedContext"/> that is the source of the event</param>
         /// <param name="tenant"><see cref="TenantId"/> that is related to the source of the event</param>
         /// <param name="environment"><see cref="Dolittle.Execution.Environment"/> for the original <see cref="ExecutionContext"/></param>
         /// <param name="claims"><see cref="Claims"/> for the user who initiated the event</param>
         /// <param name="commitSequenceNumber"><see cref="CommitSequenceNumber"/> for the commit of which this event is part.  May not be populated in the source Bounded Context.</param>
         public OriginalContext(
-            Application application,
+            Dolittle.Applications.Application application,
             BoundedContext boundedContext,
             TenantId tenant,
             Dolittle.Execution.Environment environment,
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Gets the <see cref="Application"/> for the <see cref="ExecutionContext">execution context</see>
         /// </summary>
-        public Application Application { get; }
+        public Dolittle.Applications.Application Application { get; }
 
         /// <summary>
         /// Gets the <see cref="BoundedContext"/> for the <see cref="ExecutionContext">execution context</see>

@@ -3,9 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Configuration;
-using Dolittle.Grpc;
+using Dolittle.Hosting;
 
-namespace Dolittle.Runtime.Grpc
+namespace Dolittle.Runtime.Interaction
 {
     /// <summary>
     /// Represents the configuration of the server
