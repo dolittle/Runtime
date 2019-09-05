@@ -3,8 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using Dolittle.Runtime.Application.Grpc;
-using Grpc.Core;
+using Dolittle.Hosting;
 
 namespace Dolittle.Runtime.Application
 {
@@ -26,10 +25,10 @@ namespace Dolittle.Runtime.Application
         }
 
         /// <inheritdoc/>
-        public IEnumerable<ServerServiceDefinition> BindServices()
+        public IEnumerable<Service> BindServices()
         {
-            return new ServerServiceDefinition[] {
-                Grpc.Client.BindService(_clientService)
+            return new Service[] {
+                new Service(Grpc.Client.BindService(_clientService), Grpc.Client.Descriptor)
             };
         }
     }    

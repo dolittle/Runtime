@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using Dolittle.Management;
-using Grpc.Core;
+using Dolittle.Hosting;
 
 namespace Dolittle.Runtime.Application.Management
 {
@@ -26,10 +26,10 @@ namespace Dolittle.Runtime.Application.Management
         }
 
         /// <inheritdoc/>
-        public IEnumerable<ServerServiceDefinition> BindServices()
+        public IEnumerable<Service> BindServices()
         {
-            return new ServerServiceDefinition[] {
-                Grpc.Clients.BindService(_clientsService)
+            return new Service[] {
+                new Service(Grpc.Clients.BindService(_clientsService), Grpc.Clients.Descriptor)
             };
         }
     }

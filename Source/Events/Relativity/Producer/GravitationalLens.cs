@@ -8,7 +8,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Grpc;
 using Dolittle.Runtime.Interaction;
 using Dolittle.Serialization.Protobuf;
-using Grpc.Core;
+using Dolittle.Hosting;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -50,11 +50,11 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public IEnumerable<ServerServiceDefinition> BindServices()
+        public IEnumerable<Service> BindServices()
         {
             var service = new QuantumTunnelServiceImplementation(_eventHorizon, _serializer, _executionContextManager, _fetchUnprocessedCommits, _logger);
-            return new ServerServiceDefinition[] {
-                Runtime.Grpc.Interaction.QuantumTunnelService.BindService(service)
+            return new Service[] {
+                new Service(Runtime.Grpc.Interaction.QuantumTunnelService.BindService(service), Runtime.Grpc.Interaction.QuantumTunnelService.Descriptor)
             };
         }
     }
