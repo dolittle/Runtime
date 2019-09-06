@@ -26,14 +26,14 @@ namespace Dolittle.Runtime.Application.Grpc {
           string.Concat(
             "CiZkb2xpdHRsZS9hcHBsaWNhdGlvbi9jbGllbnRfaW5mby5wcm90bxIcZG9s",
             "aXR0bGUucnVudGltZS5hcHBsaWNhdGlvbhoRc3lzdGVtL2d1aWQucHJvdG8i",
-            "WwoKQ2xpZW50SW5mbxIgCghjbGllbnRJZBgBIAEoCzIOLmRvbGl0dGxlLmd1",
+            "cwoKQ2xpZW50SW5mbxIgCghjbGllbnRJZBgBIAEoCzIOLmRvbGl0dGxlLmd1",
             "aWQSDAoEaG9zdBgCIAEoCRIMCgRwb3J0GAMgASgNEg8KB3J1bnRpbWUYBCAB",
-            "KAlCJKoCIURvbGl0dGxlLlJ1bnRpbWUuQXBwbGljYXRpb24uR3JwY2IGcHJv",
-            "dG8z"));
+            "KAkSFgoOc2VydmljZXNCeU5hbWUYBSADKAlCJKoCIURvbGl0dGxlLlJ1bnRp",
+            "bWUuQXBwbGljYXRpb24uR3JwY2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Application.Grpc.ClientInfo), global::Dolittle.Runtime.Application.Grpc.ClientInfo.Parser, new[]{ "ClientId", "Host", "Port", "Runtime" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Application.Grpc.ClientInfo), global::Dolittle.Runtime.Application.Grpc.ClientInfo.Parser, new[]{ "ClientId", "Host", "Port", "Runtime", "ServicesByName" }, null, null, null)
           }));
     }
     #endregion
@@ -69,6 +69,7 @@ namespace Dolittle.Runtime.Application.Grpc {
       host_ = other.host_;
       port_ = other.port_;
       runtime_ = other.runtime_;
+      servicesByName_ = other.servicesByName_.Clone();
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -121,6 +122,16 @@ namespace Dolittle.Runtime.Application.Grpc {
       }
     }
 
+    /// <summary>Field number for the "servicesByName" field.</summary>
+    public const int ServicesByNameFieldNumber = 5;
+    private static readonly pb::FieldCodec<string> _repeated_servicesByName_codec
+        = pb::FieldCodec.ForString(42);
+    private readonly pbc::RepeatedField<string> servicesByName_ = new pbc::RepeatedField<string>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<string> ServicesByName {
+      get { return servicesByName_; }
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ClientInfo);
@@ -138,6 +149,7 @@ namespace Dolittle.Runtime.Application.Grpc {
       if (Host != other.Host) return false;
       if (Port != other.Port) return false;
       if (Runtime != other.Runtime) return false;
+      if(!servicesByName_.Equals(other.servicesByName_)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -148,6 +160,7 @@ namespace Dolittle.Runtime.Application.Grpc {
       if (Host.Length != 0) hash ^= Host.GetHashCode();
       if (Port != 0) hash ^= Port.GetHashCode();
       if (Runtime.Length != 0) hash ^= Runtime.GetHashCode();
+      hash ^= servicesByName_.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -177,6 +190,7 @@ namespace Dolittle.Runtime.Application.Grpc {
         output.WriteRawTag(34);
         output.WriteString(Runtime);
       }
+      servicesByName_.WriteTo(output, _repeated_servicesByName_codec);
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -197,6 +211,7 @@ namespace Dolittle.Runtime.Application.Grpc {
       if (Runtime.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Runtime);
       }
+      size += servicesByName_.CalculateSize(_repeated_servicesByName_codec);
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -223,6 +238,7 @@ namespace Dolittle.Runtime.Application.Grpc {
       if (other.Runtime.Length != 0) {
         Runtime = other.Runtime;
       }
+      servicesByName_.Add(other.servicesByName_);
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -251,6 +267,10 @@ namespace Dolittle.Runtime.Application.Grpc {
           }
           case 34: {
             Runtime = input.ReadString();
+            break;
+          }
+          case 42: {
+            servicesByName_.AddEntriesFrom(input, _repeated_servicesByName_codec);
             break;
           }
         }

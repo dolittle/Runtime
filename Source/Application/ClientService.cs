@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Threading.Tasks;
+using Dolittle.Collections;
 using Dolittle.Logging;
 using Dolittle.Runtime.Application.Grpc;
 using Dolittle.Time;
@@ -40,18 +41,24 @@ namespace Dolittle.Runtime.Application
         /// <inheritdoc/>
         public override Task<ConnectionResult> Connect(ClientInfo request, ServerCallContext context)
         {
-            _logger.Information("Client connected");
+            
             var result = new ConnectionResult();
             try
             {
+                var clientId = new Guid(request.ClientId.Value.ToByteArray());
+                _logger.Information($"Client connected '{clientId}'");
+                if( request.ServicesByName.Count == 0 ) _logger.Information("Not providing any client services");
+                else request.ServicesByName.ForEach(_ => _logger.Information($"Providing service {_}"));
                 var connectionTime = _systemClock.GetCurrentTime();
                 var client = new Client(
-                    new Guid(request.ClientId.Value.ToByteArray()),
+                    clientId,
                     request.Host,
                     request.Port,
                     request.Runtime,
+                    request.ServicesByName,
                     connectionTime
                 );
+
                 _clients.Connect(client);
                 result.Status = "Connected";
             }
@@ -70,6 +77,8 @@ namespace Dolittle.Runtime.Application
             try
             { 
                 var id = (ClientId) new Guid(clientId.ToByteArray());
+
+                _logger.Information($"Disconnecting client {id}");
 
                 if (_clients.IsConnected(id))
                 {

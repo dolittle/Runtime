@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using Dolittle.Hosting;
+using Dolittle.Services;
 
 namespace Dolittle.Runtime.Application
 {
@@ -31,5 +31,5 @@ namespace Dolittle.Runtime.Application
                 new Service(Grpc.Client.BindService(_clientService), Grpc.Client.Descriptor)
             };
         }
-    }    
+    }
 }

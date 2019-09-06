@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
 using Dolittle.Management;
-using Dolittle.Hosting;
+using Dolittle.Services;
 
 namespace Dolittle.Runtime.Application.Management
 {

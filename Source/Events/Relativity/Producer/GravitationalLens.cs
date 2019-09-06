@@ -8,7 +8,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Grpc;
 using Dolittle.Runtime.Interaction;
 using Dolittle.Serialization.Protobuf;
-using Dolittle.Hosting;
+using Dolittle.Services;
 
 namespace Dolittle.Runtime.Events.Relativity
 {

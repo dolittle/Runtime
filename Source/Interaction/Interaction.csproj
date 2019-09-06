@@ -9,7 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Configuration" Version="3.*" />
-    <PackageReference Include="Dolittle.Hosting" Version="3.*" />
+    <PackageReference Include="Dolittle.Services" Version="3.*" />
   </ItemGroup>
 
 </Project>

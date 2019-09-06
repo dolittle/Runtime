@@ -14,8 +14,8 @@ namespace Dolittle.Runtime.Application.for_Clients.given
 
         Establish context = () =>
         {
-            first_client = new Client(Guid.NewGuid(), "first client", 42, "Some runtime", DateTimeOffset.UtcNow);
-            second_client = new Client(Guid.NewGuid(), "second client", 43, "Some other runtime", DateTimeOffset.UtcNow.AddDays(5));
+            first_client = new Client(Guid.NewGuid(), "first client", 42, "Some runtime", new[] {"first", "second"}, DateTimeOffset.UtcNow);
+            second_client = new Client(Guid.NewGuid(), "second client", 43, "Some other runtime", new[] {"third", "fourth"}, DateTimeOffset.UtcNow.AddDays(5));
         };
     }
 }
