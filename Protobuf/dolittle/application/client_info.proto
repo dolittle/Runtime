@@ -15,4 +15,5 @@ message ClientInfo {
     string host = 2;
     uint32 port = 3;
     string runtime = 4;
+    repeated string servicesByName = 5;
 }
