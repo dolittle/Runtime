@@ -2,9 +2,11 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Lifecycle;
+using Grpc.Core;
 
 namespace Dolittle.Runtime.Application
 {
@@ -50,6 +52,18 @@ namespace Dolittle.Runtime.Application
                 var clients = _clients.ToArray();
                 return clients;
             }
-        }      
+        }
+
+        /// <inheritdoc/>
+        public Client GetFor<TC>() where TC:ClientBase
+        {
+            return _clients.Last();
+        }
+
+        /// <inheritdoc/>
+        public Client GetFor(Type type)
+        {
+            return _clients.Last();
+        }
     }
 }

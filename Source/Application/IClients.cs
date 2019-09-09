@@ -3,7 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+using System;
 using System.Collections.Generic;
+using Grpc.Core;
 
 namespace Dolittle.Runtime.Application
 {
@@ -36,5 +38,20 @@ namespace Dolittle.Runtime.Application
         /// </summary>
         /// <returns>Collection of <see cref="Client">clients</see></returns>
         IEnumerable<Client> GetConnectedClients();
+
+        /// <summary>
+        /// Get the client that exposes the <see cref="ClientBase"/>
+        /// </summary>
+        /// <typeparam name="TC">Type of <see cref="ClientBase"/></typeparam>
+        /// <returns>Currently connected <see cref="Client"/></returns>
+        Client GetFor<TC>() where TC:ClientBase;
+
+        /// <summary>
+        /// Get the client that exposes the <see cref="ClientBase"/>
+        /// </summary>
+        /// <param name="type">Type of <see cref="ClientBase"/></param>
+        /// <returns>Currently connected <see cref="Client"/></returns>
+        Client GetFor(Type type);
+
     }
 }
