@@ -23,6 +23,6 @@ namespace Dolittle.Runtime.Application
         public Type BindingInterface => typeof(ICanBindApplicationServices);
 
         /// <inheritdoc/>
-        public EndpointVisibility Visibility => EndpointVisibility.Public;
+        public EndpointVisibility Visibility => EndpointVisibility.Private;
     }
 }
