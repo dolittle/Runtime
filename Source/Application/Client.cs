@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
+using Grpc.Core;
 
 namespace Dolittle.Runtime.Application
 {
@@ -24,7 +25,7 @@ namespace Dolittle.Runtime.Application
         public Client(
             ClientId clientId,
             string host,
-            uint port,
+            int port,
             string runtime,
             IEnumerable<string> servicesByName,
             DateTimeOffset connectionTime)
@@ -35,6 +36,17 @@ namespace Dolittle.Runtime.Application
             Runtime = runtime;
             ServicesByName = servicesByName;
             ConnectionTime = connectionTime;
+
+            var keepAliveTime = new ChannelOption("grpc.keepalive_time", 1000);
+            var keepAliveTimeout = new ChannelOption("grpc.keepalive_timeout_ms", 500);
+            var keepAliveWithoutCalls = new ChannelOption("grpc.keepalive_permit_without_calls", 1);
+
+            Channel = new Channel(host, (int)port, ChannelCredentials.Insecure, new []
+            {
+                keepAliveTime,
+                keepAliveTimeout,
+                keepAliveWithoutCalls
+            });
         }
 
         /// <summary>
@@ -50,7 +62,7 @@ namespace Dolittle.Runtime.Application
         /// <summary>
         /// Gets the TCP port for the client for connecting to it
         /// </summary>
-        public uint Port {  get; }
+        public int Port {  get; }
 
         /// <summary>
         /// Gets a string with runtime information from the client
@@ -61,6 +73,11 @@ namespace Dolittle.Runtime.Application
         /// Gets the services represented by the client by their name
         /// </summary>
         public IEnumerable<string> ServicesByName { get; }
+
+        /// <summary>
+        /// Gets the channel for the client
+        /// </summary>
+        public Channel Channel { get; }
 
         /// <summary>
         /// Gets the time when client was connected
