@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Application.Grpc {
             "CiZkb2xpdHRsZS9hcHBsaWNhdGlvbi9jbGllbnRfaW5mby5wcm90bxIcZG9s",
             "aXR0bGUucnVudGltZS5hcHBsaWNhdGlvbhoRc3lzdGVtL2d1aWQucHJvdG8i",
             "cwoKQ2xpZW50SW5mbxIgCghjbGllbnRJZBgBIAEoCzIOLmRvbGl0dGxlLmd1",
-            "aWQSDAoEaG9zdBgCIAEoCRIMCgRwb3J0GAMgASgNEg8KB3J1bnRpbWUYBCAB",
+            "aWQSDAoEaG9zdBgCIAEoCRIMCgRwb3J0GAMgASgFEg8KB3J1bnRpbWUYBCAB",
             "KAkSFgoOc2VydmljZXNCeU5hbWUYBSADKAlCJKoCIURvbGl0dGxlLlJ1bnRp",
             "bWUuQXBwbGljYXRpb24uR3JwY2IGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
@@ -102,9 +102,9 @@ namespace Dolittle.Runtime.Application.Grpc {
 
     /// <summary>Field number for the "port" field.</summary>
     public const int PortFieldNumber = 3;
-    private uint port_;
+    private int port_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public uint Port {
+    public int Port {
       get { return port_; }
       set {
         port_ = value;
@@ -184,7 +184,7 @@ namespace Dolittle.Runtime.Application.Grpc {
       }
       if (Port != 0) {
         output.WriteRawTag(24);
-        output.WriteUInt32(Port);
+        output.WriteInt32(Port);
       }
       if (Runtime.Length != 0) {
         output.WriteRawTag(34);
@@ -206,7 +206,7 @@ namespace Dolittle.Runtime.Application.Grpc {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Host);
       }
       if (Port != 0) {
-        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Port);
+        size += 1 + pb::CodedOutputStream.ComputeInt32Size(Port);
       }
       if (Runtime.Length != 0) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Runtime);
@@ -262,7 +262,7 @@ namespace Dolittle.Runtime.Application.Grpc {
             break;
           }
           case 24: {
-            Port = input.ReadUInt32();
+            Port = input.ReadInt32();
             break;
           }
           case 34: {
