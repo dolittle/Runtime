@@ -14,6 +14,7 @@
     <PackageReference Include="Dolittle.Concepts" Version="3.*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="3.*" />
     <PackageReference Include="Dolittle.PropertyBags" Version="3.*" />
+    <PackageReference Include="Dolittle.Protobuf" Version="3.*" />
     <PackageReference Include="Dolittle.ResourceTypes" Version="3.*" />
     <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="3.*" />
     <PackageReference Include="Dolittle.Serialization.Json" Version="3.*" />
