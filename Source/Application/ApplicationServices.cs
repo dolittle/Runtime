@@ -13,13 +13,13 @@ namespace Dolittle.Runtime.Application
     /// </summary>
     public class ApplicationServices : ICanBindApplicationServices
     {
-        readonly ClientService _clientService;
+        readonly ClientsService _clientService;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ApplicationServices"/>
         /// </summary>
-        /// <param name="clientService">Instance of <see cref="ClientService"/></param>
-        public ApplicationServices(ClientService clientService)
+        /// <param name="clientService">Instance of <see cref="ClientsService"/></param>
+        public ApplicationServices(ClientsService clientService)
         {
             _clientService = clientService;
         }
@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Application
         public IEnumerable<Service> BindServices()
         {
             return new Service[] {
-                new Service(Grpc.Client.BindService(_clientService), Grpc.Client.Descriptor)
+                new Service(_clientService, Grpc.Server.Clients.BindService(_clientService), Grpc.Server.Clients.Descriptor)
             };
         }
     }

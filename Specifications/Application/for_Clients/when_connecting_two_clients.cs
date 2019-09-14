@@ -2,6 +2,7 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using Dolittle.Logging;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Application.for_Clients
@@ -10,7 +11,7 @@ namespace Dolittle.Runtime.Application.for_Clients
     {
         static Clients clients;
 
-        Establish context = () => clients = new Clients();
+        Establish context = () => clients = new Clients(Moq.Mock.Of<ILogger>());
 
         Because of = () =>
         {

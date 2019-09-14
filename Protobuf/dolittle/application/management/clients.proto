@@ -6,7 +6,7 @@ syntax = "proto3";
 
 import "dolittle/application/client_info.proto";
 
-package dolittle.runtime.application;
+package dolittle.runtime.application.management;
 
 option csharp_namespace = "Dolittle.Runtime.Application.Management.Grpc";
 

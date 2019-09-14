@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             var service = new QuantumTunnelServiceImplementation(_eventHorizon, _serializer, _executionContextManager, _fetchUnprocessedCommits, _logger);
             return new Service[] {
-                new Service(Runtime.Grpc.Interaction.QuantumTunnelService.BindService(service), Runtime.Grpc.Interaction.QuantumTunnelService.Descriptor)
+                new Service(service, Runtime.Grpc.Interaction.QuantumTunnelService.BindService(service), Runtime.Grpc.Interaction.QuantumTunnelService.Descriptor)
             };
         }
     }

@@ -53,5 +53,11 @@ namespace Dolittle.Runtime.Application
         /// <returns>Currently connected <see cref="Client"/></returns>
         Client GetFor(Type type);
 
+        /// <summary>
+        /// Get a client based on its <see cref="ClientId"/>
+        /// </summary>
+        /// <param name="clientId"><see cref="ClientId"/> to get for</param>
+        /// <returns><see cref="Client"/> instance</returns>
+        Client GetById(ClientId clientId);
     }
 }

@@ -1,11 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <Import Project="../../Build/MSBuild/default.props" />
+
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <AssemblyName>Dolittle.Runtime.Application.Grpc</AssemblyName>
+        <IncludeSource>False</IncludeSource>
     </PropertyGroup>
-
-    <Import Project="../../Build/MSBuild/default.props" />
     
     <ItemGroup>
         <PackageReference Include="Google.Protobuf" Version="3.5.1" />

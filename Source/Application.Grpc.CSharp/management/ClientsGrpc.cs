@@ -18,17 +18,17 @@ namespace Dolittle.Runtime.Application.Management.Grpc {
   /// </summary>
   public static partial class Clients
   {
-    static readonly string __ServiceName = "dolittle.runtime.application.Clients";
+    static readonly string __ServiceName = "dolittle.runtime.application.management.Clients";
 
-    static readonly grpc::Marshaller<global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsRequest> __Marshaller_dolittle_runtime_application_ConnectedClientsRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsRequest.Parser.ParseFrom);
-    static readonly grpc::Marshaller<global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsResponse> __Marshaller_dolittle_runtime_application_ConnectedClientsResponse = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsResponse.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsRequest> __Marshaller_dolittle_runtime_application_management_ConnectedClientsRequest = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsRequest.Parser.ParseFrom);
+    static readonly grpc::Marshaller<global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsResponse> __Marshaller_dolittle_runtime_application_management_ConnectedClientsResponse = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsResponse.Parser.ParseFrom);
 
     static readonly grpc::Method<global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsRequest, global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsResponse> __Method_GetConnectedClients = new grpc::Method<global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsRequest, global::Dolittle.Runtime.Application.Management.Grpc.ConnectedClientsResponse>(
         grpc::MethodType.Unary,
         __ServiceName,
         "GetConnectedClients",
-        __Marshaller_dolittle_runtime_application_ConnectedClientsRequest,
-        __Marshaller_dolittle_runtime_application_ConnectedClientsResponse);
+        __Marshaller_dolittle_runtime_application_management_ConnectedClientsRequest,
+        __Marshaller_dolittle_runtime_application_management_ConnectedClientsResponse);
 
     /// <summary>Service descriptor</summary>
     public static global::Google.Protobuf.Reflection.ServiceDescriptor Descriptor

@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Application.Management
         public IEnumerable<Service> BindServices()
         {
             return new Service[] {
-                new Service(Grpc.Clients.BindService(_clientsService), Grpc.Clients.Descriptor)
+                new Service(_clientsService, Grpc.Clients.BindService(_clientsService), Grpc.Clients.Descriptor)
             };
         }
     }

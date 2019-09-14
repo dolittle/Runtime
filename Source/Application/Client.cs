@@ -14,6 +14,11 @@ namespace Dolittle.Runtime.Application
     public class Client
     {
         /// <summary>
+        /// Event that occurs when the client is disconnected
+        /// </summary>
+        public event ClientDisconnected Disconnected = (c) => {};
+
+        /// <summary>
         /// Initializes a new instance of <see cref="Client"/>
         /// </summary>
         /// <param name="clientId"><see cref="ClientId"/> of the client</param>
@@ -41,7 +46,7 @@ namespace Dolittle.Runtime.Application
             var keepAliveTimeout = new ChannelOption("grpc.keepalive_timeout_ms", 500);
             var keepAliveWithoutCalls = new ChannelOption("grpc.keepalive_permit_without_calls", 1);
 
-            Channel = new Channel(host, (int)port, ChannelCredentials.Insecure, new []
+            Channel = new Channel(host, (int) port, ChannelCredentials.Insecure, new []
             {
                 keepAliveTime,
                 keepAliveTimeout,
@@ -77,11 +82,16 @@ namespace Dolittle.Runtime.Application
         /// <summary>
         /// Gets the channel for the client
         /// </summary>
-        public Channel Channel { get; }
+        public ChannelBase Channel {  get; }
 
         /// <summary>
         /// Gets the time when client was connected
         /// </summary>
         public DateTimeOffset ConnectionTime { get; }
+
+        internal void OnDisconnected()
+        {
+            Disconnected(this);
+        }
     }
 }

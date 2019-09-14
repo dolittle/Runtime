@@ -25,18 +25,19 @@ namespace Dolittle.Runtime.Application.Management.Grpc {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Ci1kb2xpdHRsZS9hcHBsaWNhdGlvbi9tYW5hZ2VtZW50L2NsaWVudHMucHJv",
-            "dG8SHGRvbGl0dGxlLnJ1bnRpbWUuYXBwbGljYXRpb24aJmRvbGl0dGxlL2Fw",
-            "cGxpY2F0aW9uL2NsaWVudF9pbmZvLnByb3RvIhkKF0Nvbm5lY3RlZENsaWVu",
-            "dHNSZXF1ZXN0ImMKD0Nvbm5lY3RlZENsaWVudBI4CgZDbGllbnQYASABKAsy",
-            "KC5kb2xpdHRsZS5ydW50aW1lLmFwcGxpY2F0aW9uLkNsaWVudEluZm8SFgoO",
-            "Q29ubmVjdGlvblRpbWUYAiABKAMiWgoYQ29ubmVjdGVkQ2xpZW50c1Jlc3Bv",
-            "bnNlEj4KB0NsaWVudHMYASADKAsyLS5kb2xpdHRsZS5ydW50aW1lLmFwcGxp",
-            "Y2F0aW9uLkNvbm5lY3RlZENsaWVudDKSAQoHQ2xpZW50cxKGAQoTR2V0Q29u",
-            "bmVjdGVkQ2xpZW50cxI1LmRvbGl0dGxlLnJ1bnRpbWUuYXBwbGljYXRpb24u",
-            "Q29ubmVjdGVkQ2xpZW50c1JlcXVlc3QaNi5kb2xpdHRsZS5ydW50aW1lLmFw",
-            "cGxpY2F0aW9uLkNvbm5lY3RlZENsaWVudHNSZXNwb25zZSIAQi+qAixEb2xp",
-            "dHRsZS5SdW50aW1lLkFwcGxpY2F0aW9uLk1hbmFnZW1lbnQuR3JwY2IGcHJv",
-            "dG8z"));
+            "dG8SJ2RvbGl0dGxlLnJ1bnRpbWUuYXBwbGljYXRpb24ubWFuYWdlbWVudBom",
+            "ZG9saXR0bGUvYXBwbGljYXRpb24vY2xpZW50X2luZm8ucHJvdG8iGQoXQ29u",
+            "bmVjdGVkQ2xpZW50c1JlcXVlc3QiYwoPQ29ubmVjdGVkQ2xpZW50EjgKBkNs",
+            "aWVudBgBIAEoCzIoLmRvbGl0dGxlLnJ1bnRpbWUuYXBwbGljYXRpb24uQ2xp",
+            "ZW50SW5mbxIWCg5Db25uZWN0aW9uVGltZRgCIAEoAyJlChhDb25uZWN0ZWRD",
+            "bGllbnRzUmVzcG9uc2USSQoHQ2xpZW50cxgBIAMoCzI4LmRvbGl0dGxlLnJ1",
+            "bnRpbWUuYXBwbGljYXRpb24ubWFuYWdlbWVudC5Db25uZWN0ZWRDbGllbnQy",
+            "qAEKB0NsaWVudHMSnAEKE0dldENvbm5lY3RlZENsaWVudHMSQC5kb2xpdHRs",
+            "ZS5ydW50aW1lLmFwcGxpY2F0aW9uLm1hbmFnZW1lbnQuQ29ubmVjdGVkQ2xp",
+            "ZW50c1JlcXVlc3QaQS5kb2xpdHRsZS5ydW50aW1lLmFwcGxpY2F0aW9uLm1h",
+            "bmFnZW1lbnQuQ29ubmVjdGVkQ2xpZW50c1Jlc3BvbnNlIgBCL6oCLERvbGl0",
+            "dGxlLlJ1bnRpbWUuQXBwbGljYXRpb24uTWFuYWdlbWVudC5HcnBjYgZwcm90",
+            "bzM="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Dolittle.Runtime.Application.Grpc.ClientInfoReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {

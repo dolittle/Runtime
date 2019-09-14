@@ -6,21 +6,18 @@ syntax = "proto3";
 
 import "system/guid.proto";
 import "dolittle/application/client_info.proto";
+import "google/protobuf/empty.proto";
 
-package dolittle.runtime.application;
+package dolittle.runtime.application.server;
 
-option csharp_namespace = "Dolittle.Runtime.Application.Grpc";
+option csharp_namespace = "Dolittle.Runtime.Application.Grpc.Server";
 
 message ConnectionResult {
-    string Status = 1;
+    string status = 1;
 }
-
-message DisconnectedResult {
-}
-
 
 // Represents the Client service
-service Client {
+service Clients {
     rpc Connect(ClientInfo) returns(ConnectionResult) {}
-    rpc Disconnect(guid) returns(DisconnectedResult) {}
+    rpc Disconnect(guid) returns(google.protobuf.Empty) {}
 }

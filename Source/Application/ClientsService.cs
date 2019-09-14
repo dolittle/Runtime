@@ -7,8 +7,10 @@ using System.Threading.Tasks;
 using Dolittle.Collections;
 using Dolittle.Logging;
 using Dolittle.Runtime.Application.Grpc;
+using Dolittle.Runtime.Application.Grpc.Server;
 using Dolittle.Time;
 using Google.Protobuf;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Application
@@ -16,32 +18,41 @@ namespace Dolittle.Runtime.Application
     /// <summary>
     /// Represents an implementation of <see cref="ClientBase"/>
     /// </summary>
-    public class ClientService : Grpc.Client.ClientBase
+    public class ClientsService : Grpc.Server.Clients.ClientsBase
     {
         readonly IClients _clients;
         readonly ISystemClock _systemClock;
-        private readonly ILogger _logger;
+        readonly IClientConnectionStateMonitor _clientConnectionStateMonitor;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of <see cref="ILogger"/>
         /// </summary>
         /// <param name="clients"><see cref="IClients"/> for working with connected clients</param>
         /// <param name="systemClock"><see cref="ISystemClock"/> for time</param>
+        /// <param name="clientConnectionStateMonitor"><see cref="IClientConnectionStateMonitor"/> for monitoring state of a <see cref="Client"/></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
-        public ClientService(
+        public ClientsService(
             IClients clients,
             ISystemClock systemClock,
+            IClientConnectionStateMonitor clientConnectionStateMonitor,
             ILogger logger)
         {
             _clients = clients;
             _systemClock = systemClock;
             _logger = logger;
+            _clientConnectionStateMonitor = clientConnectionStateMonitor;
+        }
+
+        /// <inheritdoc/>
+        public void ClientDisconnected(Client client)
+        {
+            _clients.Disconnect(client.ClientId);
         }
 
         /// <inheritdoc/>
         public override Task<ConnectionResult> Connect(ClientInfo request, ServerCallContext context)
         {
-            
             var result = new ConnectionResult();
             try
             {
@@ -60,6 +71,9 @@ namespace Dolittle.Runtime.Application
                 );
 
                 _clients.Connect(client);
+                _clientConnectionStateMonitor.Monitor(client);
+                context.OnDisconnected(c => _clients.Disconnect(clientId));
+
                 result.Status = "Connected";
             }
             catch (Exception ex)
@@ -67,13 +81,11 @@ namespace Dolittle.Runtime.Application
                 result.Status = $"Error on connection: {ex.Message}";
             }
             return Task.FromResult(result);
-
         }
 
         /// <inheritdoc/>
-        public override Task<DisconnectedResult> Disconnect(System.Protobuf.guid clientId, ServerCallContext context)
+        public override Task<Empty> Disconnect(System.Protobuf.guid clientId, ServerCallContext context)
         {
-            var result = new DisconnectedResult();
             try
             { 
                 var id = (ClientId) new Guid(clientId.ToByteArray());
@@ -87,7 +99,7 @@ namespace Dolittle.Runtime.Application
                 }
             } 
             catch { }
-            return Task.FromResult(result);
+            return Task.FromResult(new Empty());
         }
     }
 }
