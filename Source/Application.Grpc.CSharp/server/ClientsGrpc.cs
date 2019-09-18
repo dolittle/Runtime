@@ -21,22 +21,13 @@ namespace Dolittle.Runtime.Application.Grpc.Server {
     static readonly string __ServiceName = "dolittle.runtime.application.server.Clients";
 
     static readonly grpc::Marshaller<global::Dolittle.Runtime.Application.Grpc.ClientInfo> __Marshaller_dolittle_runtime_application_ClientInfo = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Application.Grpc.ClientInfo.Parser.ParseFrom);
-    static readonly grpc::Marshaller<global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult> __Marshaller_dolittle_runtime_application_server_ConnectionResult = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult.Parser.ParseFrom);
-    static readonly grpc::Marshaller<global::System.Protobuf.guid> __Marshaller_dolittle_guid = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::System.Protobuf.guid.Parser.ParseFrom);
     static readonly grpc::Marshaller<global::Google.Protobuf.WellKnownTypes.Empty> __Marshaller_google_protobuf_Empty = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::Google.Protobuf.WellKnownTypes.Empty.Parser.ParseFrom);
 
-    static readonly grpc::Method<global::Dolittle.Runtime.Application.Grpc.ClientInfo, global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult> __Method_Connect = new grpc::Method<global::Dolittle.Runtime.Application.Grpc.ClientInfo, global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult>(
-        grpc::MethodType.Unary,
+    static readonly grpc::Method<global::Dolittle.Runtime.Application.Grpc.ClientInfo, global::Google.Protobuf.WellKnownTypes.Empty> __Method_Connect = new grpc::Method<global::Dolittle.Runtime.Application.Grpc.ClientInfo, global::Google.Protobuf.WellKnownTypes.Empty>(
+        grpc::MethodType.ServerStreaming,
         __ServiceName,
         "Connect",
         __Marshaller_dolittle_runtime_application_ClientInfo,
-        __Marshaller_dolittle_runtime_application_server_ConnectionResult);
-
-    static readonly grpc::Method<global::System.Protobuf.guid, global::Google.Protobuf.WellKnownTypes.Empty> __Method_Disconnect = new grpc::Method<global::System.Protobuf.guid, global::Google.Protobuf.WellKnownTypes.Empty>(
-        grpc::MethodType.Unary,
-        __ServiceName,
-        "Disconnect",
-        __Marshaller_dolittle_guid,
         __Marshaller_google_protobuf_Empty);
 
     /// <summary>Service descriptor</summary>
@@ -49,12 +40,7 @@ namespace Dolittle.Runtime.Application.Grpc.Server {
     [grpc::BindServiceMethod(typeof(Clients), "BindService")]
     public abstract partial class ClientsBase
     {
-      public virtual global::System.Threading.Tasks.Task<global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult> Connect(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::ServerCallContext context)
-      {
-        throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
-      }
-
-      public virtual global::System.Threading.Tasks.Task<global::Google.Protobuf.WellKnownTypes.Empty> Disconnect(global::System.Protobuf.guid request, grpc::ServerCallContext context)
+      public virtual global::System.Threading.Tasks.Task Connect(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::IServerStreamWriter<global::Google.Protobuf.WellKnownTypes.Empty> responseStream, grpc::ServerCallContext context)
       {
         throw new grpc::RpcException(new grpc::Status(grpc::StatusCode.Unimplemented, ""));
       }
@@ -84,37 +70,13 @@ namespace Dolittle.Runtime.Application.Grpc.Server {
       {
       }
 
-      public virtual global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult Connect(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
+      public virtual grpc::AsyncServerStreamingCall<global::Google.Protobuf.WellKnownTypes.Empty> Connect(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
       {
         return Connect(request, new grpc::CallOptions(headers, deadline, cancellationToken));
       }
-      public virtual global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult Connect(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::CallOptions options)
+      public virtual grpc::AsyncServerStreamingCall<global::Google.Protobuf.WellKnownTypes.Empty> Connect(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::CallOptions options)
       {
-        return CallInvoker.BlockingUnaryCall(__Method_Connect, null, options, request);
-      }
-      public virtual grpc::AsyncUnaryCall<global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult> ConnectAsync(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return ConnectAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual grpc::AsyncUnaryCall<global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult> ConnectAsync(global::Dolittle.Runtime.Application.Grpc.ClientInfo request, grpc::CallOptions options)
-      {
-        return CallInvoker.AsyncUnaryCall(__Method_Connect, null, options, request);
-      }
-      public virtual global::Google.Protobuf.WellKnownTypes.Empty Disconnect(global::System.Protobuf.guid request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return Disconnect(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual global::Google.Protobuf.WellKnownTypes.Empty Disconnect(global::System.Protobuf.guid request, grpc::CallOptions options)
-      {
-        return CallInvoker.BlockingUnaryCall(__Method_Disconnect, null, options, request);
-      }
-      public virtual grpc::AsyncUnaryCall<global::Google.Protobuf.WellKnownTypes.Empty> DisconnectAsync(global::System.Protobuf.guid request, grpc::Metadata headers = null, global::System.DateTime? deadline = null, global::System.Threading.CancellationToken cancellationToken = default(global::System.Threading.CancellationToken))
-      {
-        return DisconnectAsync(request, new grpc::CallOptions(headers, deadline, cancellationToken));
-      }
-      public virtual grpc::AsyncUnaryCall<global::Google.Protobuf.WellKnownTypes.Empty> DisconnectAsync(global::System.Protobuf.guid request, grpc::CallOptions options)
-      {
-        return CallInvoker.AsyncUnaryCall(__Method_Disconnect, null, options, request);
+        return CallInvoker.AsyncServerStreamingCall(__Method_Connect, null, options, request);
       }
       /// <summary>Creates a new instance of client from given <c>ClientBaseConfiguration</c>.</summary>
       protected override ClientsClient NewInstance(ClientBaseConfiguration configuration)
@@ -128,8 +90,7 @@ namespace Dolittle.Runtime.Application.Grpc.Server {
     public static grpc::ServerServiceDefinition BindService(ClientsBase serviceImpl)
     {
       return grpc::ServerServiceDefinition.CreateBuilder()
-          .AddMethod(__Method_Connect, serviceImpl.Connect)
-          .AddMethod(__Method_Disconnect, serviceImpl.Disconnect).Build();
+          .AddMethod(__Method_Connect, serviceImpl.Connect).Build();
     }
 
     /// <summary>Register service method with a service binder with or without implementation. Useful when customizing the  service binding logic.
@@ -138,8 +99,7 @@ namespace Dolittle.Runtime.Application.Grpc.Server {
     /// <param name="serviceImpl">An object implementing the server-side handling logic.</param>
     public static void BindService(grpc::ServiceBinderBase serviceBinder, ClientsBase serviceImpl)
     {
-      serviceBinder.AddMethod(__Method_Connect, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::Dolittle.Runtime.Application.Grpc.ClientInfo, global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult>(serviceImpl.Connect));
-      serviceBinder.AddMethod(__Method_Disconnect, serviceImpl == null ? null : new grpc::UnaryServerMethod<global::System.Protobuf.guid, global::Google.Protobuf.WellKnownTypes.Empty>(serviceImpl.Disconnect));
+      serviceBinder.AddMethod(__Method_Connect, serviceImpl == null ? null : new grpc::ServerStreamingServerMethod<global::Dolittle.Runtime.Application.Grpc.ClientInfo, global::Google.Protobuf.WellKnownTypes.Empty>(serviceImpl.Connect));
     }
 
   }

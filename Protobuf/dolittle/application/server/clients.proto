@@ -4,7 +4,6 @@
  *--------------------------------------------------------------------------------------------*/
 syntax = "proto3";
 
-import "system/guid.proto";
 import "dolittle/application/client_info.proto";
 import "google/protobuf/empty.proto";
 
@@ -18,6 +17,5 @@ message ConnectionResult {
 
 // Represents the Client service
 service Clients {
-    rpc Connect(ClientInfo) returns(ConnectionResult) {}
-    rpc Disconnect(guid) returns(google.protobuf.Empty) {}
+    rpc Connect(ClientInfo) returns(stream google.protobuf.Empty) {}
 }

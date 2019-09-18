@@ -5,7 +5,6 @@
 using System;
 using System.Linq;
 using Grpc.Core;
-using static Grpc.Core.Metadata;
 
 namespace Dolittle.Runtime.Application
 {
@@ -17,10 +16,11 @@ namespace Dolittle.Runtime.Application
         internal static IClients Clients;
 
         /// <summary>
-        /// 
+        /// Hook up a <see cref="ClientDisconnected"/> delegate that gets called when a client
+        /// on the given <see cref="ServerCallContext"/> disconnects
         /// </summary>
-        /// <param name="serverCallContext"></param>
-        /// <param name="disconnected"></param>
+        /// <param name="serverCallContext">The <see cref="ServerCallContext"/></param>
+        /// <param name="disconnected">The <see cref="ClientDisconnected"/> callback</param>
         public static void OnDisconnected(this ServerCallContext serverCallContext, ClientDisconnected disconnected)
         {
             var clientIdEntry = serverCallContext.RequestHeaders.SingleOrDefault(_ => _.Key.ToLowerInvariant() == "clientid");

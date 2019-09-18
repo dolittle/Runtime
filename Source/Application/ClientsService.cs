@@ -2,14 +2,13 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
 using System.Threading.Tasks;
+using System.Timers;
 using Dolittle.Collections;
 using Dolittle.Logging;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Application.Grpc;
-using Dolittle.Runtime.Application.Grpc.Server;
 using Dolittle.Time;
-using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 
@@ -22,7 +21,6 @@ namespace Dolittle.Runtime.Application
     {
         readonly IClients _clients;
         readonly ISystemClock _systemClock;
-        readonly IClientConnectionStateMonitor _clientConnectionStateMonitor;
         readonly ILogger _logger;
 
         /// <summary>
@@ -30,18 +28,15 @@ namespace Dolittle.Runtime.Application
         /// </summary>
         /// <param name="clients"><see cref="IClients"/> for working with connected clients</param>
         /// <param name="systemClock"><see cref="ISystemClock"/> for time</param>
-        /// <param name="clientConnectionStateMonitor"><see cref="IClientConnectionStateMonitor"/> for monitoring state of a <see cref="Client"/></param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public ClientsService(
             IClients clients,
             ISystemClock systemClock,
-            IClientConnectionStateMonitor clientConnectionStateMonitor,
             ILogger logger)
         {
             _clients = clients;
             _systemClock = systemClock;
             _logger = logger;
-            _clientConnectionStateMonitor = clientConnectionStateMonitor;
         }
 
         /// <inheritdoc/>
@@ -51,15 +46,15 @@ namespace Dolittle.Runtime.Application
         }
 
         /// <inheritdoc/>
-        public override Task<ConnectionResult> Connect(ClientInfo request, ServerCallContext context)
+        public override Task Connect(ClientInfo request, IServerStreamWriter<Empty> responseStream, ServerCallContext context)
         {
-            var result = new ConnectionResult();
+            var clientId = request.ClientId.To<ClientId>();
             try
             {
-                var clientId = new Guid(request.ClientId.Value.ToByteArray());
                 _logger.Information($"Client connected '{clientId}'");
-                if( request.ServicesByName.Count == 0 ) _logger.Information("Not providing any client services");
+                if (request.ServicesByName.Count == 0) _logger.Information("Not providing any client services");
                 else request.ServicesByName.ForEach(_ => _logger.Information($"Providing service {_}"));
+
                 var connectionTime = _systemClock.GetCurrentTime();
                 var client = new Client(
                     clientId,
@@ -71,35 +66,19 @@ namespace Dolittle.Runtime.Application
                 );
 
                 _clients.Connect(client);
-                _clientConnectionStateMonitor.Monitor(client);
-                context.OnDisconnected(c => _clients.Disconnect(clientId));
 
-                result.Status = "Connected";
+                var timer = new Timer(1000);
+                timer.Enabled = true;
+                timer.Elapsed += (s,e) => responseStream.WriteAsync(new Empty());
+
+                context.CancellationToken.ThrowIfCancellationRequested();
+                context.CancellationToken.WaitHandle.WaitOne();
             }
-            catch (Exception ex)
+            finally
             {
-                result.Status = $"Error on connection: {ex.Message}";
+                _clients.Disconnect(clientId);
             }
-            return Task.FromResult(result);
-        }
-
-        /// <inheritdoc/>
-        public override Task<Empty> Disconnect(System.Protobuf.guid clientId, ServerCallContext context)
-        {
-            try
-            { 
-                var id = (ClientId) new Guid(clientId.ToByteArray());
-
-                _logger.Information($"Disconnecting client {id}");
-
-                if (_clients.IsConnected(id))
-                {
-                    _logger.Information("Client disconnected");
-                    _clients.Disconnect(id);
-                }
-            } 
-            catch { }
-            return Task.FromResult(new Empty());
+            return Task.CompletedTask;
         }
     }
 }

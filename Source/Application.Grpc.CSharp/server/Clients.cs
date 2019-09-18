@@ -25,17 +25,15 @@ namespace Dolittle.Runtime.Application.Grpc.Server {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "Cilkb2xpdHRsZS9hcHBsaWNhdGlvbi9zZXJ2ZXIvY2xpZW50cy5wcm90bxIj",
-            "ZG9saXR0bGUucnVudGltZS5hcHBsaWNhdGlvbi5zZXJ2ZXIaEXN5c3RlbS9n",
-            "dWlkLnByb3RvGiZkb2xpdHRsZS9hcHBsaWNhdGlvbi9jbGllbnRfaW5mby5w",
-            "cm90bxobZ29vZ2xlL3Byb3RvYnVmL2VtcHR5LnByb3RvIiIKEENvbm5lY3Rp",
-            "b25SZXN1bHQSDgoGc3RhdHVzGAEgASgJMq8BCgdDbGllbnRzEmwKB0Nvbm5l",
-            "Y3QSKC5kb2xpdHRsZS5ydW50aW1lLmFwcGxpY2F0aW9uLkNsaWVudEluZm8a",
-            "NS5kb2xpdHRsZS5ydW50aW1lLmFwcGxpY2F0aW9uLnNlcnZlci5Db25uZWN0",
-            "aW9uUmVzdWx0IgASNgoKRGlzY29ubmVjdBIOLmRvbGl0dGxlLmd1aWQaFi5n",
-            "b29nbGUucHJvdG9idWYuRW1wdHkiAEIrqgIoRG9saXR0bGUuUnVudGltZS5B",
-            "cHBsaWNhdGlvbi5HcnBjLlNlcnZlcmIGcHJvdG8z"));
+            "ZG9saXR0bGUucnVudGltZS5hcHBsaWNhdGlvbi5zZXJ2ZXIaJmRvbGl0dGxl",
+            "L2FwcGxpY2F0aW9uL2NsaWVudF9pbmZvLnByb3RvGhtnb29nbGUvcHJvdG9i",
+            "dWYvZW1wdHkucHJvdG8iIgoQQ29ubmVjdGlvblJlc3VsdBIOCgZzdGF0dXMY",
+            "ASABKAkyWgoHQ2xpZW50cxJPCgdDb25uZWN0EiguZG9saXR0bGUucnVudGlt",
+            "ZS5hcHBsaWNhdGlvbi5DbGllbnRJbmZvGhYuZ29vZ2xlLnByb3RvYnVmLkVt",
+            "cHR5IgAwAUIrqgIoRG9saXR0bGUuUnVudGltZS5BcHBsaWNhdGlvbi5HcnBj",
+            "LlNlcnZlcmIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::System.Protobuf.GuidReflection.Descriptor, global::Dolittle.Runtime.Application.Grpc.ClientInfoReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Dolittle.Runtime.Application.Grpc.ClientInfoReflection.Descriptor, global::Google.Protobuf.WellKnownTypes.EmptyReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult), global::Dolittle.Runtime.Application.Grpc.Server.ConnectionResult.Parser, new[]{ "Status" }, null, null, null)
           }));
