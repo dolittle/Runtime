@@ -4,6 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Application.Grpc;
 using Dolittle.Runtime.Application.Management.Grpc;
 using Google.Protobuf;
@@ -36,14 +37,11 @@ namespace Dolittle.Runtime.Application.Management
             var response = new ConnectedClientsResponse();
             response.Clients.AddRange(clients.Select(_ =>
             {
-                var clientId = new System.Protobuf.guid();
-                clientId.Value = ByteString.CopyFrom(_.ClientId.Value.ToByteArray());
-
                 return new ConnectedClient
                 {
                     Client = new ClientInfo
                         {
-                            ClientId = clientId,
+                            ClientId = _.ClientId.ToProtobuf(),
                             Host = _.Host,
                             Port = _.Port,
                             Runtime = _.Runtime
