@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using Dolittle.Execution;
-using Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Time;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
@@ -15,11 +15,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
     public static class EventsExtensions
     {
         /// <summary>
-        /// Convert from <see cref="Runtime.Grpc.Interaction.EventMetadata"/> to <see cref="EventMetadata"/>
+        /// Convert from <see cref="Interaction.Grpc.EventMetadata"/> to <see cref="EventMetadata"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="Runtime.Grpc.Interaction.EventMetadata"/> to convert from</param>
+        /// <param name="protobuf"><see cref="Interaction.Grpc.EventMetadata"/> to convert from</param>
         /// <returns>Converted <see cref="EventMetadata"/></returns>
-        public static EventMetadata ToEventMetadata(this Runtime.Grpc.Interaction.EventMetadata protobuf)
+        public static EventMetadata ToEventMetadata(this Interaction.Grpc.EventMetadata protobuf)
         {
             var metadata = new EventMetadata(
                 protobuf.EventId.ToConcept<EventId>(),
@@ -33,13 +33,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from <see cref="EventMetadata"/> to <see cref="Runtime.Grpc.Interaction.EventMetadata"/>
+        /// Convert from <see cref="EventMetadata"/> to <see cref="Interaction.Grpc.EventMetadata"/>
         /// </summary>
         /// <param name="metadata"><see cref="EventMetadata"/> to convert from</param>
-        /// <returns>Converted <see cref="Runtime.Grpc.Interaction.EventMetadata"/></returns>
-        public static Runtime.Grpc.Interaction.EventMetadata ToProtobuf(this EventMetadata metadata)
+        /// <returns>Converted <see cref="Interaction.Grpc.EventMetadata"/></returns>
+        public static Interaction.Grpc.EventMetadata ToProtobuf(this EventMetadata metadata)
         {
-            return new Runtime.Grpc.Interaction.EventMetadata {
+            return new Interaction.Grpc.EventMetadata {
                 EventId = metadata.Id.ToProtobuf(),
                 Source = metadata.VersionedEventSource.ToProtobuf(),
                 CorrelationId = metadata.CorrelationId.ToProtobuf(),

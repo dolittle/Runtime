@@ -24,11 +24,7 @@
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="3.*" />
     <PackageReference Include="Dolittle.Time" Version="3.*" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="3.*" />
-    
-    <PackageReference Include="Google.Protobuf" Version="3.5.1" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
-    <PackageReference Include="Grpc" Version="2.23.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.23.0" />
+    <PackageReference Include="Dolittle.Runtime.Events.Relativity.Grpc" Version="3.*" />
   </ItemGroup>
 
   <ItemGroup>
@@ -36,6 +32,6 @@
     <ProjectReference Include="..\Interaction\Interaction.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
-    <ProjectReference Include="..\Grpc.Interaction\Grpc.Interaction.csproj" />
+    <ProjectReference Include="..\Protobuf\Protobuf.csproj" />
   </ItemGroup>
 </Project>

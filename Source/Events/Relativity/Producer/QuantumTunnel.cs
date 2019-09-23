@@ -9,11 +9,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
-using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Grpc.Interaction;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
@@ -25,8 +23,8 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnel : IQuantumTunnel
     {
         readonly ISerializer _serializer;
-        readonly IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _responseStream;
-        readonly ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _outbox;
+        readonly IServerStreamWriter<Interaction.Grpc.CommittedEventStreamWithContext> _responseStream;
+        readonly ConcurrentQueue<Interaction.Grpc.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
 
         readonly AutoResetEvent _waitHandle;
@@ -41,13 +39,13 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel (
             ISerializer serializer,
-            IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream,
+            IServerStreamWriter<Interaction.Grpc.CommittedEventStreamWithContext> responseStream,
             CancellationToken cancellationToken,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
-            _outbox = new ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> ();
+            _outbox = new ConcurrentQueue<Interaction.Grpc.CommittedEventStreamWithContext> ();
             _waitHandle = new AutoResetEvent (false);
             _cancelationToken = cancellationToken;
             _logger = logger;
@@ -84,7 +82,7 @@ namespace Dolittle.Runtime.Events.Relativity
                         _waitHandle.WaitOne (1000);
                         if (_outbox.IsEmpty) continue;
 
-                        Runtime.Grpc.Interaction.CommittedEventStreamWithContext message;
+                        Interaction.Grpc.CommittedEventStreamWithContext message;
                         while (!_outbox.IsEmpty)
                         {
                             if (_outbox.TryDequeue (out message))

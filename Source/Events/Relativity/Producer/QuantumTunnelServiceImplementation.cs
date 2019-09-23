@@ -9,16 +9,16 @@ using Dolittle.Applications;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
-using Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 
 namespace Dolittle.Runtime.Events.Relativity.Grpc
 {
     /// <summary>
-    /// Represents an implementation of the <see cref="Runtime.Grpc.Interaction.QuantumTunnelService.QuantumTunnelServiceBase"/>
+    /// Represents an implementation of the <see cref="Interaction.Grpc.QuantumTunnelService.QuantumTunnelServiceBase"/>
     /// </summary>
-    public class QuantumTunnelServiceImplementation : Runtime.Grpc.Interaction.QuantumTunnelService.QuantumTunnelServiceBase
+    public class QuantumTunnelServiceImplementation : Interaction.Grpc.QuantumTunnelService.QuantumTunnelServiceBase
     {
         readonly IEventHorizon _eventHorizon;
         readonly ISerializer _serializer;
@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         }
 
         /// <inheritdoc/>
-        public override async Task Open(Runtime.Grpc.Interaction.OpenTunnel request, IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream, ServerCallContext context)
+        public override async Task Open(Interaction.Grpc.OpenTunnel request, IServerStreamWriter<Interaction.Grpc.CommittedEventStreamWithContext> responseStream, ServerCallContext context)
         {
             try
             {

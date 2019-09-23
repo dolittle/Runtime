@@ -9,10 +9,7 @@
   
   <ItemGroup>
     <PackageReference Include="Dolittle.Services" Version="3.*"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="../Application.Grpc.CSharp/Application.Grpc.CSharp.csproj"/>
+    <PackageReference Include="Dolittle.Runtime.Application.Grpc" Version="3.*"/>    
   </ItemGroup>
 
 </Project>
