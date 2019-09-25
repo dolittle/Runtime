@@ -2,7 +2,7 @@
 *  Copyright (c) Dolittle. All rights reserved.
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
-import { ICanProvideDefaultCommandGroups, ICommandGroup } from "@dolittle/tooling.common.commands";
+import { ICanProvideCommandGroups, ICommandGroup } from "@dolittle/tooling.common.commands";
 
 /**
  * Represents an implementation of {ICanProvideDefaultCommandGroups} for providing the command groups of the runtime plugin
@@ -11,7 +11,7 @@ import { ICanProvideDefaultCommandGroups, ICommandGroup } from "@dolittle/toolin
  * @class DefaultCommandGroupsProvider
  * @implements {ICanProvideDefaultCommandGroups}
  */
-export class DefaultCommandGroupsProvider implements ICanProvideDefaultCommandGroups {
+export class DefaultCommandGroupsProvider implements ICanProvideCommandGroups {
 
     constructor(private _commandGroups: ICommandGroup[]) {}
 

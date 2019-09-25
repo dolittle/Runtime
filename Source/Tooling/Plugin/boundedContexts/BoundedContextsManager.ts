@@ -8,8 +8,8 @@ import { getFileDirPath, IFolders, IFileSystem} from '@dolittle/tooling.common.f
 import { groupBy } from '@dolittle/tooling.common.utilities';
 import { ILoggers } from '@dolittle/tooling.common.logging';
 import path from 'path';
-import { IContentBoilerplates, IContentBoilerplate, CreatedContentBoilerplateDetails } from '@dolittle/tooling.common.boilerplates';
-import { IBoundedContextsManager, IApplicationsManager, ApplicationConfigurationNotFound } from '../index';
+import { IContentBoilerplates, IContentBoilerplate, CreatedContentBoilerplateDetails, IBoilerplatesLoader } from '@dolittle/tooling.common.boilerplates';
+import { IBoundedContextsManager, IApplicationsManager, ApplicationConfigurationNotFound } from '../internal';
 
 
 export const boundedContextBoilerplateType = 'boundedContext';
@@ -33,10 +33,11 @@ export class BoundedContextsManager implements IBoundedContextsManager {
      * @param {IFileSystem} _fileSystem
      * @param {ILoggers} _logger
      */
-    constructor(private _boilerplates: IContentBoilerplates, private _applicationsManager: IApplicationsManager,
+    constructor(private _boilerplates: IContentBoilerplates, private _boilerplatesLoader: IBoilerplatesLoader, private _applicationsManager: IApplicationsManager,
         private _folders: IFolders, private _filesystem: IFileSystem, private _logger: ILoggers) {}
     
-    get boilerplates() {
+    async getBoilerplates() {
+        if (this._boilerplatesLoader.needsReload) await this._boilerplatesLoader.load();
         return this._boilerplates.byType(boundedContextBoilerplateType) as IContentBoilerplate[];
     }
 
@@ -60,12 +61,9 @@ export class BoundedContextsManager implements IBoundedContextsManager {
         return this._filesystem.exists(filePath);
     }
 
-    boilerplatesByLanguage(language: string, namespace?: string) {
-        let boilerplates = this.boilerplates;
-        return boilerplates.filter( _ => {
-            if (namespace && _.namespace) return _.namespace === namespace && _.language === language;
-            return _.language && language; 
-        })
+    async getBoilerplatesByLanguage(language: string, namespace?: string) {
+        if (this._boilerplatesLoader.needsReload) await this._boilerplatesLoader.load();
+        return this._boilerplates.byLanguageAndType(language, boundedContextBoilerplateType, namespace);
     }
 
     getAdornments(language?: string, boilerplateName?: string, namespace?: string) {
@@ -84,6 +82,7 @@ export class BoundedContextsManager implements IBoundedContextsManager {
         let boundedContextAdornment = new PromptDependency(
             `${boundedContextAdornmentDependencyName}`,
             `Choose bounded context adornment`,
+            [],
             chooseOneUserInputType,
             `Choose bounded context adornment`,
             false,
@@ -100,6 +99,7 @@ export class BoundedContextsManager implements IBoundedContextsManager {
             .map(target => new PromptDependency(
                 `interaction${target}`,
                 `Choose ${target} interaction layer`,
+                [],
                 chooseOneUserInputType,
                 `Choose ${target} interaction layer`,
                 false,

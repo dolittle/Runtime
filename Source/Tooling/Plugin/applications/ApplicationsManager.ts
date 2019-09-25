@@ -7,8 +7,8 @@ import { Application, applicationFilename } from '@dolittle/tooling.common.confi
 import {IFileSystem} from '@dolittle/tooling.common.files';
 import { ILoggers } from '@dolittle/tooling.common.logging';
 import path from 'path';
-import { ContentBoilerplate, CreatedContentBoilerplateDetails, IContentBoilerplates } from '@dolittle/tooling.common.boilerplates';
-import {IApplicationsManager} from '../index';
+import { ContentBoilerplate, CreatedContentBoilerplateDetails, IContentBoilerplates, IBoilerplatesLoader } from '@dolittle/tooling.common.boilerplates';
+import {IApplicationsManager} from '../internal';
 
 export const applicationBoilerplateType = 'application';
 
@@ -25,9 +25,10 @@ export class ApplicationsManager implements IApplicationsManager {
      * @param {IFileSystem} _fileSystem
      * @param {ILoggers} _logger
      */
-    constructor(private _boilerplates: IContentBoilerplates, private _fileSystem: IFileSystem, private _logger: ILoggers) {}
+    constructor(private _boilerplates: IContentBoilerplates, private _boilerplatesLoader: IBoilerplatesLoader, private _fileSystem: IFileSystem, private _logger: ILoggers) {}
 
-    get boilerplates() {
+    async getBoilerplates() {
+        if (this._boilerplatesLoader.needsReload) await this._boilerplatesLoader.load();
         return this._boilerplates.byType(applicationBoilerplateType);
     }
 
@@ -43,12 +44,9 @@ export class ApplicationsManager implements IApplicationsManager {
         return this._fileSystem.exists(filePath);
     }
 
-    boilerplatesByLanguage(language: string, namespace?: string) {
-        let boilerplates = this.boilerplates;
-        return boilerplates.filter( _ => {
-            if (namespace && _.namespace) return _.namespace === namespace && _.language === language;
-            return _.language && language; 
-        });
+    async getBoilerplatesByLanguage(language: string, namespace?: string) {
+        if (this._boilerplatesLoader.needsReload) await this._boilerplatesLoader.load();
+        return this._boilerplates.byLanguageAndType(language, applicationBoilerplateType, namespace);
     }
 
     async create(context: any, destinationPath: string, boilerplate: ContentBoilerplate): Promise<CreatedContentBoilerplateDetails[]> {

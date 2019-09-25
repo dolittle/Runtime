@@ -3,12 +3,12 @@
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
 import { chooseBoilerplate, IContentBoilerplate, IScriptRunner, CreatedContentBoilerplateDetails } from "@dolittle/tooling.common.boilerplates";
-import { Command } from "@dolittle/tooling.common.commands";
+import { Command, IFailedCommandOutputter, CommandContext } from "@dolittle/tooling.common.commands";
 import { IDependencyResolvers } from "@dolittle/tooling.common.dependencies";
 import { ICanOutputMessages, NullMessageOutputter, IBusyIndicator, NullBusyIndicator } from "@dolittle/tooling.common.utilities";
 import { ILoggers } from "@dolittle/tooling.common.logging";
 
-import { IBoundedContextsManager } from "../index";
+import { IBoundedContextsManager } from "../internal";
 
 const name = 'boundedcontext';
 const description = 'Scaffolds a Dolittle bounded context';
@@ -31,28 +31,26 @@ export class BoundedContextCommand extends Command {
         super(name, description, true);
     }
     
-    async action(dependencyResolvers: IDependencyResolvers, cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
-                outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
-        let boilerplate = await this.chooseABoilerplate(dependencyResolvers, outputter, coreLanguage, namespace);
+    async onAction(commandContext: CommandContext, dependencyResolvers: IDependencyResolvers, failedCommandOutputter: IFailedCommandOutputter, outputter: ICanOutputMessages, busyIndicator: IBusyIndicator) {
+        let boilerplate = await this.chooseABoilerplate(dependencyResolvers, outputter, commandContext.coreLanguage, commandContext.namespace);
         if (boilerplate === null) return;
 
         let dependencies = [
-                ...boilerplate.dependencies, 
-                ...this._boundedContextsManager.createAdornmentDependencies(boilerplate.language, boilerplate.name, namespace),
-                ...this._boundedContextsManager.createInteractionDependencies(boilerplate.language, boilerplate.name, namespace)
+                ...boilerplate.dependencies.dependencies, 
+                ...this._boundedContextsManager.createAdornmentDependencies(boilerplate.language, boilerplate.name, commandContext.namespace),
+                ...this._boundedContextsManager.createInteractionDependencies(boilerplate.language, boilerplate.name, commandContext.namespace)
             ];
-
-        let boilerplateContext = await dependencyResolvers.resolve({}, dependencies, cwd, coreLanguage, commandArguments);
-
-        let createdDetails = await this._boundedContextsManager.create(boilerplateContext, boilerplate, cwd, namespace);
-       
-        this.runCreationScriptsSync(createdDetails, outputter);
-    }
+        
+        try {
+            let boilerplateContext = await dependencyResolvers.resolve({}, dependencies, [], commandContext.currentWorkingDirectory, commandContext.coreLanguage);
     
-    getAllDependencies(cwd: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, any>, namespace?: string) {
-        let boilerplate = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace)[0];
-        let dependencies = boilerplate? boilerplate.dependencies : [];
-        return this.dependencies.concat(dependencies);
+            let createdDetails = await this._boundedContextsManager.create(boilerplateContext, boilerplate, commandContext.currentWorkingDirectory, commandContext.namespace);
+           
+            this.runCreationScriptsSync(createdDetails, outputter);
+
+        } catch(error) {
+            failedCommandOutputter.output(this, commandContext, error, dependencies);
+        }
     }
 
     private runCreationScriptsSync(createdDetails: CreatedContentBoilerplateDetails[], outputter: ICanOutputMessages) {
@@ -68,7 +66,7 @@ export class BoundedContextCommand extends Command {
     }
 
     private async chooseABoilerplate(dependencyResolvers: IDependencyResolvers, outputter: ICanOutputMessages, coreLanguage: string, namespace?: string) {
-        let boilerplates = this._boundedContextsManager.boilerplatesByLanguage(coreLanguage, namespace);
+        let boilerplates = await this._boundedContextsManager.getBoilerplatesByLanguage(coreLanguage, namespace);
         if (!boilerplates.length || boilerplates.length < 1) {
             let message = `No bounded context boilerplates found for language '${coreLanguage}'${namespace? ' under namespace \'' + namespace + '\'' : ''} `;
             this._logger.warn(message);

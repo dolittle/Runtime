@@ -5,7 +5,7 @@
 import { DiscoverableCommandGroup, ICommand } from "@dolittle/tooling.common.commands";
 import { ITemplatesBoilerplates, ITemplate, IBoilerplatesLoader } from "@dolittle/tooling.common.boilerplates";
 import { groupBy } from "@dolittle/tooling.common.utilities";
-import { AddCommand, IBoundedContextsManager } from "../index";
+import { AddCommand, IBoundedContextsManager } from "../internal";
 import { IFolders } from "@dolittle/tooling.common.files";
 
 const name = 'add';

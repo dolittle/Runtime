@@ -2,11 +2,11 @@
 *  Copyright (c) Dolittle. All rights reserved.
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
-import { Command } from "@dolittle/tooling.common.commands";
+import { Command, CommandContext, IFailedCommandOutputter } from "@dolittle/tooling.common.commands";
 import { ITemplate, ITemplatesBoilerplate, chooseTemplate, ITemplatesBoilerplates } from "@dolittle/tooling.common.boilerplates";
-import { ICanOutputMessages, NullMessageOutputter, IBusyIndicator, NullBusyIndicator, determineDestination } from "@dolittle/tooling.common.utilities";
-import { IDependencyResolvers, IDependency } from "@dolittle/tooling.common.dependencies";
-import { MissingBoundedContext, IBoundedContextsManager } from "../index";
+import { ICanOutputMessages, IBusyIndicator, determineDestination } from "@dolittle/tooling.common.utilities";
+import { IDependencyResolvers } from "@dolittle/tooling.common.dependencies";
+import { MissingBoundedContext, IBoundedContextsManager } from "../internal";
 import { IFolders } from "@dolittle/tooling.common.files";
 
 export class AddCommand extends Command {
@@ -27,7 +27,7 @@ export class AddCommand extends Command {
     constructor(templatesBoilerplate: ITemplatesBoilerplate, templateType: string, templates: ITemplate[], templatesBoilerplates: ITemplatesBoilerplates, 
                 boundedContextsManager: IBoundedContextsManager, folders: IFolders, dolittleConfig: any) {
         if (!templates || templates.length === 0) throw new Error('No templates given to add command');
-        super(templateType, templates[0].description, true,  undefined, [templatesBoilerplate.nameDependency, ...templatesBoilerplate.dependencies]);
+        super(templateType, templates[0].description, true,  undefined, [templatesBoilerplate.nameDependency, ...templatesBoilerplate.dependencies.dependencies]);
 
         this._templates = templates;
         this._templatesBoilerplate = templatesBoilerplate;
@@ -37,37 +37,33 @@ export class AddCommand extends Command {
         this._templatesBoilerplates = templatesBoilerplates;
     }
 
-    async action(dependencyResolvers: IDependencyResolvers, cwd: string, coreLanguage: string, commandArguments?: string[], options?: Map<string, any>, namespace?: string, 
-                outputter: ICanOutputMessages = new NullMessageOutputter(), busyIndicator: IBusyIndicator = new NullBusyIndicator()) {
+    async onAction(commandContext: CommandContext, dependencyResolvers: IDependencyResolvers, failedCommandOutputter: IFailedCommandOutputter, outputter: ICanOutputMessages, busyIndicator: IBusyIndicator) {
        
-        let template = await this.chooseATemplate(dependencyResolvers, outputter, coreLanguage, namespace);
+        let template = await this.chooseATemplate(dependencyResolvers, outputter, commandContext.coreLanguage, commandContext.namespace);
         if (template === null) return;
 
-        let boundedContext = await this._boundedContextsManager.getNearestBoundedContextConfig(cwd);
-        if (!boundedContext) throw new MissingBoundedContext(cwd);
+        try {
+            let boundedContext = await this._boundedContextsManager.getNearestBoundedContextConfig(commandContext.currentWorkingDirectory);
+            if (!boundedContext) throw new MissingBoundedContext(commandContext.currentWorkingDirectory);
 
-        let nameDependency = this._templatesBoilerplate.nameDependency;
+            let nameDependency = this._templatesBoilerplate.nameDependency;
+            
+            let context = await dependencyResolvers.resolve({}, [nameDependency], [], commandContext.currentWorkingDirectory, commandContext.coreLanguage);
+            let destinationAndName = determineDestination(template.area, this._templatesBoilerplate.language, context[nameDependency.name], commandContext.currentWorkingDirectory, boundedContext.path, this._dolittleConfig);
+            
+            context[nameDependency.name] = destinationAndName.name;
+
+            await this._folders.makeFolderIfNotExists(destinationAndName.destination);
+
+            let dependencies = template.getAllDependencies(this._templatesBoilerplate);
+            context = await dependencyResolvers.resolve(context, dependencies, [], destinationAndName.destination, commandContext.coreLanguage);
+            
+            await this._templatesBoilerplates.create(context, template, this._templatesBoilerplate, destinationAndName.destination);
+        }
+        catch (error) {
+            failedCommandOutputter.output(this, commandContext, error, template.getAllDependencies(this._templatesBoilerplate));
+        }
         
-        let context = await dependencyResolvers.resolve({}, [nameDependency], undefined, coreLanguage, commandArguments, options);
-        let destinationAndName = determineDestination(template.area, this._templatesBoilerplate.language, context[nameDependency.name], cwd, boundedContext.path, this._dolittleConfig);
-        
-        context[nameDependency.name] = destinationAndName.name;
-
-        await this._folders.makeFolderIfNotExists(destinationAndName.destination);
-
-        let dependencies = template.getAllDependencies(this._templatesBoilerplate);
-        context = await dependencyResolvers.resolve(context, dependencies, destinationAndName.destination, coreLanguage, commandArguments, options);
-        
-        await this._templatesBoilerplates.create(context, template, this._templatesBoilerplate, destinationAndName.destination);
-    }
-
-    getAllDependencies(currentWorkingDirectory: string, coreLanguage: string, commandArguments?: string[], commandOptions?: Map<string, any>, namespace?: string): IDependency[] {
-
-        let templatesWithLanguage = this._templates.filter(_ => this._templatesBoilerplate.namespace === namespace && this._templatesBoilerplate.language === coreLanguage);
-        let dependencies = templatesWithLanguage[0]? 
-            templatesWithLanguage[0].getAllDependencies(this._templatesBoilerplate)
-            : [];
-        return this.dependencies.concat(dependencies);
     }
 
     private async chooseATemplate(dependencyResolvers: IDependencyResolvers, outputter: ICanOutputMessages, coreLanguage: string, namespace?: string) {
