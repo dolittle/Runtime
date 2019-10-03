@@ -9,6 +9,7 @@
   
   <ItemGroup>
     <PackageReference Include="Dolittle.Management" Version="3.*"/>
+    <PackageReference Include="Dolittle.Protobuf" Version="3.*"/>
     <PackageReference Include="Dolittle.Runtime.Application.Grpc" Version="3.*"/>
   </ItemGroup>
 
