@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Application
 
                 var timer = new Timer(1000);
                 timer.Enabled = true;
-                timer.Elapsed += (s,e) => responseStream.WriteAsync(new Empty());
+                timer.Elapsed += (s, e) => responseStream.WriteAsync(new Empty());
 
                 context.CancellationToken.ThrowIfCancellationRequested();
                 context.CancellationToken.WaitHandle.WaitOne();
