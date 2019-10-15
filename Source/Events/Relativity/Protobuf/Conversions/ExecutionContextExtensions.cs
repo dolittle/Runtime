@@ -3,11 +3,9 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Applications;
-using Dolittle.Collections;
 using Dolittle.Execution;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Tenancy;
-using System.Globalization;
 using System.Linq;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
@@ -18,11 +16,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
     public static class ExecutionContextExtensions
     {
         /// <summary>
-        /// Convert from <see cref="Interaction.Grpc.OriginalContext"/> to <see cref="OriginalContext"/>
+        /// Convert from <see cref="Dolittle.Events.Relativity.Microservice.OriginalContext"/> to <see cref="OriginalContext"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="Interaction.Grpc.OriginalContext"/> to convert from</param>
+        /// <param name="protobuf"><see cref="Dolittle.Events.Relativity.Microservice.OriginalContext"/> to convert from</param>
         /// <returns>Converted <see cref="OriginalContext"/></returns>
-        public static OriginalContext ToOriginalContext(this Interaction.Grpc.OriginalContext protobuf)
+        public static OriginalContext ToOriginalContext(this Dolittle.Events.Relativity.Microservice.OriginalContext protobuf)
         {
             return new OriginalContext(
                 protobuf.Application.ToConcept<Dolittle.Applications.Application>(),
@@ -35,13 +33,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from <see cref="OriginalContext"/> to <see cref="Interaction.Grpc.OriginalContext"/>
+        /// Convert from <see cref="OriginalContext"/> to <see cref="Dolittle.Events.Relativity.Microservice.OriginalContext"/>
         /// </summary>
         /// <param name="originalContext"></param>
         /// <returns></returns>
-        public static Interaction.Grpc.OriginalContext ToProtobuf(this OriginalContext originalContext)
+        public static Dolittle.Events.Relativity.Microservice.OriginalContext ToProtobuf(this OriginalContext originalContext)
         {
-            var protobuf = new Interaction.Grpc.OriginalContext 
+            var protobuf = new Dolittle.Events.Relativity.Microservice.OriginalContext 
             {
                 Application = originalContext.Application.ToProtobuf(),
                 Tenant = originalContext.Tenant.ToProtobuf(),

@@ -3,33 +3,28 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Collections.Generic;
-using Dolittle.Services;
+using System.Linq;
+using Dolittle.Lifecycle;
+using Dolittle.Types;
 
 namespace Dolittle.Runtime.Application
 {
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindApplicationServices"/> for exposing
-    /// management service implementations for DependencyInversion
+    /// Represents an implementation of <see cref="IApplicationServices"/>
     /// </summary>
-    public class ApplicationServices : ICanBindApplicationServices
+    [Singleton]
+    public class ApplicationServices : IApplicationServices
     {
-        readonly ClientsService _clientService;
-
         /// <summary>
         /// Initializes a new instance of <see cref="ApplicationServices"/>
         /// </summary>
-        /// <param name="clientService">Instance of <see cref="ClientsService"/></param>
-        public ApplicationServices(ClientsService clientService)
+        /// <param name="definers">Instances of <see cref="IDefineApplicationServices">definers</see></param>
+        public ApplicationServices(IInstancesOf<IDefineApplicationServices> definers)
         {
-            _clientService = clientService;
+            Services = definers.SelectMany(_ => _.Services);
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Service> BindServices()
-        {
-            return new Service[] {
-                new Service(_clientService, Grpc.Server.Clients.BindService(_clientService), Grpc.Server.Clients.Descriptor)
-            };
-        }
+        public IEnumerable<ClientServiceDefinition> Services {  get; }
     }
 }

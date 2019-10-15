@@ -5,7 +5,7 @@
 using System;
 using System.Globalization;
 using Dolittle.Applications;
-using Dolittle.Runtime.Events.Relativity.Interaction.Grpc;
+using Dolittle.Events.Relativity.Microservice;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Protobuf.for_ArtifactExtensions

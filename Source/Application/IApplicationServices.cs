@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Application
     /// <summary>
     /// 
     /// </summary>
-    public interface IApplicationClientServices
+    public interface IApplicationServices
     {
         /// <summary>
         /// Gets the <see cref="ClientServiceDefinition"/> for all exposed services

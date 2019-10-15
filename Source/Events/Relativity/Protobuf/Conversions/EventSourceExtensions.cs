@@ -13,23 +13,23 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
     public static class EventSourceExtensions
     {
         /// <summary>
-        /// Convert from <see cref="Interaction.Grpc.EventSourceVersion"/> to <see cref="EventSourceVersion"/>
+        /// Convert from <see cref="Dolittle.Events.Relativity.Microservice.EventSourceVersion"/> to <see cref="EventSourceVersion"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="Interaction.Grpc.EventSourceVersion"/> to convert from</param>
+        /// <param name="protobuf"><see cref="Dolittle.Events.Relativity.Microservice.EventSourceVersion"/> to convert from</param>
         /// <returns>Converted <see cref="EventSourceVersion"/></returns>
-        public static EventSourceVersion ToEventSourceVersion(this Interaction.Grpc.EventSourceVersion protobuf)
+        public static EventSourceVersion ToEventSourceVersion(this Dolittle.Events.Relativity.Microservice.EventSourceVersion protobuf)
         {
             return new EventSourceVersion(protobuf.Commit, protobuf.Sequence);
         }
 
         /// <summary>
-        /// Convert from <see cref="EventSourceVersion"/> to <see cref="Interaction.Grpc.EventSourceVersion"/>
+        /// Convert from <see cref="EventSourceVersion"/> to <see cref="Dolittle.Events.Relativity.Microservice.EventSourceVersion"/>
         /// </summary>
         /// <param name="version"><see cref="EventSourceVersion"/> to convert from</param>
-        /// <returns>Converted <see cref="Interaction.Grpc.EventSourceVersion"/></returns>
-        public static Interaction.Grpc.EventSourceVersion ToProtobuf(this EventSourceVersion version)
+        /// <returns>Converted <see cref="Dolittle.Events.Relativity.Microservice.EventSourceVersion"/></returns>
+        public static Dolittle.Events.Relativity.Microservice.EventSourceVersion ToProtobuf(this EventSourceVersion version)
         {
-            return new Interaction.Grpc.EventSourceVersion
+            return new Dolittle.Events.Relativity.Microservice.EventSourceVersion
             {
                 Commit = version.Commit,
                 Sequence = version.Sequence
@@ -37,11 +37,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from <see cref="Interaction.Grpc.VersionedEventSource"/> to <see cref="VersionedEventSource"/>
+        /// Convert from <see cref="Dolittle.Events.Relativity.Microservice.VersionedEventSource"/> to <see cref="VersionedEventSource"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="Interaction.Grpc.VersionedEventSource"/> to convert from</param>
+        /// <param name="protobuf"><see cref="Dolittle.Events.Relativity.Microservice.VersionedEventSource"/> to convert from</param>
         /// <returns>Converted <see cref="VersionedEventSource"/></returns>
-        public static VersionedEventSource ToVersionedEventSource(this Interaction.Grpc.VersionedEventSource protobuf)
+        public static VersionedEventSource ToVersionedEventSource(this Dolittle.Events.Relativity.Microservice.VersionedEventSource protobuf)
         {
             return new VersionedEventSource(
                 protobuf.Version.ToEventSourceVersion(),
@@ -49,13 +49,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from <see cref="VersionedEventSource"/> to <see cref="Interaction.Grpc.VersionedEventSource"/>
+        /// Convert from <see cref="VersionedEventSource"/> to <see cref="Dolittle.Events.Relativity.Microservice.VersionedEventSource"/>
         /// </summary>
         /// <param name="versionedEventSource"><see cref="VersionedEventSource"/> to convert from</param>
-        /// <returns>Converted <see cref="Interaction.Grpc.VersionedEventSource"/></returns>
-        public static Interaction.Grpc.VersionedEventSource ToProtobuf(this VersionedEventSource versionedEventSource)
+        /// <returns>Converted <see cref="Dolittle.Events.Relativity.Microservice.VersionedEventSource"/></returns>
+        public static Dolittle.Events.Relativity.Microservice.VersionedEventSource ToProtobuf(this VersionedEventSource versionedEventSource)
         {
-            var source = new Interaction.Grpc.VersionedEventSource
+            var source = new Dolittle.Events.Relativity.Microservice.VersionedEventSource
             {
                 Version = versionedEventSource.Version.ToProtobuf(),
                 EventSource = versionedEventSource.EventSource.ToProtobuf(),

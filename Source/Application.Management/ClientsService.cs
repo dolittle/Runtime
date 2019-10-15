@@ -4,12 +4,11 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Application;
+using Dolittle.Application.Management;
 using Dolittle.Protobuf;
-using Dolittle.Runtime.Application.Grpc;
-using Dolittle.Runtime.Application.Management.Grpc;
-using Google.Protobuf;
 using Grpc.Core;
-using static Dolittle.Runtime.Application.Management.Grpc.Clients;
+using static Dolittle.Application.Management.Clients;
 
 namespace Dolittle.Runtime.Application.Management
 {

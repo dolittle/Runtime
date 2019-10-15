@@ -73,7 +73,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Applications.Configuration"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Protobuf", "Specifications\Protobuf\Protobuf.csproj", "{B68F2E27-CCB6-4A40-8269-47073A40BA55}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Interaction", "Source\Interaction\Interaction.csproj", "{B1C0064E-38F7-440E-96AC-0B68AEF95563}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microservices", "Source\Microservices\Microservices.csproj", "{B1C0064E-38F7-440E-96AC-0B68AEF95563}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Application", "Source\Application\Application.csproj", "{58BAF296-C687-4C89-B5EB-3B3DF9CD28F3}"
 EndProject

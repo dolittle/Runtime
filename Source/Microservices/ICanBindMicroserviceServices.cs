@@ -4,12 +4,12 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Application
+namespace Dolittle.Runtime.Microservices
 {
     /// <summary>
-    /// Defines a system that can bind a gRPC service for application purpose
+    /// Defines a system that can bind a gRPC service for interaction purpose
     /// </summary>
-    public interface ICanBindApplicationServices : ICanBindServices
+    public interface ICanBindMicroserviceServices : ICanBindServices
     {
-    }    
+    }
 }

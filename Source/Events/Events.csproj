@@ -24,12 +24,12 @@
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="3.*" />
     <PackageReference Include="Dolittle.Time" Version="3.*" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="3.*" />
-    <PackageReference Include="Dolittle.Runtime.Events.Relativity.Grpc" Version="3.*" />
+    <PackageReference Include="Dolittle.Events.Relativity.Contracts" Version="3.*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
-    <ProjectReference Include="..\Interaction\Interaction.csproj" />
+    <ProjectReference Include="..\Microservices\Microservices.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
     <ProjectReference Include="..\Protobuf\Protobuf.csproj" />

@@ -4,20 +4,21 @@
  *--------------------------------------------------------------------------------------------*/
 using System.Threading.Tasks;
 using System.Timers;
+using Dolittle.Application;
 using Dolittle.Collections;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
-using Dolittle.Runtime.Application.Grpc;
 using Dolittle.Time;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
+using static Dolittle.Application.Runtime.Clients;
 
 namespace Dolittle.Runtime.Application
 {
     /// <summary>
     /// Represents an implementation of <see cref="ClientBase"/>
     /// </summary>
-    public class ClientsService : Grpc.Server.Clients.ClientsBase
+    public class ClientsService : ClientsBase
     {
         readonly IClients _clients;
         readonly ISystemClock _systemClock;

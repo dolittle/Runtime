@@ -19,21 +19,21 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// Convert from <see cref="TenantOffset"/> to <see cref="TenantOffset"/>
         /// </summary>
         /// /// <param name="tenantOffset"><see cref="TenantOffset"/> to convert from</param>
-        /// <returns>Converted <see cref="Interaction.Grpc.TenantOffset"/></returns>
-        public static Interaction.Grpc.TenantOffset ToProtobuf(this TenantOffset tenantOffset)
+        /// <returns>Converted <see cref="Dolittle.Events.Relativity.Microservice.TenantOffset"/></returns>
+        public static Dolittle.Events.Relativity.Microservice.TenantOffset ToProtobuf(this TenantOffset tenantOffset)
         {
-            var message = new Interaction.Grpc.TenantOffset();
+            var message = new Dolittle.Events.Relativity.Microservice.TenantOffset();
             message.Tenant = tenantOffset.Tenant.ToProtobuf();
             message.Offset = tenantOffset.Offset;
             return message;
         }
 
         /// <summary>
-        /// Convert from <see cref="Interaction.Grpc.TenantOffset"/> to <see cref="TenantOffset"/>
+        /// Convert from <see cref="Dolittle.Events.Relativity.Microservice.TenantOffset"/> to <see cref="TenantOffset"/>
         /// </summary>
-        /// <param name="tenantOffset"><see cref="Interaction.Grpc.TenantOffset"/> to convert from</param>
+        /// <param name="tenantOffset"><see cref="Dolittle.Events.Relativity.Microservice.TenantOffset"/> to convert from</param>
         /// <returns>Converted <see cref="TenantOffset"/></returns>
-        public static TenantOffset ToTenantOffset(this Interaction.Grpc.TenantOffset tenantOffset)
+        public static TenantOffset ToTenantOffset(this Dolittle.Events.Relativity.Microservice.TenantOffset tenantOffset)
         {
             return new TenantOffset(
                 tenantOffset.Tenant.ToConcept<TenantId>(), 
@@ -41,24 +41,24 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from collection of <see cref="TenantOffset"/> to collection of <see cref="Interaction.Grpc.TenantOffset"/>
+        /// Convert from collection of <see cref="TenantOffset"/> to collection of <see cref="Dolittle.Events.Relativity.Microservice.TenantOffset"/>
         /// </summary>
         /// <param name="offsets">Collection of <see cref="TenantOffset">Offsets</see> to convert from</param>
-        /// <returns>Collection of <see cref="Interaction.Grpc.TenantOffset"/></returns>
-        public static RepeatedField<Interaction.Grpc.TenantOffset> ToProtobuf(this IEnumerable<TenantOffset> offsets)
+        /// <returns>Collection of <see cref="Dolittle.Events.Relativity.Microservice.TenantOffset"/></returns>
+        public static RepeatedField<Dolittle.Events.Relativity.Microservice.TenantOffset> ToProtobuf(this IEnumerable<TenantOffset> offsets)
         {
-            var protobuf = new RepeatedField<Interaction.Grpc.TenantOffset>();
+            var protobuf = new RepeatedField<Dolittle.Events.Relativity.Microservice.TenantOffset>();
             protobuf.Add(offsets.Select(_ => _.ToProtobuf()));
             return protobuf;
         }     
 
 
         /// <summary>
-        /// Convert from  collection of <see cref="Interaction.Grpc.TenantOffset"/> to collection of <see cref="TenantOffset"/>
+        /// Convert from  collection of <see cref="Dolittle.Events.Relativity.Microservice.TenantOffset"/> to collection of <see cref="TenantOffset"/>
         /// </summary>
-        /// <param name="offsets"><see cref="Interaction.Grpc.TenantOffset">Offsets</see> to convert from</param>
+        /// <param name="offsets"><see cref="Dolittle.Events.Relativity.Microservice.TenantOffset">Offsets</see> to convert from</param>
         /// <returns>Converted <see cref="TenantOffset">offsets</see></returns>
-        public static IEnumerable<TenantOffset> ToTenantOffsets(this IEnumerable<Interaction.Grpc.TenantOffset> offsets)
+        public static IEnumerable<TenantOffset> ToTenantOffsets(this IEnumerable<Dolittle.Events.Relativity.Microservice.TenantOffset> offsets)
         {
             return offsets.Select(_ => _.ToTenantOffset()).ToArray();
         }     

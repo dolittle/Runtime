@@ -2,18 +2,14 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System.Collections.Generic;
+using Dolittle.Services;
 
 namespace Dolittle.Runtime.Application
 {
     /// <summary>
-    /// Defines a system that defines application client services
+    /// Defines a system that can bind a gRPC service for application purpose
     /// </summary>
-    public interface IDefineApplicationClientServices
+    public interface ICanBindRuntimeServices : ICanBindServices
     {
-        /// <summary>
-        /// Gets the <see cref="ClientServiceDefinition"/>
-        /// </summary>
-        IEnumerable<ClientServiceDefinition> Services { get; }
     }
 }

@@ -5,7 +5,7 @@
 using System;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Interaction
+namespace Dolittle.Runtime.Microservices
 {
     /// <summary>
     /// Represents a <see cref="IRepresentServiceType">host type</see> that is for interaction communication
@@ -13,13 +13,13 @@ namespace Dolittle.Runtime.Interaction
     /// <remarks>
     /// Interaction is considered the channel in which a representation of processes interacting
     /// </remarks>
-    public class InteractionServiceType : IRepresentServiceType
+    public class MicroserviceServiceType : IRepresentServiceType
     {
         /// <inheritdoc/>
         public ServiceType Identifier => "Interaction";
 
         /// <inheritdoc/>
-        public Type BindingInterface => typeof(ICanBindInteractionServices);
+        public Type BindingInterface => typeof(ICanBindMicroserviceServices);
 
         /// <inheritdoc/>
         public EndpointVisibility Visibility => EndpointVisibility.Public;

@@ -4,10 +4,9 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Applications;
 using Dolittle.Collections;
-using Dolittle.Runtime.Events.Relativity.Interaction.Grpc;
+using Dolittle.Events.Relativity.Microservice;
 using Dolittle.Tenancy;
 using System.Globalization;
-using System.Linq;
 
 namespace Dolittle.Runtime.Protobuf
 {

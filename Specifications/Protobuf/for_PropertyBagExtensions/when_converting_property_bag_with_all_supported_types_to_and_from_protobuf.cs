@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using Dolittle.Collections;
-using Dolittle.Runtime.Events.Relativity.Interaction.Grpc;
+using Dolittle.Events.Relativity.Microservice;
 using Dolittle.Time;
 using Google.Protobuf.Collections;
 using Machine.Specifications;

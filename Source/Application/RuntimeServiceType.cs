@@ -14,13 +14,13 @@ namespace Dolittle.Runtime.Application
     /// Application is considered the channel in which a representation of the application is talking - 
     /// typically and SDK
     /// </remarks>
-    public class ApplicationServiceType : IRepresentServiceType
+    public class RuntimeServiceType : IRepresentServiceType
     {
         /// <inheritdoc/>
-        public ServiceType Identifier => "Application";
+        public ServiceType Identifier => "Runtime";
 
         /// <inheritdoc/>
-        public Type BindingInterface => typeof(ICanBindApplicationServices);
+        public Type BindingInterface => typeof(ICanBindRuntimeServices);
 
         /// <inheritdoc/>
         public EndpointVisibility Visibility => EndpointVisibility.Private;

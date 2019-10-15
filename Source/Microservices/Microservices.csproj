@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>Dolittle.Runtime.Interaction</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Microservices</AssemblyName>
   </PropertyGroup>
 
   <Import Project="../../Build/MSBuild/default.props" />

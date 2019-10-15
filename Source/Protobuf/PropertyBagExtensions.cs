@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Collections;
-using Dolittle.Runtime.Events.Relativity.Interaction.Grpc;
+using Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Protobuf
 {

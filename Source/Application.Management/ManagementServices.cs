@@ -26,10 +26,13 @@ namespace Dolittle.Runtime.Application.Management
         }
 
         /// <inheritdoc/>
+        public ServiceAspect Aspect => "Application";
+
+        /// <inheritdoc/>
         public IEnumerable<Service> BindServices()
         {
             return new Service[] {
-                new Service(_clientsService, Grpc.Clients.BindService(_clientsService), Grpc.Clients.Descriptor)
+                new Service(_clientsService, Dolittle.Application.Management.Clients.BindService(_clientsService), Dolittle.Application.Management.Clients.Descriptor)
             };
         }
     }
