@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Artifacts;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
@@ -45,7 +46,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         {
             return new VersionedEventSource(
                 protobuf.Version.ToEventSourceVersion(),
-                new EventSourceKey(protobuf.EventSource.ToConcept<EventSourceId>(),protobuf.Artifact.ToConcept<ArtifactId>()));
+                new EventSourceKey(protobuf.EventSource.To<EventSourceId>(),protobuf.Artifact.To<ArtifactId>()));
         }
 
         /// <summary>
@@ -63,5 +64,5 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             };
             return source;
         }
-    }   
+    }
 }

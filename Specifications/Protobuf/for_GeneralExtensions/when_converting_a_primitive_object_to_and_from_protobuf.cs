@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
     public class when_converting_a_primitive_object_to_and_from_protobuf
     {
         static object str;
-        static System.Protobuf.Value protobuf;
+        static Value protobuf;
         static object result;
 
         Establish context = () => str = "I am a string";
@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
             result = protobuf.ToCLR();
         };
         
-        It protobuf_message_should_have_an_object_value = () => protobuf.KindCase.ShouldEqual(System.Protobuf.Value.KindOneofCase.ObjectValue);
+        It protobuf_message_should_have_an_object_value = () => protobuf.KindCase.ShouldEqual(Value.KindOneofCase.ObjectValue);
         It protobuf_message_object_value_type_should_be_string = () => protobuf.ObjectValue.Type.ShouldEqual((int)Types.String);
         It should_be_equal_to_the_original = () => result.ShouldEqual(str);
     }

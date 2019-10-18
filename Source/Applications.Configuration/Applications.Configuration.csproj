@@ -8,13 +8,13 @@
   <Import Project="../../Build/MSBuild/default.props"/>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Applications" Version="3.*" />
-    <PackageReference Include="Dolittle.Booting" Version="3.*" />
-    <PackageReference Include="Dolittle.Configuration" Version="3.*" />
-    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="3.*" />
-    <PackageReference Include="Dolittle.Execution" Version="3.*" />
-    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="3.*" />
-    <PackageReference Include="Dolittle.Serialization.Json" Version="3.*" />
+    <PackageReference Include="Dolittle.Applications" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.Booting" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.Configuration" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.Execution" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.Serialization.Json" Version="4.0.0-beta*" />
 
   </ItemGroup>
 

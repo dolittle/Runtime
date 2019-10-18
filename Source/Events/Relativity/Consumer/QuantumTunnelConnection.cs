@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Events.Store;

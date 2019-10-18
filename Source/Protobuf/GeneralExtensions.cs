@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using Dolittle.Collections;
 using Dolittle.Concepts;
+using Dolittle.Protobuf;
 using Dolittle.Reflection;
 using Dolittle.Time;
 using Google.Protobuf;
@@ -20,7 +21,7 @@ namespace Dolittle.Runtime.Protobuf
     public static class GeneralExtensions
     {
         /// <summary>
-        /// Converts a <see cref="object"/> to <see cref="System.Protobuf.Value"/>.
+        /// Converts a <see cref="object"/> to <see cref="Value"/>.
         /// </summary>
         /// <remarks>
         /// This is primarily used when converting propertybags to protobuf messages and scenarios when we don't
@@ -28,16 +29,16 @@ namespace Dolittle.Runtime.Protobuf
         /// </remarks>
         /// <param name="obj"></param>
         /// <returns></returns>
-        public static System.Protobuf.Value ToProtobuf(this object obj)
+        public static Value ToProtobuf(this object obj)
         {
-            var value = new System.Protobuf.Value();
+            var value = new Value();
             var objType = obj.GetType();
 
             if (objType.IsEnumerable() && !objType.IsDictionary()) value.ListValue = ((System.Collections.IEnumerable)obj).ToProtobuf();
             else if (objType == typeof(Dolittle.PropertyBags.PropertyBag)) value.DictionaryValue = ((Dolittle.PropertyBags.PropertyBag)obj).ToProtobuf().AsDictionaryValue();
             else 
             {
-                var protobufObj = new System.Protobuf.Object();
+                var protobufObj = new Dolittle.Object();
                 var protobufType = obj.GetProtobufType();
                 protobufObj.Type = (int)protobufType;
 
@@ -55,55 +56,14 @@ namespace Dolittle.Runtime.Protobuf
             }
             return value;
         }
-        /// <summary>
-        /// Convert from a <see cref="System.Guid"/> to a <see cref="System.Protobuf.guid"/>
-        /// </summary>
-        /// <param name="guid"><see cref="System.Guid"/> to convert</param>
-        /// <returns>A <see cref="System.Protobuf.guid"/></returns>
-        public static System.Protobuf.guid ToProtobuf(this System.Guid guid)
-        {
-            var protobufGuid = new System.Protobuf.guid();
-            protobufGuid.Value = ByteString.CopyFrom(guid.ToByteArray());
-            return protobufGuid;
-        }
 
-        /// <summary>
-        /// Convert from a <see cref="System.Protobuf.guid"/> to a <see cref="System.Guid"/>
-        /// </summary>
-        /// <param name="protobuf"><see cref="System.Protobuf.guid"/> to convert</param>
-        /// <returns>A <see cref="System.Guid"/></returns>
-        public static System.Guid ToGuid(this System.Protobuf.guid protobuf)
-        {
-            return new Guid(protobuf.Value.ToByteArray());
-        }
-
-        /// <summary>
-        /// Convert a <see cref="ConceptAs{T}">Guid concept</see> to <see cref="System.Protobuf.guid"/>
-        /// </summary>
-        /// <param name="concept"><see cref="ConceptAs{T}"/> to convert from</param>
-        /// <returns>Converted <see cref="System.Protobuf.guid"/></returns>
-        public static System.Protobuf.guid ToProtobuf(this ConceptAs<Guid> concept)
-        {
-            return concept.Value.ToProtobuf();
-        }
-
-        /// <summary>
-        /// Convert a <see cref="System.Protobuf.guid"/> to <see cref="ConceptAs{T}">Guid concept</see>
-        /// </summary>
-        /// <param name="guid"><see cref="System.Protobuf.guid"/> to convert from</param>
-        /// <typeparam name="T">Type of <see cref="ConceptAs{T}"/> to convert to</typeparam>
-        /// <returns>Converted instance - matching the type given</returns>
-        public static T ToConcept<T>(this System.Protobuf.guid guid) where T : ConceptAs<Guid>
-        {
-            return ConceptFactory.CreateConceptInstance(typeof(T), new Guid(guid.Value.ToByteArray())) as T;
-        }
         /// <summary>
         /// Get the protobuf <see cref="Types"/> representation of the <see cref="object">instances type</see>
         /// </summary>
         /// <param name="obj"><see cref="object">instance</see> to get from</param>
         /// <returns><see cref="Types">Protobuf type</see></returns>
         public static Types GetProtobufType(this object obj) => obj.GetType().AsProtobufTypes();
-        
+
         /// <summary>
         /// Gets the protobuf <see cref="Types"/> representation of the <see cref="Type"/>
         /// </summary>
@@ -154,23 +114,23 @@ namespace Dolittle.Runtime.Protobuf
             }
         }
         /// <summary>
-        /// Read value from <see cref="System.Protobuf.Value"/>
+        /// Read value from <see cref="Value"/>
         /// </summary>
-        /// <param name="value"><see cref="System.Protobuf.Value"/> to read from</param>
+        /// <param name="value"><see cref="Value"/> to read from</param>
         /// <returns>Value in the correct type - null if not capable of converting</returns>
-        public static object ToCLR(this System.Protobuf.Value value)
+        public static object ToCLR(this Value value)
         {
             object returnValue = null;
 
             switch ( value.KindCase )
             {
-                case System.Protobuf.Value.KindOneofCase.ObjectValue:
+                case Value.KindOneofCase.ObjectValue:
                     returnValue = value.ObjectValue.ToCLR();
                     break;
-                case System.Protobuf.Value.KindOneofCase.ListValue:
+                case Value.KindOneofCase.ListValue:
                     returnValue = value.ListValue.ToCLR();
                     break;
-                case System.Protobuf.Value.KindOneofCase.DictionaryValue:
+                case Value.KindOneofCase.DictionaryValue:
                     returnValue = value.DictionaryValue.ToCLR();
                     break;
             }
@@ -178,11 +138,11 @@ namespace Dolittle.Runtime.Protobuf
             return returnValue;   
         }
         /// <summary>
-        /// Read value from <see cref="System.Protobuf.Object"/>
+        /// Read value from <see cref="Object"/>
         /// </summary>
-        /// <param name="obj"><see cref="System.Protobuf.Object"/> to read from</param>
+        /// <param name="obj"><see cref="Object"/> to read from</param>
         /// <returns>Value in the correct type - null if not capable of converting</returns>
-        public static object ToCLR(this System.Protobuf.Object obj)
+        public static object ToCLR(this Object obj)
         {
             var type = (Types)obj.Type;
             object value = null;
@@ -205,40 +165,44 @@ namespace Dolittle.Runtime.Protobuf
             }
             return value;
         }
+
         /// <summary>
-        /// Converts a <see cref="System.Collections.IEnumerable"/> to <see cref="System.Protobuf.ArrayValue"/>
+        /// Converts a <see cref="System.Collections.IEnumerable"/> to <see cref="ArrayValue"/>
         /// </summary>
         /// <param name="enumerable"></param>
         /// <returns></returns>
-        public static System.Protobuf.ArrayValue ToProtobuf(this System.Collections.IEnumerable enumerable)
+        public static ArrayValue ToProtobuf(this System.Collections.IEnumerable enumerable)
         {
-            var arrayValue = new System.Protobuf.ArrayValue();
+            var arrayValue = new ArrayValue();
             foreach (var item in enumerable) arrayValue.Values.Add(item.ToProtobuf());
             return arrayValue; 
         }
+
         /// <summary>
-        /// Read value from <see cref="System.Protobuf.ArrayValue"/>
+        /// Read value from <see cref="ArrayValue"/>
         /// </summary>
-        /// <param name="array"><see cref="System.Protobuf.ArrayValue"/> to read from</param>
+        /// <param name="array"><see cref="ArrayValue"/> to read from</param>
         /// <returns>Array of values</returns>
-        public static object[] ToCLR(this System.Protobuf.ArrayValue array)
+        public static object[] ToCLR(this ArrayValue array)
         {
             var list = new List<object>();
             list.AddRange(array.Values.Select(val => val.ToCLR()));
             return list.ToArray();
         }
+
         /// <summary>
-        /// Read value from <see cref="System.Protobuf.DictionaryValue"/>
+        /// Read value from <see cref="DictionaryValue"/>
         /// </summary>
-        /// <param name="dictionary"><see cref="System.Protobuf.DictionaryValue"/> to read from</param>
+        /// <param name="dictionary"><see cref="DictionaryValue"/> to read from</param>
         /// <returns>The <see cref="Dolittle.PropertyBags.PropertyBag"/></returns>
-        public static Dolittle.PropertyBags.PropertyBag ToCLR(this System.Protobuf.DictionaryValue dictionary) => dictionary.Object.ToCLR();
+        public static Dolittle.PropertyBags.PropertyBag ToCLR(this DictionaryValue dictionary) => dictionary.Object.ToCLR();
+
         /// <summary>
         /// Read value from <see cref="MapField{TKey, TValue}"/>
         /// </summary>
         /// <param name="propertyBag"><see cref="MapField{TKey, TValue}"/> to read from</param>
         /// <returns>The <see cref="Dolittle.PropertyBags.PropertyBag"/></returns>
-        public static Dolittle.PropertyBags.PropertyBag ToCLR(this MapField<string, System.Protobuf.Value> propertyBag)
+        public static Dolittle.PropertyBags.PropertyBag ToCLR(this MapField<string, Value> propertyBag)
         {
             var nullFreedictionary = new NullFreeDictionary<string,object>();
             propertyBag.ForEach(keyValue => 
@@ -248,6 +212,5 @@ namespace Dolittle.Runtime.Protobuf
             });
             return new Dolittle.PropertyBags.PropertyBag(nullFreedictionary);
         }
-        
     }
 }

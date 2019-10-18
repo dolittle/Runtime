@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
     public class when_converting_array_of_guid_to_and_from_protobuf
     {
         static Guid[] guid_array;
-        static System.Protobuf.ArrayValue protobuf;
+        static ArrayValue protobuf;
         static object[] result;
 
         Establish context = () => guid_array = new Guid[] {Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid()};

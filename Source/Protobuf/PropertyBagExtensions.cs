@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Collections;
 using Dolittle.Events.Relativity.Microservice;
-
+using Dolittle.Protobuf;
 namespace Dolittle.Runtime.Protobuf
 {
     /// <summary>
@@ -31,27 +31,26 @@ namespace Dolittle.Runtime.Protobuf
         /// <returns>Converted <see cref="PropertyBags.PropertyBag"/></returns>
         public static PropertyBags.PropertyBag ToPropertyBag(this PropertyBag propertyBag) => propertyBag.Values.ToCLR();
         /// <summary>
-        /// Convert from <see cref="PropertyBag"/> to <see cref="System.Protobuf.DictionaryValue"/>
+        /// Convert from <see cref="PropertyBag"/> to <see cref="DictionaryValue"/>
         /// </summary>
         /// <param name="propertyBag"></param>
         /// <returns></returns>
-        public static System.Protobuf.DictionaryValue AsDictionaryValue(this PropertyBag propertyBag)
+        public static DictionaryValue AsDictionaryValue(this PropertyBag propertyBag)
         {
-            var dictionaryValue = new System.Protobuf.DictionaryValue();
+            var dictionaryValue = new DictionaryValue();
             propertyBag.Values.ForEach(kvp => dictionaryValue.Object.Add(kvp.Key, kvp.Value));
             return dictionaryValue;
         }
         /// <summary>
-        /// Convert from <see cref="System.Protobuf.DictionaryValue"/> to <see cref="PropertyBag"/>
+        /// Convert from <see cref="DictionaryValue"/> to <see cref="PropertyBag"/>
         /// </summary>
         /// <param name="dictionaryValue"></param>
         /// <returns></returns>
-        public static PropertyBag AsPropertyBag(this System.Protobuf.DictionaryValue dictionaryValue)
+        public static PropertyBag AsPropertyBag(this DictionaryValue dictionaryValue)
         {
             var propertyBag = new PropertyBag();
             dictionaryValue.Object.ForEach(kvp => propertyBag.Values.Add(kvp.Key, kvp.Value));
             return propertyBag;
         }
-
     }
 }

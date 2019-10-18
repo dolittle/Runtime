@@ -2,15 +2,14 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Execution;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Tenancy;
 using Dolittle.Time;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
@@ -27,11 +26,11 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         /// <returns>Converted <see cref="CommittedEventStream"/></returns>
         public static CommittedEventStream ToCommittedEventStream(this Dolittle.Events.Relativity.Microservice.CommittedEventStream protobuf)
         {
-            var eventSourceId = protobuf.Source.EventSource.ToConcept<EventSourceId>();
-            var artifactId = protobuf.Source.Artifact.ToConcept<ArtifactId>();
+            var eventSourceId = protobuf.Source.EventSource.To<EventSourceId>();
+            var artifactId = protobuf.Source.Artifact.To<ArtifactId>();
             var versionedEventSource = new VersionedEventSource(eventSourceId, artifactId);
-            var commitId = protobuf.Id.ToConcept<CommitId>();
-            var correlationId = protobuf.CorrelationId.ToConcept<CorrelationId>();
+            var commitId = protobuf.Id.To<CommitId>();
+            var correlationId = protobuf.CorrelationId.To<CorrelationId>();
             var timeStamp = protobuf.TimeStamp.ToDateTimeOffset();
             
             var events = protobuf.Events.Select(_ =>                 
@@ -74,13 +73,12 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                     Metadata = @event.Metadata.ToProtobuf()
                 };
                 envelope.Event = @event.Event.ToProtobuf();
-                
+
                 return envelope;
             }).ForEach(protobuf.Events.Add);
 
             return protobuf;
         }
-
 
         /// <summary>
         /// Convert from <see cref="CommittedEventStreamWithContext"/> to <see cref="Dolittle.Events.Relativity.Microservice.CommittedEventStream"/>
@@ -96,7 +94,8 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
             };
 
             return protobuf;
-        }      
+        }
+
         /// <summary>
         /// Convert from <see cref="Dolittle.Events.Relativity.Microservice.CommittedEventStreamWithContext"/> to <see cref="CommittedEventStreamWithContext"/>
         /// </summary>

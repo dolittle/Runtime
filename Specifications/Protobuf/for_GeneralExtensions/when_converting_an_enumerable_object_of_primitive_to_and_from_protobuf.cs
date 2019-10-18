@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
     public class when_converting_an_enumerable_object_of_primitive_to_and_from_protobuf
     {
         static object enumerable_object;
-        static System.Protobuf.Value protobuf;
+        static Value protobuf;
         static object result;
 
         Establish context = () => enumerable_object = new int[]{1, 2, 3};
@@ -24,8 +24,8 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
             protobuf = enumerable_object.ToProtobuf();
             result = protobuf.ToCLR();
         };
-        
-        It protobuf_message_should_have_a_list_value = () => protobuf.KindCase.ShouldEqual(System.Protobuf.Value.KindOneofCase.ListValue);
+
+        It protobuf_message_should_have_a_list_value = () => protobuf.KindCase.ShouldEqual(Value.KindOneofCase.ListValue);
         It should_be_equal_to_the_original = () =>
         {
             var enumerable = CreateArrayOf(enumerable_object, _ => (int)_);
@@ -34,7 +34,6 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
             result_enumerable.ShouldContainOnly(enumerable);
         };
 
-        
         static IEnumerable<TResult> CreateArrayOf<TResult>(object arrayObject, Func<object, TResult> converterFunc) => 
             ((System.Collections.IEnumerable) arrayObject)
                 .Cast<object>()

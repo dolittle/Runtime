@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
     public class when_converting_array_of_primitive_to_and_from_protobuf
     {
         static int[] int_array;
-        static System.Protobuf.ArrayValue protobuf;
+        static ArrayValue protobuf;
         static object[] result;
 
         Establish context = () => int_array = new int[] {1, 2, 3};

@@ -2,11 +2,12 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
+using System.Globalization;
 using Dolittle.Applications;
 using Dolittle.Collections;
 using Dolittle.Events.Relativity.Microservice;
 using Dolittle.Tenancy;
-using System.Globalization;
+using Dolittle.Protobuf;
 
 namespace Dolittle.Runtime.Protobuf
 {
@@ -23,15 +24,15 @@ namespace Dolittle.Runtime.Protobuf
         public static Execution.ExecutionContext ToExecutionContext(this ExecutionContext protobuf)
         {
             return new Execution.ExecutionContext(
-                protobuf.Application.ToConcept<Application>(),
-                protobuf.BoundedContext.ToConcept<BoundedContext>(),
-                protobuf.Tenant.ToConcept<TenantId>(),
+                protobuf.Application.To<Application>(),
+                protobuf.BoundedContext.To<BoundedContext>(),
+                protobuf.Tenant.To<TenantId>(),
                 protobuf.Environment,
-                protobuf.CorrelationId.ToConcept<Dolittle.Execution.CorrelationId>(),
+                protobuf.CorrelationId.To<Dolittle.Execution.CorrelationId>(),
                 protobuf.Claims.ToClaims(),
                 CultureInfo.GetCultureInfo(protobuf.Culture)
             );
-        }    
+        }
 
         /// <summary>
         /// Convert from <see cref="Dolittle.Execution.ExecutionContext"/> to <see cref="ExecutionContext"/>
@@ -42,10 +43,10 @@ namespace Dolittle.Runtime.Protobuf
         {
             var protobuf = new ExecutionContext
             {
-                Application = executionContext.Application.ToProtobuf(),
-                BoundedContext = executionContext.BoundedContext.ToProtobuf(),
-                Tenant = executionContext.Tenant.ToProtobuf(),
-                CorrelationId = executionContext.CorrelationId.ToProtobuf(),
+                Application = Extensions.ToProtobuf(executionContext.Application),
+                BoundedContext = Extensions.ToProtobuf(executionContext.BoundedContext),
+                Tenant = Extensions.ToProtobuf(executionContext.Tenant),
+                CorrelationId = Extensions.ToProtobuf(executionContext.CorrelationId),
                 Environment = executionContext.Environment.Value,
                 Culture = executionContext.Culture?.Name ?? CultureInfo.InvariantCulture.Name
             };

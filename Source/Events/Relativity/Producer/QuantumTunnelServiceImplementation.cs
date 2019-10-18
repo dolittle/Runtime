@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Serialization.Protobuf;
@@ -52,8 +53,8 @@ namespace Dolittle.Runtime.Events.Relativity
             try
             {
                 var tunnel = new QuantumTunnel(_serializer, responseStream, context.CancellationToken, _logger);
-                var application = request.Application.ToConcept<Dolittle.Applications.Application>();
-                var boundedContext = request.BoundedContext.ToConcept<BoundedContext>();
+                var application = request.Application.To<Dolittle.Applications.Application>();
+                var boundedContext = request.BoundedContext.To<BoundedContext>();
                 var events = request
                     .Events
                     .Select(@event => @event.ToArtifact())

@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
         };
 
         static object complex_type_property_bag_object;
-        static System.Protobuf.Value protobuf;
+        static Value protobuf;
         static object result;
 
         Establish context = () => complex_type_property_bag_object = complex_type.ToPropertyBag();
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
             result = protobuf.ToCLR();
         };
         
-        It protobuf_message_should_have_a_dictionary_value = () => protobuf.KindCase.ShouldEqual(System.Protobuf.Value.KindOneofCase.DictionaryValue);
+        It protobuf_message_should_have_a_dictionary_value = () => protobuf.KindCase.ShouldEqual(Value.KindOneofCase.DictionaryValue);
         It should_be_equal_to_the_original = () =>
         {
             var complex_type_property_bag = complex_type_property_bag_object as Dolittle.PropertyBags.PropertyBag;

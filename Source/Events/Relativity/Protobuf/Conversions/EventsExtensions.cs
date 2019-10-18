@@ -2,10 +2,10 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
 using Dolittle.Execution;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Time;
+using Dolittle.Protobuf;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 {
@@ -22,9 +22,9 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         public static EventMetadata ToEventMetadata(this Dolittle.Events.Relativity.Microservice.EventMetadata protobuf)
         {
             var metadata = new EventMetadata(
-                protobuf.EventId.ToConcept<EventId>(),
+                protobuf.EventId.To<EventId>(),
                 protobuf.Source.ToVersionedEventSource(),
-                protobuf.CorrelationId.ToConcept<CorrelationId>(),
+                protobuf.CorrelationId.To<CorrelationId>(),
                 protobuf.Artifact.ToArtifact(),
                 protobuf.Occurred.ToDateTimeOffset(),
                 protobuf.OriginalContext.ToOriginalContext()

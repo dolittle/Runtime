@@ -5,8 +5,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Tenancy;
-using Google.Protobuf.Collections;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Protobuf;
+using Google.Protobuf.Collections;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 {
@@ -36,7 +37,7 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         public static TenantOffset ToTenantOffset(this Dolittle.Events.Relativity.Microservice.TenantOffset tenantOffset)
         {
             return new TenantOffset(
-                tenantOffset.Tenant.ToConcept<TenantId>(), 
+                tenantOffset.Tenant.To<TenantId>(),
                 tenantOffset.Offset);
         }
 

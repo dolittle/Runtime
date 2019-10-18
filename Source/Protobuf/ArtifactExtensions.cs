@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Events.Relativity.Microservice;
+using Dolittle.Protobuf;
 
 namespace Dolittle.Runtime.Protobuf
 {
@@ -20,7 +21,7 @@ namespace Dolittle.Runtime.Protobuf
         {
             var message = new Artifact
             {
-                Id = artifact.Id.ToProtobuf(),
+                Id = Dolittle.Protobuf.Extensions.ToProtobuf(artifact.Id),
                 Generation = artifact.Generation.Value
             };
 
@@ -35,7 +36,7 @@ namespace Dolittle.Runtime.Protobuf
         public static Artifacts.Artifact ToArtifact(this Artifact message)
         {
             return new Artifacts.Artifact(
-                message.Id.ToConcept<Artifacts.ArtifactId>(),
+                message.Id.To<Artifacts.ArtifactId>(),
                 message.Generation
             );
         }
