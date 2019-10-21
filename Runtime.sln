@@ -75,11 +75,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Protobuf", "Specifications\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Microservices", "Source\Microservices\Microservices.csproj", "{B1C0064E-38F7-440E-96AC-0B68AEF95563}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Applications", "Source\Applications\Applications.csproj", "{58BAF296-C687-4C89-B5EB-3B3DF9CD28F3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heads", "Source\Heads\Heads.csproj", "{58BAF296-C687-4C89-B5EB-3B3DF9CD28F3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Applications.Management", "Source\Applications.Management\Applications.Management.csproj", "{4A17CF77-0429-4999-86B0-609AEAB677A3}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heads.Management", "Source\Heads.Management\Heads.Management.csproj", "{4A17CF77-0429-4999-86B0-609AEAB677A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Applications", "Specifications\Applications\Applications.csproj", "{08BF36C7-190A-4BF7-AD35-ADF60E194C99}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Heads", "Specifications\Heads\Heads.csproj", "{08BF36C7-190A-4BF7-AD35-ADF60E194C99}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runtime", "Source\AggregatedPackage\Runtime.csproj", "{79E86BE6-239C-4633-9CF4-CAB0F7D4E37F}"
 EndProject

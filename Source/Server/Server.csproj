@@ -8,8 +8,8 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <ProjectReference Include="../Applications/Applications.csproj"/>
-    <ProjectReference Include="../Applications.Management/Applications.Management.csproj"/>
+    <ProjectReference Include="../Heads/Heads.csproj"/>
+    <ProjectReference Include="../Heads.Management/Heads.Management.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
