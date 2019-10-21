@@ -12,4 +12,4 @@ jobs:
 - template: Source/DotNet/pipeline.yml@templates
   parameters:
     CASCADES:
-    - 'dolittle-runtime/DotNET.SDK'
+      - 'dolittle-runtime/DotNET.SDK'
