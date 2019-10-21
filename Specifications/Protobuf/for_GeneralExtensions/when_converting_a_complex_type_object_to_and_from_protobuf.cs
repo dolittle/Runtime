@@ -4,13 +4,12 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Concepts;
 using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_GeneralExtensions.given;
 using Machine.Specifications;
+using Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
 {

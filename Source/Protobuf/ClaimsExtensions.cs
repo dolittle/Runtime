@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System.Linq;
-using Dolittle.Events.Relativity.Microservice;
+using grpc = Dolittle.Events.Relativity.Microservice;
 using Google.Protobuf.Collections;
 
 namespace Dolittle.Runtime.Protobuf
@@ -14,23 +14,23 @@ namespace Dolittle.Runtime.Protobuf
     public static class ClaimsExtensions
     {
         /// <summary>
-        /// Convert from <see cref="RepeatedField{Claim}"/> to <see cref="Security.Claims"/>
+        /// Convert from <see cref="RepeatedField{T}"/> of <see cref="grpc.Claim"/> to <see cref="Security.Claims"/>
         /// </summary>
-        /// <param name="claims"><see cref="RepeatedField{Claim}"/> to convert from</param>
+        /// <param name="claims"><see cref="RepeatedField{T}"/> of <see cref="grpc.Claim"/> to convert from</param>
         /// <returns>Converted <see cref="Security.Claims"/></returns>
-        public static Security.Claims ToClaims(this RepeatedField<Claim> claims)
+        public static Security.Claims ToClaims(this RepeatedField<grpc.Claim> claims)
         {
             return new Security.Claims(claims.Select(_ => _.ToClaim()).ToArray());
-        }  
+        }
 
         /// <summary>
-        /// Convert from <see cref="Security.Claims"/> to <see cref="RepeatedField{Claim}"/>
+        /// Convert from <see cref="Security.Claims"/> to <see cref="RepeatedField{T}"/> of <see cref="grpc.Claim"/>
         /// </summary>
         /// <param name="claims"><see cref="Security.Claims"/> to convert from</param>
-        /// <returns>Converted <see cref="RepeatedField{Claim}"/></returns>
-        public static RepeatedField<Claim> ToProtobuf(this Security.Claims claims)
+        /// <returns>Converted <see cref="RepeatedField{T}"/> of <see cref="grpc.Claim"/></returns>
+        public static RepeatedField<grpc.Claim> ToProtobuf(this Security.Claims claims)
         {
-            var protobufClaims = new RepeatedField<Claim>
+            var protobufClaims = new RepeatedField<grpc.Claim>
             {
                 claims.Select(_ => _.ToProtobuf())
             };
@@ -38,13 +38,13 @@ namespace Dolittle.Runtime.Protobuf
         } 
 
         /// <summary>
-        /// Convert from <see cref="Security.Claim"/> to <see cref="Claim"/>
+        /// Convert from <see cref="Security.Claim"/> to <see cref="grpc.Claim"/>
         /// </summary>
         /// <param name="claim"><see cref="Security.Claim"/> to convert from</param>
-        /// <returns>Converted <see cref="Claim"/></returns>
-        public static Claim ToProtobuf(this Security.Claim claim)
+        /// <returns>Converted <see cref="grpc.Claim"/></returns>
+        public static grpc.Claim ToProtobuf(this Security.Claim claim)
         {
-            return new Claim {
+            return new grpc.Claim {
                 Name = claim.Name,
                 Value = claim.Value,
                 ValueType = claim.ValueType
@@ -52,11 +52,11 @@ namespace Dolittle.Runtime.Protobuf
         }
 
         /// <summary>
-        /// Convert from <see cref="Claim"/> to <see cref="Security.Claim"/>
+        /// Convert from <see cref="grpc.Claim"/> to <see cref="Security.Claim"/>
         /// </summary>
-        /// <param name="claim"><see cref="Claim"/> to convert from</param>
+        /// <param name="claim"><see cref="grpc.Claim"/> to convert from</param>
         /// <returns>Converted <see cref="Security.Claim"/></returns>
-        public static Security.Claim ToClaim(this Claim claim)
+        public static Security.Claim ToClaim(this grpc.Claim claim)
         {
             return new Security.Claim(claim.Name, claim.Value, claim.ValueType);
         }

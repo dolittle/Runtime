@@ -4,7 +4,7 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Collections;
 using Dolittle.Events.Relativity.Microservice;
-using Dolittle.Protobuf;
+
 namespace Dolittle.Runtime.Protobuf
 {
     /// <summary>
@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Protobuf
     public static class PropertyBagExtensions
     {
         /// <summary>
-        /// Convert from <see cref="PropertyBags.PropertyBag"/> to a <see cref="PropertyBag"/>
+        /// Convert from <see cref="PropertyBag"/> to a <see cref="PropertyBag"/>
         /// </summary>
         /// <param name="propertyBag"><see cref="PropertyBag"/> to convert from</param>
         /// <returns>Converted <see cref="PropertyBag"/></returns>
@@ -25,27 +25,29 @@ namespace Dolittle.Runtime.Protobuf
         }
 
         /// <summary>
-        /// Convert from <see cref="PropertyBag"/> to <see cref="PropertyBags.PropertyBag"/>
+        /// Convert from <see cref="PropertyBag"/> to <see cref="PropertyBag"/>
         /// </summary>
         /// <param name="propertyBag"><see cref="PropertyBag"/> to convert from</param>
-        /// <returns>Converted <see cref="PropertyBags.PropertyBag"/></returns>
+        /// <returns>Converted <see cref="PropertyBag"/></returns>
         public static PropertyBags.PropertyBag ToPropertyBag(this PropertyBag propertyBag) => propertyBag.Values.ToCLR();
+
         /// <summary>
         /// Convert from <see cref="PropertyBag"/> to <see cref="DictionaryValue"/>
         /// </summary>
-        /// <param name="propertyBag"></param>
-        /// <returns></returns>
+        /// <param name="propertyBag"><see cref="PropertyBag"/> to convert</param>
+        /// <returns>Converted <see cref="DictionaryValue"/></returns>
         public static DictionaryValue AsDictionaryValue(this PropertyBag propertyBag)
         {
             var dictionaryValue = new DictionaryValue();
-            propertyBag.Values.ForEach(kvp => dictionaryValue.Object.Add(kvp.Key, kvp.Value));
+            propertyBag.Values.ForEach(kvp => dictionaryValue.Object.Add(kvp.Key, kvp.Value.ToProtobuf()));
             return dictionaryValue;
         }
+
         /// <summary>
         /// Convert from <see cref="DictionaryValue"/> to <see cref="PropertyBag"/>
         /// </summary>
-        /// <param name="dictionaryValue"></param>
-        /// <returns></returns>
+        /// <param name="dictionaryValue"><see cref="DictionaryValue"/> to convert</param>
+        /// <returns>Converted <see cref="PropertyBag"/></returns>
         public static PropertyBag AsPropertyBag(this DictionaryValue dictionaryValue)
         {
             var propertyBag = new PropertyBag();

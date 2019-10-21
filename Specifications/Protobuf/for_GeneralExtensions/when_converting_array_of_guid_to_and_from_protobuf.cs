@@ -4,8 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Linq;
-using Dolittle.Concepts;
 using Machine.Specifications;
+using Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
 {

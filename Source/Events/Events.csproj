@@ -25,7 +25,7 @@
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="4.0.0-beta*" />
     <PackageReference Include="Dolittle.Time" Version="4.0.0-beta*" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="4.0.0-beta*" />
-    <PackageReference Include="Dolittle.Events.Relativity.Contracts" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="4.0.0-beta*" />
   </ItemGroup>
 
   <ItemGroup>

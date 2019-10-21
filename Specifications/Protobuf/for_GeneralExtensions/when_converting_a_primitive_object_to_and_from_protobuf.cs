@@ -1,11 +1,9 @@
-
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
-using Dolittle.Concepts;
 using Machine.Specifications;
+using Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
 {

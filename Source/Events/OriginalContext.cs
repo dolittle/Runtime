@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events
         /// <summary>
         /// Initializes an instance of <see cref="OriginalContext"/>
         /// </summary>
-        /// <param name="application"><see cref="Dolittle.Applications.Application"/> that is the source of the event</param>
+        /// <param name="application"><see cref="Applications.Application"/> that is the source of the event</param>
         /// <param name="boundedContext"><see cref="BoundedContext"/> that is the source of the event</param>
         /// <param name="tenant"><see cref="TenantId"/> that is related to the source of the event</param>
         /// <param name="environment"><see cref="Dolittle.Execution.Environment"/> for the original <see cref="ExecutionContext"/></param>

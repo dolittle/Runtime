@@ -15,7 +15,6 @@ using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 using Dolittle.Events.Relativity.Microservice;
 using static Dolittle.Events.Relativity.Microservice.QuantumTunnelService;
-
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>

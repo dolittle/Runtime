@@ -15,11 +15,12 @@ using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Events.Relativity.Microservice;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
+using Dolittle.Events.Relativity.Microservice;
+using grpc = Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Events.Relativity.Grpc
 {
@@ -167,9 +168,9 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             Close ();
         }
 
-        AsyncServerStreamingCall<Dolittle.Events.Relativity.Microservice.CommittedEventStreamWithContext> GetOpenTunnel ()
+        AsyncServerStreamingCall<grpc.CommittedEventStreamWithContext> GetOpenTunnel ()
         {
-            var tunnel = new Dolittle.Events.Relativity.Microservice.OpenTunnel
+            var tunnel = new OpenTunnel
             {
                 Application = _destinationKey.Application.ToProtobuf (),
                 BoundedContext = _destinationKey.BoundedContext.ToProtobuf (),

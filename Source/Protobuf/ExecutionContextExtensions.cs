@@ -5,23 +5,23 @@
 using System.Globalization;
 using Dolittle.Applications;
 using Dolittle.Collections;
-using Dolittle.Events.Relativity.Microservice;
+using grpc = Dolittle.Events.Relativity.Microservice;
 using Dolittle.Tenancy;
 using Dolittle.Protobuf;
 
 namespace Dolittle.Runtime.Protobuf
 {
     /// <summary>
-    /// Extensions for converting <see cref="ExecutionContext"/> to and from protobuf representations
+    /// Extensions for converting <see cref="grpc.ExecutionContext"/> to and from protobuf representations
     /// </summary>
     public static class ExecutionContextExtensions
     {
         /// <summary>
-        /// Convert from <see cref="ExecutionContext"/> to <see cref="Dolittle.Execution.ExecutionContext"/>
+        /// Convert from <see cref="grpc.ExecutionContext"/> to <see cref="Execution.ExecutionContext"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="ExecutionContext"/> to convert from</param>
-        /// <returns>Converted <see cref="Dolittle.Execution.ExecutionContext"/></returns>
-        public static Execution.ExecutionContext ToExecutionContext(this ExecutionContext protobuf)
+        /// <param name="protobuf"><see cref="grpc.ExecutionContext"/> to convert from</param>
+        /// <returns>Converted <see cref="Execution.ExecutionContext"/></returns>
+        public static Execution.ExecutionContext ToExecutionContext(this grpc.ExecutionContext protobuf)
         {
             return new Execution.ExecutionContext(
                 protobuf.Application.To<Application>(),
@@ -35,13 +35,13 @@ namespace Dolittle.Runtime.Protobuf
         }
 
         /// <summary>
-        /// Convert from <see cref="Dolittle.Execution.ExecutionContext"/> to <see cref="ExecutionContext"/>
+        /// Convert from <see cref="Execution.ExecutionContext"/> to <see cref="grpc.ExecutionContext"/>
         /// </summary>
-        /// <param name="executionContext"><see cref="Dolittle.Execution.ExecutionContext"/> to convert from</param>
-        /// <returns>Converted <see cref="ExecutionContext"/></returns>
-        public static ExecutionContext ToProtobuf(this Execution.ExecutionContext executionContext)
+        /// <param name="executionContext"><see cref="Execution.ExecutionContext"/> to convert from</param>
+        /// <returns>Converted <see cref="grpc.ExecutionContext"/></returns>
+        public static grpc.ExecutionContext ToProtobuf(this Execution.ExecutionContext executionContext)
         {
-            var protobuf = new ExecutionContext
+            var protobuf = new grpc.ExecutionContext
             {
                 Application = Extensions.ToProtobuf(executionContext.Application),
                 BoundedContext = Extensions.ToProtobuf(executionContext.BoundedContext),
