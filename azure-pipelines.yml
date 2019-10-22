@@ -12,4 +12,11 @@ jobs:
 - template: Source/DotNet/pipeline.yml@templates
   parameters:
     CASCADES:
+      - 'dolittle-extensions/ReadModels.MongoDB'
+      - 'dolittle-runtime/Runtime.Events.MongoDB'
+      - 'dolittle-runtime/Runtime.Events.EventStore'
+      - 'dolittle-runtime/Runtime.Events.InMemory'
+      - 'dolittle-runtime/Runtime.Events.Sqlite'
+      - 'dolittle-runtime/Runtime.Events.Azure'
       - 'dolittle-runtime/DotNET.SDK'
+      - 'dolittle-interaction/AspNetCore'
