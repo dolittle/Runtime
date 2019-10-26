@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Microservices
     public class MicroserviceServiceType : IRepresentServiceType
     {
         /// <inheritdoc/>
-        public ServiceType Identifier => "Interaction";
+        public ServiceType Identifier => "Microservice";
 
         /// <inheritdoc/>
         public Type BindingInterface => typeof(ICanBindMicroserviceServices);
