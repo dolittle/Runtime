@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Applications" Version="4.0.0-beta*" />
-    <PackageReference Include="Dolittle.Globalization" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.Applications" Version="4.*" />
+    <PackageReference Include="Dolittle.Globalization" Version="4.*" />
   </ItemGroup>
 
 </Project>

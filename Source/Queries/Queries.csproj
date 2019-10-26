@@ -8,9 +8,9 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.DependencyInversion" Version="4.0.0-beta*" />
-    <PackageReference Include="Dolittle.Types" Version="4.0.0-beta*" />
-    <PackageReference Include="Dolittle.Reflection" Version="4.0.0-beta*" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="4.*" />
+    <PackageReference Include="Dolittle.Types" Version="4.*" />
+    <PackageReference Include="Dolittle.Reflection" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>
