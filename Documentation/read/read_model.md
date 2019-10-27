@@ -13,7 +13,7 @@ A read model is a structure that is used to expose data to clients in an optimiz
 To create a *Read Model* mark your class with the marker interface `IReadModel`. *Read Models* exist only to be exposed through [*Queries*]({{< relref query >}}), just like the *Queries* exist only to expose *Read.
 
 ```csharp
-using Dolittle.Read;
+using Dolittle.ReadModels;
 
 public class ShoppingCartPreview : IReadModel
 {

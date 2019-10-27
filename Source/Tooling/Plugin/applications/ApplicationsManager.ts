@@ -4,10 +4,10 @@
  *--------------------------------------------------------------------------------------------*/
 
 import { Application, applicationFilename } from '@dolittle/tooling.common.configurations';
-import {FileSystem, fileSystem} from '@dolittle/tooling.common.files';
-import { Logger, logger } from '@dolittle/tooling.common.logging';
+import {IFileSystem} from '@dolittle/tooling.common.files';
+import { ILoggers } from '@dolittle/tooling.common.logging';
 import path from 'path';
-import { ContentBoilerplate, CreatedContentBoilerplateDetails, IContentBoilerplates, contentBoilerplates } from '@dolittle/tooling.common.boilerplates';
+import { ContentBoilerplate, CreatedContentBoilerplateDetails, IContentBoilerplates } from '@dolittle/tooling.common.boilerplates';
 import {IApplicationsManager} from '../index';
 
 export const applicationBoilerplateType = 'application';
@@ -22,24 +22,25 @@ export class ApplicationsManager implements IApplicationsManager {
     /**
      * Instantiates an instance of {ApplicationsManager}.
      * @param {IContentBoilerplates} _boilerplates
-     * @param {FileSystem} _fileSystem
-     * @param {Logger} _logger
+     * @param {IFileSystem} _fileSystem
+     * @param {ILoggers} _logger
      */
-    constructor(private _boilerplates: IContentBoilerplates, private _fileSystem: FileSystem, private _logger: Logger) {}
+    constructor(private _boilerplates: IContentBoilerplates, private _fileSystem: IFileSystem, private _logger: ILoggers) {}
 
     get boilerplates() {
         return this._boilerplates.byType(applicationBoilerplateType);
     }
 
-    getApplicationFrom(folder: string) {
+    async getApplicationFrom(folder: string) {
         if (! this.hasApplication(folder)) return null;
         const filePath = path.join(folder, applicationFilename);
-        return Application.fromJson(JSON.parse(this._fileSystem.readFileSync(filePath, 'utf8')), filePath);
+        let json = await this._fileSystem.readJson(filePath);
+        return Application.fromJson(json, filePath);
     }
 
     hasApplication(folder: string) {
         const filePath = path.join(folder, applicationFilename);
-        return this._fileSystem.existsSync(filePath);
+        return this._fileSystem.exists(filePath);
     }
 
     boilerplatesByLanguage(language: string, namespace?: string) {
@@ -50,11 +51,11 @@ export class ApplicationsManager implements IApplicationsManager {
         });
     }
 
-    create(context: any, destinationPath: string, boilerplate: ContentBoilerplate): CreatedContentBoilerplateDetails[] {
+    async create(context: any, destinationPath: string, boilerplate: ContentBoilerplate): Promise<CreatedContentBoilerplateDetails[]> {
         this._logger.info(`Creating an application with language '${boilerplate.language}' at destination ${destinationPath}`);
         
         let createdDetails: CreatedContentBoilerplateDetails[] = [];
-        let createdApplicationDetails = this._boilerplates.create(boilerplate, destinationPath, context);
+        let createdApplicationDetails = await this._boilerplates.create(boilerplate, destinationPath, context);
         
         createdDetails.push(createdApplicationDetails);
         
