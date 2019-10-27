@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Management" Version="4.*"/>
     <PackageReference Include="Dolittle.Protobuf" Version="4.*"/>
-    <PackageReference Include="Dolittle.Runtime.Management.Contracts" Version="4.0.0-beta*"/>
+    <PackageReference Include="Dolittle.Runtime.Management.Contracts" Version="4.*"/>
   </ItemGroup>
 
   <ItemGroup>
