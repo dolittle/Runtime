@@ -49,6 +49,6 @@
     "@dolittle/tooling.common.packages": "8.*",
     "@dolittle/tooling.common.plugins": "8.*",
     "@dolittle/tooling.common.utilities": "8.*",
-    "@dolittle/typescript.build.node": "^1.0.15"
+    "@dolittle/typescript.build.node": "^1.1.0"
   }
 }
