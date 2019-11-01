@@ -25,36 +25,30 @@
     "tooling": "8.*"
   },
   "files": [
-    "lib",
-    "package.json",
-    "**/*.d.ts"
+    "Distribution",
+    "package.json"
   ],
-  "main": "lib/index.js",
-  "types": "index.d.ts",
-  "typings": "index.d.ts",
+  "main": "Distribution/index.js",
   "scripts": {
-    "ts:cjs": "tsc -p tsconfig.json --declaration false",
-    "ts:typedefs": "tsc --outDir . --emitDeclarationOnly",
-    "ts:all": "yarn ts:cjs && yarn ts:typedefs",
-    "ts:clean": "del './*.d.ts' '**/*.d.ts' '!node_modules/**/*' lib ",
-    "build": "yarn clean && yarn ts:all",
-    "clean": "del dist && yarn ts:clean",
-    "prepublishOnly": "yarn build"
+    "tasks": "gulp --tasks --gulpfile node_modules/@dolittle/typescript.build.node/Gulpfile.js",
+    "clean": "gulp clean --gulpfile node_modules/@dolittle/typescript.build.node/Gulpfile.js",
+    "build": "gulp build --gulpfile node_modules/@dolittle/typescript.build.node/Gulpfile.js",
+    "test": "gulp test --gulpfile node_modules/@dolittle/typescript.build.node/Gulpfile.js",
+    "test:run": "gulp test-run --gulpfile node_modules/@dolittle/typescript.build.node/Gulpfile.js",
+    "test:clean": "gulp test-clean --gulpfile node_modules/@dolittle/typescript.build.node/Gulpfile.js",
+    "prepublishOnly": "yarn build && yarn test:run && yarn test:clean"
   },
-  "dependencies": {
-
-  },
+  "dependencies": {},
   "devDependencies": {
     "@dolittle/tooling.common.boilerplates": "8.*",
-    "@dolittle/tooling.common.configurations": "8.*",
     "@dolittle/tooling.common.commands": "8.*",
+    "@dolittle/tooling.common.configurations": "8.*",
     "@dolittle/tooling.common.dependencies": "8.*",
     "@dolittle/tooling.common.files": "8.*",
-    "@dolittle/tooling.common.plugins": "8.*",
     "@dolittle/tooling.common.logging": "8.*",
+    "@dolittle/tooling.common.packages": "8.*",
+    "@dolittle/tooling.common.plugins": "8.*",
     "@dolittle/tooling.common.utilities": "8.*",
-    "@types/node": "12.0.0",
-    "del-cli": "^2.0.0",
-    "typescript": "^3.4.5"
+    "@dolittle/typescript.build.node": "^1.0.15"
   }
 }
