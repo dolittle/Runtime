@@ -25,6 +25,7 @@
     "tooling": "8.*"
   },
   "files": [
+    "Boilerplates",
     "Distribution",
     "package.json"
   ],
