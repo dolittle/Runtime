@@ -4,13 +4,12 @@
 *--------------------------------------------------------------------------------------------*/
 import { contentBoilerplates, boilerplatesLoader, templatesBoilerplates, scriptRunner } from "@dolittle/tooling.common.boilerplates";
 import { dolittleConfig } from "@dolittle/tooling.common.configurations";
-import { dependencyResolvers } from "@dolittle/tooling.common.dependencies";
 import { fileSystem, folders } from "@dolittle/tooling.common.files";
 import { loggers } from "@dolittle/tooling.common.logging";
 import { Plugin } from "@dolittle/tooling.common.plugins";
 import { 
     ApplicationsManager, BoundedContextsManager, DefaultCommandGroupsProvider, AddCommandGroup,
-    CreateCommandGroup, ApplicationCommand, BoundedContextCommand, DefaultCommandsProvider, NamespaceProvider, RuntimeNamespace
+    CreateCommandGroup, ApplicationCommand, BoundedContextCommand, DefaultCommandsProvider, NamespaceProvider, RuntimeNamespace, AddFeatureCommand
 } from "./internal";
 
 let applicationsManager = new ApplicationsManager(contentBoilerplates, boilerplatesLoader, fileSystem, loggers);
@@ -19,12 +18,12 @@ let boundedContextsManager = new BoundedContextsManager(contentBoilerplates, boi
 let commandGroupsProvider = new DefaultCommandGroupsProvider([
     new AddCommandGroup(boilerplatesLoader, templatesBoilerplates, boundedContextsManager, folders, dolittleConfig),
     new CreateCommandGroup([
-        new ApplicationCommand(applicationsManager, dependencyResolvers, loggers),
+        new ApplicationCommand(applicationsManager, loggers),
         new BoundedContextCommand(boundedContextsManager, scriptRunner, loggers)
     ])
 ]);
 
-let commandsProvider = new DefaultCommandsProvider([]);
+let commandsProvider = new DefaultCommandsProvider([new AddFeatureCommand(boundedContextsManager, fileSystem, loggers)]);
 let namespaceProvider = new NamespaceProvider([new RuntimeNamespace()]);
 
 export let plugin = new Plugin(commandsProvider, commandGroupsProvider, namespaceProvider);

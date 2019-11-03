@@ -22,6 +22,9 @@ export * from './add/MissingBoundedContext';
 export * from './add/AddCommandGroup';
 export * from './add/AddCommand';
 
+//addFeature
+export * from './addFeature/AddFeatureCommand';
+
 // create
 export * from './create/CreateCommandGroup';
 export * from './create/ApplicationCommand';

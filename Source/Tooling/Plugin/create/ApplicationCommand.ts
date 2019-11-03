@@ -26,7 +26,7 @@ export class ApplicationCommand extends Command {
      * @param {IApplicationsManager} _applicationsManager
      * @param {IDependencyResolvers} _dependencyResolvers
      */
-    constructor(private _applicationsManager: IApplicationsManager, private _dependencyResolvers: IDependencyResolvers, private _logger: ILoggers) {
+    constructor(private _applicationsManager: IApplicationsManager, private _logger: ILoggers) {
         super(name, description, true);
     }
     
