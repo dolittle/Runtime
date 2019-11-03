@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Protobuf
         public static DictionaryValue AsDictionaryValue(this PropertyBag propertyBag)
         {
             var dictionaryValue = new DictionaryValue();
-            propertyBag.Values.ForEach(kvp => dictionaryValue.Object.Add(kvp.Key, kvp.Value.ToProtobuf()));
+            propertyBag.Values.ForEach(kvp => dictionaryValue.Object.Add(kvp.Key, kvp.Value));
             return dictionaryValue;
         }
 
