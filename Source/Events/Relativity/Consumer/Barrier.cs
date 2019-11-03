@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Relativity
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             ITenantOffsetRepository tenantOffsetRepository,
-            Application application,
+            Dolittle.Applications.Application application,
             BoundedContext boundedContext)
         {
             _logger = logger;

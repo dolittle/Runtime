@@ -2,16 +2,16 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-using System;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Execution;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Time;
+using grpc = Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 {
@@ -21,20 +21,20 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
     public static class EventStreamExtensions
     {
         /// <summary>
-        /// Convert a <see cref="Runtime.Grpc.Interaction.CommittedEventStream"/> to <see cref="CommittedEventStream"/>
+        /// Convert a <see cref="grpc.CommittedEventStream"/> to <see cref="CommittedEventStream"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="Runtime.Grpc.Interaction.CommittedEventStream"/> to convert from</param>
+        /// <param name="protobuf"><see cref="grpc.CommittedEventStream"/> to convert from</param>
         /// <returns>Converted <see cref="CommittedEventStream"/></returns>
-        public static CommittedEventStream ToCommittedEventStream(this Runtime.Grpc.Interaction.CommittedEventStream protobuf)
+        public static CommittedEventStream ToCommittedEventStream(this grpc.CommittedEventStream protobuf)
         {
-            var eventSourceId = protobuf.Source.EventSource.ToConcept<EventSourceId>();
-            var artifactId = protobuf.Source.Artifact.ToConcept<ArtifactId>();
+            var eventSourceId = protobuf.Source.EventSource.To<EventSourceId>();
+            var artifactId = protobuf.Source.Artifact.To<ArtifactId>();
             var versionedEventSource = new VersionedEventSource(eventSourceId, artifactId);
-            var commitId = protobuf.Id.ToConcept<CommitId>();
-            var correlationId = protobuf.CorrelationId.ToConcept<CorrelationId>();
+            var commitId = protobuf.Id.To<CommitId>();
+            var correlationId = protobuf.CorrelationId.To<CorrelationId>();
             var timeStamp = protobuf.TimeStamp.ToDateTimeOffset();
-            
-            var events = protobuf.Events.Select(_ =>                 
+
+            var events = protobuf.Events.Select(_ =>
                 new EventEnvelope(
                     _.Metadata.ToEventMetadata(),
                     _.Event.ToPropertyBag()
@@ -52,13 +52,13 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
         }
 
         /// <summary>
-        /// Convert from <see cref="CommittedEventStream"/> to <see cref="Runtime.Grpc.Interaction.CommittedEventStream"/>
+        /// Convert from <see cref="CommittedEventStream"/> to <see cref="grpc.CommittedEventStream"/>
         /// </summary>
         /// <param name="committedEventStream"><see cref="CommittedEventStream"/> to convert from</param>
-        /// <returns>The converted <see cref="Runtime.Grpc.Interaction.CommittedEventStream"/></returns>
-        public static Runtime.Grpc.Interaction.CommittedEventStream ToProtobuf(this CommittedEventStream committedEventStream)
+        /// <returns>The converted <see cref="grpc.CommittedEventStream"/></returns>
+        public static grpc.CommittedEventStream ToProtobuf(this CommittedEventStream committedEventStream)
         {
-            var protobuf = new Runtime.Grpc.Interaction.CommittedEventStream
+            var protobuf = new grpc.CommittedEventStream
             {
                 Sequence = committedEventStream.Sequence,
                 Source = committedEventStream.Source.ToProtobuf(),
@@ -69,40 +69,40 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 
             committedEventStream.Events.Select(@event =>
             {
-                var envelope = new Runtime.Grpc.Interaction.EventEnvelope
+                var envelope = new grpc.EventEnvelope
                 {
                     Metadata = @event.Metadata.ToProtobuf()
                 };
                 envelope.Event = @event.Event.ToProtobuf();
-                
+
                 return envelope;
             }).ForEach(protobuf.Events.Add);
 
             return protobuf;
         }
 
-
         /// <summary>
-        /// Convert from <see cref="CommittedEventStreamWithContext"/> to <see cref="Runtime.Grpc.Interaction.CommittedEventStream"/>
+        /// Convert from <see cref="CommittedEventStreamWithContext"/> to <see cref="grpc.CommittedEventStream"/>
         /// </summary>
         /// <param name="contextualEventStream"><see cref="CommittedEventStreamWithContext"/> to convert from</param>
-        /// <returns>Converted <see cref="Runtime.Grpc.Interaction.CommittedEventStream"/></returns>
-        public static Runtime.Grpc.Interaction.CommittedEventStreamWithContext ToProtobuf(this CommittedEventStreamWithContext contextualEventStream)
+        /// <returns>Converted <see cref="grpc.CommittedEventStream"/></returns>
+        public static grpc.CommittedEventStreamWithContext ToProtobuf(this CommittedEventStreamWithContext contextualEventStream)
         {
-            var protobuf = new Runtime.Grpc.Interaction.CommittedEventStreamWithContext
+            var protobuf = new grpc.CommittedEventStreamWithContext
             {
                 Commit = contextualEventStream.EventStream.ToProtobuf(),
                 Context = contextualEventStream.Context.ToProtobuf()
             };
 
             return protobuf;
-        }      
+        }
+
         /// <summary>
-        /// Convert from <see cref="Runtime.Grpc.Interaction.CommittedEventStreamWithContext"/> to <see cref="CommittedEventStreamWithContext"/>
+        /// Convert from <see cref="grpc.CommittedEventStreamWithContext"/> to <see cref="CommittedEventStreamWithContext"/>
         /// </summary>
-        /// <param name="protobuf"><see cref="Runtime.Grpc.Interaction.CommittedEventStreamWithContext"/> to convert from</param>
+        /// <param name="protobuf"><see cref="grpc.CommittedEventStreamWithContext"/> to convert from</param>
         /// <returns>Converted <see cref="CommittedEventStreamWithContext"/></returns>
-        public static CommittedEventStreamWithContext ToCommittedEventStreamWithContext(this Runtime.Grpc.Interaction.CommittedEventStreamWithContext protobuf)
+        public static CommittedEventStreamWithContext ToCommittedEventStreamWithContext(this grpc.CommittedEventStreamWithContext protobuf)
         {
             var context = protobuf.Context.ToExecutionContext();
             var committedEventStream = protobuf.Commit.ToCommittedEventStream();

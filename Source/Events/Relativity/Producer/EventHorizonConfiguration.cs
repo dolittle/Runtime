@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Gets or sets the identifier of the application to penetrate to
         /// </summary>
-        public Application Application { get; set; }
+        public Dolittle.Applications.Application Application { get; set; }
 
         /// <summary>
         /// Gets or sets the identifier of the bounded context to penetrate to

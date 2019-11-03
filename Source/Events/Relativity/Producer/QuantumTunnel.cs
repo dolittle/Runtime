@@ -9,13 +9,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
-using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Grpc.Interaction;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
+using grpc = Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
@@ -25,10 +24,9 @@ namespace Dolittle.Runtime.Events.Relativity
     public class QuantumTunnel : IQuantumTunnel
     {
         readonly ISerializer _serializer;
-        readonly IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _responseStream;
-        readonly ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> _outbox;
+        readonly IServerStreamWriter<grpc.CommittedEventStreamWithContext> _responseStream;
+        readonly ConcurrentQueue<grpc.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
-
         readonly AutoResetEvent _waitHandle;
         readonly CancellationToken _cancelationToken;
 
@@ -41,13 +39,13 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnel (
             ISerializer serializer,
-            IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream,
+            IServerStreamWriter<grpc.CommittedEventStreamWithContext> responseStream,
             CancellationToken cancellationToken,
             ILogger logger)
         {
             _responseStream = responseStream;
             _serializer = serializer;
-            _outbox = new ConcurrentQueue<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> ();
+            _outbox = new ConcurrentQueue<grpc.CommittedEventStreamWithContext> ();
             _waitHandle = new AutoResetEvent (false);
             _cancelationToken = cancellationToken;
             _logger = logger;
@@ -57,7 +55,7 @@ namespace Dolittle.Runtime.Events.Relativity
         public event QuantumTunnelCollapsed Collapsed = (q) => { };
 
         /// <inheritdoc/>
-        public void PassThrough (Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext contextualEventStream)
+        public void PassThrough (Processing.CommittedEventStreamWithContext contextualEventStream)
         {
             try
             {
@@ -84,7 +82,7 @@ namespace Dolittle.Runtime.Events.Relativity
                         _waitHandle.WaitOne (1000);
                         if (_outbox.IsEmpty) continue;
 
-                        Runtime.Grpc.Interaction.CommittedEventStreamWithContext message;
+                        grpc.CommittedEventStreamWithContext message;
                         while (!_outbox.IsEmpty)
                         {
                             if (_outbox.TryDequeue (out message))
