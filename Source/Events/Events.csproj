@@ -9,33 +9,30 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Applications" Version="3.*" />
-    <PackageReference Include="Dolittle.Artifacts" Version="3.*" />
-    <PackageReference Include="Dolittle.Booting" Version="3.*" />
-    <PackageReference Include="Dolittle.Collections" Version="3.*" />
-    <PackageReference Include="Dolittle.Concepts" Version="3.*" />
-    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="3.*" />
-    <PackageReference Include="Dolittle.DependencyInversion" Version="3.*" />
-    <PackageReference Include="Dolittle.Lifecycle" Version="3.*" />
-    <PackageReference Include="Dolittle.PropertyBags" Version="3.*" />
-    <PackageReference Include="Dolittle.ResourceTypes" Version="3.*" />
-    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="3.*" />
-    <PackageReference Include="Dolittle.Serialization.Json" Version="3.*" />
-    <PackageReference Include="Dolittle.Serialization.Protobuf" Version="3.*" />
-    <PackageReference Include="Dolittle.Time" Version="3.*" />
-    <PackageReference Include="Dolittle.DependencyInversion" Version="3.*" />
-    
-    <PackageReference Include="Google.Protobuf" Version="3.5.1" />
-    <PackageReference Include="Google.Protobuf.Tools" Version="3.5.1" />
-    <PackageReference Include="Grpc" Version="1.8.0" />
-    <PackageReference Include="Grpc.Tools" Version="1.8.0" />
+    <PackageReference Include="Dolittle.Applications" Version="4.*" />
+    <PackageReference Include="Dolittle.Artifacts" Version="4.*" />
+    <PackageReference Include="Dolittle.Booting" Version="4.*" />
+    <PackageReference Include="Dolittle.Collections" Version="4.*" />
+    <PackageReference Include="Dolittle.Concepts" Version="4.*" />
+    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="4.*" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="4.*" />
+    <PackageReference Include="Dolittle.Lifecycle" Version="4.*" />
+    <PackageReference Include="Dolittle.PropertyBags" Version="4.*" />
+    <PackageReference Include="Dolittle.Protobuf" Version="4.*" />
+    <PackageReference Include="Dolittle.ResourceTypes" Version="4.*" />
+    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="4.*" />
+    <PackageReference Include="Dolittle.Serialization.Json" Version="4.*" />
+    <PackageReference Include="Dolittle.Serialization.Protobuf" Version="4.*" />
+    <PackageReference Include="Dolittle.Time" Version="4.*" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="4.*" />
+    <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
-    <ProjectReference Include="..\Server\Server.csproj" />
+    <ProjectReference Include="..\Microservices\Microservices.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
-    <ProjectReference Include="..\Grpc.Interaction\Grpc.Interaction.csproj" />
+    <ProjectReference Include="..\Protobuf\Protobuf.csproj" />
   </ItemGroup>
 </Project>

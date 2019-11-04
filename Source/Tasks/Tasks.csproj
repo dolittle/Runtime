@@ -8,11 +8,11 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Collections" Version="3.*" />
-    <PackageReference Include="Dolittle.Execution" Version="3.*" />
-    <PackageReference Include="Dolittle.Types" Version="3.*" />
-    <PackageReference Include="Dolittle.Reflection" Version="3.*" />
-    <PackageReference Include="Dolittle.DependencyInversion" Version="3.*" />
+    <PackageReference Include="Dolittle.Collections" Version="4.*" />
+    <PackageReference Include="Dolittle.Execution" Version="4.*" />
+    <PackageReference Include="Dolittle.Types" Version="4.*" />
+    <PackageReference Include="Dolittle.Reflection" Version="4.*" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="4.*" />
   </ItemGroup>
 
   <ItemGroup>

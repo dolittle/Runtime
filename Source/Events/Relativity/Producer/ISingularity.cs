@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <summary>
         /// Gets the <see cef="Application"/> the <see cref="ISingularity"/> represents
         /// </summary>
-        Application Application { get; }
+        Dolittle.Applications.Application Application { get; }
 
         /// <summary>
         /// Gets the <see cref="BoundedContext"/> in which the <see cref="ISingularity"/> represents

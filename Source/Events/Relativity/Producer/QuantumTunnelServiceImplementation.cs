@@ -8,17 +8,19 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
-using Dolittle.Runtime.Grpc.Interaction.Protobuf.Conversion;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
-
-namespace Dolittle.Runtime.Events.Relativity.Grpc
+using Dolittle.Events.Relativity.Microservice;
+using static Dolittle.Events.Relativity.Microservice.QuantumTunnelService;
+namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Represents an implementation of the <see cref="Runtime.Grpc.Interaction.QuantumTunnelService.QuantumTunnelServiceBase"/>
+    /// Represents an implementation of the <see cref="QuantumTunnelServiceBase"/>
     /// </summary>
-    public class QuantumTunnelServiceImplementation : Runtime.Grpc.Interaction.QuantumTunnelService.QuantumTunnelServiceBase
+    public class QuantumTunnelServiceImplementation : QuantumTunnelServiceBase
     {
         readonly IEventHorizon _eventHorizon;
         readonly ISerializer _serializer;
@@ -29,7 +31,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         /// </summary>
         /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with</param>
         /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="ExecutionContext"/></param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="Dolittle.Execution.ExecutionContext"/></param>
         /// <param name="fetchUnprocessedCommits"><see cref="IFetchUnprocessedCommits"/> for fetching unprocessed commits</param>
         /// <param name="logger"><see cref="ILogger"/> for logging</param>
         public QuantumTunnelServiceImplementation(
@@ -45,13 +47,13 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         }
 
         /// <inheritdoc/>
-        public override async Task Open(Runtime.Grpc.Interaction.OpenTunnel request, IServerStreamWriter<Runtime.Grpc.Interaction.CommittedEventStreamWithContext> responseStream, ServerCallContext context)
+        public override async Task Open(OpenTunnel request, IServerStreamWriter<CommittedEventStreamWithContext> responseStream, ServerCallContext context)
         {
             try
             {
                 var tunnel = new QuantumTunnel(_serializer, responseStream, context.CancellationToken, _logger);
-                var application = request.Application.ToConcept<Application>();
-                var boundedContext = request.BoundedContext.ToConcept<BoundedContext>();
+                var application = request.Application.To<Dolittle.Applications.Application>();
+                var boundedContext = request.BoundedContext.To<BoundedContext>();
                 var events = request
                     .Events
                     .Select(@event => @event.ToArtifact())
