@@ -12,20 +12,8 @@ import { IApplicationsManager } from "../internal";
 const name = 'application';
 const description = 'Scaffolds a Dolittle application';
 
-/**
- * Represents an implementation of {ICommand} for creating a dolittle application
- *
- * @export
- * @class ApplicationCommand
- * @extends {Command}
- */
 export class ApplicationCommand extends Command {
     
-    /**
-     * Instantiates an instance of {ApplicationCommand}.
-     * @param {IApplicationsManager} _applicationsManager
-     * @param {IDependencyResolvers} _dependencyResolvers
-     */
     constructor(private _applicationsManager: IApplicationsManager, private _logger: ILoggers) {
         super(name, description, true);
     }

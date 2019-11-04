@@ -2,10 +2,10 @@
 *  Copyright (c) Dolittle. All rights reserved.
 *  Licensed under the MIT License. See LICENSE in the project root for license information.
 *--------------------------------------------------------------------------------------------*/
-import { Command, CommandContext, IFailedCommandOutputter, CommandFailed } from "@dolittle/tooling.common.commands";
+import { Command, CommandContext, IFailedCommandOutputter } from "@dolittle/tooling.common.commands";
 import { IDependencyResolvers, PromptDependency, IsNotEmpty, argumentUserInputType,  } from "@dolittle/tooling.common.dependencies";
 import { ILoggers } from "@dolittle/tooling.common.logging";
-import { ICanOutputMessages, NullMessageOutputter, IBusyIndicator, NullBusyIndicator, Exception, areas, determineDestination } from "@dolittle/tooling.common.utilities";
+import { ICanOutputMessages, IBusyIndicator, Exception, areas, determineDestination } from "@dolittle/tooling.common.utilities";
 import { IBoundedContextsManager } from "../internal";
 import { dolittleConfig } from "@dolittle/tooling.common.configurations";
 import { IFileSystem } from "@dolittle/tooling.common.files";

@@ -18,12 +18,6 @@ export class AddCommand extends Command {
     private _folders: IFolders;
     private _dolittleConfig: any;
 
-    /**
-     * Creates an instance of {AddCommand}.
-     * @param {string} artifactType
-     * @param {ITemplate[]} artifactTemplates
-     * @memberof Installed
-     */
     constructor(templatesBoilerplate: ITemplatesBoilerplate, templateType: string, templates: ITemplate[], templatesBoilerplates: ITemplatesBoilerplates, 
                 boundedContextsManager: IBoundedContextsManager, folders: IFolders, dolittleConfig: any) {
         if (!templates || templates.length === 0) throw new Error('No templates given to add command');

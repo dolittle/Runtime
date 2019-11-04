@@ -13,20 +13,8 @@ import { IBoundedContextsManager } from "../internal";
 const name = 'boundedcontext';
 const description = 'Scaffolds a Dolittle bounded context';
 
-/**
- * Represents an implementation of {ICommand} for creating a dolittle bounded context
- *
- * @export
- * @class BoundedContextCommand
- * @extends {Command}
- */
 export class BoundedContextCommand extends Command {
     
-    /**
-     * Instantiates an instance of {BoundedContextCommand}.
-     * @param {IBoundedContextsManager} _boundedContextsManager
-     * @param {IDependencyResolvers} _dependencyResolvers
-     */
     constructor(private _boundedContextsManager: IBoundedContextsManager, private _scriptRunner: IScriptRunner, private _logger: ILoggers) { 
         super(name, description, true);
     }

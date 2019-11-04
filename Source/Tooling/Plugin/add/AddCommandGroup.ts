@@ -13,13 +13,6 @@ const description = `Adds basic building blocks to an existing bounded context.
 
 What can be added to a bounded context is based on the boilerplates available on the local system.`;
 
-/**
- * Represents an implementation of {ICommandGroup} for the command group related to adding templates to bounded contexts
- *
- * @export
- * @class AddCommandGroup
- * @extends {DiscoverableCommandGroup}
- */
 export class AddCommandGroup extends DiscoverableCommandGroup {
 
     private _commands!: ICommand[];

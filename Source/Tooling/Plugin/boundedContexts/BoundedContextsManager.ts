@@ -16,12 +16,6 @@ export const boundedContextBoilerplateType = 'boundedContext';
 
 const boundedContextAdornmentDependencyName = 'boundedContextAdornment'
 
-/**
- * Represents an implementation of {IBoundedContextsManager}
- *
- * @export
- * @class BoundedContextsManager
- */
 export class BoundedContextsManager implements IBoundedContextsManager {
 
     /**
