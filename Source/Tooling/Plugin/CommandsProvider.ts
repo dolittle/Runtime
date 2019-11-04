@@ -5,13 +5,13 @@
 import { ICanProvideCommands, ICommand } from "@dolittle/tooling.common.commands";
 
 /**
- * Represents an implementation of {ICanProvideDefaultCommands} for providing default commands
+ * Represents an implementation of {ICanProvideCommands} for providing default commands
  *
  * @export
- * @class DefaultCommandsProvider
- * @implements {ICanProvideDefaultCommands}
+ * @class CommandsProvider
+ * @implements {ICanProvideCommands}
  */
-export class DefaultCommandsProvider implements ICanProvideCommands {
+export class CommandsProvider implements ICanProvideCommands {
 
     constructor(private _commandGroups: ICommand[]) {}
 
