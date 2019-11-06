@@ -8,10 +8,12 @@
   <Import Project="../../Build/MSBuild/default.props" />
 
   <ItemGroup>
-    
+
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dolittle.Booting" Version="4.*" />
+    <PackageReference Include="Dolittle.Configuration" Version="4.*" />
     <PackageReference Include="Dolittle.Types" Version="4.*" />
     <PackageReference Include="prometheus-net" Version="3.3.0" />
   </ItemGroup>
