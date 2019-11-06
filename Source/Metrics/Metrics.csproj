@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Dolittle.Runtime.Metrics</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/default.props" />
+
+  <ItemGroup>
+
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Booting" Version="4.*" />
+    <PackageReference Include="Dolittle.Configuration" Version="4.*" />
+    <PackageReference Include="Dolittle.Types" Version="4.*" />
+    <PackageReference Include="prometheus-net" Version="3.3.0" />
+  </ItemGroup>
+
+</Project>

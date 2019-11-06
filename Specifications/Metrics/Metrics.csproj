@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>Dolittle.Runtime.Metrics.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../Build/MSBuild/specs.props"></Import>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\Metrics\Metrics.csproj" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Types.Testing" Version="4.*"/>
+  </ItemGroup>
+
+
+</Project>
