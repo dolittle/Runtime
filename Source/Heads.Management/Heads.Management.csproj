@@ -4,10 +4,9 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dolittle.Runtime.Heads.Management</AssemblyName>
   </PropertyGroup>
-
-  <Import Project="../../Build/MSBuild/default.props"/>
   
   <ItemGroup>
+    <PackageReference Include="Dolittle.Common" Version="1.*" />
     <PackageReference Include="Dolittle.Management" Version="4.*"/>
     <PackageReference Include="Dolittle.Protobuf" Version="4.*"/>
     <PackageReference Include="Dolittle.Runtime.Management.Contracts" Version="4.*"/>
