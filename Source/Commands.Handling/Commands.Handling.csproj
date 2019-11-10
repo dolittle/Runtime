@@ -5,16 +5,14 @@
     <AssemblyName>Dolittle.Runtime.Commands.Handling</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../Build/MSBuild/default.props"></Import>
-
   <ItemGroup>
     <ProjectReference Include="..\Commands\Commands.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dolittle.Common" Version="1.*" />
     <PackageReference Include="Dolittle.Types" Version="4.*" />
     <PackageReference Include="Dolittle.Lifecycle" Version="4.*" />
     <PackageReference Include="Dolittle.Applications" Version="4.*" />
   </ItemGroup>
-
 </Project>

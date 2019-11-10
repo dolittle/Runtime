@@ -5,16 +5,14 @@
     <AssemblyName>Dolittle.Runtime.Commands</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../Build/MSBuild/default.props"/>
-
   <ItemGroup>
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
     <ProjectReference Include="..\Validation\Validation.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Dolittle.Common" Version="1.*" />
     <PackageReference Include="Dolittle.Applications" Version="4.*" />
     <PackageReference Include="Dolittle.Execution" Version="4.*" />
   </ItemGroup>
-
 </Project>

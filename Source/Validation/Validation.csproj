@@ -5,9 +5,8 @@
     <AssemblyName>Dolittle.Runtime.Validation</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../Build/MSBuild/default.props" />
-
   <ItemGroup>
+    <PackageReference Include="Dolittle.Common" Version="1.*" />
     <PackageReference Include="Dolittle.Rules" Version="4.*" />
     <PackageReference Include="Dolittle.Types" Version="4.*" />
     <PackageReference Include="Dolittle.Reflection" Version="4.*" />
