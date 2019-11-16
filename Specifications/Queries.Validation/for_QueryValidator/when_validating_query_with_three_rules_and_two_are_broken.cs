@@ -39,9 +39,9 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
             third_rule_broken = new Mock<IValueRule>();
             third_rule_broken.SetupGet(r => r.Property).Returns(property);
 
-            first_broken_rule_first_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString());
-            first_broken_rule_second_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString());
-            third_broken_rule_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString());
+            first_broken_rule_first_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString(),string.Empty);
+            first_broken_rule_second_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString(),string.Empty);
+            third_broken_rule_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString(),string.Empty);
 
             first_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) =>
             {
