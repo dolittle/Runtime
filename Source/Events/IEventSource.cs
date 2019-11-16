@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 using Dolittle.Runtime.Transactions;
 using Dolittle.Runtime.Events;
+using System.Collections.Generic;
+using Dolittle.Rules;
 
 namespace Dolittle.Events
 {
@@ -24,9 +26,21 @@ namespace Dolittle.Events
 		EventSourceVersion Version { get; }
 
 		/// <summary>
-		/// A stream of events that have been applied to the <seealso cref="EventSource">EventSource</seealso> but have not yet been committed to the EventStore.
+		/// Gets a stream of events that have been applied to the <seealso cref="EventSource">EventSource</seealso> but have not yet been committed to the EventStore.
 		/// </summary>
 		UncommittedEvents UncommittedEvents { get; }
+
+		/// <summary>
+		/// Gets a <see cref="IEnumerable{T}">collection</see> of <see cref="BrokenRule">broken rules</see>
+		/// </summary>
+		IEnumerable<BrokenRule> BrokenRules { get; }
+
+		/// <summary>
+		/// Builds an evaluation of rules that needs to be passed
+		/// </summary>
+		/// <param name="rules"><see cref="IRule">Rules</see> to evaluate</param>
+		/// <returns><see cref="RuleSetEvaluation"/> for handling the evaluation</returns>
+		RuleSetEvaluation Evaluate(params IRule[] rules);
 
 		/// <summary>
 		/// Apply a new event to the EventSource.  This will be applied and added to the <see cref="UncommittedEvents">UncommitedEvents</see>.

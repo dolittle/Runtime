@@ -11,6 +11,11 @@ using Dolittle.Runtime.Commands;
 using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Commands.Security;
 using Dolittle.Runtime.Commands.Validation;
+using Dolittle.Rules;
+using System.Collections.Generic;
+using Dolittle.Collections;
+using System.Linq;
+using Dolittle.Events;
 
 namespace Dolittle.Runtime.Commands.Coordination
 {
@@ -23,8 +28,10 @@ namespace Dolittle.Runtime.Commands.Coordination
         readonly ICommandContextManager _commandContextManager;
         readonly ICommandValidators _commandValidationService;
         readonly ICommandSecurityManager _commandSecurityManager;
+        readonly IRuleContexts _ruleContexts;
         readonly ILocalizer _localizer;
         readonly ILogger _logger;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandCoordinator">CommandCoordinator</see>
@@ -33,6 +40,7 @@ namespace Dolittle.Runtime.Commands.Coordination
         /// <param name="commandContextManager">A <see cref="ICommandContextManager"/> for establishing a <see cref="CommandContext"/></param>
         /// <param name="commandSecurityManager">A <see cref="ICommandSecurityManager"/> for dealing with security and commands</param>
         /// <param name="commandValidators">A <see cref="ICommandValidators"/> for validating a <see cref="CommandRequest"/> before handling</param>
+        /// <param name="ruleContexts"></param>
         /// <param name="localizer">A <see cref="ILocalizer"/> to use for controlling localization of current thread when handling commands</param>
         /// <param name="logger"><see cref="ILogger"/> to log with</param>
         public CommandCoordinator(
@@ -40,6 +48,7 @@ namespace Dolittle.Runtime.Commands.Coordination
             ICommandContextManager commandContextManager,
             ICommandSecurityManager commandSecurityManager,
             ICommandValidators commandValidators,
+            IRuleContexts ruleContexts,
             ILocalizer localizer,
             ILogger logger)
         {
@@ -49,6 +58,7 @@ namespace Dolittle.Runtime.Commands.Coordination
             _commandValidationService = commandValidators;
             _localizer = localizer;
             _logger = logger;
+            _ruleContexts = ruleContexts;
         }
 
         /// <inheritdoc/>
@@ -57,7 +67,7 @@ namespace Dolittle.Runtime.Commands.Coordination
             return Handle(_commandContextManager.EstablishForCommand(command), command);
         }
 
-        CommandResult Handle(ITransaction transaction, CommandRequest command)
+        CommandResult Handle(ICommandContext commandContext, CommandRequest command)
         {
             var commandResult = new CommandResult();
             try
@@ -74,7 +84,7 @@ namespace Dolittle.Runtime.Commands.Coordination
                     {
                         _logger.Trace("Command not authorized");
                         commandResult.SecurityMessages = authorizationResult.BuildFailedAuthorizationMessages();
-                        transaction.Rollback();
+                        commandContext.Rollback();
                         return commandResult;
                     }
 
@@ -90,26 +100,35 @@ namespace Dolittle.Runtime.Commands.Coordination
                         {
                             _logger.Trace("Handle the command");
                             _commandHandlerManager.Handle(command);
+
+                            _logger.Trace("Collect any broken rules");
+                            commandResult.BrokenRules = commandContext.GetObjectsBeingTracked()
+                                .SelectMany(_ => _.BrokenRules)
+                                .Select(_ => new BrokenRuleResult(
+                                    _.Rule.GetType().Name,
+                                    $"EventSource: {_.Instance.GetType().Name} - with id {((IEventSource)_.Context.Target).EventSourceId.Value}",
+                                    _.Reasons));
+
                             _logger.Trace("Commit transaction");
-                            transaction.Commit();
+                            commandContext.Commit();
                         }
                         catch (TargetInvocationException ex)
                         {
                             _logger.Error(ex, "Error handling command");
                             commandResult.Exception = ex.InnerException;
-                            transaction.Rollback();
+                            commandContext.Rollback();
                         }
                         catch (Exception ex)
                         {
                             _logger.Error(ex, "Error handling command");
                             commandResult.Exception = ex;
-                            transaction.Rollback();
+                            commandContext.Rollback();
                         }
                     }
                     else
                     {
                         _logger.Information("Command was not successful, rolling back");
-                        transaction.Rollback();
+                        commandContext.Rollback();
                     }
                 }
             }
@@ -126,6 +145,5 @@ namespace Dolittle.Runtime.Commands.Coordination
 
             return commandResult;
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

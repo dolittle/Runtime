@@ -98,8 +98,6 @@ namespace Dolittle.Runtime.Commands.Coordination
         {
             // Todo : Should rollback any aggregated roots that are being tracked - this should really only be allowed to happen if we have not stored the events yet
             // once the events are stored, we can't roll back
-
         }
-
     }
 }

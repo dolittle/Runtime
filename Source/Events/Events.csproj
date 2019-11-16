@@ -20,6 +20,7 @@
     <PackageReference Include="Dolittle.Protobuf" Version="4.*" />
     <PackageReference Include="Dolittle.ResourceTypes" Version="4.*" />
     <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="4.*" />
+    <PackageReference Include="Dolittle.Rules" Version="4.*" />
     <PackageReference Include="Dolittle.Serialization.Json" Version="4.*" />
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="4.*" />
     <PackageReference Include="Dolittle.Time" Version="4.*" />
