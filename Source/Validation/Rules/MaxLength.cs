@@ -25,9 +25,9 @@ namespace Dolittle.Validation.Rules
         /// <summary>
         /// Gets the required length
         /// </summary>
-        public int Length { get; private set; }
+        public int Length { get; }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public override void Evaluate(IRuleContext context, object instance)
         {
             if (FailIfValueTypeMismatch<string>(context, instance))
@@ -36,6 +36,5 @@ namespace Dolittle.Validation.Rules
                 if (length > Length) context.Fail(this, instance, Reasons.LengthIsTooLong);
             }
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

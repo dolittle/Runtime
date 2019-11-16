@@ -17,17 +17,17 @@ namespace Dolittle.Validation.Rules
         /// <summary>
         /// When a value is null, this is the reason given 
         /// </summary>
-        public static BrokenRuleReason ValueIsNull = BrokenRuleReason.Create("712D26C6-A40F-4A3D-8C69-1475E761A1CF");
+        public static BrokenRuleReason ValueIsNull = BrokenRuleReason.Create("712D26C6-A40F-4A3D-8C69-1475E761A1CF", "Value is null");
 
         /// <summary>
         /// When a value is not specified, this is the reason given
         /// </summary>
-        public static BrokenRuleReason StringIsEmpty = BrokenRuleReason.Create("6DE903D6-014C-4B07-B5D3-C3F28677C1A6");
+        public static BrokenRuleReason StringIsEmpty = BrokenRuleReason.Create("6DE903D6-014C-4B07-B5D3-C3F28677C1A6", "String is empty");
 
         /// <summary>
         /// When a value is not specified, this is the reason given
         /// </summary>
-        public static BrokenRuleReason ValueNotSpecified = BrokenRuleReason.Create("5F790FC3-5C7D-4F3A-B1E9-8F85FAF7176D");
+        public static BrokenRuleReason ValueNotSpecified = BrokenRuleReason.Create("5F790FC3-5C7D-4F3A-B1E9-8F85FAF7176D", "Valud not specified");
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Required"/> rule
@@ -35,7 +35,7 @@ namespace Dolittle.Validation.Rules
         /// <param name="property"><see cref="PropertyInfo">Property</see> the rule is for</param>
         public Required(PropertyInfo property) : base(property) { }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public override void Evaluate(IRuleContext context, object instance)
         {
             if (instance == null) context.Fail(this, instance, ValueIsNull);
@@ -50,6 +50,5 @@ namespace Dolittle.Validation.Rules
                 }
             }
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }
