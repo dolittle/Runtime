@@ -4,6 +4,8 @@
  *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
+using Dolittle.Reflection;
 using Dolittle.Rules;
 using Dolittle.Runtime.Events;
 
@@ -14,6 +16,7 @@ namespace Dolittle.Events
     /// </summary>
     public class EventSource : IEventSource
     {
+        readonly List<RuleSetEvaluation> _ruleSetEvaluations = new List<RuleSetEvaluation>();
         readonly List<BrokenRule> _brokenRules = new List<BrokenRule>();
 
         /// <summary>
@@ -40,12 +43,30 @@ namespace Dolittle.Events
         public IEnumerable<BrokenRule> BrokenRules => _brokenRules;
 
         /// <inheritdoc/>
+        public IEnumerable<RuleSetEvaluation> RuleSetEvaluations => _ruleSetEvaluations;
+
+        /// <inheritdoc/>
         public RuleSetEvaluation Evaluate(params IRule[] rules)
         {
             var evaluation = new RuleSetEvaluation(new RuleSet(rules));
             evaluation.Evaluate(this);
+            _ruleSetEvaluations.Add(evaluation);
             _brokenRules.AddRange(evaluation.BrokenRules);
             return evaluation;
+        }
+
+        /// <inheritdoc/>
+        public RuleSetEvaluation Evaluate(params Expression<Func<RuleEvaluationResult>>[] rules)
+        {
+            var actualRules = new List<MethodRule>();
+            foreach (var rule in rules)
+            {
+                var name = rule.GetMethodInfo().Name;
+                var method = rule.Compile();
+                actualRules.Add(new MethodRule(name, method));
+            }
+
+            return Evaluate(actualRules.ToArray());
         }
 
         /// <inheritdoc/>
