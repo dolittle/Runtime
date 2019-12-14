@@ -1,54 +1,47 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 
 namespace Dolittle.Runtime.Commands.Coordination
 {
     /// <summary>
-    /// Represents a <see cref="ICommandContextManager">Command context manager</see>
+    /// Represents a <see cref="ICommandContextManager">Command context manager</see>.
     /// </summary>
     public class CommandContextManager : ICommandContextManager
     {
+        [ThreadStatic]
+        static ICommandContext _currentContext;
+
         readonly ICommandContextFactory _factory;
 
-        [ThreadStatic] static ICommandContext _currentContext;
-
-
-        static ICommandContext CurrentContext
-        {
-            get { return _currentContext;  }
-            set { _currentContext = value; }
-        }
-
         /// <summary>
-        /// Reset context
+        /// Initializes a new instance of the <see cref="CommandContextManager"/> class.
         /// </summary>
-        public static void ResetContext()
-        {
-            CurrentContext = null;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of <see cref="CommandContextManager">CommandContextManager</see>
-        /// </summary>
-        /// <param name="factory">A <see cref="ICommandContextFactory"/> to use for building an <see cref="ICommandContext"/></param>
+        /// <param name="factory">A <see cref="ICommandContextFactory"/> to use for building an <see cref="ICommandContext"/>.</param>
         public CommandContextManager(ICommandContextFactory factory)
         {
             _factory = factory;
-        }
-
-        private static bool IsInContext(CommandRequest command)
-        {
-            var inContext = null != CurrentContext && CurrentContext.Command.Equals(command);
-            return inContext;
         }
 
         /// <inheritdoc/>
         public bool HasCurrent
         {
             get { return CurrentContext != null; }
+        }
+
+        static ICommandContext CurrentContext
+        {
+            get { return _currentContext; }
+            set { _currentContext = value; }
+        }
+
+        /// <summary>
+        /// Reset context.
+        /// </summary>
+        public static void ResetContext()
+        {
+            CurrentContext = null;
         }
 
         /// <inheritdoc/>
@@ -58,6 +51,7 @@ namespace Dolittle.Runtime.Commands.Coordination
             {
                 throw new InvalidOperationException("Command not established");
             }
+
             return CurrentContext;
         }
 
@@ -69,7 +63,10 @@ namespace Dolittle.Runtime.Commands.Coordination
                 var commandContext = _factory.Build(command);
                 CurrentContext = commandContext;
             }
+
             return CurrentContext;
         }
+
+        static bool IsInContext(CommandRequest command) => CurrentContext?.Command.Equals(command) == true;
     }
 }

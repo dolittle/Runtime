@@ -1,18 +1,17 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Logging;
-using Dolittle.Execution;
 using Dolittle.Events;
+using Dolittle.Execution;
+using Dolittle.Logging;
 using Dolittle.Runtime.Events.Coordination;
 
 namespace Dolittle.Runtime.Commands.Coordination
 {
     /// <summary>
-    /// Represents a <see cref="ICommandContext">ICommandContext</see>
+    /// Represents a <see cref="ICommandContext">ICommandContext</see>.
     /// </summary>
     public class CommandContext : ICommandContext
     {
@@ -22,12 +21,12 @@ namespace Dolittle.Runtime.Commands.Coordination
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new <see cref="CommandContext">CommandContext</see>
+        /// Initializes a new instance of the <see cref="CommandContext"/> class.
         /// </summary>
-        /// <param name="command">The <see cref="CommandRequest">command</see> the context is for</param>
-        /// <param name="executionContext">The <see cref="ExecutionContext"/> for the command</param>
-        /// <param name="uncommittedEventStreamCoordinator">The <see cref="IUncommittedEventStreamCoordinator"/> to use for coordinating the committing of events</param>
-        /// <param name="logger"><see cref="ILogger"/> to use for logging</param>
+        /// <param name="command">The <see cref="CommandRequest">command</see> the context is for.</param>
+        /// <param name="executionContext">The <see cref="ExecutionContext"/> for the command.</param>
+        /// <param name="uncommittedEventStreamCoordinator">The <see cref="IUncommittedEventStreamCoordinator"/> to use for coordinating the committing of events.</param>
+        /// <param name="logger"><see cref="ILogger"/> to use for logging.</param>
         public CommandContext(
             CommandRequest command,
             ExecutionContext executionContext,
@@ -39,10 +38,8 @@ namespace Dolittle.Runtime.Commands.Coordination
             _uncommittedEventStreamCoordinator = uncommittedEventStreamCoordinator;
             _logger = logger;
 
-            // This should be exposed to the client somehow - maybe even coming from the client
             CorrelationId = CorrelationId.New();
         }
-
 
         /// <inheritdoc/>
         public CorrelationId CorrelationId { get; }
@@ -56,7 +53,7 @@ namespace Dolittle.Runtime.Commands.Coordination
         /// <inheritdoc/>
         public void RegisterForTracking(IEventSource eventSource)
         {
-            if( _objectsTracked.Contains(eventSource)) return;
+            if (_objectsTracked.Contains(eventSource)) return;
             _objectsTracked.Add(eventSource);
         }
 
@@ -65,7 +62,6 @@ namespace Dolittle.Runtime.Commands.Coordination
         {
             return _objectsTracked;
         }
-
 
         /// <inheritdoc/>
         public void Dispose()
