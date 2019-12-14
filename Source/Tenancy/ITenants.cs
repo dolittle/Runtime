@@ -1,20 +1,19 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Tenancy
 {
     /// <summary>
-    /// Defines a system for working with <see cref="TenantId">tenants</see>
+    /// Defines a system for working with <see cref="TenantId">tenants</see>.
     /// </summary>
-    public interface ITenants 
+    public interface ITenants
     {
         /// <summary>
-        /// Gets all available tenants represented by their <see cref="TenantId"/>
+        /// Gets all available tenants represented by their <see cref="TenantId"/>.
         /// </summary>
-        IEnumerable<TenantId>   All { get; }
+        IEnumerable<TenantId> All { get; }
     }
 }
