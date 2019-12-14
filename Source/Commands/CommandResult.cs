@@ -1,9 +1,9 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Dolittle.Rules;
@@ -12,34 +12,34 @@ using Dolittle.Validation;
 namespace Dolittle.Runtime.Commands
 {
     /// <summary>
-    /// Represents the result after handling a <see cref="CommandRequest"/>
+    /// Represents the result after handling a <see cref="CommandRequest"/>.
     /// </summary>
     public class CommandResult
     {
         /// <summary>
-        /// Gets or sets the name of command that this result is related to
+        /// Gets or sets the name of command that this result is related to.
         /// </summary>
         public CommandRequest Command { get; set; }
 
         /// <summary>
-        /// Gets a <see cref="IEnumerable{T}">collection</see> of <see cref="BrokenRule">broken rules</see>
+        /// Gets or sets a <see cref="IEnumerable{T}">collection</see> of <see cref="BrokenRule">broken rules</see>.
         /// </summary>
-        public IEnumerable<BrokenRuleResult> BrokenRules { get; set; } = new BrokenRuleResult[0];
+        public IEnumerable<BrokenRuleResult> BrokenRules { get; set; } = Array.Empty<BrokenRuleResult>();
 
         /// <summary>
-        /// Gets or sets the ValidationResults generated during handling of a command
+        /// Gets or sets the ValidationResults generated during handling of a command.
         /// </summary>
-        public IEnumerable<ValidationResult> ValidationResults { get; set; } = new ValidationResult[0];
+        public IEnumerable<ValidationResult> ValidationResults { get; set; } = Array.Empty<ValidationResult>();
 
         /// <summary>
-        /// Gets the error messages that are related to full command during validation
+        /// Gets or sets the error messages that are related to full command during validation.
         /// </summary>
-        public IEnumerable<string> CommandValidationMessages { get; set; } = new string[0];
+        public IEnumerable<string> CommandValidationMessages { get; set; } = Array.Empty<string>();
 
         /// <summary>
-        /// Gets the messages that are related to broken security rules
+        /// Gets or sets the messages that are related to broken security rules.
         /// </summary>
-        public IEnumerable<string> SecurityMessages { get; set; } = new string[0];
+        public IEnumerable<string> SecurityMessages { get; set; } = Array.Empty<string>();
 
         /// <summary>
         /// Gets any validation errors (for properties or for the full command) as a simple string enumerbale.
@@ -51,56 +51,60 @@ namespace Dolittle.Runtime.Commands
         }
 
         /// <summary>
-        /// Gets or sets the exception, if any, that occured during a handle
+        /// Gets or sets the exception, if any, that occured during a handle.
         /// </summary>
         public Exception Exception { get; set; }
 
         /// <summary>
-        /// Gets or sets the exception message, if any
+        /// Gets or sets the exception message, if any.
         /// </summary>
         public string ExceptionMessage { get; set; }
 
         /// <summary>
-        /// Gets the success state of the result
+        /// Gets a value indicating whether the command is successful or not.
         /// </summary>
         /// <remarks>
         /// If there are invalid validationresult or command validattion messages, this is false.
         /// If an exception occured, this is false.
-        /// Otherwise, its true
+        /// Otherwise, its true.
         /// </remarks>
-        public bool Success
-        {
-            get { return Exception == null && PassedSecurity && !Invalid &&!HasBrokenRules; }
-        }
+        public bool Success => Exception == null && PassedSecurity && !Invalid && !HasBrokenRules;
 
         /// <summary>
-        /// Gets the validation state of the result
+        /// Gets a value indicating whether or not the command is valid.
         /// </summary>
         /// <remarks>
-        /// If there are any validationresults or command validation messages this returns false, true if not
+        /// If there are any validationresults or command validation messages this returns false, true if not.
         /// </remarks>
-        public bool Invalid
-        {
-            get { return (ValidationResults != null && ValidationResults.Any()) || (CommandValidationMessages != null && CommandValidationMessages.Any()); }
-        }
+        public bool Invalid => (ValidationResults?.Any() == true) || (CommandValidationMessages?.Any() == true);
 
         /// <summary>
-        /// Gets whether or not command passed security
+        /// Gets a value indicating whether or not command passed security.
         /// </summary>
-        public bool PassedSecurity
-        {
-            get { return SecurityMessages != null && !SecurityMessages.Any(); }
-        }
+        public bool PassedSecurity => SecurityMessages?.Any() == false;
 
         /// <summary>
-        /// Gets whether or not there are any broken rules
+        /// Gets a value indicating whether or not there are any broken rules.
         /// </summary>
         public bool HasBrokenRules => BrokenRules.Any();
 
         /// <summary>
-        /// Merges another CommandResult instance into the current instance
+        /// Create a <see cref="CommandResult"/> for a given <see cref="CommandRequest"/> instance.
         /// </summary>
-        /// <param name="commandResultToMerge">The source <see cref="CommandResult"/> to merge into current instance</param>
+        /// <param name="command"><see cref="CommandRequest"/> to create from.</param>
+        /// <returns>A <see cref="CommandResult"/> with <see cref="CommandRequest"/> details populated.</returns>
+        public static CommandResult ForCommand(CommandRequest command)
+        {
+            return new CommandResult
+            {
+                Command = command
+            };
+        }
+
+        /// <summary>
+        /// Merges another CommandResult instance into the current instance.
+        /// </summary>
+        /// <param name="commandResultToMerge">The source <see cref="CommandResult"/> to merge into current instance.</param>
         public void MergeWith(CommandResult commandResultToMerge)
         {
             if (Exception == null)
@@ -110,17 +114,20 @@ namespace Dolittle.Runtime.Commands
             MergeCommandErrorMessages(commandResultToMerge);
         }
 
-        /// <summary>
-        /// Create a <see cref="CommandResult"/> for a given <see cref="CommandRequest"/> instance
-        /// </summary>
-        /// <param name="command"><see cref="CommandRequest"/> to create from</param>
-        /// <returns>A <see cref="CommandResult"/> with <see cref="CommandRequest"/> details populated</returns>
-        public static CommandResult ForCommand(CommandRequest command)
+        /// <inheritdoc/>
+        public override string ToString()
         {
-            return new CommandResult
-            {
-                Command = command
-            };
+            var stringBuilder = new StringBuilder();
+            stringBuilder.AppendFormat(CultureInfo.InvariantCulture, "Success : {0}", Success);
+            stringBuilder.AppendFormat(CultureInfo.InvariantCulture, ", Invalid : {0}", Invalid);
+
+            if (Exception != null)
+                stringBuilder.AppendFormat(CultureInfo.InvariantCulture, ", Exception : {0}", Exception.Message);
+
+            if (ExceptionMessage != null)
+                stringBuilder.AppendFormat(CultureInfo.InvariantCulture, ", ExceptionMesssage : {0}", ExceptionMessage);
+
+            return stringBuilder.ToString();
         }
 
         void MergeValidationResults(CommandResult commandResultToMerge)
@@ -153,25 +160,6 @@ namespace Dolittle.Runtime.Commands
             var commandErrorMessages = CommandValidationMessages.ToList();
             commandErrorMessages.AddRange(commandResultToMerge.CommandValidationMessages);
             CommandValidationMessages = commandErrorMessages.ToArray();
-        }
-
-        /// <summary>
-        /// Returns a string that represents the state of the <see cref="CommandResult"/>
-        /// </summary>
-        /// <returns><see cref="String"/> with full detail from the <see cref="CommandResult"/></returns>
-        public override string ToString()
-        {
-            var stringBuilder = new StringBuilder();
-            stringBuilder.AppendFormat("Success : {0}", Success);
-            stringBuilder.AppendFormat(", Invalid : {0}", Invalid);
-
-            if (Exception != null)
-                stringBuilder.AppendFormat(", Exception : {0}", Exception.Message);
-
-            if (ExceptionMessage != null)
-                stringBuilder.AppendFormat(", ExceptionMesssage : {0}", ExceptionMessage);
-
-            return stringBuilder.ToString();
         }
     }
 }
