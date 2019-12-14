@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Dolittle.Rules;
 using Dolittle.Validation;
 
 namespace Dolittle.Runtime.Commands
@@ -16,34 +17,29 @@ namespace Dolittle.Runtime.Commands
     public class CommandResult
     {
         /// <summary>
-        /// Initializes an instance of <see cref="CommandResult"/>
-        /// </summary>
-        public CommandResult()
-        {
-            ValidationResults = new ValidationResult[0];
-            CommandValidationMessages = new string[0];
-            SecurityMessages = new string[0];
-        }
-
-        /// <summary>
         /// Gets or sets the name of command that this result is related to
         /// </summary>
         public CommandRequest Command { get; set; }
 
         /// <summary>
+        /// Gets a <see cref="IEnumerable{T}">collection</see> of <see cref="BrokenRule">broken rules</see>
+        /// </summary>
+        public IEnumerable<BrokenRuleResult> BrokenRules { get; set; } = new BrokenRuleResult[0];
+
+        /// <summary>
         /// Gets or sets the ValidationResults generated during handling of a command
         /// </summary>
-        public IEnumerable<ValidationResult> ValidationResults { get; set; }
+        public IEnumerable<ValidationResult> ValidationResults { get; set; } = new ValidationResult[0];
 
         /// <summary>
         /// Gets the error messages that are related to full command during validation
         /// </summary>
-        public IEnumerable<string> CommandValidationMessages { get; set; }
+        public IEnumerable<string> CommandValidationMessages { get; set; } = new string[0];
 
         /// <summary>
         /// Gets the messages that are related to broken security rules
         /// </summary>
-        public IEnumerable<string> SecurityMessages { get; set; }
+        public IEnumerable<string> SecurityMessages { get; set; } = new string[0];
 
         /// <summary>
         /// Gets any validation errors (for properties or for the full command) as a simple string enumerbale.
@@ -66,33 +62,40 @@ namespace Dolittle.Runtime.Commands
 
         /// <summary>
         /// Gets the success state of the result
-        ///
+        /// </summary>
+        /// <remarks>
         /// If there are invalid validationresult or command validattion messages, this is false.
         /// If an exception occured, this is false.
         /// Otherwise, its true
-        /// </summary>
+        /// </remarks>
         public bool Success
         {
-            get { return null == Exception && PassedSecurity && !Invalid; }
+            get { return Exception == null && PassedSecurity && !Invalid &&!HasBrokenRules; }
         }
 
         /// <summary>
         /// Gets the validation state of the result
-        ///
-        /// If there are any validationresults or command validation messages this returns false, true if not
         /// </summary>
+        /// <remarks>
+        /// If there are any validationresults or command validation messages this returns false, true if not
+        /// </remarks>
         public bool Invalid
         {
             get { return (ValidationResults != null && ValidationResults.Any()) || (CommandValidationMessages != null && CommandValidationMessages.Any()); }
         }
 
         /// <summary>
-        /// Gets or sets wether or not command passed security
+        /// Gets whether or not command passed security
         /// </summary>
         public bool PassedSecurity
         {
             get { return SecurityMessages != null && !SecurityMessages.Any(); }
         }
+
+        /// <summary>
+        /// Gets whether or not there are any broken rules
+        /// </summary>
+        public bool HasBrokenRules => BrokenRules.Any();
 
         /// <summary>
         /// Merges another CommandResult instance into the current instance
@@ -106,7 +109,6 @@ namespace Dolittle.Runtime.Commands
             MergeValidationResults(commandResultToMerge);
             MergeCommandErrorMessages(commandResultToMerge);
         }
-
 
         /// <summary>
         /// Create a <see cref="CommandResult"/> for a given <see cref="CommandRequest"/> instance

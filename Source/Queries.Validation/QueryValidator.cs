@@ -55,7 +55,7 @@ namespace Dolittle.Queries.Validation
 
         RuleFailed RuleFailed(IRuleContext ruleContext, Dictionary<IRule, BrokenRule> brokenRules)
         {
-            return (rule, instance, reason) =>
+            return (rule, instance, cause) =>
             {
                 BrokenRule brokenRule;
                 if (brokenRules.ContainsKey(rule)) brokenRule = brokenRules[rule];
@@ -64,7 +64,7 @@ namespace Dolittle.Queries.Validation
                     brokenRule = new BrokenRule(rule, instance, ruleContext);
                     brokenRules[rule] = brokenRule;
                 }
-                brokenRule.AddReason(reason);
+                brokenRule.AddCause(cause);
             };
         }
     }

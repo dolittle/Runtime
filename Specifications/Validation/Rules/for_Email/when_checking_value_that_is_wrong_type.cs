@@ -1,4 +1,5 @@
-﻿using Dolittle.Rules;
+﻿using Dolittle.Machine.Specifications.Rules;
+using Dolittle.Rules;
 using Dolittle.Validation;
 using Dolittle.Validation.Rules;
 using Machine.Specifications;
@@ -20,6 +21,6 @@ namespace Dolittle.Specs.Validation.Rules.for_Email
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, 42);
 
-        It should_fail_with_wrong_type_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, Moq.It.IsAny<object>(), ValueRule.ValueTypeMismatch), Times.Once());
+        It should_fail_with_wrong_type_as_reason = () => rule_context_mock.ShouldFailWith(rule, Moq.It.IsAny<object>(), ValueRule.ValueTypeMismatch);
     }
 }

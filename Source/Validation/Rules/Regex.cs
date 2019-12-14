@@ -15,7 +15,7 @@ namespace Dolittle.Validation.Rules
         /// <summary>
         /// When a string does not conform to the specified expression, this is the reason given
         /// </summary>
-        public static BrokenRuleReason NotConformingToExpression = BrokenRuleReason.Create("BE58A125-40DB-47EA-B260-37F7AF4455C5");
+        public static Reason NotConformingToExpression = Reason.Create("BE58A125-40DB-47EA-B260-37F7AF4455C5", "Value '{Value}' does not conform to regular expression");
 
         System.Text.RegularExpressions.Regex _actualRegex;
 
@@ -33,16 +33,15 @@ namespace Dolittle.Validation.Rules
         /// <summary>
         /// Get the expression that values must conform to
         /// </summary>
-        public string Expression { get; private set; }
+        public string Expression { get; }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public override void Evaluate(IRuleContext context, object instance)
         {
             if (FailIfValueTypeMismatch<string>(context, instance))
             {
-                if (!_actualRegex.IsMatch((string)instance)) context.Fail(this, instance, NotConformingToExpression);
+                if (!_actualRegex.IsMatch((string)instance)) context.Fail(this, instance, NotConformingToExpression.WithArgs(new{ValueRule=instance}));
             }
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

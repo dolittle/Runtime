@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Rules;
 using Dolittle.Validation;
+using Dolittle.Machine.Specifications.Rules;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -19,9 +20,9 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
         static Mock<IValueRule> second_rule_not_broken;
         static Mock<IValueRule> third_rule_broken;
 
-        static BrokenRuleReason first_broken_rule_first_reason;
-        static BrokenRuleReason first_broken_rule_second_reason;
-        static BrokenRuleReason third_broken_rule_reason;
+        static Reason first_broken_rule_first_reason;
+        static Reason first_broken_rule_second_reason;
+        static Reason third_broken_rule_reason;
 
         
 
@@ -39,19 +40,19 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
             third_rule_broken = new Mock<IValueRule>();
             third_rule_broken.SetupGet(r => r.Property).Returns(property);
 
-            first_broken_rule_first_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString());
-            first_broken_rule_second_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString());
-            third_broken_rule_reason = BrokenRuleReason.Create(Guid.NewGuid().ToString());
+            first_broken_rule_first_reason = Reason.Create(Guid.NewGuid().ToString(),string.Empty);
+            first_broken_rule_second_reason = Reason.Create(Guid.NewGuid().ToString(),string.Empty);
+            third_broken_rule_reason = Reason.Create(Guid.NewGuid().ToString(),string.Empty);
 
             first_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) =>
             {
-                context.Fail(first_rule_broken.Object, instance, first_broken_rule_first_reason);
-                context.Fail(first_rule_broken.Object, instance, first_broken_rule_second_reason);
+                context.Fail(first_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == first_broken_rule_first_reason));
+                context.Fail(first_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == first_broken_rule_second_reason));
             });
 
             third_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) =>
             {
-                context.Fail(third_rule_broken.Object, instance, third_broken_rule_reason);
+                context.Fail(third_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == third_broken_rule_reason));
             });
 
             descriptor_mock = new Mock<IQueryValidationDescriptor>();
@@ -68,20 +69,18 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
 
             rule_context_mock.Setup(r => r.OnFailed(Moq.It.IsAny<RuleFailed>())).Callback((RuleFailed c) => callbacks.Add(c));
             rule_context_mock.Setup(r => 
-                r.Fail(Moq.It.IsAny<IRule>(), Moq.It.IsAny<object>(), Moq.It.IsAny<BrokenRuleReason>()))
-                .Callback((IRule rule, object instance, BrokenRuleReason reason) =>
+                r.Fail(Moq.It.IsAny<IRule>(), Moq.It.IsAny<object>(), Moq.It.IsAny<Cause>()))
+                .Callback((IRule rule, object instance, Reason reason) =>
                 {
-                    callbacks.ForEach(c => c(rule, instance, reason));
-                });
-
-            
+                    callbacks.ForEach(c => c(rule, instance, reason.NoArgs()));
+                });            
         };
 
         Because of = () => result = query_validator.Validate(query);
 
         It should_be_unsuccessul = () => result.Success.ShouldBeFalse();
         It should_have_two_broken_rules = () => result.BrokenRules.Count().ShouldEqual(2);
-        It should_hold_a_broken_rule_with_first_broken_rule_reasons = () => result.BrokenRules.First().Reasons.ShouldContainOnly(first_broken_rule_first_reason, first_broken_rule_second_reason);
-        It should_hold_a_broken_rule_with_third_broken_rule_reasons = () => result.BrokenRules.ToArray()[1].Reasons.ShouldContainOnly(third_broken_rule_reason);
+        It should_hold_a_broken_rule_with_first_broken_rule_reasons = () => result.BrokenRules.ToArray()[0].Causes.First().Reason.ShouldEqual(first_broken_rule_first_reason);
+        It should_hold_a_broken_rule_with_third_broken_rule_reasons = () => result.BrokenRules.ToArray()[1].Causes.First().Reason.ShouldEqual(third_broken_rule_reason);
     }
 }

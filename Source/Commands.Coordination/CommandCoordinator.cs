@@ -11,6 +11,11 @@ using Dolittle.Runtime.Commands;
 using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Commands.Security;
 using Dolittle.Runtime.Commands.Validation;
+using Dolittle.Rules;
+using System.Collections.Generic;
+using Dolittle.Collections;
+using System.Linq;
+using Dolittle.Events;
 
 namespace Dolittle.Runtime.Commands.Coordination
 {
@@ -25,6 +30,7 @@ namespace Dolittle.Runtime.Commands.Coordination
         readonly ICommandSecurityManager _commandSecurityManager;
         readonly ILocalizer _localizer;
         readonly ILogger _logger;
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandCoordinator">CommandCoordinator</see>
@@ -57,7 +63,7 @@ namespace Dolittle.Runtime.Commands.Coordination
             return Handle(_commandContextManager.EstablishForCommand(command), command);
         }
 
-        CommandResult Handle(ITransaction transaction, CommandRequest command)
+        CommandResult Handle(ICommandContext commandContext, CommandRequest command)
         {
             var commandResult = new CommandResult();
             try
@@ -74,7 +80,7 @@ namespace Dolittle.Runtime.Commands.Coordination
                     {
                         _logger.Trace("Command not authorized");
                         commandResult.SecurityMessages = authorizationResult.BuildFailedAuthorizationMessages();
-                        transaction.Rollback();
+                        commandContext.Rollback();
                         return commandResult;
                     }
 
@@ -90,26 +96,36 @@ namespace Dolittle.Runtime.Commands.Coordination
                         {
                             _logger.Trace("Handle the command");
                             _commandHandlerManager.Handle(command);
+
+                            _logger.Trace("Collect any broken rules");
+                            commandResult.BrokenRules = commandContext.GetObjectsBeingTracked()
+                                .SelectMany(_ => _.BrokenRules)
+                                .Select(_ => new BrokenRuleResult(
+                                    _.Rule.Name,
+                                    $"EventSource: {_.Context.Target.GetType().Name} - with id {((IEventSource)_.Context.Target).EventSourceId.Value}",
+                                    _.Instance?.ToString()??"[Not Set]",
+                                    _.Causes));
+
                             _logger.Trace("Commit transaction");
-                            transaction.Commit();
+                            commandContext.Commit();
                         }
                         catch (TargetInvocationException ex)
                         {
                             _logger.Error(ex, "Error handling command");
                             commandResult.Exception = ex.InnerException;
-                            transaction.Rollback();
+                            commandContext.Rollback();
                         }
                         catch (Exception ex)
                         {
                             _logger.Error(ex, "Error handling command");
                             commandResult.Exception = ex;
-                            transaction.Rollback();
+                            commandContext.Rollback();
                         }
                     }
                     else
                     {
                         _logger.Information("Command was not successful, rolling back");
-                        transaction.Rollback();
+                        commandContext.Rollback();
                     }
                 }
             }
@@ -126,6 +142,5 @@ namespace Dolittle.Runtime.Commands.Coordination
 
             return commandResult;
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

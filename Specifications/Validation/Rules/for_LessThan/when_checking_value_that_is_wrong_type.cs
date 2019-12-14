@@ -20,6 +20,6 @@ namespace Dolittle.Specs.Validation.Rules.for_LessThan
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, "string");
 
-        It should_fail_with_wrong_type_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, Moq.It.IsAny<object>(), ValueRule.ValueTypeMismatch), Times.Once());
+        It should_fail_with_wrong_type_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, Moq.It.IsAny<object>(), Moq.It.Is<Cause>(_ => _.Reason == ValueRule.ValueTypeMismatch)), Times.Once());
     }
 }

@@ -22,6 +22,6 @@ namespace Dolittle.Specs.Validation.Rules.for_MaxLength
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, value);
 
-        It should_fail_with_length_is_too_long_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, value, Reasons.LengthIsTooLong), Times.Once());
+        It should_fail_with_length_is_too_long_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, value, Moq.It.Is<Cause>(_ => _.Reason == Reasons.LengthIsTooLong)), Times.Once());
     }
 }

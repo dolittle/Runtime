@@ -1,4 +1,5 @@
-﻿using Dolittle.Rules;
+﻿using Dolittle.Machine.Specifications.Rules;
+using Dolittle.Rules;
 using Dolittle.Validation.Rules;
 using Machine.Specifications;
 using Moq;
@@ -20,6 +21,6 @@ namespace Dolittle.Specs.Validation.Rules.for_Email
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, value);
 
-        It should_fail_with_invalid_email_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, value, Email.InvalidEMailReason), Times.Once());
+        It should_fail_with_invalid_email_as_reason = () => rule_context_mock.ShouldFailWith(rule, value, Email.InvalidEMailReason);
     }
 }

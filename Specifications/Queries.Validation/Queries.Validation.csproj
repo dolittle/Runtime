@@ -8,6 +8,10 @@
   <Import Project="../../Build/MSBuild/specs.props"></Import>
 
   <ItemGroup>
+    <PackageReference Include="Dolittle.Machine.Specifications.Rules" Version="2.*"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Source\Queries.Validation\Queries.Validation.csproj" />
   </ItemGroup>
 

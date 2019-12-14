@@ -27,18 +27,17 @@ namespace Dolittle.Validation.Rules
         /// <summary>
         /// Gets the value that input value must be less than
         /// </summary>
-        public T Value { get; private set; }
+        public T Value { get; }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public override void Evaluate(IRuleContext context, object instance)
         {
             if (FailIfValueTypeMismatch<T>(context, instance))
             {
                 var comparison = ((IComparable<T>)instance).CompareTo(Value);
-                if (comparison == 0) context.Fail(this, instance, Reasons.ValueIsEqual);
-                if (comparison > 0) context.Fail(this, instance, Reasons.ValueIsGreaterThan);
+                if (comparison == 0) context.Fail(this, instance, Reasons.ValueIsEqual.WithArgs(new{LeftHand=instance, RightHand=Value}));
+                if (comparison > 0) context.Fail(this, instance, Reasons.ValueIsGreaterThan.WithArgs(new{LeftHand=instance, RightHand=Value}));
             }
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

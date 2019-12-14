@@ -3,6 +3,10 @@
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 using System;
+using System.Collections.Generic;
+using System.Linq.Expressions;
+using Dolittle.Reflection;
+using Dolittle.Rules;
 using Dolittle.Runtime.Events;
 
 namespace Dolittle.Events
@@ -12,6 +16,9 @@ namespace Dolittle.Events
     /// </summary>
     public class EventSource : IEventSource
     {
+        readonly List<RuleSetEvaluation> _ruleSetEvaluations = new List<RuleSetEvaluation>();
+        readonly List<BrokenRule> _brokenRules = new List<BrokenRule>();
+
         /// <summary>
         /// Initializes an instance of <see cref="EventSource">EventSource</see>
         /// </summary>
@@ -24,13 +31,43 @@ namespace Dolittle.Events
         }
 
         /// <inheritdoc/>
-        public EventSourceId EventSourceId { get; set; }
+        public EventSourceId EventSourceId { get; }
 
         /// <inheritdoc/>
         public EventSourceVersion Version { get; private set; }
 
         /// <inheritdoc/>
         public UncommittedEvents UncommittedEvents { get; private set; }
+
+        /// <inheritdoc/>
+        public IEnumerable<BrokenRule> BrokenRules => _brokenRules;
+
+        /// <inheritdoc/>
+        public IEnumerable<RuleSetEvaluation> RuleSetEvaluations => _ruleSetEvaluations;
+
+        /// <inheritdoc/>
+        public RuleSetEvaluation Evaluate(params IRule[] rules)
+        {
+            var evaluation = new RuleSetEvaluation(new RuleSet(rules));
+            evaluation.Evaluate(this);
+            _ruleSetEvaluations.Add(evaluation);
+            _brokenRules.AddRange(evaluation.BrokenRules);
+            return evaluation;
+        }
+
+        /// <inheritdoc/>
+        public RuleSetEvaluation Evaluate(params Expression<Func<RuleEvaluationResult>>[] rules)
+        {
+            var actualRules = new List<MethodRule>();
+            foreach (var rule in rules)
+            {
+                var name = rule.GetMethodInfo().Name;
+                var method = rule.Compile();
+                actualRules.Add(new MethodRule(name, method));
+            }
+
+            return Evaluate(actualRules.ToArray());
+        }
 
         /// <inheritdoc/>
         public void Apply(IEvent @event)
@@ -86,16 +123,16 @@ namespace Dolittle.Events
         void InvokeOnMethod(IEvent @event)
         {
             var handleMethod = this.GetOnMethod(@event);
-            if (handleMethod != null)
-                handleMethod.Invoke(this, new[] { @event });
+            handleMethod?.Invoke(this, new[] { @event });
         }
-
 
         void ValidateEventStream(CommittedEvents eventStream)
         {
             if (!IsForThisEventSource(eventStream.EventSourceId))
-                throw new InvalidOperationException("Cannot apply an EventStream belonging to a different event source." +
-                    string.Format(@"Expected events for Id {0} but got events for Id {1}", EventSourceId, eventStream.EventSourceId));
+            {
+                throw new InvalidOperationException("Cannot apply an EventStream belonging to a different event source. " +
+                    string.Format($"Expected events for Id '{EventSourceId}' but got events for Id '{eventStream.EventSourceId}'"));
+            }
         }
 
         bool IsForThisEventSource(Guid targetEventSourceId)

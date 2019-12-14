@@ -20,6 +20,6 @@ namespace Dolittle.Specs.Validation.Rules.for_GreaterThan
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, value);
 
-        It should_fail_with_value_is_less_than_reason = () => rule_context_mock.Verify(r => r.Fail(rule, value, Reasons.ValueIsLessThan), Times.Once());
+        It should_fail_with_value_is_less_than_reason = () => rule_context_mock.Verify(r => r.Fail(rule, value, Moq.It.Is<Cause>(_ => _.Reason == Reasons.ValueIsLessThan)), Times.Once());
     }
 }
