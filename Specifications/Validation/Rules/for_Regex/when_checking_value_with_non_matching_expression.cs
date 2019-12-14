@@ -21,6 +21,6 @@ namespace Dolittle.Specs.Validation.Rules.for_Regex
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, string.Empty);
 
-        It should_fail_with_not_conforming_to_expression_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, string.Empty, Regex.NotConformingToExpression), Times.Once());
+        It should_fail_with_not_conforming_to_expression_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, string.Empty, Moq.It.Is<Cause>(_ => _.Reason == Regex.NotConformingToExpression)), Times.Once());
     }
 }

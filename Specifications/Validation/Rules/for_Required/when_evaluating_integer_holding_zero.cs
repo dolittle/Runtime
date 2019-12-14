@@ -20,6 +20,6 @@ namespace Dolittle.Specs.Validation.Rules.for_Required
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, 0);
 
-        It should_fail_with_value_not_specified_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, 0, Required.ValueNotSpecified));
+        It should_fail_with_value_not_specified_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, 0, Moq.It.Is<Cause>(_ => _.Reason == Required.ValueNotSpecified)), Moq.Times.Once());
     }
 }

@@ -35,7 +35,7 @@ namespace Dolittle.Validation.Rules
             if (FailIfValueTypeMismatch<T>(context, instance))
             {
                 var comparison = ((IComparable<T>)instance).CompareTo(Value);
-                if (comparison > 0) context.Fail(this, instance, Reasons.ValueIsGreaterThan);
+                if (comparison > 0) context.Fail(this, instance, Reasons.ValueIsGreaterThan.WithArgs(new{LeftHand=instance, RightHand=Value}));
             }
         }
     }

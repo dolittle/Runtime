@@ -23,6 +23,6 @@ namespace Dolittle.Specs.Validation.Rules.for_Required
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, string.Empty);
 
-        It should_fail_with_string_is_empty_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, string.Empty, Required.StringIsEmpty));
+        It should_fail_with_string_is_empty_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, string.Empty, Moq.It.Is<Cause>(_ => _.Reason == Required.StringIsEmpty)), Moq.Times.Once());
     }
 }

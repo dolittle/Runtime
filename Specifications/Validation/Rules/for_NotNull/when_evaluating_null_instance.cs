@@ -19,6 +19,6 @@ namespace Dolittle.Specs.Validation.Rules.for_NotNull
 
         Because of = () => rule.Evaluate(rule_context_mock.Object, null);
 
-        It should_fail_with_value_is_null_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, null, NotNull.ValueIsNull));
+        It should_fail_with_value_is_null_as_reason = () => rule_context_mock.Verify(r => r.Fail(rule, null, Moq.It.Is<Cause>(_ => _.Reason == NotNull.ValueIsNull)), Moq.Times.Once());
     }
 }

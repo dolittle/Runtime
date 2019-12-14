@@ -33,7 +33,7 @@ namespace Dolittle.Validation.Rules
             if (FailIfValueTypeMismatch<string>(context, instance))
             {
                 var length = ((string)instance).Length;
-                if (length > Length) context.Fail(this, instance, Reasons.LengthIsTooLong);
+                if (length > Length) context.Fail(this, instance, Reasons.LengthIsTooLong.WithArgs(new{Length=length}));
             }
         }
     }

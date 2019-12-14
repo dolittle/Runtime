@@ -17,12 +17,18 @@ namespace Dolittle.Runtime.Commands
         /// </summary>
         /// <param name="rule">Name of rule that was broken</param>
         /// <param name="target">Identifying target that the rule is broken for</param>
-        /// <param name="reasons">All the <see cref="BrokenRuleReason">reasons</see></param>
-        public BrokenRuleResult(string rule, string target, IEnumerable<BrokenRuleReason> reasons)
+        /// <param name="instance">String representation of the instance that was involved in the rule being broken</param>
+        /// <param name="causes">All the <see cref="Cause">causes</see></param>
+        public BrokenRuleResult(
+            string rule,
+            string target,
+            string instance,
+            IEnumerable<Cause> causes)
         {
             Rule = rule;
             Target = target;
-            Reasons = reasons;
+            Instance = instance;
+            Causes = causes;
         }
 
         /// <summary>
@@ -36,8 +42,13 @@ namespace Dolittle.Runtime.Commands
         public string Target { get; }
 
         /// <summary>
-        /// Gets all the reasons for the rule being broken
+        /// Gets the string representation of the instance that was involved in the rule being broken
         /// </summary>
-        public IEnumerable<BrokenRuleReason> Reasons { get; }
+        public string Instance { get; }
+
+        /// <summary>
+        /// Gets all the causes for the rule being broken
+        /// </summary>
+        public IEnumerable<Cause> Causes { get; }
     }
 }

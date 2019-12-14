@@ -15,7 +15,7 @@ namespace Dolittle.Validation
         /// <summary>
         /// When a value is of the wrong type, this is the reason given for breaking a rule
         /// </summary>
-        public static BrokenRuleReason ValueTypeMismatch = BrokenRuleReason.Create("150757B0-8118-42FB-A8C4-2D49E7AC3AFD", "Value type mismatch");
+        public static Reason ValueTypeMismatch = Reason.Create("150757B0-8118-42FB-A8C4-2D49E7AC3AFD", "Value type mismatch - expected {Expected} got {Type}");
 
         /// <summary>
         /// Initializes a new instance of <see cref="ValueRule"/>
@@ -23,8 +23,12 @@ namespace Dolittle.Validation
         /// <param name="property"><see cref="PropertyInfo">Property</see> the rule is for</param>
         protected ValueRule(PropertyInfo property)
         {
+            Name = GetType().Name;
             Property = property;
         }
+
+        /// <inheritdoc/>
+        public virtual string Name { get; }
 
         /// <inheritdoc/>
         public PropertyInfo Property { get; }
@@ -34,7 +38,7 @@ namespace Dolittle.Validation
         {
             if (value.GetType() != typeof(TDesired))
             {
-                context.Fail(this, value, ValueTypeMismatch);
+                context.Fail(this, value, ValueTypeMismatch.WithArgs(new{Expected=typeof(TDesired), Types=value.GetType()}));
                 return false;
             }
             return true;

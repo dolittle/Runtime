@@ -15,7 +15,7 @@ namespace Dolittle.Validation.Rules
         /// <summary>
         /// When a value is null, this is the reason given 
         /// </summary>
-        public static BrokenRuleReason ValueIsNull = BrokenRuleReason.Create("712D26C6-A40F-4A3D-8C69-1475E761A1CF", "Value is null");
+        public static Reason ValueIsNull = Reason.Create("712D26C6-A40F-4A3D-8C69-1475E761A1CF", "Value is null");
 
         /// <summary>
         /// Initializes a new instance of the <see cref="NotNull"/> rule
@@ -26,7 +26,7 @@ namespace Dolittle.Validation.Rules
         /// <inheritdoc/>
         public override void Evaluate(IRuleContext context, object instance)
         {
-            if (instance == null) context.Fail(this, instance, ValueIsNull);
+            if (instance == null) context.Fail(this, instance, ValueIsNull.NoArgs());
         }
     }
 }

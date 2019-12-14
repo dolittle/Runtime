@@ -10,4 +10,8 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Validation\Validation.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Machine.Specifications.Rules" Version="2.*"/>
+  </ItemGroup>
 </Project>
