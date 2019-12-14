@@ -1,18 +1,15 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-using System.IO;
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Linq;
 using Dolittle.Booting;
-using Dolittle.Collections;
 using Dolittle.Execution;
 using Dolittle.ResourceTypes.Configuration;
 
 namespace Dolittle.Applications.Configuration
 {
     /// <summary>
-    /// Performs the boot procedures for the application configuration
+    /// Performs the boot procedures for the application configuration.
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
@@ -21,15 +18,15 @@ namespace Dolittle.Applications.Configuration
         readonly BoundedContextConfiguration _boundedContextConfiguration;
 
         /// <summary>
-        /// Instantiates an instance of <see cref="BootProcedure"/>
+        /// Initializes a new instance of the <see cref="BootProcedure"/> class.
         /// </summary>
-        /// <param name="boundedContextConfiguration"><see cref="BoundedContextConfiguration"/> to use</param>
-        /// <param name="executionContextManager"></param>
-        /// <param name="resourceConfiguration"></param>
+        /// <param name="boundedContextConfiguration"><see cref="BoundedContextConfiguration"/> to use.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> to use for <see cref="ExecutionContext"/>.</param>
+        /// <param name="resourceConfiguration"><see cref="IResourceConfiguration">Configuration</see> of resources.</param>
         public BootProcedure(
             BoundedContextConfiguration boundedContextConfiguration,
             IExecutionContextManager executionContextManager,
-            IResourceConfiguration resourceConfiguration )
+            IResourceConfiguration resourceConfiguration)
         {
             _executionContextManager = executionContextManager;
             _resourceConfiguration = resourceConfiguration;
@@ -46,8 +43,8 @@ namespace Dolittle.Applications.Configuration
 
             _resourceConfiguration.ConfigureResourceTypes(
                 _boundedContextConfiguration.Resources.ToDictionary(
-                    kvp => kvp.Key, 
-                    kvp => environment == Environment.Production? kvp.Value.Production : kvp.Value.Development));
+                    kvp => kvp.Key,
+                    kvp => environment == Environment.Production ? kvp.Value.Production : kvp.Value.Development));
         }
     }
 }
