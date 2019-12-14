@@ -28,7 +28,6 @@ namespace Dolittle.Runtime.Commands.Coordination
         readonly ICommandContextManager _commandContextManager;
         readonly ICommandValidators _commandValidationService;
         readonly ICommandSecurityManager _commandSecurityManager;
-        readonly IRuleContexts _ruleContexts;
         readonly ILocalizer _localizer;
         readonly ILogger _logger;
 
@@ -40,7 +39,6 @@ namespace Dolittle.Runtime.Commands.Coordination
         /// <param name="commandContextManager">A <see cref="ICommandContextManager"/> for establishing a <see cref="CommandContext"/></param>
         /// <param name="commandSecurityManager">A <see cref="ICommandSecurityManager"/> for dealing with security and commands</param>
         /// <param name="commandValidators">A <see cref="ICommandValidators"/> for validating a <see cref="CommandRequest"/> before handling</param>
-        /// <param name="ruleContexts"></param>
         /// <param name="localizer">A <see cref="ILocalizer"/> to use for controlling localization of current thread when handling commands</param>
         /// <param name="logger"><see cref="ILogger"/> to log with</param>
         public CommandCoordinator(
@@ -48,7 +46,6 @@ namespace Dolittle.Runtime.Commands.Coordination
             ICommandContextManager commandContextManager,
             ICommandSecurityManager commandSecurityManager,
             ICommandValidators commandValidators,
-            IRuleContexts ruleContexts,
             ILocalizer localizer,
             ILogger logger)
         {
@@ -58,7 +55,6 @@ namespace Dolittle.Runtime.Commands.Coordination
             _commandValidationService = commandValidators;
             _localizer = localizer;
             _logger = logger;
-            _ruleContexts = ruleContexts;
         }
 
         /// <inheritdoc/>
@@ -105,9 +101,10 @@ namespace Dolittle.Runtime.Commands.Coordination
                             commandResult.BrokenRules = commandContext.GetObjectsBeingTracked()
                                 .SelectMany(_ => _.BrokenRules)
                                 .Select(_ => new BrokenRuleResult(
-                                    _.Rule.GetType().Name,
-                                    $"EventSource: {_.Instance.GetType().Name} - with id {((IEventSource)_.Context.Target).EventSourceId.Value}",
-                                    _.Reasons));
+                                    _.Rule.Name,
+                                    $"EventSource: {_.Context.Target.GetType().Name} - with id {((IEventSource)_.Context.Target).EventSourceId.Value}",
+                                    _.Instance?.ToString()??"[Not Set]",
+                                    _.Causes));
 
                             _logger.Trace("Commit transaction");
                             commandContext.Commit();
