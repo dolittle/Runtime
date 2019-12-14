@@ -5,7 +5,7 @@
     <AssemblyName>Dolittle.Runtime.Commands.Specs</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../Build/MSBuild/specs.props"></Import>
+  <Import Project="../../specs.props"/>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Commands\Commands.csproj" />

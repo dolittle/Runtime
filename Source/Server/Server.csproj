@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Common" Version="1.*" />
+    <PackageReference Include="Dolittle.Common" Version="2.*" />
     <PackageReference Include="Dolittle.Booting" Version="4.*" />
     <PackageReference Include="Dolittle.Configuration.Files" Version="4.*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="4.*" />

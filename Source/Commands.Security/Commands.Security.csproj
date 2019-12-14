@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Common" Version="1.*" />
+    <PackageReference Include="Dolittle.Common" Version="2.*" />
     <PackageReference Include="Dolittle.Security" Version="4.*" />
   </ItemGroup>
 </Project>

@@ -5,7 +5,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Common" Version="1.*" />
+        <PackageReference Include="Dolittle.Common" Version="2.*" />
     </ItemGroup>
 
     <ItemGroup>

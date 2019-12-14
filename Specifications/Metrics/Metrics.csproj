@@ -5,12 +5,11 @@
     <AssemblyName>Dolittle.Runtime.Metrics.Specs</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../Build/MSBuild/specs.props"></Import>
+  <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Metrics\Metrics.csproj" />
   </ItemGroup>
-
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Types.Testing" Version="4.*"/>
