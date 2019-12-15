@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using Dolittle.Lifecycle;
 using Grpc.Core;
@@ -9,18 +8,20 @@ using Grpc.Core;
 namespace Dolittle.Runtime.Heads
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IClientFor{T}"/>
+    /// Represents an implementation of <see cref="IClientFor{T}"/>.
     /// </summary>
+    /// <typeparam name="T">Type of <see cref="ClientBase"/>.</typeparam>
     [Singleton]
-    public class ClientFor<T> : IClientFor<T> where T : ClientBase
+    public class ClientFor<T> : IClientFor<T>
+        where T : ClientBase
     {
         readonly IConnectedHeads _connectedHeads;
         T _instance;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ClientFor{T}"/>
+        /// Initializes a new instance of the <see cref="ClientFor{T}"/> class.
         /// </summary>
-        /// <param name="connectedHeads"><see cref="IConnectedHeads"/> to use for maintaining connection state</param>
+        /// <param name="connectedHeads"><see cref="IConnectedHeads"/> to use for maintaining connection state.</param>
         public ClientFor(IConnectedHeads connectedHeads)
         {
             _connectedHeads = connectedHeads;
@@ -35,11 +36,12 @@ namespace Dolittle.Runtime.Heads
                 {
                     var type = typeof(T);
                     var client = _connectedHeads.GetFor(type);
-                    client.Disconnected += (c) => _instance = null;
+                    client.Disconnected += _ => _instance = null;
 
-                    var constructor = type.GetConstructor(new Type[]  {  typeof(ChannelBase) });
-                    _instance = constructor.Invoke(new [] { client.Channel }) as T;
+                    var constructor = type.GetConstructor(new Type[] { typeof(ChannelBase) });
+                    _instance = constructor.Invoke(new[] { client.Channel }) as T;
                 }
+
                 return _instance;
             }
         }
