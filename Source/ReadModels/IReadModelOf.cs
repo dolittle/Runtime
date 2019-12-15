@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Linq.Expressions;
 
@@ -16,10 +15,11 @@ namespace Dolittle.ReadModels
     /// type <typeparamref name="T"/> is retrieved.
     /// In most cases it is possible to use the provided <see cref="ReadModelOf{T}"/> by implementing a <see cref="IReadModelRepositoryFor{T}"/>.
     /// </remarks>
-    public interface IReadModelOf<T> where T : IReadModel
+    public interface IReadModelOf<T>
+        where T : IReadModel
     {
         /// <summary>
-        /// Filter by properties
+        /// Filter by properties.
         /// </summary>
         /// <param name="propertyExpressions">Property filter expressions to use.</param>
         /// <returns>An instance or default/null of the <see cref="IReadModel"/>, throws an exception if there is not a unique match.</returns>
