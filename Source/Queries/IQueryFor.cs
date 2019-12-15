@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.ReadModels;
 
 namespace Dolittle.Queries
@@ -14,7 +13,8 @@ namespace Dolittle.Queries
     /// Types inheriting from this interface will be picked up proxy generation, deserialized and dispatched to the
     /// correct instance of <see cref="IQueryProviderFor{T}"/>.
     /// </remarks>
-    public interface IQueryFor<T> : IQuery where T : IReadModel
+    public interface IQueryFor<T> : IQuery
+        where T : IReadModel
     {
     }
 }

@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,21 +9,21 @@ using System.Reflection;
 namespace Dolittle.Queries
 {
     /// <summary>
-    /// Provides a set of methods for working with <see cref="IQueryable"/>
+    /// Provides a set of methods for working with <see cref="IQueryable"/>.
     /// </summary>
     public static class QueryableExtensions
     {
-        static MethodInfo _countMethod;
-        static MethodInfo _skipMethod;
-        static MethodInfo _takeMethod;
+        static readonly MethodInfo _countMethod;
+        static readonly MethodInfo _skipMethod;
+        static readonly MethodInfo _takeMethod;
 
         static QueryableExtensions()
         {
             var queryableMethods = typeof(System.Linq.Queryable).GetTypeInfo().GetMethods(BindingFlags.Public | BindingFlags.Static);
 
-            _countMethod = queryableMethods.Where(m => m.Name == "Count" && m.GetParameters().Length == 1).First();
-            _skipMethod = queryableMethods.Where(m => m.Name == "Skip").First();
-            _takeMethod = queryableMethods.Where(m => m.Name == "Take").First();
+            _countMethod = queryableMethods.First(m => m.Name == "Count" && m.GetParameters().Length == 1);
+            _skipMethod = queryableMethods.First(m => m.Name == "Skip");
+            _takeMethod = queryableMethods.First(m => m.Name == "Take");
         }
 
         /// <summary>
@@ -49,8 +48,7 @@ namespace Dolittle.Queries
         public static IQueryable Skip(this IQueryable queryable, int count)
         {
             var genericMethod = _skipMethod.MakeGenericMethod(new Type[] { queryable.ElementType });
-            queryable = genericMethod.Invoke(null, new object[] { queryable, count }) as IQueryable;
-            return queryable;
+            return genericMethod.Invoke(null, new object[] { queryable, count }) as IQueryable;
         }
 
         /// <summary>
@@ -62,19 +60,18 @@ namespace Dolittle.Queries
         public static IQueryable Take(this IQueryable queryable, int count)
         {
             var genericMethod = _takeMethod.MakeGenericMethod(new Type[] { queryable.ElementType });
-            queryable = genericMethod.Invoke(null, new object[] { queryable, count }) as IQueryable;
-            return queryable;
+            return genericMethod.Invoke(null, new object[] { queryable, count }) as IQueryable;
         }
 
         /// <summary>
-        /// Returns true if you need to treat the Take() extension as a end index, rather than count
+        /// Returns true if you need to treat the Take() extension as a end index, rather than count.
         /// </summary>
         /// <param name="queryable">The <see cref="IQueryable"/> to check for.</param>
-        /// <returns>True if one needs to use it as end index, false if not</returns>
+        /// <returns>True if one needs to use it as end index, false if not.</returns>
         public static bool IsTakeEndIndex(this IQueryable queryable)
         {
             var providerType = queryable.Provider.GetType();
-            return providerType.Name == "INhQueryProvider" || providerType.Namespace.StartsWith("NHibernate");
+            return providerType.Name == "INhQueryProvider" || providerType.Namespace.StartsWith("NHibernate", StringComparison.InvariantCulture);
         }
     }
 }
