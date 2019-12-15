@@ -1,11 +1,12 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+#pragma warning disable CA1717, CA1720
+
 namespace Dolittle.Runtime.Protobuf
 {
     /// <summary>
-    /// Represents the allowed types in an object type
+    /// Represents the allowed types in an object type.
     /// </summary>
     public enum Types
     {
@@ -13,7 +14,7 @@ namespace Dolittle.Runtime.Protobuf
         String = 1,
 
         /// <summary>32 bit integer</summary>
-        Int32 ,
+        Int32,
 
         /// <summary>64 bit integer</summary>
         Int64,
@@ -30,7 +31,6 @@ namespace Dolittle.Runtime.Protobuf
         /// <summary>float 32 bit</summary>
         Float,
 
-
         /// <summary>double -  64 bit</summary>
         Double,
 
@@ -45,6 +45,5 @@ namespace Dolittle.Runtime.Protobuf
 
         /// <summary>Type is unknown</summary>
         Unknown
-
     }
 }
