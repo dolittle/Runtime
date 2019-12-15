@@ -1,23 +1,23 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+
+#pragma warning disable CA2008
 
 namespace Dolittle.Concurrency
 {
     /// <summary>
-    /// Represents a <see cref="IScheduler"/>
+    /// Represents a <see cref="IScheduler"/>.
     /// </summary>
     public class Scheduler : IScheduler
     {
-        Dictionary<Guid, CancellationTokenSource> _cancellationTokens = new Dictionary<Guid, CancellationTokenSource>();
+        readonly Dictionary<Guid, CancellationTokenSource> _cancellationTokens = new Dictionary<Guid, CancellationTokenSource>();
 
-
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public Guid Start(Action action, Action actionDone = null)
         {
             var id = Guid.NewGuid();
@@ -25,41 +25,40 @@ namespace Dolittle.Concurrency
             var cancellationToken = cancellationTokenSource.Token;
             _cancellationTokens[id] = cancellationTokenSource;
 
-            var task = Task.Factory.StartNew(action, cancellationToken);
-            task.ContinueWith(t =>
+            var task = Task.Run(action, cancellationToken);
+
+            task.ContinueWith(_ =>
             {
                 _cancellationTokens.Remove(id);
-                if (actionDone != null)
-                    actionDone();
+                actionDone?.Invoke();
             });
 
             return id;
         }
 
+        /// <inheritdoc/>
         public Guid Start<T>(Action<T> action, T objectState, Action<T> actionDone = null)
         {
             var id = Guid.NewGuid();
             var cancellationTokenSource = new CancellationTokenSource();
-            //var cancellationToken = cancellationTokenSource.Token;
             _cancellationTokens[id] = cancellationTokenSource;
 
-            var task = Task.Factory.StartNew(o=>action((T)o), objectState);
+            var task = Task.Run(() => action(objectState));
 
-            task.ContinueWith(t =>
+            task.ContinueWith(_ =>
             {
                 _cancellationTokens.Remove(id);
-                if (actionDone != null)
-                    actionDone(objectState);
+                actionDone?.Invoke(objectState);
             });
 
             return id;
         }
 
+        /// <inheritdoc/>
         public void Stop(Guid id)
         {
             if (_cancellationTokens.ContainsKey(id))
                 _cancellationTokens[id].Cancel();
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }
