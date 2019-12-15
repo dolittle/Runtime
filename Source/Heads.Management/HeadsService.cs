@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Heads.Management;
@@ -12,16 +11,16 @@ using static Dolittle.Heads.Management.Heads;
 namespace Dolittle.Runtime.Heads.Management
 {
     /// <summary>
-    /// Represents an implementation of <see cref="HeadsBase"/>
+    /// Represents an implementation of <see cref="HeadsBase"/>.
     /// </summary>
     public class HeadsService : HeadsBase
     {
         readonly IConnectedHeads _connectedHeads;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="HeadsService"/>
+        /// Initializes a new instance of the <see cref="HeadsService"/> class.
         /// </summary>
-        /// <param name="connectedHeads">The <see cref="IConnectedHeads"/></param>
+        /// <param name="connectedHeads">The <see cref="IConnectedHeads"/>.</param>
         public HeadsService(IConnectedHeads connectedHeads)
         {
             _connectedHeads = connectedHeads;
