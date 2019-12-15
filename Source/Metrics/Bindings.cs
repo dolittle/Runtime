@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Reflection;
 using Dolittle.DependencyInversion;
 using Prometheus;
@@ -9,7 +8,7 @@ using Prometheus;
 namespace Dolittle.Runtime.Metrics
 {
     /// <summary>
-    /// Represents <see cref="ICanProvideBindings">bindings</see> for the metrics system
+    /// Represents <see cref="ICanProvideBindings">bindings</see> for the metrics system.
     /// </summary>
     public class Bindings : ICanProvideBindings
     {

@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Types;
@@ -10,7 +9,7 @@ using Prometheus;
 namespace Dolittle.Runtime.Metrics
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IMetricProviders"/>
+    /// Represents an implementation of <see cref="IMetricProviders"/>.
     /// </summary>
     public class MetricProviders : IMetricProviders
     {
@@ -18,10 +17,10 @@ namespace Dolittle.Runtime.Metrics
         readonly IMetricFactory _metricFactory;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="MetricProviders"/>
+        /// Initializes a new instance of the <see cref="MetricProviders"/> class.
         /// </summary>
-        /// <param name="providers"><see cref="IInstancesOf{T}"/> of <see cref="ICanProvideMetrics"/></param>
-        /// <param name="metricFactory"><see cref="IMetricFactory"/></param>
+        /// <param name="providers"><see cref="IInstancesOf{T}"/> of <see cref="ICanProvideMetrics"/>.</param>
+        /// <param name="metricFactory"><see cref="IMetricFactory"/>.</param>
         public MetricProviders(
             IInstancesOf<ICanProvideMetrics> providers,
             IMetricFactory metricFactory)
