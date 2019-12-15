@@ -1,30 +1,26 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-using System;
-using System.Linq.Expressions;
-using Dolittle.Collections;
-using Dolittle.Rules;
-using Dolittle.Reflection;
-using System.Reflection;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
+using Dolittle.Collections;
+using Dolittle.Reflection;
+using Dolittle.Rules;
 
 namespace Dolittle.Queries.Validation
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IQueryValidator"/>
+    /// Represents an implementation of <see cref="IQueryValidator"/>.
     /// </summary>
     public class QueryValidator : IQueryValidator
     {
-        IQueryValidationDescriptors _descriptors;
-        IRuleContexts _ruleContexts;
+        readonly IQueryValidationDescriptors _descriptors;
+        readonly IRuleContexts _ruleContexts;
 
         /// <summary>
-        /// Initializes an instance of <see cref="QueryValidator"/>
+        /// Initializes a new instance of the <see cref="QueryValidator"/> class.
         /// </summary>
-        /// <param name="descriptors"><see cref="IQueryValidationDescriptors"/> for getting descriptors for queries for running through rules</param>
-        /// <param name="ruleContexts"><see cref="IRuleContexts"/> used for getting <see cref="IRuleContext"/></param>
+        /// <param name="descriptors"><see cref="IQueryValidationDescriptors"/> for getting descriptors for queries for running through rules.</param>
+        /// <param name="ruleContexts"><see cref="IRuleContexts"/> used for getting <see cref="IRuleContext"/>.</param>
         public QueryValidator(IQueryValidationDescriptors descriptors, IRuleContexts ruleContexts)
         {
             _descriptors = descriptors;
@@ -43,7 +39,8 @@ namespace Dolittle.Queries.Validation
             if (hasDescriptor)
             {
                 var descriptor = _descriptors.CallGenericMethod<IQueryValidationDescriptor, IQueryValidationDescriptors>(d => d.GetDescriptorFor<IQuery>, query.GetType());
-                descriptor.ArgumentRules.ForEach(r => {
+                descriptor.ArgumentRules.ForEach(r =>
+                {
                     var value = r.Property.GetValue(query);
                     r.Evaluate(ruleContext, value);
                 });
@@ -58,12 +55,16 @@ namespace Dolittle.Queries.Validation
             return (rule, instance, cause) =>
             {
                 BrokenRule brokenRule;
-                if (brokenRules.ContainsKey(rule)) brokenRule = brokenRules[rule];
+                if (brokenRules.ContainsKey(rule))
+                {
+                    brokenRule = brokenRules[rule];
+                }
                 else
                 {
                     brokenRule = new BrokenRule(rule, instance, ruleContext);
                     brokenRules[rule] = brokenRule;
                 }
+
                 brokenRule.AddCause(cause);
             };
         }
