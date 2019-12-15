@@ -1,10 +1,9 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using Dolittle.Events;
 using Dolittle.Artifacts;
+using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Migration
 {
@@ -17,31 +16,30 @@ namespace Dolittle.Runtime.Events.Migration
         /// <summary>
         /// Gets the number of generations (migrations) that the logical event has gone through.
         /// </summary>
-        /// <param name="logicalEvent">The logical event (initial generation)</param>
-        /// <returns>migration level</returns>
+        /// <param name="logicalEvent">The logical event (initial generation).</param>
+        /// <returns>migration level.</returns>
         Generation GetCurrentGenerationFor(Type logicalEvent);
 
         /// <summary>
-        /// Gets the concrete type that the logical event took at the specified migration level
+        /// Gets the concrete type that the logical event took at the specified migration level.
         /// </summary>
-        /// <param name="logicalEvent">The logical event</param>
-        /// <param name="level">The level we wish the concrete type for</param>
-        /// <returns>The concrete type</returns>
+        /// <param name="logicalEvent">The logical event.</param>
+        /// <param name="level">The level we wish the concrete type for.</param>
+        /// <returns>The concrete type.</returns>
         Type GetTargetTypeForGeneration(Type logicalEvent, Generation level);
 
         /// <summary>
-        /// Gets the logical event type of the migration hierarchy of which the passed in event is part
+        /// Gets the logical event type of the migration hierarchy of which the passed in event is part.
         /// </summary>
-        /// <param name="event">Event for which you want to know the logical event </param>
-        /// <returns>Type of the logical event</returns>
+        /// <param name="event">Event for which you want to know the logical event.</param>
+        /// <returns>Type of the logical event.</returns>
         Type GetLogicalTypeFor(Type @event);
 
-
         /// <summary>
-        /// Gets the logical event type of the migration hierarchy from the name of the logical event
+        /// Gets the logical event type of the migration hierarchy from the name of the logical event.
         /// </summary>
-        /// <param name="logicalEventName">Name of the logical event</param>
-        /// <returns>Type of the logical event</returns>
+        /// <param name="logicalEventName">Name of the logical event.</param>
+        /// <returns>Type of the logical event.</returns>
         Type GetLogicalTypeFromName(string logicalEventName);
     }
 }
