@@ -1,12 +1,13 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using System.Collections.Generic;
 using Dolittle.Artifacts;
+using Dolittle.Collections;
+using Dolittle.Execution;
 using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
-using Dolittle.Execution;
-using Dolittle.Runtime.Events;
-using Dolittle.Collections;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
 namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
@@ -14,7 +15,8 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
     public class an_event_horizon_and_a_committed_event_stream : all_dependencies
     {
         protected static EventHorizon event_horizon;
-        protected static Dolittle.Runtime.Events.Store.CommittedEventStream committed_event_stream;
+        protected static CommittedEventStream committed_event_stream;
+
         Establish context = () =>
         {
             var eventSource = new VersionedEventSource(Guid.NewGuid(), Guid.NewGuid());
@@ -26,7 +28,7 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
                 CommitId.New(),
                 CorrelationId.New(),
                 DateTimeOffset.UtcNow,
-                new EventStream(new []
+                new EventStream(new[]
                 {
                     new EventEnvelope(
                         new EventMetadata(
@@ -35,11 +37,9 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon.given
                             correlationId,
                             new Artifact(ArtifactId.New(), ArtifactGeneration.First),
                             DateTimeOffset.UtcNow,
-                            specs.Events.an_original_context()
-                        ), new PropertyBag(new NullFreeDictionary<string, object>())
-                    )
-                })
-            );
+                            specs.Events.an_original_context()),
+                        new PropertyBag(new NullFreeDictionary<string, object>()))
+                }));
 
             event_horizon = new EventHorizon(execution_context_manager.Object, unproccessed_commits_fetcher.Object, logger.Object);
         };

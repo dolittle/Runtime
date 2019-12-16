@@ -1,3 +1,7 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using Machine.Specifications;
 using Moq;
@@ -7,8 +11,8 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon
 {
     public class when_gravitating_towards_two_singularities : given.an_event_horizon
     {
-        static Mock<ISingularity>   first_singularity;
-        static Mock<ISingularity>   second_singularity;
+        static Mock<ISingularity> first_singularity;
+        static Mock<ISingularity> second_singularity;
 
         static IEnumerable<TenantOffset> tenant_offsets;
 
@@ -17,11 +21,10 @@ namespace Dolittle.Runtime.Events.Relativity.for_EventHorizon
             first_singularity = new Mock<ISingularity>();
             second_singularity = new Mock<ISingularity>();
 
-            tenant_offsets = new TenantOffset[]{};
+            tenant_offsets = Array.Empty<TenantOffset>();
         };
 
-
-        Because of = () => 
+        Because of = () =>
         {
             event_horizon.GravitateTowards(first_singularity.Object, tenant_offsets);
             event_horizon.GravitateTowards(second_singularity.Object, tenant_offsets);

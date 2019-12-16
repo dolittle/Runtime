@@ -1,17 +1,16 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
+using Dolittle.Execution;
+using Dolittle.Runtime.Events.Store;
+using Machine.Specifications;
+using Moq;
+using processors = Dolittle.Runtime.Events.Specs.Processing.given;
+using specs = Dolittle.Runtime.Events.Specs.given;
+
 namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given
 {
-    using System.Collections.Generic;
-    using System.Globalization;
-    using Dolittle.Applications;
-    using Dolittle.Execution;
-    using Dolittle.Logging;
-    using Dolittle.Runtime.Events.Processing;
-    using Dolittle.Runtime.Events.Store;
-    using specs = Dolittle.Runtime.Events.Specs.given;
-    using given = Dolittle.Runtime.Events.Specs.Processing.given;
-    using Machine.Specifications;
-    using Moq;
-
     public class a_test_scoped_event_processing_hub
     {
         protected static TestScopedEventProcessingHub hub;
@@ -21,15 +20,14 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.g
         protected static int execution_context_sets = 0;
         protected static ExecutionContext current_execution_context;
 
-        Establish context = () => 
-        {   
+        Establish context = () =>
+        {
             var execution_context = specs.Contexts.get_execution_context();
             mocked_execution_context_manager = mocks.an_execution_context_manager();
             mocked_execution_context_manager.SetupGet(m => m.Current)
                 .Returns(execution_context);
-            //mocked_execution_context_manager.SetupSet(ecm => ecm.Current = Moq.It.IsAny<ExecutionContext>()).Callback<ExecutionContext>(ec => {current_execution_context = ec; execution_context_sets++;});    
-            hub = new TestScopedEventProcessingHub(mocks.a_logger().Object,mocked_execution_context_manager.Object);
-            commits = given.committed_event_streams();
-        }; 
+            hub = new TestScopedEventProcessingHub(mocked_execution_context_manager.Object, mocks.a_logger().Object);
+            commits = processors.committed_event_streams();
+        };
     }
 }

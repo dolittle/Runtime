@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using Machine.Specifications;
 
 namespace Dolittle.Events.Specs.for_EventSource.given
@@ -12,7 +15,7 @@ namespace Dolittle.Events.Specs.for_EventSource.given
         protected static Guid second_event_source_id;
         protected static SimpleEvent simple_event;
         protected static AnotherSimpleEvent another_simple_event;
-        
+
         Establish context = () =>
                                 {
                                     event_source_id = Guid.NewGuid();

@@ -1,12 +1,13 @@
-﻿namespace Dolittle.Runtime.Events.Specs
-{
-    using System;
-    using Dolittle.Logging;
-    using Dolittle.Runtime.Events.Processing;
-    using Dolittle.Execution;
-    using Moq;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-    public class mocks
+using Dolittle.Execution;
+using Dolittle.Logging;
+using Moq;
+
+namespace Dolittle.Runtime.Events.Specs
+{
+    public static class mocks
     {
         public static Mock<ILogger> a_logger()
         {

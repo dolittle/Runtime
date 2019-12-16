@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -13,7 +16,7 @@ namespace Dolittle.Runtime.Events.Specs.for_UncommittedEventStream
                 {
                     var version = EventSourceVersion.Initial;
                     events_and_envelopes = new List<VersionedEvent>();
-                    for (var i = 0; i < 5; i++ )
+                    for (var i = 0; i < 5; i++)
                     {
                         var @event = new SimpleEvent();
                         events_and_envelopes.Add(new VersionedEvent(@event, version));
