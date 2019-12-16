@@ -108,14 +108,12 @@ namespace Dolittle.Runtime.Commands.Coordination
                             commandResult.Exception = ex.InnerException;
                             commandContext.Rollback();
                         }
-#pragma warning disable CA1031
                         catch (Exception ex)
                         {
                             _logger.Error(ex, "Error handling command");
                             commandResult.Exception = ex;
                             commandContext.Rollback();
                         }
-#pragma warning restore CA1031
                     }
                     else
                     {
@@ -129,13 +127,11 @@ namespace Dolittle.Runtime.Commands.Coordination
                 _logger.Error(ex, "Error handling command");
                 commandResult.Exception = ex.InnerException;
             }
-#pragma warning disable CA1031
             catch (Exception ex)
             {
                 _logger.Error(ex, "Error handling command");
                 commandResult.Exception = ex;
             }
-#pragma warning restore CA1031
 
             return commandResult;
         }

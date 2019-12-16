@@ -1,47 +1,38 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Applications;
 using Dolittle.Concepts;
-using Dolittle.Lifecycle;
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Relativity
 {
-
     /// <summary>
-    /// A key to identify a particular <see cref="Application" /> and <see cref="BoundedContext" /> combination
+    /// A key to identify a particular <see cref="Application" /> and <see cref="BoundedContext" /> combination.
     /// </summary>
     public class EventHorizonKey : Value<EventHorizonKey>
     {
         /// <summary>
-        /// Returns the Application
+        /// Initializes a new instance of the <see cref="EventHorizonKey"/> class.
         /// </summary>
-        /// <value></value>
-        public Dolittle.Applications.Application Application { get; }
-        /// <summary>
-        /// Returns the BoundedContext
-        /// </summary>
-        /// <value></value>
-        public BoundedContext BoundedContext { get; }
-
-        /// <summary>
-        /// Instantiates an instance of <see cref="EventHorizonKey" />
-        /// </summary>
-        /// <param name="application"></param>
-        /// <param name="boundedContext"></param>
-        public EventHorizonKey(Dolittle.Applications.Application application, BoundedContext boundedContext)
+        /// <param name="application"><see cref="Application"/> part of the key.</param>
+        /// <param name="boundedContext"><see cref="BoundedContext"/> part of the key.</param>
+        public EventHorizonKey(Application application, BoundedContext boundedContext)
         {
             Application = application;
             BoundedContext = boundedContext;
         }
 
         /// <summary>
-        /// Returns a string representation of the key
+        /// Gets the Application.
         /// </summary>
-        /// <returns></returns>
+        public Application Application { get; }
+
+        /// <summary>
+        /// Gets the BoundedContext.
+        /// </summary>
+        public BoundedContext BoundedContext { get; }
+
+        /// <inheritdoc/>
         public override string ToString()
         {
             return $"{Application} {BoundedContext}";

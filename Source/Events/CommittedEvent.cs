@@ -1,19 +1,22 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Events;
+using Dolittle.Runtime.Events.Store;
+
 namespace Dolittle.Runtime.Events
 {
-    using Dolittle.Events;
-    using Dolittle.Runtime.Events.Store;
-
     /// <summary>
-    /// Represent an instance of an Event that has been committed to the Event Store
+    /// Represent an instance of an Event that has been committed to the Event Store.
     /// </summary>
     public class CommittedEvent
     {
         /// <summary>
-        /// Instantiates an instance of a <see cref="CommittedEvent" />
+        /// Initializes a new instance of the <see cref="CommittedEvent"/> class.
         /// </summary>
-        /// <param name="version">The committed event version</param>
-        /// <param name="metadata">Metadata describing the event</param>
-        /// <param name="event">The <see cref="IEvent">event</see> instance</param>
+        /// <param name="version">The committed event version.</param>
+        /// <param name="metadata">Metadata describing the event.</param>
+        /// <param name="event">The <see cref="IEvent">event</see> instance.</param>
         public CommittedEvent(CommittedEventVersion version, EventMetadata metadata, IEvent @event)
         {
             Version = version;
@@ -22,26 +25,23 @@ namespace Dolittle.Runtime.Events
         }
 
         /// <summary>
-        /// The Version of this Event, including the CommitSequenceNumber, the Event Source Commit Version and the Event Sequence Number
+        /// Gets the Version of this Event, including the CommitSequenceNumber, the Event Source Commit Version and the Event Sequence Number.
         /// </summary>
-        /// <value></value>
         public CommittedEventVersion Version { get; }
 
         /// <summary>
-        /// Metadata describing the event
+        /// Gets the metadata describing the event.
         /// </summary>
-        /// <value></value>
         public EventMetadata Metadata { get; }
 
         /// <summary>
-        /// The Id of the Event
+        /// Gets the Id of the Event.
         /// </summary>
-        /// <value></value>
         public EventId Id => Metadata.Id;
+
         /// <summary>
-        /// The instance of the <see cref="IEvent">event</see> that was committed
+        /// Gets the instance of the <see cref="IEvent">event</see> that was committed.
         /// </summary>
-        /// <value></value>
         public IEvent Event { get; }
     }
 }

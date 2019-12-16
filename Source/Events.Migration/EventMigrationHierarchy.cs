@@ -110,12 +110,10 @@ namespace Dolittle.Runtime.Events.Migration
                     ThrowInvalidMigrationTypeException(expectedTypeToMigrateFrom, type);
                 }
             }
-#pragma warning disable CA1031
             catch
             {
                 ThrowInvalidMigrationTypeException(expectedTypeToMigrateFrom, type);
             }
-#pragma warning restore CA1031
         }
 
         Type GetMigrationFromType(Type migrationType)

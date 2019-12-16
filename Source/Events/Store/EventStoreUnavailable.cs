@@ -1,44 +1,22 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+
 namespace Dolittle.Runtime.Events.Store
 {
-    using System;
-    using System.Runtime.Serialization;
-
     /// <summary>
-    /// Represents the exceptional situation when we cannot communicate with the intended <see cref="IEventStore"/>
+    /// Exception that gets thrown when the <see cref="IEventStore"/> is unavailable.
     /// </summary>
-    [Serializable]
     public class EventStoreUnavailable : Exception
     {
         /// <summary>
-        ///     Initializes a new instance of the EventStoreUnavailable custom exception
+        /// Initializes a new instance of the <see cref="EventStoreUnavailable"/> class.
         /// </summary>
-        public EventStoreUnavailable()
-        {}
-    
-        /// <summary>
-        ///     Initializes a new instance of the EventStoreUnavailable custom exception
-        /// </summary>
-        /// <param name="message">A message describing the exception</param>
+        /// <param name="message">A message describing the exception.</param>
         public EventStoreUnavailable(string message)
             : base(message)
-        {}
-    
-        /// <summary>
-        ///     Initializes a new instance of the EventStoreUnavailable custom exception
-        /// </summary>
-        /// <param name="message">A message describing the exception</param>
-        /// <param name="innerException">An inner exception that is the original source of the error</param>
-        public EventStoreUnavailable(string message, Exception innerException)
-            : base(message, innerException)
-        {}
-    
-        /// <summary>
-        ///     Initializes a new instance of the EventStoreUnavailable custom exception
-        /// </summary>
-        /// <param name="info">The SerializationInfo that holds the object data of the exception</param>
-        /// <param name="context">The StreamingContext that contains contextual information about the source or destination</param>
-        protected EventStoreUnavailable(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {}
+        {
+        }
     }
 }

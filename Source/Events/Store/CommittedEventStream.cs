@@ -1,27 +1,26 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Dolittle.Runtime.Events;
 using Dolittle.Events;
 using Dolittle.Execution;
-using System.Linq;
 
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// A stream of events for a specific <see cref="IEventSource" /> that represent an atomic commit
+    /// A stream of events for a specific <see cref="IEventSource" /> that represent an atomic commit.
     /// </summary>
-    public class CommittedEventStream 
+    public class CommittedEventStream
     {
         /// <summary>
-        /// Instantiates a new instance of a <see cref="CommittedEventStream" />
+        /// Initializes a new instance of the <see cref="CommittedEventStream"/> class.
         /// </summary>
-        /// <param name="sequence">The <see cref="CommitSequenceNumber" /> for this committed event stream</param>
-        /// <param name="source">The <see cref="VersionedEventSource" /> that this stream applies to</param>
-        /// <param name="id">The unique id in the form of a <see cref="CommitId" /></param>
-        /// <param name="correlationId">A <see cref="CorrelationId" /> used to relate this event stream to other actions in the system</param>
-        /// <param name="timestamp">A timestamp in the form of a <see cref="DateTimeOffset" /> representing when the stream was committed</param>
-        /// <param name="events">An enumerable of <see cref="EventEnvelope" /> representing the events that are committed in this commit</param>
+        /// <param name="sequence">The <see cref="CommitSequenceNumber" /> for this committed event stream.</param>
+        /// <param name="source">The <see cref="VersionedEventSource" /> that this stream applies to.</param>
+        /// <param name="id">The unique id in the form of a <see cref="CommitId" />.</param>
+        /// <param name="correlationId">A <see cref="CorrelationId" /> used to relate this event stream to other actions in the system.</param>
+        /// <param name="timestamp">A timestamp in the form of a <see cref="DateTimeOffset" /> representing when the stream was committed.</param>
+        /// <param name="events">An enumerable of <see cref="EventEnvelope" /> representing the events that are committed in this commit.</param>
         public CommittedEventStream(CommitSequenceNumber sequence, VersionedEventSource source, CommitId id, CorrelationId correlationId, DateTimeOffset timestamp, EventStream events)
         {
             Sequence = sequence;
@@ -32,42 +31,40 @@ namespace Dolittle.Runtime.Events.Store
             Events = events;
             LastEventVersion = source.ToCommittedEventVersion(sequence);
         }
+
         /// <summary>
-        /// The <see cref="CommitSequenceNumber" /> for this committed event stream
+        /// Gets the <see cref="CommitSequenceNumber" /> for this committed event stream.
         /// </summary>
-        /// <value></value>
         public CommitSequenceNumber Sequence { get; }
 
         /// <summary>
-        /// The <see cref="CommitSequenceNumber" /> for this committed event stream
+        /// Gets the <see cref="CommitSequenceNumber" /> for this committed event stream.
         /// </summary>
-        /// <value></value>
         public VersionedEventSource Source { get; }
+
         /// <summary>
-        /// The unique id in the form of a <see cref="CommitId" />
+        /// Gets the unique id in the form of a <see cref="CommitId" />.
         /// </summary>
-        /// <value></value>
         public CommitId Id { get; }
+
         /// <summary>
-        /// A timestamp in the form of a <see cref="DateTimeOffset" /> representing when the strwam was committed
+        /// Gets a timestamp in the form of a <see cref="DateTimeOffset" /> representing when the strwam was committed.
         /// </summary>
-        /// <value></value>
         public DateTimeOffset Timestamp { get; }
+
         /// <summary>
-        /// An <see cref="EventStream" /> comprising an enumerable of <see cref="EventEnvelope" /> representing the events that are committed in this commit
+        /// Gets an <see cref="EventStream" /> comprising an enumerable of <see cref="EventEnvelope" /> representing the events that are committed in this commit.
         /// </summary>
-        /// <value></value>
         public EventStream Events { get; }
+
         /// <summary>
-        /// A <see cref="CorrelationId" /> used to relate this event stream to other actions in the system
+        /// Gets a <see cref="CorrelationId" /> used to relate this event stream to other actions in the system.
         /// </summary>
-        /// <value></value>
         public CorrelationId CorrelationId { get; }
 
         /// <summary>
-        /// The <see cref="CommittedEventVersion">Version</see> of the last event in this commit
+        /// Gets the <see cref="CommittedEventVersion">Version</see> of the last event in this commit.
         /// </summary>
-        /// <value></value>
         public CommittedEventVersion LastEventVersion { get; }
     }
 }

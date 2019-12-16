@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
@@ -12,7 +11,7 @@ using Dolittle.Runtime.Events;
 namespace Dolittle.Events
 {
     /// <summary>
-    /// Represents a <see cref="IEventSource">IEventSource</see>
+    /// Represents a <see cref="IEventSource">IEventSource</see>.
     /// </summary>
     public class EventSource : IEventSource
     {
@@ -20,9 +19,9 @@ namespace Dolittle.Events
         readonly List<BrokenRule> _brokenRules = new List<BrokenRule>();
 
         /// <summary>
-        /// Initializes an instance of <see cref="EventSource">EventSource</see>
+        /// Initializes a new instance of the <see cref="EventSource"/> class.
         /// </summary>
-        /// <param name="id"><see cref="EventSourceId"/> of the event source</param>
+        /// <param name="id"><see cref="EventSourceId"/> of the event source.</param>
         protected EventSource(EventSourceId id)
         {
             EventSourceId = id;
@@ -115,10 +114,10 @@ namespace Dolittle.Events
         }
 
         /// <inheritdoc/>
-		public void Dispose()
-		{
-			Commit();
-		}
+        public void Dispose()
+        {
+            Commit();
+        }
 
         void InvokeOnMethod(IEvent @event)
         {
@@ -131,7 +130,7 @@ namespace Dolittle.Events
             if (!IsForThisEventSource(eventStream.EventSourceId))
             {
                 throw new InvalidOperationException("Cannot apply an EventStream belonging to a different event source. " +
-                    string.Format($"Expected events for Id '{EventSourceId}' but got events for Id '{eventStream.EventSourceId}'"));
+                    $"Expected events for Id '{EventSourceId}' but got events for Id '{eventStream.EventSourceId}'");
             }
         }
 

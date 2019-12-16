@@ -1,36 +1,26 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Linq;
+using Dolittle.Applications;
+using Dolittle.Booting;
+using Dolittle.DependencyInversion;
+using Dolittle.Execution;
+using Dolittle.Logging;
+using Dolittle.ResourceTypes.Configuration;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Tenancy;
+using Dolittle.Scheduling;
+using Dolittle.Security;
+using Dolittle.Types;
+
 namespace Dolittle.Runtime.Events.Processing
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using Dolittle.Booting;
-    using Dolittle.Collections;
-    using Dolittle.Logging;
-    using Dolittle.Runtime.Events;
-    using Dolittle.Runtime.Events.Processing;
-    using Dolittle.Runtime.Events.Store;
-    using Dolittle.Runtime.Tenancy;
-    using Dolittle.Types;
-    using Dolittle.DependencyInversion;
-    using Dolittle.Execution;
-    using Dolittle.Security;
-    using Dolittle.ResourceTypes.Configuration;
-    using Dolittle.Applications.Configuration;
-    using Dolittle.Scheduling;
-    using Dolittle.Applications;
-
     /// <summary>
-    /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>
+    /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="EventProcessors"/>.
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
-
-        int _canPerformCount = 10;
-
         readonly IInstancesOf<IKnowAboutEventProcessors> _systemsThatKnowAboutEventProcessors;
         readonly ITenants _tenants;
         readonly IScopedEventProcessingHub _processingHub;
@@ -40,29 +30,29 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IExecutionContextManager _executionContextManager;
         readonly IResourceConfiguration _resourceConfiguration;
         readonly IScheduler _scheduler;
-
+        int _canPerformCount = 10;
 
         /// <summary>
-        /// Instantiates a new instance of <see cref="BootProcedure" />
+        /// Initializes a new instance of the <see cref="BootProcedure"/> class.
         /// </summary>
-        /// <param name="systemsThatKnowAboutEventProcessors">Provides <see cref="IEventProcessor">Event Processors</see></param>
-        /// <param name="tenants">A collection of all <see cref="ITenants">tenants</see></param>
-        /// <param name="processingHub">An instance of <see cref="IScopedEventProcessingHub" /> for processing <see cref="CommittedEventStream">Committed Event Streams</see></param>
-        /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" /></param>
-        /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" /></param>
-        /// <param name="executionContextManager">The <see cref="ExecutionContextManager" /> for setting the correct execution context for the Event Processors </param>
-        /// <param name="resourceConfiguration"><see cref="IResourceConfiguration"/> for resources</param>
-        /// <param name="environment">Current <see cref="Execution.Environment">execution environment</see></param>
-        /// <param name="scheduler"><see cref="IScheduler"/> to use for scheduling</param>
-        /// <param name="application">Current <see cref="Application"/></param>
-        /// <param name="boundedContext">Current <see cref="BoundedContext"/></param>
-        /// <param name="logger">An instance of <see cref="ILogger" /> for logging</param>
+        /// <param name="systemsThatKnowAboutEventProcessors">Provides <see cref="IEventProcessor">Event Processors</see>.</param>
+        /// <param name="tenants">A collection of all <see cref="ITenants">tenants</see>.</param>
+        /// <param name="processingHub">An instance of <see cref="IScopedEventProcessingHub" /> for processing <see cref="CommittedEventStream">Committed Event Streams</see>.</param>
+        /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" />.</param>
+        /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" />.</param>
+        /// <param name="executionContextManager">The <see cref="ExecutionContextManager" /> for setting the correct execution context for the Event Processors.</param>
+        /// <param name="resourceConfiguration"><see cref="IResourceConfiguration"/> for resources.</param>
+        /// <param name="scheduler"><see cref="IScheduler"/> to use for scheduling.</param>
+        /// <param name="application">Current <see cref="Application"/>.</param>
+        /// <param name="boundedContext">Current <see cref="BoundedContext"/>.</param>
+        /// <param name="environment">Current <see cref="Execution.Environment">execution environment</see>.</param>
+        /// <param name="logger">An instance of <see cref="ILogger" /> for logging.</param>
         public BootProcedure(
-            IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors, 
-            ITenants tenants, 
-            IScopedEventProcessingHub processingHub, 
-            FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository, 
-            FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher, 
+            IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors,
+            ITenants tenants,
+            IScopedEventProcessingHub processingHub,
+            FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository,
+            FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,
             IExecutionContextManager executionContextManager,
             IResourceConfiguration resourceConfiguration,
             IScheduler scheduler,
@@ -90,8 +80,7 @@ namespace Dolittle.Runtime.Events.Processing
         public bool CanPerform()
         {
             var hasAny = _systemsThatKnowAboutEventProcessors.SelectMany(_ => _.ToList()).Any();
-            if( (hasAny && _resourceConfiguration.IsConfigured) || _canPerformCount-- == 0 ) return true;
-            return false;
+            return (hasAny && _resourceConfiguration.IsConfigured) || _canPerformCount-- == 0;
         }
 
         /// <inheritdoc />
@@ -104,7 +93,7 @@ namespace Dolittle.Runtime.Events.Processing
         void GatherAllEventProcessors()
         {
             _logger.Information("Gather all event processors");
-            
+
             _scheduler.PerformForEach(_systemsThatKnowAboutEventProcessors, (system) =>
             {
                 _logger.Information($"System that knows about event processors : {system.GetType().AssemblyQualifiedName}");
@@ -117,7 +106,7 @@ namespace Dolittle.Runtime.Events.Processing
                     {
                         _logger.Information($"Register scoped event processor for tenant : {t}");
                         _executionContextManager.CurrentFor(t, CorrelationId.New(), Claims.Empty);
-                        _processingHub.Register(new ScopedEventProcessor(t, processor,_getOffsetRepository,_getUnprocessedEventsFetcher, _logger));
+                        _processingHub.Register(new ScopedEventProcessor(t, processor, _getOffsetRepository, _getUnprocessedEventsFetcher, _logger));
                     });
                 });
             });

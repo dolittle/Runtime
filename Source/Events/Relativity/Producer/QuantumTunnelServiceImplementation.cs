@@ -1,24 +1,23 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Applications;
-using Dolittle.Execution;
+using Dolittle.Events.Relativity.Microservice;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
-using Dolittle.Events.Relativity.Microservice;
 using static Dolittle.Events.Relativity.Microservice.QuantumTunnelService;
+
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Represents an implementation of the <see cref="QuantumTunnelServiceBase"/>
+    /// Represents an implementation of the <see cref="QuantumTunnelServiceBase"/>.
     /// </summary>
     public class QuantumTunnelServiceImplementation : QuantumTunnelServiceBase
     {
@@ -27,18 +26,14 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="QuantumTunnelServiceImplementation"/>
+        /// Initializes a new instance of the <see cref="QuantumTunnelServiceImplementation"/> class.
         /// </summary>
-        /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with</param>
-        /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for dealing with <see cref="Dolittle.Execution.ExecutionContext"/></param>
-        /// <param name="fetchUnprocessedCommits"><see cref="IFetchUnprocessedCommits"/> for fetching unprocessed commits</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        /// <param name="eventHorizon"><see cref="IEventHorizon"/> to work with.</param>
+        /// <param name="serializer"><see cref="ISerializer"/> to be used for serialization.</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public QuantumTunnelServiceImplementation(
             IEventHorizon eventHorizon,
             ISerializer serializer,
-            IExecutionContextManager executionContextManager,
-            IFetchUnprocessedCommits fetchUnprocessedCommits,
             ILogger logger)
         {
             _eventHorizon = eventHorizon;
@@ -51,34 +46,35 @@ namespace Dolittle.Runtime.Events.Relativity
         {
             try
             {
-                var tunnel = new QuantumTunnel(_serializer, responseStream, context.CancellationToken, _logger);
-                var application = request.Application.To<Dolittle.Applications.Application>();
-                var boundedContext = request.BoundedContext.To<BoundedContext>();
-                var events = request
-                    .Events
-                    .Select(@event => @event.ToArtifact())
-                    .ToArray();
-                var tenantOffsets = request.Offsets.ToTenantOffsets();
+                using (var tunnel = new QuantumTunnel(_serializer, responseStream, _logger, context.CancellationToken))
+                {
+                    var application = request.Application.To<Dolittle.Applications.Application>();
+                    var boundedContext = request.BoundedContext.To<BoundedContext>();
+                    var events = request
+                        .Events
+                        .Select(@event => @event.ToArtifact())
+                        .ToArray();
+                    var tenantOffsets = request.Offsets.ToTenantOffsets();
 
-                var subscription = new EventParticleSubscription(events);
+                    var subscription = new EventParticleSubscription(events);
 
-                _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
+                    _logger.Information($"Opening up a quantum tunnel for bounded context '{boundedContext}' in application '{application}'");
 
-                var singularity = new Singularity(application, boundedContext, tunnel, subscription);
-                _eventHorizon.GravitateTowards(singularity, tenantOffsets);
-                tunnel.Collapsed += qt => _eventHorizon.Collapse(singularity);
+                    var singularity = new Singularity(application, boundedContext, tunnel, subscription);
+                    _eventHorizon.GravitateTowards(singularity, tenantOffsets);
+                    tunnel.Collapsed += _ => _eventHorizon.Collapse(singularity);
 
-                await tunnel.Open(request.Offsets.ToTenantOffsets());
+                    await tunnel.Open(request.Offsets.ToTenantOffsets()).ConfigureAwait(false);
 
-                _logger.Information($"Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
+                    _logger.Information($"Quantum tunnel collapsed for bounded context '{boundedContext}' in application '{application}'");
+                }
             }
             catch (Exception ex)
             {
                 _logger.Error(ex, "Problems opening tunnel");
             }
 
-            await Task.CompletedTask;
+            await Task.CompletedTask.ConfigureAwait(false);
         }
-
     }
 }

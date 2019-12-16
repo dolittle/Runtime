@@ -1,44 +1,22 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using System.Runtime.Serialization;
 
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// 
+    /// Exception that gets thrown when a commit is duplicate.
     /// </summary>
-    [Serializable]
     public class CommitIsADuplicate : Exception
     {
         /// <summary>
-        ///     Initializes a new instance of the CommitIsADuplicate custom exception
+        /// Initializes a new instance of the <see cref="CommitIsADuplicate"/> class.
         /// </summary>
-        public CommitIsADuplicate()
-        {}
-    
-        /// <summary>
-        ///     Initializes a new instance of the CommitIsADuplicate custom exception
-        /// </summary>
-        /// <param name="message">A message describing the exception</param>
+        /// <param name="message">A message describing the exception.</param>
         public CommitIsADuplicate(string message)
             : base(message)
-        {}
-    
-        /// <summary>
-        ///     Initializes a new instance of the CommitIsADuplicate custom exception
-        /// </summary>
-        /// <param name="message">A message describing the exception</param>
-        /// <param name="innerException">An inner exception that is the original source of the error</param>
-        public CommitIsADuplicate(string message, Exception innerException)
-            : base(message, innerException)
-        {}
-    
-        /// <summary>
-        ///     Initializes a new instance of the CommitIsADuplicate custom exception
-        /// </summary>
-        /// <param name="info">The SerializationInfo that holds the object data of the exception</param>
-        /// <param name="context">The StreamingContext that contains contextual information about the source or destination</param>
-        protected CommitIsADuplicate(SerializationInfo info, StreamingContext context)
-            : base(info, context)
-        {}
+        {
+        }
     }
 }
