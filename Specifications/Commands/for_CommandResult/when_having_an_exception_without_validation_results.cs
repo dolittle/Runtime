@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Commands.Specs.for_CommandResult
@@ -14,6 +17,6 @@ namespace Dolittle.Runtime.Commands.Specs.for_CommandResult
 
         It should_be_valid = () => result.Invalid.ShouldBeFalse();
         It should_not_be_successful = () => result.Success.ShouldBeFalse();
-        It should_not_have_any_validation_messages = () =>  result.AllValidationMessages.ShouldBeEmpty();
+        It should_not_have_any_validation_messages = () => result.AllValidationMessages.ShouldBeEmpty();
     }
 }
