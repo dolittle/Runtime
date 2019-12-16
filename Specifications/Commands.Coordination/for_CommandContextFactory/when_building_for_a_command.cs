@@ -1,13 +1,15 @@
-﻿using Dolittle.Artifacts;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Dynamic;
+using Dolittle.Artifacts;
 using Dolittle.Execution;
 using Machine.Specifications;
-using Moq;
-using System.Dynamic;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextFactory
 {
-    [Subject(typeof (CommandContextFactory))]
+    [Subject(typeof(CommandContextFactory))]
     public class when_building_for_a_command : given.a_command_context_factory
     {
         static CommandRequest command;

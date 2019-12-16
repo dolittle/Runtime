@@ -1,8 +1,10 @@
-﻿using System.Dynamic;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Dynamic;
 using Dolittle.Artifacts;
 using Dolittle.Execution;
 using Machine.Specifications;
-using Moq;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
@@ -22,6 +24,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
 
         It should_return_a_non_null_context = () => commandContext.ShouldNotBeNull();
         It should_return_context_with_command_in_it = () => commandContext.Command.ShouldEqual(command);
+
         It should_return_the_same_calling_it_twice_on_same_thread = () =>
                                                                         {
                                                                             var secondContext = Manager.EstablishForCommand(command);

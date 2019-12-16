@@ -1,4 +1,7 @@
-﻿using Dolittle.Security;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -11,7 +14,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator
         static CommandResult result;
         static Mock<AuthorizationResult> authorization_result;
 
-        Establish context = () => 
+        Establish context = () =>
         {
             authorization_result = new Mock<AuthorizationResult>();
             authorization_result.Setup(r => r.IsAuthorized).Returns(false);

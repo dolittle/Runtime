@@ -1,11 +1,14 @@
-﻿using System.Dynamic;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Dynamic;
 using Dolittle.Artifacts;
+using Dolittle.Execution;
 using Dolittle.Globalization;
 using Dolittle.Logging;
 using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Commands.Security;
 using Dolittle.Runtime.Commands.Validation;
-using Dolittle.Execution;
 using Dolittle.Security;
 using Machine.Specifications;
 using Moq;
@@ -24,7 +27,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator.gi
         protected static Mock<ILogger> logger;
         protected static CommandRequest command;
 
-        Establish context = ()=>
+        Establish context = () =>
         {
             var artifact = Artifact.New();
             command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());
@@ -50,8 +53,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandCoordinator.gi
                 command_security_manager_mock.Object,
                 command_validators_mock.Object,
                 localizer_mock.Object,
-                logger.Object
-            );
+                logger.Object);
         };
     }
 }
