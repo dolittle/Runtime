@@ -1,4 +1,7 @@
-﻿using Machine.Specifications;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Machine.Specifications;
 
 namespace Dolittle.Queries.Specs.for_ReadModelFilters.given
 {
@@ -6,9 +9,6 @@ namespace Dolittle.Queries.Specs.for_ReadModelFilters.given
     {
         protected static ReadModelFilters filters;
 
-        Establish context = () =>
-        {
-            filters = new ReadModelFilters(type_discoverer.Object, container.Object);
-        };
+        Establish context = () => filters = new ReadModelFilters(type_discoverer.Object, container.Object);
     }
 }

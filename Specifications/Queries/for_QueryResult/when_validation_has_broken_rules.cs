@@ -1,4 +1,8 @@
-﻿using Dolittle.Rules;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using Dolittle.Rules;
 using Machine.Specifications;
 
 namespace Dolittle.Queries.Specs.for_QueryResult
@@ -7,9 +11,10 @@ namespace Dolittle.Queries.Specs.for_QueryResult
     {
         static QueryResult result;
 
-        Because of = () => result = new QueryResult { 
+        Because of = () => result = new QueryResult
+        {
             BrokenRules = new[] { new BrokenRule(null, null, null) },
-            Items = new object[0]
+            Items = Array.Empty<object>()
         };
 
         It should_be_considered_unsuccessful = () => result.Success.ShouldBeFalse();
