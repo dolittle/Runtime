@@ -1,4 +1,7 @@
-﻿using Machine.Specifications;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
@@ -10,21 +13,23 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
         static PagingInfo paging;
         static DerivedQueryType actual_query;
         static QueryProviderResult result;
-        static ReadModelWithString[] items = new[] {
+
+        static ReadModelWithString[] items = new[]
+        {
             new ReadModelWithString { Content = "Hello" },
             new ReadModelWithString { Content = "World" },
         };
 
         Establish context = () =>
         {
-
             query = new QueryForKnownProvider();
             paging = new PagingInfo();
 
             actual_query = new DerivedQueryType();
             query.QueryToReturn = actual_query;
 
-            result = new QueryProviderResult {
+            result = new QueryProviderResult
+            {
                 Items = items
             };
 
@@ -35,6 +40,6 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
 
         It should_forward_query_to_provider = () => query_provider_for_derived_type.query_passed_to_execute.ShouldEqual(actual_query);
         It should_forward_paging_info_to_provider = () => query_provider_for_derived_type.paging_info_passed_to_execute.ShouldEqual(paging);
-        It should_filter_result = () => read_model_filters.Verify(r => r.Filter(items),Times.Once());
+        It should_filter_result = () => read_model_filters.Verify(r => r.Filter(items), Times.Once());
     }
 }

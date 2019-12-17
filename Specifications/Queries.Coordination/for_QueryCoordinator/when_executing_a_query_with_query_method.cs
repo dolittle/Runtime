@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using Machine.Specifications;
 
 namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
@@ -9,7 +12,7 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
         static PagingInfo paging;
         static Exception exception;
 
-        Establish   context = () => 
+        Establish context = () =>
         {
             query = new QueryWithQueryMethod();
             paging = new PagingInfo();
