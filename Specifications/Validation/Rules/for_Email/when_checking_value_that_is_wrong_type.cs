@@ -1,4 +1,7 @@
-﻿using Dolittle.Machine.Specifications.Rules;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Machine.Specifications.Rules;
 using Dolittle.Rules;
 using Dolittle.Validation;
 using Dolittle.Validation.Rules;
@@ -13,7 +16,7 @@ namespace Dolittle.Specs.Validation.Rules.for_Email
         static Email rule;
         static Mock<IRuleContext> rule_context_mock;
 
-        Establish context = () => 
+        Establish context = () =>
         {
             rule = new Email(null);
             rule_context_mock = new Mock<IRuleContext>();
