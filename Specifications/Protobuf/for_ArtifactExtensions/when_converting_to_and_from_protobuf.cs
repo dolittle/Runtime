@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Events.Relativity.Microservice;
 using Machine.Specifications;
 
@@ -9,13 +8,13 @@ namespace Dolittle.Runtime.Protobuf.for_ArtifactExtensions
 {
     public class when_converting_to_and_from_protobuf
     {
-        static Dolittle.Artifacts.Artifact original;
+        static Artifacts.Artifact original;
         static Artifact protobuf;
-        static Dolittle.Artifacts.Artifact result;
+        static Artifacts.Artifact result;
 
-        Establish context = () => original = new Dolittle.Artifacts.Artifact(Dolittle.Artifacts.ArtifactId.New(), Dolittle.Artifacts.ArtifactGeneration.First);
+        Establish context = () => original = new Artifacts.Artifact(Dolittle.Artifacts.ArtifactId.New(), Artifacts.ArtifactGeneration.First);
 
-        Because of = () => 
+        Because of = () =>
         {
             protobuf = original.ToProtobuf();
             result = protobuf.ToArtifact();

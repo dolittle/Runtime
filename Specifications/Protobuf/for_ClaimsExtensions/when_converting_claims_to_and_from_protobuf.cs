@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Events.Relativity.Microservice;
 using Google.Protobuf.Collections;
 using Machine.Specifications;
@@ -14,13 +13,13 @@ namespace Dolittle.Runtime.Protobuf.for_ClaimsExtensions
         static RepeatedField<Claim> protobuf;
         static Security.Claims result;
 
-        Establish context = () => original = new Security.Claims(new[] {
-            new Security.Claim("FirstClaim","FirstValue","FirstClaimType"),
-            new Security.Claim("SecondClaim","SecondValue","SecondClaimType")
+        Establish context = () => original = new Security.Claims(new[]
+        {
+            new Security.Claim("FirstClaim", "FirstValue", "FirstClaimType"),
+            new Security.Claim("SecondClaim", "SecondValue", "SecondClaimType")
         });
-        
 
-        Because of = () => 
+        Because of = () =>
         {
             protobuf = original.ToProtobuf();
             result = protobuf.ToClaims();
