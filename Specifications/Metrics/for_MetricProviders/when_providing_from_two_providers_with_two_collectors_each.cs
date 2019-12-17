@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using Dolittle.Types.Testing;
 using Machine.Specifications;
@@ -29,24 +28,25 @@ namespace Dolittle.Runtime.Metrics.for_MetricProviders
 
             var providerInstances = new StaticInstancesOf<ICanProvideMetrics>(
                 firstProvider.Object,
-                secondProvider.Object
-            );
+                secondProvider.Object);
 
             metric_factory = new Mock<IMetricFactory>();
 
             providers = new MetricProviders(providerInstances, metric_factory.Object);
 
-            first_provider_first_collector = Prometheus.Metrics.CreateCounter("FirstFirst","");
-            first_provider_second_collector = Prometheus.Metrics.CreateCounter("FirstSecond","");
-            second_provider_first_collector = Prometheus.Metrics.CreateCounter("SecondFirst","");
-            second_provider_second_collector = Prometheus.Metrics.CreateCounter("SecondSecond","");
+            first_provider_first_collector = Prometheus.Metrics.CreateCounter("FirstFirst", "");
+            first_provider_second_collector = Prometheus.Metrics.CreateCounter("FirstSecond", "");
+            second_provider_first_collector = Prometheus.Metrics.CreateCounter("SecondFirst", "");
+            second_provider_second_collector = Prometheus.Metrics.CreateCounter("SecondSecond", "");
 
-            firstProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[] {
+            firstProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[]
+            {
                 first_provider_first_collector,
                 first_provider_second_collector
             });
 
-            secondProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[] {
+            secondProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[]
+            {
                 second_provider_first_collector,
                 second_provider_second_collector
             });
@@ -54,7 +54,8 @@ namespace Dolittle.Runtime.Metrics.for_MetricProviders
 
         Because of = () => collectors = providers.Provide();
 
-        It should_return_all_collectors = () => collectors.ShouldContainOnly(new[] {
+        It should_return_all_collectors = () => collectors.ShouldContainOnly(new[]
+        {
             first_provider_first_collector,
             first_provider_second_collector,
             second_provider_first_collector,
