@@ -1,8 +1,11 @@
-﻿using Dolittle.Validation;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using Dolittle.Validation;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
-
 
 namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
 {
@@ -17,7 +20,7 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
             query = new SomeQuery();
             query_validation_descriptors_mock.Setup(q => q.HasDescriptorFor<SomeQuery>()).Returns(true);
             descriptor_mock = new Mock<IQueryValidationDescriptor>();
-            descriptor_mock.SetupGet(d => d.ArgumentRules).Returns(new IValueRule[0]);
+            descriptor_mock.SetupGet(d => d.ArgumentRules).Returns(Array.Empty<IValueRule>());
             query_validation_descriptors_mock.Setup(q => q.GetDescriptorFor<SomeQuery>()).Returns(descriptor_mock.Object);
         };
 

@@ -1,10 +1,12 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Dolittle.Rules;
 using Dolittle.Validation;
-using Dolittle.Machine.Specifications.Rules;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -24,8 +26,6 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
         static Reason first_broken_rule_second_reason;
         static Reason third_broken_rule_reason;
 
-        
-
         Establish context = () =>
         {
             query = new SomeQuery();
@@ -40,9 +40,9 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
             third_rule_broken = new Mock<IValueRule>();
             third_rule_broken.SetupGet(r => r.Property).Returns(property);
 
-            first_broken_rule_first_reason = Reason.Create(Guid.NewGuid().ToString(),string.Empty);
-            first_broken_rule_second_reason = Reason.Create(Guid.NewGuid().ToString(),string.Empty);
-            third_broken_rule_reason = Reason.Create(Guid.NewGuid().ToString(),string.Empty);
+            first_broken_rule_first_reason = Reason.Create(Guid.NewGuid().ToString(), string.Empty);
+            first_broken_rule_second_reason = Reason.Create(Guid.NewGuid().ToString(), string.Empty);
+            third_broken_rule_reason = Reason.Create(Guid.NewGuid().ToString(), string.Empty);
 
             first_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) =>
             {
@@ -50,13 +50,11 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
                 context.Fail(first_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == first_broken_rule_second_reason));
             });
 
-            third_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) =>
-            {
-                context.Fail(third_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == third_broken_rule_reason));
-            });
+            third_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) => context.Fail(third_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == third_broken_rule_reason)));
 
             descriptor_mock = new Mock<IQueryValidationDescriptor>();
-            descriptor_mock.SetupGet(d => d.ArgumentRules).Returns(new IValueRule[] {
+            descriptor_mock.SetupGet(d => d.ArgumentRules).Returns(new IValueRule[]
+            {
                 first_rule_broken.Object,
                 second_rule_not_broken.Object,
                 third_rule_broken.Object
@@ -68,12 +66,9 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
             var callbacks = new List<RuleFailed>();
 
             rule_context_mock.Setup(r => r.OnFailed(Moq.It.IsAny<RuleFailed>())).Callback((RuleFailed c) => callbacks.Add(c));
-            rule_context_mock.Setup(r => 
+            rule_context_mock.Setup(r =>
                 r.Fail(Moq.It.IsAny<IRule>(), Moq.It.IsAny<object>(), Moq.It.IsAny<Cause>()))
-                .Callback((IRule rule, object instance, Reason reason) =>
-                {
-                    callbacks.ForEach(c => c(rule, instance, reason.NoArgs()));
-                });            
+                .Callback((IRule rule, object instance, Reason reason) => callbacks.ForEach(c => c(rule, instance, reason.NoArgs())));
         };
 
         Because of = () => result = query_validator.Validate(query);

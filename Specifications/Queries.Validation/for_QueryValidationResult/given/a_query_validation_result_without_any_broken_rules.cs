@@ -1,4 +1,8 @@
-﻿using Dolittle.Rules;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using Dolittle.Rules;
 using Machine.Specifications;
 
 namespace Dolittle.Queries.Validation.Specs.for_QueryValidationResult.given
@@ -7,6 +11,6 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidationResult.given
     {
         protected static QueryValidationResult result;
 
-        Establish context = () => result = new QueryValidationResult(new BrokenRule[0]);
+        Establish context = () => result = new QueryValidationResult(Array.Empty<BrokenRule>());
     }
 }
