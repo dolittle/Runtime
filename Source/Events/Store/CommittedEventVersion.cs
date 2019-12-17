@@ -51,10 +51,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="left">Left hand side.</param>
         /// <param name="right">Right hand side.</param>
         /// <returns>true if greater, false otherwise.</returns>
-        public static bool operator >(CommittedEventVersion left, CommittedEventVersion right)
-        {
-            return left.CompareTo(right) == 1;
-        }
+        public static bool operator >(CommittedEventVersion left, CommittedEventVersion right) => left is object && left.CompareTo(right) > 0;
 
         /// <summary>
         /// Indicates if the first version is less than the second version.
@@ -62,10 +59,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="left">Left hand side.</param>
         /// <param name="right">Right hand side.</param>
         /// <returns>true if less, false otherwise.</returns>
-        public static bool operator <(CommittedEventVersion left, CommittedEventVersion right)
-        {
-            return left.CompareTo(right) == -1;
-        }
+        public static bool operator <(CommittedEventVersion left, CommittedEventVersion right) => left is null ? right is object : left.CompareTo(right) < 0;
 
         /// <summary>
         /// Indicates if the first version is greater than or equal to the second version.
@@ -73,10 +67,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="left">Left hand side.</param>
         /// <param name="right">Right hand side.</param>
         /// <returns>true if greater than or equal to, false otherwise.</returns>
-        public static bool operator >=(CommittedEventVersion left, CommittedEventVersion right)
-        {
-            return left.CompareTo(right) >= 0;
-        }
+        public static bool operator >=(CommittedEventVersion left, CommittedEventVersion right) => left is null ? right is null : left.CompareTo(right) >= 0;
 
         /// <summary>
         /// Indicates if the first version is less than or equal to the second version.
@@ -84,10 +75,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="left">Left hand side.</param>
         /// <param name="right">Right hand side.</param>
         /// <returns>true if less than or equal to, false otherwise.</returns>
-        public static bool operator <=(CommittedEventVersion left, CommittedEventVersion right)
-        {
-            return left.CompareTo(right) <= 0;
-        }
+        public static bool operator <=(CommittedEventVersion left, CommittedEventVersion right) => left is null || left.CompareTo(right) <= 0;
 
         /// <summary>
         /// Implicit equality operator for comparing two <see cref="CommittedEventVersion"/> instances.
@@ -95,10 +83,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="left">Left hand side.</param>
         /// <param name="right">Right hand side.</param>
         /// <returns>true if equal, false if not.</returns>
-        public static bool operator ==(CommittedEventVersion left, CommittedEventVersion right)
-        {
-            return left.Equals(right);
-        }
+        public static bool operator ==(CommittedEventVersion left, CommittedEventVersion right) => left is null ? right is null : left.Equals(right);
 
         /// <summary>
         /// Implicit not-equal operator for comparing two <see cref="CommittedEventVersion"/> instances.
@@ -106,10 +91,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="left">Left hand side.</param>
         /// <param name="right">Right hand side.</param>
         /// <returns>true if not equal, false if they are.</returns>
-        public static bool operator !=(CommittedEventVersion left, CommittedEventVersion right)
-        {
-            return !(left == right);
-        }
+        public static bool operator !=(CommittedEventVersion left, CommittedEventVersion right) => !(left == right);
 
         /// <summary>
         /// Compares two instances of <see cref="CommittedEventVersion" />.
