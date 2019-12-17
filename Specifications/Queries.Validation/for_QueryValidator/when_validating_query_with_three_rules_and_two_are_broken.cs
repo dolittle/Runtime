@@ -46,11 +46,11 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
 
             first_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) =>
             {
-                context.Fail(first_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == first_broken_rule_first_reason));
-                context.Fail(first_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == first_broken_rule_second_reason));
+                context.Fail(first_rule_broken.Object, instance, first_broken_rule_first_reason.NoArgs());
+                context.Fail(first_rule_broken.Object, instance, first_broken_rule_second_reason.NoArgs());
             });
 
-            third_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) => context.Fail(third_rule_broken.Object, instance, Moq.It.Is<Cause>(_ => _.Reason == third_broken_rule_reason)));
+            third_rule_broken.Setup(f => f.Evaluate(Moq.It.IsAny<IRuleContext>(), Moq.It.IsAny<object>())).Callback((IRuleContext context, object instance) => context.Fail(third_rule_broken.Object, instance, third_broken_rule_reason.NoArgs()));
 
             descriptor_mock = new Mock<IQueryValidationDescriptor>();
             descriptor_mock.SetupGet(d => d.ArgumentRules).Returns(new IValueRule[]
@@ -68,7 +68,7 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidator
             rule_context_mock.Setup(r => r.OnFailed(Moq.It.IsAny<RuleFailed>())).Callback((RuleFailed c) => callbacks.Add(c));
             rule_context_mock.Setup(r =>
                 r.Fail(Moq.It.IsAny<IRule>(), Moq.It.IsAny<object>(), Moq.It.IsAny<Cause>()))
-                .Callback((IRule rule, object instance, Reason reason) => callbacks.ForEach(c => c(rule, instance, reason.NoArgs())));
+                .Callback((IRule rule, object instance, Cause cause) => callbacks.ForEach(c => c(rule, instance, cause)));
         };
 
         Because of = () => result = query_validator.Validate(query);
