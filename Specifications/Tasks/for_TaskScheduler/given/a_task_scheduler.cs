@@ -1,9 +1,11 @@
-﻿using Dolittle.Concurrency;
-using Dolittle.Tasks;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Concurrency;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Specs.Tasks.for_TaskScheduler.given
+namespace Dolittle.Tasks.Specs.for_TaskScheduler.given
 {
     public class a_task_scheduler
     {

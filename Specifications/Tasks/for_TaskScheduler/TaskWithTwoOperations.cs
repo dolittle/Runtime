@@ -1,11 +1,14 @@
-﻿using Dolittle.Tasks;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 
-namespace Dolittle.Specs.Tasks.for_TaskScheduler
+namespace Dolittle.Tasks.Specs.for_TaskScheduler
 {
     public class TaskWithTwoOperations : Task
     {
         bool _runAsynchronously;
+
         public TaskWithTwoOperations(bool runAsynchronously)
         {
             _runAsynchronously = runAsynchronously;
@@ -13,38 +16,37 @@ namespace Dolittle.Specs.Tasks.for_TaskScheduler
 
         public override TaskOperation[] Operations
         {
-            get 
-            { 
-                return new TaskOperation[] {
+            get
+            {
+                return new TaskOperation[]
+                {
                     FirstOperation,
                     SecondOperation
                 };
             }
         }
 
-
         public bool FirstOperationCalled = false;
         public int FirstOperationIndex = -1;
         public Action FirstOperationCallback;
+
         void FirstOperation(Task task, int operationIndex)
         {
             FirstOperationCalled = true;
             FirstOperationIndex = operationIndex;
-            if (FirstOperationCallback != null)
-                FirstOperationCallback();
+            FirstOperationCallback?.Invoke();
         }
 
         public bool SecondOperationCalled = false;
         public int SecondOperationIndex = -1;
         public Action SecondOperationCallback;
+
         void SecondOperation(Task task, int operationIndex)
         {
             SecondOperationCalled = true;
             SecondOperationIndex = operationIndex;
-            if (SecondOperationCallback != null)
-                SecondOperationCallback();
+            SecondOperationCallback?.Invoke();
         }
-
 
         public override bool CanRunOperationsAsynchronously { get { return _runAsynchronously; } }
     }

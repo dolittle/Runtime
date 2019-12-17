@@ -1,20 +1,23 @@
-﻿using System;
-using Dolittle.Tasks;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using Machine.Specifications;
 
-namespace Dolittle.Specs.Tasks.for_TaskManager
+namespace Dolittle.Tasks.Specs.for_TaskManager
 {
     public class when_pausing : given.a_task_manager_with_one_reporter
     {
         static TaskId task_id = Guid.NewGuid();
         static OurTask task;
 
-        Establish context = () => {
+        Establish context = () =>
+        {
             task = new OurTask
             {
                 Id = task_id,
             };
-            task_repository.Setup(t=>t.Load(task_id)).Returns(task);
+            task_repository.Setup(t => t.Load(task_id)).Returns(task);
         };
 
         Because of = () => task_manager.Pause(task_id);

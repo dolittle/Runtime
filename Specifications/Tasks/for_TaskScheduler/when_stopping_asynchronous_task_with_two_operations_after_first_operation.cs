@@ -1,8 +1,10 @@
-﻿using System;
-using Machine.Specifications;
-using Dolittle.Tasks;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Specs.Tasks.for_TaskScheduler
+using System;
+using Machine.Specifications;
+
+namespace Dolittle.Tasks.Specs.for_TaskScheduler
 {
     [Subject(typeof(TaskScheduler))]
     public class when_stopping_asynchronous_task_with_two_operations_after_first_operation : given.a_task_scheduler
@@ -15,8 +17,9 @@ namespace Dolittle.Specs.Tasks.for_TaskScheduler
         {
             task = new TaskWithTwoOperations(true);
             task.FirstOperationCallback = () => task_scheduler.Stop(task);
-            scheduler_mock.Setup(s => 
-                s.Start<Task>(Moq.It.IsAny<Action<Task>>(), task, Moq.It.IsAny<Action<Task>>())).Returns((Action<Task> a, Task t,Action<Task> d) => {
+            scheduler_mock.Setup(s =>
+                s.Start<Task>(Moq.It.IsAny<Action<Task>>(), task, Moq.It.IsAny<Action<Task>>())).Returns((Action<Task> a, Task t, Action<Task> d) =>
+                {
                     var id = guids[action_count];
                     a(t);
                     d(t);
@@ -27,6 +30,6 @@ namespace Dolittle.Specs.Tasks.for_TaskScheduler
 
         Because of = () => task_scheduler.Start(task);
 
-        It should_call_stop_for_second_operation = () => scheduler_mock.Verify(s => s.Stop(guids[1]), Moq.Times.Once());        
+        It should_call_stop_for_second_operation = () => scheduler_mock.Verify(s => s.Stop(guids[1]), Moq.Times.Once());
     }
 }

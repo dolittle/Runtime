@@ -1,15 +1,18 @@
-﻿using Machine.Specifications;
-using System;
-using Dolittle.Tasks;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Specs.Tasks.for_TaskManager
+using System;
+using Machine.Specifications;
+
+namespace Dolittle.Tasks.Specs.for_TaskManager
 {
     public class when_starting_and_it_gets_done : given.a_task_manager_with_one_reporter
     {
         static TaskId task_id = TaskId.New();
         static OurTask task;
 
-        Establish context = () => {
+        Establish context = () =>
+        {
             task = new OurTask
             {
                 CurrentOperation = 1
