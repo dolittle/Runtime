@@ -1,7 +1,9 @@
-﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
-using Machine.Specifications;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
 {

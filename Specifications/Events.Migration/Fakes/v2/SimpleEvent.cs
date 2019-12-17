@@ -1,4 +1,7 @@
-﻿namespace Dolittle.Runtime.Events.Migration.Specs.Fakes.v2
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Dolittle.Runtime.Events.Migration.Specs.Fakes.v2
 {
     public class SimpleEvent : Fakes.SimpleEvent, IAmNextGenerationOf<Fakes.SimpleEvent>
     {

@@ -1,3 +1,6 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using Machine.Specifications;
 
@@ -8,10 +11,7 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyMan
     {
         static Exception exception;
 
-        Because of = () =>
-                         {
-                             exception = Catch.Exception(() => event_migration_hierarchy_manager.GetLogicalTypeFromName("UnregisteredEvent"));
-                         };
+        Because of = () => exception = Catch.Exception(() => event_migration_hierarchy_manager.GetLogicalTypeFromName("UnregisteredEvent"));
 
         It should_throw_an_unregistered_event_exception = () => exception.ShouldBeOfExactType(typeof(UnregisteredEventException));
     }

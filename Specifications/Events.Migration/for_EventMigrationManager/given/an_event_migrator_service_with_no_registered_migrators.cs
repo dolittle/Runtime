@@ -1,10 +1,12 @@
-﻿using Dolittle.Execution;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using Dolittle.DependencyInversion;
 using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
-using System;
-using Dolittle.Types;
-using Dolittle.DependencyInversion;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationManager.given
 {
