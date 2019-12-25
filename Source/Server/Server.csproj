@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
   </PropertyGroup>
 
@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Common" Version="2.*" />
     <PackageReference Include="Dolittle.Booting" Version="4.*" />
     <PackageReference Include="Dolittle.Configuration.Files" Version="4.*" />
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="4.*" />

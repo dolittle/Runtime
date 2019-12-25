@@ -1,12 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dolittle.Runtime.Queries.Security</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Common" Version="2.*" />
     <PackageReference Include="Dolittle.Security" Version="4.*" />
   </ItemGroup>
 

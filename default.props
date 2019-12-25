@@ -1,0 +1,9 @@
+<Project>
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Common" Version="2.*"/>
+    </ItemGroup>
+</Project>
