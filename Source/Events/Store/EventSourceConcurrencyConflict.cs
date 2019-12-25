@@ -11,5 +11,20 @@ namespace Dolittle.Runtime.Events.Store
     /// </summary>
     public class EventSourceConcurrencyConflict : Exception
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventSourceConcurrencyConflict"/> class.
+        /// </summary>
+        public EventSourceConcurrencyConflict()
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventSourceConcurrencyConflict"/> class.
+        /// </summary>
+        /// <param name="message">Message to show.</param>
+        public EventSourceConcurrencyConflict(string message)
+            : base(message)
+        {
+        }
     }
 }
