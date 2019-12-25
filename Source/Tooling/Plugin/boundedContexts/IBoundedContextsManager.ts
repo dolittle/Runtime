@@ -19,7 +19,7 @@ export interface IBoundedContextsManager {
      *
      * @type {IContentBoilerplate[]}
      */
-    boilerplates: IContentBoilerplate[]
+    getBoilerplates(): Promise<IContentBoilerplate[]>
 
     /**
      * Searches the file hierarchy for bounded-context.json and returns the BoundedContext
@@ -41,7 +41,7 @@ export interface IBoundedContextsManager {
      * @param {string} [namespace=undefined]
      * @return {IContentBoilerplate[]} The bounded context {Boilerplate} with of the given language
      */
-    boilerplatesByLanguage(language: string, namespace?: string): IContentBoilerplate[]
+    getBoilerplatesByLanguage(language: string, namespace?: string): Promise<IContentBoilerplate[]>
 
     /**
      * Gets the adornment boilerplates for a bounded context based on language and boilerplate name

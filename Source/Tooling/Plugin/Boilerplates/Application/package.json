@@ -1,0 +1,15 @@
+{
+  "name": "@dolittle/boilerplates.application",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Application boilerplate for the Dolittle platform",
+  "keywords": [
+    "dolittle",
+    "tooling",
+    "boilerplates",
+    "application"
+  ],
+  "dolittle": {
+    "tooling": "8.*"
+  }
+}

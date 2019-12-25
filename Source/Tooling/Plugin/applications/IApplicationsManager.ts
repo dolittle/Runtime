@@ -2,7 +2,6 @@
  *  Copyright (c) Dolittle. All rights reserved.
  *  Licensed under the MIT License. See LICENSE in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-
 import { Application } from '@dolittle/tooling.common.configurations';
 import { IContentBoilerplate, CreatedContentBoilerplateDetails } from "@dolittle/tooling.common.boilerplates";
 
@@ -19,7 +18,7 @@ export interface IApplicationsManager {
      *
      * @type {IContentBoilerplate[]}
      */
-    boilerplates: IContentBoilerplate[]
+    getBoilerplates(): Promise<IContentBoilerplate[]>
 
     /**
      * Gets the application configuration from the given folder
@@ -41,7 +40,7 @@ export interface IApplicationsManager {
      * @param {string} [namespace=undefined]
      * @return {IContentBoilerplate[]} The application {Boilerplate} with of the given language
      */
-    boilerplatesByLanguage(language: string, namespace?: string): IContentBoilerplate[]
+    getBoilerplatesByLanguage(language: string, namespace?: string): Promise<IContentBoilerplate[]>
 
     /**
      * Creates a dolittle application
