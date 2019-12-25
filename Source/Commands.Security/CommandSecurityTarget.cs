@@ -1,23 +1,22 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Security;
-using Dolittle.Runtime.Commands;
 
 namespace Dolittle.Runtime.Commands.Security
 {
     /// <summary>
-    /// Represents a specific <see cref="ISecurityTarget"/> for <see cref="CommandRequest">commands</see>
+    /// Represents a specific <see cref="ISecurityTarget"/> for <see cref="CommandRequest">commands</see>.
     /// </summary>
     public class CommandSecurityTarget : SecurityTarget
     {
         const string COMMAND = "Command";
 
         /// <summary>
-        /// Instantiates an instance of <see cref="CommandSecurityTarget"/>
+        /// Initializes a new instance of the <see cref="CommandSecurityTarget"/> class.
         /// </summary>
-        public CommandSecurityTarget() : base(COMMAND)
+        public CommandSecurityTarget()
+            : base(COMMAND)
         {
         }
     }

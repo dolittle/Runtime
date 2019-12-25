@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -9,9 +11,11 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
     {
         static QueryForGenericKnownType query;
         static PagingInfo paging;
-        static GenericKnownType<object>  actual_query;
+        static GenericKnownType<object> actual_query;
         static QueryProviderResult result;
-        static ReadModelWithString[] items = new[] {
+
+        static ReadModelWithString[] items = new[]
+        {
             new ReadModelWithString { Content = "Hello" },
             new ReadModelWithString { Content = "World" },
         };

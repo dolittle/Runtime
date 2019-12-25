@@ -1,7 +1,7 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Rules;
@@ -9,27 +9,27 @@ using Dolittle.Rules;
 namespace Dolittle.Queries.Validation
 {
     /// <summary>
-    /// Represents the result of query validation, typically done by <see cref="IQueryValidator"/>
+    /// Represents the result of query validation, typically done by <see cref="IQueryValidator"/>.
     /// </summary>
     public class QueryValidationResult
     {
         /// <summary>
-        /// Initializes an instance of <see cref="QueryValidationResult"/>
+        /// Initializes a new instance of the <see cref="QueryValidationResult"/> class.
         /// </summary>
-        /// <param name="brokenRules">Broken rules</param>
+        /// <param name="brokenRules">Broken rules.</param>
         public QueryValidationResult(IEnumerable<BrokenRule> brokenRules)
         {
-            BrokenRules = brokenRules ?? new BrokenRule[0];
+            BrokenRules = brokenRules ?? Array.Empty<BrokenRule>();
         }
 
         /// <summary>
-        /// Gets all the broken rules
+        /// Gets all the broken rules.
         /// </summary>
-        public IEnumerable<BrokenRule> BrokenRules { get; private set; }
+        public IEnumerable<BrokenRule> BrokenRules { get; }
 
         /// <summary>
-        /// Gets wether or not the validation was successful
+        /// Gets a value indicating whether or not the validation was successful.
         /// </summary>
-        public bool Success { get { return BrokenRules.Count() == 0; } }
+        public bool Success => !BrokenRules.Any();
     }
 }

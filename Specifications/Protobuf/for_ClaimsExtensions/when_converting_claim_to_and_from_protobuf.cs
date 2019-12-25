@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Events.Relativity.Microservice;
 using Machine.Specifications;
 
@@ -13,9 +12,9 @@ namespace Dolittle.Runtime.Protobuf.for_ClaimsExtensions
         static Claim protobuf;
         static Security.Claim result;
 
-        Establish context = () => original = new Security.Claim("SomeClaim","SomeValue","SomeClaimType");
+        Establish context = () => original = new Security.Claim("SomeClaim", "SomeValue", "SomeClaimType");
 
-        Because of = () => 
+        Because of = () =>
         {
             protobuf = original.ToProtobuf();
             result = protobuf.ToClaim();

@@ -1,38 +1,38 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using Dolittle.Collections;
-using Dolittle.Execution;
+using Dolittle.DependencyInversion;
 using Dolittle.Reflection;
 using Dolittle.Types;
-using Dolittle.DependencyInversion;
-using System.Linq;
 
 namespace Dolittle.Tasks
 {
     /// <summary>
-    /// Represents a <see cref="ITaskManager"/>
+    /// Represents a <see cref="ITaskManager"/>.
     /// </summary>
     public class TaskManager : ITaskManager
     {
-        ITaskRepository _taskRepository;
-        ITaskScheduler _taskScheduler;
-        IContainer _container;
-        IEnumerable<ITaskStatusReporter> _reporters;
-
+        readonly ITaskRepository _taskRepository;
+        readonly ITaskScheduler _taskScheduler;
+        readonly IContainer _container;
+        readonly IEnumerable<ITaskStatusReporter> _reporters;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TaskManager"/>
+        /// Initializes a new instance of the <see cref="TaskManager"/> class.
         /// </summary>
-        /// <param name="taskRepository">A <see cref="ITaskRepository"/> to load / save <see cref="Task">tasks</see></param>
-        /// <param name="taskScheduler">A <see cref="ITaskScheduler"/> for executing tasks and their operations</param>
-        /// <param name="reporters"><see cref="IInstancesOf{ITaskStatusReporter}">Reporters</see></param>
-        /// <param name="container">A <see cref="IContainer"/> to use for getting instances</param>
-        public TaskManager(ITaskRepository taskRepository, ITaskScheduler taskScheduler, IInstancesOf<ITaskStatusReporter> reporters, IContainer container)
+        /// <param name="taskRepository">A <see cref="ITaskRepository"/> to load / save <see cref="Task">tasks</see>.</param>
+        /// <param name="taskScheduler">A <see cref="ITaskScheduler"/> for executing tasks and their operations.</param>
+        /// <param name="reporters"><see cref="IInstancesOf{ITaskStatusReporter}">Reporters</see>.</param>
+        /// <param name="container">A <see cref="IContainer"/> to use for getting instances.</param>
+        public TaskManager(
+            ITaskRepository taskRepository,
+            ITaskScheduler taskScheduler,
+            IInstancesOf<ITaskStatusReporter> reporters,
+            IContainer container)
         {
             _taskRepository = taskRepository;
             _taskScheduler = taskScheduler;
@@ -41,11 +41,12 @@ namespace Dolittle.Tasks
         }
 
         /// <inheritdoc/>
-        public T Start<T>() where T : Task
+        public T Start<T>()
+            where T : Task
         {
             var task = _container.Get<T>();
             task.Id = Guid.NewGuid();
-            task.StateChange += t =>
+            task.StateChange += _ =>
             {
                 _taskRepository.Save(task);
                 Report(tt => tt.StateChanged(task));
@@ -63,7 +64,8 @@ namespace Dolittle.Tasks
         }
 
         /// <inheritdoc/>
-        public T Resume<T>(TaskId taskId) where T : Task
+        public T Resume<T>(TaskId taskId)
+            where T : Task
         {
             var task = _taskRepository.Load(taskId) as T;
             task.Begin();
@@ -93,7 +95,7 @@ namespace Dolittle.Tasks
         {
             var method = expression.GetMethodInfo();
             var arguments = expression.GetMethodArguments();
-            
+
             _reporters.ForEach(reporter => method.Invoke(reporter, arguments));
         }
     }

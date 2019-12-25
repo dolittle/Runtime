@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 
 namespace Dolittle.Runtime.Events.Migration
@@ -13,9 +12,9 @@ namespace Dolittle.Runtime.Events.Migration
     public class DuplicateInEventMigrationHierarchyException : Exception
     {
         /// <summary>
-        /// Initializes an instance of <see cref="DuplicateInEventMigrationHierarchyException"/>
+        /// Initializes a new instance of the <see cref="DuplicateInEventMigrationHierarchyException"/> class.
         /// </summary>
-        /// <param name="message">The error message that explains the reason for the exception</param>
+        /// <param name="message">The error message that explains the reason for the exception.</param>
         public DuplicateInEventMigrationHierarchyException(string message)
             : base(message)
         {

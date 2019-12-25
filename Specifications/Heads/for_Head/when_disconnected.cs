@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Reflection;
 using Machine.Specifications;
@@ -14,15 +13,15 @@ namespace Dolittle.Runtime.Heads.for_Head
         static MethodInfo disconnected_method;
         static bool disconnected = false;
 
-        Establish context = () => 
+        Establish context = () =>
         {
-            head = new Head(Guid.NewGuid(),"",42,"",new string[0], DateTimeOffset.UtcNow);
+            head = new Head(Guid.NewGuid(), "", 42, "", Array.Empty<string>(), DateTimeOffset.UtcNow);
             head.Disconnected += (c) => disconnected = true;
 
-            disconnected_method = typeof(Head).GetMethod("OnDisconnected",BindingFlags.Instance|BindingFlags.NonPublic);
+            disconnected_method = typeof(Head).GetMethod("OnDisconnected", BindingFlags.Instance | BindingFlags.NonPublic);
         };
 
-        Because of = () => disconnected_method.Invoke(head, new object[0]);
+        Because of = () => disconnected_method.Invoke(head, Array.Empty<object>());
 
         It should_trigger_disconnected_event = () => disconnected.ShouldBeTrue();
     }

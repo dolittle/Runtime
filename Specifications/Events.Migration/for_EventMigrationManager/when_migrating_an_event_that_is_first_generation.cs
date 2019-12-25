@@ -1,8 +1,10 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Events;
 using Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationManager.given;
-using Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationService.given;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationService
 {

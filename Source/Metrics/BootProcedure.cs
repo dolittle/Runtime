@@ -1,13 +1,12 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Booting;
 
 namespace Dolittle.Runtime.Metrics
 {
     /// <summary>
-    /// Represents a <see cref="ICanPerformBootProcedure">boot procedure</see> for hooking up metrics
+    /// Represents a <see cref="ICanPerformBootProcedure">boot procedure</see> for hooking up metrics.
     /// </summary>
     public class BootProcedure : ICanPerformBootProcedure
     {
@@ -15,10 +14,10 @@ namespace Dolittle.Runtime.Metrics
         readonly IMetricsSystem _metricsSystem;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="BootProcedure"/>
+        /// Initializes a new instance of the <see cref="BootProcedure"/> class.
         /// </summary>
-        /// <param name="metricProviders"><see cref="IMetricProviders"/></param>
-        /// <param name="metricsSystem"><see cref="IMetricsSystem"/></param>
+        /// <param name="metricProviders"><see cref="IMetricProviders"/>.</param>
+        /// <param name="metricsSystem"><see cref="IMetricsSystem"/>.</param>
         public BootProcedure(
             IMetricProviders metricProviders,
             IMetricsSystem metricsSystem)

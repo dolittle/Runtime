@@ -1,9 +1,8 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-using Machine.Specifications;
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Events.Relativity.Microservice;
+using Machine.Specifications;
 
 namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
 {
@@ -15,12 +14,12 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
 
         Establish context = () => str = "I am a string";
 
-        Because of = () => 
+        Because of = () =>
         {
             protobuf = str.ToProtobuf();
             result = protobuf.ToCLR();
         };
-        
+
         It protobuf_message_should_have_an_object_value = () => protobuf.KindCase.ShouldEqual(Value.KindOneofCase.ObjectValue);
         It protobuf_message_object_value_type_should_be_string = () => protobuf.ObjectValue.Type.ShouldEqual((int)Types.String);
         It should_be_equal_to_the_original = () => result.ShouldEqual(str);

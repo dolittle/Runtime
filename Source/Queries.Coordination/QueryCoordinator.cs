@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,30 +16,30 @@ using Dolittle.Types;
 namespace Dolittle.Queries.Coordination
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IQueryProvider"/>
+    /// Represents an implementation of <see cref="IQueryProvider"/>.
     /// </summary>
     public class QueryCoordinator : IQueryCoordinator
     {
         const string QueryPropertyName = "Query";
         const string ExecuteMethodName = "Execute";
 
-        Dictionary<Type, Type> _queryProviderTypesPerTargetType;
         readonly ITypeFinder _typeFinder;
         readonly IContainer _container;
         readonly IFetchingSecurityManager _fetchingSecurityManager;
         readonly IQueryValidator _validator;
         readonly IReadModelFilters _filters;
-        private readonly ILogger _logger;
+        readonly ILogger _logger;
+        Dictionary<Type, Type> _queryProviderTypesPerTargetType;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="QueryCoordinator"/>
+        /// Initializes a new instance of the <see cref="QueryCoordinator"/> class.
         /// </summary>
-        /// <param name="typeFinder"><see cref="ITypeFinder"/> to use for discovering <see cref="IQueryProviderFor{T}"/> implementations</param>
-        /// <param name="container"><see cref="IContainer"/> for getting instances of <see cref="IQueryProviderFor{T}">query providers</see></param>
-        /// <param name="fetchingSecurityManager"><see cref="IFetchingSecurityManager"/> to use for securing <see cref="IQuery">queries</see></param>
-        /// <param name="validator"><see cref="IQueryValidator"/> to use for validating <see cref="IQuery">queries</see></param>
-        /// <param name="filters"><see cref="IReadModelFilters">Filters</see> used to filter any of the read models coming back after a query</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        /// <param name="typeFinder"><see cref="ITypeFinder"/> to use for discovering <see cref="IQueryProviderFor{T}"/> implementations.</param>
+        /// <param name="container"><see cref="IContainer"/> for getting instances of <see cref="IQueryProviderFor{T}">query providers</see>.</param>
+        /// <param name="fetchingSecurityManager"><see cref="IFetchingSecurityManager"/> to use for securing <see cref="IQuery">queries</see>.</param>
+        /// <param name="validator"><see cref="IQueryValidator"/> to use for validating <see cref="IQuery">queries</see>.</param>
+        /// <param name="filters"><see cref="IReadModelFilters">Filters</see> used to filter any of the read models coming back after a query.</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public QueryCoordinator(
             ITypeFinder typeFinder,
             IContainer container,
@@ -63,7 +62,7 @@ namespace Dolittle.Queries.Coordination
         {
             var queryType = query.GetType();
             _logger.Information($"Executing query of type '{queryType.AssemblyQualifiedName}'");
-            
+
             var taskCompletionSource = new TaskCompletionSource<QueryResult>();
             var result = QueryResult.For(query);
 
@@ -75,15 +74,16 @@ namespace Dolittle.Queries.Coordination
                 if (!authorizationResult.IsAuthorized)
                 {
                     result.SecurityMessages = authorizationResult.BuildFailedAuthorizationMessages();
-                    result.Items = new object[0];
+                    result.Items = Array.Empty<object>();
                     taskCompletionSource.SetResult(result);
                     return taskCompletionSource.Task;
                 }
+
                 var validation = _validator.Validate(query);
                 result.BrokenRules = validation.BrokenRules;
                 if (!validation.Success)
                 {
-                    result.Items = new object[0];
+                    result.Items = Array.Empty<object>();
                     taskCompletionSource.SetResult(result);
                     return taskCompletionSource.Task;
                 }
@@ -94,6 +94,7 @@ namespace Dolittle.Queries.Coordination
                 if (actualQuery is Task && queryReturnType.IsGenericType)
                 {
                     var task = actualQuery as Task;
+#pragma warning disable CA2008
                     task.ContinueWith(tr =>
                     {
                         var resultProperty = tr.GetType().GetProperty("Result");
@@ -103,6 +104,7 @@ namespace Dolittle.Queries.Coordination
 
                         taskCompletionSource.SetResult(result);
                     });
+#pragma warning restore CA2008
                 }
                 else
                 {
@@ -119,16 +121,20 @@ namespace Dolittle.Queries.Coordination
             {
                 result.Exception = ex;
 
-                switch( ex )
+                switch (ex)
                 {
-                    case MissingQueryProperty missingQueryProperty:{
-                        taskCompletionSource.SetException(ex);
-                        throw ex;
-                    };
-                        
-                    default: {
-                        taskCompletionSource.SetResult(result);
-                    } break;
+                    case MissingQueryProperty missingQueryProperty:
+                        {
+                            taskCompletionSource.SetException(ex);
+                            throw;
+                        }
+
+                    default:
+                        {
+                            taskCompletionSource.SetResult(result);
+                        }
+
+                        break;
                 }
             }
 
@@ -140,8 +146,7 @@ namespace Dolittle.Queries.Coordination
             var provider = GetQueryProvider(queryType, resultType, actualQuery);
             var providerResult = ExecuteOnProvider(provider, actualQuery, paging);
             result.TotalItems = providerResult.TotalItems;
-            var readModels = providerResult.Items as IEnumerable<IReadModel>;
-            result.Items = readModels != null ? _filters.Filter(readModels) : providerResult.Items;
+            result.Items = providerResult.Items is IEnumerable<IReadModel> readModels ? _filters.Filter(readModels) : providerResult.Items;
 
             _logger.Trace($"Query resulted in {result.TotalItems} items");
         }
@@ -173,28 +178,29 @@ namespace Dolittle.Queries.Coordination
             if (queryProviderType == null)
                 queryProviderType = GetActualProviderTypeFrom(resultType);
             ThrowIfMissingQueryProvider(queryProviderType, queryType, resultType);
-            var provider = _container.Get(queryProviderType);
-            return provider;
+            return _container.Get(queryProviderType);
         }
 
         QueryProviderResult ExecuteOnProvider(object provider, object query, PagingInfo paging)
         {
             var method = provider.GetType().GetTypeInfo().GetMethod(ExecuteMethodName);
-            var result = method.Invoke(provider, new [] { query, paging }) as QueryProviderResult;
+            var result = method.Invoke(provider, new[] { query, paging }) as QueryProviderResult;
             return result;
         }
 
         Type GetQueryTypeFrom(Type type)
         {
             var queryProviderForType = type.GetTypeInfo().GetInterface(typeof(IQueryProviderFor<>).FullName);
-            var queryType = queryProviderForType.GetTypeInfo().GetGenericArguments() [0];
+            var queryType = queryProviderForType.GetTypeInfo().GetGenericArguments()[0];
             return queryType;
         }
 
         Type GetActualProviderTypeFrom(Type type)
         {
             if (_queryProviderTypesPerTargetType.ContainsKey(type))
+            {
                 return _queryProviderTypesPerTargetType[type];
+            }
             else
             {
                 var interfaces = type.GetTypeInfo().GetInterfaces();
@@ -205,6 +211,7 @@ namespace Dolittle.Queries.Coordination
                         return type;
                 }
             }
+
             return null;
         }
 
@@ -215,7 +222,7 @@ namespace Dolittle.Queries.Coordination
             _queryProviderTypesPerTargetType = queryTypes.Select(t => new
             {
                 TargetType = GetQueryTypeFrom(t),
-                    QueryProviderType = t
+                QueryProviderType = t
             }).ToDictionary(t => t.TargetType, t => t.QueryProviderType);
         }
     }

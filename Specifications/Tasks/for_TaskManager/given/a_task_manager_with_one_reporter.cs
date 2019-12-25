@@ -1,13 +1,12 @@
-﻿using Dolittle.Tasks;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.DependencyInversion;
+using Dolittle.Types.Testing;
 using Machine.Specifications;
 using Moq;
-using Dolittle.Execution;
-using Dolittle.Types;
-using Dolittle.DependencyInversion;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Dolittle.Specs.Tasks.for_TaskManager.given
+namespace Dolittle.Tasks.Specs.for_TaskManager.given
 {
     public class a_task_manager_with_one_reporter
     {
@@ -24,10 +23,10 @@ namespace Dolittle.Specs.Tasks.for_TaskManager.given
             task_scheduler = new Mock<ITaskScheduler>();
             container = new Mock<IContainer>();
 
-
-            task_manager = new TaskManager(task_repository.Object, 
-                task_scheduler.Object, 
-                new InstancesOf<ITaskStatusReporter>(new[] { task_status_reporter.Object }), 
+            task_manager = new TaskManager(
+                task_repository.Object,
+                task_scheduler.Object,
+                new StaticInstancesOf<ITaskStatusReporter>(new[] { task_status_reporter.Object }),
                 container.Object);
         };
     }

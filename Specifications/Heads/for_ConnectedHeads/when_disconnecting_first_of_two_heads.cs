@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Logging;
 using Machine.Specifications;
 
@@ -10,6 +9,7 @@ namespace Dolittle.Runtime.Heads.for_ConnectedHeads
     public class when_disconnecting_first_of_two_heads : given.two_heads
     {
         static ConnectedHeads connected_heads;
+
         Establish context = () =>
         {
             connected_heads = new ConnectedHeads(Moq.Mock.Of<ILogger>());

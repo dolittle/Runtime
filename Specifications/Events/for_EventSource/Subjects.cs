@@ -1,6 +1,9 @@
-﻿namespace Dolittle.Events.Specs.for_EventSource
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+namespace Dolittle.Events.Specs.for_EventSource
 {
-    public class Subjects
+    public static class Subjects
     {
         public const string reapplying_events = "ReApplying events";
         public const string applying_events = "Applying events";

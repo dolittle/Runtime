@@ -1,3 +1,6 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using Machine.Specifications;
 
@@ -7,13 +10,9 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyMan
     {
         static Exception exception_when_level_does_not_exist;
 
-        Because of = () =>
-        {
-           exception_when_level_does_not_exist = Catch.Exception(() => event_migration_hierarchy_manager.GetTargetTypeForGeneration(event_without_migrations, 1));
-        };
+        Because of = () => exception_when_level_does_not_exist = Catch.Exception(() => event_migration_hierarchy_manager.GetTargetTypeForGeneration(event_without_migrations, 1));
 
         It should_throw_a_migration_level_out_of_range_exception_when_the_migration_level_has_not_been_reached =
             () => exception_when_level_does_not_exist.ShouldBeOfExactType(typeof(MigrationLevelOutOfRangeException));
-
     }
 }

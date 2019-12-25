@@ -1,5 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -12,7 +13,9 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
         static PagingInfo paging;
         static QueryType actual_query;
         static QueryProviderResult result;
-        static ReadModelWithString[] items = new[] {
+
+        static ReadModelWithString[] items = new[]
+        {
             new ReadModelWithString { Content = "Hello" },
             new ReadModelWithString { Content = "World" },
         };
@@ -25,7 +28,8 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
             actual_query = new QueryType();
             query.QueryToReturn = actual_query;
 
-            result = new QueryProviderResult {
+            result = new QueryProviderResult
+            {
                 Items = items
             };
 
@@ -35,6 +39,6 @@ namespace Dolittle.Queries.Coordination.Specs.for_QueryCoordinator
         Because of = () => coordinator.Execute(query, paging);
 
         It should_forward_query_with_clause_to_provider = () => query_provider_mock.Verify(q => q.Execute(actual_query, paging), Moq.Times.Once());
-        It should_filter_result = () => read_model_filters.Verify(r => r.Filter(items),Times.Once());
+        It should_filter_result = () => read_model_filters.Verify(r => r.Filter(items), Times.Once());
     }
 }

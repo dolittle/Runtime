@@ -1,9 +1,11 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Specs.for_EventSourceVersion
 {
-    [Subject(typeof (EventSourceVersion))]
+    [Subject(typeof(EventSourceVersion))]
     public class when_converting_the_event_source_version_to_a_single_number : given.a_range_of_event_source_versions
     {
         static double low_low_version;
@@ -18,10 +20,10 @@ namespace Dolittle.Runtime.Events.Specs.for_EventSourceVersion
 
         Establish context = () =>
                          {
-                            expected_low_low_version = 1.0002;
-                            expected_low_high_version = 1.02;
-                            expected_high_low_version = 100000.0002;
-                            expected_high_high_version = 100000.02;
+                             expected_low_low_version = 1.0002;
+                             expected_low_high_version = 1.02;
+                             expected_high_low_version = 100000.0002;
+                             expected_high_high_version = 100000.02;
                          };
 
         Because of = () =>

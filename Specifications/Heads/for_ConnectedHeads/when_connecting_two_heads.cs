@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Logging;
 using Machine.Specifications;
 
@@ -19,6 +18,6 @@ namespace Dolittle.Runtime.Heads.for_ConnectedHeads
             connected_heads.Connect(second_head);
         };
 
-        It should_have_both_heads_as_connected_heads = () => connected_heads.GetAll().ShouldContainOnly(new [] { first_head, second_head });
+        It should_have_both_heads_as_connected_heads = () => connected_heads.GetAll().ShouldContainOnly(new[] { first_head, second_head });
     }
 }

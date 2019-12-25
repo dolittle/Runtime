@@ -1,6 +1,8 @@
-﻿using Dolittle.Rules;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Rules;
 using Machine.Specifications;
-using Moq;
 
 namespace Dolittle.Queries.Validation.Specs.for_QueryValidationResult.given
 {
@@ -8,7 +10,6 @@ namespace Dolittle.Queries.Validation.Specs.for_QueryValidationResult.given
     {
         protected static QueryValidationResult result;
 
-
-        Establish context = () => result = new QueryValidationResult(new [] {new BrokenRule(rule_mock.Object, instance, rule_context_mock.Object)});
+        Establish context = () => result = new QueryValidationResult(new[] { new BrokenRule(rule_mock.Object, instance, rule_context_mock.Object) });
     }
 }

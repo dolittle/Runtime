@@ -1,7 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,7 +11,7 @@ using Grpc.Core;
 namespace Dolittle.Runtime.Heads
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IConnectedHeads"/>
+    /// Represents an implementation of <see cref="IConnectedHeads"/>.
     /// </summary>
     [Singleton]
     public class ConnectedHeads : IConnectedHeads
@@ -21,9 +20,9 @@ namespace Dolittle.Runtime.Heads
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="ConnectedHeads"/>
+        /// Initializes a new instance of the <see cref="ConnectedHeads"/> class.
         /// </summary>
-        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConnectedHeads(ILogger logger)
         {
             _logger = logger;
@@ -32,16 +31,16 @@ namespace Dolittle.Runtime.Heads
         /// <inheritdoc/>
         public void Connect(Head head)
         {
-            lock( _heads ) _heads.Add(head);
+            lock (_heads) _heads.Add(head);
         }
 
         /// <inheritdoc/>
         public void Disconnect(HeadId headId)
         {
-            lock( _heads )
+            lock (_heads)
             {
                 var head = _heads.SingleOrDefault(_ => _.HeadId == headId);
-                if( head != null )
+                if (head != null)
                 {
                     _logger.Information($"Disconnecting head '{headId}'");
                     _heads?.Remove(head);
@@ -52,7 +51,7 @@ namespace Dolittle.Runtime.Heads
         /// <inheritdoc/>
         public bool IsConnected(HeadId headId)
         {
-            lock( _heads )
+            lock (_heads)
             {
                 return _heads.Any(_ => _.HeadId == headId);
             }
@@ -61,7 +60,7 @@ namespace Dolittle.Runtime.Heads
         /// <inheritdoc/>
         public IEnumerable<Head> GetAll()
         {
-            lock( _heads )
+            lock (_heads)
             {
                 var heads = _heads.ToArray();
                 return heads;
@@ -69,7 +68,8 @@ namespace Dolittle.Runtime.Heads
         }
 
         /// <inheritdoc/>
-        public Head GetFor<TC>() where TC:ClientBase
+        public Head GetFor<TC>()
+            where TC : ClientBase
         {
             return _heads.Last();
         }

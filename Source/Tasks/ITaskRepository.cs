@@ -1,45 +1,44 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 
 namespace Dolittle.Tasks
 {
     /// <summary>
-    /// Defines a repository for working with <see cref="Task">tasks</see>
+    /// Defines a repository for working with <see cref="Task">tasks</see>.
     /// </summary>
     public interface ITaskRepository
     {
         /// <summary>
-        /// Load all tasks
+        /// Load all tasks.
         /// </summary>
-        /// <returns>A collection of <see cref="Task">Tasks</see></returns>
+        /// <returns>A collection of <see cref="Task">Tasks</see>.</returns>
         IEnumerable<Task> LoadAll();
 
         /// <summary>
-        /// Load a specific <see cref="Task"/>
+        /// Load a specific <see cref="Task"/>.
         /// </summary>
-        /// <param name="taskId"><see cref="TaskId"/> of the task</param>
-        /// <returns>The loaded <see cref="Task"/></returns>
+        /// <param name="taskId"><see cref="TaskId"/> of the task.</param>
+        /// <returns>The loaded <see cref="Task"/>.</returns>
         Task Load(TaskId taskId);
 
         /// <summary>
-        /// Save a <see cref="Task"/>
+        /// Save a <see cref="Task"/>.
         /// </summary>
-        /// <param name="task"><see cref="Task"/> to save</param>
+        /// <param name="task"><see cref="Task"/> to save.</param>
         void Save(Task task);
 
         /// <summary>
-        /// Delete a task <see cref="Task"/>
+        /// Delete a task <see cref="Task"/>.
         /// </summary>
-        /// <param name="task"><see cref="Task"/> to delete</param>
+        /// <param name="task"><see cref="Task"/> to delete.</param>
         void Delete(Task task);
 
         /// <summary>
-        /// Delete a <see cref="Task"/> by its <see cref="TaskId">identifier</see>
+        /// Delete a <see cref="Task"/> by its <see cref="TaskId">identifier</see>.
         /// </summary>
-        /// <param name="taskId"><see cref="TaskId"/> of the task</param>
+        /// <param name="taskId"><see cref="TaskId"/> of the task.</param>
         void DeleteById(TaskId taskId);
     }
 }

@@ -1,32 +1,34 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Events;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// An enumerable of <see cref="CommittedEventEnvelope" />s for holding committed events that cross commits
+    /// An enumerable of <see cref="CommittedEventEnvelope" />s for holding committed events that cross commits.
     /// </summary>
     public class SingleEventTypeEventStream : IEnumerable<CommittedEventEnvelope>, IEquatable<SingleEventTypeEventStream>
     {
-        List<CommittedEventEnvelope> _events;
         private static readonly EnumerableEqualityComparer<CommittedEventEnvelope> _comparer = new EnumerableEqualityComparer<CommittedEventEnvelope>();
+        readonly List<CommittedEventEnvelope> _events;
 
         /// <summary>
-        /// Instantiates a new instance of <see cref="SingleEventTypeEventStream" /> initialized with events.
-        /// Event instances of more than one <see cref="ArtifactId">type</see> throws a <see cref="MultipleEventTypesInSingleEventTypeEventStream" /> exception
+        /// Initializes a new instance of the <see cref="SingleEventTypeEventStream"/> class.
         /// </summary>
-        /// <param name="events"></param>
+        /// <param name="events"><see cref="IEnumerable{T}"/> of <see cref="CommittedEventEnvelope"/>.</param>
+        /// <exception type="MultipleEventTypesInSingleEventTypeEventStream">Thrown when there are event instances of more than one <see cref="ArtifactId">type</see>.</exception>
         public SingleEventTypeEventStream(IEnumerable<CommittedEventEnvelope> events)
         {
-            if(events != null && events.Any())
+            if (events?.Any() == true)
             {
                 var artifact = events.First().Metadata.Artifact.Id;
-                if(!events.All(e => e.Metadata.Artifact.Id == artifact))
+                if (!events.All(e => e.Metadata.Artifact.Id == artifact))
                     throw new MultipleEventTypesInSingleEventTypeEventStream();
             }
 
@@ -34,54 +36,49 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <summary>
-        /// Equates two <see cref="SingleEventTypeEventStream" /> instances
+        /// Gets a value indicating whether or not there are any events.
         /// </summary>
-        /// <param name="first">The first <see cref="SingleEventTypeEventStream" /> instance</param>
-        /// <param name="second">The second <see cref="SingleEventTypeEventStream" /> instance</param>
-        /// <returns>true if equal, otherwise false</returns>
-        public static bool Equals(SingleEventTypeEventStream first, SingleEventTypeEventStream second)
-        {
-            return _comparer.Equals(first,second);
-        }
+        public bool IsEmpty => _events.Count == 0;
 
         /// <summary>
-        /// Equates this instance of <see cref="SingleEventTypeEventStream" /> to another
+        /// Equates two <see cref="SingleEventTypeEventStream" /> instances.
         /// </summary>
-        /// <param name="other"> The other <see cref="SingleEventTypeEventStream" /> to equate with</param>
-        /// <returns>true if equal, false otherwise</returns>
+        /// <param name="left">The left <see cref="SingleEventTypeEventStream" /> instance.</param>
+        /// <param name="right">The right <see cref="SingleEventTypeEventStream" /> instance.</param>
+        /// <returns>true if equal, otherwise false.</returns>
+        public static bool Equals(SingleEventTypeEventStream left, SingleEventTypeEventStream right)
+        {
+            return _comparer.Equals(left, right);
+        }
+
+        /// <inheritdoc/>
         public bool Equals(SingleEventTypeEventStream other)
         {
-            return Equals(this,other);
+            return Equals(this, other);
         }
 
-        /// <summary>
-        /// Gets an enumerator for iterating over the <see cref="CommittedEventEnvelope" />s
-        /// </summary>
-        /// <returns></returns>
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as SingleEventTypeEventStream);
+        }
+
+        /// <inheritdoc/>
         public IEnumerator<CommittedEventEnvelope> GetEnumerator()
         {
             return _events.GetEnumerator();
         }
 
-        /// <summary>
-        /// Calculates the hashcode for this 
-        /// </summary>
-        /// <returns>the hashcode</returns>
+        /// <inheritdoc/>
         public override int GetHashCode()
         {
             return _comparer.GetHashCode(this);
         }
 
+        /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator()
         {
             return _events.GetEnumerator() as IEnumerator;
         }
-
-        /// <summary>
-        /// Indicates if there are any events
-        /// </summary>
-        public bool IsEmpty => !_events.Any();
     }
 }
-
-

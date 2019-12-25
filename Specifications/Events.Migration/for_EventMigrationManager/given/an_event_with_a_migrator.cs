@@ -1,4 +1,7 @@
-﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
 using Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationManager.given;
 using Machine.Specifications;
 

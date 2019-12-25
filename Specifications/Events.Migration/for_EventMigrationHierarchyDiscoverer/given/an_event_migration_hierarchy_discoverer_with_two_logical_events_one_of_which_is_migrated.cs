@@ -1,10 +1,12 @@
-﻿using Dolittle.Execution;
-using Machine.Specifications;
-using Moq;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
+using Dolittle.Events;
 using Dolittle.Runtime.Events.Migration.Specs.Fakes;
 using Dolittle.Types;
-using Dolittle.Events;
+using Machine.Specifications;
+using Moq;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscoverer.given
 {
@@ -16,7 +18,7 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscove
 
         Establish context = () =>
                                 {
-                                    event_types = new []
+                                    event_types = new[]
                                                       {
                                                          typeof(AnotherSimpleEvent),
                                                          typeof(SimpleEvent),
@@ -28,7 +30,5 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscove
                                     type_finder.Setup(d => d.FindMultiple<IEvent>()).Returns(event_types);
                                     event_migration_level_discoverer = new EventMigrationHierarchyDiscoverer(type_finder.Object);
                                 };
-
-
     }
 }

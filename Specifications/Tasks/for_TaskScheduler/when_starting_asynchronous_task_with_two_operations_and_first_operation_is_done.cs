@@ -1,8 +1,10 @@
-﻿using System;
-using Machine.Specifications;
-using Dolittle.Tasks;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Specs.Tasks.for_TaskScheduler
+using System;
+using Machine.Specifications;
+
+namespace Dolittle.Tasks.Specs.for_TaskScheduler
 {
     [Subject(typeof(TaskScheduler))]
     public class when_starting_asynchronous_task_with_two_operations_and_first_operation_is_done : given.a_task_scheduler
@@ -19,10 +21,9 @@ namespace Dolittle.Specs.Tasks.for_TaskScheduler
                     a(t);
                     d(t);
                 });
-            
         };
 
-        Because of = () => task_scheduler.Start(task, t=>done_called=true);
+        Because of = () => task_scheduler.Start(task, t => done_called = true);
 
         It should_start_both_operations = () => scheduler_mock.Verify(s => s.Start<Task>(Moq.It.IsAny<Action<Task>>(), task, Moq.It.IsAny<Action<Task>>()), Moq.Times.Exactly(1));
         It should_get_correct_index_for_second_operation = () => task.SecondOperationIndex.ShouldEqual(1);

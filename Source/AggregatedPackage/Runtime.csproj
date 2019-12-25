@@ -1,12 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props"/>
+
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
         <AssemblyName>Dolittle.Runtime</AssemblyName>
     </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Dolittle.Common" Version="1.*" />
-    </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="../**/*.csproj" Exclude="../AggregatedPackage/Runtime.csproj;../Build/Build.csproj" />

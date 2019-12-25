@@ -1,7 +1,10 @@
-﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
-using Machine.Specifications;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscoverer
 {
@@ -14,13 +17,14 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscove
         Because of = () =>
                          {
                              event_migration_hierarchies = event_migration_level_discoverer.GetMigrationHierarchies();
-                             non_migrated_event_hierarchy = event_migration_hierarchies.Where(e => e.LogicalEvent == typeof(AnotherSimpleEvent)).First();
-                             migrated_event_hierarchy = event_migration_hierarchies.Where(e => e.LogicalEvent == typeof(SimpleEvent)).First();
+                             non_migrated_event_hierarchy = event_migration_hierarchies.First(e => e.LogicalEvent == typeof(AnotherSimpleEvent));
+                             migrated_event_hierarchy = event_migration_hierarchies.First(e => e.LogicalEvent == typeof(SimpleEvent));
                          };
 
         It should_create_two_seperate_hierarchies = () => event_migration_hierarchies.Count().ShouldEqual(2);
         It should_create_a_hierarchy_with_no_children_for_the_event_that_is_not_migrated = () => non_migrated_event_hierarchy.MigrationLevel.ShouldEqual(0);
         It should_create_a_hierarchy_with_children_for_the_event_that_is_migrated = () => migrated_event_hierarchy.MigrationLevel.ShouldEqual(2);
+
         It should_order_the_event_generations_correctly_for_the_migrated_event = () =>
                                             {
                                                 migrated_event_hierarchy.GetConcreteTypeForLevel(0).ShouldEqual(typeof(SimpleEvent));

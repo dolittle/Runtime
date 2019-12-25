@@ -1,19 +1,18 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Dolittle.Events;
 using Dolittle.Lifecycle;
 using Dolittle.Types;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Migration
 {
     /// <summary>
-    /// Represents a <see cref="IEventMigrationHierarchyDiscoverer">IEventMigrationHierarchyDiscoverer</see>
+    /// Represents a <see cref="IEventMigrationHierarchyDiscoverer">IEventMigrationHierarchyDiscoverer</see>.
     /// </summary>
     /// <remarks>
     /// The discoverer will automatically build an <see cref="EventMigrationHierarchy">EventMigrationHierarchy</see> for all events.
@@ -21,13 +20,13 @@ namespace Dolittle.Runtime.Events.Migration
     [Singleton]
     public class EventMigrationHierarchyDiscoverer : IEventMigrationHierarchyDiscoverer
     {
-        private readonly ITypeFinder _typeFinder;
-        private static readonly Type _migrationInterface = typeof (IAmNextGenerationOf<>);
+        static readonly Type _migrationInterface = typeof(IAmNextGenerationOf<>);
+        readonly ITypeFinder _typeFinder;
 
         /// <summary>
-        /// Initializes an instance of <see cref="EventMigrationHierarchyDiscoverer"/>
+        /// Initializes a new instance of the <see cref="EventMigrationHierarchyDiscoverer"/> class.
         /// </summary>
-        /// <param name="typeFinder"></param>
+        /// <param name="typeFinder"><see cref="ITypeFinder"/> for finding types.</param>
         public EventMigrationHierarchyDiscoverer(ITypeFinder typeFinder)
         {
             _typeFinder = typeFinder;
@@ -38,9 +37,8 @@ namespace Dolittle.Runtime.Events.Migration
         {
             var allEvents = GetAllEventTypes();
             var logicalEvents = GetLogicalEvents(allEvents);
-            return logicalEvents.Select(logicalEvent => GetMigrationHierarchy(logicalEvent,allEvents)).ToList();
+            return logicalEvents.Select(logicalEvent => GetMigrationHierarchy(logicalEvent, allEvents)).ToList();
         }
-
 
         static EventMigrationHierarchy GetMigrationHierarchy(Type logicalEvent, IEnumerable<Type> allEvents)
         {
@@ -53,6 +51,7 @@ namespace Dolittle.Runtime.Events.Migration
                 migrationHierarchy.AddMigrationLevel(migrationType);
                 migrationType = GetMigrationTypeFor(migrationType, migratedEvents);
             }
+
             return migrationHierarchy;
         }
 
@@ -63,17 +62,14 @@ namespace Dolittle.Runtime.Events.Migration
 
         static Type GetMigrationType(Type migrationSourceType, Type candidateType)
         {
-            var types = from interfaceType in 
+            var types = from interfaceType in
                             candidateType.GetTypeInfo().ImplementedInterfaces
                         where interfaceType.GetTypeInfo().IsGenericType
-
                         let baseInterface = interfaceType.GetGenericTypeDefinition()
                         where baseInterface == _migrationInterface && interfaceType
-                            .GetTypeInfo().GenericTypeArguments
-                            .First() == migrationSourceType
+                            .GetTypeInfo().GenericTypeArguments[0] == migrationSourceType
                         select interfaceType
-                            .GetTypeInfo().GenericTypeArguments
-                            .First();
+                            .GetTypeInfo().GenericTypeArguments[0];
 
             var migratedFromType = types.FirstOrDefault();
 
@@ -89,7 +85,7 @@ namespace Dolittle.Runtime.Events.Migration
 
         static IEnumerable<Type> GetMigratedEvents(IEnumerable<Type> allEventTypes)
         {
-            foreach(var @event in allEventTypes)
+            foreach (var @event in allEventTypes)
             {
                 var eventType = (from ievent in @event
                                     .GetTypeInfo().ImplementedInterfaces

@@ -1,19 +1,20 @@
-﻿using System.Dynamic;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Dynamic;
 using Dolittle.Artifacts;
 using Dolittle.Execution;
-using Dolittle.Runtime.Transactions;
 using Machine.Specifications;
-using Moq;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Commands.Validation.Specs.for_CommandValidators
 {
     public class when_validating_and_there_are_two_providers : given.command_validators_with_two_providers
     {
-        static CommandRequest   command;
+        static CommandRequest command;
         static CommandValidationResult result;
 
-        Establish context = () => 
+        Establish context = () =>
         {
             var artifact = Artifact.New();
             command = new CommandRequest(CorrelationId.Empty, artifact.Id, artifact.Generation, new ExpandoObject());

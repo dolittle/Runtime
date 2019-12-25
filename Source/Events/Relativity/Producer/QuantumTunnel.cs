@@ -1,17 +1,13 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Collections;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Serialization.Protobuf;
 using Grpc.Core;
 using grpc = Dolittle.Events.Relativity.Microservice;
@@ -19,81 +15,94 @@ using grpc = Dolittle.Events.Relativity.Microservice;
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IQuantumTunnel"/>
+    /// Represents an implementation of <see cref="IQuantumTunnel"/>.
     /// </summary>
-    public class QuantumTunnel : IQuantumTunnel
+    public class QuantumTunnel : IQuantumTunnel, IDisposable
     {
         readonly ISerializer _serializer;
         readonly IServerStreamWriter<grpc.CommittedEventStreamWithContext> _responseStream;
         readonly ConcurrentQueue<grpc.CommittedEventStreamWithContext> _outbox;
         readonly ILogger _logger;
         readonly AutoResetEvent _waitHandle;
-        readonly CancellationToken _cancelationToken;
+        readonly CancellationToken _cancellationToken;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="IQuantumTunnel"/>
+        /// Initializes a new instance of the <see cref="QuantumTunnel"/> class.
         /// </summary>
-        /// /// <param name="serializer"><see cref="ISerializer"/> to use</param>
-        /// <param name="responseStream">The committed event stream to pass through</param>
-        /// <param name="cancellationToken"></param>
-        /// <param name="logger"><see cref="ILogger"/> for logging</param>
-        public QuantumTunnel (
+        /// <param name="serializer"><see cref="ISerializer"/> to use.</param>
+        /// <param name="responseStream">The committed event stream to pass through.</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+        /// <param name="cancellationToken"><see cref="CancellationToken"/> to use.</param>
+        public QuantumTunnel(
             ISerializer serializer,
             IServerStreamWriter<grpc.CommittedEventStreamWithContext> responseStream,
-            CancellationToken cancellationToken,
-            ILogger logger)
+            ILogger logger,
+            CancellationToken cancellationToken)
         {
             _responseStream = responseStream;
             _serializer = serializer;
-            _outbox = new ConcurrentQueue<grpc.CommittedEventStreamWithContext> ();
-            _waitHandle = new AutoResetEvent (false);
-            _cancelationToken = cancellationToken;
+            _outbox = new ConcurrentQueue<grpc.CommittedEventStreamWithContext>();
+            _waitHandle = new AutoResetEvent(false);
             _logger = logger;
+            _cancellationToken = cancellationToken;
         }
 
         /// <inheritdoc/>
-        public event QuantumTunnelCollapsed Collapsed = (q) => { };
+        public event QuantumTunnelCollapsed Collapsed = (_) => { };
 
         /// <inheritdoc/>
-        public void PassThrough (Processing.CommittedEventStreamWithContext contextualEventStream)
+        public void Dispose()
+        {
+            _waitHandle.Dispose();
+        }
+
+        /// <inheritdoc/>
+        public void PassThrough(Processing.CommittedEventStreamWithContext contextualEventStream)
         {
             try
             {
-                var message = contextualEventStream.ToProtobuf ();
-                _outbox.Enqueue (message);
-                _waitHandle.Set ();
+                var message = contextualEventStream.ToProtobuf();
+                _outbox.Enqueue(message);
+                _waitHandle.Set();
             }
             catch (Exception ex)
             {
-                _logger.Error (ex, "Error creating and enqueueing committed event stream");
+                _logger.Error(ex, "Error creating and enqueueing committed event stream");
             }
         }
 
-        /// <inheritdoc/>
-        public async Task Open (IEnumerable<TenantOffset> tenantOffsets)
+        /// <summary>
+        /// Opens the tunnel.
+        /// </summary>
+        /// <param name="tenantOffsets"><see cref="IEnumerable{T}"/> of <see cref="TenantOffset"/>.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task Open(IEnumerable<TenantOffset> tenantOffsets)
         {
-            await Task.Run (async () =>
+            if (tenantOffsets is null)
             {
-                for (;;)
+                throw new ArgumentNullException(nameof(tenantOffsets));
+            }
+
+            await Task.Run(async () =>
+            {
+                while (!_cancellationToken.IsCancellationRequested)
                 {
-                    if (_cancelationToken.IsCancellationRequested) break;
                     try
                     {
-                        _waitHandle.WaitOne (1000);
+                        _waitHandle.WaitOne(1000);
                         if (_outbox.IsEmpty) continue;
 
-                        grpc.CommittedEventStreamWithContext message;
                         while (!_outbox.IsEmpty)
                         {
-                            if (_outbox.TryDequeue (out message))
+                            if (_outbox.TryDequeue(out grpc.CommittedEventStreamWithContext message))
                             {
                                 try
                                 {
-                                    await _responseStream.WriteAsync (message);
+                                    await _responseStream.WriteAsync(message).ConfigureAwait(false);
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logger.Error (ex, "Error trying to send");
+                                    _logger.Error(ex, "Error trying to send");
                                     break;
                                 }
                             }
@@ -101,28 +110,12 @@ namespace Dolittle.Runtime.Events.Relativity
                     }
                     catch (Exception outerException)
                     {
-                        _logger.Error (outerException, "Error during emptying of outbox");
+                        _logger.Error(outerException, "Error during emptying of outbox");
                     }
                 }
-            });
+            }).ConfigureAwait(false);
 
-            Collapsed (this);
-        }
-
-        void AddToQueue (IEnumerable<Commits> commits)
-        {
-            commits.ForEach (_ => AddToQueue (_));
-        }
-
-        void AddToQueue (Commits commits)
-        {
-            commits.ForEach (_ => AddToQueue (_));
-        }
-
-        void AddToQueue (Store.CommittedEventStream committedEventStream)
-        {
-            var originalContext = committedEventStream.Events.First ().Metadata.OriginalContext;
-            _outbox.Enqueue (new Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext (committedEventStream, originalContext.ToExecutionContext (committedEventStream.CorrelationId)).ToProtobuf ());
+            Collapsed(this);
         }
     }
 }

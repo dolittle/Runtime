@@ -1,5 +1,6 @@
-﻿using System.Reflection;
-using Dolittle.Rules;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Validation;
 using Machine.Specifications;
 using Moq;
@@ -9,10 +10,11 @@ namespace Dolittle.Specs.Validation.for_ValueValidationBuilder
 {
     public class when_adding_rule
     {
-        static ValueValidationBuilder<object>   builder;
-        static Mock<IValueRule>  rule_mock;
+        static ValueValidationBuilder<object> builder;
+        static Mock<IValueRule> rule_mock;
 
-        Establish context = () => {
+        Establish context = () =>
+        {
             builder = new ValueValidationBuilder<object>(null);
             rule_mock = new Mock<IValueRule>();
         };

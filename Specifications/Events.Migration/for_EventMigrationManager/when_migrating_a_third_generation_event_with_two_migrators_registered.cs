@@ -1,7 +1,10 @@
-﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Dolittle.Events;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
 using Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationService.given;
 using Machine.Specifications;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationService
 {
@@ -14,6 +17,7 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationService
         Because of = () => result = event_migrator_manager.Migrate(source_event);
 
         It should_migrate_the_event_to_the_second_generation_type = () => result.ShouldBeAssignableTo(typeof(SimpleEvent));
+
         It should_migrate_the_correct_values = () =>
         {
             var v3 = result as Fakes.v3.SimpleEvent;

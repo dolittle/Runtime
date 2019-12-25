@@ -1,9 +1,12 @@
-﻿using System.Reflection;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Reflection;
 using Machine.Specifications;
 
 namespace Dolittle.Events.Specs.for_EventSource
 {
-    [Subject(typeof (EventSourceExtensions))]
+    [Subject(typeof(EventSourceExtensions))]
     public class when_getting_the_on_method_on_an_event_source_for_an_event : given.two_different_event_source_types_that_handle_different_events
     {
         protected static MethodInfo handled_event_for_first_event_source;
@@ -15,11 +18,7 @@ namespace Dolittle.Events.Specs.for_EventSource
         Because of = () =>
                          {
                              handled_event_for_first_event_source = event_source.GetOnMethod(simple_event);
-                             //unhandled_event_for_first_event_source = event_source.GetHandleMethod(another_simple_event);
-
                              handled_event_for_second_event_source = second_event_source.GetOnMethod(another_simple_event);
-                             //unhandled_event_for_second_event_source = second_event_source.GetHandleMethod(simple_event);
-
                              second_handled_event_for_second_event_source = second_event_source.GetOnMethod(new SimpleEventWithOneProperty());
                          };
 

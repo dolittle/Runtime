@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.Reflection;
 using Dolittle.Rules;
@@ -9,27 +8,30 @@ using Dolittle.Rules;
 namespace Dolittle.Queries.Validation
 {
     /// <summary>
-    /// Represents an argument on a query
+    /// Represents an argument on a query.
     /// </summary>
     public class QueryArgument
     {
         /// <summary>
-        /// Gets or sets the property info for the argument
+        /// Gets the property info for the argument.
         /// </summary>
-        public PropertyInfo Property { get; private set; }
+        public PropertyInfo Property { get; }
 
         /// <summary>
-        /// Gets or sets the rules for the argument
+        /// Gets or sets the rules for the argument.
         /// </summary>
         public IEnumerable<IRule> Rules { get; set; }
 
         /// <summary>
-        /// 
+        /// Validate the argument.
         /// </summary>
-        /// <param name="context"></param>
-        /// <returns></returns>
-        public QueryArgumentValidationResult    Validate(IRuleContext context)
+        /// <param name="context"><see cref="IRuleContext"/> to validate.</param>
+        /// <returns>The <see cref="QueryArgumentValidationResult"/>.</returns>
+        public QueryArgumentValidationResult Validate(IRuleContext context)
         {
+            if (context == null)
+                throw new System.ArgumentNullException(nameof(context));
+
             var result = new QueryArgumentValidationResult(null);
 
             return result;

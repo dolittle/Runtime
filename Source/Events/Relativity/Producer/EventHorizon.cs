@@ -1,8 +1,6 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
-using System;
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,22 +13,22 @@ using Dolittle.Runtime.Events.Store;
 namespace Dolittle.Runtime.Events.Relativity
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IEventHorizon"/>
+    /// Represents an implementation of <see cref="IEventHorizon"/>.
     /// </summary>
     [Singleton]
     public class EventHorizon : IEventHorizon
     {
         readonly List<ISingularity> _singularities = new List<ISingularity>();
         readonly IExecutionContextManager _executionContextManager;
-        readonly IFetchUnprocessedCommits _unprocessedCommitFetcher; 
+        readonly IFetchUnprocessedCommits _unprocessedCommitFetcher;
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="EventHorizon"/>
+        /// Initializes a new instance of the <see cref="EventHorizon"/> class.
         /// </summary>
-        /// <param name="executionContextManager"></param>
-        /// <param name="unprocessedCommitsFetcher"></param>
-        /// <param name="logger"><see cref="ILogger"/> for logging</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for working with <see cref="ExecutionContext"/>.</param>
+        /// <param name="unprocessedCommitsFetcher"><see cref="IFetchUnprocessedCommits"/> for fetching unprocessed commits.</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public EventHorizon(IExecutionContextManager executionContextManager, IFetchUnprocessedCommits unprocessedCommitsFetcher, ILogger logger)
         {
             _executionContextManager = executionContextManager;
@@ -39,9 +37,18 @@ namespace Dolittle.Runtime.Events.Relativity
         }
 
         /// <inheritdoc/>
-        public void PassThrough(Dolittle.Runtime.Events.Processing.CommittedEventStreamWithContext committedEventStream)
+        public IEnumerable<ISingularity> Singularities
         {
-            lock(_singularities)
+            get
+            {
+                lock (_singularities) return _singularities;
+            }
+        }
+
+        /// <inheritdoc/>
+        public void PassThrough(Processing.CommittedEventStreamWithContext committedEventStream)
+        {
+            lock (_singularities)
             {
                 _logger.Information($"Committed eventstream entering event horizon with {_singularities.Count} singularities");
                 _singularities
@@ -57,7 +64,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public void Collapse(ISingularity singularity)
         {
-            lock(_singularities)
+            lock (_singularities)
             {
                 _logger.Information($"Quantum tunnel collapsed for singularity identified with bounded context '{singularity.BoundedContext}' in application '{singularity.Application}'");
                 _singularities.Remove(singularity);
@@ -67,20 +74,11 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <inheritdoc/>
         public void GravitateTowards(ISingularity singularity, IEnumerable<TenantOffset> tenantOffsets)
         {
-            lock(_singularities)
+            lock (_singularities)
             {
                 _logger.Information($"Gravitate events in the event horizon towards singularity identified with bounded context '{singularity.BoundedContext}' in application '{singularity.Application}'");
                 _singularities.Add(singularity);
                 SendUnprocessedCommitsThroughSingularity(tenantOffsets, singularity);
-            }
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<ISingularity> Singularities
-        {
-            get
-            {
-                lock(_singularities) return _singularities;
             }
         }
 
@@ -93,7 +91,8 @@ namespace Dolittle.Runtime.Events.Relativity
         IEnumerable<Commits> GetCommits(IEnumerable<TenantOffset> tenantOffsets)
         {
             var commits = new List<Commits>();
-            Parallel.ForEach(tenantOffsets, (_) => {
+            Parallel.ForEach(tenantOffsets, (_) =>
+            {
                 _executionContextManager.CurrentFor(_.Tenant);
                 commits.Add(_unprocessedCommitFetcher.GetUnprocessedCommits(_.Offset));
             });
@@ -102,13 +101,14 @@ namespace Dolittle.Runtime.Events.Relativity
 
         void PassThroughSingularity(IEnumerable<Commits> commitsArray, ISingularity singularity)
         {
-            commitsArray.ForEach(commits => {
-                commits.ForEach(commit => {
-                    var committedEventStreamWithContext = new Processing.CommittedEventStreamWithContext(commit, commit.Events.First().Metadata.OriginalContext.ToExecutionContext(commit.CorrelationId)); 
+            commitsArray.ForEach(commits =>
+            {
+                commits.ForEach(commit =>
+                {
+                    var committedEventStreamWithContext = new Processing.CommittedEventStreamWithContext(commit, commit.Events.First().Metadata.OriginalContext.ToExecutionContext(commit.CorrelationId));
                     if (singularity.CanPassThrough(committedEventStreamWithContext)) singularity.PassThrough(committedEventStreamWithContext);
                 });
             });
         }
-        
     }
 }

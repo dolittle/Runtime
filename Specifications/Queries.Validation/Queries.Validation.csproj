@@ -5,7 +5,7 @@
     <AssemblyName>Dolittle.Queries.Validation.Specs</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../Build/MSBuild/specs.props"></Import>
+  <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Machine.Specifications.Rules" Version="2.*"/>

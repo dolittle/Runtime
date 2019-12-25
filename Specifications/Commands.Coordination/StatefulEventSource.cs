@@ -1,37 +1,41 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using Dolittle.Events;
-using Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs
 {
     public class StatefulEventSource : EventSource
     {
+        public bool CommitCalled = false;
+        public bool RollbackCalled = false;
+
         public string Value { get; set; }
+
         public bool EventApplied { get; private set; }
 
-        public StatefulEventSource(Guid id) : base(id)
+        public StatefulEventSource(Guid id)
+            : base(id)
         {
         }
 
-        void On(SimpleEvent simpleEvent)
-        {
-            EventApplied = true;
-            Value = simpleEvent.Content;
-        }
-
-
-        public bool CommitCalled = false;
         public override void Commit()
         {
             CommitCalled = true;
             base.Commit();
         }
 
-        public bool RollbackCalled = false;
         public override void Rollback()
         {
             RollbackCalled = true;
             base.Rollback();
+        }
+
+        void On(SimpleEvent simpleEvent)
+        {
+            EventApplied = true;
+            Value = simpleEvent.Content;
         }
     }
 }

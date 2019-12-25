@@ -1,26 +1,20 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
+using System.Linq;
 using System.Reflection;
+using Dolittle.Events;
 using Dolittle.Globalization;
 using Dolittle.Logging;
-using Dolittle.Runtime.Transactions;
-using Dolittle.Runtime.Commands;
 using Dolittle.Runtime.Commands.Handling;
 using Dolittle.Runtime.Commands.Security;
 using Dolittle.Runtime.Commands.Validation;
-using Dolittle.Rules;
-using System.Collections.Generic;
-using Dolittle.Collections;
-using System.Linq;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Commands.Coordination
 {
     /// <summary>
-    /// Represents a <see cref="ICommandCoordinator">ICommandCoordinator</see>
+    /// Represents a <see cref="ICommandCoordinator">ICommandCoordinator</see>.
     /// </summary>
     public class CommandCoordinator : ICommandCoordinator
     {
@@ -31,16 +25,15 @@ namespace Dolittle.Runtime.Commands.Coordination
         readonly ILocalizer _localizer;
         readonly ILogger _logger;
 
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommandCoordinator">CommandCoordinator</see>
+        /// Initializes a new instance of the <see cref="CommandCoordinator"/> class.
         /// </summary>
-        /// <param name="commandHandlerManager">A <see cref="ICommandHandlerManager"/> for handling commands</param>
-        /// <param name="commandContextManager">A <see cref="ICommandContextManager"/> for establishing a <see cref="CommandContext"/></param>
-        /// <param name="commandSecurityManager">A <see cref="ICommandSecurityManager"/> for dealing with security and commands</param>
-        /// <param name="commandValidators">A <see cref="ICommandValidators"/> for validating a <see cref="CommandRequest"/> before handling</param>
-        /// <param name="localizer">A <see cref="ILocalizer"/> to use for controlling localization of current thread when handling commands</param>
-        /// <param name="logger"><see cref="ILogger"/> to log with</param>
+        /// <param name="commandHandlerManager">A <see cref="ICommandHandlerManager"/> for handling commands.</param>
+        /// <param name="commandContextManager">A <see cref="ICommandContextManager"/> for establishing a <see cref="CommandContext"/>.</param>
+        /// <param name="commandSecurityManager">A <see cref="ICommandSecurityManager"/> for dealing with security and commands.</param>
+        /// <param name="commandValidators">A <see cref="ICommandValidators"/> for validating a <see cref="CommandRequest"/> before handling.</param>
+        /// <param name="localizer">A <see cref="ILocalizer"/> to use for controlling localization of current thread when handling commands.</param>
+        /// <param name="logger"><see cref="ILogger"/> to log with.</param>
         public CommandCoordinator(
             ICommandHandlerManager commandHandlerManager,
             ICommandContextManager commandContextManager,
@@ -103,7 +96,7 @@ namespace Dolittle.Runtime.Commands.Coordination
                                 .Select(_ => new BrokenRuleResult(
                                     _.Rule.Name,
                                     $"EventSource: {_.Context.Target.GetType().Name} - with id {((IEventSource)_.Context.Target).EventSourceId.Value}",
-                                    _.Instance?.ToString()??"[Not Set]",
+                                    _.Instance?.ToString() ?? "[Not Set]",
                                     _.Causes));
 
                             _logger.Trace("Commit transaction");

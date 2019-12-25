@@ -1,6 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Rules;
-using Dolittle.Validation;
 using Dolittle.Validation.Rules;
 using Machine.Specifications;
 using Moq;
@@ -14,7 +15,7 @@ namespace Dolittle.Specs.Validation.Rules.for_MaxLength
         static MaxLength rule;
         static Mock<IRuleContext> rule_context_mock;
 
-        Establish context = () => 
+        Establish context = () =>
         {
             rule = new MaxLength(null, 4);
             rule_context_mock = new Mock<IRuleContext>();

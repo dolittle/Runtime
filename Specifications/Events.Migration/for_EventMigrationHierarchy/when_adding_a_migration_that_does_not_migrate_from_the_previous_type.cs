@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
 using Dolittle.Runtime.Events.Migration.Specs.Fakes.v3;
 using Machine.Specifications;
 
@@ -8,10 +11,7 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy
     {
         static Exception Exception;
 
-        Because of = () =>
-        {
-            Exception = Catch.Exception(() => event_migration_hierarchy.AddMigrationLevel(typeof(SimpleEvent)));
-        };
+        Because of = () => Exception = Catch.Exception(() => event_migration_hierarchy.AddMigrationLevel(typeof(SimpleEvent)));
 
         It should_throw_an_invalid_migration_type_exception = () => Exception.ShouldBeOfExactType(typeof(InvalidMigrationTypeException));
     }

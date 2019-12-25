@@ -1,6 +1,9 @@
-﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
-using Machine.Specifications;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
 {
@@ -9,11 +12,8 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyMan
     {
         static Type event_type;
 
-        Because of = () =>
-        {
-            event_type = event_migration_hierarchy_manager.GetLogicalTypeFromName("SimpleEvent");
-        };
+        Because of = () => event_type = event_migration_hierarchy_manager.GetLogicalTypeFromName("SimpleEvent");
 
-        It should_get_the_correct_logical_event = () =>  event_type.ShouldEqual(typeof (SimpleEvent));
+        It should_get_the_correct_logical_event = () => event_type.ShouldEqual(typeof(SimpleEvent));
     }
 }

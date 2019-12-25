@@ -1,50 +1,48 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using Dolittle.Concepts;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Represents the identification of an event source
+    /// Represents the identification of an event source.
     /// </summary>
     public class EventSourceId : ConceptAs<Guid>
     {
         /// <summary>
-        /// A static singleton instance to represent an "Empty" <see cref="EventSourceId" />
+        /// A static singleton instance to represent an "Empty" <see cref="EventSourceId" />.
         /// </summary>
         public static readonly EventSourceId Empty = Guid.Empty;
 
         /// <summary>
-        /// Creates a new instance of an <see cref="EventSourceId"/> with an empty guid 
+        /// Initializes a new instance of the <see cref="EventSourceId"/> class.
         /// </summary>
-        public EventSourceId() => new EventSourceId(Guid.Empty);
-
-        /// <summary>
-        /// Instantiates a new instance of an <see cref="EventSourceId"/> with a unique id
-        /// </summary>
-        /// <param name="guid"></param>
-        public EventSourceId(Guid guid) => Value = guid;
-
-
-        /// <summary>
-        /// Creates a new instance of <see cref="EventSourceId"/> with a unique id
-        /// </summary>
-        /// <returns>A new <see cref="EventSourceId"/></returns>
-        public static EventSourceId New()
+        public EventSourceId()
+            : this(Guid.Empty)
         {
-            return new EventSourceId { Value = Guid.NewGuid() };
         }
 
         /// <summary>
-        /// Implicitly convert from a <see cref="Guid"/> to an <see cref="EventSourceId"/>
+        /// Initializes a new instance of the <see cref="EventSourceId"/> class.
         /// </summary>
-        /// <param name="eventId"></param>
-        public static implicit operator EventSourceId(Guid eventId)
+        /// <param name="id"><see cref="Guid"/> value.</param>
+        public EventSourceId(Guid id) => Value = id;
+
+        /// <summary>
+        /// Implicitly convert from a <see cref="Guid"/> to an <see cref="EventSourceId"/>.
+        /// </summary>
+        /// <param name="eventId">EventSourceId as <see cref="Guid"/>.</param>
+        public static implicit operator EventSourceId(Guid eventId) => new EventSourceId { Value = eventId };
+
+        /// <summary>
+        /// Creates a new instance of <see cref="EventSourceId"/> with a unique id.
+        /// </summary>
+        /// <returns>A new <see cref="EventSourceId"/>.</returns>
+        public static EventSourceId New()
         {
-            return new EventSourceId { Value = eventId };
+            return new EventSourceId { Value = Guid.NewGuid() };
         }
     }
 }

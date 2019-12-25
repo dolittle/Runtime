@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Rules;
 using Dolittle.Validation;
 using Dolittle.Validation.Rules;
@@ -10,9 +12,10 @@ namespace Dolittle.Specs.Validation.Rules.for_GreaterThan
 {
     public class when_checking_value_that_is_wrong_type
     {
-        static GreaterThan<double>  rule;
+        static GreaterThan<double> rule;
         static Mock<IRuleContext> rule_context_mock;
-        Establish context = () => 
+
+        Establish context = () =>
         {
             rule = new GreaterThan<double>(null, 42.0);
             rule_context_mock = new Mock<IRuleContext>();

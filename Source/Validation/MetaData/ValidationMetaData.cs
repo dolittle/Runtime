@@ -1,28 +1,28 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using Dolittle.Types;
 
 namespace Dolittle.Validation.MetaData
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IValidationMetaData"/>
+    /// Represents an implementation of <see cref="IValidationMetaData"/>.
     /// </summary>
     public class ValidationMetaData : IValidationMetaData
     {
-        IInstancesOf<ICanGenerateValidationMetaData> _generators;
+        readonly IInstancesOf<ICanGenerateValidationMetaData> _generators;
 
         /// <summary>
-        /// Initializes an instance of <see cref="ValidationMetaData"/>
+        /// Initializes a new instance of the <see cref="ValidationMetaData"/> class.
         /// </summary>
+        /// <param name="generators">Instances of <see cref="ICanGenerateValidationMetaData"/>.</param>
         public ValidationMetaData(IInstancesOf<ICanGenerateValidationMetaData> generators)
         {
             _generators = generators;
         }
 
-#pragma warning disable 1591 // Xml Comments
+        /// <inheritdoc/>
         public TypeMetaData GetMetaDataFor(Type typeForValidation)
         {
             var typeMetaData = new TypeMetaData();
@@ -33,15 +33,14 @@ namespace Dolittle.Validation.MetaData
 
                 foreach (var property in metaData.Properties.Keys)
                 {
-                    foreach( var ruleSet in metaData.Properties[property].Keys ) 
+                    foreach (var ruleSet in metaData.Properties[property].Keys)
                     {
                         typeMetaData[property][ruleSet] = metaData.Properties[property][ruleSet];
                     }
-                }                
+                }
             }
 
             return typeMetaData;
         }
-#pragma warning restore 1591 // Xml Comments
     }
 }

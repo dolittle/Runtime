@@ -1,6 +1,9 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
-using Machine.Specifications;
 using Dolittle.Events;
+using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager
 {
@@ -11,8 +14,7 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyMan
         Because of = () =>
                          {
                              exception = Catch.Exception(() =>
-                                    event_migration_hierarchy_manager.GetTargetTypeForGeneration(typeof(IEvent),1)
-                                 );
+                                    event_migration_hierarchy_manager.GetTargetTypeForGeneration(typeof(IEvent), 1));
                          };
 
         It should_throw_an_unregistered_event_exception = () => exception.ShouldBeOfExactType(typeof(UnregisteredEventException));

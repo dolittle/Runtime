@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using Dolittle.ReadModels;
 
 namespace Dolittle.Queries.Specs.for_ReadModelFilters
@@ -7,6 +10,7 @@ namespace Dolittle.Queries.Specs.for_ReadModelFilters
     {
         public bool FilterCalled = false;
         public IEnumerable<IReadModel> ReadModelsPassedForFilter = null;
+
         public IEnumerable<IReadModel> Filter(IEnumerable<IReadModel> readModels)
         {
             FilterCalled = true;

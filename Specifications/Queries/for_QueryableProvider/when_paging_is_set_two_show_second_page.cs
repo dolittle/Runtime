@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System.Collections.Generic;
 using System.Linq;
 using Machine.Specifications;
 
@@ -16,7 +19,7 @@ namespace Dolittle.Queries.Specs.for_QueryableProvider
         static string[] second_page;
         static string[] third_page;
 
-        Establish context = () => 
+        Establish context = () =>
         {
             provider = new QueryableProvider();
             paging = new PagingInfo
@@ -25,15 +28,18 @@ namespace Dolittle.Queries.Specs.for_QueryableProvider
                 Number = 1
             };
 
-            first_page = new [] {
+            first_page = new[]
+            {
                 "first_page_first_item",
                 "first_page_second_item"
             };
-            second_page = new [] {
+            second_page = new[]
+            {
                 "second_page_first_item",
                 "second_page_second_item"
             };
-            third_page = new [] {
+            third_page = new[]
+            {
                 "third_page_first_item",
                 "third_page_second_item"
             };

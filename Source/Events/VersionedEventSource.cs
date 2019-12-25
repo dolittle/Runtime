@@ -1,66 +1,67 @@
-﻿using System;
-using Dolittle.Concepts;
-using Dolittle.Applications;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Artifacts;
+using Dolittle.Concepts;
 using Dolittle.Events;
 using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// A unique identifier of a particular EventSource (instance, type and version)
+    /// A unique identifier of a particular EventSource (instance, type and version).
     /// </summary>
     public class VersionedEventSource : Value<VersionedEventSource>
     {
         /// <summary>
-        /// Instantiates a new instance of a <see cref="VersionedEventSource" /> set to the initial version
+        /// Initializes a new instance of the <see cref="VersionedEventSource"/> class.
         /// </summary>
-        /// <param name="eventSource">The <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" /></param>
-        /// <param name="artifact">The <see cref="ArtifactId" /> that uniquely identifies the type of this event source</param>
-        /// <returns></returns>
-        public VersionedEventSource(EventSourceId eventSource, ArtifactId artifact): this(EventSourceVersion.Initial, new EventSourceKey(eventSource, artifact))
-        {}
+        /// <param name="eventSource">The <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" />.</param>
+        /// <param name="artifact">The <see cref="ArtifactId" /> that uniquely identifies the type of this event source.</param>
+        public VersionedEventSource(EventSourceId eventSource, ArtifactId artifact)
+            : this(EventSourceVersion.Initial, new EventSourceKey(eventSource, artifact))
+        {
+        }
 
         /// <summary>
-        /// Instantiates a new instance of a <see cref="VersionedEventSource" /> set to the supplied version
+        /// Initializes a new instance of the <see cref="VersionedEventSource"/> class.
         /// </summary>
-        /// <param name="version">The <see cref="EventSourceVersion" /> of this instance</param>
-        /// <param name="key">The <see cref="EventSourceKey">Key</see> for this particular <see cref="IEventSource" /></param>
+        /// <param name="version">The <see cref="EventSourceVersion" /> of this instance.</param>
+        /// <param name="key">The <see cref="EventSourceKey">Key</see> for this particular <see cref="IEventSource" />.</param>
         public VersionedEventSource(EventSourceVersion version, EventSourceKey key)
         {
             Version = version;
             Key = key;
         }
+
         /// <summary>
-        /// The <see cref="EventSourceVersion" /> of this instance
+        /// Gets the <see cref="EventSourceVersion" /> of this instance.
         /// </summary>
-        /// <value></value>
         public EventSourceVersion Version { get; }
+
         /// <summary>
-        /// The <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" />
+        /// Gets the <see cref="EventSourceId">Id</see> for this particular <see cref="IEventSource" />.
         /// </summary>
-        /// <value></value>
         public EventSourceId EventSource => Key.Id;
+
         /// <summary>
-        /// The <see cref="ArtifactId" /> that uniquely identifies the type of this event source
+        /// Gets the <see cref="ArtifactId" /> that uniquely identifies the type of this event source.
         /// </summary>
-        /// <value></value>
         public ArtifactId Artifact => Key.Artifact;
+
         /// <summary>
-        /// The <see cref="EventSourceKey" /> that uniquely identifies this event source
+        /// Gets the <see cref="EventSourceKey" /> that uniquely identifies this event source.
         /// </summary>
-        /// <value></value>
         public EventSourceKey Key { get; }
 
-
         /// <summary>
-        /// Creates a <see cref="CommittedEventVersion" /> based upon this <see cref="VersionedEventSource" /> 
+        /// Creates a <see cref="CommittedEventVersion" /> based upon this <see cref="VersionedEventSource" />.
         /// </summary>
-        /// <param name="commitSequence">the <see cref="CommitSequenceNumber" /></param>
-        /// <returns>The <see cref="CommittedEventVersion" /> based upon this <see cref="VersionedEventSource" /> </returns>
+        /// <param name="commitSequence">the <see cref="CommitSequenceNumber" />.</param>
+        /// <returns>The <see cref="CommittedEventVersion" /> based upon this <see cref="VersionedEventSource" />.</returns>
         public CommittedEventVersion ToCommittedEventVersion(CommitSequenceNumber commitSequence)
         {
-            return this.Version.ToCommittedEventVersion(commitSequence);
+            return Version.ToCommittedEventVersion(commitSequence);
         }
     }
 }

@@ -1,27 +1,24 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Events.Relativity.Microservice;
 using Dolittle.PropertyBags;
 using Dolittle.Runtime.Events.Relativity.Protobuf.Conversion.for_GeneralExtensions.given;
 using Machine.Specifications;
-using Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
 {
     public class when_converting_a_mutable_complex_type_object_to_and_from_protobuf
     {
-        readonly static a_complex_type complex_type = new a_complex_type
+        static readonly a_complex_type complex_type = new a_complex_type
         {
             Int = 1,
             Guid = Guid.NewGuid(),
-            IntArray = new int[] {1, 2, 3},
-            IntList = new List<int> {1, 2, 3}
-
+            IntArray = new int[] { 1, 2, 3 },
+            IntList = new List<int> { 1, 2, 3 }
         };
 
         static object complex_type_property_bag_object;
@@ -30,13 +27,14 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
 
         Establish context = () => complex_type_property_bag_object = complex_type.ToPropertyBag();
 
-        Because of = () => 
+        Because of = () =>
         {
             protobuf = complex_type_property_bag_object.ToProtobuf();
             result = protobuf.ToCLR();
         };
-        
+
         It protobuf_message_should_have_a_dictionary_value = () => protobuf.KindCase.ShouldEqual(Value.KindOneofCase.DictionaryValue);
+
         It should_be_equal_to_the_original = () =>
         {
             var complex_type_property_bag = complex_type_property_bag_object as Dolittle.PropertyBags.PropertyBag;
@@ -48,10 +46,9 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
             CreateArrayOf<int>(complex_type_property_bag["IntList"], _ => (int)_).ShouldContainOnly(CreateArrayOf<int>(result_property_bag["IntList"], _ => (int)_));
         };
 
-        static IEnumerable<TResult> CreateArrayOf<TResult>(object arrayObject, Func<object, TResult> converterFunc) => 
-            ((System.Collections.IEnumerable) arrayObject)
+        static IEnumerable<TResult> CreateArrayOf<TResult>(object arrayObject, Func<object, TResult> converterFunc) =>
+            ((System.Collections.IEnumerable)arrayObject)
                 .Cast<object>()
                 .Select(converterFunc);
-        
     }
 }

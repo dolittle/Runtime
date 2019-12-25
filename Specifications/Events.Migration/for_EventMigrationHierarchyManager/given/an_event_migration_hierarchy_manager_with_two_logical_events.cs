@@ -1,7 +1,10 @@
-﻿using Dolittle.Runtime.Events.Migration.Specs.Fakes;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using Dolittle.Runtime.Events.Migration.Specs.Fakes;
 using Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationLevelDiscoverer.given;
 using Machine.Specifications;
-using System;
 
 namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyManager.given
 {
@@ -11,9 +14,6 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyMan
         protected static Type event_without_migrations = typeof(AnotherSimpleEvent);
         protected static Type event_with_migrations = typeof(SimpleEvent);
 
-        Establish context = () =>
-                                {
-                                    event_migration_hierarchy_manager = new EventMigrationHierarchyManager(event_migration_level_discoverer);
-                                };
+        Establish context = () => event_migration_hierarchy_manager = new EventMigrationHierarchyManager(event_migration_level_discoverer);
     }
 }

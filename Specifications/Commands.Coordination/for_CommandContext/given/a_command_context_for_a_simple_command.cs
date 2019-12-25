@@ -1,11 +1,13 @@
-﻿using Dolittle.Events;
-using Dolittle.Execution;
-using Machine.Specifications;
-using Moq;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Dynamic;
+using Dolittle.Artifacts;
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Coordination;
-using Dolittle.Artifacts;
+using Machine.Specifications;
+using Moq;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext.given
 {

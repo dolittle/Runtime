@@ -1,27 +1,26 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Linq;
 using Dolittle.Applications;
 using Dolittle.Execution;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Tenancy;
-using Dolittle.Protobuf;
 using grpc = Dolittle.Events.Relativity.Microservice;
 
 namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
 {
     /// <summary>
-    /// Extensions for converting <see cref="ExecutionContext"/> to and from protobuf representations
+    /// Extensions for converting <see cref="ExecutionContext"/> to and from protobuf representations.
     /// </summary>
     public static class ExecutionContextExtensions
     {
         /// <summary>
-        /// Convert from <see cref="grpc.OriginalContext"/> to <see cref="OriginalContext"/>
+        /// Convert from <see cref="grpc.OriginalContext"/> to <see cref="OriginalContext"/>.
         /// </summary>
-        /// <param name="protobuf"><see cref="grpc.OriginalContext"/> to convert from</param>
-        /// <returns>Converted <see cref="OriginalContext"/></returns>
+        /// <param name="protobuf"><see cref="grpc.OriginalContext"/> to convert from.</param>
+        /// <returns>Converted <see cref="OriginalContext"/>.</returns>
         public static OriginalContext ToOriginalContext(this grpc.OriginalContext protobuf)
         {
             return new OriginalContext(
@@ -30,15 +29,14 @@ namespace Dolittle.Runtime.Events.Relativity.Protobuf.Conversion
                 protobuf.Tenant.To<TenantId>(),
                 protobuf.Environment,
                 protobuf.Claims.ToClaims(),
-                protobuf.CommitInOrigin
-            );
+                protobuf.CommitInOrigin);
         }
 
         /// <summary>
-        /// Convert from <see cref="OriginalContext"/> to <see cref="grpc.OriginalContext"/>
+        /// Convert from <see cref="OriginalContext"/> to <see cref="grpc.OriginalContext"/>.
         /// </summary>
-        /// <param name="originalContext"></param>
-        /// <returns></returns>
+        /// <param name="originalContext"><see cref="OriginalContext"/> to convert from.</param>
+        /// <returns>Converted <see cref="grpc.OriginalContext"/>.</returns>
         public static grpc.OriginalContext ToProtobuf(this OriginalContext originalContext)
         {
             var protobuf = new grpc.OriginalContext

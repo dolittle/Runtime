@@ -1,25 +1,23 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
-using Dolittle.Execution;
-using Dolittle.Validation;
 using Dolittle.Types;
+using Dolittle.Validation;
 
 namespace Dolittle.Runtime.Commands.Validation
 {
     /// <summary>
-    /// Represents an implementation of <see cref="ICommandValidators"/> 
+    /// Represents an implementation of <see cref="ICommandValidators"/>.
     /// </summary>
     public class CommandValidators : ICommandValidators
     {
-        IInstancesOf<ICommandValidator> _validators;
+        readonly IInstancesOf<ICommandValidator> _validators;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="CommandValidators"/>
+        /// Initializes a new instance of the <see cref="CommandValidators"/> class.
         /// </summary>
-        /// <param name="validators">Instances of validators to use</param>
+        /// <param name="validators">Instances of validators to use.</param>
         public CommandValidators(IInstancesOf<ICommandValidator> validators)
         {
             _validators = validators;
@@ -37,6 +35,7 @@ namespace Dolittle.Runtime.Commands.Validation
                 errorMessages.AddRange(validatorResult.CommandErrorMessages);
                 validationResults.AddRange(validatorResult.ValidationResults);
             }
+
             var result = new CommandValidationResult
             {
                 CommandErrorMessages = errorMessages,

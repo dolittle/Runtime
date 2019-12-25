@@ -1,8 +1,6 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
@@ -11,8 +9,8 @@ namespace Dolittle.Runtime.Protobuf.for_GeneralExtensions
     {
         static Types type;
 
-        Because of = () => type = ((uint)42).GetProtobufType();
+        Because of = () => type = 42U.GetProtobufType();
 
         It should_be_unsigned_32_bit_integer = () => type.ShouldEqual(Types.UInt32);
-    }    
+    }
 }

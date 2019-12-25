@@ -1,8 +1,11 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using Machine.Specifications;
+
 namespace Dolittle.Runtime.Events.for_EventSourceVersion.when_incrementing_the_sequence
 {
-    using Machine.Specifications;
-
-    [Subject(typeof(EventSourceVersion),"NextSequence")]
+    [Subject(typeof(EventSourceVersion), "NextSequence")]
     public class on_the_initial_version
     {
         static EventSourceVersion result;

@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>Dolittle.Runtime.Commands.Coordination</AssemblyName>
   </PropertyGroup>
 
@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Common" Version="1.*" />
     <PackageReference Include="Dolittle.Applications" Version="4.*" />
     <PackageReference Include="Dolittle.Globalization" Version="4.*" />
   </ItemGroup>

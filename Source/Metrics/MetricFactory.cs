@@ -1,24 +1,23 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Lifecycle;
 using Prometheus;
 
 namespace Dolittle.Runtime.Metrics
 {
     /// <summary>
-    /// Represents an implementation of <see cref="MetricFactory"/>
+    /// Represents an implementation of <see cref="MetricFactory"/>.
     /// </summary>
     [Singleton]
     public class MetricFactory : IMetricFactory
     {
-        readonly Prometheus.MetricFactory   _innerMetricFactory;
+        readonly Prometheus.MetricFactory _innerMetricFactory;
 
         /// <summary>
-        /// Initializes a new instance of <see cref="MetricFactory"/>
+        /// Initializes a new instance of the <see cref="MetricFactory"/> class.
         /// </summary>
-        /// <param name="innerMetricFactory">The inner <see cref="Prometheus.MetricFactory"/> for Prometheus</param>
+        /// <param name="innerMetricFactory">The inner <see cref="Prometheus.MetricFactory"/> for Prometheus.</param>
         public MetricFactory(Prometheus.MetricFactory innerMetricFactory)
         {
             _innerMetricFactory = innerMetricFactory;

@@ -1,7 +1,6 @@
-﻿/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Dolittle. All rights reserved.
- *  Licensed under the MIT License. See LICENSE in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Generic;
 using Dolittle.Validation;
 
@@ -16,7 +15,7 @@ namespace Dolittle.Queries.Validation
     public interface IQueryValidationDescriptor
     {
         /// <summary>
-        /// Gets the argument rules
+        /// Gets the argument rules.
         /// </summary>
         IEnumerable<IValueRule> ArgumentRules { get; }
     }

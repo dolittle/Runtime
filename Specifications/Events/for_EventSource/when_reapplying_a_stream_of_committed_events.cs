@@ -1,34 +1,33 @@
-﻿using Machine.Specifications;
-using Moq;
-using It = Machine.Specifications.It;
-using Dolittle.Events;
-using Dolittle.Runtime.Events;
+﻿// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Execution;
-using Dolittle.Artifacts;
-using System;
+using Machine.Specifications;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Events.Specs.for_EventSource
 {
     [Subject(Subjects.reapplying_events)]
     public class when_reapplying_a_stream_of_committed_events : given.a_stateful_event_source
     {
-        static Dolittle.Runtime.Events.CommittedEvents event_stream;
+        static Runtime.Events.CommittedEvents event_stream;
+
         Establish context =
             () =>
             {
                 var versioned_event_source = a_versioned_event_source_for(event_source_id);
 
                 var first_event = new SimpleEvent();
-                var first_committed_event = build_committed_event(versioned_event_source, first_event, new CommittedEventVersion(1,1,0));
+                var first_committed_event = build_committed_event(versioned_event_source, first_event, new CommittedEventVersion(1, 1, 0));
 
                 var second_event = new SimpleEvent();
-                var second_committed_event = build_committed_event(versioned_event_source, second_event, new CommittedEventVersion(1,1,1));
+                var second_committed_event = build_committed_event(versioned_event_source, second_event, new CommittedEventVersion(1, 1, 1));
 
                 var third_event = new SimpleEvent();
-                var third_committed_event = build_committed_event(versioned_event_source, third_event, new CommittedEventVersion(2,2,0));
+                var third_committed_event = build_committed_event(versioned_event_source, third_event, new CommittedEventVersion(2, 2, 0));
 
-                event_stream = new Dolittle.Runtime.Events.CommittedEvents(event_source_id,new[] {
+                event_stream = new Runtime.Events.CommittedEvents(event_source_id, new[]
+                {
                     first_committed_event,
                     second_committed_event,
                     third_committed_event
