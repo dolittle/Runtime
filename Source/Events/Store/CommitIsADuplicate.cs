@@ -10,13 +10,5 @@ namespace Dolittle.Runtime.Events.Store
     /// </summary>
     public class CommitIsADuplicate : Exception
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CommitIsADuplicate"/> class.
-        /// </summary>
-        /// <param name="message">A message describing the exception.</param>
-        public CommitIsADuplicate(string message)
-            : base(message)
-        {
-        }
     }
 }
