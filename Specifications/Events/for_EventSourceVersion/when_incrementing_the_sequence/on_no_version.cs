@@ -14,6 +14,6 @@ namespace Dolittle.Runtime.Events.for_EventSourceVersion.when_incrementing_the_s
         Because of = () => exception = Catch.Exception(() => EventSourceVersion.NoVersion.NextSequence());
 
         It should_fail = () => exception.ShouldNotBeNull();
-        It should_indicate_an_invalid_version = () => exception.ShouldBeOfExactType<InvalidEventSourceVersion>();
+        It should_indicate_an_invalid_version = () => exception.ShouldBeOfExactType<UnableToGetNextSequenceInCommit>();
     }
 }

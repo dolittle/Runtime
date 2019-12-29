@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store
         public EventStream(IEnumerable<EventEnvelope> events)
         {
             if (events?.Any() != true)
-                throw new InvalidEmptyEventStream(events == null ? $"{nameof(events)} cannot be null" : $"{nameof(events)} cannot be empty");
+                throw new InvalidEmptyEventStream();
 
             _events = events != null ? new List<EventEnvelope>(events) : new List<EventEnvelope>();
         }

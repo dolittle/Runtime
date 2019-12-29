@@ -6,7 +6,7 @@ using System;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represents the error when an <see cref="SingleEventTypeEventStream" /> is created with events from more than one Event Type.
+    /// Exception that gets thrown when an <see cref="SingleEventTypeEventStream" /> is created with events from more than one Event Type.
     /// </summary>
     public class MultipleEventTypesInSingleEventTypeEventStream : Exception
     {
@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.Events.Store
         /// Initializes a new instance of the <see cref="MultipleEventTypesInSingleEventTypeEventStream"/> class.
         /// </summary>
         public MultipleEventTypesInSingleEventTypeEventStream()
+            : base("There are multiple different event types in an event stream purposed for only one type.")
         {
         }
     }

@@ -6,15 +6,15 @@ using System;
 namespace Dolittle.Queries
 {
     /// <summary>
-    /// The exception that is thrown when a query is not known by its name in the system.
+    /// Exception that gets thrown when a query is not known by its name in the system.
     /// </summary>
-    public class UnknownQueryException : ArgumentException
+    public class UnknownQuery : ArgumentException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnknownQueryException"/> class.
+        /// Initializes a new instance of the <see cref="UnknownQuery"/> class.
         /// </summary>
         /// <param name="name">Name of query.</param>
-        public UnknownQueryException(string name)
+        public UnknownQuery(string name)
             : base("There is no query named : " + name)
         {
         }

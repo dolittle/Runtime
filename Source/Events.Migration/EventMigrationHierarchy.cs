@@ -52,8 +52,7 @@ namespace Dolittle.Runtime.Events.Migration
         {
             if (_migrationLevels.Contains(type))
             {
-                throw new DuplicateInEventMigrationHierarchyException(
-                    $"Type {type} already exists in the hierarchy for Event {LogicalEvent}.Cannot have more than one migration path for an Event");
+                throw new DuplicateInEventMigrationHierarchy(type, LogicalEvent);
             }
 
             if (MigrationLevel >= 0)
@@ -92,9 +91,7 @@ namespace Dolittle.Runtime.Events.Migration
         {
             if (!ImplementsMigrationInterface(type))
             {
-                throw new NotAMigratedEventTypeException(
-                        "This is not a valid migrated event type.  All events that are migrations of earlier generations of events" +
-                        "must implement the IAmNextGenerationOf<T> interface where T is the previous generation of the event.");
+                throw new NotAMigratedEventType(type);
             }
         }
 
@@ -134,7 +131,7 @@ namespace Dolittle.Runtime.Events.Migration
 
         void ThrowInvalidMigrationTypeException(Type expected, Type actual)
         {
-            throw new InvalidMigrationTypeException($"Expected migration for type {expected} but got migration for type {actual} instead.");
+            throw new InvalidMigrationType(expected, actual);
         }
     }
 }

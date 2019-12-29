@@ -6,7 +6,7 @@ using System;
 namespace Dolittle.Queries.Coordination
 {
     /// <summary>
-    /// The exception that is thrown when a well known query does not have the query property on it.
+    /// Exception that gets thrown when a well known query does not have the query property on it.
     /// </summary>
     public class MissingQueryProperty : ArgumentException
     {

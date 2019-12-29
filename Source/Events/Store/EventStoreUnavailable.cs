@@ -13,10 +13,10 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="EventStoreUnavailable"/> class.
         /// </summary>
-        /// <param name="message">A message describing the exception.</param>
+        /// <param name="cause">The cause of why the event store is unavailable.</param>
         /// <param name="innerException">The inner <see cref="Exception"/>.</param>
-        public EventStoreUnavailable(string message, Exception innerException)
-            : base(message, innerException)
+        public EventStoreUnavailable(string cause, Exception innerException)
+            : base(cause, innerException)
         {
         }
     }

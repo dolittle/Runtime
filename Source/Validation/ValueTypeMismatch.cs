@@ -6,7 +6,7 @@ using System;
 namespace Dolittle.Validation
 {
     /// <summary>
-    /// The exception that is thrown if a value coming in is of the wrong type from what is expected in a rule.
+    /// Exception that gets thrown when a value coming in is of the wrong type from what is expected in a rule.
     /// </summary>
     public class ValueTypeMismatch : ArgumentException
     {

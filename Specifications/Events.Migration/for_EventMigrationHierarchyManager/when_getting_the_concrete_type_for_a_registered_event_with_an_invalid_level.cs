@@ -13,6 +13,6 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyMan
         Because of = () => exception_when_level_does_not_exist = Catch.Exception(() => event_migration_hierarchy_manager.GetTargetTypeForGeneration(event_without_migrations, 1));
 
         It should_throw_a_migration_level_out_of_range_exception_when_the_migration_level_has_not_been_reached =
-            () => exception_when_level_does_not_exist.ShouldBeOfExactType(typeof(MigrationLevelOutOfRangeException));
+            () => exception_when_level_does_not_exist.ShouldBeOfExactType(typeof(MissingMigrationLevel));
     }
 }

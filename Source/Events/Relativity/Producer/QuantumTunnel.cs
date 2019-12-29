@@ -78,10 +78,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task Open(IEnumerable<TenantOffset> tenantOffsets)
         {
-            if (tenantOffsets is null)
-            {
-                throw new ArgumentNullException(nameof(tenantOffsets));
-            }
+            if (tenantOffsets == null) return;
 
             await Task.Run(async () =>
             {

@@ -13,10 +13,10 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="EventStorePersistenceError"/> class.
         /// </summary>
-        /// <param name="message">A message describing the exception.</param>
+        /// <param name="cause">The cause of the persistence problem exception.</param>
         /// <param name="innerException">The inner <see cref="Exception"/>.</param>
-        public EventStorePersistenceError(string message, Exception innerException)
-            : base(message, innerException)
+        public EventStorePersistenceError(string cause, Exception innerException)
+            : base(cause, innerException)
         {
         }
     }

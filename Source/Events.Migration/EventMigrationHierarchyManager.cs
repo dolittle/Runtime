@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Migration
         public Type GetTargetTypeForGeneration(Type logicalEvent, Generation level)
         {
             if (level < 0)
-                throw new MigrationLevelOutOfRangeException($"The lowest possible migration level is 0.  You asked for {level}");
+                throw new MissingMigrationLevel(logicalEvent, level);
 
             var hierarchy = GetHierarchyForLogicalType(logicalEvent);
             Type type;
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Migration
             }
             catch (Exception)
             {
-                throw new MigrationLevelOutOfRangeException($"The maximum migration level for the logical event {logicalEvent.FullName} is {hierarchy.MigrationLevel}.  Does not have a migration level of {level}");
+                throw new MissingMigrationLevel(logicalEvent, level);
             }
 
             return type;
@@ -66,7 +66,7 @@ namespace Dolittle.Runtime.Events.Migration
             var hierarchy = _hierarchies.FirstOrDefault(h => h.MigratedTypes.Contains(@event));
 
             if (hierarchy == null)
-                throw new UnregisteredEventException($"Cannot find an event migration hierarchy that contains '{@event.AssemblyQualifiedName}' event type");
+                throw new MissingEventTypeInHierarchy(@event.AssemblyQualifiedName);
 
             return hierarchy.LogicalEvent;
         }
@@ -77,7 +77,7 @@ namespace Dolittle.Runtime.Events.Migration
             var hierarchy = _hierarchies.FirstOrDefault(h => h.LogicalEvent.Name == typeName);
 
             if (hierarchy == null)
-                throw new UnregisteredEventException($"Cannot find an event migration hierarchy with the logical event named '{typeName}'.");
+                throw new MissingEventTypeInHierarchy(typeName);
 
             return hierarchy.LogicalEvent;
         }
@@ -87,7 +87,7 @@ namespace Dolittle.Runtime.Events.Migration
             var hierarchy = _hierarchies.FirstOrDefault(hal => hal.LogicalEvent == logicalEvent);
 
             if (hierarchy == null)
-                throw new UnregisteredEventException($"Cannot find the logical event '{logicalEvent.AssemblyQualifiedName}' in the migration hierarchies.");
+                throw new MissingEventTypeInHierarchy(logicalEvent.AssemblyQualifiedName);
 
             return hierarchy;
         }

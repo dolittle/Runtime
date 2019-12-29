@@ -13,6 +13,6 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy
 
         Because of = () => Exception = Catch.Exception(() => event_migration_hierarchy.AddMigrationLevel(typeof(IEvent)));
 
-        It should_throw_a_not_a_migrated_event_type_exception = () => Exception.ShouldBeOfExactType(typeof(NotAMigratedEventTypeException));
+        It should_throw_a_not_a_migrated_event_type_exception = () => Exception.ShouldBeOfExactType(typeof(NotAMigratedEventType));
     }
 }

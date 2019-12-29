@@ -7,7 +7,7 @@ using Grpc.Core;
 namespace Dolittle.Runtime.Heads
 {
     /// <summary>
-    /// Exception that gets thrown if a <see cref="Type"/> does not implement <see cref="ClientBase{T}"/>.
+    /// Exception that gets thrown when a <see cref="Type"/> does not implement <see cref="ClientBase{T}"/>.
     /// </summary>
     public class MustInheritFromClientBase : Exception
     {

@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store
     /// <summary>
     /// A read-only collection of <see cref="CommittedEventStream" />.
     /// </summary>
-    public class Commits : IEnumerable<CommittedEventStream>, IEnumerable
+    public class Commits : IEnumerable<CommittedEventStream>
     {
         readonly ReadOnlyCollection<CommittedEventStream> _commits;
 

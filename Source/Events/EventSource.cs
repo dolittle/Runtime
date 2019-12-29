@@ -129,8 +129,7 @@ namespace Dolittle.Events
         {
             if (!IsForThisEventSource(eventStream.EventSourceId))
             {
-                throw new InvalidOperationException("Cannot apply an EventStream belonging to a different event source. " +
-                    $"Expected events for Id '{EventSourceId}' but got events for Id '{eventStream.EventSourceId}'");
+                throw new EventBelongsToOtherEventSource(eventStream.EventSourceId, EventSourceId);
             }
         }
 
@@ -142,13 +141,13 @@ namespace Dolittle.Events
         void ThrowIfStateful()
         {
             if (!this.IsStateless())
-                throw new InvalidFastForward("Cannot fast forward stateful event source");
+                throw new FastForwardNoAllowedForStatefulEventSource(GetType());
         }
 
         void ThrowIfNotInitialVersion()
         {
             if (!Version.Equals(EventSourceVersion.Initial))
-                throw new InvalidFastForward("Cannot fast forward event source that is not an initial version");
+                throw new FastForwardNotAllowedForStatefulEventSourceWithEvents(GetType());
         }
     }
 }

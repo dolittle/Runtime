@@ -20,8 +20,8 @@ namespace Dolittle.Runtime.Events.Processing
         readonly TenantId _tenant;
         readonly IEventProcessor _processor;
         readonly ILogger _logger;
-        private readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
-        private readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
+        readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScopedEventProcessor"/> class.

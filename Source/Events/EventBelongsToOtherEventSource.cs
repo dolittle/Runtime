@@ -7,7 +7,7 @@ using Dolittle.Events;
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Exception that gets thrown if an <see cref="IEvent"/> has a mismatch with the <see cref="IEventSource"/>
+    /// Exception that gets thrown when an <see cref="IEvent"/> has a mismatch with the <see cref="IEventSource"/>
     /// its being used with.
     /// </summary>
     public class EventBelongsToOtherEventSource : ArgumentException

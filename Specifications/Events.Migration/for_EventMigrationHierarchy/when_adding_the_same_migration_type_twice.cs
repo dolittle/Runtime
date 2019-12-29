@@ -17,6 +17,6 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy
                              Exception = Catch.Exception(() => event_migration_hierarchy.AddMigrationLevel(typeof(SimpleEvent)));
                          };
 
-        It should_throw_a_duplicate_in_event_migration_hierarchy_exception = () => Exception.ShouldBeOfExactType(typeof(DuplicateInEventMigrationHierarchyException));
+        It should_throw_a_duplicate_in_event_migration_hierarchy_exception = () => Exception.ShouldBeOfExactType(typeof(DuplicateInEventMigrationHierarchy));
     }
 }

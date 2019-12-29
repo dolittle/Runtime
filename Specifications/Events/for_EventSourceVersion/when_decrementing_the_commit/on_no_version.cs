@@ -14,6 +14,6 @@ namespace Dolittle.Runtime.Events.for_EventSourceVersion.when_decrementing_the_c
         Because of = () => exception = Catch.Exception(() => EventSourceVersion.NoVersion.PreviousCommit());
 
         It should_fail = () => exception.ShouldNotBeNull();
-        It should_indicate_an_invalid_version = () => exception.ShouldBeOfExactType<InvalidEventSourceVersion>();
+        It should_indicate_an_invalid_version = () => exception.ShouldBeOfExactType<UnableToGetPreviousCommit>();
     }
 }

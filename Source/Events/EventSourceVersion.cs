@@ -122,7 +122,7 @@ namespace Dolittle.Runtime.Events
         public EventSourceVersion NextSequence()
         {
             if (Commit < 1)
-                throw new InvalidEventSourceVersion($"Cannot get the Next Sequence on Commit {Commit}");
+                throw new UnableToGetNextSequenceInCommit(this);
 
             var nextSequence = new EventSourceVersion(Commit, Sequence + 1);
             return nextSequence;
@@ -135,7 +135,7 @@ namespace Dolittle.Runtime.Events
         public EventSourceVersion PreviousCommit()
         {
             if (Commit < 1)
-                throw new InvalidEventSourceVersion($"Cannot get the Previous Commit of Commit {Commit}");
+                throw new UnableToGetPreviousCommit(this);
 
             if (Commit == 1)
                 return NoVersion;

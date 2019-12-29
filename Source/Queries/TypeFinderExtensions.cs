@@ -17,13 +17,13 @@ namespace Dolittle.Queries
         /// </summary>
         /// <param name="typeFinder">instance of <see cref="ITypeFinder"/> being extended.</param>
         /// <param name="fullName">The full name of the type.</param>
-        /// <returns>the type if found, <see cref="UnknownQueryException" /> if not found or type is not a query.</returns>
+        /// <returns>the type if found, <see cref="UnknownQuery" /> if not found or type is not a query.</returns>
         public static Type GetQueryTypeByName(this ITypeFinder typeFinder, string fullName)
         {
             var queryType = typeFinder.FindTypeByFullName(fullName);
 
             if (queryType?.HasInterface(typeof(IQuery)) != true)
-                throw new UnknownQueryException(fullName);
+                throw new UnknownQuery(fullName);
 
             return queryType;
         }

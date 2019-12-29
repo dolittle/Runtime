@@ -6,16 +6,15 @@ using System;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represents the error when an <see cref="EventStream" /> is created with no events.
+    /// Exception that gets thrown when an <see cref="EventStream" /> is created with no events.
     /// </summary>
     public class InvalidEmptyEventStream : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidEmptyEventStream"/> class.
         /// </summary>
-        /// <param name="message">A message describing the exception.</param>
-        public InvalidEmptyEventStream(string message)
-            : base(message)
+        public InvalidEmptyEventStream()
+            : base("An event stream should not be empty")
         {
         }
     }

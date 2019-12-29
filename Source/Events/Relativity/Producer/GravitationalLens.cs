@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly ISerializer _serializer;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
-        private readonly IFetchUnprocessedCommits _fetchUnprocessedCommits;
+        readonly IFetchUnprocessedCommits _fetchUnprocessedCommits;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GravitationalLens"/> class.

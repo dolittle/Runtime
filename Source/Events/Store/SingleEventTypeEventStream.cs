@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store
     /// </summary>
     public class SingleEventTypeEventStream : IEnumerable<CommittedEventEnvelope>, IEquatable<SingleEventTypeEventStream>
     {
-        private static readonly EnumerableEqualityComparer<CommittedEventEnvelope> _comparer = new EnumerableEqualityComparer<CommittedEventEnvelope>();
+        static readonly EnumerableEqualityComparer<CommittedEventEnvelope> _comparer = new EnumerableEqualityComparer<CommittedEventEnvelope>();
         readonly List<CommittedEventEnvelope> _events;
 
         /// <summary>

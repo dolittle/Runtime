@@ -17,13 +17,13 @@ namespace Dolittle.ReadModels
         /// </summary>
         /// <param name="typeFinder">instance of <see cref="ITypeFinder"/> being extended.</param>
         /// <param name="fullName">The full name of the type.</param>
-        /// <returns>the type if found, <see cref="UnknownReadModelOfException" /> if not found or type is not a readmodelof.</returns>
+        /// <returns>the type if found, <see cref="UnknownReadModelOf" /> if not found or type is not a readmodelof.</returns>
         public static Type GetReadModelOfTypeByName(this ITypeFinder typeFinder, string fullName)
         {
             var readModelOfType = typeFinder.FindTypeByFullName(fullName);
 
             if (readModelOfType?.HasInterface(typeof(IReadModelOf<>)) != true)
-                throw new UnknownReadModelOfException(fullName);
+                throw new UnknownReadModelOf(fullName);
 
             return readModelOfType;
         }

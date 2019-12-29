@@ -6,15 +6,15 @@ using System;
 namespace Dolittle.ReadModels
 {
     /// <summary>
-    /// The exception that is thrown when a readmodelof is not known by its name in the system.
+    /// Exception that gets thrown when a readmodelof is not known by its name in the system.
     /// </summary>
-    public class UnknownReadModelOfException : ArgumentException
+    public class UnknownReadModelOf : ArgumentException
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="UnknownReadModelOfException"/> class.
+        /// Initializes a new instance of the <see cref="UnknownReadModelOf"/> class.
         /// </summary>
         /// <param name="name">Name of missing read model type.</param>
-        public UnknownReadModelOfException(string name)
+        public UnknownReadModelOf(string name)
             : base("There is no readmodelof named : " + name)
         {
         }

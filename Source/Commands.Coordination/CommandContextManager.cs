@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Commands.Coordination
         {
             if (!HasCurrent)
             {
-                throw new InvalidOperationException("Command not established");
+                throw new NoEstablishedCommandContext();
             }
 
             return CurrentContext;

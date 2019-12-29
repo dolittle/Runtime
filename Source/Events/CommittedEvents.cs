@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events
         {
             if (committedEvent.Event == null)
             {
-                throw new ArgumentNullException($"Cannot append a null event - '{nameof(committedEvent)}'");
+                throw new EventCanNotBeNull();
             }
 
             if (committedEvent.Metadata.EventSourceId != EventSourceId)

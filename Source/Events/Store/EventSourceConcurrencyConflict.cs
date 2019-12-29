@@ -14,16 +14,10 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="EventSourceConcurrencyConflict"/> class.
         /// </summary>
-        public EventSourceConcurrencyConflict()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventSourceConcurrencyConflict"/> class.
-        /// </summary>
-        /// <param name="message">Message to show.</param>
-        public EventSourceConcurrencyConflict(string message)
-            : base(message)
+        /// <param name="currentVersion">The current version before commit.</param>
+        /// <param name="commitVersion">The version of the commit that causes a concurrency conflict.</param>
+        public EventSourceConcurrencyConflict(EventSourceVersion currentVersion, EventSourceVersion commitVersion)
+            : base($"Current Version is {currentVersion}, tried to commit {commitVersion}")
         {
         }
     }

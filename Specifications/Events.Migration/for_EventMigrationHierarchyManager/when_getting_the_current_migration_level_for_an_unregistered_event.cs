@@ -17,6 +17,6 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchyMan
                    event_migration_hierarchy_manager.GetCurrentGenerationFor(typeof(IEvent)));
         };
 
-        It should_throw_an_unregistered_event_exception = () => exception.ShouldBeOfExactType(typeof(UnregisteredEventException));
+        It should_throw_an_unregistered_event_exception = () => exception.ShouldBeOfExactType(typeof(MissingEventTypeInHierarchy));
     }
 }
