@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.f
         static CommittedEventStream committed_event_stream;
         static List<CommittedEventEnvelope> committed_simple_events;
         static List<CommittedEventEnvelope> committed_another_events;
-        private static Exception ex;
+        static Exception ex;
 
         Establish context = () =>
         {

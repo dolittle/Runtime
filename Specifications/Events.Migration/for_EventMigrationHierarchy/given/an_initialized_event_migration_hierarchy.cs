@@ -12,10 +12,10 @@ namespace Dolittle.Runtime.Events.Migration.Specs.for_EventMigrationHierarchy.gi
         protected static Type hierarchy_for_type;
         protected static EventMigrationHierarchy event_migration_hierarchy;
 
-        private Establish context = () =>
-                                        {
-                                            hierarchy_for_type = typeof(SimpleEvent);
-                                            event_migration_hierarchy = new EventMigrationHierarchy(hierarchy_for_type);
-                                        };
+        Establish context = () =>
+        {
+            hierarchy_for_type = typeof(SimpleEvent);
+            event_migration_hierarchy = new EventMigrationHierarchy(hierarchy_for_type);
+        };
     }
 }
