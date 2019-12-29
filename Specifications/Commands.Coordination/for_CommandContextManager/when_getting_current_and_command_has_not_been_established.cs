@@ -12,6 +12,6 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContextManager
         static Exception exception;
         Because of = () => exception = Catch.Exception(() => Manager.GetCurrent());
 
-        It should_throw_invalid_operation_exception = () => exception.ShouldBeOfExactType(typeof(InvalidOperationException));
+        It should_throw_invalid_operation_exception = () => exception.ShouldBeOfExactType(typeof(NoEstablishedCommandContext));
     }
 }
