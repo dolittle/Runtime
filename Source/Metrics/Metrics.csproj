@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Booting" Version="4.*" />
-    <PackageReference Include="Dolittle.Configuration" Version="4.*" />
-    <PackageReference Include="Dolittle.Types" Version="4.*" />
+    <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Configuration" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Types" Version="$(FundamentalsVersion)" />
     <PackageReference Include="prometheus-net" Version="3.3.0" />
   </ItemGroup>
 

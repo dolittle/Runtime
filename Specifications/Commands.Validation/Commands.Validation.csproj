@@ -1,15 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../specs.props"></Import>
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>Dolittle.Runtime.Commands.Validation.Specs</AssemblyName>
   </PropertyGroup>
 
-  <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Commands.Validation\Commands.Validation.csproj" />
   </ItemGroup>
-
 
 </Project>

@@ -6,11 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.ResourceTypes" Version="4.*" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\Validation\Validation.csproj" />
+    <PackageReference Include="Dolittle.ResourceTypes" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Validation" Version="$(FundamentalsVersion)" />
   </ItemGroup>
   
 </Project>

@@ -6,9 +6,9 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Dolittle.Management" Version="4.*"/>
-    <PackageReference Include="Dolittle.Protobuf" Version="4.*"/>
-    <PackageReference Include="Dolittle.Runtime.Management.Contracts" Version="4.*"/>
+    <PackageReference Include="Dolittle.Management" Version="$(FundamentalsVersion)"/>
+    <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)"/>
+    <PackageReference Include="Dolittle.Runtime.Management.Contracts" Version="$(FundamentalsVersion)"/>
   </ItemGroup>
 
   <ItemGroup>
