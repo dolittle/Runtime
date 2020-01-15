@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
+        <TargetFramework>netstandard2.1</TargetFramework>
         <FundamentalsVersion>4.*</FundamentalsVersion>
     </PropertyGroup>
 
