@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Store;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Defines something that is capable of processing an event .
+    /// Defines something that is capable of processing an event.
     /// </summary>
     public interface IEventProcessor
     {
