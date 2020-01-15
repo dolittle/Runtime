@@ -1,4 +1,6 @@
 <Project>
+    <Import Project="versions.props"/>
+    
     <PropertyGroup>
         <TargetFramework>netcoreapp3.1</TargetFramework>
         <IsTestProject>true</IsTestProject>

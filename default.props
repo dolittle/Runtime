@@ -1,4 +1,6 @@
 <Project>
+    <Import Project="versions.props"/>
+    
     <PropertyGroup>
         <TargetFramework>netstandard2.1</TargetFramework>
         <FundamentalsVersion>4.*</FundamentalsVersion>
