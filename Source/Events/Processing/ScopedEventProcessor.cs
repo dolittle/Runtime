@@ -12,7 +12,7 @@ using Dolittle.Tenancy;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Processes an individiual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />.
+    /// Processes an individual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />.
     /// </summary>
     public class ScopedEventProcessor
     {
