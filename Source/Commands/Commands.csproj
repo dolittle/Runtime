@@ -7,11 +7,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
-    <ProjectReference Include="..\Validation\Validation.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Applications" Version="4.*" />
-    <PackageReference Include="Dolittle.Execution" Version="4.*" />
+    <PackageReference Include="Dolittle.Applications" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Validation" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 </Project>

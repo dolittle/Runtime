@@ -1,7 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
     <AssemblyName>Dolittle.Runtime.Commands.Coordination.Specs</AssemblyName>
   </PropertyGroup>
 
@@ -12,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Globalization" Version="4.*" />
+    <PackageReference Include="Dolittle.Globalization" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 
 </Project>

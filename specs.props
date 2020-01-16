@@ -1,17 +1,15 @@
 <Project>
+    <Import Project="versions.props"/>
+    
     <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
+        <TargetFramework>netcoreapp3.1</TargetFramework>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Common.Specs" Version="2.*"/>
         <PackageReference Include="Dolittle.Types.Testing" Version="4.*"/>
-        <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.8.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.9.0" />
-        <PackageReference Include="Machine.Specifications" Version="0.12.0" />
-        <PackageReference Include="Machine.Specifications.Should" Version="0.11.0" />
-        <PackageReference Include="moq" Version="4.7.*" />
-
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
+        <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.9.0" />
     </ItemGroup>
 </Project>

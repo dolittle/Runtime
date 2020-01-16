@@ -12,12 +12,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Booting" Version="4.*" />
-    <PackageReference Include="Dolittle.Configuration.Files" Version="4.*" />
-    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="4.*" />
-    <PackageReference Include="Dolittle.DependencyInversion.Booting" Version="4.*" />
-    <PackageReference Include="Dolittle.DependencyInversion.Autofac" Version="4.*" />
-    <PackageReference Include="Dolittle.Resilience" Version="4.*" />
+    <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Configuration.Files" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.DependencyInversion.Booting" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.DependencyInversion.Autofac" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="2.2.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="2.2.0" />
   </ItemGroup>
