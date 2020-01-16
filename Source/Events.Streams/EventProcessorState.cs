@@ -4,20 +4,20 @@
 namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
-    /// The state of an <see cref="ICanProcessStreamOfEvents" >event processor</see>.
+    /// Reprents the state of an <see cref="ICanProcessStreamOfEvents">event processor</see>.
     /// </summary>
-    public enum EventStreamProcessorState
+    public class EventProcessorState
     {
-        /// <summary>The state of an <see cref="ICanProcessStreamOfEvents" >event processor</see> when it has successfully processed an <see cref="EventEnvelope">event</see>.</summary>
-        Ok = 0,
+        /// <summary>
+        /// Gets or sets the <see cref="ProcessingState">state</see>.
+        /// </summary>
+        /// <value><see cref="ProcessingState"/>.</value>
+        public ProcessingState State { get; set; }
 
-        /// <summary>The state of an <see cref="ICanProcessStreamOfEvents" >event processor</see> when it has unsuccessfully processed an <see cref="EventEnvelope">event</see> and it has to stop processing.</summary>
-        Stop,
-
-        /// <summary>The state of an <see cref="ICanProcessStreamOfEvents" >event processor</see> when it has unsuccessfully processed an <see cref="EventEnvelope">event</see>, but it will retry later at some point later.</summary>
-        Retry,
-
-        /// <summary>The state of an <see cref="ICanProcessStreamOfEvents" >event processor</see> when it has skipped the processing of an <see cref="EventEnvelope">event</see>.</summary>
-        Ignore
+        /// <summary>
+        /// Gets or sets the <see cref="EventStreamOffset">offset</see>.
+        /// </summary>
+        /// <value><see cref="EventStreamOffset"/>.</value>
+        public EventStreamOffset Offset { get; set; }
     }
 }
