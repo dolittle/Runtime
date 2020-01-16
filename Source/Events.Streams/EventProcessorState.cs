@@ -9,15 +9,26 @@ namespace Dolittle.Runtime.Events.Streams
     public class EventProcessorState
     {
         /// <summary>
-        /// Gets or sets the <see cref="ProcessingState">state</see>.
+        /// A null-state of <see cref="EventProcessorState"/>.
         /// </summary>
-        /// <value><see cref="ProcessingState"/>.</value>
-        public ProcessingState State { get; set; }
+        public static readonly EventProcessorState NullState = new EventProcessorState { Offset = 0, ProcessingState = ProcessingState.NullState };
 
         /// <summary>
-        /// Gets or sets the <see cref="EventStreamOffset">offset</see>.
+        /// Gets or sets the <see cref="ProcessingState">state</see>.
+        /// </summary>
+        /// <value><see cref="Streams.ProcessingState"/>.</value>
+        public ProcessingState ProcessingState { get; set; }
+
+        /// <summary>
+        /// Gets or sets  the <see cref="EventStreamOffset">offset</see>.
         /// </summary>
         /// <value><see cref="EventStreamOffset"/>.</value>
         public EventStreamOffset Offset { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="EventProcessorState">state</see> is a null state.
+        /// </summary>
+        /// <returns>Whether or not this is a null state.</returns>
+        public bool IsNullState => ProcessingState == ProcessingState.NullState;
     }
 }

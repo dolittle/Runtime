@@ -8,6 +8,9 @@ namespace Dolittle.Runtime.Events.Streams
     /// </summary>
     public enum ProcessingState
     {
+        /// <summary>A null state of an <see cref="ICanProcessStreamOfEvents" >event processor</see> when it has been initialized.</summary>
+        NullState = -1,
+
         /// <summary>The state of an <see cref="ICanProcessStreamOfEvents" >event processor</see> when it has successfully processed an <see cref="EventEnvelope">event</see>.</summary>
         Ok = 0,
 
