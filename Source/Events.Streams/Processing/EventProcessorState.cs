@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Streams.Processing
 {
     /// <summary>
-    /// Reprents the state of an <see cref="ICanProcessStreamOfEvents">event processor</see>.
+    /// Reprents the state of an event processor.
     /// </summary>
     public class EventProcessorState
     {

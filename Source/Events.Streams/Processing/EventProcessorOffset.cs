@@ -3,10 +3,10 @@
 
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Streams.Processing
 {
     /// <summary>
-    /// An incrementing number used to identify the offset of an <see cref="ICanProcessStreamOfEvents">event processor</see>.
+    /// An incrementing number used to identify the offset of an event processor.
     /// </summary>
     public class EventProcessorOffset : ConceptAs<ulong>
     {
