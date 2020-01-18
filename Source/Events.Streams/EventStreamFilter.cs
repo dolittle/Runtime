@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Streams
     {
         readonly EventStreamId _eventStreamId;
         readonly ICanHandleEventProcessing<FilteringResult> _eventStreamProcessor;
-        readonly ICanManageEventStream _eventStreamManager;
+        readonly ICanManageEventStreams _eventStreamManager;
         EventStreamState _currentState;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Streams
         public EventStreamFilter(
             EventStreamId eventStreamId,
             ICanHandleEventProcessing<FilteringResult> eventStreamProcessor,
-            ICanManageEventStream eventStreamManager)
+            ICanManageEventStreams eventStreamManager)
         {
             _eventStreamId = eventStreamId;
             _eventStreamProcessor = eventStreamProcessor;
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Streams
         /// <inheritdoc/>
         public async Task Process(IObservable<EventEnvelope> eventStream)
         {
-            _currentState = _eventStreamManager.GetState();
+            _currentState = _eventStreamManager.GetState(_eventStreamId);
             var localStream = eventStream.Skip((int)_currentState.Offset.Value);
             await Task.Run(async () =>
             {
@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Streams
                     else if (_currentState.StreamState == StreamState.Retry) Thread.Sleep(3000);
                     var @event = await localStream.FirstAsync();
                     var filteringResult = _eventStreamProcessor.Process(_eventStreamId, @event);
-                    _currentState = _eventStreamManager.UpdateState(filteringResult.StreamState);
+                    _currentState = _eventStreamManager.UpdateState(_eventStreamId, filteringResult.StreamState);
 
                     if (filteringResult.IncludeEvent)
                     {

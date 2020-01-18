@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Streams.Processing
     {
         readonly EventStreamId _eventStreamId;
         readonly ICanHandleEventProcessing<ProcessingResult> _eventStreamProcessor;
-        readonly ICanManageEventStream _eventStreamManager;
+        readonly ICanManageEventStreams _eventStreamManager;
         EventStreamState _currentState;
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         public EventStreamProcessor(
             EventStreamId eventStreamId,
             ICanHandleEventProcessing<ProcessingResult> eventStreamProcessor,
-            ICanManageEventStream eventStreamManager)
+            ICanManageEventStreams eventStreamManager)
         {
             _eventStreamId = eventStreamId;
             _eventStreamProcessor = eventStreamProcessor;
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         /// <inheritdoc/>
         public async Task Process(IObservable<EventEnvelope> eventStream)
         {
-            _currentState = _eventStreamManager.GetState();
+            _currentState = _eventStreamManager.GetState(_eventStreamId);
             var localStream = eventStream.Skip((int)_currentState.Offset.Value);
             await Task.Run(async () =>
             {
@@ -49,8 +49,8 @@ namespace Dolittle.Runtime.Events.Streams.Processing
                     if (_currentState.StreamState == StreamState.Ignore) localStream = localStream.Skip(1);
                     else if (_currentState.StreamState == StreamState.Retry) Thread.Sleep(3000);
                     var @event = await localStream.FirstAsync();
-                    var filteringResult = _eventStreamProcessor.Process(_eventStreamId, @event);
-                    _currentState = _eventStreamManager.UpdateState(filteringResult.StreamState);
+                    var processingResult = _eventStreamProcessor.Process(_eventStreamId, @event);
+                    _currentState = _eventStreamManager.UpdateState(_eventStreamId, processingResult.StreamState);
                 }
             }).ConfigureAwait(false);
         }
