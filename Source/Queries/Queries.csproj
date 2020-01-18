@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.DependencyInversion" Version="4.*" />
-    <PackageReference Include="Dolittle.Types" Version="4.*" />
-    <PackageReference Include="Dolittle.Reflection" Version="4.*" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Types" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Reflection" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 
   <ItemGroup>

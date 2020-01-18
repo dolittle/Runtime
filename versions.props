@@ -1,0 +1,5 @@
+<Project>
+    <PropertyGroup>
+        <FundamentalsVersion>4.*</FundamentalsVersion>
+    </PropertyGroup>
+</Project>

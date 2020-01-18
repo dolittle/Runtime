@@ -6,13 +6,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Rules" Version="4.*" />
-    <PackageReference Include="Dolittle.Lifecycle" Version="4.*" />
+    <PackageReference Include="Dolittle.Rules" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Lifecycle" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Validation" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Queries\Queries.csproj" />
-    <ProjectReference Include="..\Validation\Validation.csproj" />
   </ItemGroup>
 
 </Project>

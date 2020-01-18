@@ -7,24 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Applications" Version="4.*" />
-    <PackageReference Include="Dolittle.Artifacts" Version="4.*" />
-    <PackageReference Include="Dolittle.Booting" Version="4.*" />
-    <PackageReference Include="Dolittle.Collections" Version="4.*" />
-    <PackageReference Include="Dolittle.Concepts" Version="4.*" />
-    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="4.*" />
-    <PackageReference Include="Dolittle.DependencyInversion" Version="4.*" />
-    <PackageReference Include="Dolittle.Lifecycle" Version="4.*" />
-    <PackageReference Include="Dolittle.PropertyBags" Version="4.*" />
-    <PackageReference Include="Dolittle.Protobuf" Version="4.*" />
-    <PackageReference Include="Dolittle.ResourceTypes" Version="4.*" />
-    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="4.*" />
-    <PackageReference Include="Dolittle.Rules" Version="4.*" />
-    <PackageReference Include="Dolittle.Serialization.Json" Version="4.*" />
-    <PackageReference Include="Dolittle.Serialization.Protobuf" Version="4.*" />
-    <PackageReference Include="Dolittle.Time" Version="4.*" />
-    <PackageReference Include="Dolittle.DependencyInversion" Version="4.*" />
-    <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="4.*" />
+    <PackageReference Include="Dolittle.Applications" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Artifacts" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Collections" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Lifecycle" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.PropertyBags" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.ResourceTypes" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Rules" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Serialization.Json" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Serialization.Protobuf" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Time" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
