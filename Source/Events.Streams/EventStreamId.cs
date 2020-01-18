@@ -26,9 +26,9 @@ namespace Dolittle.Runtime.Events.Streams
         /// Creates a new instance of <see cref="EventStreamId"/> with a unique id.
         /// </summary>
         /// <returns>A new <see cref="EventStreamId"/>.</returns>
-        public static EventId New()
+        public static EventStreamId New()
         {
-            return new EventId { Value = Guid.NewGuid() };
+            return new EventStreamId { Value = Guid.NewGuid() };
         }
     }
 }
