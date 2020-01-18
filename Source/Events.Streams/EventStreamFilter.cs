@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
-    /// Represents an implementation of <see cref="EventStreamFilter"/>.
+    /// Represents an implementation of <see cref="ICanProcessStreamOfEvents"/> that filters a stream of events.
     /// </summary>
     public class EventStreamFilter : ICanProcessStreamOfEvents
     {
