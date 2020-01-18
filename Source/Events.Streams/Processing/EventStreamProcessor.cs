@@ -5,6 +5,7 @@ using System;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Logging;
 
 namespace Dolittle.Runtime.Events.Streams.Processing
 {
@@ -16,6 +17,7 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         readonly EventStreamId _eventStreamId;
         readonly ICanHandleEventProcessing<ProcessingResult> _eventStreamProcessor;
         readonly ICanManageEventStreams _eventStreamManager;
+        readonly ILogger _logger;
         EventStreamState _currentState;
 
         /// <summary>
@@ -24,14 +26,17 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         /// <param name="eventStreamId">Event stream id.</param>
         /// <param name="eventStreamProcessor">Event stream processor.</param>
         /// <param name="eventStreamManager">Event stream manager.</param>
+        /// <param name="logger">Logger.</param>
         public EventStreamProcessor(
             EventStreamId eventStreamId,
             ICanHandleEventProcessing<ProcessingResult> eventStreamProcessor,
-            ICanManageEventStreams eventStreamManager)
+            ICanManageEventStreams eventStreamManager,
+            ILogger logger)
         {
             _eventStreamId = eventStreamId;
             _eventStreamProcessor = eventStreamProcessor;
             _eventStreamManager = eventStreamManager;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -39,6 +44,8 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         {
             _currentState = _eventStreamManager.GetState(_eventStreamId);
             var localStream = eventStream.Skip((int)_currentState.Offset.Value);
+
+            _logger.Information($"Event Stream Filterer has started processing stream: {_eventStreamId.Value} from offset {_currentState.Offset}");
             await Task.Run(async () =>
             {
                 while (_currentState.StreamState != StreamState.Stop)
