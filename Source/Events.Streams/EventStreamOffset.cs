@@ -6,7 +6,7 @@ using Dolittle.Concepts;
 namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
-    /// An incrementing number used to identify the offset of an <see cref="IEventStream">event stream</see>.
+    /// An offset used to identify the offset of an event stream.
     /// </summary>
     public class EventStreamOffset : ConceptAs<ulong>
     {

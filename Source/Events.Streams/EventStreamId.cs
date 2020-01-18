@@ -7,7 +7,7 @@ using Dolittle.Concepts;
 namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
-    /// Represents the identification of an <see cref="IEventStream"/>.
+    /// Represents the identification of an event stream.
     /// </summary>
     public class EventStreamId : ConceptAs<Guid>
     {
