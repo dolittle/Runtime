@@ -1,9 +1,8 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Artifacts;
-using Dolittle.Events;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -18,15 +17,15 @@ namespace Dolittle.Runtime.Events.Processing
         EventProcessorId Identifier { get; }
 
         /// <summary>
-        /// Gets the <see cref="Artifact"/> for the <see cref="IEvent">event type</see>
-        /// it represents.
+        /// Gets the <see cref="StreamId">stream id</see>.
         /// </summary>
-        Artifact Event { get; }
+        StreamId StreamId { get; }
 
         /// <summary>
         /// Process an event.
         /// </summary>
         /// <param name="eventEnvelope"><see cref="CommittedEventEnvelope"/> for event to process.</param>
-        void Process(CommittedEventEnvelope eventEnvelope);
+        /// <returns><see cref="ProcessingResult">Processing result</see>.</returns>
+        ProcessingResult Process(CommittedEventEnvelope eventEnvelope);
     }
 }
