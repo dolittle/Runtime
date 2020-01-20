@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Streams.Processing
 {
     /// <summary>
     /// Defines the hub for working with <see cref="StreamProcessor">stream processors</see>.

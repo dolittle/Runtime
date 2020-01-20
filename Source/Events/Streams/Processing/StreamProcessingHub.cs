@@ -10,16 +10,15 @@ using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Streams.Processing
 {
     /// <summary>
     /// Represents an implementation of <see cref="IStreamProcessingHub"/>.
     /// </summary>
     [Singleton]
 
-    public class StreakProcessingHub : IStreamProcessingHub, IDisposable
+    public class StreamProcessingHub : IStreamProcessingHub, IDisposable
     {
         readonly object _lockObj = new object();
 
@@ -35,11 +34,11 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreakProcessingHub"/> class.
+        /// Initializes a new instance of the <see cref="StreamProcessingHub"/> class.
         /// </summary>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for working with <see cref="ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public StreakProcessingHub(
+        public StreamProcessingHub(
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
