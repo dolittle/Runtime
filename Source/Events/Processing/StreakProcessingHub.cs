@@ -10,35 +10,36 @@ using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IScopedEventProcessingHub"/>.
+    /// Represents an implementation of <see cref="IStreamProcessingHub"/>.
     /// </summary>
     [Singleton]
 
-    public class ScopedEventProcessingHub : IScopedEventProcessingHub, IDisposable
+    public class StreakProcessingHub : IStreamProcessingHub, IDisposable
     {
         readonly object _lockObj = new object();
 
-        readonly ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorId, ScopedEventProcessor>> _scopedProcessors
-                            = new ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorId, ScopedEventProcessor>>();
+        readonly ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorId, StreamProcessor>> _scopedProcessors
+                            = new ConcurrentDictionary<ScopedEventProcessorKey, ConcurrentDictionary<EventProcessorId, StreamProcessor>>();
 
         readonly BlockingCollection<CommittedEventStreamWithContext> _queue = new BlockingCollection<CommittedEventStreamWithContext>();
 
-        readonly System.Threading.ManualResetEvent _canProcessEvents = new System.Threading.ManualResetEvent(false);
+        readonly System.Threading.ManualResetEvent _canProcessStreams = new System.Threading.ManualResetEvent(false);
 
         readonly ILogger _logger;
 
         readonly IExecutionContextManager _executionContextManager;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ScopedEventProcessingHub"/> class.
+        /// Initializes a new instance of the <see cref="StreakProcessingHub"/> class.
         /// </summary>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for working with <see cref="ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public ScopedEventProcessingHub(
+        public StreakProcessingHub(
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
@@ -47,20 +48,20 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <inheritdoc/>
-        public void Register(ScopedEventProcessor processor)
+        public void Register(StreamProcessor processor, StreamId streamId)
         {
             _logger.Debug($"Adding ScopedEventProcessor  {processor.Key}");
-            _scopedProcessors.GetOrAdd(processor.Key, (_) => new ConcurrentDictionary<EventProcessorId, ScopedEventProcessor>())
+            _scopedProcessors.GetOrAdd(processor.Key, (_) => new ConcurrentDictionary<EventProcessorId, StreamProcessor>())
                 .AddOrUpdate(processor.ProcessorId, processor, (_, __) => processor);
             processor.CatchUp();
         }
 
         /// <inheritdoc/>
-        public void Process(CommittedEventStream committedEventStream)
+        public ProcessingResult Process(CommittedEventStream committedEventStream)
         {
             var committedEventStreamWithContext = new CommittedEventStreamWithContext(committedEventStream, _executionContextManager.Current);
             _logger.Debug($"Received  stream {committedEventStream.Sequence} {committedEventStream.Id} {committedEventStream.CorrelationId}");
-            if (_canProcessEvents.WaitOne(TimeSpan.FromMilliseconds(1)))
+            if (_canProcessStreams.WaitOne(TimeSpan.FromMilliseconds(1)))
             {
                 _logger.Debug($"Processing  stream {committedEventStream.Sequence} {committedEventStream.Id} {committedEventStream.CorrelationId}");
                 ProcessStream(committedEventStreamWithContext);
@@ -73,27 +74,27 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <inheritdoc/>
-        public void BeginProcessingEvents()
+        public void BeginProcessingStreams()
         {
             _logger.Debug($"BeginProcessingEvents");
             ProcessQueue();
         }
 
         /// <summary>
-        /// Gets the <see cref="ScopedEventProcessor" /> registered for the specified key or null if none is registered.
+        /// Gets the <see cref="StreamProcessor" /> registered for the specified key or null if none is registered.
         /// </summary>
         /// <param name="key">Key to search for.</param>
-        /// <returns>The registered <see cref="IEnumerable{ScopedEventProcessor}" /> for the key or null if none is registered.</returns>
-        public IEnumerable<ScopedEventProcessor> GetProcessorsFor(ScopedEventProcessorKey key)
+        /// <returns>The registered <see cref="IEnumerable{StreamProcessor}" /> for the key or null if none is registered.</returns>
+        public IEnumerable<StreamProcessor> GetProcessorsFor(ScopedEventProcessorKey key)
         {
-            var dictionary = _scopedProcessors.TryGetValue(key, out ConcurrentDictionary<EventProcessorId, ScopedEventProcessor> processors) ? processors : null;
-            return dictionary?.Values.ToArray() ?? Enumerable.Empty<ScopedEventProcessor>();
+            var dictionary = _scopedProcessors.TryGetValue(key, out ConcurrentDictionary<EventProcessorId, StreamProcessor> processors) ? processors : null;
+            return dictionary?.Values.ToArray() ?? Enumerable.Empty<StreamProcessor>();
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            _canProcessEvents.Dispose();
+            _canProcessStreams.Dispose();
             _queue.Dispose();
         }
 
@@ -125,7 +126,7 @@ namespace Dolittle.Runtime.Events.Processing
         void Process(CommittedEventEnvelope envelope, ExecutionContext executionContext)
         {
             var key = new ScopedEventProcessorKey(executionContext.Tenant, envelope.Metadata.Artifact);
-            if (_scopedProcessors.TryGetValue(key, out ConcurrentDictionary<EventProcessorId, ScopedEventProcessor> processors))
+            if (_scopedProcessors.TryGetValue(key, out ConcurrentDictionary<EventProcessorId, StreamProcessor> processors))
             {
                 if (processors?.Values.Any() ?? false)
                 {
@@ -145,7 +146,7 @@ namespace Dolittle.Runtime.Events.Processing
                 _queue.CompleteAdding();
                 if (_queue.Count == 0)
                 {
-                    _canProcessEvents.Set();
+                    _canProcessStreams.Set();
                     return;
                 }
 
@@ -154,7 +155,7 @@ namespace Dolittle.Runtime.Events.Processing
                     ProcessStream(contextualStream);
                 }
 
-                _canProcessEvents.Set();
+                _canProcessStreams.Set();
                 _logger.Debug($"Processed committed event stream queue");
             }
         }

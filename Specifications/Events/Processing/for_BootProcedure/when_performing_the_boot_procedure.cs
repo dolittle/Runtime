@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
         static BootProcedure boot_procedure;
         static Mock<IInstancesOf<IKnowAboutEventProcessors>> I_know_about_event_processors;
         static Mock<ITenants> tenants;
-        static Mock<IScopedEventProcessingHub> processing_hub;
+        static Mock<IStreamProcessingHub> processing_hub;
         static Mock<ITypeFinder> type_finder;
         static Mock<IContainer> container;
         static Execution.Environment environment = Execution.Environment.Undetermined;
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
             tenants = get_tenants();
             number_of_scoped_processors = tenants.Object.All.Count() * number_of_processors_per_tenant;
 
-            processing_hub = new Mock<IScopedEventProcessingHub>();
+            processing_hub = new Mock<IStreamProcessingHub>();
             boot_procedure = new BootProcedure(
                 I_know_about_event_processors.Object,
                 tenants.Object,

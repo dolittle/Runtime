@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Relativity
     {
         readonly FactoryFor<IEventStore> _getEventStore;
         readonly FactoryFor<IGeodesics> _getGeodesics;
-        readonly IScopedEventProcessingHub _processingHub;
+        readonly IStreamProcessingHub _processingHub;
         readonly ILogger _logger;
         readonly EventHorizonKey _eventHorizonKey;
         readonly IExecutionContextManager _executionContextManager;
@@ -31,14 +31,14 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="getEventStore"><see cref="FactoryFor{IEventStore}" /> factory function that returns a correctly scoped <see cref="IEventStore" />.</param>
         /// <param name="getGeodesics"><see cref="FactoryFor{IGeodesics}" /> factory function that returns a correctly scoped <see cref="IGeodesics" />.</param>
         /// <param name="key">The <see cref="EventHorizonKey" /> to identify the Event Horizon.</param>
-        /// <param name="processingHub"><see cref="IScopedEventProcessingHub" /> for processing events from the <see cref="CommittedEventStream" />.</param>
+        /// <param name="processingHub"><see cref="IStreamProcessingHub" /> for processing events from the <see cref="CommittedEventStream" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for working with <see cref="ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger" /> for logging.</param>
         public ParticleStreamProcessor(
             FactoryFor<IEventStore> getEventStore,
             FactoryFor<IGeodesics> getGeodesics,
             EventHorizonKey key,
-            IScopedEventProcessingHub processingHub,
+            IStreamProcessingHub processingHub,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {

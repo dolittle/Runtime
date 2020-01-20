@@ -11,7 +11,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.for_Process
 {
-    [Subject(typeof(ScopedEventProcessingHub), nameof(IScopedEventProcessingHub.Process))]
+    [Subject(typeof(ScopedEventProcessingHub), nameof(IStreamProcessingHub.Process))]
     public class when_processing_a_committed_event_stream_with_events_that_have_no_processors_registered : a_scoped_event_processor_hub_configured_with_some_processors
     {
         static CommittedEventStream committed_event_stream;

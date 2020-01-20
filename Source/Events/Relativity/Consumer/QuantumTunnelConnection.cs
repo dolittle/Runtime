@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         readonly FactoryFor<IGeodesics> _getGeodesics;
         readonly ISerializer _serializer;
         readonly FactoryFor<IEventStore> _getEventStore;
-        readonly IScopedEventProcessingHub _eventProcessingHub;
+        readonly IStreamProcessingHub _eventProcessingHub;
         readonly CancellationTokenSource _runCancellationTokenSource;
         readonly CancellationToken _runCancellationToken;
         readonly IExecutionContextManager _executionContextManager;
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
         /// <param name="events"><see cref="IEnumerable{Artifact}">Events</see> to connect for.</param>
         /// <param name="getGeodesics">A <see cref="FactoryFor{IGeodesics}"/> to provide the correctly scoped geodesics instance for path offsetting.</param>
         /// <param name="getEventStore">A factory to provide the correctly scoped <see cref="IEventStore"/> to persist incoming events to.</param>
-        /// <param name="eventProcessingHub"><see cref="IScopedEventProcessingHub"/> for processing incoming events.</param>
+        /// <param name="eventProcessingHub"><see cref="IStreamProcessingHub"/> for processing incoming events.</param>
         /// <param name="serializer"><see cref="ISerializer"/> to use for deserializing content of commits.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> so we can set the correct context for the processing of the Events.</param>
@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.Events.Relativity.Grpc
             IEnumerable<Dolittle.Artifacts.Artifact> events,
             FactoryFor<IGeodesics> getGeodesics,
             FactoryFor<IEventStore> getEventStore,
-            IScopedEventProcessingHub eventProcessingHub,
+            IStreamProcessingHub eventProcessingHub,
             ISerializer serializer,
             ILogger logger,
             IExecutionContextManager executionContextManager,

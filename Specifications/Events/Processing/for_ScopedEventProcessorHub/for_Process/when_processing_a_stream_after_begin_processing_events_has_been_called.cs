@@ -8,7 +8,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.for_Process
 {
-    [Subject(typeof(ScopedEventProcessingHub), nameof(IScopedEventProcessingHub.Process))]
+    [Subject(typeof(ScopedEventProcessingHub), nameof(IStreamProcessingHub.Process))]
     public class when_processing_a_stream_after_begin_processing_events_has_been_called : a_test_scoped_event_processing_hub
     {
         Establish context = () => hub.BeginProcessingEvents();

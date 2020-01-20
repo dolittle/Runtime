@@ -7,6 +7,7 @@ using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing
@@ -14,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Processes an individual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />.
     /// </summary>
-    public class ScopedEventProcessor
+    public class StreamProcessor
     {
         readonly object lockObject = new object();
         readonly TenantId _tenant;
@@ -24,14 +25,14 @@ namespace Dolittle.Runtime.Events.Processing
         readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ScopedEventProcessor"/> class.
+        /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" /> that this processor is scoped to.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" />.</param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
-        public ScopedEventProcessor(
+        public StreamProcessor(
             TenantId tenant,
             IEventProcessor processor,
             FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository,
@@ -56,6 +57,11 @@ namespace Dolittle.Runtime.Events.Processing
         /// Gets a <see cref="ScopedEventProcessorKey" /> to identity the <see cref="Artifact">Event</see> and <see cref="TenantId">Tenant</see> combination.
         /// </summary>
         public ScopedEventProcessorKey Key { get; }
+
+        /// <summary>
+        /// Gets the <see cref="StreamId">stream id</see>.
+        /// </summary>
+        public StreamId StreamId { get; }
 
         /// <summary>
         /// Gets the unique identifer for the <see cref="IEventProcessor" />.
