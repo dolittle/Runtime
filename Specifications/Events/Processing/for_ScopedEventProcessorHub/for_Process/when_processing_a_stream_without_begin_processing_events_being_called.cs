@@ -8,7 +8,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.for_Process
 {
-    [Subject(typeof(ScopedEventProcessingHub), nameof(IStreamProcessingHub.Process))]
+    [Subject(typeof(ScopedEventProcessingHub), nameof(IScopedEventProcessingHub.Process))]
     public class when_processing_a_stream_without_begin_processing_events_being_called : a_test_scoped_event_processing_hub
     {
         Because of = () => commits.ForEach(c => hub.Process(c));

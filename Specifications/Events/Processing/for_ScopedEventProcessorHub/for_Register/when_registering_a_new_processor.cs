@@ -12,7 +12,7 @@ using processors = Dolittle.Runtime.Events.Specs.Processing.given;
 
 namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.for_Register
 {
-    [Subject(typeof(ScopedEventProcessingHub), nameof(IStreamProcessingHub.Register))]
+    [Subject(typeof(ScopedEventProcessingHub), nameof(IScopedEventProcessingHub.Register))]
     public class when_registering_a_new_processor : a_scoped_event_processor_hub
     {
         static Mock<IEventProcessor> processor;
