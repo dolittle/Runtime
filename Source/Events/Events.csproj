@@ -25,6 +25,7 @@
     <PackageReference Include="Dolittle.Time" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="System.Reactive" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup>
