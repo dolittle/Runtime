@@ -7,7 +7,7 @@ using Dolittle.Concepts;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents a unique identifier for a <see cref="IEventProcessor"/>.
+    /// Represents a unqiue identifier for a <see cref="IEventProcessor"/>.
     /// </summary>
     public class EventProcessorId : ConceptAs<Guid>
     {

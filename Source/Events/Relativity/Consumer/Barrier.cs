@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Relativity
         readonly FactoryFor<IGeodesics> _getGeodesics;
         readonly ISerializer _serializer;
         readonly FactoryFor<IEventStore> _getEventStore;
-        readonly IStreamProcessingHub _eventProcessingHub;
+        readonly IScopedEventProcessingHub _eventProcessingHub;
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
         readonly ITenantOffsetRepository _tenantOffsetRepository;
@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Relativity
         /// <param name="getGeodesics">A <see cref="FactoryFor{IGeodesics}"/> to get the correctly scoped geodesics for path offsetting.</param>
         /// <param name="serializer"><see cref="ISerializer"/> used for serialization.</param>
         /// <param name="getEventStore">A <see cref="FactoryFor{IEventStore}"/> to get the correctly scoped EventStore to persist incoming events to.</param>
-        /// <param name="eventProcessingHub"><see cref="IStreamProcessingHub"/> for processing incoming events.</param>
+        /// <param name="eventProcessingHub"><see cref="IScopedEventProcessingHub"/> for processing incoming events.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging purposes.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> to set the correct context for processing events.</param>
         /// <param name="tenants"><see cref="ITenants"/> all the tenants that we will process events for.</param>
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Relativity
             FactoryFor<IGeodesics> getGeodesics,
             ISerializer serializer,
             FactoryFor<IEventStore> getEventStore,
-            IStreamProcessingHub eventProcessingHub,
+            IScopedEventProcessingHub eventProcessingHub,
             ILogger logger,
             IExecutionContextManager executionContextManager,
             ITenants tenants,

@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly IInstancesOf<IKnowAboutEventProcessors> _systemsThatKnowAboutEventProcessors;
         readonly ITenants _tenants;
-        readonly IStreamProcessingHub _processingHub;
+        readonly IScopedEventProcessingHub _processingHub;
         readonly ILogger _logger;
         readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
         readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="systemsThatKnowAboutEventProcessors">Provides <see cref="IEventProcessor">Event Processors</see>.</param>
         /// <param name="tenants">A collection of all <see cref="ITenants">tenants</see>.</param>
-        /// <param name="processingHub">An instance of <see cref="IStreamProcessingHub" /> for processing <see cref="CommittedEventStream">Committed Event Streams</see>.</param>
+        /// <param name="processingHub">An instance of <see cref="IScopedEventProcessingHub" /> for processing <see cref="CommittedEventStream">Committed Event Streams</see>.</param>
         /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" />.</param>
         /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" />.</param>
         /// <param name="executionContextManager">The <see cref="ExecutionContextManager" /> for setting the correct execution context for the Event Processors.</param>
@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing
         public BootProcedure(
             IInstancesOf<IKnowAboutEventProcessors> systemsThatKnowAboutEventProcessors,
             ITenants tenants,
-            IStreamProcessingHub processingHub,
+            IScopedEventProcessingHub processingHub,
             FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository,
             FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,
             IExecutionContextManager executionContextManager,

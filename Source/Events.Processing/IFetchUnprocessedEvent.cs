@@ -16,6 +16,6 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         /// </summary>
         /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
         /// <returns>An unprocessed stream.</returns>
-        IObservable<CommittedEventEnvelope> GetUnprocessedStream(StreamPosition streamPosition);
+        CommittedEventEnvelope GetUnprocessedStream(StreamId streamId, StreamPosition streamPosition);
     }
 }

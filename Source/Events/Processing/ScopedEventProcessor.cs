@@ -2,54 +2,60 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Reactive.Linq;
+using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.Events.Streams.Processing
+namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Processes an individual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />.
+    /// Processes an individiual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />.
     /// </summary>
-    public class StreamProcessor
+    public class ScopedEventProcessor
     {
         readonly object lockObject = new object();
         readonly TenantId _tenant;
         readonly IEventProcessor _processor;
         readonly ILogger _logger;
-        readonly FactoryFor<IFetchUnprocessedStream> _getUnprocessedStream;
-        readonly FactoryFor<IStreamProcessorStateAndPositionRepository> _getStateAndPositionRepository;
+        readonly FactoryFor<IFetchUnprocessedEvents> _getUnprocessedEventsFetcher;
+        readonly FactoryFor<IEventProcessorOffsetRepository> _getOffsetRepository;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
+        /// Initializes a new instance of the <see cref="ScopedEventProcessor"/> class.
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" /> that this processor is scoped to.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-        /// <param name="getStateAndPositionRepository">A factory function to return a correctly scoped instance of <see cref="IStreamProcessorStateAndPositionRepository" />.</param>
-        /// <param name="getUnprocessedStream">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedStream" />.</param>
+        /// <param name="getOffsetRepository">A factory function to return a correctly scoped instance of <see cref="IEventProcessorOffsetRepository" />.</param>
+        /// <param name="getUnprocessedEventsFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchUnprocessedEvents" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
-        public StreamProcessor(
+        public ScopedEventProcessor(
             TenantId tenant,
             IEventProcessor processor,
-            FactoryFor<IStreamProcessorStateAndPositionRepository> getStateAndPositionRepository,
-            FactoryFor<IFetchUnprocessedStream> getUnprocessedStream,
+            FactoryFor<IEventProcessorOffsetRepository> getOffsetRepository,
+            FactoryFor<IFetchUnprocessedEvents> getUnprocessedEventsFetcher,
             ILogger logger)
         {
+            LastVersionProcessed = CommittedEventVersion.None;
             _tenant = tenant;
             _processor = processor;
             _logger = logger;
-            _getUnprocessedStream = getUnprocessedStream;
-            _getStateAndPositionRepository = getStateAndPositionRepository;
+            Key = new ScopedEventProcessorKey(tenant, processor.Event);
+            _getUnprocessedEventsFetcher = getUnprocessedEventsFetcher;
+            _getOffsetRepository = getOffsetRepository;
         }
 
         /// <summary>
-        /// Gets the <see cref="StreamId">stream id</see>.
+        /// Gets the <see cref="CommittedEventVersion">version</see> of the last event that was processed.
         /// </summary>
-        public StreamId StreamId { get; }
+        public CommittedEventVersion LastVersionProcessed { get; private set; }
+
+        /// <summary>
+        /// Gets a <see cref="ScopedEventProcessorKey" /> to identity the <see cref="Artifact">Event</see> and <see cref="TenantId">Tenant</see> combination.
+        /// </summary>
+        public ScopedEventProcessorKey Key { get; }
 
         /// <summary>
         /// Gets the unique identifer for the <see cref="IEventProcessor" />.
@@ -62,22 +68,26 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         public bool HasCaughtUp { get; private set; }
 
         /// <summary>
-        /// Gets the current <see cref="StreamProcessorStateAndPosition" />.
-        /// </summary>
-        public StreamProcessorStateAndPosition CurrentStateAndPosition { get; private set; } = StreamProcessorStateAndPosition.New;
-
-        /// <summary>
         /// Instructs the Processor to Catch up by processing events that have been committed since the last processed event.
         /// </summary>
-        public async virtual void CatchUp()
+        public virtual void CatchUp()
         {
-            using (var repository = _getStateAndPositionRepository())
+            using (var repository = _getOffsetRepository())
             {
-                CurrentStateAndPosition = repository.Get(ProcessorId);
+                LastVersionProcessed = repository.Get(ProcessorId);
             }
 
-            var stream = _getUnprocessedStream().GetUnprocessedStream(CurrentStateAndPosition.Position);
-            
+            var unprocessedEventsFetcher = _getUnprocessedEventsFetcher();
+            SingleEventTypeEventStream eventStream = unprocessedEventsFetcher.GetUnprocessedEvents(Key.Event.Id, LastVersionProcessed) ?? new SingleEventTypeEventStream(null);
+            do
+            {
+                if (!eventStream.IsEmpty)
+                {
+                    eventStream.ForEach(e => ProcessEvent(e));
+                    eventStream = unprocessedEventsFetcher.GetUnprocessedEvents(Key.Event.Id, LastVersionProcessed);
+                }
+            }
+            while (!eventStream.IsEmpty);
             HasCaughtUp = true;
         }
 
@@ -137,7 +147,7 @@ namespace Dolittle.Runtime.Events.Streams.Processing
             try
             {
                 LastVersionProcessed = committedEventVersion;
-                using (var repository = _getStateAndPositionRepository())
+                using (var repository = _getOffsetRepository())
                 {
                     repository.Set(ProcessorId, LastVersionProcessed);
                 }

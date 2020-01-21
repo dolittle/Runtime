@@ -7,7 +7,7 @@ using System.Reactive.Linq;
 using Dolittle.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Streams.Processing
+namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFetchUnprocessedStream" />.
