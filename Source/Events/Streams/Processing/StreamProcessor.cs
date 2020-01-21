@@ -77,16 +77,7 @@ namespace Dolittle.Runtime.Events.Streams.Processing
             }
 
             var stream = _getUnprocessedStream().GetUnprocessedStream(CurrentStateAndPosition.Position);
-            do
-            {
-                var emtpy = await stream.IsEmpty();
-                if (!await stream.Is)
-                {
-                    eventStream.ForEach(e => ProcessEvent(e));
-                    eventStream = unprocessedStreamFetcher.GetUnprocessedEvents(Key.Event.Id, LastVersionProcessed);
-                }
-            }
-            while (!stream.IsEmpty()());
+            
             HasCaughtUp = true;
         }
 
