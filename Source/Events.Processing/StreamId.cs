@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Represents the identification of a stream.
@@ -15,6 +15,11 @@ namespace Dolittle.Runtime.Events.Streams
         /// Represents a not set <see cref="StreamId"/>.
         /// </summary>
         public static StreamId NotSet = Guid.Empty;
+
+        /// <summary>
+        /// Represents a all stream <see cref="StreamId"/>.
+        /// </summary>
+        public static StreamId AllStreamId = Guid.Empty;
 
         /// <summary>
         /// Implicitly convert from a <see cref="Guid"/> to a <see cref="StreamId"/>.

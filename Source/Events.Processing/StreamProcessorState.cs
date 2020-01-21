@@ -3,7 +3,7 @@
 
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events.Streams.Processing
+namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Represents a combination of <see cref="StreamPosition" /> and <see cref="StreamProcessingState" /> that represents the state of an <see cref="StreamProcessor" />.
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         /// <summary>
         /// Gets a new, initial, <see cref="StreamProcessorState" />.
         /// </summary>
-        public static StreamProcessorState New => new StreamProcessorState(StreamProcessingState.Running, StreamPosition.Start);
+        public static StreamProcessorState New => new StreamProcessorState(StreamProcessingState.Waiting, StreamPosition.Start);
 
         /// <summary>
         /// Gets the <see cref="StreamProcessingState" />.
@@ -35,5 +35,11 @@ namespace Dolittle.Runtime.Events.Streams.Processing
         /// Gets the <see cref="StreamPosition" />.
         /// </summary>
         public StreamPosition Position { get; }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            return $"({State}, {Position.Value})";
+        }
     }
 }

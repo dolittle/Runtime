@@ -3,7 +3,7 @@
 
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
     /// An position used to identify the position, or offset, of a stream.
@@ -26,5 +26,11 @@ namespace Dolittle.Runtime.Events.Streams
         /// </summary>
         /// <param name="position">Position number as <see cref="ulong"/>.</param>
         public static implicit operator StreamPosition(ulong position) => new StreamPosition(position);
+
+        /// <summary>
+        /// Increments the <see cref="StreamPosition" />.
+        /// </summary>
+        /// <returns>The new <see cref="StreamPosition" />.</returns>
+        public StreamPosition Increment() => Value + 1;
     }
 }
