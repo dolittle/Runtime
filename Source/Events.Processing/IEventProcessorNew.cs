@@ -21,6 +21,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="event">The event.</param>
         /// <returns><see cref="ProcessingResult" />.</returns>
-        Task<ProcessingResult> Processing(CommittedEventEnvelope @event);
+        Task<ProcessingResult> Process(CommittedEventEnvelope @event);
     }
 }
