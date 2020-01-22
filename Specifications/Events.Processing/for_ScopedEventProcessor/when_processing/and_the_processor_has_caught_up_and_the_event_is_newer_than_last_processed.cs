@@ -2,15 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Specs.Processing;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Processing.for_ScopedEventProcessor.when_processing
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessor.when_processing
 {
     [Subject(typeof(ScopedEventProcessor), "Process")]
     public class and_the_processor_has_caught_up_and_the_event_is_newer_than_last_processed : scoped_event_processors

@@ -4,10 +4,10 @@
 using Dolittle.Runtime.Events.Processing;
 using Machine.Specifications;
 using Moq;
-using processors = Dolittle.Runtime.Events.Specs.Processing.given;
+using processors = Dolittle.Runtime.Events.Processing.Specs.given;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.Processing
+namespace Dolittle.Runtime.Events.Processing.Specs
 {
     public class scoped_event_processors
     {

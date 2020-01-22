@@ -20,7 +20,7 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_BootProcessing
+namespace Dolittle.Runtime.Events.Processing.Specs.for_BootProcessing
 {
     [Subject(typeof(BootProcedure), nameof(BootProcedure.Perform))]
     public class when_performing_the_boot_procedure

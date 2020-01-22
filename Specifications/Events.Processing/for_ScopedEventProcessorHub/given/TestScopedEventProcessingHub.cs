@@ -4,9 +4,8 @@
 using System.Collections.Generic;
 using Dolittle.Execution;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.given
 {
     public class TestScopedEventProcessingHub : ScopedEventProcessingHub
     {

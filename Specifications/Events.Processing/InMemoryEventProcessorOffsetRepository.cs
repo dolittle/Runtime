@@ -3,10 +3,9 @@
 
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Specs.Processing
+namespace Dolittle.Runtime.Events.Processing.Specs
 {
     public class InMemoryEventProcessorOffsetRepository : IEventProcessorOffsetRepository
     {

@@ -8,7 +8,7 @@ using Moq;
 using It = Machine.Specifications.It;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessor.when_catching_up
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessor.when_catching_up
 {
     [Subject(typeof(ScopedEventProcessor), "CatchUp")]
     public class and_there_are_no_new_events : scoped_event_processors

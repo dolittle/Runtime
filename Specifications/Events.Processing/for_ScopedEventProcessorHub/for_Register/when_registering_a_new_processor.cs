@@ -2,15 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given;
+using Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.given;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
-using processors = Dolittle.Runtime.Events.Specs.Processing.given;
+using processors = Dolittle.Runtime.Events.Processing.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.for_Register
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.for_Register
 {
     [Subject(typeof(ScopedEventProcessingHub), nameof(IScopedEventProcessingHub.Register))]
     public class when_registering_a_new_processor : a_scoped_event_processor_hub

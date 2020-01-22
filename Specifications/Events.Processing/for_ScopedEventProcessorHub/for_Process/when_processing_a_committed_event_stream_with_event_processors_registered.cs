@@ -3,13 +3,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given;
+using Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.given;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.for_Process
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.for_Process
 {
     [Subject(typeof(ScopedEventProcessingHub), nameof(IScopedEventProcessingHub.Process))]
     public class when_processing_a_committed_event_stream_with_event_processors_registered : a_scoped_event_processor_hub_configured_with_processors

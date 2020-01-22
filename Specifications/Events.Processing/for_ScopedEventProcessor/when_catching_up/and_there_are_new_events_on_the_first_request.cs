@@ -9,7 +9,7 @@ using Moq;
 using It = Machine.Specifications.It;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessor.when_catching_up
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessor.when_catching_up
 {
     [Subject(typeof(ScopedEventProcessor), "CatchUp")]
     public class and_there_are_new_events_on_the_first_request : scoped_event_processors

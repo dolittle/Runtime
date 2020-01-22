@@ -6,10 +6,10 @@ using Dolittle.Execution;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 using Moq;
-using processors = Dolittle.Runtime.Events.Specs.Processing.given;
+using processors = Dolittle.Runtime.Events.Processing.Specs.given;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.given
 {
     public class a_test_scoped_event_processing_hub
     {

@@ -4,12 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given;
+using Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.given;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.for_Process
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.for_Process
 {
     [Subject(typeof(ScopedEventProcessingHub), nameof(IScopedEventProcessingHub.Process))]
     public class when_processing_a_committed_event_stream_with_events_that_have_no_processors_registered : a_scoped_event_processor_hub_configured_with_some_processors
@@ -22,9 +21,9 @@ namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.f
         Establish context = () =>
         {
             hub.BeginProcessingEvents();
-            committed_event_stream = Specs.given.Events.Build();
-            committed_simple_events = committed_event_stream.Events.Where(e => e.Metadata.Artifact == Specs.given.Artifacts.artifact_for_simple_event).Select(e => e.ToCommittedEventEnvelope(committed_event_stream.Sequence)).ToList();
-            committed_another_events = committed_event_stream.Events.Where(e => e.Metadata.Artifact == Specs.given.Artifacts.artifact_for_another_event).Select(e => e.ToCommittedEventEnvelope(committed_event_stream.Sequence)).ToList();
+            committed_event_stream = Events.Specs.given.Events.Build();
+            committed_simple_events = committed_event_stream.Events.Where(e => e.Metadata.Artifact == Events.Specs.given.Artifacts.artifact_for_simple_event).Select(e => e.ToCommittedEventEnvelope(committed_event_stream.Sequence)).ToList();
+            committed_another_events = committed_event_stream.Events.Where(e => e.Metadata.Artifact == Events.Specs.given.Artifacts.artifact_for_another_event).Select(e => e.ToCommittedEventEnvelope(committed_event_stream.Sequence)).ToList();
         };
 
         Because of = () => ex = Catch.Exception(() => hub.Process(committed_event_stream));

@@ -8,9 +8,9 @@ using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 using Moq;
-using processors = Dolittle.Runtime.Events.Specs.Processing.given;
+using processors = Dolittle.Runtime.Events.Processing.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.when_fetching_unprocessed_events.given
+namespace Dolittle.Runtime.Events.Processing.Specs.when_fetching_unprocessed_events.given
 {
     public class a_fetch_unprocessed_events
     {

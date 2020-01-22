@@ -4,11 +4,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Collections;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Specs.Processing
+namespace Dolittle.Runtime.Events.Processing.Specs
 {
     public static class IEventProcessorMockExtensions
     {

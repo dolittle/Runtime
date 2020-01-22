@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.when_fetching_unprocessed_events
+namespace Dolittle.Runtime.Events.Processing.Specs.when_fetching_unprocessed_events
 {
     [Subject(typeof(IFetchUnprocessedEvents), nameof(IFetchUnprocessedEvents.GetUnprocessedEvents))]
     public class and_there_are_events_with_a_commit_version_greater_than_the_last_processed : given.a_fetch_unprocessed_events

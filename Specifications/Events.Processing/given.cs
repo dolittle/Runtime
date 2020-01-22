@@ -11,7 +11,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Specs.Processing
+namespace Dolittle.Runtime.Events.Processing.Specs
 {
     public static class given
     {

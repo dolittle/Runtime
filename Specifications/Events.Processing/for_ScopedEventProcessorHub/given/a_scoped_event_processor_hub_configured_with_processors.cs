@@ -2,12 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Execution;
-using Dolittle.Runtime.Events.Processing;
 using Machine.Specifications;
 using Moq;
 using specs = Dolittle.Runtime.Events.Specs.given;
 
-namespace Dolittle.Runtime.Events.Specs.Processing.for_ScopedEventProcessorHub.given
+namespace Dolittle.Runtime.Events.Processing.Specs.for_ScopedEventProcessorHub.given
 {
     public class a_scoped_event_processor_hub_configured_with_processors : scoped_event_processors
     {
