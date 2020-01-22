@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Commands.Coordination
     public class CommandContext : ICommandContext
     {
         readonly IUncommittedEventStreamCoordinator _uncommittedEventStreamCoordinator;
-        readonly List<IEventSource> _objectsTracked = new List<IEventSource>();
+        readonly List<AggregateRoot> _aggregateRootsTracked = new List<AggregateRoot>();
 
         readonly ILogger _logger;
 
@@ -51,16 +51,16 @@ namespace Dolittle.Runtime.Commands.Coordination
         public ExecutionContext ExecutionContext { get; }
 
         /// <inheritdoc/>
-        public void RegisterForTracking(IEventSource eventSource)
+        public void RegisterForTracking(AggregateRoot aggregateRoot)
         {
-            if (_objectsTracked.Contains(eventSource)) return;
-            _objectsTracked.Add(eventSource);
+            if (_aggregateRootsTracked.Contains(aggregateRoot)) return;
+            _aggregateRootsTracked.Add(aggregateRoot);
         }
 
         /// <inheritdoc/>
-        public IEnumerable<IEventSource> GetObjectsBeingTracked()
+        public IEnumerable<AggregateRoot> GetAggregateRootsBeingTracked()
         {
-            return _objectsTracked;
+            return _aggregateRootsTracked;
         }
 
         /// <inheritdoc/>
@@ -73,18 +73,18 @@ namespace Dolittle.Runtime.Commands.Coordination
         public void Commit()
         {
             _logger.Information("Commit transaction");
-            var trackedObjects = GetObjectsBeingTracked();
-            _logger.Trace($"Total number of objects tracked '{trackedObjects.Count()}");
-            foreach (var trackedObject in trackedObjects)
+            var trackedAggregateRoots = GetAggregateRootsBeingTracked();
+            _logger.Trace($"Total number of objects tracked '{trackedAggregateRoots.Count()}");
+            foreach (var trackedAggregateRoot in trackedAggregateRoots)
             {
-                _logger.Trace($"Committing events from {trackedObject.GetType().AssemblyQualifiedName}");
-                var events = trackedObject.UncommittedEvents;
+                _logger.Trace($"Committing events from {trackedAggregateRoot.GetType().AssemblyQualifiedName}");
+                var events = trackedAggregateRoot.UncommittedEvents;
                 if (events.HasEvents)
                 {
                     _logger.Trace("Events present - send them to uncommitted eventstream coordinator");
                     _uncommittedEventStreamCoordinator.Commit(CorrelationId, events);
                     _logger.Trace("Commit object");
-                    trackedObject.Commit();
+                    trackedAggregateRoot.Commit();
                 }
             }
         }
