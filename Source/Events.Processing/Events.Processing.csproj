@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Events</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Events</RootNamespace>
+  </PropertyGroup>
+
+</Project>
