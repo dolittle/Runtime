@@ -6,7 +6,7 @@ using Dolittle.Concepts;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// An position used to identify the position, or offset, of a stream.
+    /// An unsigned long used to identify the position, or offset, of a stream.
     /// </summary>
     public class StreamPosition : ConceptAs<ulong>
     {
