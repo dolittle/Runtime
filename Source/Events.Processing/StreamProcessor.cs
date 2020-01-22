@@ -242,6 +242,6 @@ namespace Dolittle.Runtime.Events.Processing
 
         bool IsInProcessingState(StreamProcessingState state) => CurrentState.State == state;
 
-        bool IsInState(StreamProcessingState state, StreamPosition position) => state == CurrentState.State && position == CurrentState.Position;
+        bool IsInState(StreamProcessingState state, StreamPosition position) => IsInProcessingState(state) && position == CurrentState.Position;
     }
 }
