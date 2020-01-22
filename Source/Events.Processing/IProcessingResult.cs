@@ -11,6 +11,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the <see cref="ProcessingResultValue" />.
         /// </summary>
-        ProcessingResultValue Result { get; }
+        ProcessingResultValue Value { get; }
     }
 }
