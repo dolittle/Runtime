@@ -160,7 +160,6 @@ namespace Dolittle.Runtime.Events.Processing
             try
             {
                 _logger.Debug($"{LogMessageBeginning} is processing event with artifact id '{@event.Metadata.Artifact.Id}'");
-                SetState(StreamProcessingState.Processing);
                 var processingResult = await _processor.Process(@event).ConfigureAwait(false);
 
                 HandleProcessingResult(@event, processingResult);
