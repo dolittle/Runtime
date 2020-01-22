@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Applications" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Tenancy" Version="$(FundamentalsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Events\Events.csproj" />
+  </ItemGroup>
+
+</Project>
