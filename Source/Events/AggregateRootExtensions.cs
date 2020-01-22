@@ -9,48 +9,48 @@ using System.Reflection;
 namespace Dolittle.Events
 {
     /// <summary>
-    /// Extensions for <see cref="EventSource"/>.
+    /// Extensions for <see cref="AggregateRoot"/>.
     /// </summary>
-    public static class EventSourceExtensions
+    public static class AggregateRootExtensions
     {
         /// <summary>
-        /// Get handle method from an <see cref="EventSource"/> for a specific <see cref="IEvent"/>, if any.
+        /// Get handle method from an <see cref="AggregateRoot"/> for a specific <see cref="IEvent"/>, if any.
         /// </summary>
-        /// <param name="eventSource"><see cref="EventSource"/> to get method from.</param>
+        /// <param name="aggregateRoot"><see cref="AggregateRoot"/> to get method from.</param>
         /// <param name="event"><see cref="IEvent"/> to get method for.</param>
         /// <returns><see cref="MethodInfo"/> containing information about the handle method, null if none exists.</returns>
-        public static MethodInfo GetOnMethod(this EventSource eventSource, IEvent @event)
+        public static MethodInfo GetOnMethod(this AggregateRoot aggregateRoot, IEvent @event)
         {
             var eventType = @event.GetType();
-            var handleMethods = GetHandleMethodsFor(eventSource.GetType());
+            var handleMethods = GetHandleMethodsFor(aggregateRoot.GetType());
             return handleMethods.ContainsKey(eventType) ? handleMethods[eventType] : null;
         }
 
         /// <summary>
-        /// Indicates whether the Event Source maintains state and requires to handles events to restore that state.
+        /// Indicates whether the Aggregate Root maintains state and requires handling events to restore that state.
         /// </summary>
-        /// <param name="eventSource"><see cref="EventSource"/> to test for state.</param>
-        /// <returns>true if the Event Source does not maintain state.</returns>
-        public static bool IsStateless(this EventSource eventSource)
+        /// <param name="aggregateRoot"><see cref="AggregateRoot"/> to test for statelessness.</param>
+        /// <returns>true if the Aggregate Root does not maintain state.</returns>
+        public static bool IsStateless(this AggregateRoot aggregateRoot)
         {
-            return GetHandleMethodsFor(eventSource.GetType()).Count == 0;
+            return GetHandleMethodsFor(aggregateRoot.GetType()).Count == 0;
         }
 
-        static Dictionary<Type, MethodInfo> GetHandleMethodsFor(Type eventSourceType)
+        static Dictionary<Type, MethodInfo> GetHandleMethodsFor(Type aggregateRootType)
         {
-            return typeof(EventSourceHandleMethods<>)
-                              .MakeGenericType(eventSourceType)
+            return typeof(AggregateRootHandleMethods<>)
+                              .MakeGenericType(aggregateRootType)
                               .GetRuntimeField("MethodsPerEventType")
                               .GetValue(null) as Dictionary<Type, MethodInfo>;
         }
 
-        static class EventSourceHandleMethods<T>
+        static class AggregateRootHandleMethods<T>
         {
             public static readonly Dictionary<Type, MethodInfo> MethodsPerEventType = new Dictionary<Type, MethodInfo>();
 
-            static EventSourceHandleMethods()
+            static AggregateRootHandleMethods()
             {
-                var eventSourceType = typeof(T);
+                var aggregateRootType = typeof(T);
 
                 bool hasEventParameter(MethodInfo m)
                 {
@@ -61,7 +61,7 @@ namespace Dolittle.Events
                     return typeof(IEvent).GetTypeInfo().IsAssignableFrom(parameters.Single().ParameterType.GetTypeInfo());
                 }
 
-                var methods = eventSourceType.GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Where(m => m.Name.Equals("On", StringComparison.InvariantCultureIgnoreCase) && hasEventParameter(m));
+                var methods = aggregateRootType.GetTypeInfo().GetMethods(BindingFlags.NonPublic | BindingFlags.Instance).Where(m => m.Name.Equals("On", StringComparison.InvariantCultureIgnoreCase) && hasEventParameter(m));
                 foreach (var method in methods)
                     MethodsPerEventType[method.GetParameters()[0].ParameterType] = method;
             }
