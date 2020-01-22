@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// Processes an <see cref="CommittedEventEnvelope">event</see>.
         /// </summary>
         /// <param name="event">The event.</param>
-        /// <returns><see cref="ProcessingResult" />.</returns>
-        Task<ProcessingResult> Process(CommittedEventEnvelope @event);
+        /// <returns><see cref="IProcessingResult" />.</returns>
+        Task<IProcessingResult> Process(CommittedEventEnvelope @event);
     }
 }
