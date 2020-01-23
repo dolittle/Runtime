@@ -1,14 +1,13 @@
-﻿// Copyright (c) Dolittle. All rights reserved.
+// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Artifacts;
-using Dolittle.Events;
+using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Defines something that is capable of processing an event .
+    /// Defines a system that processes an event.
     /// </summary>
     public interface IEventProcessor
     {
@@ -18,15 +17,10 @@ namespace Dolittle.Runtime.Events.Processing
         EventProcessorId Identifier { get; }
 
         /// <summary>
-        /// Gets the <see cref="Artifact"/> for the <see cref="IEvent">event type</see>
-        /// it represents.
+        /// Processes an <see cref="CommittedEventEnvelope">event</see>.
         /// </summary>
-        Artifact Event { get; }
-
-        /// <summary>
-        /// Process an event.
-        /// </summary>
-        /// <param name="eventEnvelope"><see cref="CommittedEventEnvelope"/> for event to process.</param>
-        void Process(CommittedEventEnvelope eventEnvelope);
+        /// <param name="event">The event.</param>
+        /// <returns><see cref="IProcessingResult" />.</returns>
+        Task<IProcessingResult> Process(CommittedEventEnvelope @event);
     }
 }

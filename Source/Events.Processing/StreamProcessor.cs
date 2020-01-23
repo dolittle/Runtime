@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing
     {
         const int TimeToWait = 1000;
         readonly TenantId _tenant;
-        readonly IEventProcessorNew _processor;
+        readonly IEventProcessor _processor;
         readonly ILogger _logger;
         readonly FactoryFor<IFetchNextEvent> _getNextEventFetcher;
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStateRepository;
@@ -28,14 +28,14 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" /> that this processor is scoped to.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
-        /// <param name="processor">An <see cref="IEventProcessorNew" /> to process the event.</param>
+        /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="getStreamProcessorStateRepository">A factory function to return a correctly scoped instance of <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="getNextEventFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchNextEvent" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public StreamProcessor(
             TenantId tenant,
             StreamId sourceStreamId,
-            IEventProcessorNew processor,
+            IEventProcessor processor,
             FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStateRepository,
             FactoryFor<IFetchNextEvent> getNextEventFetcher,
             ILogger logger)
@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <summary>
-        /// Gets the unique identifer for the <see cref="IEventProcessor" />.
+        /// Gets the unique identifer for the <see cref="StreamProcessor" />.
         /// </summary>
         public StreamProcessorKey Key { get; }
 
