@@ -47,6 +47,8 @@ namespace Dolittle.Runtime.Events.Processing
         public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
         {
             var result = await _filter.Filter(@event, Identifier).ConfigureAwait(false);
+
+            // TODO: Handle partition
             if (result.IsIncluded) await _eventToStreamWriter.Write(@event, _targetStreamId).ConfigureAwait(false);
 
             return result;
