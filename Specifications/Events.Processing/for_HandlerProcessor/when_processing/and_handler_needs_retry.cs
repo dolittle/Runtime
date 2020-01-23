@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor.when_processin
         static RemoteEventProcessor handler_processor;
         static IProcessingResult result;
 
-        Establish context = () => handler_processor = new RemoteEventProcessor(tenant_id, event_processor_id, Processing.given.a_handler_service(retry_handling_result));
+        Establish context = () => handler_processor = new RemoteEventProcessor(event_processor_id, Processing.given.a_handler_service(retry_handling_result));
 
         Because of = async () => result = await handler_processor.Process(an_event);
 

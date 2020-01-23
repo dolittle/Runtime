@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Tenancy;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor.given
@@ -17,13 +16,11 @@ namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor.given
 
         protected static readonly CommittedEventEnvelope an_event = Processing.given.a_committed_event_envelope;
 
-        protected static TenantId tenant_id;
         protected static EventProcessorId event_processor_id;
         protected static Moq.Mock<IRemoteProcessorService> handler_service_mock;
 
         Establish context = () =>
         {
-            tenant_id = Guid.NewGuid();
             event_processor_id = Guid.NewGuid();
             handler_service_mock = new Moq.Mock<IRemoteProcessorService>();
         };

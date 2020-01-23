@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -12,22 +11,18 @@ namespace Dolittle.Runtime.Events.Processing
     /// </summary>
     public class RemoteEventProcessor : IEventProcessor
     {
-        readonly TenantId _tenant;
         readonly IRemoteProcessorService _remoteHandler;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteEventProcessor"/> class.
         /// </summary>
-        /// <param name="tenant">The <see cref="TenantId" />.</param>
         /// <param name="id">The <see cref="EventProcessorId" />.</param>
         /// <param name="remoteProcessor">The <see cref="IRemoteProcessorService" />.</param>
         public RemoteEventProcessor(
-            TenantId tenant,
             EventProcessorId id,
             IRemoteProcessorService remoteProcessor)
         {
             Identifier = id;
-            _tenant = tenant;
             _remoteHandler = remoteProcessor;
         }
 
@@ -37,8 +32,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
         {
-            var result = await _remoteHandler.Handle(@event, Identifier).ConfigureAwait(false);
-            return result;
+            return await _remoteHandler.Handle(@event, Identifier).ConfigureAwait(false);
         }
     }
 }
