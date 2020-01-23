@@ -5,7 +5,7 @@ using Dolittle.Execution;
 using Dolittle.Logging;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Specs
+namespace Dolittle.Runtime.Events.Processing.Specs
 {
     public static class mocks
     {
