@@ -9,35 +9,35 @@ using Dolittle.Tenancy;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IEventProcessorNew" />that processes the filtering of an event.
+    /// Represents an implementation of <see cref="IEventProcessor" />that processes the filtering of an event.
     /// </summary>
-    public class RemoteFilterProcessor : IEventProcessorNew
+    public class RemoteFilterProcessor : IEventProcessor
     {
         readonly TenantId _tenant;
-        readonly IFilterService _filter;
+        readonly IRemoteFilterService _filter;
         readonly StreamId _targetStreamId;
-        readonly FactoryFor<IWriteEventToStream> _getEventToStreamWriter;
+        readonly IWriteEventToStream _eventToStreamWriter;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
+        /// Initializes a new instance of the <see cref="RemoteFilterProcessor"/> class.
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" />.</param>
         /// <param name="id">The <see cref="EventProcessorId" />.</param>
         /// <param name="targetStreamId">The stream to include events in.</param>
-        /// <param name="filter">The <see cref="IFilterService" />.</param>
-        /// <param name="getEventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
-        public FilterProcessor(
+        /// <param name="filter">The <see cref="IRemoteFilterService" />.</param>
+        /// <param name="eventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
+        public RemoteFilterProcessor(
             TenantId tenant,
             EventProcessorId id,
             StreamId targetStreamId,
-            IFilterService filter,
-            FactoryFor<IWriteEventToStream> getEventToStreamWriter)
+            IRemoteFilterService filter,
+            IWriteEventToStream eventToStreamWriter)
         {
             Identifier = id;
             _tenant = tenant;
             _targetStreamId = targetStreamId;
             _filter = filter;
-            _getEventToStreamWriter = getEventToStreamWriter;
+            _eventToStreamWriter = eventToStreamWriter;
         }
 
         /// <inheritdoc />
@@ -47,11 +47,7 @@ namespace Dolittle.Runtime.Events.Processing
         public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
         {
             var result = await _filter.Filter(@event, Identifier).ConfigureAwait(false);
-            if (result.IsIncluded)
-            {
-                var writer = _getEventToStreamWriter();
-                await writer.Write(@event, _targetStreamId).ConfigureAwait(false);
-            }
+            if (result.IsIncluded) await _eventToStreamWriter.Write(@event, _targetStreamId).ConfigureAwait(false);
 
             return result;
         }

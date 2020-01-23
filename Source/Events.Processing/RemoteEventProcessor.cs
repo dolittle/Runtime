@@ -8,27 +8,27 @@ using Dolittle.Tenancy;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IEventProcessorNew" />that processes the handling of an event.
+    /// Represents an implementation of <see cref="IEventProcessor" />that processes the handling of an event.
     /// </summary>
-    public class RemoteEventProcessor : IEventProcessorNew
+    public class RemoteEventProcessor : IEventProcessor
     {
         readonly TenantId _tenant;
-        readonly IHandlerService _handler;
+        readonly IRemoteProcessorService _remoteHandler;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="HandlerProcessor"/> class.
+        /// Initializes a new instance of the <see cref="RemoteEventProcessor"/> class.
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" />.</param>
         /// <param name="id">The <see cref="EventProcessorId" />.</param>
-        /// <param name="handler">The <see cref="IHandlerService" />.</param>
-        public HandlerProcessor(
+        /// <param name="remoteProcessor">The <see cref="IRemoteProcessorService" />.</param>
+        public RemoteEventProcessor(
             TenantId tenant,
             EventProcessorId id,
-            IHandlerService handler)
+            IRemoteProcessorService remoteProcessor)
         {
             Identifier = id;
             _tenant = tenant;
-            _handler = handler;
+            _remoteHandler = remoteProcessor;
         }
 
         /// <inheritdoc />
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
         {
-            var result = await _handler.Handle(@event, Identifier).ConfigureAwait(false);
+            var result = await _remoteHandler.Handle(@event, Identifier).ConfigureAwait(false);
             return result;
         }
     }
