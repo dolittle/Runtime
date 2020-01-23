@@ -38,8 +38,6 @@ namespace Dolittle.Runtime.Heads.Management
                     Head = new HeadInfo
                     {
                         HeadId = _.HeadId.ToProtobuf(),
-                        Host = _.Host,
-                        Port = _.Port,
                         Runtime = _.Runtime
                     },
                     ConnectionTime = _.ConnectionTime.ToUnixTimeMilliseconds()

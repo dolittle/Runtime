@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using System.Timers;
-using Dolittle.Collections;
 using Dolittle.Heads.Runtime;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
@@ -56,16 +55,11 @@ namespace Dolittle.Runtime.Heads
             try
             {
                 _logger.Information($"Head connected '{headId}'");
-                if (request.ServicesByName.Count == 0) _logger.Information("Not providing any head services");
-                else request.ServicesByName.ForEach(_ => _logger.Information($"Providing service {_}"));
 
                 var connectionTime = _systemClock.GetCurrentTime();
                 var client = new Head(
                     headId,
-                    request.Host,
-                    request.Port,
                     request.Runtime,
-                    request.ServicesByName,
                     connectionTime);
 
                 _connectedHeads.Connect(client);
