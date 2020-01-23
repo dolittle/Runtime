@@ -12,5 +12,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Events\Events.csproj" />
+    <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
   </ItemGroup>
 </Project>

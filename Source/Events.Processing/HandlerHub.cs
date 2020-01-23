@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Tenancy;
 
@@ -22,6 +23,8 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="handlerService">The <see cref="IHandlerService" />.</param>
         /// <param name="streamProcessorHub">The <see cref="IStreamProcessorHub" />.</param>
         public HandlerHub(
+            IExecutionContextManager manager,
+            ITenants tenants,
             IHandlerService handlerService,
             IStreamProcessorHub streamProcessorHub)
         {
