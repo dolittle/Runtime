@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// </summary>
     public class RemoteEventProcessor : IEventProcessor
     {
-        readonly IRemoteProcessorService _remoteHandler;
+        readonly IRemoteProcessorService _remoteProcessor;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteEventProcessor"/> class.
@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing
             IRemoteProcessorService remoteProcessor)
         {
             Identifier = id;
-            _remoteHandler = remoteProcessor;
+            _remoteProcessor = remoteProcessor;
         }
 
         /// <inheritdoc />
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
         {
-            return await _remoteHandler.Handle(@event, Identifier).ConfigureAwait(false);
+            return await _remoteProcessor.Process(@event, Identifier).ConfigureAwait(false);
         }
     }
 }
