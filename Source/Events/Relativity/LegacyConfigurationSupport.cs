@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Relativity
             {
                 var json = File.ReadAllText(file);
                 var configuration = JsonConvert.DeserializeObject<ServerConfiguration>(json);
-                EndpointConfigurationDefaultProvider.DefaultPublicPort = configuration.Interaction.Port;
+                EndpointsConfigurationDefaultProvider.DefaultPublicPort = configuration.Interaction.Port;
             }
         }
     }
