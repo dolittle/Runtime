@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Runtime
         /// <inheritdoc/>
         public override async Task<EventCommitResponse> Commit(grpc.UncommittedEvents request, ServerCallContext context)
         {
-            _logger.Information("Events received");
+            _logger.Information($"Events received : {request.Events.Count}");
             return await Task.FromResult(new EventCommitResponse()).ConfigureAwait(false);
         }
 
