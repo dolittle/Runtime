@@ -59,6 +59,11 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         public StreamProcessorState CurrentState { get; private set; }
 
+        /// <summary>
+        /// Gets the <see cref="EventProcessorId" />.
+        /// </summary>
+        public EventProcessorId EventProcessorId => _processor.Identifier;
+
         string LogMessageBeginning { get; }
 
         bool RetryClockIsTicking { get; } = false;
