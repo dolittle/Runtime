@@ -4,16 +4,14 @@
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="ProcessingResult" /> where processing failed.
+    /// Represents an implementation of <see cref="IProcessingResult" /> where processing failed.
     /// </summary>
-    public class FailedProcessingResult : ProcessingResult
+    public class FailedProcessingResult : IProcessingResult
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FailedProcessingResult"/> class.
-        /// </summary>
-        public FailedProcessingResult()
-            : base(ProcessingState.Failed)
-        {
-        }
+        /// <inheritdoc />
+        public bool Succeeded => false;
+
+        /// <inheritdoc />
+        public bool Retry => false;
     }
 }
