@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessorNew" />that processes the handling of an event.
     /// </summary>
-    public class HandlerProcessor : IEventProcessorNew
+    public class RemoteEventProcessor : IEventProcessorNew
     {
         readonly TenantId _tenant;
         readonly IHandlerService _handler;

@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessorNew" />that processes the filtering of an event.
     /// </summary>
-    public class FilterProcessor : IEventProcessorNew
+    public class RemoteFilterProcessor : IEventProcessorNew
     {
         readonly TenantId _tenant;
         readonly IFilterService _filter;
