@@ -6,7 +6,7 @@ using Dolittle.Events;
 
 namespace Dolittle.Runtime.Commands.Coordination.Specs
 {
-    public class StatefulEventSource : EventSource
+    public class StatefulAggregateRoot : AggregateRoot
     {
         public bool CommitCalled = false;
         public bool RollbackCalled = false;
@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs
 
         public bool EventApplied { get; private set; }
 
-        public StatefulEventSource(Guid id)
+        public StatefulAggregateRoot(Guid id)
             : base(id)
         {
         }

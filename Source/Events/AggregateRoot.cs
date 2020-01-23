@@ -47,7 +47,15 @@ namespace Dolittle.Events
         /// <summary>
         /// Gets sequence of <see cref="IEvent"/>s applied bthe Event Source that have not been committed to the Event Store.
         /// </summary>
-        public UncommittedAggregateEvents UncommittedEvents { get; }
+        public UncommittedAggregateEvents UncommittedEvents
+        {
+            get
+            {
+                var events = new UncommittedAggregateEvents(EventSource, GetType(), Version - (uint)_uncommittedEvents.Count);
+                foreach (var @event in _uncommittedEvents) events.Append(@event);
+                return events;
+            }
+        }
 
         /// <summary>
         /// Gets a <see cref="IEnumerable{T}">collection</see> of <see cref="BrokenRule">broken rules</see>.
