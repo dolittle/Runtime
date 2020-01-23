@@ -7,9 +7,9 @@ namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor
 {
     public class when_creating_handler_processor : given.all_dependencies
     {
-        static HandlerProcessor handler_processor;
+        static RemoteEventProcessor handler_processor;
 
-        Because of = () => handler_processor = new HandlerProcessor(tenant_id, event_processor_id, handler_service_mock.Object);
+        Because of = () => handler_processor = new RemoteEventProcessor(tenant_id, event_processor_id, handler_service_mock.Object);
 
         It should_have_the_correct_identifier = () => handler_processor.Identifier.ShouldEqual(event_processor_id);
     }

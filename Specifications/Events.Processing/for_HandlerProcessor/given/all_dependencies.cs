@@ -10,21 +10,22 @@ namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor.given
 {
     public class all_dependencies
     {
-        protected static readonly IHandlerResult succeeded_handling_result = new succeeded_handling_result();
-        protected static readonly IHandlerResult failed_handling_result = new failed_handling_result();
-        protected static readonly IHandlerResult retry_handling_result = new retry_handling_result();
+        protected static readonly int retry_timeout = 123;
+        protected static readonly IProcessingResult succeeded_handling_result = new SucceededProcessingResult();
+        protected static readonly IProcessingResult failed_handling_result = new FailedProcessingResult();
+        protected static readonly IProcessingResult retry_handling_result = new RetryProcessingResult(retry_timeout);
 
         protected static readonly CommittedEventEnvelope an_event = Processing.given.a_committed_event_envelope;
 
         protected static TenantId tenant_id;
         protected static EventProcessorId event_processor_id;
-        protected static Moq.Mock<IHandlerService> handler_service_mock;
+        protected static Moq.Mock<IRemoteProcessorService> handler_service_mock;
 
         Establish context = () =>
         {
             tenant_id = Guid.NewGuid();
             event_processor_id = Guid.NewGuid();
-            handler_service_mock = new Moq.Mock<IHandlerService>();
+            handler_service_mock = new Moq.Mock<IRemoteProcessorService>();
         };
     }
 }

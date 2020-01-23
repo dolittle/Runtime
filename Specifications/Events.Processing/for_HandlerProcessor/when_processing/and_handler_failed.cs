@@ -7,14 +7,14 @@ namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor.when_processin
 {
     public class and_handler_failed : given.all_dependencies
     {
-        static HandlerProcessor handler_processor;
+        static RemoteEventProcessor handler_processor;
         static IProcessingResult result;
 
-        Establish context = () => handler_processor = new HandlerProcessor(tenant_id, event_processor_id, Processing.given.a_handler_service(failed_handling_result));
+        Establish context = () => handler_processor = new RemoteEventProcessor(tenant_id, event_processor_id, Processing.given.a_handler_service(failed_handling_result));
 
         Because of = async () => result = await handler_processor.Process(an_event);
 
-        It should_return_processing_result = () => result.ShouldNotBeNull();
-        It should_return_succeeded_processing = () => result.Value.ShouldEqual(ProcessingResultValue.Failed);
+        It should_not_succeed_processing = () => result.Succeeded.ShouldEqual(false);
+        It should_not_retry_processing = () => result.Retry.ShouldEqual(false);
     }
 }

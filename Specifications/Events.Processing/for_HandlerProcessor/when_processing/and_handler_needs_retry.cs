@@ -7,14 +7,16 @@ namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor.when_processin
 {
     public class and_handler_needs_retry : given.all_dependencies
     {
-        static HandlerProcessor handler_processor;
+        static RemoteEventProcessor handler_processor;
         static IProcessingResult result;
 
-        Establish context = () => handler_processor = new HandlerProcessor(tenant_id, event_processor_id, Processing.given.a_handler_service(retry_handling_result));
+        Establish context = () => handler_processor = new RemoteEventProcessor(tenant_id, event_processor_id, Processing.given.a_handler_service(retry_handling_result));
 
         Because of = async () => result = await handler_processor.Process(an_event);
 
-        It should_return_processing_result = () => result.ShouldNotBeNull();
-        It should_return_succeeded_processing = () => result.Value.ShouldEqual(ProcessingResultValue.Retry);
+        It should_not_succeed_processing = () => result.Succeeded.ShouldEqual(false);
+        It should_retry_processing = () => result.Retry.ShouldEqual(true);
+        It should_be_of_type_RetryProcessingResult = () => result.ShouldBeOfExactType<RetryProcessingResult>();
+        It should_have_the_correct_timeout = () => (result as RetryProcessingResult).RetryTimeout.ShouldEqual(retry_timeout);
     }
 }
