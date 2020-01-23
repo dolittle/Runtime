@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Processing
     public class SucceededProcessingResult : IProcessingResult
     {
         /// <inheritdoc />
-        public bool Succeeded => false;
+        public bool Succeeded => true;
 
         /// <inheritdoc />
         public bool Retry => false;

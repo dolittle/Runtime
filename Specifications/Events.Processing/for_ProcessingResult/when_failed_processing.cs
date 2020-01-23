@@ -5,12 +5,13 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
 {
-    public class when_creating_failed_processing_result
+    public class when_failed_processing
     {
         static FailedProcessingResult result;
 
         Because of = () => result = new FailedProcessingResult();
 
-        It should_have_failed_result_value = () => result.Value.ShouldEqual(ProcessingState.Failed);
+        It should_not_be_succeeded = () => result.Succeeded.ShouldEqual(false);
+        It should_not_retry = () => result.Retry.ShouldEqual(false);
     }
 }

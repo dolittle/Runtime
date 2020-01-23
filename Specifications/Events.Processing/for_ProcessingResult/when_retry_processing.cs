@@ -5,14 +5,15 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
 {
-    public class when_creating_retry_processing_result
+    public class when_retry_processing
     {
         static RetryProcessingResult result;
-        static ulong timeout = 123;
+        static int timeout = 123;
 
         Because of = () => result = new RetryProcessingResult(timeout);
 
-        It should_have_retry_result_value = () => result.Value.ShouldEqual(ProcessingState.Retry);
-        It should_have_the_same_timeout = () => result.RetryTimeout.ShouldEqual(timeout);
+        It should_not_be_succeeded = () => result.Succeeded.ShouldEqual(false);
+        It should_retry = () => result.Retry.ShouldEqual(true);
+        It should_have_the_correct_timeout = () => result.RetryTimeout.ShouldEqual(timeout);
     }
 }

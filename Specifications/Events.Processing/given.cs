@@ -31,11 +31,6 @@ namespace Dolittle.Runtime.Events.Processing
             return event_processor_mock.Object;
         }
 
-        public static Mock<IFetchNextEvent> a_next_event_fetcher()
-        {
-
-        }
-
         public static Mock<IFetchNextEvent> a_next_event_fetcher_mock() => new Mock<IFetchNextEvent>();
 
         public static Mock<IEventProcessor> an_event_processor_mock() => new Mock<IEventProcessor>();

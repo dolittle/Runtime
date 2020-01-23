@@ -5,12 +5,13 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
 {
-    public class when_creating_succeeded_processing_result
+    public class when_succeeded_processing
     {
         static SucceededProcessingResult result;
 
         Because of = () => result = new SucceededProcessingResult();
 
-        It should_have_succeeded_result_value = () => result.Value.ShouldEqual(ProcessingState.Succeeded);
+        It should_be_succeeded = () => result.Succeeded.ShouldEqual(true);
+        It should_not_retry = () => result.Retry.ShouldEqual(false);
     }
 }
