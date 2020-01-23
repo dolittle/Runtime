@@ -3,16 +3,16 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_HandlerProcessor.when_processing
+namespace Dolittle.Runtime.Events.Processing.for_RemoteEventProcessor.when_processing
 {
-    public class and_handler_needs_retry : given.all_dependencies
+    public class and_processing_needs_retry : given.all_dependencies
     {
-        static RemoteEventProcessor handler_processor;
+        static RemoteEventProcessor processing_processor;
         static IProcessingResult result;
 
-        Establish context = () => handler_processor = new RemoteEventProcessor(event_processor_id, Processing.given.a_handler_service(retry_handling_result));
+        Establish context = () => processing_processor = new RemoteEventProcessor(event_processor_id, Processing.given.a_remote_processor_service(retry_handling_result));
 
-        Because of = async () => result = await handler_processor.Process(an_event);
+        Because of = async () => result = await processing_processor.Process(an_event);
 
         It should_not_succeed_processing = () => result.Succeeded.ShouldEqual(false);
         It should_retry_processing = () => result.Retry.ShouldEqual(true);
