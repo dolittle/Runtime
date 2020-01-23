@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.DependencyInversion;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
@@ -18,39 +17,39 @@ namespace Dolittle.Runtime.Events.Processing
     {
         const int TimeToWait = 1000;
         readonly TenantId _tenant;
-        readonly IEventProcessorNew _processor;
+        readonly IEventProcessor _processor;
         readonly ILogger _logger;
-        readonly FactoryFor<IFetchNextEvent> _getNextEventFetcher;
-        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStateRepository;
+        readonly IFetchNextEvent _nextEventFetcher;
+        readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
         /// <param name="tenant">The <see cref="TenantId" /> that this processor is scoped to.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
-        /// <param name="processor">An <see cref="IEventProcessorNew" /> to process the event.</param>
-        /// <param name="getStreamProcessorStateRepository">A factory function to return a correctly scoped instance of <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="getNextEventFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchNextEvent" />.</param>
+        /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
+        /// <param name="streamProcessorStateRepository">A factory function to return a correctly scoped instance of <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="nextEventFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchNextEvent" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public StreamProcessor(
             TenantId tenant,
             StreamId sourceStreamId,
-            IEventProcessorNew processor,
-            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStateRepository,
-            FactoryFor<IFetchNextEvent> getNextEventFetcher,
+            IEventProcessor processor,
+            IStreamProcessorStateRepository streamProcessorStateRepository,
+            IFetchNextEvent nextEventFetcher,
             ILogger logger)
         {
             _tenant = tenant;
             _processor = processor;
             _logger = logger;
-            _getNextEventFetcher = getNextEventFetcher;
-            _getStreamProcessorStateRepository = getStreamProcessorStateRepository;
+            _nextEventFetcher = nextEventFetcher;
+            _streamProcessorStateRepository = streamProcessorStateRepository;
             Key = new StreamProcessorKey(_processor.Identifier, sourceStreamId);
             LogMessageBeginning = $"Stream Processor for tenant '{tenant.Value}', event processor '{Key.EventProcessorId.Value}' with source stream '{Key.SourceStreamId.Value}'";
         }
 
         /// <summary>
-        /// Gets the unique identifer for the <see cref="IEventProcessor" />.
+        /// Gets the unique identifer for the <see cref="StreamProcessor" />.
         /// </summary>
         public StreamProcessorKey Key { get; }
 
@@ -76,10 +75,7 @@ namespace Dolittle.Runtime.Events.Processing
             try
             {
                 _logger.Debug($"{LogMessageBeginning} is starting up.");
-                using (var repository = _getStreamProcessorStateRepository())
-                {
-                    CurrentState = repository.Get(Key) ?? StreamProcessorState.New;
-                }
+                CurrentState = _streamProcessorStateRepository.Get(Key) ?? StreamProcessorState.New;
 
                 if (IsWaiting()) SetState(StreamProcessingState.Processing);
                 while (!IsStopping())
@@ -150,8 +146,7 @@ namespace Dolittle.Runtime.Events.Processing
             try
             {
                 _logger.Debug($"{LogMessageBeginning} is fetching next event.");
-                var nextEventFetcher = _getNextEventFetcher();
-                return await nextEventFetcher.FetchNextEvent(Key.SourceStreamId, CurrentState.Position).ConfigureAwait(false);
+                return await _nextEventFetcher.FetchNextEvent(Key.SourceStreamId, CurrentState.Position).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -177,18 +172,18 @@ namespace Dolittle.Runtime.Events.Processing
 
         void HandleProcessingResult(CommittedEventEnvelope @event, IProcessingResult processingResult)
         {
-            switch (processingResult.Value)
+            if (processingResult.Succeeded)
             {
-                case ProcessingResultValue.Succeeded:
-                    _logger.Debug($"{LogMessageBeginning} processed event with artifact id '{@event.Metadata.Artifact.Id}'");
-                    IncrementPosition();
-                    break;
-                case ProcessingResultValue.Retry:
-                    SetState(StreamProcessingState.Retrying);
-                    break;
-                case ProcessingResultValue.Failed:
-                    Stop();
-                    break;
+                _logger.Debug($"{LogMessageBeginning} processed event with artifact id '{@event.Metadata.Artifact.Id}'");
+                IncrementPosition();
+            }
+            else if (processingResult.Retry)
+            {
+                SetState(StreamProcessingState.Retrying);
+            }
+            else
+            {
+                Stop();
             }
         }
 
@@ -219,12 +214,9 @@ namespace Dolittle.Runtime.Events.Processing
             if (IsInState(state, position)) return;
             try
             {
-                using (var repository = _getStreamProcessorStateRepository())
-                {
-                    _logger.Debug($"{LogMessageBeginning} is setting new state to {CurrentState}");
-                    repository.Set(Key, CurrentState);
-                    CurrentState = new StreamProcessorState(state, position);
-                }
+                _logger.Debug($"{LogMessageBeginning} is setting new state to {CurrentState}");
+                _streamProcessorStateRepository.Set(Key, CurrentState);
+                CurrentState = new StreamProcessorState(state, position);
             }
             catch (Exception ex)
             {

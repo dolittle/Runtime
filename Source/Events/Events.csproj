@@ -23,7 +23,6 @@
     <PackageReference Include="Dolittle.Serialization.Json" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Time" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 

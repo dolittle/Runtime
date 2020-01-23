@@ -23,6 +23,25 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         public static Mock<IHandlerService> a_handler_service_mock() => new Moq.Mock<IHandlerService>();
+        public static IEventProcessor an_event_processor(EventProcessorId id, IProcessingResult result)
+        {
+            var event_processor_mock = an_event_processor_mock();
+            event_processor_mock.SetupGet(_ => _.Identifier).Returns(id);
+            event_processor_mock.Setup(_ => _.Process(Moq.It.IsAny<CommittedEventEnvelope>())).Returns(Task.FromResult(result));
+            return event_processor_mock.Object;
+        }
+
+        public static IEventProcessor an_event_processor(EventProcessorId id, Func<CommittedEventEnvelope, Task<IProcessingResult>> result_callback)
+        {
+            var event_processor_mock = an_event_processor_mock();
+            event_processor_mock.SetupGet(_ => _.Identifier).Returns(id);
+            event_processor_mock.Setup(_ => _.Process(Moq.It.IsAny<CommittedEventEnvelope>())).Returns(result_callback);
+            return event_processor_mock.Object;
+        }
+
+        public static Mock<IFetchNextEvent> a_next_event_fetcher_mock() => new Mock<IFetchNextEvent>();
+
+        public static Mock<IEventProcessor> an_event_processor_mock() => new Mock<IEventProcessor>();
 
         public static CommittedEventEnvelope a_committed_event_envelope => new CommittedEventEnvelope(
                 1,
