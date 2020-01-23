@@ -16,5 +16,6 @@ namespace Dolittle.Runtime.Events.Specs.given
     public abstract class Events
     {
         public static readonly SimpleEvent event_one = new SimpleEvent { Content = "One" };
+        public static readonly SimpleEvent event_two = new SimpleEvent { Content = "Two" };
     }
 }

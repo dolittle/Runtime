@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedEvents.given
                 Microservice.New(),
                 Guid.NewGuid(),
                 new Cause(CauseType.Command, 0),
-                event_one);
+                event_two);
         };
     }
 }
