@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
 
         Because of = () => result = new RetryProcessingResult(timeout);
 
-        It should_have_retry_result_value = () => result.Value.ShouldEqual(ProcessingResultValue.Retry);
+        It should_have_retry_result_value = () => result.Value.ShouldEqual(ProcessingState.Retry);
         It should_have_the_same_timeout = () => result.RetryTimeout.ShouldEqual(timeout);
     }
 }

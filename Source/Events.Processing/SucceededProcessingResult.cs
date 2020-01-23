@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// Initializes a new instance of the <see cref="SucceededProcessingResult"/> class.
         /// </summary>
         public SucceededProcessingResult()
-            : base(ProcessingResultValue.Succeeded)
+            : base(ProcessingState.Succeeded)
         {
         }
     }

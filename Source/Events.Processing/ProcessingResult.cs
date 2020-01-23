@@ -11,10 +11,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcessingResult"/> class.
         /// </summary>
-        /// <param name="resultValue">The <see cref="ProcessingResultValue"/>.</param>
-        public ProcessingResult(ProcessingResultValue resultValue) => Value = resultValue;
+        /// <param name="state">The <see cref="ProcessingState"/>.</param>
+        public ProcessingResult(ProcessingState state) => Value = state;
 
         /// <inheritdoc/>
-        public ProcessingResultValue Value { get; }
+        public ProcessingState Value { get; }
     }
 }

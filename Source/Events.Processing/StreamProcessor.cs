@@ -179,14 +179,14 @@ namespace Dolittle.Runtime.Events.Processing
         {
             switch (processingResult.Value)
             {
-                case ProcessingResultValue.Succeeded:
+                case ProcessingState.Succeeded:
                     _logger.Debug($"{LogMessageBeginning} processed event with artifact id '{@event.Metadata.Artifact.Id}'");
                     IncrementPosition();
                     break;
-                case ProcessingResultValue.Retry:
+                case ProcessingState.Retry:
                     SetState(StreamProcessingState.Retrying);
                     break;
-                case ProcessingResultValue.Failed:
+                case ProcessingState.Failed:
                     Stop();
                     break;
             }

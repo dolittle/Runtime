@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="retryTimeout">The retry timeout.</param>
         public RetryProcessingResult(ulong retryTimeout)
-            : base(ProcessingResultValue.Retry) => RetryTimeout = retryTimeout;
+            : base(ProcessingState.Retry) => RetryTimeout = retryTimeout;
 
         /// <summary>
         /// Gets the retry timeout value.

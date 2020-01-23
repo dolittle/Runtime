@@ -9,8 +9,8 @@ namespace Dolittle.Runtime.Events.Processing
     public interface IProcessingResult
     {
         /// <summary>
-        /// Gets the <see cref="ProcessingResultValue" />.
+        /// Gets the <see cref="ProcessingState" />.
         /// </summary>
-        ProcessingResultValue Value { get; }
+        ProcessingState Value { get; }
     }
 }

@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents the state of the processing of an event.
     /// </summary>
-    public enum ProcessingResultValue
+    public enum ProcessingState
     {
         /// <summary>The state when processing succeeded.</summary>
         Succeeded = 0,

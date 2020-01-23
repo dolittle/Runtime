@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// Initializes a new instance of the <see cref="FailedProcessingResult"/> class.
         /// </summary>
         public FailedProcessingResult()
-            : base(ProcessingResultValue.Failed)
+            : base(ProcessingState.Failed)
         {
         }
     }

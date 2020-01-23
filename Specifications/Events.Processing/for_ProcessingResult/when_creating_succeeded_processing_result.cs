@@ -11,6 +11,6 @@ namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
 
         Because of = () => result = new SucceededProcessingResult();
 
-        It should_have_succeeded_result_value = () => result.Value.ShouldEqual(ProcessingResultValue.Succeeded);
+        It should_have_succeeded_result_value = () => result.Value.ShouldEqual(ProcessingState.Succeeded);
     }
 }
