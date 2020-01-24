@@ -3,7 +3,7 @@ title: Dynamic Metrics
 description: How to provide dynamic metrics that gets exposed
 keywords: Metrics
 author: Dolittle
-weight: 2
+weight: 3
 ---
 Sometimes you don't know ahead of time what metrics you will be exposing.
 Instead of using the [provider model]({{< relref providing_metrics >}}),
