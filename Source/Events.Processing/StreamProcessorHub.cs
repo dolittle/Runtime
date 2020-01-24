@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Events.Processing
             var streamProcessor = new StreamProcessor(sourceStreamId, eventProcessor, streamProcessorStateRepository, nextEventFetcher, _logger);
             _logger.Debug($"Created Stream Processor with key '{streamProcessor.Key}' for tenant '{tenant}'");
             _streamProcessors.GetOrAdd(streamProcessor.Key, (_) => new ConcurrentDictionary<TenantId, StreamProcessor>())
-                .AddOrUpdate(executionContext.Tenant, streamProcessor, (_, __) => streamProcessor);
+                .AddOrUpdate(tenant, streamProcessor, (_, __) => streamProcessor);
 
             var task = streamProcessor.Start();
         }
