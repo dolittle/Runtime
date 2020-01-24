@@ -7,12 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Applications" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.PropertyBags" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
