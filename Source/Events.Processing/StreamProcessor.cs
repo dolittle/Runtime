@@ -66,7 +66,8 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Starts up the processing of the stream. It will continiously process and wait for events to process until it is stopped.
         /// </summary>
-        public async void Start()
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation of starting the <see cref="StreamProcessor" />.</returns>
+        public async Task Start()
         {
             try
             {
