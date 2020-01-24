@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events
         /// <returns>The new <see cref="CommittedEventEnvelope" />.</returns>
         public CommittedEventEnvelope ToCommittedEventEnvelope(CommitSequenceNumber commitSequenceNumber)
         {
-            return new CommittedEventEnvelope(commitSequenceNumber, this.Metadata, this.Event);
+            return new CommittedEventEnvelope(commitSequenceNumber, Metadata, Event);
         }
     }
 }

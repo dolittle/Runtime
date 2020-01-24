@@ -1,5 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Events.Processing.Specs</AssemblyName>
   </PropertyGroup>
@@ -7,8 +7,8 @@
   <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
-    <ProjectReference Include="..\Events\Events.csproj" />
     <ProjectReference Include="..\..\Source\Events.Processing\Events.Processing.csproj" />
   </ItemGroup>
+
 
 </Project>
