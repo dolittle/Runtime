@@ -16,7 +16,6 @@ namespace Dolittle.Runtime.Events.Processing
     public class StreamProcessor
     {
         const int TimeToWait = 1000;
-        readonly TenantId _tenant;
         readonly IEventProcessor _processor;
         readonly ILogger _logger;
         readonly IFetchNextEvent _nextEventFetcher;
@@ -25,27 +24,24 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
-        /// <param name="tenant">The <see cref="TenantId" /> that this processor is scoped to.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStateRepository">A factory function to return a correctly scoped instance of <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="nextEventFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchNextEvent" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public StreamProcessor(
-            TenantId tenant,
             StreamId sourceStreamId,
             IEventProcessor processor,
             IStreamProcessorStateRepository streamProcessorStateRepository,
             IFetchNextEvent nextEventFetcher,
             ILogger logger)
         {
-            _tenant = tenant;
             _processor = processor;
             _logger = logger;
             _nextEventFetcher = nextEventFetcher;
             _streamProcessorStateRepository = streamProcessorStateRepository;
             Key = new StreamProcessorKey(_processor.Identifier, sourceStreamId);
-            LogMessageBeginning = $"Stream Processor for tenant '{tenant.Value}', event processor '{Key.EventProcessorId.Value}' with source stream '{Key.SourceStreamId.Value}'";
+            LogMessageBeginning = $"Stream Processor for event processor '{Key.EventProcessorId.Value}' with source stream '{Key.SourceStreamId.Value}'";
         }
 
         /// <summary>
