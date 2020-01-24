@@ -4,21 +4,27 @@
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IProcessingResult" /> where processing failed and it should try to process again.
+    /// Represents an implementation of <see cref="IFilterResult" /> where filtering failed and it should try to filter again.
     /// </summary>
-    public class RetryProcessingResult : IProcessingResult
+    public class RetryFilteringResult : IFilterResult
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RetryProcessingResult"/> class.
+        /// Initializes a new instance of the <see cref="RetryFilteringResult"/> class.
         /// </summary>
         /// <param name="retryTimeout">The retry timeout in milliseconds.</param>
-        public RetryProcessingResult(int retryTimeout) => RetryTimeout = retryTimeout;
+        public RetryFilteringResult(int retryTimeout) => RetryTimeout = retryTimeout;
 
         /// <inheritdoc />
         public bool Succeeded => false;
 
         /// <inheritdoc />
         public bool Retry => true;
+
+        /// <inheritdoc />
+        public bool IsIncluded => false;
+
+        /// <inheritdoc />
+        public int Partition => 0;
 
         /// <summary>
         /// Gets the timeout when retrying.

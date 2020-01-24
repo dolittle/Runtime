@@ -12,8 +12,6 @@ namespace Dolittle.Runtime.Events.Specs
         public static Mock<ILogger> a_logger()
         {
             var logger = new Mock<ILogger>();
-            /*logger.Setup(_ => _.Debug(Moq.It.IsAny<string>(),Moq.It.IsAny<string>(),Moq.It.IsAny<int>(),Moq.It.IsAny<string>()))
-                                    .Callback<string,string,int,string>((msg,path,line,mbr) => Console.WriteLine(msg));*/
             return logger;
         }
 

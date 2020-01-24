@@ -9,8 +9,13 @@ namespace Dolittle.Runtime.Events.Processing
     public interface IProcessingResult
     {
         /// <summary>
-        /// Gets the <see cref="ProcessingResultValue" />.
+        /// Gets a value indicating whether processing succeeded.
         /// </summary>
-        ProcessingResultValue Value { get; }
+        bool Succeeded { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether to retry processing.
+        /// </summary>
+        bool Retry { get; }
     }
 }

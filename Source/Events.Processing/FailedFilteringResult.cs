@@ -4,14 +4,20 @@
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IProcessingResult" /> where processing failed.
+    /// Represents an implementation of <see cref="IFilterResult" /> where filtering failed.
     /// </summary>
-    public class FailedProcessingResult : IProcessingResult
+    public class FailedFilteringResult : IFilterResult
     {
         /// <inheritdoc />
         public bool Succeeded => false;
 
         /// <inheritdoc />
         public bool Retry => false;
+
+        /// <inheritdoc />
+        public bool IsIncluded => false;
+
+        /// <inheritdoc />
+        public int Partition => 0;
     }
 }
