@@ -15,6 +15,24 @@ namespace Dolittle.Runtime.Events.Processing
 {
     public static class given
     {
+        public static IRemoteProcessorService a_remote_processor_service(IProcessingResult result)
+        {
+            var handler_service = a_remote_processor_mock();
+            handler_service.Setup(_ => _.Process(Moq.It.IsAny<CommittedEventEnvelope>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
+            return handler_service.Object;
+        }
+
+        public static Mock<IRemoteProcessorService> a_remote_processor_mock() => new Moq.Mock<IRemoteProcessorService>();
+
+        public static IRemoteFilterService a_remote_filter_service(IFilterResult result)
+        {
+            var handler_service = a_remote_filter_mock();
+            handler_service.Setup(_ => _.Filter(Moq.It.IsAny<CommittedEventEnvelope>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
+            return handler_service.Object;
+        }
+
+        public static Mock<IRemoteFilterService> a_remote_filter_mock() => new Moq.Mock<IRemoteFilterService>();
+
         public static IEventProcessor an_event_processor(EventProcessorId id, IProcessingResult result)
         {
             var event_processor_mock = an_event_processor_mock();
