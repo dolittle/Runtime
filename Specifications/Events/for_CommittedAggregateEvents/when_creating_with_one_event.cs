@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents
     {
         static CommittedAggregateEvents events;
 
-        Because of = () => 
+        Because of = () =>
         {
             events = new CommittedAggregateEvents(event_source_id, aggregate_root_type, aggregate_root_version, new CommittedAggregateEvent[] { first_event });
         };
