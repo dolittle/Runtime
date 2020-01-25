@@ -185,7 +185,7 @@ namespace Dolittle.Events
 
         void ThrowIfStateful()
         {
-            if (!this.IsStateless()) throw new FastForwardNoAllowedForStatefulEventSource(GetType());
+            if (!this.IsStateless()) throw new FastForwardNotAllowedForStatefulAggregateRoot(GetType());
         }
     }
 }
