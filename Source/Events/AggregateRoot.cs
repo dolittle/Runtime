@@ -15,7 +15,7 @@ namespace Dolittle.Events
     /// <summary>
     /// Represents a base class to be used for Aggregate Roots in your domain.
     /// </summary>
-    public class AggregateRoot : ITransaction
+    public abstract class AggregateRoot : ITransaction
     {
         readonly List<RuleSetEvaluation> _ruleSetEvaluations;
         readonly List<BrokenRule> _brokenRules;
