@@ -11,9 +11,15 @@ namespace Dolittle.Runtime.Events.Specs.for_UncommittedEvents
         static UncommittedEvents events;
         static Exception exception;
 
-        Establish context = () => events = new UncommittedEvents();
+        Establish context = () =>
+        {
+            events = new UncommittedEvents();
+        };
 
-        Because of = () => exception = Catch.Exception(() => events.Append(null));
+        Because of = () => exception = Catch.Exception(() =>
+        {
+            events.Append(null);
+        });
 
         It should_not_have_events = () => events.HasEvents.ShouldBeFalse();
         It should_have_a_count_of_zero = () => events.Count.ShouldEqual(0);

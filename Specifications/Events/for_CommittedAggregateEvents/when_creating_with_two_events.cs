@@ -3,13 +3,16 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Specs.for_CommittedEvents
+namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents
 {
-    public class when_creating_a_new_committed_events_with_two_events : given.two_committed_events
+    public class when_creating_with_two_events : given.an_aggregate_instance_and_some_committed_events
     {
-        static CommittedEvents events;
+        static CommittedAggregateEvents events;
 
-        Because of = () => events = new CommittedEvents(new CommittedEvent[] { first_event, second_event });
+        Because of = () =>
+        {
+            events = new CommittedAggregateEvents(event_source_id, aggregate_root_type, aggregate_root_version, new CommittedAggregateEvent[] { first_event, second_event });
+        };
 
         It should_have_events = () => events.HasEvents.ShouldBeTrue();
         It should_have_a_count_of_two = () => events.Count.ShouldEqual(2);

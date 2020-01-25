@@ -9,7 +9,10 @@ namespace Dolittle.Runtime.Events.Specs.for_UncommittedEvents
     {
         static UncommittedEvents events;
 
-        Establish context = () => events = new UncommittedEvents();
+        Establish context = () =>
+        {
+            events = new UncommittedEvents();
+        };
 
         Because of = () =>
         {

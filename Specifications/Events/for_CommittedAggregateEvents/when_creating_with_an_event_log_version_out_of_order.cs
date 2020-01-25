@@ -1,4 +1,4 @@
-// Copyright (c) Dolittle. All rights reserved.
+﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
@@ -6,7 +6,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents
 {
-    public class when_creating_a_new_committed_aggregate_events_with_an_event_log_version_out_of_order : given.an_aggregate_instance_and_some_committed_events
+    public class when_creating_with_an_event_log_version_out_of_order : given.an_aggregate_instance_and_some_committed_events
     {
         static CommittedAggregateEvents events;
         static Exception exception;

@@ -10,7 +10,10 @@ namespace Dolittle.Runtime.Events.Specs.for_UncommittedEvents
     {
         static UncommittedEvents events;
 
-        Because of = () => events = new UncommittedEvents();
+        Because of = () =>
+        {
+            events = new UncommittedEvents();
+        };
 
         It should_not_have_events = () => events.HasEvents.ShouldBeFalse();
         It should_have_a_count_of_zero = () => events.Count.ShouldEqual(0);

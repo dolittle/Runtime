@@ -6,7 +6,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Specs.for_CommittedEvents
 {
-    public class when_creating_a_new_committed_events_with_out_of_order_events : given.two_committed_events
+    public class when_creating_with_out_of_order_events : given.two_committed_events
     {
         static CommittedEvents events;
         static Exception exception;
