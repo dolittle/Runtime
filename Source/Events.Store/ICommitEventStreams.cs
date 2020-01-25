@@ -4,9 +4,9 @@
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Defines an interface for committing event streams.
+    /// Defines an interface for committing events.
     /// </summary>
-    public interface ICommitEventStreams
+    public interface ICommitEvents
     {
         /// <summary>
         /// Commits an <see cref="UncommittedEvents"/> to the Event Store, returning a corresponding <see cref="CommittedEvents"/>.
