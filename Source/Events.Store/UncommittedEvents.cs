@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="events">The <see cref="UncommittedEvent">events</see>.</param>
         public UncommittedEvents(IReadOnlyList<UncommittedEvent> events)
         {
+            foreach (var @event in events) ThrowIfEventIsNull(@event);
             _events = new NullFreeList<UncommittedEvent>(events);
         }
 
@@ -39,5 +40,10 @@ namespace Dolittle.Runtime.Events.Store
 
         /// <inheritdoc/>
         IEnumerator IEnumerable.GetEnumerator() => _events.GetEnumerator();
+
+        void ThrowIfEventIsNull(UncommittedEvent @event)
+        {
+            if (@event == null) throw new EventCanNotBeNull();
+        }
     }
 }
