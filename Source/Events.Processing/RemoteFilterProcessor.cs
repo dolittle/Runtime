@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -39,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing
         public EventProcessorId Identifier { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
+        public async Task<IProcessingResult> Process(CommittedEvent @event)
         {
             var result = await _filter.Filter(@event, Identifier).ConfigureAwait(false);
 

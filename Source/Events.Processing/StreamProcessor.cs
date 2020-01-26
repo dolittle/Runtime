@@ -5,13 +5,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Processes an individual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />.
+    /// Processes an individual <see cref="CommittedEvent" /> for the correct <see cref="TenantId" />.
     /// </summary>
     public class StreamProcessor
     {
@@ -138,7 +137,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        async Task<CommittedEventEnvelope> FetchNextEvent()
+        async Task<CommittedEvent> FetchNextEvent()
         {
             try
             {
@@ -152,7 +151,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        async Task ProcessEvent(CommittedEventEnvelope @event)
+        async Task ProcessEvent(CommittedEvent @event)
         {
             try
             {
@@ -167,7 +166,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        void HandleProcessingResult(CommittedEventEnvelope @event, IProcessingResult processingResult)
+        void HandleProcessingResult(CommittedEvent @event, IProcessingResult processingResult)
         {
             if (processingResult.Succeeded)
             {

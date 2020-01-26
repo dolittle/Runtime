@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -30,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing
         public EventProcessorId Identifier { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
+        public async Task<IProcessingResult> Process(CommittedEvent @event)
         {
             return await _remoteProcessor.Process(@event, Identifier).ConfigureAwait(false);
         }
