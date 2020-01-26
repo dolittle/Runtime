@@ -6,10 +6,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../DataPoints/DataPoints.csproj"/>
-        <ProjectReference Include="../DataTypes/DataTypes.csproj"/>
-        <ProjectReference Include="../Identity/Identity.csproj"/>
-        <ProjectReference Include="../State/State.csproj"/>
+        <ProjectReference Include="../TimeSeries.DataPoints/TimeSeries.DataPoints.csproj"/>
+        <ProjectReference Include="../TimeSeries.DataTypes/TimeSeries.DataTypes.csproj"/>
+        <ProjectReference Include="../TimeSeries.Identity/TimeSeries.Identity.csproj"/>
+        <ProjectReference Include="../TimeSeries.State/TimeSeries.State.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

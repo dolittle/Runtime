@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../../Source/Connectors/Connectors.csproj"/>
+        <ProjectReference Include="../../Source/TimeSeries.Connectors/TimeSeries.Connectors.csproj"/>
 
         <PackageReference Include="Dolittle.Runtime.TimeSeries.Contracts" Version="1.*" Alias="contracts"/>
     </ItemGroup>

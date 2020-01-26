@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Identity/Identity.csproj" />
+        <ProjectReference Include="../TimeSeries.Identity/TimeSeries.Identity.csproj" />
     </ItemGroup>
 
     <ItemGroup>

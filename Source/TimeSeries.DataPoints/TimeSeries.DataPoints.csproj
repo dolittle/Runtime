@@ -6,8 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../DataTypes/DataTypes.csproj"/>
-        <ProjectReference Include="../State/State.csproj"/>
+        <ProjectReference Include="../TimeSeries.DataTypes/TimeSeries.DataTypes.csproj"/>
+        <ProjectReference Include="../TimeSeries.State/TimeSeries.State.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
