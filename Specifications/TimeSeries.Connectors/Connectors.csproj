@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../specs.props"/>
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.TimeSeries.Connectors.Specs</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../../Source/Connectors/Connectors.csproj"/>
+
+        <PackageReference Include="Dolittle.Runtime.TimeSeries.Contracts" Version="1.*" Alias="contracts"/>
+    </ItemGroup>
+
+</Project>

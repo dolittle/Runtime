@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Fundamentals" Version="4.*"/>
-        <PackageReference Include="Dolittle.TimeSeries.Runtime" Version="1.*"/>
+        <PackageReference Include="Dolittle.Runtime.TimeSeries" Version="1.*"/>
         <PackageReference Include="Dolittle.ReadModels.MongoDB" Version="4.*" />
         <PackageReference Include="Dolittle.Runtime.Events.MongoDB" Version="4.*" />
     </ItemGroup>
