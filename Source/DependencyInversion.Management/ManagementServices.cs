@@ -4,38 +4,38 @@
 extern alias contracts;
 
 using System.Collections.Generic;
+using contracts::Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Management;
 using Dolittle.Services;
-using grpc = contracts::Dolittle.Runtime.Heads.Management;
 
-namespace Dolittle.Runtime.Heads.Management
+namespace Dolittle.Runtime.DependencyInversion.Management
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindManagementServices"/> for exposing
-    /// management service implementations for Heads.
+    /// management service implementations for DependencyInversion.
     /// </summary>
     public class ManagementServices : ICanBindManagementServices
     {
-        readonly HeadsService _clientsService;
+        readonly ContainerService _containerService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ManagementServices"/> class.
         /// </summary>
-        /// <param name="clientsService"><see cref="HeadsService"/> to expose.</param>
-        public ManagementServices(HeadsService clientsService)
+        /// <param name="containerService">The <see cref="ContainerService"/>.</param>
+        public ManagementServices(ContainerService containerService)
         {
-            _clientsService = clientsService;
+            _containerService = containerService;
         }
 
         /// <inheritdoc/>
-        public ServiceAspect Aspect => "Runtime";
+        public ServiceAspect Aspect => "DependencyInversion";
 
         /// <inheritdoc/>
         public IEnumerable<Service> BindServices()
         {
-            return new Service[]
+            return new[]
             {
-                new Service(_clientsService, grpc.Heads.BindService(_clientsService), grpc.Heads.Descriptor)
+                new Service(_containerService, Container.BindService(_containerService), Container.Descriptor)
             };
         }
     }

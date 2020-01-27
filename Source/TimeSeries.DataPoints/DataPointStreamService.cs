@@ -1,14 +1,15 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Logging;
-using Dolittle.TimeSeries.DataTypes.Runtime;
-using Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Runtime.TimeSeries.State;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using static Dolittle.TimeSeries.DataPoints.Runtime.DataPointStream;
+using static contracts::Dolittle.Runtime.TimeSeries.DataPoints.DataPointStream;
 
 namespace Dolittle.Runtime.TimeSeries.DataPoints
 {
@@ -39,7 +40,7 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
             _logger.Information($"DataPointStream opened");
             while (await requestStream.MoveNext().ConfigureAwait(false))
             {
-                _dataPointsState.Set(requestStream.Current.ToMicroservice());
+                _dataPointsState.Set(requestStream.Current);
             }
 
             _logger.Information($"DataPointStream closed");

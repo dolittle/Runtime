@@ -1,18 +1,19 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System;
 using System.Collections.Generic;
+using contracts::Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Collections;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
-using Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Runtime.TimeSeries.Identity;
 using Dolittle.Runtime.TimeSeries.State;
 using Google.Protobuf.WellKnownTypes;
-using grpc = Dolittle.TimeSeries.DataPoints.Runtime;
-using microserviceDataTypes = Dolittle.TimeSeries.DataTypes.Microservice;
+using grpc = contracts::Dolittle.Runtime.TimeSeries.DataPoints;
 
 namespace Dolittle.Runtime.TimeSeries.Connectors
 {
@@ -56,7 +57,7 @@ namespace Dolittle.Runtime.TimeSeries.Connectors
                     _logger.Information("DataPoint received");
                     var timeSeriesId = _timeSeriesMapper.Identify(connectorName, tagDataPoint.Tag);
 
-                    var dataPoint = new microserviceDataTypes.DataPoint
+                    var dataPoint = new DataPoint
                     {
                         TimeSeries = timeSeriesId.ToProtobuf(),
                         Timestamp = Timestamp.FromDateTimeOffset(DateTimeOffset.UtcNow)
@@ -65,21 +66,21 @@ namespace Dolittle.Runtime.TimeSeries.Connectors
                     switch (tagDataPoint.MeasurementCase)
                     {
                         case grpc.TagDataPoint.MeasurementOneofCase.SingleValue:
-                            dataPoint.SingleValue = tagDataPoint.SingleValue.ToMicroservice();
+                            dataPoint.SingleValue = tagDataPoint.SingleValue;
                             break;
                         case grpc.TagDataPoint.MeasurementOneofCase.Vector2Value:
-                            dataPoint.Vector2Value = new microserviceDataTypes.Vector2
+                            dataPoint.Vector2Value = new Vector2
                             {
-                                X = tagDataPoint.Vector2Value.X.ToMicroservice(),
-                                Y = tagDataPoint.Vector2Value.Y.ToMicroservice()
+                                X = tagDataPoint.Vector2Value.X,
+                                Y = tagDataPoint.Vector2Value.Y
                             };
                             break;
                         case grpc.TagDataPoint.MeasurementOneofCase.Vector3Value:
-                            dataPoint.Vector3Value = new microserviceDataTypes.Vector3
+                            dataPoint.Vector3Value = new Vector3
                             {
-                                X = tagDataPoint.Vector3Value.X.ToMicroservice(),
-                                Y = tagDataPoint.Vector3Value.Y.ToMicroservice(),
-                                Z = tagDataPoint.Vector3Value.Z.ToMicroservice()
+                                X = tagDataPoint.Vector3Value.X,
+                                Y = tagDataPoint.Vector3Value.Y,
+                                Z = tagDataPoint.Vector3Value.Z
                             };
                             break;
                     }

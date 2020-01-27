@@ -3,12 +3,13 @@
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Heads/Heads.csproj"/>
-    <ProjectReference Include="../Heads.Management/Heads.Management.csproj"/>
-    <ProjectReference Include="../Metrics/Metrics.csproj"/>
+    <ProjectReference Include="../../Source/AggregatedPackage/Runtime.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

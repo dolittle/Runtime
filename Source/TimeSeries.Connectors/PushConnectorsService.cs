@@ -1,14 +1,16 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using static Dolittle.TimeSeries.Connectors.Runtime.PushConnectors;
-using grpc = Dolittle.TimeSeries.Connectors.Runtime;
+using static contracts::Dolittle.Runtime.TimeSeries.Connectors.PushConnectors;
+using grpc = contracts::Dolittle.Runtime.TimeSeries.Connectors;
 
 namespace Dolittle.Runtime.TimeSeries.Connectors
 {

@@ -8,6 +8,6 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)"/>
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)"/>
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(FundamentalsVersion)"/>    
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts"/>    
   </ItemGroup>
 </Project>

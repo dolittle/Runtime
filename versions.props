@@ -1,5 +1,6 @@
 <Project>
     <PropertyGroup>
+        <ContractsVersion>4.*</ContractsVersion>
         <FundamentalsVersion>4.*</FundamentalsVersion>
     </PropertyGroup>
 </Project>

@@ -1,21 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"></Import>
+    <Import Project="../../default.props"/>
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.TimeSeries.State</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../Heads/Heads.csproj"/>
+        <ProjectReference Include="../Metrics/Metrics.csproj"/>
+        <ProjectReference Include="../Microservices/Microservices.csproj"/>
         <ProjectReference Include="../TimeSeries.Identity/TimeSeries.Identity.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Runtime.Heads" Version="4.*" />
-        <PackageReference Include="Dolittle.Runtime.Metrics" Version="4.*" />
-        <PackageReference Include="Dolittle.Runtime.Microservices" Version="4.*" />
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts"/>
         <PackageReference Include="Dolittle.Protobuf" Version="4.*" />
-        <PackageReference Include="Dolittle.Runtime.TimeSeries.Contracts" Version="1.*" />
-        <PackageReference Include="Dolittle.TimeSeries.Microservice.Contracts" Version="1.*" />
-        <PackageReference Include="prometheus-net" Version="3.3.0" />
     </ItemGroup>
 </Project>

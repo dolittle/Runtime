@@ -1,15 +1,15 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
+extern alias contracts;
+
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Logging;
 using Dolittle.Scheduling;
-using Dolittle.TimeSeries.DataTypes.Runtime;
-using Dolittle.Runtime.TimeSeries.DataTypes;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using static Dolittle.TimeSeries.State.Microservice.DataPointsState;
+using static contracts::Dolittle.Runtime.TimeSeries.State.DataPointsState;
 
 namespace Dolittle.Runtime.TimeSeries.DataPoints
 {
@@ -49,9 +49,7 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
         {
             _logger.Information($"Pull from '{_endPoint.Target}'");
             var dataPoints = await _client.GetAllAsync(new Empty());
-
-            var converted = dataPoints.DataPoints_.Select(_ => _.ToRuntime());
-            _processors.Process(converted);
+            _processors.Process(dataPoints.DataPoints_);
         }
     }
 }

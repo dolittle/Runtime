@@ -1,16 +1,18 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
-using Dolittle.TimeSeries.DataTypes.Runtime;
 using Grpc.Core;
-using static Dolittle.TimeSeries.DataPoints.Runtime.DataPointProcessors;
-using grpc = Dolittle.TimeSeries.DataPoints.Runtime;
+using static contracts::Dolittle.Runtime.TimeSeries.DataPoints.DataPointProcessors;
+using grpc = contracts::Dolittle.Runtime.TimeSeries.DataPoints;
 
 namespace Dolittle.Runtime.TimeSeries.DataPoints
 {

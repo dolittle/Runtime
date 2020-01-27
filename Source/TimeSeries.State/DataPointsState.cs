@@ -1,14 +1,16 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using contracts::Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Metrics;
-using Dolittle.TimeSeries.DataTypes.Microservice;
 using Dolittle.Runtime.TimeSeries.Identity;
 
 namespace Dolittle.Runtime.TimeSeries.State

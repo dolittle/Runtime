@@ -7,8 +7,10 @@
 
     <ItemGroup>
         <ProjectReference Include="../../Source/TimeSeries.Connectors/TimeSeries.Connectors.csproj"/>
+    </ItemGroup>
 
-        <PackageReference Include="Dolittle.Runtime.TimeSeries.Contracts" Version="1.*" Alias="contracts"/>
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts"/>
     </ItemGroup>
 
 </Project>

@@ -1,8 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Collections.Generic;
-using Dolittle.TimeSeries.DataTypes.Microservice;
+using contracts::Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Runtime.TimeSeries.Identity;
 
 namespace Dolittle.Runtime.TimeSeries.State

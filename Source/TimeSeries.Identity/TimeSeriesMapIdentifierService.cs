@@ -1,13 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
+extern alias contracts;
+
 using System.Threading.Tasks;
 using Dolittle.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using static Dolittle.TimeSeries.Identity.Runtime.TimeSeriesMapIdentifier;
-using grpc = Dolittle.TimeSeries.Identity.Runtime;
+using static contracts::Dolittle.Runtime.TimeSeries.Identity.TimeSeriesMapIdentifier;
+using grpc = contracts::Dolittle.Runtime.TimeSeries.Identity;
 
 namespace Dolittle.Runtime.TimeSeries.Identity
 {

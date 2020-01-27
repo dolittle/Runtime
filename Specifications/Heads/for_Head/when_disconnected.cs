@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Heads.for_Head
 
         Establish context = () =>
         {
-            head = new Head(Guid.NewGuid(), "", 42, "", Array.Empty<string>(), DateTimeOffset.UtcNow);
+            head = new Head(Guid.NewGuid(), "", DateTimeOffset.UtcNow);
             head.Disconnected += (c) => disconnected = true;
 
             disconnected_method = typeof(Head).GetMethod("OnDisconnected", BindingFlags.Instance | BindingFlags.NonPublic);

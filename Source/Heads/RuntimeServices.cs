@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Collections.Generic;
 using Dolittle.Services;
 
@@ -31,7 +33,7 @@ namespace Dolittle.Runtime.Heads
         {
             return new Service[]
             {
-                new Service(_headsService, Dolittle.Heads.Runtime.Heads.BindService(_headsService), Dolittle.Heads.Runtime.Heads.Descriptor)
+                new Service(_headsService, contracts::Dolittle.Runtime.Heads.Heads.BindService(_headsService), contracts::Dolittle.Runtime.Heads.Heads.Descriptor)
             };
         }
     }

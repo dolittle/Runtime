@@ -1,15 +1,18 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"></Import>
+    <Import Project="../../default.props"/>
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.TimeSeries.Identity</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Concepts" Version="4.*"/>
-        <PackageReference Include="Dolittle.Configuration" Version="4.*"/>
-        <PackageReference Include="Dolittle.Runtime.Heads" Version="4.*"/>
-        <PackageReference Include="Dolittle.Runtime.TimeSeries.Contracts" Version="1.*" />
+        <ProjectReference Include="../Heads/Heads.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)"/>
+        <PackageReference Include="Dolittle.Configuration" Version="$(FundamentalsVersion)"/>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts" />
     </ItemGroup>
 
 </Project>

@@ -1,10 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Collections.Generic;
 using Dolittle.Runtime.Heads;
 using Dolittle.Services;
-using grpc = Dolittle.TimeSeries.Identity.Runtime;
 
 namespace Dolittle.Runtime.TimeSeries.Identity
 {
@@ -33,7 +34,7 @@ namespace Dolittle.Runtime.TimeSeries.Identity
         {
             return new Service[]
             {
-                new Service(_timeSeriesMapIdentifierService, grpc.TimeSeriesMapIdentifier.BindService(_timeSeriesMapIdentifierService), grpc.TimeSeriesMapIdentifier.Descriptor)
+                new Service(_timeSeriesMapIdentifierService, contracts::Dolittle.Runtime.TimeSeries.Identity.TimeSeriesMapIdentifier.BindService(_timeSeriesMapIdentifierService), contracts::Dolittle.Runtime.TimeSeries.Identity.TimeSeriesMapIdentifier.Descriptor)
             };
         }
     }

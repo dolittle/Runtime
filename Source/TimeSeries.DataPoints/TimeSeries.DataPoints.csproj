@@ -6,14 +6,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../Heads/Heads.csproj"/>
+        <ProjectReference Include="../Microservices/Microservices.csproj"/>
         <ProjectReference Include="../TimeSeries.DataTypes/TimeSeries.DataTypes.csproj"/>
         <ProjectReference Include="../TimeSeries.State/TimeSeries.State.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Runtime.Heads" Version="4.*"/>
-        <PackageReference Include="Dolittle.Runtime.Microservices" Version="4.*"/>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts"/>
         <PackageReference Include="Dolittle.Protobuf" Version="4.*"/>
-        <PackageReference Include="Dolittle.Runtime.TimeSeries.Contracts" Version="1.*" />
     </ItemGroup>
 </Project>

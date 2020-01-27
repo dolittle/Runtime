@@ -1,11 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Threading.Tasks;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using static Dolittle.TimeSeries.State.Microservice.DataPointsState;
-using grpc = Dolittle.TimeSeries.State.Microservice;
+using static contracts::Dolittle.Runtime.TimeSeries.State.DataPointsState;
+using grpc = contracts::Dolittle.Runtime.TimeSeries.State;
 
 namespace Dolittle.Runtime.TimeSeries.State
 {

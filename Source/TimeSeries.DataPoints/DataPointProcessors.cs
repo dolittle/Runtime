@@ -1,11 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Collections.Generic;
+using contracts::Dolittle.Runtime.TimeSeries.DataTypes;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Scheduling;
-using Dolittle.TimeSeries.DataTypes.Runtime;
 
 namespace Dolittle.Runtime.TimeSeries.DataPoints
 {

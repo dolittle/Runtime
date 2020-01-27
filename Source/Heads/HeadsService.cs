@@ -1,15 +1,17 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Threading.Tasks;
 using System.Timers;
-using Dolittle.Heads.Runtime;
+using contracts::Dolittle.Runtime.Heads;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Time;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using static Dolittle.Heads.Runtime.Heads;
+using static contracts::Dolittle.Runtime.Heads.Heads;
 
 namespace Dolittle.Runtime.Heads
 {
