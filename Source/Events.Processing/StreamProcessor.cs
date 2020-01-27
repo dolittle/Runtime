@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
@@ -71,8 +70,9 @@ namespace Dolittle.Runtime.Events.Processing
         {
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is starting up.");
+                _logger.Information($"{LogMessageBeginning} is starting up.");
                 CurrentState = _streamProcessorStateRepository.Get(Key) ?? StreamProcessorState.New;
+                _logger.Information($"{LogMessageBeginning} got current state '{CurrentState}' from stream processor state repository.");
 
                 if (IsWaiting()) SetState(StreamProcessingState.Processing);
                 while (!IsStopping())
@@ -83,24 +83,24 @@ namespace Dolittle.Runtime.Events.Processing
             }
             catch (Exception ex)
             {
-                _logger.Debug($"{LogMessageBeginning}: Error while processing - {ex}");
+                _logger.Information($"{LogMessageBeginning}: Error while processing - {ex}");
             }
 
-            _logger.Debug($"{LogMessageBeginning} has stopped processing.");
+            _logger.Information($"{LogMessageBeginning} has stopped processing.");
         }
 
         async Task EnterProcessing()
         {
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is starting to process.");
+                _logger.Information($"{LogMessageBeginning} is starting to process.");
                 while (IsProcessing())
                 {
                     var @event = await FetchNextEvent().ConfigureAwait(false);
                     if (@event == null)
                     {
-                        _logger.Debug($"{LogMessageBeginning} has no event to process.");
-                        Wait();
+                        _logger.Information($"{LogMessageBeginning} has no event to process.");
+                        await Wait().ConfigureAwait(false);
                     }
                     else
                     {
@@ -119,15 +119,13 @@ namespace Dolittle.Runtime.Events.Processing
         {
             try
             {
-                // TODO: Start clock
-                // TODO: Store retry_timeout in state
                 _logger.Warning($"{LogMessageBeginning} processing failed. Entering retrying state.");
                 var @event = await FetchNextEvent().ConfigureAwait(false);
                 while (IsRetrying())
                 {
-                    _logger.Debug($"{LogMessageBeginning} is waiting to retry");
-                    Thread.Sleep(TimeToWait);
-                    _logger.Debug($"{LogMessageBeginning} is trying to process event with artifact id '{@event.Metadata.Artifact.Id.Value}' again.");
+                    _logger.Information($"{LogMessageBeginning} is waiting to retry");
+                    await Task.Delay(TimeToWait).ConfigureAwait(false);
+                    _logger.Information($"{LogMessageBeginning} is trying to process event with artifact id '{@event.Metadata.Artifact.Id.Value}' again.");
                     await ProcessEvent(@event).ConfigureAwait(false);
                 }
             }
@@ -142,7 +140,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is fetching next event.");
+                _logger.Information($"{LogMessageBeginning} is fetching next event.");
                 return await _nextEventFetcher.FetchNextEvent(Key.SourceStreamId, CurrentState.Position).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -156,7 +154,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is processing event with artifact id '{@event.Metadata.Artifact.Id}'");
+                _logger.Information($"{LogMessageBeginning} is processing event with artifact id '{@event.Metadata.Artifact.Id}'");
                 var processingResult = await _processor.Process(@event).ConfigureAwait(false);
                 HandleProcessingResult(@event, processingResult);
             }
@@ -171,7 +169,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
             if (processingResult.Succeeded)
             {
-                _logger.Debug($"{LogMessageBeginning} processed event with artifact id '{@event.Metadata.Artifact.Id}'");
+                _logger.Information($"{LogMessageBeginning} processed event with artifact id '{@event.Metadata.Artifact.Id}'");
                 IncrementPosition();
             }
             else if (processingResult.Retry)
@@ -184,11 +182,11 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        void Wait(int milliseconds = TimeToWait)
+        async Task Wait(int milliseconds = TimeToWait)
         {
-            _logger.Debug($"{LogMessageBeginning} is waiting...");
+            _logger.Information($"{LogMessageBeginning} is waiting...");
             SetState(StreamProcessingState.Waiting);
-            Thread.Sleep(milliseconds);
+            await Task.Delay(milliseconds).ConfigureAwait(false);
             SetState(StreamProcessingState.Processing);
         }
 
@@ -200,7 +198,7 @@ namespace Dolittle.Runtime.Events.Processing
 
         void IncrementPosition()
         {
-            _logger.Debug($"{LogMessageBeginning} is incrementing its position in the source stream '{Key.SourceStreamId.Value}'");
+            _logger.Information($"{LogMessageBeginning} is incrementing its position in the source stream '{Key.SourceStreamId.Value}'");
             SetState(StreamProcessingState.Processing, CurrentState.Position.Increment());
         }
 
@@ -211,9 +209,9 @@ namespace Dolittle.Runtime.Events.Processing
             if (IsInState(state, position)) return;
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is setting new state to {CurrentState}");
-                _streamProcessorStateRepository.Set(Key, CurrentState);
                 CurrentState = new StreamProcessorState(state, position);
+                _logger.Information($"{LogMessageBeginning} is setting new state to {CurrentState}");
+                _streamProcessorStateRepository.Set(Key, CurrentState);
             }
             catch (Exception ex)
             {

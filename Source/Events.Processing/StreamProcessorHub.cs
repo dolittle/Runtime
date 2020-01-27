@@ -15,8 +15,7 @@ namespace Dolittle.Runtime.Events.Processing
     [Singleton]
     public class StreamProcessorHub : IStreamProcessorHub
     {
-        readonly ConcurrentDictionary<StreamProcessorKey, ConcurrentDictionary<TenantId, StreamProcessor>> _streamProcessors =
-            new ConcurrentDictionary<StreamProcessorKey, ConcurrentDictionary<TenantId, StreamProcessor>>();
+        readonly ConcurrentDictionary<StreamProcessorKey, ConcurrentDictionary<TenantId, StreamProcessor>> _streamProcessors;
 
         readonly ILogger _logger;
 
@@ -26,6 +25,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public StreamProcessorHub(ILogger logger)
         {
+            _streamProcessors = new ConcurrentDictionary<StreamProcessorKey, ConcurrentDictionary<TenantId, StreamProcessor>>();
             _logger = logger;
         }
 
@@ -34,10 +34,11 @@ namespace Dolittle.Runtime.Events.Processing
         {
             var tenant = executionContext.Tenant;
             var streamProcessor = new StreamProcessor(sourceStreamId, eventProcessor, streamProcessorStateRepository, nextEventFetcher, _logger);
-            _logger.Debug($"Created Stream Processor with key '{streamProcessor.Key}' for tenant '{tenant}'");
+            _logger.Information($"Created Stream Processor with key '{streamProcessor.Key}' for tenant '{tenant}'");
             _streamProcessors.GetOrAdd(streamProcessor.Key, (_) => new ConcurrentDictionary<TenantId, StreamProcessor>())
                 .AddOrUpdate(tenant, streamProcessor, (_, __) => streamProcessor);
 
+            _logger.Information($"Stream Processor with key '{streamProcessor.Key}' for tenant '{tenant}' has started");
             var task = streamProcessor.Start();
         }
     }
