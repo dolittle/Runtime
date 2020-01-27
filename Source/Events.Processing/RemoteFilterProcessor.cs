@@ -4,7 +4,6 @@
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -47,7 +46,7 @@ namespace Dolittle.Runtime.Events.Processing
         string LogMessageBeginning { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEventEnvelope @event)
+        public async Task<IProcessingResult> Process(CommittedEvent @event)
         {
             _logger.Information($"{LogMessageBeginning} is filtering event '{@event.Metadata.Artifact.Id}'");
             var result = await _filter.Filter(@event, Identifier).ConfigureAwait(false);

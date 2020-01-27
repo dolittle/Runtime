@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -14,9 +13,9 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Filters the event.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEventEnvelope" />.</param>
+        /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation of filtering an event.</returns>
-        Task<IFilterResult> Filter(CommittedEventEnvelope @event, EventProcessorId eventProcessorId);
+        Task<IFilterResult> Filter(CommittedEvent @event, EventProcessorId eventProcessorId);
     }
 }
