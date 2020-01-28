@@ -33,13 +33,10 @@ namespace Dolittle.Runtime.Events.Processing
         public void Register(IEventProcessor eventProcessor, StreamId sourceStreamId, IStreamProcessorStateRepository streamProcessorStateRepository, IFetchNextEvent nextEventFetcher, ExecutionContext executionContext)
         {
             var tenant = executionContext.Tenant;
+            _logger.Debug($"Created Stream Processor with key '{new StreamProcessorKey(eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
             var streamProcessor = new StreamProcessor(sourceStreamId, eventProcessor, streamProcessorStateRepository, nextEventFetcher, _logger);
-            _logger.Debug($"Created Stream Processor with key '{streamProcessor.Key}' for tenant '{tenant}'");
             _streamProcessors.GetOrAdd(streamProcessor.Key, (_) => new ConcurrentDictionary<TenantId, StreamProcessor>())
                 .AddOrUpdate(tenant, streamProcessor, (_, __) => streamProcessor);
-
-            _logger.Debug($"Stream Processor with key '{streamProcessor.Key}' for tenant '{tenant}' has started");
-            var task = streamProcessor.Start();
         }
     }
 }

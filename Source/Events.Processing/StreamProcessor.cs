@@ -40,6 +40,8 @@ namespace Dolittle.Runtime.Events.Processing
             _streamProcessorStateRepository = streamProcessorStateRepository;
             Key = new StreamProcessorKey(_processor.Identifier, sourceStreamId);
             LogMessageBeginning = $"Stream Processor for event processor '{Key.EventProcessorId.Value}' with source stream '{Key.SourceStreamId.Value}'";
+
+            Start();
         }
 
         /// <summary>
@@ -64,8 +66,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Starts up the processing of the stream. It will continiously process and wait for events to process until it is stopped.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation of starting the <see cref="StreamProcessor" />.</returns>
-        public async Task Start()
+        async void Start()
         {
             try
             {
@@ -178,7 +179,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
             else
             {
-                _logger.Debug($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'. Stream Processor is stopping");
+                _logger.Debug($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'.");
                 Stop();
             }
         }
@@ -193,8 +194,11 @@ namespace Dolittle.Runtime.Events.Processing
 
         void Stop()
         {
-            _logger.Error($"{LogMessageBeginning} is stopping");
-            SetState(StreamProcessingState.Stopping);
+            if (!IsInProcessingState(StreamProcessingState.Stopping))
+            {
+                _logger.Error($"{LogMessageBeginning} is stopping");
+                SetState(StreamProcessingState.Stopping);
+            }
         }
 
         void IncrementPosition()
