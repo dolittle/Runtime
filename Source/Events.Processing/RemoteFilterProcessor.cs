@@ -48,14 +48,14 @@ namespace Dolittle.Runtime.Events.Processing
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event)
         {
-            _logger.Information($"{LogMessageBeginning} is filtering event '{@event.Metadata.Artifact.Id}'");
+            _logger.Debug($"{LogMessageBeginning} is filtering event '{@event.Metadata.Artifact.Id}'");
             var result = await _filter.Filter(@event, Identifier).ConfigureAwait(false);
-            _logger.Information($"{LogMessageBeginning} filtered event '{@event.Metadata.Artifact.Id}' with result Succeeded = {result.Succeeded}");
+            _logger.Debug($"{LogMessageBeginning} filtered event '{@event.Metadata.Artifact.Id}' with result Succeeded = {result.Succeeded}");
 
             // TODO: Handle partition
             if (result.IsIncluded)
             {
-                _logger.Information($"{LogMessageBeginning} writing event '{@event.Metadata.Artifact.Id}' to stream '{_targetStreamId.Value}'");
+                _logger.Debug($"{LogMessageBeginning} writing event '{@event.Metadata.Artifact.Id}' to stream '{_targetStreamId.Value}'");
                 await _eventToStreamWriter.Write(@event, _targetStreamId).ConfigureAwait(false);
             }
 

@@ -4,6 +4,7 @@
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
+using Dolittle.Logging;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Scheduling;
 
@@ -22,6 +23,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly FactoryFor<IFetchNextEvent> _getNextEventFetcher;
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStateRepository;
         readonly IStreamProcessorHub _streamProcessorHub;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcessorHub"/> class.
@@ -33,6 +35,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="getNextEventFetcher">The <see cref="FactoryFor{IFetchNextEvent}" />.</param>
         /// <param name="getStreamProcessorStateRepository">The <see cref="FactoryFor{IStreamProcessorStateRepository}" />.</param>
         /// <param name="streamProcessorHub">The <see cref="IStreamProcessorHub" />.</param>
+        /// <param name="logger">The <see cref="ILogger" />.</param>
         public ProcessorHub(
             IScheduler scheduler,
             IExecutionContextManager executionContextManager,
@@ -40,7 +43,8 @@ namespace Dolittle.Runtime.Events.Processing
             IRemoteProcessorService remoteProcessorService,
             FactoryFor<IFetchNextEvent> getNextEventFetcher,
             FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStateRepository,
-            IStreamProcessorHub streamProcessorHub)
+            IStreamProcessorHub streamProcessorHub,
+            ILogger logger)
         {
             _scheduler = scheduler;
             _executionContextManager = executionContextManager;
@@ -49,16 +53,18 @@ namespace Dolittle.Runtime.Events.Processing
             _getNextEventFetcher = getNextEventFetcher;
             _getStreamProcessorStateRepository = getStreamProcessorStateRepository;
             _streamProcessorHub = streamProcessorHub;
+            _logger = logger;
         }
 
         /// <inheritdoc />
         public void Register(EventProcessorId processorId, StreamId sourceStreamId)
         {
+            _logger.Information($"Registering event processor '{processorId.Value}' with source stream '{sourceStreamId.Value}'");
             _scheduler.PerformForEach(_tenants.All, tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
                 _streamProcessorHub.Register(
-                    new RemoteEventProcessor(processorId, _remoteProcessorService),
+                    new RemoteEventProcessor(processorId, _remoteProcessorService, _logger),
                     sourceStreamId,
                     _getStreamProcessorStateRepository(),
                     _getNextEventFetcher(),

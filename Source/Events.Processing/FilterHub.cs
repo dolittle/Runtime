@@ -4,6 +4,7 @@
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
+using Dolittle.Logging;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Scheduling;
 
@@ -23,6 +24,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly FactoryFor<IWriteEventToStream> _getEventToStreamWriter;
         readonly FactoryFor<IFetchNextEvent> _getNextEventFetcher;
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStateRepository;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterHub"/> class.
@@ -35,6 +37,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="getEventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
         /// <param name="getNextEventFetcher">The <see cref="FactoryFor{IFetchNextEvent}" />.</param>
         /// <param name="getStreamProcessorStateRepository">The <see cref="FactoryFor{IStreamProcessorStateRepository}" />.</param>
+        /// <param name="logger"><see cref="ILogger" />.</param>
         public FilterHub(
             ITenants tenants,
             IExecutionContextManager executionContextManager,
@@ -43,7 +46,8 @@ namespace Dolittle.Runtime.Events.Processing
             IStreamProcessorHub streamProcessorHub,
             FactoryFor<IWriteEventToStream> getEventToStreamWriter,
             FactoryFor<IFetchNextEvent> getNextEventFetcher,
-            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStateRepository)
+            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStateRepository,
+            ILogger logger)
         {
             _tenants = tenants;
             _executionContextManager = executionContextManager;
@@ -53,16 +57,18 @@ namespace Dolittle.Runtime.Events.Processing
             _getEventToStreamWriter = getEventToStreamWriter;
             _getNextEventFetcher = getNextEventFetcher;
             _getStreamProcessorStateRepository = getStreamProcessorStateRepository;
+            _logger = logger;
         }
 
         /// <inheritdoc />
         public void Register(FilterId filterId, StreamId targetStreamId)
         {
+            _logger.Information($"Registering filter '{filterId.Value}' with target stream '{targetStreamId.Value}'");
             _scheduler.PerformForEach(_tenants.All, tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
                 _streamProcessorHub.Register(
-                    new RemoteFilterProcessor(filterId.Value, targetStreamId, _filterService, _getEventToStreamWriter()),
+                    new RemoteFilterProcessor(filterId.Value, targetStreamId, _filterService, _getEventToStreamWriter(), _logger),
                     StreamId.AllStreamId,
                     _getStreamProcessorStateRepository(),
                     _getNextEventFetcher(),
