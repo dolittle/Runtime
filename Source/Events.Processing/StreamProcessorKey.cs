@@ -22,14 +22,14 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <summary>
-        /// Gets the <see cref="EventProcessorId" />.
+        /// Gets or sets the <see cref="EventProcessorId" />.
         /// </summary>
-        public EventProcessorId EventProcessorId { get; }
+        public EventProcessorId EventProcessorId { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="StreamId" />.
+        /// Gets or sets  the <see cref="StreamId" />.
         /// </summary>
-        public StreamId SourceStreamId { get; }
+        public StreamId SourceStreamId { get; set; }
 
         /// <inheritdoc />
         public override string ToString()

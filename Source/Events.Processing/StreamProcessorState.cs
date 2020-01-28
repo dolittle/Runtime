@@ -27,14 +27,14 @@ namespace Dolittle.Runtime.Events.Processing
         public static StreamProcessorState New => new StreamProcessorState(StreamProcessingState.Waiting, StreamPosition.Start);
 
         /// <summary>
-        /// Gets the <see cref="StreamProcessingState" />.
+        /// Gets or sets the <see cref="StreamProcessingState" />.
         /// </summary>
-        public StreamProcessingState State { get; }
+        public StreamProcessingState State { get; set; }
 
         /// <summary>
-        /// Gets the <see cref="StreamPosition" />.
+        /// Gets or sets the <see cref="StreamPosition" />.
         /// </summary>
-        public StreamPosition Position { get; }
+        public StreamPosition Position { get; set; }
 
         /// <inheritdoc/>
         public override string ToString()
