@@ -37,10 +37,10 @@ namespace Dolittle.Runtime.Events.Processing
         string LogMessageBeginning { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event)
+        public Task<IProcessingResult> Process(CommittedEvent @event)
         {
             _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Metadata.Artifact.Id}'");
-            return await _remoteProcessor.Process(@event, Identifier).ConfigureAwait(false);
+            return _remoteProcessor.Process(@event, Identifier);
         }
     }
 }
