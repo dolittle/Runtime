@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
@@ -20,10 +21,8 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IExecutionContextManager _executionContextManager;
         readonly IScheduler _scheduler;
         readonly IRemoteFilterService _filterService;
-        readonly IStreamProcessorHub _streamProcessorHub;
+        readonly FactoryFor<IStreamProcessorHub> _getStreamProcessorHub;
         readonly FactoryFor<IWriteEventToStream> _getEventToStreamWriter;
-        readonly FactoryFor<IFetchNextEvent> _getNextEventFetcher;
-        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStateRepository;
         readonly ILogger _logger;
 
         /// <summary>
@@ -33,30 +32,24 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="scheduler">The <see cref="IScheduler" />.</param>
         /// <param name="filterService">The <see cref="IRemoteFilterService" />.</param>
-        /// <param name="streamProcessorHub">The <see cref="IStreamProcessorHub" />.</param>
+        /// <param name="getStreamProcessorHub">The <see cref="FactoryFor{IStreamProcessorHub}" />.</param>
         /// <param name="getEventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
-        /// <param name="getNextEventFetcher">The <see cref="FactoryFor{IFetchNextEvent}" />.</param>
-        /// <param name="getStreamProcessorStateRepository">The <see cref="FactoryFor{IStreamProcessorStateRepository}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
         public FilterHub(
             ITenants tenants,
             IExecutionContextManager executionContextManager,
             IScheduler scheduler,
             IRemoteFilterService filterService,
-            IStreamProcessorHub streamProcessorHub,
+            FactoryFor<IStreamProcessorHub> getStreamProcessorHub,
             FactoryFor<IWriteEventToStream> getEventToStreamWriter,
-            FactoryFor<IFetchNextEvent> getNextEventFetcher,
-            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStateRepository,
             ILogger logger)
         {
             _tenants = tenants;
             _executionContextManager = executionContextManager;
             _scheduler = scheduler;
             _filterService = filterService;
-            _streamProcessorHub = streamProcessorHub;
+            _getStreamProcessorHub = getStreamProcessorHub;
             _getEventToStreamWriter = getEventToStreamWriter;
-            _getNextEventFetcher = getNextEventFetcher;
-            _getStreamProcessorStateRepository = getStreamProcessorStateRepository;
             _logger = logger;
         }
 
@@ -64,15 +57,12 @@ namespace Dolittle.Runtime.Events.Processing
         public void Register(FilterId filterId, StreamId targetStreamId)
         {
             _logger.Information($"Registering filter '{filterId.Value}' with target stream '{targetStreamId.Value}'");
-            _scheduler.PerformForEach(_tenants.All, tenant =>
+            _tenants.All.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
-                _streamProcessorHub.Register(
+                _getStreamProcessorHub().Register(
                     new RemoteFilterProcessor(filterId.Value, targetStreamId, _filterService, _getEventToStreamWriter(), _logger),
-                    StreamId.AllStreamId,
-                    _getStreamProcessorStateRepository(),
-                    _getNextEventFetcher(),
-                    _executionContextManager.Current);
+                    StreamId.AllStreamId);
             });
         }
     }
