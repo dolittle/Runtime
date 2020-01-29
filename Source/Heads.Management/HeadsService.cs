@@ -1,12 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Heads.Management;
+using contracts::Dolittle.Runtime.Heads.Management;
 using Dolittle.Protobuf;
 using Grpc.Core;
-using static Dolittle.Heads.Management.Heads;
+using static contracts::Dolittle.Runtime.Heads.Management.Heads;
 
 namespace Dolittle.Runtime.Heads.Management
 {

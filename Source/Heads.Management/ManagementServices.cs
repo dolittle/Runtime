@@ -1,9 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Collections.Generic;
-using Dolittle.Management;
+using Dolittle.Runtime.Management;
 using Dolittle.Services;
+using grpc = contracts::Dolittle.Runtime.Heads.Management;
 
 namespace Dolittle.Runtime.Heads.Management
 {
@@ -32,7 +35,7 @@ namespace Dolittle.Runtime.Heads.Management
         {
             return new Service[]
             {
-                new Service(_clientsService, Dolittle.Heads.Management.Heads.BindService(_clientsService), Dolittle.Heads.Management.Heads.Descriptor)
+                new Service(_clientsService, grpc.Heads.BindService(_clientsService), grpc.Heads.Descriptor)
             };
         }
     }
