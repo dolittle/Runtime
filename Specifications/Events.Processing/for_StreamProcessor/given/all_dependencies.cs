@@ -11,6 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.given
         protected static StreamId source_stream_id;
         protected static IStreamProcessorStateRepository stream_processor_state_repository;
         protected static IFetchNextEvent next_event_fetcher;
+
         Establish context = () =>
         {
             var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();

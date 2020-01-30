@@ -2,14 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.given
 {
     public class all_dependencies
     {
-        protected static readonly CommittedEventEnvelope an_event = Processing.given.a_committed_event_envelope;
+        protected static readonly CommittedEvent an_event = Processing.given.a_committed_event;
 
         protected static EventProcessorId event_processor_id;
         protected static StreamId target_stream_id;
