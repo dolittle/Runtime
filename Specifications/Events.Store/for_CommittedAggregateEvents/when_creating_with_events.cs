@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
@@ -12,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 
         Because of = () =>
         {
-            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact, aggregate_version, new[] { event_one, event_two, event_three });
+            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version, new[] { event_one, event_two, event_three });
         };
 
         It should_not_be_empty = () => events.ShouldNotBeEmpty();
