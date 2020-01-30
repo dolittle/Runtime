@@ -7,7 +7,6 @@ using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Tenancy;
-using Dolittle.Scheduling;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -19,7 +18,6 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly ITenants _tenants;
         readonly IExecutionContextManager _executionContextManager;
-        readonly IScheduler _scheduler;
         readonly IRemoteFilterService _filterService;
         readonly FactoryFor<IStreamProcessorHub> _getStreamProcessorHub;
         readonly FactoryFor<IWriteEventToStream> _getEventToStreamWriter;
@@ -30,7 +28,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="tenants">The tenants.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="scheduler">The <see cref="IScheduler" />.</param>
         /// <param name="filterService">The <see cref="IRemoteFilterService" />.</param>
         /// <param name="getStreamProcessorHub">The <see cref="FactoryFor{IStreamProcessorHub}" />.</param>
         /// <param name="getEventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
@@ -38,7 +35,6 @@ namespace Dolittle.Runtime.Events.Processing
         public FilterHub(
             ITenants tenants,
             IExecutionContextManager executionContextManager,
-            IScheduler scheduler,
             IRemoteFilterService filterService,
             FactoryFor<IStreamProcessorHub> getStreamProcessorHub,
             FactoryFor<IWriteEventToStream> getEventToStreamWriter,
@@ -46,7 +42,6 @@ namespace Dolittle.Runtime.Events.Processing
         {
             _tenants = tenants;
             _executionContextManager = executionContextManager;
-            _scheduler = scheduler;
             _filterService = filterService;
             _getStreamProcessorHub = getStreamProcessorHub;
             _getEventToStreamWriter = getEventToStreamWriter;
@@ -56,7 +51,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <inheritdoc />
         public void Register(FilterId filterId, StreamId targetStreamId)
         {
-            _logger.Information($"Registering filter '{filterId.Value}' with target stream '{targetStreamId.Value}'");
+            _logger.Information($"Registering filter '{filterId.Value}' with target stream '{targetStreamId.Value}' for all tenants.");
             _tenants.All.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
