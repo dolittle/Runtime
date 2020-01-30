@@ -14,7 +14,8 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents.given
     {
         public static EventSourceId event_source_id = Guid.Parse("a96d181c-cf8b-4bc9-a576-20be48166101");
         public static Artifact aggregate_artifact = new Artifact(Guid.Parse("28238ebc-6454-4229-8891-5798ecb1875f"), ArtifactGeneration.First);
-        public static AggregateRootVersion aggregate_version = AggregateRootVersion.Initial;
+        public static AggregateRootVersion aggregate_version_before = 0;
+        public static AggregateRootVersion aggregate_version_after = 3;
 
         public static CorrelationId correlation_id = Guid.Parse("4a52a13f-4f74-4ee8-a74d-d1b4b6076d8c");
         public static Microservice microservice_id = Guid.Parse("5d352805-d550-4b12-af6c-58c1e898c84d");
@@ -30,9 +31,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents.given
 
         Establish context = () =>
         {
-            event_one = new CommittedAggregateEvent(event_source_id, aggregate_artifact, aggregate_version, 0, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "one");
-            event_two = new CommittedAggregateEvent(event_source_id, aggregate_artifact, aggregate_version + 1, 1, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "two");
-            event_three = new CommittedAggregateEvent(event_source_id, aggregate_artifact, aggregate_version + 2, 2, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "three");
+            event_one = new CommittedAggregateEvent(event_source_id, aggregate_artifact, 0, 0, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "one");
+            event_two = new CommittedAggregateEvent(event_source_id, aggregate_artifact, 1, 1, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "two");
+            event_three = new CommittedAggregateEvent(event_source_id, aggregate_artifact, 2, 2, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "three");
         };
     }
 }

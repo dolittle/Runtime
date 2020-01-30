@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 
         Because of = () => exception = Catch.Exception(() =>
         {
-            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version, new[] { event_one, null, event_three });
+            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version_after, new[] { event_one, null, event_three });
         });
 
         It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
