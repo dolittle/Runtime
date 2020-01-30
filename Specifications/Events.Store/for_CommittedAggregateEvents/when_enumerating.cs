@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 
         Establish context = () =>
         {
-            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact, aggregate_version, new[] { event_one, event_two, event_three });
+            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version, new[] { event_one, event_two, event_three });
         };
 
         Because of = () =>

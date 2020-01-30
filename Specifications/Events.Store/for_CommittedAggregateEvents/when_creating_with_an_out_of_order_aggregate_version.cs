@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 
         Because of = () => exception = Catch.Exception(() =>
         {
-            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact, aggregate_version, new[] { event_one, event_two, event_three, out_of_order_event });
+            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version, new[] { event_one, event_two, event_three, out_of_order_event });
         });
 
         It should_throw_an_exception = () => exception.ShouldBeOfExactType<AggregateRootVersionIsOutOfOrder>();

@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 
         Because of = () =>
         {
-            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact, aggregate_version, Array.Empty<CommittedAggregateEvent>());
+            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version, Array.Empty<CommittedAggregateEvent>());
         };
 
         It should_not_have_events = () => events.HasEvents.ShouldBeFalse();
