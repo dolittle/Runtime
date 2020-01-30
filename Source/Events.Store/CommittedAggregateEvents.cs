@@ -20,14 +20,14 @@ namespace Dolittle.Runtime.Events.Store
         /// Initializes a new instance of the <see cref="CommittedAggregateEvents"/> class.
         /// </summary>
         /// <param name="eventSource">The <see cref="EventSourceId"/> that the Events were applied to.</param>
-        /// <param name="aggregateRoot">The <see cref="Artifact"/> representing the type of the Aggregate Root that applied the Event to the Event Source.</param>
+        /// <param name="aggregateRoot">The <see cref="ArtifactId"/> representing the type of the Aggregate Root that applied the Event to the Event Source.</param>
         /// <param name="aggregateRootVersion">The version of the <see cref="AggregateRoot"/> that applied the Events.</param>
         /// <param name="events">The <see cref="CommittedAggregateEvent">events</see>.</param>
-        public CommittedAggregateEvents(EventSourceId eventSource, Artifact aggregateRoot, AggregateRootVersion aggregateRootVersion, IReadOnlyList<CommittedAggregateEvent> events)
+        public CommittedAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion aggregateRootVersion, IReadOnlyList<CommittedAggregateEvent> events)
         {
             EventSource = eventSource;
             AggregateRoot = aggregateRoot;
-            AggregateRootVersion = aggregateRootVersion;
+            AggregateRootVersion = AggregateRootVersion.Initial;
 
             for (var i = 0; i < events.Count; i++)
             {
@@ -37,7 +37,10 @@ namespace Dolittle.Runtime.Events.Store
                 ThrowIfEventWasAppliedByOtherAggregateRoot(@event);
                 ThrowIfAggreggateRootVersionIsOutOfOrder(@event, AggregateRootVersion + (uint)i);
                 if (i > 0) ThrowIfEventLogVersionIsOutOfOrder(@event, events[i - 1]);
+                AggregateRootVersion++;
             }
+
+            ThrowIfEventsAreMissingForExpectedVersion(aggregateRootVersion);
 
             _events = new NullFreeList<CommittedAggregateEvent>(events);
         }
@@ -48,12 +51,12 @@ namespace Dolittle.Runtime.Events.Store
         public EventSourceId EventSource { get; }
 
         /// <summary>
-        /// Gets the <see cref="Artifact"/> representing the type of the Aggregate Root that applied the Event to the Event Source.
+        /// Gets the <see cref="ArtifactId"/> representing the type of the Aggregate Root that applied the Event to the Event Source.
         /// </summary>
-        public Artifact AggregateRoot { get; }
+        public ArtifactId AggregateRoot { get; }
 
         /// <summary>
-        /// Gets the version of the <see cref="AggregateRoot"/> that applied the Events.
+        /// Gets the version of the <see cref="AggregateRoot"/> after all the Events was applied.
         /// </summary>
         public AggregateRootVersion AggregateRootVersion { get; }
 
@@ -86,7 +89,7 @@ namespace Dolittle.Runtime.Events.Store
 
         void ThrowIfEventWasAppliedByOtherAggregateRoot(CommittedAggregateEvent @event)
         {
-            if (@event.AggregateRoot != AggregateRoot) throw new EventWasAppliedByOtherAggregateRoot(@event.AggregateRoot, AggregateRoot);
+            if (@event.AggregateRoot.Id != AggregateRoot) throw new EventWasAppliedByOtherAggregateRoot(@event.AggregateRoot.Id, AggregateRoot);
         }
 
         void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvent @event, AggregateRootVersion expectedVersion)
@@ -97,6 +100,11 @@ namespace Dolittle.Runtime.Events.Store
         void ThrowIfEventLogVersionIsOutOfOrder(CommittedAggregateEvent @event, CommittedAggregateEvent previousEvent)
         {
             if (@event.EventLogVersion != previousEvent.EventLogVersion + 1) throw new EventLogVersionIsOutOfOrder(@event.EventLogVersion, previousEvent.EventLogVersion + 1);
+        }
+
+        void ThrowIfEventsAreMissingForExpectedVersion(AggregateRootVersion aggregateRootVersion)
+        {
+            if (AggregateRootVersion != aggregateRootVersion) throw new MissingEventsForExpectedAggregateRootVersion(aggregateRootVersion, AggregateRootVersion);
         }
     }
 }

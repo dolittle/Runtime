@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events
         {
             EventSource = eventSource;
             AggregateRoot = aggregateRoot;
-            AggregateRootVersion = aggregateRootVersion;
+            AggregateRootVersion = AggregateRootVersion.Initial;
 
             for (var i = 0; i < events.Count; i++)
             {
@@ -37,7 +37,10 @@ namespace Dolittle.Runtime.Events
                 ThrowIfEventWasAppliedByOtherAggregateRoot(@event);
                 ThrowIfAggreggateRootVersionIsOutOfOrder(@event, AggregateRootVersion + (uint)i);
                 if (i > 0) ThrowIfEventLogVersionIsOutOfOrder(@event, events[i - 1]);
+                AggregateRootVersion++;
             }
+
+            ThrowIfEventsAreMissingForExpectedVersion(aggregateRootVersion);
 
             _events = new NullFreeList<CommittedAggregateEvent>(events);
         }
@@ -97,6 +100,11 @@ namespace Dolittle.Runtime.Events
         void ThrowIfEventLogVersionIsOutOfOrder(CommittedAggregateEvent @event, CommittedAggregateEvent previousEvent)
         {
             if (@event.EventLogVersion != previousEvent.EventLogVersion + 1) throw new EventLogVersionIsOutOfOrder(@event.EventLogVersion, previousEvent.EventLogVersion + 1);
+        }
+
+        void ThrowIfEventsAreMissingForExpectedVersion(AggregateRootVersion aggregateRootVersion)
+        {
+            if (AggregateRootVersion != aggregateRootVersion) throw new MissingEventsForExpectedAggregateRootVersion(aggregateRootVersion, AggregateRootVersion);
         }
     }
 }

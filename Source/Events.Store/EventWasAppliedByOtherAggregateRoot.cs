@@ -15,9 +15,9 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="EventWasAppliedByOtherAggregateRoot"/> class.
         /// </summary>
-        /// <param name="eventAggregateRoot">Type <see cref="Artifact"/> the Event was applied by.</param>
-        /// <param name="aggregateRoot"><see cref="Artifact"/> of the Aggregate Root.</param>
-        public EventWasAppliedByOtherAggregateRoot(Artifact eventAggregateRoot, Artifact aggregateRoot)
+        /// <param name="eventAggregateRoot">Type <see cref="ArtifactId"/> the Event was applied by.</param>
+        /// <param name="aggregateRoot"><see cref="ArtifactId"/> of the Aggregate Root.</param>
+        public EventWasAppliedByOtherAggregateRoot(ArtifactId eventAggregateRoot, ArtifactId aggregateRoot)
             : base($"Aggregate Root '{eventAggregateRoot}' from event does not match with '{aggregateRoot}'.")
         {
         }
