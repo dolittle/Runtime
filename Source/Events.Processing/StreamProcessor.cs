@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the current <see cref="StreamProcessorState" />.
         /// </summary>
-        public StreamProcessorState CurrentState { get; private set; }
+        public StreamProcessorState CurrentState { get; private set; } = StreamProcessorState.New;
 
         /// <summary>
         /// Gets the <see cref="EventProcessorId" />.

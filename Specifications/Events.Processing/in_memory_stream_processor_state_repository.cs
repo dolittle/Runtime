@@ -17,6 +17,7 @@ namespace Dolittle.Runtime.Events.Processing
 
         public Task<StreamProcessorState> Get(StreamProcessorKey streamProcessorKey)
         {
+            if (!states.ContainsKey(streamProcessorKey)) return Task.FromResult<StreamProcessorState>(null);
             return Task.FromResult(states[streamProcessorKey]);
         }
 
@@ -24,6 +25,7 @@ namespace Dolittle.Runtime.Events.Processing
 
         public Task Set(StreamProcessorKey streamProcessorKey, StreamProcessorState streamProcessorState)
         {
+            if (states.ContainsKey(streamProcessorKey)) states.Remove(streamProcessorKey);
             states.Add(streamProcessorKey, streamProcessorState);
             return Task.CompletedTask;
         }
