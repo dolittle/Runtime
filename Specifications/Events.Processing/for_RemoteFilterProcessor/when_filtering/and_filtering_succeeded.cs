@@ -23,6 +23,6 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.when_proc
         It should_be_an_IFilterResult = () => result.ShouldBeAssignableTo<IFilterResult>();
         It should_have_the_correct_is_included_value = () => (result as IFilterResult).IsIncluded.ShouldEqual(is_included);
         It should_have_the_correct_partition_value = () => (result as IFilterResult).Partition.ShouldEqual(partition);
-        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<StreamId>()), Moq.Times.Once());
+        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(an_event, target_stream_id), Moq.Times.Once());
     }
 }
