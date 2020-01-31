@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
@@ -42,6 +44,9 @@ namespace Dolittle.Runtime.Events.Processing
             _logger = logger;
             _factory = new TaskFactory(TaskCreationOptions.DenyChildAttach, TaskContinuationOptions.DenyChildAttach);
         }
+
+        /// <inheritdoc/>
+        public IEnumerable<StreamProcessor> StreamProcessors => _streamProcessors.Select(_ => _.Value);
 
         /// <inheritdoc />
         public void Register(IEventProcessor eventProcessor, StreamId sourceStreamId)
