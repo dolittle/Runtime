@@ -1,9 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Collections.Generic;
 using Dolittle.Runtime.Heads;
 using Dolittle.Services;
+using grpc = contracts::Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Events.Runtime
 {
@@ -32,7 +35,7 @@ namespace Dolittle.Runtime.Events.Runtime
         {
             return new Service[]
             {
-                new Service(_eventStoreService, Dolittle.Events.Runtime.EventStore.BindService(_eventStoreService), Dolittle.Events.Runtime.EventStore.Descriptor)
+                new Service(_eventStoreService, grpc.EventStore.BindService(_eventStoreService), grpc.EventStore.Descriptor)
             };
         }
     }

@@ -1,0 +1,11 @@
+Source/**/bin
+Source/**/obj
+Schemas
+Samples
+Packages
+Documentation
+Build
+Artifacts
+.vscode
+Specifications/**/bin
+Specifications/**/obj
