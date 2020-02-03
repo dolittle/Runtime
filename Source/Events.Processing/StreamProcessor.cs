@@ -2,16 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Processes an individual <see cref="CommittedEventEnvelope" /> for the correct <see cref="TenantId" />.
+    /// Processes an individual <see cref="CommittedEvent" /> for the correct <see cref="TenantId" />.
     /// </summary>
     public class StreamProcessor
     {
@@ -52,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the current <see cref="StreamProcessorState" />.
         /// </summary>
-        public StreamProcessorState CurrentState { get; private set; }
+        public StreamProcessorState CurrentState { get; private set; } = StreamProcessorState.New;
 
         /// <summary>
         /// Gets the <see cref="EventProcessorId" />.
@@ -64,17 +62,18 @@ namespace Dolittle.Runtime.Events.Processing
         bool RetryClockIsTicking { get; } = false;
 
         /// <summary>
-        /// Starts up the processing of the stream. It will continiously process and wait for events to process until it is stopped.
+        /// Starts up the processing of the stream. It will continuously process and wait for events to process until it is stopped.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation of starting the <see cref="StreamProcessor" />.</returns>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation of a <see cref="StreamProcessor" />.</returns>
         public async Task Start()
         {
             try
             {
                 _logger.Debug($"{LogMessageBeginning} is starting up.");
-                CurrentState = _streamProcessorStateRepository.Get(Key) ?? StreamProcessorState.New;
+                CurrentState = (await _streamProcessorStateRepository.Get(Key).ConfigureAwait(false)) ?? StreamProcessorState.New;
+                _logger.Debug($"{LogMessageBeginning} got current state '{CurrentState}' from stream processor state repository.");
 
-                if (IsWaiting()) SetState(StreamProcessingState.Processing);
+                if (IsWaiting()) await SetState(StreamProcessingState.Processing).ConfigureAwait(false);
                 while (!IsStopping())
                 {
                     if (IsProcessing()) await EnterProcessing().ConfigureAwait(false);
@@ -83,10 +82,11 @@ namespace Dolittle.Runtime.Events.Processing
             }
             catch (Exception ex)
             {
-                _logger.Debug($"{LogMessageBeginning}: Error while processing - {ex}");
+                _logger.Error($"{LogMessageBeginning}: Error while processing - {ex}");
             }
 
             _logger.Debug($"{LogMessageBeginning} has stopped processing.");
+            return;
         }
 
         async Task EnterProcessing()
@@ -100,7 +100,7 @@ namespace Dolittle.Runtime.Events.Processing
                     if (@event == null)
                     {
                         _logger.Debug($"{LogMessageBeginning} has no event to process.");
-                        Wait();
+                        await Wait().ConfigureAwait(false);
                     }
                     else
                     {
@@ -119,14 +119,12 @@ namespace Dolittle.Runtime.Events.Processing
         {
             try
             {
-                // TODO: Start clock
-                // TODO: Store retry_timeout in state
                 _logger.Warning($"{LogMessageBeginning} processing failed. Entering retrying state.");
                 var @event = await FetchNextEvent().ConfigureAwait(false);
                 while (IsRetrying())
                 {
                     _logger.Debug($"{LogMessageBeginning} is waiting to retry");
-                    Thread.Sleep(TimeToWait);
+                    await Task.Delay(TimeToWait).ConfigureAwait(false);
                     _logger.Debug($"{LogMessageBeginning} is trying to process event with artifact id '{@event.Metadata.Artifact.Id.Value}' again.");
                     await ProcessEvent(@event).ConfigureAwait(false);
                 }
@@ -138,7 +136,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        async Task<CommittedEventEnvelope> FetchNextEvent()
+        async Task<CommittedEvent> FetchNextEvent()
         {
             try
             {
@@ -152,7 +150,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        async Task ProcessEvent(CommittedEventEnvelope @event)
+        async Task ProcessEvent(CommittedEvent @event)
         {
             try
             {
@@ -167,7 +165,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        void HandleProcessingResult(CommittedEventEnvelope @event, IProcessingResult processingResult)
+        void HandleProcessingResult(CommittedEvent @event, IProcessingResult processingResult)
         {
             if (processingResult.Succeeded)
             {
@@ -176,44 +174,49 @@ namespace Dolittle.Runtime.Events.Processing
             }
             else if (processingResult.Retry)
             {
+                _logger.Debug($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'. Retrying processing");
                 SetState(StreamProcessingState.Retrying);
             }
             else
             {
+                _logger.Error($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'.");
                 Stop();
             }
         }
 
-        void Wait(int milliseconds = TimeToWait)
+        async Task Wait(int milliseconds = TimeToWait)
         {
             _logger.Debug($"{LogMessageBeginning} is waiting...");
-            SetState(StreamProcessingState.Waiting);
-            Thread.Sleep(milliseconds);
-            SetState(StreamProcessingState.Processing);
+            await SetState(StreamProcessingState.Waiting).ConfigureAwait(false);
+            await Task.Delay(milliseconds).ConfigureAwait(false);
+            await SetState(StreamProcessingState.Processing).ConfigureAwait(false);
         }
 
         void Stop()
         {
-            _logger.Error($"{LogMessageBeginning} is stopping");
-            SetState(StreamProcessingState.Stopping);
+            if (!IsInProcessingState(StreamProcessingState.Stopping))
+            {
+                _logger.Error($"{LogMessageBeginning} is stopping");
+                SetState(StreamProcessingState.Stopping);
+            }
         }
 
-        void IncrementPosition()
+        Task IncrementPosition()
         {
             _logger.Debug($"{LogMessageBeginning} is incrementing its position in the source stream '{Key.SourceStreamId.Value}'");
-            SetState(StreamProcessingState.Processing, CurrentState.Position.Increment());
+            return SetState(StreamProcessingState.Processing, CurrentState.Position.Increment());
         }
 
-        void SetState(StreamProcessingState state) => SetState(state, CurrentState.Position);
+        Task SetState(StreamProcessingState state) => SetState(state, CurrentState.Position);
 
-        void SetState(StreamProcessingState state, StreamPosition position)
+        async Task SetState(StreamProcessingState state, StreamPosition position)
         {
             if (IsInState(state, position)) return;
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is setting new state to {CurrentState}");
-                _streamProcessorStateRepository.Set(Key, CurrentState);
                 CurrentState = new StreamProcessorState(state, position);
+                _logger.Debug($"{LogMessageBeginning} is setting new state to {CurrentState}");
+                await _streamProcessorStateRepository.Set(Key, CurrentState).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

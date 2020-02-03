@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Dolittle.Collections;
 
 namespace Dolittle.Runtime.Events.Processing
@@ -14,19 +15,19 @@ namespace Dolittle.Runtime.Events.Processing
         {
         }
 
-        public StreamProcessorState Get(StreamProcessorKey streamProcessorKey)
+        public Task<StreamProcessorState> Get(StreamProcessorKey streamProcessorKey)
         {
-            return states[streamProcessorKey];
+            if (!states.ContainsKey(streamProcessorKey)) return Task.FromResult<StreamProcessorState>(null);
+            return Task.FromResult(states[streamProcessorKey]);
         }
 
-        public void Set(StreamProcessorKey streamProcessorKey, StreamProcessingState streamProcessingState, StreamPosition streamPosition)
-        {
-            Set(streamProcessorKey, new StreamProcessorState(streamProcessingState, streamPosition));
-        }
+        public Task Set(StreamProcessorKey streamProcessorKey, StreamProcessingState streamProcessingState, StreamPosition streamPosition) => Set(streamProcessorKey, new StreamProcessorState(streamProcessingState, streamPosition));
 
-        public void Set(StreamProcessorKey streamProcessorKey, StreamProcessorState streamProcessorState)
+        public Task Set(StreamProcessorKey streamProcessorKey, StreamProcessorState streamProcessorState)
         {
+            if (states.ContainsKey(streamProcessorKey)) states.Remove(streamProcessorKey);
             states.Add(streamProcessorKey, streamProcessorState);
+            return Task.CompletedTask;
         }
     }
 }

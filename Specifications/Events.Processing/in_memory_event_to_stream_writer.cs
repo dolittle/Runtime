@@ -3,15 +3,14 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     public class in_memory_event_to_stream_writer : IWriteEventToStream
     {
-        readonly IDictionary<StreamId, IList<CommittedEventEnvelope>> events = new Dictionary<StreamId, IList<CommittedEventEnvelope>>();
+        readonly IDictionary<StreamId, IList<CommittedEvent>> events = new Dictionary<StreamId, IList<CommittedEvent>>();
 
-        public Task<bool> Write(CommittedEventEnvelope @event, StreamId streamId)
+        public Task<bool> Write(CommittedEvent @event, StreamId streamId)
         {
             if (events.ContainsKey(streamId))
             {
@@ -21,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
             else
             {
-                events.Add(streamId, new CommittedEventEnvelope[] { @event });
+                events.Add(streamId, new CommittedEvent[] { @event });
             }
 
             return Task.FromResult(true);
