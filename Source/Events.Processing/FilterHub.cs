@@ -49,14 +49,14 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <inheritdoc />
-        public void Register(FilterId filterId, StreamId targetStreamId)
+        public void Register(StreamId targetStreamId, StreamId sourceStreamId)
         {
-            _logger.Information($"Registering filter '{filterId.Value}' with target stream '{targetStreamId.Value}' for all tenants.");
+            _logger.Information($"Registering filter with target stream '{targetStreamId.Value}' and source stream '{sourceStreamId.Value}' for all tenants.");
             _tenants.All.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
                 _getStreamProcessorHub().Register(
-                    new RemoteFilterProcessor(filterId.Value, targetStreamId, _filterService, _getEventToStreamWriter(), _logger),
+                    new RemoteFilterProcessor(targetStreamId, _filterService, _getEventToStreamWriter(), _logger),
                     StreamId.AllStreamId);
             });
         }

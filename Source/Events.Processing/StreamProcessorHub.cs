@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing
     [SingletonPerTenant]
     public class StreamProcessorHub : IStreamProcessorHub
     {
-        readonly ConcurrentDictionary<StreamProcessorKey, StreamProcessor> _streamProcessors;
+        readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
         readonly IFetchNextEvent _nextEventFetcher;
         readonly IExecutionContextManager _executionContextManager;
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
-            _streamProcessors = new ConcurrentDictionary<StreamProcessorKey, StreamProcessor>();
+            _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
             _streamProcessorStateRepository = streamProcessorStateRepository;
             _nextEventFetcher = nextEventFetcher;
             _executionContextManager = executionContextManager;
@@ -54,15 +54,15 @@ namespace Dolittle.Runtime.Events.Processing
             var tenant = _executionContextManager.Current.Tenant;
             var streamProcessor = new StreamProcessor(sourceStreamId, eventProcessor, _streamProcessorStateRepository, _nextEventFetcher, _logger);
 
-            if (_streamProcessors.TryAdd(streamProcessor.Key, streamProcessor))
+            if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))
             {
                 #pragma warning disable CA2008
                 _factory.StartNew(streamProcessor.Start);
-                _logger.Debug($"Started Stream Processor with key '{new StreamProcessorKey(eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
+                _logger.Debug($"Started Stream Processor with key '{new StreamProcessorId(eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
             }
             else
             {
-                throw new StreamProcessorKeyAlreadyRegistered(streamProcessor.Key);
+                throw new StreamProcessorKeyAlreadyRegistered(streamProcessor.Identifier);
             }
         }
     }

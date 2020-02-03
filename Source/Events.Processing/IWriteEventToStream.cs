@@ -13,9 +13,9 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Writes an event to a stream in the event store.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="event">The <see cref="FilteredEvent" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <returns>A <see cref="Task"/> representing whether the event was successfully written to the event store.</returns>
-        Task<bool> Write(CommittedEvent @event, StreamId streamId);
+        Task<bool> Write(FilteredEvent @event, StreamId streamId);
     }
 }

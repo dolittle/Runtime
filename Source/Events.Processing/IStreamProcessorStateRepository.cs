@@ -14,25 +14,25 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the <see cref="StreamProcessorState" /> for this <see cref="StreamProcessor" />.
         /// </summary>
-        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorKey" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
         /// <returns><see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> Get(StreamProcessorKey streamProcessorKey);
+        Task<StreamProcessorState> Get(StreamProcessorId streamProcessorKey);
 
         /// <summary>
         /// Sets the Offset (last event processed) for this <see cref="StreamProcessor" />.
         /// </summary>
-        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorKey" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
         /// <param name="streamProcessingState">The new<see cref="StreamProcessingState" />of the <see cref="StreamProcessor" />.</param>
         /// <param name="streamPosition">The new<see cref="StreamPosition" />of the <see cref="StreamProcessor"/>.</param>
         /// <returns>>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task Set(StreamProcessorKey streamProcessorKey, StreamProcessingState streamProcessingState, StreamPosition streamPosition);
+        Task Set(StreamProcessorId streamProcessorKey, StreamProcessingState streamProcessingState, StreamPosition streamPosition);
 
         /// <summary>
         /// Sets the Offset (last event processed) for this <see cref="StreamProcessor" />.
         /// </summary>
-        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorKey" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
         /// <param name="streamProcessorState">The new<see cref="StreamProcessorState" />of the <see cref="StreamProcessor" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task Set(StreamProcessorKey streamProcessorKey, StreamProcessorState streamProcessorState);
+        Task Set(StreamProcessorId streamProcessorKey, StreamProcessorState streamProcessorState);
     }
 }

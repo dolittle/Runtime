@@ -14,8 +14,8 @@ namespace Dolittle.Runtime.Events.Processing
         bool IsIncluded { get; }
 
         /// <summary>
-        /// Gets the partition.
+        /// Gets the <see cref="PartitionId" />.
         /// </summary>
-        int Partition { get; }
+        PartitionId Partition { get; }
     }
 }

@@ -20,19 +20,17 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteFilterProcessor"/> class.
         /// </summary>
-        /// <param name="id">The <see cref="EventProcessorId" />.</param>
-        /// <param name="targetStreamId">The stream to include events in.</param>
+        /// <param name="targetStreamId">The stream to to write included events in.</param>
         /// <param name="filter">The <see cref="IRemoteFilterService" />.</param>
         /// <param name="eventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
         public RemoteFilterProcessor(
-            EventProcessorId id,
             StreamId targetStreamId,
             IRemoteFilterService filter,
             IWriteEventToStream eventToStreamWriter,
             ILogger logger)
         {
-            Identifier = id;
+            Identifier = _targetStreamId.Value;
             _targetStreamId = targetStreamId;
             _filter = filter;
             _eventToStreamWriter = eventToStreamWriter;
@@ -52,11 +50,10 @@ namespace Dolittle.Runtime.Events.Processing
             var result = await _filter.Filter(@event, Identifier).ConfigureAwait(false);
             _logger.Debug($"{LogMessageBeginning} filtered event '{@event.Metadata.Artifact.Id}' with result Succeeded = {result.Succeeded}");
 
-            // TODO: Handle partition
             if (result.IsIncluded)
             {
                 _logger.Debug($"{LogMessageBeginning} writing event '{@event.Metadata.Artifact.Id}' to stream '{_targetStreamId.Value}'");
-                await _eventToStreamWriter.Write(@event, _targetStreamId).ConfigureAwait(false);
+                await _eventToStreamWriter.Write(new FilteredEvent(@event, result.Partition), _targetStreamId).ConfigureAwait(false);
             }
 
             return result;
