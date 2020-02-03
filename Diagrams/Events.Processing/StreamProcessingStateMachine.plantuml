@@ -1,0 +1,24 @@
+@startuml StreamProcessor
+
+state FetchingEvent : fetch_next_event()
+state Processing : process_event()\nhandle_processing_result()\nincrement_position()
+state Waiting : wait_for_x_milliseconds()
+state Stopping : stop()
+state Retrying : wait_for_x_milliseconds()\nretry()
+
+[*] --> FetchingEvent : Starting up\nCurrent state
+FetchingEvent -> Processing : Committed event
+FetchingEvent -> Waiting : No new event
+FetchingEvent -> Stopping : Timeout
+
+Processing --> FetchingEvent : ProcessingState = Succeeded\nIncrement position
+Processing --> Retrying : ProcessingState = Retry
+Processing --> Stopping : ProcessingState = Error\nTimeout
+
+Waiting --> FetchingEvent : Try fetch again
+
+Retrying --> Processing : Try again
+
+Stopping --> [*]
+
+@enduml
