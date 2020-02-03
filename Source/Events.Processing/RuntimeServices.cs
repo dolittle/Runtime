@@ -1,11 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using Dolittle.Runtime.Heads;
-using Dolittle.Services;
+extern alias contracts;
 
-namespace Dolittle.Runtime.Events.Runtime
+using System.Collections.Generic;
+using Dolittle.Runtime.Services;
+using Dolittle.Services;
+using grpc = contracts::Dolittle.Runtime.Events.Processing;
+
+namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
@@ -32,7 +35,7 @@ namespace Dolittle.Runtime.Events.Runtime
         {
             return new Service[]
             {
-                new Service(_filtersService, Dolittle.Events.Processing.Runtime.Filters.BindService(_filtersService), Dolittle.Events.Processing.Runtime.Filters.Descriptor)
+                new Service(_filtersService, grpc.Filters.BindService(_filtersService), grpc.Filters.Descriptor)
             };
         }
     }

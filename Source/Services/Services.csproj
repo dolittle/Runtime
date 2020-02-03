@@ -2,7 +2,7 @@
   <Import Project="../../default.props"/>
 
   <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Services.Management</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Services</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>

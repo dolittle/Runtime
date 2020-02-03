@@ -9,10 +9,12 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>    
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Events\Events.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
   </ItemGroup>
 </Project>

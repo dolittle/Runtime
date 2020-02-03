@@ -3,7 +3,7 @@
 
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Heads
+namespace Dolittle.Runtime.Services
 {
     /// <summary>
     /// Defines a system that can bind a gRPC service for application purpose.

@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Heads
+namespace Dolittle.Runtime.Services
 {
     /// <summary>
     /// Represents a <see cref="IRepresentServiceType">host type</see> that is for application communication.

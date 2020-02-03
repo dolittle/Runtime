@@ -7,13 +7,13 @@
 
   <ItemGroup>
     <ProjectReference Include="../Events/Events.csproj"/>
-    <ProjectReference Include="../Heads/Heads.csproj"/>
+    <ProjectReference Include="../Services/Services.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Management" Version="$(FundamentalsVersion)"/>
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)"/>
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts"/>
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
   </ItemGroup>
 
 </Project>
