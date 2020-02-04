@@ -8,14 +8,15 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Defines a system that can write an event to a stream in the event store.
     /// </summary>
-    public interface IWriteEventToStream
+    public interface IWriteEventsToStreams
     {
         /// <summary>
-        /// Writes an event to a stream in the event store.
+        /// Writes an event to a stream.
         /// </summary>
-        /// <param name="event">The <see cref="FilteredEvent" />.</param>
+        /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
+        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <returns>A <see cref="Task"/> representing whether the event was successfully written to the event store.</returns>
-        Task<bool> Write(FilteredEvent @event, StreamId streamId);
+        Task<bool> Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId);
     }
 }

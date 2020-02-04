@@ -15,12 +15,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="eventProcessorId"><see cref="EventProcessorId"/>.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId"/>.</param>
-        /// <param name="partitionId"><see cref ="PartitionId" />.</param>
-        public StreamProcessorId(EventProcessorId eventProcessorId, StreamId sourceStreamId, PartitionId partitionId)
+        public StreamProcessorId(EventProcessorId eventProcessorId, StreamId sourceStreamId)
         {
             EventProcessorId = eventProcessorId;
             SourceStreamId = sourceStreamId;
-            PartitionId = partitionId;
         }
 
         /// <summary>
@@ -33,15 +31,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         public StreamId SourceStreamId { get; set; }
 
-        /// <summary>
-        /// Gets or sets  the <see cref="PartitionId" />.
-        /// </summary>
-        public PartitionId PartitionId { get; set; }
-
         /// <inheritdoc />
         public override string ToString()
         {
-            return $"{EventProcessorId} - {SourceStreamId} - {PartitionId}";
+            return $"{EventProcessorId} - {SourceStreamId}";
         }
     }
 }

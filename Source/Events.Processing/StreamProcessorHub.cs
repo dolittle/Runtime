@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
-        readonly IFetchNextEvent _nextEventFetcher;
+        readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
         readonly TaskFactory _factory;
@@ -28,18 +28,18 @@ namespace Dolittle.Runtime.Events.Processing
         /// Initializes a new instance of the <see cref="StreamProcessorHub"/> class.
         /// </summary>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="nextEventFetcher">The <see cref="IFetchNextEvent" />.</param>
+        /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public StreamProcessorHub(
             IStreamProcessorStateRepository streamProcessorStateRepository,
-            IFetchNextEvent nextEventFetcher,
+            IFetchEventsFromStreams eventsFromStreamsFetcher,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
             _streamProcessorStateRepository = streamProcessorStateRepository;
-            _nextEventFetcher = nextEventFetcher;
+            _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _executionContextManager = executionContextManager;
             _logger = logger;
             _factory = new TaskFactory(TaskCreationOptions.DenyChildAttach, TaskContinuationOptions.DenyChildAttach);
@@ -52,7 +52,12 @@ namespace Dolittle.Runtime.Events.Processing
         public void Register(IEventProcessor eventProcessor, StreamId sourceStreamId)
         {
             var tenant = _executionContextManager.Current.Tenant;
-            var streamProcessor = new StreamProcessor(sourceStreamId, eventProcessor, _streamProcessorStateRepository, _nextEventFetcher, _logger);
+            var streamProcessor = new StreamProcessor(
+                sourceStreamId,
+                eventProcessor,
+                _streamProcessorStateRepository,
+                _eventsFromStreamsFetcher,
+                _logger);
 
             if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))
             {

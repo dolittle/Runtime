@@ -14,25 +14,42 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the <see cref="StreamProcessorState" /> for this <see cref="StreamProcessor" />.
         /// </summary>
-        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
-        /// <returns><see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> Get(StreamProcessorId streamProcessorKey);
+        /// <param name="streamProcessorId">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
+        Task<StreamProcessorState> Get(StreamProcessorId streamProcessorId);
 
         /// <summary>
-        /// Sets the Offset (last event processed) for this <see cref="StreamProcessor" />.
+        /// Increments the <see cref="StreamPosition" /> for a <see cref="StreamProcessor" />.
         /// </summary>
         /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
-        /// <param name="streamProcessingState">The new<see cref="StreamProcessingState" />of the <see cref="StreamProcessor" />.</param>
-        /// <param name="streamPosition">The new<see cref="StreamPosition" />of the <see cref="StreamProcessor"/>.</param>
-        /// <returns>>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task Set(StreamProcessorId streamProcessorKey, StreamProcessingState streamProcessingState, StreamPosition streamPosition);
+        /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
+        Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorKey);
 
         /// <summary>
-        /// Sets the Offset (last event processed) for this <see cref="StreamProcessor" />.
+        /// Adds a failing partition to the state.
         /// </summary>
-        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
-        /// <param name="streamProcessorState">The new<see cref="StreamProcessorState" />of the <see cref="StreamProcessor" />.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task Set(StreamProcessorId streamProcessorKey, StreamProcessorState streamProcessorState);
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
+        /// <param name="currentState">The current <see cref="StreamProcessorState" />.</param>
+        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+        /// <param name="retryTime">The <see cref="DateTimeOffset" /> point in time to retry processing.</param>
+        /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
+        Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, StreamProcessorState currentState, PartitionId partitionId, DateTimeOffset retryTime);
+
+        /// <summary>
+        /// Adds a failing partition to the state.
+        /// </summary>
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
+        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+        /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
+        Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId);
+
+        /// <summary>
+        /// Sets the <see cref="FailingPartitionState" /> of for a partition.
+        /// </summary>
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
+        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+        /// <param name="failingPartitionState">The <see cref="FailingPartitionState" />.</param>
+        /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
+        Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState);
     }
 }

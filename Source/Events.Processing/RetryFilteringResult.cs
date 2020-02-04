@@ -6,13 +6,13 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IFilterResult" /> where filtering failed and it should try to filter again.
     /// </summary>
-    public class RetryFilteringResult : IFilterResult
+    public class RetryFilteringResult : IRetryFilteringResult
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RetryFilteringResult"/> class.
         /// </summary>
         /// <param name="retryTimeout">The retry timeout in milliseconds.</param>
-        public RetryFilteringResult(int retryTimeout) => RetryTimeout = retryTimeout;
+        public RetryFilteringResult(uint retryTimeout) => RetryTimeout = retryTimeout;
 
         /// <inheritdoc />
         public bool Succeeded => false;
@@ -24,11 +24,9 @@ namespace Dolittle.Runtime.Events.Processing
         public bool IsIncluded => false;
 
         /// <inheritdoc />
-        public PartitionId Partition => PartitionId.Empty;
+        public PartitionId Partition => PartitionId.NotSet;
 
-        /// <summary>
-        /// Gets the timeout when retrying.
-        /// </summary>
-        public int RetryTimeout { get; }
+        /// <inheritdoc/>
+        public uint RetryTimeout { get; }
     }
 }
