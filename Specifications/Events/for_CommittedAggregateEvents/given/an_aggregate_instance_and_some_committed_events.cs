@@ -13,7 +13,6 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents.given
     {
         public static EventSourceId event_source_id = Guid.Parse("f869cdd9-b5cc-49fc-9133-182fbb5909ae");
         public static Type aggregate_root_type = typeof(aggregate_one);
-        public static AggregateRootVersion aggregate_root_version = 1;
 
         public static CommittedAggregateEvent first_event;
         public static CommittedAggregateEvent second_event;
@@ -27,8 +26,8 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents.given
             first_event = new CommittedAggregateEvent(
                 event_source_id,
                 aggregate_root_type,
-                1,
-                1,
+                0,
+                0,
                 DateTimeOffset.Now,
                 CorrelationId.New(),
                 Microservice.New(),
@@ -39,8 +38,8 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents.given
             second_event = new CommittedAggregateEvent(
                 event_source_id,
                 aggregate_root_type,
-                2,
-                2,
+                1,
+                1,
                 DateTimeOffset.Now,
                 CorrelationId.New(),
                 Microservice.New(),
@@ -51,8 +50,8 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents.given
             event_with_other_event_source_id = new CommittedAggregateEvent(
                 Guid.Parse("108cab46-02bb-4a5f-a827-76d30a67c358"),
                 aggregate_root_type,
-                3,
-                3,
+                2,
+                2,
                 DateTimeOffset.Now,
                 CorrelationId.New(),
                 Microservice.New(),
@@ -63,8 +62,8 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents.given
             event_with_other_aggregate_root_type = new CommittedAggregateEvent(
                 event_source_id,
                 typeof(aggregate_two),
-                3,
-                3,
+                2,
+                2,
                 DateTimeOffset.Now,
                 CorrelationId.New(),
                 Microservice.New(),
@@ -75,7 +74,7 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents.given
             event_with_earlier_event_log_version = new CommittedAggregateEvent(
                 event_source_id,
                 aggregate_root_type,
-                3,
+                2,
                 0,
                 DateTimeOffset.Now,
                 CorrelationId.New(),
@@ -88,7 +87,7 @@ namespace Dolittle.Runtime.Events.Specs.for_CommittedAggregateEvents.given
                 event_source_id,
                 aggregate_root_type,
                 0,
-                3,
+                2,
                 DateTimeOffset.Now,
                 CorrelationId.New(),
                 Microservice.New(),
