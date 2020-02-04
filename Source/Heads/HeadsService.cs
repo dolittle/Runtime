@@ -1,16 +1,17 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Threading.Tasks;
 using System.Timers;
-using Dolittle.Collections;
-using Dolittle.Heads.Runtime;
+using contracts::Dolittle.Runtime.Heads;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Time;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using static Dolittle.Heads.Runtime.Heads;
+using static contracts::Dolittle.Runtime.Heads.Heads;
 
 namespace Dolittle.Runtime.Heads
 {
@@ -56,16 +57,11 @@ namespace Dolittle.Runtime.Heads
             try
             {
                 _logger.Information($"Head connected '{headId}'");
-                if (request.ServicesByName.Count == 0) _logger.Information("Not providing any head services");
-                else request.ServicesByName.ForEach(_ => _logger.Information($"Providing service {_}"));
 
                 var connectionTime = _systemClock.GetCurrentTime();
                 var client = new Head(
                     headId,
-                    request.Host,
-                    request.Port,
                     request.Runtime,
-                    request.ServicesByName,
                     connectionTime);
 
                 _connectedHeads.Connect(client);

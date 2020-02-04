@@ -1,12 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Threading.Tasks;
-using Dolittle.Events.Runtime;
+using contracts::Dolittle.Runtime.Events;
 using Dolittle.Logging;
 using Grpc.Core;
-using static Dolittle.Events.Runtime.EventStore;
-using grpc = Dolittle.Events.Runtime;
+using static contracts::Dolittle.Runtime.Events.EventStore;
+using grpc = contracts::Dolittle.Runtime.Events;
 
 namespace Dolittle.Runtime.Events.Runtime
 {
@@ -29,7 +31,7 @@ namespace Dolittle.Runtime.Events.Runtime
         /// <inheritdoc/>
         public override async Task<EventCommitResponse> Commit(grpc.UncommittedEvents request, ServerCallContext context)
         {
-            _logger.Information("Events received");
+            _logger.Information($"Events received : {request.Events.Count}");
             return await Task.FromResult(new EventCommitResponse()).ConfigureAwait(false);
         }
 

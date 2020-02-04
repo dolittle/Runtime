@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props"></Import>
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.TimeSeries.Connectors</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Heads/Heads.csproj"/>
+        <ProjectReference Include="../TimeSeries.DataPoints/TimeSeries.DataPoints.csproj"/>
+        <ProjectReference Include="../TimeSeries.DataTypes/TimeSeries.DataTypes.csproj"/>
+        <ProjectReference Include="../TimeSeries.Identity/TimeSeries.Identity.csproj"/>
+        <ProjectReference Include="../TimeSeries.State/TimeSeries.State.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts"/>
+        <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)"/>
+    </ItemGroup>
+
+</Project>
