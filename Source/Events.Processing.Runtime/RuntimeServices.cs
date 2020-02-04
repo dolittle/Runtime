@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Runtime
         {
             return new Service[]
             {
-                new Service(_filtersService, Dolittle.Events.Processing.Runtime.Filters.BindService(_filtersService), Dolittle.Events.Processing.Runtime.Filters.Descriptor)
+                new Service(_filtersService, Processing.Filters.BindService(_filtersService), Processing.Filters.Descriptor)
             };
         }
     }
