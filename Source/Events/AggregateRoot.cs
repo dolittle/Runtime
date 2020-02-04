@@ -119,10 +119,10 @@ namespace Dolittle.Events
         {
             ThrowIfEventWasAppliedToOtherEventSource(events);
             ThrowIfEventWasAppliedByOtherAggregateRoot(events);
-            ThrowIfAggreggateRootVersionIsOutOfOrder(events);
 
             foreach (var @event in events)
             {
+                ThrowIfAggreggateRootVersionIsOutOfOrder(@event);
                 InvokeOnMethod(@event.Event);
                 Version++;
             }
@@ -178,9 +178,9 @@ namespace Dolittle.Events
             if (events.AggregateRoot != GetType()) throw new EventWasAppliedByOtherAggregateRoot(events.AggregateRoot, GetType());
         }
 
-        void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvents events)
+        void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvent @event)
         {
-            if (events.AggregateRootVersion != Version) throw new AggregateRootVersionIsOutOfOrder(events.AggregateRootVersion, Version);
+            if (@event.AggregateRootVersion != Version) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, Version);
         }
 
         void ThrowIfStateful()
