@@ -21,6 +21,6 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.when_proc
         It should_retry_processing = () => result.Retry.ShouldEqual(true);
         It should_be_of_type_RetryFilteringResult = () => result.ShouldBeOfExactType<RetryFilteringResult>();
         It should_have_the_correct_timeout = () => (result as RetryFilteringResult).RetryTimeout.ShouldEqual(retry_timeout);
-        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<StreamId>()), Moq.Times.Never());
+        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<StreamId>()), Moq.Times.Never());
     }
 }

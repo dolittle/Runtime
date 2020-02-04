@@ -17,6 +17,6 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.when_filt
 
         It should_not_succeed_processing = () => result.Succeeded.ShouldEqual(false);
         It should_not_retry_processing = () => result.Retry.ShouldEqual(false);
-        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<StreamId>()), Moq.Times.Never());
+        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<StreamId>()), Moq.Times.Never());
     }
 }
