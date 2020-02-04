@@ -17,28 +17,28 @@ namespace Dolittle.Runtime.Events.Specs.for_AggregateRoot.given
         static TenantId tenantId = Guid.Parse("54ad514b-baa5-44f5-8a6b-870d2ce0dcb2");
         static Cause cause = new Cause(CauseType.Command, 0);
 
-        public static CommittedAggregateEvents build_committed_events(EventSourceId eventSource, Type aggregateRoot, AggregateRootVersion aggregateRootVersion)
+        public static CommittedAggregateEvents build_committed_events(EventSourceId eventSource, Type aggregateRoot)
         {
             var events = new List<CommittedAggregateEvent>();
             events.Add(build_committed_event(
                 eventSource,
                 aggregateRoot,
-                aggregateRootVersion,
+                0,
                 0,
                 event_one));
             events.Add(build_committed_event(
                 eventSource,
                 aggregateRoot,
-                aggregateRootVersion + 1,
+                1,
                 1,
                 event_two));
             events.Add(build_committed_event(
                 eventSource,
                 aggregateRoot,
-                aggregateRootVersion + 2,
+                2,
                 2,
                 event_three));
-            return new CommittedAggregateEvents(eventSource, aggregateRoot, aggregateRootVersion, events);
+            return new CommittedAggregateEvents(eventSource, aggregateRoot, 3, events);
         }
 
         static CommittedAggregateEvent build_committed_event(EventSourceId eventSource, Type aggregateRoot, AggregateRootVersion aggregateRootVersion, EventLogVersion eventLogVersion, IEvent @event)

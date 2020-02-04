@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Specs.for_AggregateRoot
 
         Establish context = () =>
         {
-            events = build_committed_events(event_source_id, typeof(StatefullAggregateRoot), AggregateRootVersion.Initial);
+            events = build_committed_events(event_source_id, typeof(StatefullAggregateRoot));
         };
 
         Because of = () =>

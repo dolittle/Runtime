@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Specs.for_AggregateRoot
 
         Establish context = () =>
         {
-            events = build_committed_events(Guid.Parse("aa81d146-0c45-4121-bce0-fcc547257ccd"), typeof(StatefullAggregateRoot), AggregateRootVersion.Initial);
+            events = build_committed_events(Guid.Parse("aa81d146-0c45-4121-bce0-fcc547257ccd"), typeof(StatefullAggregateRoot));
         };
 
         Because of = () => exception = Catch.Exception(() =>
