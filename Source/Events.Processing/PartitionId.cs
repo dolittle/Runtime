@@ -12,14 +12,9 @@ namespace Dolittle.Runtime.Events.Processing
     public class PartitionId : ConceptAs<Guid>
     {
         /// <summary>
-        /// Gets the default <see cref="PartitionId" />.
+        /// Gets the not set <see cref="PartitionId" />.
         /// </summary>
-        public static PartitionId Default => new PartitionId { Value = Guid.Parse("fc03c8dd-88cc-4e7b-a200-a0ca7fb5deae") };
-
-        /// <summary>
-        /// Gets the empty <see cref="PartitionId" />.
-        /// </summary>
-        public static PartitionId Empty => new PartitionId { Value = Guid.Empty };
+        public static PartitionId NotSet => new PartitionId { Value = Guid.Empty };
 
         /// <summary>
         /// Implicitly convert from <see cref="Guid"/> to <see cref="PartitionId"/>.

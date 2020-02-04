@@ -18,6 +18,6 @@ namespace Dolittle.Runtime.Events.Processing
         public bool IsIncluded => false;
 
         /// <inheritdoc />
-        public PartitionId Partition => PartitionId.Empty;
+        public PartitionId Partition => PartitionId.NotSet;
     }
 }
