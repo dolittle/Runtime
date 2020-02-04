@@ -125,7 +125,7 @@ namespace Dolittle.Runtime.Events.Processing
                 {
                     _logger.Debug($"{LogMessageBeginning} is waiting to retry");
                     await Task.Delay(TimeToWait).ConfigureAwait(false);
-                    _logger.Debug($"{LogMessageBeginning} is trying to process event with artifact id '{@event.Metadata.Artifact.Id.Value}' again.");
+                    _logger.Debug($"{LogMessageBeginning} is trying to process event with artifact id '{@event.Type.Id.Value}' again.");
                     await ProcessEvent(@event).ConfigureAwait(false);
                 }
             }
@@ -136,7 +136,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        async Task<CommittedEvent> FetchNextEvent()
+        async Task<Store.CommittedEvent> FetchNextEvent()
         {
             try
             {
@@ -150,36 +150,36 @@ namespace Dolittle.Runtime.Events.Processing
             }
         }
 
-        async Task ProcessEvent(CommittedEvent @event)
+        async Task ProcessEvent(Store.CommittedEvent @event)
         {
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is processing event with artifact id '{@event.Metadata.Artifact.Id}'");
+                _logger.Debug($"{LogMessageBeginning} is processing event with artifact id '{@event.Type.Id}'");
                 var processingResult = await _processor.Process(@event).ConfigureAwait(false);
                 HandleProcessingResult(@event, processingResult);
             }
             catch (Exception ex)
             {
-                _logger.Error($"{LogMessageBeginning}: Error processing event with artifact id '{@event.Metadata.Artifact.Id.Value} - {ex.Message}");
+                _logger.Error($"{LogMessageBeginning}: Error processing event with artifact id '{@event.Type.Id.Value} - {ex.Message}");
                 throw;
             }
         }
 
-        void HandleProcessingResult(CommittedEvent @event, IProcessingResult processingResult)
+        void HandleProcessingResult(Store.CommittedEvent @event, IProcessingResult processingResult)
         {
             if (processingResult.Succeeded)
             {
-                _logger.Debug($"{LogMessageBeginning} processed event with artifact id '{@event.Metadata.Artifact.Id}'");
+                _logger.Debug($"{LogMessageBeginning} processed event with artifact id '{@event.Type.Id}'");
                 IncrementPosition();
             }
             else if (processingResult.Retry)
             {
-                _logger.Debug($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'. Retrying processing");
+                _logger.Debug($"{LogMessageBeginning} failed processing event with artifact id '{@event.Type.Id}'. Retrying processing");
                 SetState(StreamProcessingState.Retrying);
             }
             else
             {
-                _logger.Error($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'.");
+                _logger.Error($"{LogMessageBeginning} failed processing event with artifact id '{@event.Type.Id}'.");
                 Stop();
             }
         }
