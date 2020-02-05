@@ -157,7 +157,7 @@ namespace Dolittle.Runtime.Events.Processing
         Task<StreamProcessorState> GetPersistedCurrentState()
         {
             _logger.Debug($"{LogMessageBeginning} is getting the persisted state for this stream processor.");
-            return _streamProcessorStateRepository.Get(Identifier);
+            return _streamProcessorStateRepository.GetOrAddNew(Identifier);
         }
 
         Task<IProcessingResult> ProcessEvent(CommittedEvent @event, PartitionId partitionId)

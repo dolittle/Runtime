@@ -12,11 +12,11 @@ namespace Dolittle.Runtime.Events.Processing
     public interface IStreamProcessorStateRepository : IDisposable
     {
         /// <summary>
-        /// Gets the <see cref="StreamProcessorState" /> for this <see cref="StreamProcessor" />.
+        /// Gets the <see cref="StreamProcessorState" /> for this <see cref="StreamProcessor" /> or creates and adds a new one.
         /// </summary>
         /// <param name="streamProcessorId">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> Get(StreamProcessorId streamProcessorId);
+        Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId);
 
         /// <summary>
         /// Increments the <see cref="StreamPosition" /> for a <see cref="StreamProcessor" />.
