@@ -37,10 +37,10 @@ namespace Dolittle.Runtime.Events.Processing
         string LogMessageBeginning { get; }
 
         /// <inheritdoc />
-        public Task<IProcessingResult> Process(Store.CommittedEvent @event)
+        public Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Type.Id}'");
-            return _remoteProcessor.Process(@event, Identifier);
+            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
+            return _remoteProcessor.Process(@event, partitionId, Identifier);
         }
     }
 }

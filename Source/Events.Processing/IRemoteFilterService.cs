@@ -13,9 +13,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Filters the event.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="event">The <see cref="Store.CommittedEvent" />.</param>
+        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation of filtering an event.</returns>
-        Task<IFilterResult> Filter(Store.CommittedEvent @event, EventProcessorId eventProcessorId);
+        Task<IFilterResult> Filter(Store.CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
     }
 }

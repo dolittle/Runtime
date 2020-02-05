@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
     public class when_retry_processing
     {
         static RetryProcessingResult result;
-        static int timeout = 123;
+        static uint timeout = 123;
 
         Because of = () => result = new RetryProcessingResult(timeout);
 

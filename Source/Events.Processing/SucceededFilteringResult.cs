@@ -12,11 +12,11 @@ namespace Dolittle.Runtime.Events.Processing
         /// Initializes a new instance of the <see cref="SucceededFilteringResult"/> class.
         /// </summary>
         /// <param name="isIncluded">Is event included in filter.</param>
-        /// <param name="partition">The partition.</param>
-        public SucceededFilteringResult(bool isIncluded, int partition = 0)
+        /// <param name="partitionId">The <see cref="PartitionId" /> />.</param>
+        public SucceededFilteringResult(bool isIncluded, PartitionId partitionId)
         {
             IsIncluded = isIncluded;
-            Partition = partition;
+            Partition = partitionId;
         }
 
         /// <inheritdoc />
@@ -29,6 +29,6 @@ namespace Dolittle.Runtime.Events.Processing
         public bool IsIncluded { get; }
 
         /// <inheritdoc />
-        public int Partition { get; }
+        public PartitionId Partition { get; }
     }
 }

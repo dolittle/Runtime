@@ -10,17 +10,16 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.given
     {
         protected static readonly Store.CommittedEvent an_event = Processing.given.a_committed_event;
 
-        protected static EventProcessorId event_processor_id;
+        protected static readonly PartitionId partition_id = PartitionId.NotSet;
         protected static StreamId target_stream_id;
         protected static Moq.Mock<IRemoteFilterService> remote_filter_mock;
-        protected static Moq.Mock<IWriteEventToStream> event_to_stream_writer_mock;
+        protected static Moq.Mock<IWriteEventsToStreams> event_to_stream_writer_mock;
 
         Establish context = () =>
         {
-            event_processor_id = Guid.NewGuid();
             target_stream_id = Guid.NewGuid();
             remote_filter_mock = new Moq.Mock<IRemoteFilterService>();
-            event_to_stream_writer_mock = new Moq.Mock<IWriteEventToStream>();
+            event_to_stream_writer_mock = new Moq.Mock<IWriteEventsToStreams>();
         };
     }
 }

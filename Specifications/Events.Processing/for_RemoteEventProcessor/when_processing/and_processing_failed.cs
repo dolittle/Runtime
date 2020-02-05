@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteEventProcessor.when_proce
 
         Establish context = () => remote_processor = new RemoteEventProcessor(event_processor_id, Processing.given.a_remote_processor_service(failed_handling_result), Moq.Mock.Of<ILogger>());
 
-        Because of = async () => result = await remote_processor.Process(an_event);
+        Because of = async () => result = await remote_processor.Process(an_event, partition_id).ConfigureAwait(false);
 
         It should_not_succeed_processing = () => result.Succeeded.ShouldEqual(false);
         It should_not_retry_processing = () => result.Retry.ShouldEqual(false);

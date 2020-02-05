@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Collections;
@@ -9,25 +10,55 @@ namespace Dolittle.Runtime.Events.Processing
 {
     public class in_memory_stream_processor_state_repository : IStreamProcessorStateRepository
     {
-        readonly IDictionary<StreamProcessorKey, StreamProcessorState> states = new NullFreeDictionary<StreamProcessorKey, StreamProcessorState>();
+        readonly IDictionary<StreamProcessorId, StreamProcessorState> states = new NullFreeDictionary<StreamProcessorId, StreamProcessorState>();
 
         public void Dispose()
         {
         }
 
-        public Task<StreamProcessorState> Get(StreamProcessorKey streamProcessorKey)
+        public Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId)
         {
-            if (!states.ContainsKey(streamProcessorKey)) return Task.FromResult<StreamProcessorState>(null);
-            return Task.FromResult(states[streamProcessorKey]);
+            states.TryGetValue(streamProcessorId, out var state);
+            if (state == default)
+            {
+                state = StreamProcessorState.New;
+                states.Add(streamProcessorId, state);
+            }
+
+            return Task.FromResult(state);
         }
 
-        public Task Set(StreamProcessorKey streamProcessorKey, StreamProcessingState streamProcessingState, StreamPosition streamPosition) => Set(streamProcessorKey, new StreamProcessorState(streamProcessingState, streamPosition));
-
-        public Task Set(StreamProcessorKey streamProcessorKey, StreamProcessorState streamProcessorState)
+        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId)
         {
-            if (states.ContainsKey(streamProcessorKey)) states.Remove(streamProcessorKey);
-            states.Add(streamProcessorKey, streamProcessorState);
-            return Task.CompletedTask;
+            var newState = states[streamProcessorId];
+            newState.Position = newState.Position.Increment();
+            states[streamProcessorId] = newState;
+
+            return Task.FromResult(newState);
+        }
+
+        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime)
+        {
+            var newState = states[streamProcessorId];
+            newState.FailingPartitions.Add(partitionId, new FailingPartitionState { Position = position, RetryTime = retryTime });
+            states[streamProcessorId] = newState;
+            return Task.FromResult(newState);
+        }
+
+        public Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId)
+        {
+            var newState = states[streamProcessorId];
+            newState.FailingPartitions.Remove(partitionId);
+            states[streamProcessorId] = newState;
+            return Task.FromResult(newState);
+        }
+
+        public Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState)
+        {
+            var newState = states[streamProcessorId];
+            newState.FailingPartitions[partitionId] = failingPartitionState;
+            states[streamProcessorId] = newState;
+            return Task.FromResult(newState);
         }
     }
 }

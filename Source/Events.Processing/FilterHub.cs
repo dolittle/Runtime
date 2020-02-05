@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IExecutionContextManager _executionContextManager;
         readonly IRemoteFilterService _filterService;
         readonly FactoryFor<IStreamProcessorHub> _getStreamProcessorHub;
-        readonly FactoryFor<IWriteEventToStream> _getEventToStreamWriter;
+        readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly ILogger _logger;
 
         /// <summary>
@@ -30,34 +30,34 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="filterService">The <see cref="IRemoteFilterService" />.</param>
         /// <param name="getStreamProcessorHub">The <see cref="FactoryFor{IStreamProcessorHub}" />.</param>
-        /// <param name="getEventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
+        /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
         public FilterHub(
             ITenants tenants,
             IExecutionContextManager executionContextManager,
             IRemoteFilterService filterService,
             FactoryFor<IStreamProcessorHub> getStreamProcessorHub,
-            FactoryFor<IWriteEventToStream> getEventToStreamWriter,
+            FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
             ILogger logger)
         {
             _tenants = tenants;
             _executionContextManager = executionContextManager;
             _filterService = filterService;
             _getStreamProcessorHub = getStreamProcessorHub;
-            _getEventToStreamWriter = getEventToStreamWriter;
+            _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _logger = logger;
         }
 
         /// <inheritdoc />
-        public void Register(FilterId filterId, StreamId targetStreamId)
+        public void Register(StreamId targetStreamId, StreamId sourceStreamId)
         {
-            _logger.Information($"Registering filter '{filterId.Value}' with target stream '{targetStreamId.Value}' for all tenants.");
+            _logger.Information($"Registering filter with target stream '{targetStreamId.Value}' and source stream '{sourceStreamId.Value}' for all tenants.");
             _tenants.All.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
                 _getStreamProcessorHub().Register(
-                    new RemoteFilterProcessor(filterId.Value, targetStreamId, _filterService, _getEventToStreamWriter(), _logger),
-                    StreamId.AllStreamId);
+                    new RemoteFilterProcessor(targetStreamId, _filterService, _getEventsToStreamsWriter(), _logger),
+                    sourceStreamId);
             });
         }
     }

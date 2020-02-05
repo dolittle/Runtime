@@ -8,7 +8,8 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteEventProcessor.given
 {
     public class all_dependencies
     {
-        protected static readonly int retry_timeout = 123;
+        protected static readonly uint retry_timeout = 123;
+        protected static readonly PartitionId partition_id = PartitionId.NotSet;
         protected static readonly IProcessingResult succeeded_handling_result = new SucceededProcessingResult();
         protected static readonly IProcessingResult failed_handling_result = new FailedProcessingResult();
         protected static readonly IProcessingResult retry_handling_result = new RetryProcessingResult(retry_timeout);

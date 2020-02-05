@@ -6,21 +6,34 @@ using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Events.Processing
 {
-    public class in_memory_event_to_stream_writer : IWriteEventToStream
+    public class in_memory_event_to_stream_writer : IWriteEventsToStreams
     {
-        readonly IDictionary<StreamId, IList<Store.CommittedEvent>> events = new Dictionary<StreamId, IList<Store.CommittedEvent>>();
+        readonly IDictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>> streams = new Dictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>>();
 
-        public Task<bool> Write(Store.CommittedEvent @event, StreamId streamId)
+        public Task<bool> Write(Store.CommittedEvent @event, StreamId streamId, PartitionId partitionId)
         {
-            if (events.ContainsKey(streamId))
+            if (streams.ContainsKey(streamId))
             {
-                var newEvents = events[streamId];
-                newEvents.Add(@event);
-                events.Add(streamId, newEvents);
+                var stream = streams[streamId];
+                if (stream.ContainsKey(partitionId))
+                {
+                    var events = stream[partitionId];
+                    events.Add(@event);
+                    stream[partitionId] = events;
+                    streams[streamId] = stream;
+                }
+                else
+                {
+                    stream.Add(partitionId, new Store.CommittedEvent[] { @event });
+                    streams[streamId] = stream;
+                }
             }
             else
             {
-                events.Add(streamId, new Store.CommittedEvent[] { @event });
+                streams.Add(streamId, new Dictionary<PartitionId, IList<Store.CommittedEvent>>
+                {
+                    { partitionId, new Store.CommittedEvent[] { @event } }
+                });
             }
 
             return Task.FromResult(true);

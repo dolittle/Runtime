@@ -10,8 +10,8 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor
     {
         static RemoteFilterProcessor remote_filter;
 
-        Because of = () => remote_filter = new RemoteFilterProcessor(event_processor_id, target_stream_id, Processing.given.a_remote_filter_service(new FailedFilteringResult()), event_to_stream_writer_mock.Object, Moq.Mock.Of<ILogger>());
+        Because of = () => remote_filter = new RemoteFilterProcessor(target_stream_id, Processing.given.a_remote_filter_service(new FailedFilteringResult()), event_to_stream_writer_mock.Object, Moq.Mock.Of<ILogger>());
 
-        It should_have_the_correct_identifier = () => remote_filter.Identifier.ShouldEqual(event_processor_id);
+        It should_have_the_correct_identifier = () => remote_filter.Identifier.Value.ShouldEqual(target_stream_id.Value);
     }
 }
