@@ -17,6 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor
 
         It should_have_the_correct_event_processor_id = () => stream_processor.EventProcessorId.ShouldEqual(event_processor_mock.Object.Identifier);
         It should_have_the_correct_key = () => stream_processor.Identifier.ShouldEqual(new StreamProcessorId(event_processor_mock.Object.Identifier, source_stream_id));
-        It should_have_the_correct_initial_state = () => stream_processor.CurrentState.ShouldEqual(StreamProcessorState.New);
+        It should_have_the_correct_initial_position = () => stream_processor.CurrentState.Position.ShouldEqual(StreamPosition.Start);
+        It should_not_have_any_failing_partitions = () => stream_processor.CurrentState.FailingPartitions.Count.ShouldEqual(0);
     }
 }

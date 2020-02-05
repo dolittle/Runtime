@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing.for_FilterHub.when_registering
     {
         static readonly TenantId tenant = Guid.NewGuid();
         static readonly StreamId target_stream_id = Guid.NewGuid();
-        static readonly StreamId source_stream_id = Guid.NewGuid();
+        static readonly StreamId source_stream_id = StreamId.AllStreamId;
 
         static IFilterHub filter_hub;
 

@@ -19,13 +19,13 @@ namespace Dolittle.Runtime.Events.Processing
                 {
                     var events = stream[partitionId];
                     events.Add(@event);
-                    stream.Add(partitionId, events);
-                    streams.Add(streamId, stream);
+                    stream[partitionId] = events;
+                    streams[streamId] = stream;
                 }
                 else
                 {
                     stream.Add(partitionId, new CommittedEvent[] { @event });
-                    streams.Add(streamId, stream);
+                    streams[streamId] = stream;
                 }
             }
             else
