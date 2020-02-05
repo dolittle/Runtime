@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessorHub.given
     public class all_dependencies
     {
         protected static Mock<IExecutionContextManager> execution_context_manager_mock;
-        protected static Mock<IFetchNextEvent> next_event_fetcher_mock;
+        protected static Mock<IFetchEventsFromStreams> next_event_fetcher_mock;
         protected static IStreamProcessorStateRepository stream_processor_state_repository;
 
         Establish context = () =>

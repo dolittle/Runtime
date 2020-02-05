@@ -48,6 +48,11 @@ namespace Dolittle.Runtime.Events.Processing
         public StreamProcessorId Identifier { get; }
 
         /// <summary>
+        /// Gets the <see cref="EventProcessorId" />.
+        /// </summary>
+        public EventProcessorId EventProcessorId => _processor.Identifier;
+
+        /// <summary>
         /// Gets the current <see cref="StreamProcessorState" />.
         /// </summary>
         public StreamProcessorState CurrentState { get; private set; } = StreamProcessorState.New;
@@ -70,7 +75,6 @@ namespace Dolittle.Runtime.Events.Processing
                     await Task.Delay(1000).ConfigureAwait(false);
                     await CatchupFailingPartitions().ConfigureAwait(false);
 
-                    // TODO: Handle timeout
                     var eventAndPartition = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
 
                     if (CurrentState.FailingPartitions.Keys.Contains(eventAndPartition.PartitionId))

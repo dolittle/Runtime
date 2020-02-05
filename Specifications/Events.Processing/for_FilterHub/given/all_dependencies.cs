@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.for_FilterHub.given
         protected static Mock<ITenants> tenants_mock;
         protected static Mock<IExecutionContextManager> execution_context_manager_mock;
         protected static Mock<FactoryFor<IStreamProcessorHub>> get_stream_processor_hub_mock;
-        protected static Mock<FactoryFor<IWriteEventToStream>> get_event_to_stream_writer_mock;
+        protected static Mock<FactoryFor<IWriteEventsToStreams>> get_event_to_stream_writer_mock;
         protected static Mock<IStreamProcessorHub> stream_processor_hub_mock;
 
         Establish context = () =>
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.for_FilterHub.given
             stream_processor_hub_mock = new Mock<IStreamProcessorHub>();
             get_stream_processor_hub_mock = new Mock<FactoryFor<IStreamProcessorHub>>();
             get_stream_processor_hub_mock.Setup(_ => _.Invoke()).Returns(stream_processor_hub_mock.Object);
-            get_event_to_stream_writer_mock = new Mock<FactoryFor<IWriteEventToStream>>();
+            get_event_to_stream_writer_mock = new Mock<FactoryFor<IWriteEventsToStreams>>();
             get_event_to_stream_writer_mock.Setup(_ => _.Invoke()).Returns(new in_memory_event_to_stream_writer());
         };
     }
