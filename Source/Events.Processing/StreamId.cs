@@ -12,11 +12,6 @@ namespace Dolittle.Runtime.Events.Processing
     public class StreamId : ConceptAs<Guid>
     {
         /// <summary>
-        /// Represents a not set <see cref="StreamId"/>.
-        /// </summary>
-        public static StreamId NotSet = Guid.Empty;
-
-        /// <summary>
         /// Represents a all stream <see cref="StreamId"/>.
         /// </summary>
         public static StreamId AllStreamId = Guid.Empty;

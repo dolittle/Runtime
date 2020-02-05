@@ -14,28 +14,26 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly IRemoteFilterService _filter;
         readonly StreamId _targetStreamId;
-        readonly IWriteEventToStream _eventToStreamWriter;
+        readonly IWriteEventsToStreams _eventsToStreamsWriter;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteFilterProcessor"/> class.
         /// </summary>
-        /// <param name="id">The <see cref="EventProcessorId" />.</param>
-        /// <param name="targetStreamId">The stream to include events in.</param>
+        /// <param name="targetStreamId">The stream to to write included events in.</param>
         /// <param name="filter">The <see cref="IRemoteFilterService" />.</param>
-        /// <param name="eventToStreamWriter">The <see cref="FactoryFor{IWriteEventToStream}" />.</param>
+        /// <param name="eventsToStreamsWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
         public RemoteFilterProcessor(
-            EventProcessorId id,
             StreamId targetStreamId,
             IRemoteFilterService filter,
-            IWriteEventToStream eventToStreamWriter,
+            IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
         {
-            Identifier = id;
+            Identifier = _targetStreamId.Value;
             _targetStreamId = targetStreamId;
             _filter = filter;
-            _eventToStreamWriter = eventToStreamWriter;
+            _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
             LogMessageBeginning = $"Remote Filter Processor '{Identifier}' with target stream '{_targetStreamId}'";
         }
@@ -46,17 +44,16 @@ namespace Dolittle.Runtime.Events.Processing
         string LogMessageBeginning { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is filtering event '{@event.Metadata.Artifact.Id}'");
-            var result = await _filter.Filter(@event, Identifier).ConfigureAwait(false);
-            _logger.Debug($"{LogMessageBeginning} filtered event '{@event.Metadata.Artifact.Id}' with result Succeeded = {result.Succeeded}");
+            _logger.Debug($"{LogMessageBeginning} is filtering event '{@event.Metadata.Artifact.Id}' for partition '{partitionId.Value}'");
+            var result = await _filter.Filter(@event, partitionId, Identifier).ConfigureAwait(false);
+            _logger.Debug($"{LogMessageBeginning} filtered event '{@event.Metadata.Artifact.Id}' for partition '{partitionId.Value}' with result 'Succeeded' = {result.Succeeded}");
 
-            // TODO: Handle partition
-            if (result.IsIncluded)
+            if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug($"{LogMessageBeginning} writing event '{@event.Metadata.Artifact.Id}' to stream '{_targetStreamId.Value}'");
-                await _eventToStreamWriter.Write(@event, _targetStreamId).ConfigureAwait(false);
+                _logger.Debug($"{LogMessageBeginning} writing event '{@event.Metadata.Artifact.Id}' to stream '{_targetStreamId.Value}' in partition '{partitionId.Value}'");
+                await _eventsToStreamsWriter.Write(@event, _targetStreamId, result.Partition).ConfigureAwait(false);
             }
 
             return result;

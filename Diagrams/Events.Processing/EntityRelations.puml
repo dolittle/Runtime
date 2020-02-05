@@ -1,0 +1,48 @@
+@startuml EntityRelations
+
+entity Filter {
+    * filter_id: Filter
+    --
+}
+
+entity EventHandler {
+    * event_handler_id: EventHandlerId
+    --
+    * event_artifact_ids: ArtifactId[1..*]
+}
+
+entity StreamProcessor_Filter {
+    * stream_processor_key: (
+        event_processor_id: EventHandlerId,
+        source_stream_id: StreamId
+    )
+    --
+    * source_stream_id: StreamId
+}
+
+entity EventProcessor_Filter {
+    * event_processor_id: EventProcessorId
+    --
+    target_stream_id: StreamId
+}
+
+entity StreamProcessor_EventProcessor {
+    * stream_processor_key: (
+        event_processor_id: EventHandlerId,
+        source_stream_id: StreamId
+    )
+    --
+    * source_stream_id: StreamId
+}
+
+entity EventProcessor_EventProcessor {
+    * event_processor_id: EventProcessorId
+    --
+}
+Filter ||--|| StreamProcessor_Filter
+EventHandler ||--|| StreamProcessor_EventProcessor
+EventHandler ||--|| StreamProcessor_Filter
+StreamProcessor_Filter ||--|| EventProcessor_Filter
+StreamProcessor_EventProcessor ||--|| EventProcessor_EventProcessor
+
+@enduml

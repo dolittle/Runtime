@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Collections;
@@ -9,25 +10,37 @@ namespace Dolittle.Runtime.Events.Processing
 {
     public class in_memory_stream_processor_state_repository : IStreamProcessorStateRepository
     {
-        readonly IDictionary<StreamProcessorKey, StreamProcessorState> states = new NullFreeDictionary<StreamProcessorKey, StreamProcessorState>();
+        readonly IDictionary<StreamProcessorId, StreamProcessorState> states = new NullFreeDictionary<StreamProcessorId, StreamProcessorState>();
 
         public void Dispose()
         {
         }
 
-        public Task<StreamProcessorState> Get(StreamProcessorKey streamProcessorKey)
+        public Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorKey)
         {
-            if (!states.ContainsKey(streamProcessorKey)) return Task.FromResult<StreamProcessorState>(null);
-            return Task.FromResult(states[streamProcessorKey]);
+            states.TryGetValue(streamProcessorKey, out var state);
+            if (state == default) state = StreamProcessorState.New;
+            return Task.FromResult(state);
         }
 
-        public Task Set(StreamProcessorKey streamProcessorKey, StreamProcessingState streamProcessingState, StreamPosition streamPosition) => Set(streamProcessorKey, new StreamProcessorState(streamProcessingState, streamPosition));
-
-        public Task Set(StreamProcessorKey streamProcessorKey, StreamProcessorState streamProcessorState)
+        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorKey)
         {
-            if (states.ContainsKey(streamProcessorKey)) states.Remove(streamProcessorKey);
-            states.Add(streamProcessorKey, streamProcessorState);
-            return Task.CompletedTask;
+            throw new NotImplementedException();
+        }
+
+        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, StreamProcessorState currentState, PartitionId partitionId, DateTimeOffset retryTime)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState)
+        {
+            throw new NotImplementedException();
         }
     }
 }

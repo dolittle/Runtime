@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -17,10 +16,11 @@ namespace Dolittle.Runtime.Events.Processing
         EventProcessorId Identifier { get; }
 
         /// <summary>
-        /// Processes an <see cref="CommittedEventEnvelope">event</see>.
+        /// Processes an <see cref="CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.
         /// </summary>
-        /// <param name="event">The event.</param>
+        /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <returns><see cref="IProcessingResult" />.</returns>
-        Task<IProcessingResult> Process(CommittedEvent @event);
+        Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId);
     }
 }

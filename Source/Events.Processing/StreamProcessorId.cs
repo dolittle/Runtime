@@ -8,14 +8,14 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents a unique key for a <see cref="StreamProcessor" />.
     /// </summary>
-    public class StreamProcessorKey : Value<StreamProcessorKey>
+    public class StreamProcessorId : Value<StreamProcessorId>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessorKey"/> class.
+        /// Initializes a new instance of the <see cref="StreamProcessorId"/> class.
         /// </summary>
         /// <param name="eventProcessorId"><see cref="EventProcessorId"/>.</param>
-        /// <param name="sourceStreamId">The <see cref="EventProcessorId"/>.</param>
-        public StreamProcessorKey(EventProcessorId eventProcessorId, StreamId sourceStreamId)
+        /// <param name="sourceStreamId">The <see cref="StreamId"/>.</param>
+        public StreamProcessorId(EventProcessorId eventProcessorId, StreamId sourceStreamId)
         {
             EventProcessorId = eventProcessorId;
             SourceStreamId = sourceStreamId;

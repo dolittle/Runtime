@@ -48,6 +48,6 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessorHub.when_registe
 
         It should_have_registered_one_stream_processor = () => registered_stream_processors.Count().ShouldEqual(1);
 
-        It should_register_a_stream_processor_with_the_correct_key = () => registered_stream_processors.First().Key.ShouldEqual(new StreamProcessorKey(event_processor_id, source_stream_id));
+        It should_register_a_stream_processor_with_the_correct_key = () => registered_stream_processors.First().Identifier.ShouldEqual(new StreamProcessorId(event_processor_id, source_stream_id));
     }
 }
