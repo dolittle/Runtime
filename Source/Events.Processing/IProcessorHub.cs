@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// Registers a <see cref="StreamProcessor" />.
         /// </summary>
         /// <param name="processorId">The <see cref="EventProcessorId" />.</param>
-        /// <param name="sourceStreamId">The <see cref="StreamId" /> that this stream processor listens to <see cref="CommittedEvent" /> events from.</param>
+        /// <param name="sourceStreamId">The <see cref="StreamId" /> that this stream processor listens to <see cref="Store.CommittedEvent" /> events from.</param>
         void Register(EventProcessorId processorId, StreamId sourceStreamId);
     }
 }

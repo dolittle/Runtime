@@ -3,12 +3,9 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.Events;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Security;
 using Moq;
 
 namespace Dolittle.Runtime.Events.Processing
@@ -22,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing
         public static IRemoteProcessorService a_remote_processor_service(IProcessingResult result)
         {
             var handler_service = a_remote_processor_mock();
-            handler_service.Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
+            handler_service.Setup(_ => _.Process(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
             return handler_service.Object;
         }
 
@@ -31,15 +28,15 @@ namespace Dolittle.Runtime.Events.Processing
         public static IRemoteFilterService a_remote_filter_service(IFilterResult result)
         {
             var handler_service = a_remote_filter_mock();
-            handler_service.Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
+            handler_service.Setup(_ => _.Filter(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
             return handler_service.Object;
         }
 
         public static Mock<IRemoteFilterService> a_remote_filter_mock() => new Moq.Mock<IRemoteFilterService>();
 
-        public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, IProcessingResult result) => an_event_processor_mock(id, (result, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CommittedEvent>()));
+        public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, IProcessingResult result) => an_event_processor_mock(id, (result, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<Store.CommittedEvent>()));
 
-        public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, params (IProcessingResult result, PartitionId partition_Id, CommittedEvent @event)[] event_and_result_pairs)
+        public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, params (IProcessingResult result, PartitionId partition_Id, Store.CommittedEvent @event)[] event_and_result_pairs)
         {
             var event_processor_mock = an_event_processor_mock();
             event_processor_mock.SetupGet(_ => _.Identifier).Returns(id);
@@ -47,11 +44,11 @@ namespace Dolittle.Runtime.Events.Processing
             return event_processor_mock;
         }
 
-        public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, Func<CommittedEvent, PartitionId, Task<IProcessingResult>> callback)
+        public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, Func<Store.CommittedEvent, PartitionId, Task<IProcessingResult>> callback)
         {
             var event_processor_mock = an_event_processor_mock();
             event_processor_mock.SetupGet(_ => _.Identifier).Returns(id);
-            event_processor_mock.Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>())).Returns(callback);
+            event_processor_mock.Setup(_ => _.Process(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<PartitionId>())).Returns(callback);
             return event_processor_mock;
         }
 
@@ -59,15 +56,14 @@ namespace Dolittle.Runtime.Events.Processing
 
         public static Mock<IEventProcessor> an_event_processor_mock() => new Mock<IEventProcessor>();
 
-        public static CommittedEvent a_committed_event => new CommittedEvent(
-                new CommittedEventVersion(1, 1, 1),
-                new EventMetadata(
-                    EventId.New(),
-                    new VersionedEventSource(EventSourceId.New(), ArtifactId.New()),
-                    Guid.NewGuid(),
-                    new Artifact(ArtifactId.New(), ArtifactGeneration.First),
-                    DateTimeOffset.UtcNow,
-                    new OriginalContext(Application.New(), BoundedContext.New(), Guid.NewGuid(), "", Claims.Empty, null)),
-                new MyEvent());
+        public static Store.CommittedEvent a_committed_event => new Store.CommittedEvent(
+            0,
+            DateTimeOffset.Now,
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            new Cause(CauseType.Command, 0),
+            new Artifact(ArtifactId.New(), ArtifactGeneration.First),
+            "Event Content");
     }
 }

@@ -36,17 +36,17 @@ namespace Dolittle.Runtime.Events.Runtime
         }
 
         /// <inheritdoc/>
-        public override async Task<EventCommitResponse> CommitForAggregate(UncommittedAggregateEvents request, ServerCallContext context)
+        public override async Task<EventCommitResponse> CommitForAggregate(grpc.UncommittedAggregateEvents request, ServerCallContext context)
         {
             _logger.Information("Events for Aggregate received");
             return await Task.FromResult(new EventCommitResponse()).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        public override async Task<CommittedAggregateEvents> FetchForAggregate(Aggregate request, ServerCallContext context)
+        public override async Task<grpc.CommittedAggregateEvents> FetchForAggregate(Aggregate request, ServerCallContext context)
         {
             _logger.Information("Fetch for Aggregate");
-            return await Task.FromResult(new CommittedAggregateEvents()).ConfigureAwait(false);
+            return await Task.FromResult(new grpc.CommittedAggregateEvents()).ConfigureAwait(false);
         }
     }
 }

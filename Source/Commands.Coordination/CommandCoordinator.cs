@@ -4,7 +4,6 @@
 using System;
 using System.Linq;
 using System.Reflection;
-using Dolittle.Events;
 using Dolittle.Globalization;
 using Dolittle.Logging;
 using Dolittle.Runtime.Commands.Handling;
@@ -91,13 +90,12 @@ namespace Dolittle.Runtime.Commands.Coordination
                             _commandHandlerManager.Handle(command);
 
                             _logger.Trace("Collect any broken rules");
-                            commandResult.BrokenRules = commandContext.GetObjectsBeingTracked()
-                                .SelectMany(_ => _.BrokenRules)
-                                .Select(_ => new BrokenRuleResult(
-                                    _.Rule.Name,
-                                    $"EventSource: {_.Context.Target.GetType().Name} - with id {((IEventSource)_.Context.Target).EventSourceId.Value}",
-                                    _.Instance?.ToString() ?? "[Not Set]",
-                                    _.Causes));
+                            commandResult.BrokenRules = commandContext.GetAggregateRootsBeingTracked()
+                                .SelectMany(_ => _.BrokenRules.Select(__ => new BrokenRuleResult(
+                                        __.Rule.Name,
+                                        $"EventSource: {_.GetType().Name} - with id {_.EventSource.Value}",
+                                        __.Instance?.ToString() ?? "[Not Set]",
+                                        __.Causes)));
 
                             _logger.Trace("Commit transaction");
                             commandContext.Commit();

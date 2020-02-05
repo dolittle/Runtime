@@ -17,6 +17,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <returns>A <see cref="Task"/> representing whether the event was successfully written to the event store.</returns>
-        Task<bool> Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId);
+        Task<bool> Write(Store.CommittedEvent @event, StreamId streamId, PartitionId partitionId);
     }
 }

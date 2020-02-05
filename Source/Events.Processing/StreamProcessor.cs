@@ -164,9 +164,9 @@ namespace Dolittle.Runtime.Events.Processing
             return _streamProcessorStateRepository.GetOrAddNew(Identifier);
         }
 
-        Task<IProcessingResult> ProcessEvent(CommittedEvent @event, PartitionId partitionId)
+        Task<IProcessingResult> ProcessEvent(Store.CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Metadata.Artifact.Id.Value}' in partition '{partitionId.Value}'");
+            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Type.Id.Value}' in partition '{partitionId.Value}'");
             return _processor.Process(@event, partitionId);
         }
 

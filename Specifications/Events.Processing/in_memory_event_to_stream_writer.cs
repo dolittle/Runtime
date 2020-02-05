@@ -8,9 +8,9 @@ namespace Dolittle.Runtime.Events.Processing
 {
     public class in_memory_event_to_stream_writer : IWriteEventsToStreams
     {
-        readonly IDictionary<StreamId, IDictionary<PartitionId, IList<CommittedEvent>>> streams = new Dictionary<StreamId, IDictionary<PartitionId, IList<CommittedEvent>>>();
+        readonly IDictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>> streams = new Dictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>>();
 
-        public Task<bool> Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId)
+        public Task<bool> Write(Store.CommittedEvent @event, StreamId streamId, PartitionId partitionId)
         {
             if (streams.ContainsKey(streamId))
             {
@@ -24,15 +24,15 @@ namespace Dolittle.Runtime.Events.Processing
                 }
                 else
                 {
-                    stream.Add(partitionId, new CommittedEvent[] { @event });
+                    stream.Add(partitionId, new Store.CommittedEvent[] { @event });
                     streams[streamId] = stream;
                 }
             }
             else
             {
-                streams.Add(streamId, new Dictionary<PartitionId, IList<CommittedEvent>>
+                streams.Add(streamId, new Dictionary<PartitionId, IList<Store.CommittedEvent>>
                 {
-                    { partitionId, new CommittedEvent[] { @event } }
+                    { partitionId, new Store.CommittedEvent[] { @event } }
                 });
             }
 

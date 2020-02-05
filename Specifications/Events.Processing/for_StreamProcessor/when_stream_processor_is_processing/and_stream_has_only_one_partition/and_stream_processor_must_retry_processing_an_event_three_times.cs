@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
     public class and_stream_processor_must_retry_processing_an_event_three_times : given.all_dependencies
     {
         static readonly PartitionId partition_id = PartitionId.NotSet;
-        static readonly CommittedEvent first_event = Processing.given.a_committed_event;
+        static readonly Store.CommittedEvent first_event = Processing.given.a_committed_event;
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
 
         static readonly Moq.Mock<IEventProcessor> event_processor_mock =
@@ -35,13 +35,9 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
             stream_processor = new StreamProcessor(source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, Moq.Mock.Of<ILogger>());
         };
 
-        Because of = () =>
-        {
-            while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(50);
-            stream_processor.BeginProcessing().Wait();
-        };
+        Because of = () => stream_processor.BeginProcessing().Wait();
 
-        It should_process_three_times = () => event_processor_mock.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>()), Moq.Times.Exactly(3));
+        It should_process_three_times = () => event_processor_mock.Verify(_ => _.Process(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<PartitionId>()), Moq.Times.Exactly(3));
         It should_process_first_event_three_times = () => event_processor_mock.Verify(_ => _.Process(first_event, partition_id), Moq.Times.Exactly(3));
         It should_have_current_position_equal_zero = () => stream_processor.CurrentState.Position.ShouldEqual(new StreamPosition(1));
         It should_have_one_failing_partition = () => stream_processor.CurrentState.FailingPartitions.Count.ShouldEqual(1);
