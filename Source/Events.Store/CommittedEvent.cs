@@ -18,17 +18,17 @@ namespace Dolittle.Runtime.Events.Store
         /// Initializes a new instance of the <see cref="CommittedEvent"/> class.
         /// </summary>
         /// <param name="eventLogVersion">The version of the Event Log the Event was committed to.</param>
-        /// <param name="occured">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
+        /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
         /// <param name="correlationId">The <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system.</param>
         /// <param name="microservice">The <see cref="Microservice"/> within which the Event occured.</param>
         /// <param name="tenant">The <see cref="TenantId"/> within which the Event occured.</param>
         /// <param name="cause">The link to the cause of the Event.</param>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
-        public CommittedEvent(EventLogVersion eventLogVersion, DateTimeOffset occured, CorrelationId correlationId, Microservice microservice, TenantId tenant, Cause cause, Artifact type, string content)
+        public CommittedEvent(EventLogVersion eventLogVersion, DateTimeOffset occurred, CorrelationId correlationId, Microservice microservice, TenantId tenant, Cause cause, Artifact type, string content)
         {
             EventLogVersion = eventLogVersion;
-            Occured = occured;
+            Occurred = occurred;
             CorrelationId = correlationId;
             Microservice = microservice;
             Tenant = tenant;
@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Gets the <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.
         /// </summary>
-        public DateTimeOffset Occured { get; }
+        public DateTimeOffset Occurred { get; }
 
         /// <summary>
         /// Gets the <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system.
@@ -53,12 +53,12 @@ namespace Dolittle.Runtime.Events.Store
         public CorrelationId CorrelationId { get; }
 
         /// <summary>
-        /// Gets the <see cref="Microservice"/> within which the Event occured.
+        /// Gets the <see cref="Microservice"/> within which the Event occurred.
         /// </summary>
         public Microservice Microservice { get; }
 
         /// <summary>
-        /// Gets the <see cref="TenantId"/> within which the Event occured.
+        /// Gets the <see cref="TenantId"/> within which the Event occurred.
         /// </summary>
         public TenantId Tenant { get; }
 
