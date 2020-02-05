@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
         {
-            Identifier = _targetStreamId.Value;
+            Identifier = targetStreamId.Value;
             _targetStreamId = targetStreamId;
             _filter = filter;
             _eventsToStreamsWriter = eventsToStreamsWriter;
