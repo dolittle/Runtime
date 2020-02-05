@@ -2,242 +2,218 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Processes an individual <see cref="CommittedEvent" /> for the correct <see cref="TenantId" />.
+    /// Represents a system that processes a stream of events.
     /// </summary>
     public class StreamProcessor
     {
-        const int TimeToWait = 1000;
         readonly IEventProcessor _processor;
         readonly ILogger _logger;
-        readonly IFetchNextEvent _nextEventFetcher;
+        readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
+        bool _hasStarted = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-        /// <param name="streamProcessorStateRepository">A factory function to return a correctly scoped instance of <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="nextEventFetcher">A factory function to return a correctly scoped instance of <see cref="IFetchNextEvent" />.</param>
+        /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public StreamProcessor(
             StreamId sourceStreamId,
             IEventProcessor processor,
             IStreamProcessorStateRepository streamProcessorStateRepository,
-            IFetchNextEvent nextEventFetcher,
+            IFetchEventsFromStreams eventsFromStreamsFetcher,
             ILogger logger)
         {
             _processor = processor;
             _logger = logger;
-            _nextEventFetcher = nextEventFetcher;
+            _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStateRepository = streamProcessorStateRepository;
-            Key = new StreamProcessorKey(_processor.Identifier, sourceStreamId);
-            LogMessageBeginning = $"Stream Processor for event processor '{Key.EventProcessorId.Value}' with source stream '{Key.SourceStreamId.Value}'";
+            Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
+            LogMessageBeginning = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId.Value}' with source stream '{Identifier.SourceStreamId.Value}'";
         }
 
         /// <summary>
-        /// Gets the unique identifer for the <see cref="StreamProcessor" />.
+        /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="StreamProcessor"/>.
         /// </summary>
-        public StreamProcessorKey Key { get; }
+        public StreamProcessorId Identifier { get; }
 
         /// <summary>
         /// Gets the current <see cref="StreamProcessorState" />.
         /// </summary>
         public StreamProcessorState CurrentState { get; private set; } = StreamProcessorState.New;
 
-        /// <summary>
-        /// Gets the <see cref="EventProcessorId" />.
-        /// </summary>
-        public EventProcessorId EventProcessorId => _processor.Identifier;
-
         string LogMessageBeginning { get; }
 
-        bool RetryClockIsTicking { get; } = false;
-
         /// <summary>
-        /// Starts up the processing of the stream. It will continuously process and wait for events to process until it is stopped.
+        /// Starts up the <see cref="StreamProcessor" />.
         /// </summary>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation of a <see cref="StreamProcessor" />.</returns>
-        public async Task Start()
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task BeginProcessing()
         {
             try
             {
-                _logger.Debug($"{LogMessageBeginning} is starting up.");
-                CurrentState = (await _streamProcessorStateRepository.Get(Key).ConfigureAwait(false)) ?? StreamProcessorState.New;
-                _logger.Debug($"{LogMessageBeginning} got current state '{CurrentState}' from stream processor state repository.");
-
-                if (IsWaiting()) await SetState(StreamProcessingState.Processing).ConfigureAwait(false);
-                while (!IsStopping())
+                if (_hasStarted) return;
+                _hasStarted = true;
+                CurrentState = await GetPersistedCurrentState().ConfigureAwait(false);
+                while (true)
                 {
-                    if (IsProcessing()) await EnterProcessing().ConfigureAwait(false);
-                    else if (IsRetrying()) await EnterRetrying().ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"{LogMessageBeginning}: Error while processing - {ex}");
-            }
+                    await Task.Delay(1000).ConfigureAwait(false);
+                    await CatchupFailingPartitions().ConfigureAwait(false);
 
-            _logger.Debug($"{LogMessageBeginning} has stopped processing.");
-            return;
-        }
+                    // TODO: Handle timeout
+                    var eventAndPartition = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
 
-        async Task EnterProcessing()
-        {
-            try
-            {
-                _logger.Debug($"{LogMessageBeginning} is starting to process.");
-                while (IsProcessing())
-                {
-                    var @event = await FetchNextEvent().ConfigureAwait(false);
-                    if (@event == null)
+                    if (CurrentState.FailingPartitions.Keys.Contains(eventAndPartition.PartitionId))
                     {
-                        _logger.Debug($"{LogMessageBeginning} has no event to process.");
-                        await Wait().ConfigureAwait(false);
+                        CurrentState = await IncrementPosition().ConfigureAwait(false);
                     }
                     else
                     {
-                        await ProcessEvent(@event).ConfigureAwait(false);
+                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.PartitionId).ConfigureAwait(false);
+                        if (processingResult.Succeeded)
+                        {
+                            CurrentState = await IncrementPosition().ConfigureAwait(false);
+                        }
+                        else if (processingResult is IRetryProcessingResult retryProcessingResult)
+                        {
+                            CurrentState = await AddFailingPartition(eventAndPartition.PartitionId, retryProcessingResult.RetryTimeout).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            CurrentState = await AddFailingPartition(eventAndPartition.PartitionId, DateTimeOffset.MaxValue).ConfigureAwait(false);
+                        }
                     }
                 }
             }
             catch (Exception ex)
             {
-                _logger.Error($"{LogMessageBeginning}: Error while processing - {ex}");
+                _logger.Error($"{LogMessageBeginning} failed - {ex}");
                 throw;
             }
         }
 
-        async Task EnterRetrying()
+        async Task CatchupFailingPartitions()
         {
-            try
+            foreach (var kvp in CurrentState.FailingPartitions.AsEnumerable())
             {
-                _logger.Warning($"{LogMessageBeginning} processing failed. Entering retrying state.");
-                var @event = await FetchNextEvent().ConfigureAwait(false);
-                while (IsRetrying())
+                var partitionId = kvp.Key;
+                var failingPartitionState = kvp.Value;
+                if (ShouldRetryProcessing(failingPartitionState))
                 {
-                    _logger.Debug($"{LogMessageBeginning} is waiting to retry");
-                    await Task.Delay(TimeToWait).ConfigureAwait(false);
-                    _logger.Debug($"{LogMessageBeginning} is trying to process event with artifact id '{@event.Metadata.Artifact.Id.Value}' again.");
-                    await ProcessEvent(@event).ConfigureAwait(false);
+                    var nextPosition = await FindPositionOfNextEventInPartition(partitionId, failingPartitionState.Position).ConfigureAwait(false);
+                    while (ShouldProcessNextEventInPartition(nextPosition))
+                    {
+                        if (!ShouldRetryProcessing(failingPartitionState)) break;
+
+                        var eventAndPartition = await FetchEventWithPartitionAtPosition(nextPosition).ConfigureAwait(false);
+                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.PartitionId).ConfigureAwait(false);
+
+                        if (processingResult.Succeeded)
+                        {
+                            failingPartitionState = await ChangePositionInFailingPartition(partitionId, failingPartitionState.Position, nextPosition.Increment()).ConfigureAwait(false);
+                        }
+                        else if (processingResult is IRetryProcessingResult retryProcessingResult)
+                        {
+                            failingPartitionState = await SetFailingPartitionState(partitionId, retryProcessingResult.RetryTimeout, nextPosition).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            failingPartitionState = await SetFailingPartitionState(partitionId, DateTimeOffset.MaxValue, nextPosition).ConfigureAwait(false);
+                        }
+
+                        nextPosition = await FindPositionOfNextEventInPartition(partitionId, failingPartitionState.Position).ConfigureAwait(false);
+                    }
+
+                    if (ShouldRetryProcessing(failingPartitionState)) CurrentState = await RemoveFailingPartition(partitionId).ConfigureAwait(false);
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.Error($"{LogMessageBeginning}: Error while retrying - {ex}");
-                throw;
-            }
         }
 
-        async Task<CommittedEvent> FetchNextEvent()
+        Task<StreamProcessorState> AddFailingPartition(PartitionId partitionId, uint retryTimeout) => AddFailingPartition(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout));
+
+        async Task<StreamProcessorState> AddFailingPartition(PartitionId partitionId, DateTimeOffset retryTime)
         {
-            try
-            {
-                _logger.Debug($"{LogMessageBeginning} is fetching next event.");
-                return await _nextEventFetcher.FetchNextEvent(Key.SourceStreamId, CurrentState.Position).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"{LogMessageBeginning}: Error while fetching next event - {ex}");
-                throw;
-            }
+            _logger.Debug($"{LogMessageBeginning} is adding failing partition '{partitionId}' with retry time '{retryTime}'");
+            var streamProcessorState = await _streamProcessorStateRepository.AddFailingPartition(Identifier, CurrentState, partitionId, retryTime).ConfigureAwait(false);
+            return new StreamProcessorState(streamProcessorState.Position.Increment(), streamProcessorState.FailingPartitions);
         }
 
-        async Task ProcessEvent(CommittedEvent @event)
+        Task<StreamProcessorState> RemoveFailingPartition(PartitionId partitionId)
         {
-            try
-            {
-                _logger.Debug($"{LogMessageBeginning} is processing event with artifact id '{@event.Metadata.Artifact.Id}'");
-                var processingResult = await _processor.Process(@event).ConfigureAwait(false);
-                HandleProcessingResult(@event, processingResult);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"{LogMessageBeginning}: Error processing event with artifact id '{@event.Metadata.Artifact.Id.Value} - {ex.Message}");
-                throw;
-            }
+            _logger.Debug($"{LogMessageBeginning} is removing failing partition '{partitionId}'");
+            return _streamProcessorStateRepository.RemoveFailingPartition(Identifier, partitionId);
         }
 
-        void HandleProcessingResult(CommittedEvent @event, IProcessingResult processingResult)
+        Task<StreamProcessorState> GetPersistedCurrentState()
         {
-            if (processingResult.Succeeded)
-            {
-                _logger.Debug($"{LogMessageBeginning} processed event with artifact id '{@event.Metadata.Artifact.Id}'");
-                IncrementPosition();
-            }
-            else if (processingResult.Retry)
-            {
-                _logger.Debug($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'. Retrying processing");
-                SetState(StreamProcessingState.Retrying);
-            }
-            else
-            {
-                _logger.Error($"{LogMessageBeginning} failed processing event with artifact id '{@event.Metadata.Artifact.Id}'.");
-                Stop();
-            }
+            _logger.Debug($"{LogMessageBeginning} is getting the persisted state for this stream processor.");
+            return _streamProcessorStateRepository.Get(Identifier);
         }
 
-        async Task Wait(int milliseconds = TimeToWait)
+        Task<IProcessingResult> ProcessEvent(CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is waiting...");
-            await SetState(StreamProcessingState.Waiting).ConfigureAwait(false);
-            await Task.Delay(milliseconds).ConfigureAwait(false);
-            await SetState(StreamProcessingState.Processing).ConfigureAwait(false);
+            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Metadata.Artifact.Id.Value}' in partition '{partitionId.Value}'");
+            return _processor.Process(@event, partitionId);
         }
 
-        void Stop()
+        Task<StreamProcessorState> IncrementPosition()
         {
-            if (!IsInProcessingState(StreamProcessingState.Stopping))
-            {
-                _logger.Error($"{LogMessageBeginning} is stopping");
-                SetState(StreamProcessingState.Stopping);
-            }
+            _logger.Debug($"{LogMessageBeginning} is incrementing its position from '{CurrentState.Position.Value}' to '{CurrentState.Position.Increment().Value}'");
+            return _streamProcessorStateRepository.IncrementPosition(Identifier);
         }
 
-        Task IncrementPosition()
+        async Task<FailingPartitionState> ChangePositionInFailingPartition(PartitionId partitionId, StreamPosition oldPosition, StreamPosition newPosition)
         {
-            _logger.Debug($"{LogMessageBeginning} is incrementing its position in the source stream '{Key.SourceStreamId.Value}'");
-            return SetState(StreamProcessingState.Processing, CurrentState.Position.Increment());
+            _logger.Debug($"{LogMessageBeginning} is chaning its position from '{oldPosition.Value}' to '{newPosition.Value}' in partition'{partitionId.Value}'");
+            var newFailingPartitionState = new FailingPartitionState { Position = newPosition, RetryTime = DateTimeOffset.MinValue };
+            CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
+                Identifier,
+                partitionId,
+                newFailingPartitionState).ConfigureAwait(false);
+            return newFailingPartitionState;
         }
 
-        Task SetState(StreamProcessingState state) => SetState(state, CurrentState.Position);
+        Task<CommittedEventWithPartition> FetchNextEventWithPartitionToProcess() => FetchEventWithPartitionAtPosition(CurrentState.Position);
 
-        async Task SetState(StreamProcessingState state, StreamPosition position)
+        Task<CommittedEventWithPartition> FetchEventWithPartitionAtPosition(StreamPosition position)
         {
-            if (IsInState(state, position)) return;
-            try
-            {
-                CurrentState = new StreamProcessorState(state, position);
-                _logger.Debug($"{LogMessageBeginning} is setting new state to {CurrentState}");
-                await _streamProcessorStateRepository.Set(Key, CurrentState).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error($"{LogMessageBeginning}: Error setting new state - {ex}");
-
-                // This is a weird scenario where the state cannot be persisted in the event store.
-                CurrentState = new StreamProcessorState(StreamProcessingState.Stopping, CurrentState.Position);
-                throw;
-            }
+            _logger.Debug($"{LogMessageBeginning} is fetching event at position '{position.Value}'.");
+            return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, position);
         }
 
-        bool IsProcessing() => IsInProcessingState(StreamProcessingState.Processing);
+        Task<StreamPosition> FindPositionOfNextEventInPartition(PartitionId partitionId, StreamPosition fromPosition)
+        {
+            _logger.Debug($"{LogMessageBeginning} is fetching next event to process in partition '{partitionId}' from position '{fromPosition}'.");
+            return _eventsFromStreamsFetcher.FindNext(Identifier.SourceStreamId, partitionId, fromPosition);
+        }
 
-        bool IsWaiting() => IsInProcessingState(StreamProcessingState.Waiting);
+        Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, uint retryTimeout, StreamPosition position) => SetFailingPartitionState(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout), position);
 
-        bool IsRetrying() => IsInProcessingState(StreamProcessingState.Retrying);
+        async Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, DateTimeOffset retryTime, StreamPosition position)
+        {
+            _logger.Debug($"{LogMessageBeginning} is setting retry time '{retryTime}' and position '{position.Value}' for partition '{partitionId.Value}'");
+            var newFailingPartitionState = new FailingPartitionState { Position = position, RetryTime = retryTime };
+            CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
+                Identifier,
+                partitionId,
+                newFailingPartitionState)
+                .ConfigureAwait(false);
 
-        bool IsStopping() => IsInProcessingState(StreamProcessingState.Stopping);
+            return newFailingPartitionState;
+        }
 
-        bool IsInProcessingState(StreamProcessingState state) => CurrentState.State == state;
+        bool ShouldProcessNextEventInPartition(StreamPosition position) => position.Value < CurrentState.Position.Value;
 
-        bool IsInState(StreamProcessingState state, StreamPosition position) => IsInProcessingState(state) && position == CurrentState.Position;
+        bool ShouldRetryProcessing(FailingPartitionState state) => DateTimeOffset.Now.CompareTo(state.RetryTime) >= 0;
     }
 }

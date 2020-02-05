@@ -62,7 +62,7 @@ namespace Dolittle.Runtime.Events.Processing
             if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))
             {
                 #pragma warning disable CA2008
-                _factory.StartNew(streamProcessor.Start);
+                _factory.StartNew(streamProcessor.BeginProcessing);
                 _logger.Debug($"Started Stream Processor with key '{new StreamProcessorId(eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
             }
             else
