@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Events.Processing.Runtime;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Processing;
 using Grpc.Core;
-using static Dolittle.Events.Processing.Runtime.Filters;
+using static Dolittle.Runtime.Events.Processing.Filters;
 
 namespace Dolittle.Runtime.Events.Runtime
 {

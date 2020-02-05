@@ -16,6 +16,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
         /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
         /// <returns>The next event.</returns>
-        Task<CommittedEvent> FetchNextEvent(StreamId streamId, StreamPosition streamPosition);
+        Task<Store.CommittedEvent> FetchNextEvent(StreamId streamId, StreamPosition streamPosition);
     }
 }

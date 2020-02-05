@@ -16,6 +16,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation of processing an event.</returns>
-        Task<IProcessingResult> Process(CommittedEvent @event, EventProcessorId eventProcessorId);
+        Task<IProcessingResult> Process(Store.CommittedEvent @event, EventProcessorId eventProcessorId);
     }
 }

@@ -8,9 +8,9 @@ namespace Dolittle.Runtime.Events.Processing
 {
     public class in_memory_event_to_stream_writer : IWriteEventToStream
     {
-        readonly IDictionary<StreamId, IList<CommittedEvent>> events = new Dictionary<StreamId, IList<CommittedEvent>>();
+        readonly IDictionary<StreamId, IList<Store.CommittedEvent>> events = new Dictionary<StreamId, IList<Store.CommittedEvent>>();
 
-        public Task<bool> Write(CommittedEvent @event, StreamId streamId)
+        public Task<bool> Write(Store.CommittedEvent @event, StreamId streamId)
         {
             if (events.ContainsKey(streamId))
             {
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
             else
             {
-                events.Add(streamId, new CommittedEvent[] { @event });
+                events.Add(streamId, new Store.CommittedEvent[] { @event });
             }
 
             return Task.FromResult(true);

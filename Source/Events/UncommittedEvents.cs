@@ -3,74 +3,44 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
+using Dolittle.Collections;
 using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Represents a stream of events that are uncommitted.
+    /// Represents a sequence of <see cref="IEvent"/>s that have not been committed to the Event Store.
     /// </summary>
-    public class UncommittedEvents : IEnumerable<IEvent>
+    public class UncommittedEvents : IReadOnlyList<IEvent>
     {
-        readonly List<VersionedEvent> _events = new List<VersionedEvent>();
+        readonly NullFreeList<IEvent> _events = new NullFreeList<IEvent>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="UncommittedEvents"/> class.
-        /// </summary>
-        /// <param name="eventSource">The <see cref="IEventSource"/>.</param>
-        public UncommittedEvents(IEventSource eventSource)
-        {
-            EventSource = eventSource;
-        }
-
-        /// <summary>
-        /// Gets the <see cref="IEventSource"/> for the <see cref="UncommittedEvents"/>.
-        /// </summary>
-        public IEventSource EventSource { get; }
-
-        /// <summary>
-        /// Gets the Id of the <see cref="IEventSource"/> that this <see cref="UncommittedEvents"/> relates to.
-        /// </summary>
-        public EventSourceId EventSourceId => EventSource.EventSourceId;
-
-        /// <summary>
-        /// Gets the <see cref="IEvent">events</see> and associated <see cref="EventSourceVersion">version</see>.
-        /// </summary>
-        public IEnumerable<VersionedEvent> Events => _events.ToArray();
-
-        /// <summary>
-        /// Gets a value indicating whether or not there are any events in the Stream.
+        /// Gets a value indicating whether or not there are any events in the uncommitted sequence.
         /// </summary>
         public bool HasEvents => Count > 0;
 
-        /// <summary>
-        /// Gets the number of Events in the Stream.
-        /// </summary>
+        /// <inheritdoc/>
         public int Count => _events.Count;
 
+        /// <inheritdoc/>
+        public IEvent this[int index] => _events[index];
+
         /// <summary>
-        /// Appends an event to the uncommitted event stream, setting the correct EventSourceId and Sequence Number for the event.
+        /// Appends an event to the uncommitted sequence.
         /// </summary>
-        /// <param name="event">The <see cref="IEvent"/>to be append.</param>
-        /// <param name="version">The <see cref="EventSourceVersion">version</see> of the <see cref="IEventSource"/> the <see cref="IEvent"/> is for.</param>
-        public void Append(IEvent @event, EventSourceVersion version)
+        /// <param name="event"><see cref="IEvent"/> to append.</param>
+        public void Append(IEvent @event)
         {
             ThrowIfEventIsNull(@event);
-            _events.Add(new VersionedEvent(@event, version));
+            _events.Add(@event);
         }
 
         /// <inheritdoc/>
-        public IEnumerator<IEvent> GetEnumerator()
-        {
-            return _events.Select(e => e.Event).GetEnumerator();
-        }
+        public IEnumerator<IEvent> GetEnumerator() => _events.GetEnumerator();
 
         /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _events.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _events.GetEnumerator();
 
         void ThrowIfEventIsNull(IEvent @event)
         {

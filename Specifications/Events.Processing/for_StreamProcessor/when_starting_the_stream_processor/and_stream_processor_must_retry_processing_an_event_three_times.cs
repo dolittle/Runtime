@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_starting_t
 {
     public class and_stream_processor_must_retry_processing_an_event_three_times : given.all_dependencies
     {
-        static readonly CommittedEvent first_event = Processing.given.a_committed_event;
+        static readonly Store.CommittedEvent first_event = Processing.given.a_committed_event;
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
 
         static readonly Moq.Mock<IEventProcessor> event_processor_mock =
@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_starting_t
 
         Because of = () => stream_processor.Start().Wait();
 
-        It should_process_three_times = () => event_processor_mock.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>()), Moq.Times.Exactly(3));
+        It should_process_three_times = () => event_processor_mock.Verify(_ => _.Process(Moq.It.IsAny<Store.CommittedEvent>()), Moq.Times.Exactly(3));
         It should_process_first_event_three_times = () => event_processor_mock.Verify(_ => _.Process(first_event), Moq.Times.Exactly(3));
         It should_have_current_position_equal_zero = () => stream_processor.CurrentState.Position.ShouldEqual(new StreamPosition(0));
         It should_have_current_state_equal_stopping = () => stream_processor.CurrentState.State.ShouldEqual(StreamProcessingState.Stopping);

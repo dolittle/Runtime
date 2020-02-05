@@ -29,15 +29,15 @@ namespace Dolittle.Runtime.Commands.Coordination
         ExecutionContext ExecutionContext { get; }
 
         /// <summary>
-        /// Register an <see cref="IEventSource">event source</see> for tracking.
+        /// Register an <see cref="AggregateRoot">aggregate root</see> for tracking.
         /// </summary>
-        /// <param name="eventSource"><see cref="IEventSource"/> being tracked.</param>
-        void RegisterForTracking(IEventSource eventSource);
+        /// <param name="aggregateRoot"><see cref="AggregateRoot"/> to be tracked.</param>
+        void RegisterForTracking(AggregateRoot aggregateRoot);
 
         /// <summary>
-        /// Get objects that are being tracked.
+        /// Get <see cref="AggregateRoot">aggregate roots</see> that are being tracked.
         /// </summary>
         /// <returns>All tracked objects.</returns>
-        IEnumerable<IEventSource> GetObjectsBeingTracked();
+        IEnumerable<AggregateRoot> GetAggregateRootsBeingTracked();
     }
 }
