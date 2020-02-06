@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events
         /// <param name="eventEventSource">The <see cref="EventSourceId"/> the Event was applied to.</param>
         /// <param name="eventSource"><see cref="EventSourceId"/> of the Event Source.</param>
         public EventWasAppliedToOtherEventSource(EventSourceId eventEventSource, EventSourceId eventSource)
-            : base($"Event Source '{eventEventSource}' from event dooes not match with '{eventSource}'.")
+            : base($"Event Source '{eventEventSource}' from event does not match with '{eventSource}'.")
         {
         }
     }
