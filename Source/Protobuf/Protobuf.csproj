@@ -11,6 +11,7 @@
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Security" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Time" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Google.Protobuf" Version="3.11.2" />
   </ItemGroup>
 
