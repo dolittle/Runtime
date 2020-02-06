@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.given
 {
     public class all_dependencies
     {
-        protected static readonly CommittedEvent an_event = Processing.given.a_committed_event;
+        protected static readonly Store.CommittedEvent an_event = Processing.given.a_committed_event;
 
         protected static readonly PartitionId partition_id = PartitionId.NotSet;
         protected static StreamId target_stream_id;

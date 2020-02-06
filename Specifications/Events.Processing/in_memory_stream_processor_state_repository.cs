@@ -16,31 +16,49 @@ namespace Dolittle.Runtime.Events.Processing
         {
         }
 
-        public Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorKey)
+        public Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId)
         {
-            states.TryGetValue(streamProcessorKey, out var state);
-            if (state == default) state = StreamProcessorState.New;
+            states.TryGetValue(streamProcessorId, out var state);
+            if (state == default)
+            {
+                state = StreamProcessorState.New;
+                states.Add(streamProcessorId, state);
+            }
+
             return Task.FromResult(state);
         }
 
-        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorKey)
+        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId)
         {
-            throw new NotImplementedException();
+            var newState = states[streamProcessorId];
+            newState.Position = newState.Position.Increment();
+            states[streamProcessorId] = newState;
+
+            return Task.FromResult(newState);
         }
 
-        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, StreamProcessorState currentState, PartitionId partitionId, DateTimeOffset retryTime)
+        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime)
         {
-            throw new NotImplementedException();
+            var newState = states[streamProcessorId];
+            newState.FailingPartitions.Add(partitionId, new FailingPartitionState { Position = position, RetryTime = retryTime });
+            states[streamProcessorId] = newState;
+            return Task.FromResult(newState);
         }
 
         public Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId)
         {
-            throw new NotImplementedException();
+            var newState = states[streamProcessorId];
+            newState.FailingPartitions.Remove(partitionId);
+            states[streamProcessorId] = newState;
+            return Task.FromResult(newState);
         }
 
         public Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState)
         {
-            throw new NotImplementedException();
+            var newState = states[streamProcessorId];
+            newState.FailingPartitions[partitionId] = failingPartitionState;
+            states[streamProcessorId] = newState;
+            return Task.FromResult(newState);
         }
     }
 }

@@ -16,11 +16,11 @@ namespace Dolittle.Runtime.Events.Processing
         EventProcessorId Identifier { get; }
 
         /// <summary>
-        /// Processes an <see cref="CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.
+        /// Processes an <see cref="Store.CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="event">The <see cref="Store.CommittedEvent" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <returns><see cref="IProcessingResult" />.</returns>
-        Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId);
+        Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId);
     }
 }

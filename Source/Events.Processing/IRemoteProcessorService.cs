@@ -13,10 +13,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Process an event.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="event">The <see cref="Store.CommittedEvent" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation of processing an event.</returns>
-        Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
+        Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
     }
 }

@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
         {
-            Identifier = _targetStreamId.Value;
+            Identifier = targetStreamId.Value;
             _targetStreamId = targetStreamId;
             _filter = filter;
             _eventsToStreamsWriter = eventsToStreamsWriter;
@@ -44,15 +44,15 @@ namespace Dolittle.Runtime.Events.Processing
         string LogMessageBeginning { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId)
+        public async Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is filtering event '{@event.Metadata.Artifact.Id}' for partition '{partitionId.Value}'");
+            _logger.Debug($"{LogMessageBeginning} is filtering event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
             var result = await _filter.Filter(@event, partitionId, Identifier).ConfigureAwait(false);
-            _logger.Debug($"{LogMessageBeginning} filtered event '{@event.Metadata.Artifact.Id}' for partition '{partitionId.Value}' with result 'Succeeded' = {result.Succeeded}");
+            _logger.Debug($"{LogMessageBeginning} filtered event '{@event.Type.Id.Value}' for partition '{partitionId.Value}' with result 'Succeeded' = {result.Succeeded}");
 
             if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug($"{LogMessageBeginning} writing event '{@event.Metadata.Artifact.Id}' to stream '{_targetStreamId.Value}' in partition '{partitionId.Value}'");
+                _logger.Debug($"{LogMessageBeginning} writing event '{@event.Type.Id.Value}' to stream '{_targetStreamId.Value}' in partition '{partitionId.Value}'");
                 await _eventsToStreamsWriter.Write(@event, _targetStreamId, result.Partition).ConfigureAwait(false);
             }
 

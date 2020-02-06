@@ -21,19 +21,19 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Increments the <see cref="StreamPosition" /> for a <see cref="StreamProcessor" />.
         /// </summary>
-        /// <param name="streamProcessorKey">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="streamProcessorId">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorKey);
+        Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId);
 
         /// <summary>
         /// Adds a failing partition to the state.
         /// </summary>
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        /// <param name="currentState">The current <see cref="StreamProcessorState" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+        /// <param name="position">The <see cref="StreamPosition" /> of the failing event.</param>
         /// <param name="retryTime">The <see cref="DateTimeOffset" /> point in time to retry processing.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, StreamProcessorState currentState, PartitionId partitionId, DateTimeOffset retryTime);
+        Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime);
 
         /// <summary>
         /// Adds a failing partition to the state.

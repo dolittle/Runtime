@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Defines a system that can fetch <see cref="CommittedEvent">events</see> from <see cref="StreamId">streams</see>.
+    /// Defines a system that can fetch <see cref="Store.CommittedEvent">events</see> from <see cref="StreamId">streams</see>.
     /// </summary>
     public interface IFetchEventsFromStreams
     {

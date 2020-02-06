@@ -37,9 +37,9 @@ namespace Dolittle.Runtime.Events.Processing
         string LogMessageBeginning { get; }
 
         /// <inheritdoc />
-        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId)
+        public Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Metadata.Artifact.Id}' for partition '{partitionId.Value}'");
+            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
             return _remoteProcessor.Process(@event, partitionId, Identifier);
         }
     }
