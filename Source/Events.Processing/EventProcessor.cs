@@ -9,38 +9,35 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessor" />that processes the handling of an event.
     /// </summary>
-    public class RemoteEventProcessor : IEventProcessor
+    public class EventProcessor : IEventProcessor
     {
-        readonly IRemoteProcessorService _remoteProcessor;
         readonly ILogger _logger;
+        readonly string _logMessagePrefix;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RemoteEventProcessor"/> class.
+        /// Initializes a new instance of the <see cref="EventProcessor"/> class.
         /// </summary>
         /// <param name="id">The <see cref="EventProcessorId" />.</param>
-        /// <param name="remoteProcessor">The <see cref="IRemoteProcessorService" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public RemoteEventProcessor(
+        public EventProcessor(
             EventProcessorId id,
-            IRemoteProcessorService remoteProcessor,
             ILogger logger)
         {
             Identifier = id;
-            _remoteProcessor = remoteProcessor;
             _logger = logger;
-            LogMessageBeginning = $"Remote Event Processor '{Identifier}'";
+            _logMessagePrefix = $"Remote Event Processor '{Identifier}'";
         }
 
         /// <inheritdoc />
         public EventProcessorId Identifier { get; }
 
-        string LogMessageBeginning { get; }
-
         /// <inheritdoc />
-        public Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId)
+        public async Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
-            return _remoteProcessor.Process(@event, partitionId, Identifier);
+            _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
+
+            await Task.CompletedTask.ConfigureAwait(false);
+            return new SucceededProcessingResult();
         }
     }
 }

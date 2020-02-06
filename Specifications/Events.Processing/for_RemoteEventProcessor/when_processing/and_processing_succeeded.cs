@@ -8,10 +8,10 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteEventProcessor.when_proce
 {
     public class and_processing_succeeded : given.all_dependencies
     {
-        static RemoteEventProcessor remote_processor;
+        static EventProcessor remote_processor;
         static IProcessingResult result;
 
-        Establish context = () => remote_processor = new RemoteEventProcessor(event_processor_id, Processing.given.a_remote_processor_service(succeeded_handling_result), Moq.Mock.Of<ILogger>());
+        Establish context = () => remote_processor = new EventProcessor(event_processor_id, Processing.given.a_remote_processor_service(succeeded_handling_result), Moq.Mock.Of<ILogger>());
 
         Because of = async () => result = await remote_processor.Process(an_event, partition_id).ConfigureAwait(false);
 

@@ -39,8 +39,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// <inheritdoc/>
         public override Task Connect(IAsyncStreamReader<FilterClientToRuntimeResponse> requestStream, IServerStreamWriter<FilterRuntimeToClientRequest> responseStream, ServerCallContext context)
         {
-            var filterId = ByteString.CopyFrom(context.RequestHeaders.First(_ => _.Key == $"filterid{Metadata.BinaryHeaderSuffix}").ValueBytes).To<EventProcessorId>();
-            var streamId = ByteString.CopyFrom(context.RequestHeaders.First(_ => _.Key == $"streamid{Metadata.BinaryHeaderSuffix}").ValueBytes).To<StreamId>();
+            var filterArguments = context.GetArgumentsMessage<FilterArguments>();
+
+            var filterId = filterArguments.FilterId.To<EventProcessorId>();
+            var streamId = filterArguments.StreamId.To<StreamId>();
             _logger.Information($"Filter client connected - '{filterId}' - '{streamId}' - Method: {context.Method}");
 
             Task.Run(async () =>

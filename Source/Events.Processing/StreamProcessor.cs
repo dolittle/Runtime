@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 
@@ -17,6 +16,8 @@ namespace Dolittle.Runtime.Events.Processing
         readonly ILogger _logger;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
+        readonly string _logMessagePrefix;
+
         bool _hasStarted = false;
 
         /// <summary>
@@ -39,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStateRepository = streamProcessorStateRepository;
             Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
-            LogMessageBeginning = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId.Value}' with source stream '{Identifier.SourceStreamId.Value}'";
+            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId.Value}' with source stream '{Identifier.SourceStreamId.Value}'";
         }
 
         /// <summary>
@@ -56,8 +57,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// Gets the current <see cref="StreamProcessorState" />.
         /// </summary>
         public StreamProcessorState CurrentState { get; private set; } = StreamProcessorState.New;
-
-        string LogMessageBeginning { get; }
 
         /// <summary>
         /// Starts up the <see cref="StreamProcessor" />.
@@ -101,14 +100,13 @@ namespace Dolittle.Runtime.Events.Processing
             }
             catch (Exception ex)
             {
-                _logger.Error($"{LogMessageBeginning} failed - {ex}");
+                _logger.Error($"{_logMessagePrefix} failed - {ex}");
             }
         }
 
         async Task CatchupFailingPartitions()
         {
-            var failingPartitions = CurrentState.FailingPartitions.ToList();
-            foreach (var kvp in failingPartitions)
+            foreach (var kvp in CurrentState.FailingPartitions)
             {
                 var partitionId = kvp.Key;
                 var failingPartitionState = kvp.Value;
@@ -147,38 +145,38 @@ namespace Dolittle.Runtime.Events.Processing
 
         async Task<StreamProcessorState> AddFailingPartitionAndIncrementPosition(PartitionId partitionId, DateTimeOffset retryTime)
         {
-            _logger.Debug($"{LogMessageBeginning} is adding failing partition '{partitionId}' with retry time '{retryTime}'");
+            _logger.Debug($"{_logMessagePrefix} is adding failing partition '{partitionId}' with retry time '{retryTime}'");
             await _streamProcessorStateRepository.AddFailingPartition(Identifier, partitionId, CurrentState.Position, retryTime).ConfigureAwait(false);
             return await IncrementPosition().ConfigureAwait(false);
         }
 
         Task<StreamProcessorState> RemoveFailingPartition(PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is removing failing partition '{partitionId}'");
+            _logger.Debug($"{_logMessagePrefix} is removing failing partition '{partitionId}'");
             return _streamProcessorStateRepository.RemoveFailingPartition(Identifier, partitionId);
         }
 
         Task<StreamProcessorState> GetPersistedCurrentState()
         {
-            _logger.Debug($"{LogMessageBeginning} is getting the persisted state for this stream processor.");
+            _logger.Debug($"{_logMessagePrefix} is getting the persisted state for this stream processor.");
             return _streamProcessorStateRepository.GetOrAddNew(Identifier);
         }
 
         Task<IProcessingResult> ProcessEvent(Store.CommittedEvent @event, PartitionId partitionId)
         {
-            _logger.Debug($"{LogMessageBeginning} is processing event '{@event.Type.Id.Value}' in partition '{partitionId.Value}'");
+            _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' in partition '{partitionId.Value}'");
             return _processor.Process(@event, partitionId);
         }
 
         Task<StreamProcessorState> IncrementPosition()
         {
-            _logger.Debug($"{LogMessageBeginning} is incrementing its position from '{CurrentState.Position.Value}' to '{CurrentState.Position.Increment().Value}'");
+            _logger.Debug($"{_logMessagePrefix} is incrementing its position from '{CurrentState.Position.Value}' to '{CurrentState.Position.Increment().Value}'");
             return _streamProcessorStateRepository.IncrementPosition(Identifier);
         }
 
         async Task<FailingPartitionState> ChangePositionInFailingPartition(PartitionId partitionId, StreamPosition oldPosition, StreamPosition newPosition)
         {
-            _logger.Debug($"{LogMessageBeginning} is chaning its position from '{oldPosition.Value}' to '{newPosition.Value}' in partition'{partitionId.Value}'");
+            _logger.Debug($"{_logMessagePrefix} is chaning its position from '{oldPosition.Value}' to '{newPosition.Value}' in partition'{partitionId.Value}'");
             var newFailingPartitionState = new FailingPartitionState { Position = newPosition, RetryTime = DateTimeOffset.MinValue };
             CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
                 Identifier,
@@ -191,13 +189,13 @@ namespace Dolittle.Runtime.Events.Processing
 
         Task<CommittedEventWithPartition> FetchEventWithPartitionAtPosition(StreamPosition position)
         {
-            _logger.Debug($"{LogMessageBeginning} is fetching event at position '{position.Value}'.");
+            _logger.Debug($"{_logMessagePrefix} is fetching event at position '{position.Value}'.");
             return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, position);
         }
 
         Task<StreamPosition> FindPositionOfNextEventInPartition(PartitionId partitionId, StreamPosition fromPosition)
         {
-            _logger.Debug($"{LogMessageBeginning} is fetching next event to process in partition '{partitionId}' from position '{fromPosition}'.");
+            _logger.Debug($"{_logMessagePrefix} is fetching next event to process in partition '{partitionId}' from position '{fromPosition}'.");
             return _eventsFromStreamsFetcher.FindNext(Identifier.SourceStreamId, partitionId, fromPosition);
         }
 
@@ -205,7 +203,7 @@ namespace Dolittle.Runtime.Events.Processing
 
         async Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, DateTimeOffset retryTime, StreamPosition position)
         {
-            _logger.Debug($"{LogMessageBeginning} is setting retry time '{retryTime}' and position '{position.Value}' for partition '{partitionId.Value}'");
+            _logger.Debug($"{_logMessagePrefix} is setting retry time '{retryTime}' and position '{position.Value}' for partition '{partitionId.Value}'");
             var newFailingPartitionState = new FailingPartitionState { Position = position, RetryTime = retryTime };
             CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
                 Identifier,
