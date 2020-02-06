@@ -14,12 +14,12 @@ namespace Dolittle.Runtime.Events.Processing.for_Filters.when_registering
         static readonly StreamId target_stream_id = Guid.NewGuid();
         static readonly StreamId source_stream_id = StreamId.AllStreamId;
 
-        static IFilterHub filter_hub;
+        static IFilters filters;
 
         Establish context = () =>
         {
             tenants_mock.SetupGet(_ => _.All).Returns(new TenantId[] { tenant });
-            filter_hub = new FilterHub(
+            filters = new Filters(
                 tenants_mock.Object,
                 execution_context_manager_mock.Object,
                 Processing.given.a_remote_filter_service(new SucceededFilteringResult(true, PartitionId.NotSet)),
@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Processing.for_Filters.when_registering
                 Moq.Mock.Of<ILogger>());
         };
 
-        Because of = () => filter_hub.Register(target_stream_id, source_stream_id);
+        Because of = () => filters.Register(target_stream_id, source_stream_id);
 
         It should_set_execution_context_for_tenant = () => execution_context_manager_mock.Verify(_ => _.CurrentFor(tenant, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()));
         It should_register_stream_processor_hub_with_correct_stream_id = () => stream_processor_hub_mock.Verify(_ => _.Register(Moq.It.IsAny<IEventProcessor>(), StreamId.AllStreamId));
