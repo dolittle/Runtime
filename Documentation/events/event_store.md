@@ -62,28 +62,6 @@ The CommittedEventVersion is like the EventSourceVersion mentioned above but wit
 
 Events are serialized for persistence.  As an Event will have numerous code-representations over its lifetime, the Event is separated from its particular code representation and persisted as a combination of the Artifact (conceptual identification of the Event), the Generation (a number indicating which version of the Event it is) and a Property Bag that is a generic persistence mechanism for DTO like structures like the Event.  Events are intended to be serialized for persistence and communication, therefore they should be designed with this in mind (see Domain Events). You should regard the serialised version of an event as the canonical expression of it. Any run-time representation will be a reflection of this canonical version, subject to the idiosyncrasies of the particular current runtime.
 
-### Property Bag
-The *Property Bag* is a simple, write-once dictionary like structure that stores the content of an Event and that can be used to rehydrate the Event.  The PropertyBag only supports getters and all values are set through the constructor. Once constructed the event is immutable, and cannot change.
-
-{{% notice Tip %}}
-An *Object Factory* is used to create populated instances of the type from a Property Bag.  Read-only event types are supported but properties must be passed in through the constructor with the convention that the Property must be named in PascalCase and the constructor parameter should have exactly the same name but in Camel Case.
-
-'''csharp
-public event MyEvent : IEvent
-{
-  public MyEvent(int myIntProperty, string aStringProperty)
-  {
-    MyIntProperty = myIntProperty;
-    AStringProperty = aStringProperty;
-  }
-  public int MyIntProperty { get; }
-  public string AStringProperty { get; }
-}
-'''
-
-The Object Factory will always use the Constructor with the greatest number of parameters to try to populate the values.  Where there are more than one constructor with the greatest number of parameters, the constructor used is indeterminate.  This situation *SHOULD* be avoided. 
-{{% /notice %}}
-
 ## Querying the Event Store
 
 Event Stores are not general purpose data storage engines.  As such they require and provide only rudimentary querying capabilities.

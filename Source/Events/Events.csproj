@@ -15,7 +15,6 @@
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Lifecycle" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.PropertyBags" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.ResourceTypes" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="$(FundamentalsVersion)" />
@@ -23,7 +22,6 @@
     <PackageReference Include="Dolittle.Serialization.Json" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Serialization.Protobuf" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Time" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +29,5 @@
     <ProjectReference Include="..\Microservices\Microservices.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
     <ProjectReference Include="..\Transactions\Transactions.csproj" />
-    <ProjectReference Include="..\Protobuf\Protobuf.csproj" />
   </ItemGroup>
 </Project>
