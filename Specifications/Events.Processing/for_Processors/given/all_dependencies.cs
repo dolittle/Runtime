@@ -7,7 +7,7 @@ using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.for_ProcessorHub.given
+namespace Dolittle.Runtime.Events.Processing.for_Processors.given
 {
     public class all_dependencies
     {

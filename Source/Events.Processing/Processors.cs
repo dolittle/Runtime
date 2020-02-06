@@ -11,10 +11,10 @@ using Dolittle.Runtime.Tenancy;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IProcessorHub" />.
+    /// Represents an implementation of <see cref="IProcessors" />.
     /// </summary>
     [Singleton]
-    public class ProcessorHub : IProcessorHub
+    public class Processors : IProcessors
     {
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
@@ -23,14 +23,14 @@ namespace Dolittle.Runtime.Events.Processing
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ProcessorHub"/> class.
+        /// Initializes a new instance of the <see cref="Processors"/> class.
         /// </summary>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="tenants">The <see cref="ITenants" />.</param>
         /// <param name="remoteProcessorService">The <see cref="IRemoteProcessorService" />.</param>
         /// <param name="getStreamProcessorHub">The <see cref="FactoryFor{IStreamProcessorHub}" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public ProcessorHub(
+        public Processors(
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             IRemoteProcessorService remoteProcessorService,

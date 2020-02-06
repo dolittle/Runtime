@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Defines a hub for <see cref="StreamProcessor" /> interacting with a <see cref="RemoteEventProcessor" />.
     /// </summary>
-    public interface IProcessorHub
+    public interface IProcessors
     {
         /// <summary>
         /// Registers a <see cref="StreamProcessor" />.

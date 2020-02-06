@@ -6,7 +6,7 @@ using Dolittle.Logging;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_ProcessorHub.when_registering
+namespace Dolittle.Runtime.Events.Processing.for_Processors.when_registering
 {
     public class and_there_are_two_tenants : given.all_dependencies
     {
@@ -15,12 +15,12 @@ namespace Dolittle.Runtime.Events.Processing.for_ProcessorHub.when_registering
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
         static readonly StreamId stream_id = Guid.NewGuid();
 
-        static IProcessorHub processor_hub;
+        static IProcessors processors;
 
         Establish context = () =>
         {
             tenants_mock.SetupGet(_ => _.All).Returns(new TenantId[] { tenant1, tenant2 });
-            processor_hub = new ProcessorHub(
+            processors = new Processors(
                 execution_context_manager_mock.Object,
                 tenants_mock.Object,
                 Processing.given.a_remote_processor_service(new SucceededProcessingResult()),
@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Processing.for_ProcessorHub.when_registering
                 Moq.Mock.Of<ILogger>());
         };
 
-        Because of = () => processor_hub.Register(event_processor_id, stream_id);
+        Because of = () => processors.Register(event_processor_id, stream_id);
 
         It should_set_execution_context_for_tenant1 = () => execution_context_manager_mock.Verify(_ => _.CurrentFor(tenant1, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()));
         It should_set_execution_context_for_tenant2 = () => execution_context_manager_mock.Verify(_ => _.CurrentFor(tenant2, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()));
