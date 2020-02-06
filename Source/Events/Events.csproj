@@ -15,7 +15,6 @@
     <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Lifecycle" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.PropertyBags" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.ResourceTypes" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="$(FundamentalsVersion)" />

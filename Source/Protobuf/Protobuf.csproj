@@ -8,7 +8,6 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Artifacts" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.PropertyBags" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Security" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Runtime.Microservice.Contracts" Version="$(FundamentalsVersion)" />
