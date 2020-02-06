@@ -7,7 +7,7 @@ using Dolittle.Logging;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_FilterHub.when_registering
+namespace Dolittle.Runtime.Events.Processing.for_Filters.when_registering
 {
     public class and_there_are_no_tenants : given.all_dependencies
     {

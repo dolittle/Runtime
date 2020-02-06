@@ -11,10 +11,10 @@ using Dolittle.Runtime.Tenancy;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IFilterHub" />.
+    /// Represents an implementation of <see cref="IFilters" />.
     /// </summary>
     [Singleton]
-    public class FilterHub : IFilterHub
+    public class Filters : IFilters
     {
         readonly ITenants _tenants;
         readonly IExecutionContextManager _executionContextManager;
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FilterHub"/> class.
+        /// Initializes a new instance of the <see cref="Filters"/> class.
         /// </summary>
         /// <param name="tenants">The tenants.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="getStreamProcessorHub">The <see cref="FactoryFor{IStreamProcessorHub}" />.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
-        public FilterHub(
+        public Filters(
             ITenants tenants,
             IExecutionContextManager executionContextManager,
             IRemoteFilterService filterService,

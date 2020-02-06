@@ -6,12 +6,11 @@ using Dolittle.Logging;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_FilterHub.when_registering
+namespace Dolittle.Runtime.Events.Processing.for_Filters.when_registering
 {
-    public class and_there_are_two_tenants : given.all_dependencies
+    public class and_there_is_one_tenant : given.all_dependencies
     {
-        static readonly TenantId tenant1 = Guid.NewGuid();
-        static readonly TenantId tenant2 = Guid.NewGuid();
+        static readonly TenantId tenant = Guid.NewGuid();
         static readonly StreamId target_stream_id = Guid.NewGuid();
         static readonly StreamId source_stream_id = StreamId.AllStreamId;
 
@@ -19,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.for_FilterHub.when_registering
 
         Establish context = () =>
         {
-            tenants_mock.SetupGet(_ => _.All).Returns(new TenantId[] { tenant1, tenant2 });
+            tenants_mock.SetupGet(_ => _.All).Returns(new TenantId[] { tenant });
             filter_hub = new FilterHub(
                 tenants_mock.Object,
                 execution_context_manager_mock.Object,
@@ -31,8 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.for_FilterHub.when_registering
 
         Because of = () => filter_hub.Register(target_stream_id, source_stream_id);
 
-        It should_set_execution_context_for_tenant1 = () => execution_context_manager_mock.Verify(_ => _.CurrentFor(tenant1, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()));
-        It should_set_execution_context_for_tenant2 = () => execution_context_manager_mock.Verify(_ => _.CurrentFor(tenant2, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()));
+        It should_set_execution_context_for_tenant = () => execution_context_manager_mock.Verify(_ => _.CurrentFor(tenant, Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()));
         It should_register_stream_processor_hub_with_correct_stream_id = () => stream_processor_hub_mock.Verify(_ => _.Register(Moq.It.IsAny<IEventProcessor>(), StreamId.AllStreamId));
     }
 }

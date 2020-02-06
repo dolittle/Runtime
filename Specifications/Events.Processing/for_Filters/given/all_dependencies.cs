@@ -7,7 +7,7 @@ using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.for_FilterHub.given
+namespace Dolittle.Runtime.Events.Processing.for_Filters.given
 {
     public class all_dependencies
     {
