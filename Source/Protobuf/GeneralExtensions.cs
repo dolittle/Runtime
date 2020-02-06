@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dolittle.Collections;
-using Dolittle.PropertyBags;
 using Dolittle.Reflection;
 using Dolittle.Time;
 using Google.Protobuf;
@@ -24,10 +23,6 @@ namespace Dolittle.Runtime.Protobuf
         /// <summary>
         /// Converts a <see cref="object"/> to <see cref="grpc.Value"/>.
         /// </summary>
-        /// <remarks>
-        /// This is primarily used when converting propertybags to protobuf messages and scenarios when we don't
-        /// know the actual type of obj.
-        /// </remarks>
         /// <param name="source"><see cref="object"/> to convert.</param>
         /// <returns>Converted value.</returns>
         public static grpc.Value ToProtobuf(this object source)
@@ -38,10 +33,6 @@ namespace Dolittle.Runtime.Protobuf
             if (objType.IsEnumerable() && !objType.IsDictionary())
             {
                 value.ListValue = ((IEnumerable)source).ToProtobuf();
-            }
-            else if (objType == typeof(PropertyBag))
-            {
-                value.DictionaryValue = ((PropertyBag)source).ToProtobuf().AsDictionaryValue();
             }
             else
             {
@@ -196,23 +187,23 @@ namespace Dolittle.Runtime.Protobuf
         /// Read value from <see cref="grpc.DictionaryValue"/>.
         /// </summary>
         /// <param name="dictionary"><see cref="grpc.DictionaryValue"/> to read from.</param>
-        /// <returns>The <see cref="PropertyBag"/>.</returns>
-        public static PropertyBag ToCLR(this grpc.DictionaryValue dictionary) => dictionary.Object.ToCLR();
+        /// <returns>The <see cref="IDictionary{TKey, TValue}"/>.</returns>
+        public static IDictionary<string, object> ToCLR(this grpc.DictionaryValue dictionary) => dictionary.Object.ToCLR();
 
         /// <summary>
         /// Read value from <see cref="MapField{TKey, TValue}"/>.
         /// </summary>
-        /// <param name="propertyBag"><see cref="MapField{TKey, TValue}"/> to read from.</param>
-        /// <returns>The <see cref="PropertyBag"/>.</returns>
-        public static PropertyBag ToCLR(this MapField<string, grpc.Value> propertyBag)
+        /// <param name="keysAndValues"><see cref="MapField{TKey, TValue}"/> to read from.</param>
+        /// <returns>The <see cref="IDictionary{TKey, TValue}"/>.</returns>
+        public static IDictionary<string, object> ToCLR(this MapField<string, grpc.Value> keysAndValues)
         {
             var nullFreedictionary = new NullFreeDictionary<string, object>();
-            propertyBag.ForEach(keyValue =>
+            keysAndValues.ForEach(keyAndValue =>
             {
-                var value = keyValue.Value.ToCLR();
-                if (value != null) nullFreedictionary.Add(keyValue.Key, value);
+                var value = keyAndValue.Value.ToCLR();
+                if (value != null) nullFreedictionary.Add(keyAndValue.Key, value);
             });
-            return new PropertyBag(nullFreedictionary);
+            return nullFreedictionary;
         }
     }
 }
