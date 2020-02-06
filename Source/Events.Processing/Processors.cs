@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
         readonly IRemoteProcessorService _remoteProcessorService;
-        readonly FactoryFor<IStreamProcessorHub> _getStreamProcessorHub;
+        readonly FactoryFor<IStreamProcessors> _getStreamProcessorHub;
         readonly ILogger _logger;
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Processing
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             IRemoteProcessorService remoteProcessorService,
-            FactoryFor<IStreamProcessorHub> getStreamProcessorHub,
+            FactoryFor<IStreamProcessors> getStreamProcessorHub,
             ILogger logger)
         {
             _executionContextManager = executionContextManager;

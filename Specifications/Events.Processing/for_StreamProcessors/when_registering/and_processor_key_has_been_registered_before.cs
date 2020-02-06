@@ -8,7 +8,7 @@ using Dolittle.Security;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_StreamProcessorHub.when_registering
+namespace Dolittle.Runtime.Events.Processing.for_StreamProcessors.when_registering
 {
     public class and_processor_key_has_been_registered_before : given.all_dependencies
     {
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessorHub.when_registe
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
         static readonly StreamId source_stream_id = Guid.NewGuid();
         static Moq.Mock<IEventProcessor> event_processor_mock;
-        static IStreamProcessorHub stream_processor_hub;
+        static IStreamProcessors stream_processors;
         static Exception exception;
 
         Establish context = () =>
@@ -31,16 +31,16 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessorHub.when_registe
                 CultureInfo.CurrentCulture));
             event_processor_mock = new Moq.Mock<IEventProcessor>();
             event_processor_mock.SetupGet(_ => _.Identifier).Returns(event_processor_id);
-            stream_processor_hub = new StreamProcessorHub(
+            stream_processors = new StreamProcessors(
                 stream_processor_state_repository,
                 next_event_fetcher_mock.Object,
                 execution_context_manager_mock.Object,
                 Moq.Mock.Of<ILogger>());
 
-            stream_processor_hub.Register(event_processor_mock.Object, source_stream_id);
+            stream_processors.Register(event_processor_mock.Object, source_stream_id);
         };
 
-        Because of = () => exception = Catch.Exception(() => stream_processor_hub.Register(event_processor_mock.Object, source_stream_id));
+        Because of = () => exception = Catch.Exception(() => stream_processors.Register(event_processor_mock.Object, source_stream_id));
 
         It should_throw_an_exception = () => exception.ShouldNotBeNull();
 

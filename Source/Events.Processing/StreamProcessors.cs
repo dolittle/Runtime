@@ -12,10 +12,10 @@ using Dolittle.Logging;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IStreamProcessorHub" />.
+    /// Represents an implementation of <see cref="IStreamProcessors" />.
     /// </summary>
     [SingletonPerTenant]
-    public class StreamProcessorHub : IStreamProcessorHub
+    public class StreamProcessors : IStreamProcessors
     {
         readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
@@ -25,13 +25,13 @@ namespace Dolittle.Runtime.Events.Processing
         readonly TaskFactory _factory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessorHub"/> class.
+        /// Initializes a new instance of the <see cref="Processing.StreamProcessors"/> class.
         /// </summary>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public StreamProcessorHub(
+        public StreamProcessors(
             IStreamProcessorStateRepository streamProcessorStateRepository,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             IExecutionContextManager executionContextManager,
@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <inheritdoc/>
-        public IEnumerable<StreamProcessor> StreamProcessors => _streamProcessors.Select(_ => _.Value);
+        public IEnumerable<StreamProcessor> Processors => _streamProcessors.Select(_ => _.Value);
 
         /// <inheritdoc />
         public void Register(IEventProcessor eventProcessor, StreamId sourceStreamId)

@@ -5,7 +5,7 @@ using Dolittle.Execution;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.for_StreamProcessorHub.given
+namespace Dolittle.Runtime.Events.Processing.for_StreamProcessors.given
 {
     public class all_dependencies
     {

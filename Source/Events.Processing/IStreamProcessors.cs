@@ -8,13 +8,13 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Defines a hub for <see cref="StreamProcessor" />.
     /// </summary>
-    public interface IStreamProcessorHub
+    public interface IStreamProcessors
     {
         /// <summary>
-        /// Gets the registered stream processors.
+        /// Gets all registered stream processors.
         /// </summary>
         /// <returns>The<see cref="IEnumerable{StreamProcessor}" >stream processors</see>.</returns>
-        IEnumerable<StreamProcessor> StreamProcessors { get; }
+        IEnumerable<StreamProcessor> Processors { get; }
 
         /// <summary>
         /// Registers and starts a <see cref="StreamProcessor" />.
