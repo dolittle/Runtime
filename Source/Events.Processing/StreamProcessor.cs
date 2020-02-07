@@ -74,7 +74,6 @@ namespace Dolittle.Runtime.Events.Processing
                 {
                     await CatchupFailingPartitions().ConfigureAwait(false);
 
-                    await Task.Delay(1000).ConfigureAwait(false);
                     CommittedEventWithPartition eventAndPartition = default;
                     while (eventAndPartition == default)
                     {
