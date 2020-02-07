@@ -1,6 +1,9 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
@@ -12,8 +15,9 @@ namespace Dolittle.Runtime.Events.Store
         /// Commits an <see cref="UncommittedEvents"/> to the Event Store, returning a corresponding <see cref="CommittedEvents"/>.
         /// </summary>
         /// <param name="events">The <see cref="UncommittedEvents"/> to be committed.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns><see cref="CommittedEvents"/> corresponding to the <see cref="UncommittedEvents"/> supplied.</returns>
-        CommittedEvents CommitEvents(UncommittedEvents events);
+        Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Commits an <see cref="UncommittedAggregateEvents"/> to the Event Store, returning a corresponding <see cref="CommittedAggregateEvents"/>.
@@ -21,6 +25,7 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="events">The <see cref="UncommittedAggregateEvents"/> to be committed.</param>
         /// <returns><see cref="CommittedAggregateEvents"/> corresponding to the <see cref="UncommittedAggregateEvents"/> supplied.</returns>
-        CommittedAggregateEvents CommitAggregateEvents(UncommittedAggregateEvents events);
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken = default);
     }
 }
