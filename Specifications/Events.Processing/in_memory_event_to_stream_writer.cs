@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Events.Processing
@@ -10,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly IDictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>> streams = new Dictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>>();
 
-        public Task<bool> Write(Store.CommittedEvent @event, StreamId streamId, PartitionId partitionId)
+        public Task Write(Store.CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             if (streams.ContainsKey(streamId))
             {
