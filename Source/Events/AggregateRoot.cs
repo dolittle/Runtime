@@ -183,7 +183,7 @@ namespace Dolittle.Events
             if (@event.AggregateRootVersion != Version) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, Version);
         }
 
-        void ThrowIfStatefull()
+        void ThrowIfStateful()
         {
             if (!this.IsStateless()) throw new FastForwardNotAllowedForStatefulAggregateRoot(GetType());
         }
