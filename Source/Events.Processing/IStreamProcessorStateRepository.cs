@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Events.Processing
@@ -9,21 +10,23 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Defines how we get and set the <see cref="StreamProcessorState"/>for <see cref="StreamProcessor" >stream processors</see>.
     /// </summary>
-    public interface IStreamProcessorStateRepository : IDisposable
+    public interface IStreamProcessorStateRepository
     {
         /// <summary>
         /// Gets the <see cref="StreamProcessorState" /> for this <see cref="StreamProcessor" /> or creates and adds a new one.
         /// </summary>
         /// <param name="streamProcessorId">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId);
+        Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Increments the <see cref="StreamPosition" /> for a <see cref="StreamProcessor" />.
         /// </summary>
         /// <param name="streamProcessorId">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId);
+        Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds a failing partition to the state.
@@ -32,16 +35,18 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="position">The <see cref="StreamPosition" /> of the failing event.</param>
         /// <param name="retryTime">The <see cref="DateTimeOffset" /> point in time to retry processing.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime);
+        Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds a failing partition to the state.
         /// </summary>
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId);
+        Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets the <see cref="FailingPartitionState" /> of for a partition.
@@ -49,7 +54,8 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="failingPartitionState">The <see cref="FailingPartitionState" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState);
+        Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState, CancellationToken cancellationToken = default);
     }
 }

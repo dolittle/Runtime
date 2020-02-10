@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Processing
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStateRepository = streamProcessorStateRepository;
             Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
-            LogMessageBeginning = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId.Value}' with source stream '{Identifier.SourceStreamId.Value}'";
+            LogMessageBeginning = $"Stream Processor for event processor '{Identifier.EventProcessorId.Value}' with source stream '{Identifier.SourceStreamId.Value}'";
         }
 
         /// <summary>
@@ -72,10 +72,20 @@ namespace Dolittle.Runtime.Events.Processing
                 CurrentState = await GetPersistedCurrentState().ConfigureAwait(false);
                 while (true)
                 {
-                    await Task.Delay(1000).ConfigureAwait(false);
                     await CatchupFailingPartitions().ConfigureAwait(false);
 
-                    var eventAndPartition = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
+                    CommittedEventWithPartition eventAndPartition = default;
+                    while (eventAndPartition == default)
+                    {
+                        try
+                        {
+                            eventAndPartition = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
+                        }
+                        catch (NoEventInStreamAtPosition)
+                        {
+                            await Task.Delay(1000).ConfigureAwait(false);
+                        }
+                    }
 
                     if (CurrentState.FailingPartitions.Keys.Contains(eventAndPartition.PartitionId))
                     {

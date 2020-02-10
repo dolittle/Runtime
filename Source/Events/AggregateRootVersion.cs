@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events
     public class AggregateRootVersion : ConceptAs<uint>
     {
         /// <summary>
-        /// The inital version of an <see cref="AggregateRoot"/> that has applied no events.
+        /// The initial version of an <see cref="AggregateRoot"/> that has applied no events.
         /// </summary>
         public static readonly AggregateRootVersion Initial = 0;
 

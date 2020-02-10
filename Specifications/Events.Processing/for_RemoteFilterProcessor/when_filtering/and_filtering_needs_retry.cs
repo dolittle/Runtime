@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
 using Dolittle.Logging;
 using Machine.Specifications;
 
@@ -21,6 +22,6 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.when_proc
         It should_be_of_assignable_to_IRetryFilteringResult = () => result.ShouldBeAssignableTo<IRetryFilteringResult>();
         It should_be_of_type_RetryFilteringResult = () => result.ShouldBeOfExactType<RetryFilteringResult>();
         It should_have_the_correct_timeout = () => (result as IRetryFilteringResult).RetryTimeout.ShouldEqual(retry_timeout);
-        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(an_event, target_stream_id, partition_id), Moq.Times.Never());
+        It should_write_the_event_to_stream = () => event_to_stream_writer_mock.Verify(_ => _.Write(an_event, target_stream_id, partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Never());
     }
 }

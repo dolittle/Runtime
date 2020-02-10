@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
 
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
         }
 
-        public Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId)
+        public Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
         {
             states.TryGetValue(streamProcessorId, out var state);
             if (state == default)
@@ -28,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing
             return Task.FromResult(state);
         }
 
-        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId)
+        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
             newState.Position = newState.Position.Increment();
@@ -37,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing
             return Task.FromResult(newState);
         }
 
-        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime)
+        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
             newState.FailingPartitions.Add(partitionId, new FailingPartitionState { Position = position, RetryTime = retryTime });
@@ -45,7 +46,7 @@ namespace Dolittle.Runtime.Events.Processing
             return Task.FromResult(newState);
         }
 
-        public Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId)
+        public Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
             newState.FailingPartitions.Remove(partitionId);
@@ -53,7 +54,7 @@ namespace Dolittle.Runtime.Events.Processing
             return Task.FromResult(newState);
         }
 
-        public Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState)
+        public Task<StreamProcessorState> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, FailingPartitionState failingPartitionState, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
             newState.FailingPartitions[partitionId] = failingPartitionState;

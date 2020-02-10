@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events
         /// </summary>
         /// <param name="type"><see cref="AggregateRoot"/> type.</param>
         public FastForwardNotAllowedForStatefulAggregateRoot(Type type)
-            : base($"Cannot fast forward stateful aggregate root of type '{type.AssemblyQualifiedName}'.")
+            : base($"Cannot fast forward statefull aggregate root of type '{type.AssemblyQualifiedName}'.")
         {
         }
     }
