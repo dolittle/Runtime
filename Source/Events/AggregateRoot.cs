@@ -134,7 +134,7 @@ namespace Dolittle.Events
         /// <param name="version">Version to fast forward to.</param>
         public void FastForward(AggregateRootVersion version)
         {
-            ThrowIfStatefull();
+            ThrowIfStateful();
             Version = version;
         }
 
