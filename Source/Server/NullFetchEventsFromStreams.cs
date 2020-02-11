@@ -18,8 +18,10 @@ namespace Dolittle.Runtime.Server
     public class NullFetchEventsFromStreams : IFetchEventsFromStreams
     {
         /// <inheritdoc/>
-        public Task<CommittedEventWithPartition> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        public async Task<CommittedEventWithPartition> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
         {
+            await Task.Delay(1000).ConfigureAwait(false);
+
             var committedEvent = new Events.Store.CommittedEvent(
                 EventLogVersion.Initial,
                 DateTimeOffset.UtcNow,
@@ -29,8 +31,7 @@ namespace Dolittle.Runtime.Server
                 new Cause(CauseType.Command, 0),
                 new Artifacts.Artifact(Guid.Parse("bc26f986-5515-4506-9944-cd7e93bec7fe"), 1),
                 "{\"myInteger\": 42, \"myString\":\"Fourty Two\"}");
-            var committedEventWithPartition = new CommittedEventWithPartition(committedEvent, PartitionId.NotSet);
-            return Task.FromResult(committedEventWithPartition);
+            return new CommittedEventWithPartition(committedEvent, PartitionId.NotSet);
         }
 
         /// <inheritdoc/>
