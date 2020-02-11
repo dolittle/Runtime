@@ -97,10 +97,20 @@ namespace Dolittle.Runtime.Events.Processing
                 CurrentState = await GetPersistedCurrentState().ConfigureAwait(false);
                 while (!_cancellationTokenSource.IsCancellationRequested)
                 {
-                    await Task.Delay(1000).ConfigureAwait(false);
                     await CatchupFailingPartitions().ConfigureAwait(false);
 
-                    var eventAndPartition = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
+                    CommittedEventWithPartition eventAndPartition = default;
+                    while (eventAndPartition == default)
+                    {
+                        try
+                        {
+                            eventAndPartition = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
+                        }
+                        catch (NoEventInStreamAtPosition)
+                        {
+                            await Task.Delay(1000).ConfigureAwait(false);
+                        }
+                    }
 
                     if (CurrentState.FailingPartitions.Keys.Contains(eventAndPartition.PartitionId))
                     {

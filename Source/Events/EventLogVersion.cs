@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events
     public class EventLogVersion : ConceptAs<uint>
     {
         /// <summary>
-        /// The inital version of the Event Store before any Events are committed.
+        /// The initial version of the Event Store before any Events are committed.
         /// </summary>
         public static EventLogVersion Initial = 0;
 

@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
         /// <param name="correlationId">The <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system.</param>
         /// <param name="microservice">The <see cref="Microservice"/> within which the Event occured.</param>
-        /// <param name="tenant">The <see cref="TenantId"/> within which the Event occured.</param>
+        /// <param name="tenant">The <see cref="TenantId"/> within which the Event occurred.</param>
         /// <param name="cause">The link to the cause of the Event.</param>
         /// <param name="event">An instance of the Event that was committed to the Event Store.</param>
         public CommittedEvent(EventLogVersion eventLogVersion, DateTimeOffset occurred, CorrelationId correlationId, Microservice microservice, TenantId tenant, Cause cause, IEvent @event)

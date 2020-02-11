@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Machine.Specifications;
@@ -29,9 +30,10 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
 
         Establish context = () =>
         {
-            next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 0)).Returns(Task.FromResult(new CommittedEventWithPartition(first_event, partition_id)));
-            next_event_fetcher.Setup(_ => _.FindNext(Moq.It.IsAny<StreamId>(), partition_id, 0)).Returns(Task.FromResult(new StreamPosition(0)));
-            next_event_fetcher.Setup(_ => _.FindNext(Moq.It.IsAny<StreamId>(), partition_id, Moq.It.IsInRange(new StreamPosition(1), new StreamPosition(uint.MaxValue), Moq.Range.Inclusive))).Returns(Task.FromResult(new StreamPosition(uint.MaxValue)));
+            next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new CommittedEventWithPartition(first_event, partition_id)));
+            next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 1, Moq.It.IsAny<CancellationToken>())).Throws(new Exception());
+            next_event_fetcher.Setup(_ => _.FindNext(Moq.It.IsAny<StreamId>(), partition_id, 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new StreamPosition(0)));
+            next_event_fetcher.Setup(_ => _.FindNext(Moq.It.IsAny<StreamId>(), partition_id, Moq.It.IsInRange(new StreamPosition(1), new StreamPosition(uint.MaxValue), Moq.Range.Inclusive), Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new StreamPosition(uint.MaxValue)));
             stream_processor = new StreamProcessor(source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, Moq.Mock.Of<ILogger>());
         };
 

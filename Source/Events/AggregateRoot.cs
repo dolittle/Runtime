@@ -45,7 +45,7 @@ namespace Dolittle.Events
         public AggregateRootVersion Version { get; private set; }
 
         /// <summary>
-        /// Gets sequence of <see cref="IEvent"/>s applied bthe Event Source that have not been committed to the Event Store.
+        /// Gets sequence of <see cref="IEvent"/>s applied by the Event Source that have not been committed to the Event Store.
         /// </summary>
         public UncommittedAggregateEvents UncommittedEvents
         {
@@ -100,7 +100,7 @@ namespace Dolittle.Events
         }
 
         /// <summary>
-        /// Apply a new event to the EventSource.  This will be applied and added to the <see cref="UncommittedEvents">UncommitedEvents</see>.
+        /// Apply a new event to the EventSource.  This will be applied and added to the <see cref="UncommittedEvents">uncommitted events</see>.
         /// </summary>
         /// <param name="event">The event that is to be applied.</param>
         public void Apply(IEvent @event)
@@ -131,7 +131,7 @@ namespace Dolittle.Events
         /// <summary>
         /// Fast forward to the specified version of the <see cref="EventSource">EventSource</see>.
         /// </summary>
-        /// <param name="version">Version to fast foward to.</param>
+        /// <param name="version">Version to fast forward to.</param>
         public void FastForward(AggregateRootVersion version)
         {
             ThrowIfStateful();
