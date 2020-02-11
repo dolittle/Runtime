@@ -2,23 +2,26 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+
+#pragma warning disable CA2008
 
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
     /// Represents a system that processes a stream of events.
     /// </summary>
-    public class StreamProcessor
+    public class StreamProcessor : IDisposable
     {
         readonly IEventProcessor _processor;
         readonly ILogger _logger;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
         readonly string _logMessagePrefix;
-
-        bool _hasStarted = false;
+        Task _task;
+        CancellationTokenSource _cancellationTokenSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
@@ -40,7 +43,7 @@ namespace Dolittle.Runtime.Events.Processing
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStateRepository = streamProcessorStateRepository;
             Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
-            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId.Value}' with source stream '{Identifier.SourceStreamId.Value}'";
+            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' with source stream '{Identifier.SourceStreamId}'";
         }
 
         /// <summary>
@@ -58,6 +61,31 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         public StreamProcessorState CurrentState { get; private set; } = StreamProcessorState.New;
 
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _cancellationTokenSource?.Dispose();
+            _cancellationTokenSource = null;
+        }
+
+        /// <summary>
+        /// Start processing.
+        /// </summary>
+        public void Start()
+        {
+            _task = Task.Factory.StartNew(BeginProcessing, TaskCreationOptions.DenyChildAttach);
+            _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+        }
+
+        /// <summary>
+        /// Stop processing.
+        /// </summary>
+        public void Stop()
+        {
+            _cancellationTokenSource.Cancel();
+        }
+
         /// <summary>
         /// Starts up the <see cref="StreamProcessor" />.
         /// </summary>
@@ -66,10 +94,8 @@ namespace Dolittle.Runtime.Events.Processing
         {
             try
             {
-                if (_hasStarted) return;
-                _hasStarted = true;
                 CurrentState = await GetPersistedCurrentState().ConfigureAwait(false);
-                while (true)
+                while (!_cancellationTokenSource.IsCancellationRequested)
                 {
                     await Task.Delay(1000).ConfigureAwait(false);
                     await CatchupFailingPartitions().ConfigureAwait(false);
@@ -100,7 +126,10 @@ namespace Dolittle.Runtime.Events.Processing
             }
             catch (Exception ex)
             {
-                _logger.Error($"{_logMessagePrefix} failed - {ex}");
+                if (!_cancellationTokenSource.IsCancellationRequested)
+                {
+                    _logger.Error($"{_logMessagePrefix} failed - {ex}");
+                }
             }
         }
 

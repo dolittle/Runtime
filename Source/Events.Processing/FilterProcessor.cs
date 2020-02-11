@@ -5,8 +5,11 @@ extern alias contracts;
 
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
+using Dolittle.Execution;
 using Dolittle.Logging;
-using Grpc.Core;
+using Dolittle.Protobuf;
+using Dolittle.Services;
+using Google.Protobuf;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -15,37 +18,46 @@ namespace Dolittle.Runtime.Events.Processing
     /// </summary>
     public class FilterProcessor : AbstractFilterProcessor
     {
-        readonly IAsyncStreamReader<FilterClientToRuntimeResponse> _requestStream;
-        readonly IServerStreamWriter<FilterRuntimeToClientRequest> _responseStream;
-        readonly ServerCallContext _context;
+        readonly IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> _callDispatcher;
+        readonly IExecutionContextManager _executionContextManager;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
         /// </summary>
-        /// <param name="requestStream"><see cref="IAsyncStreamReader{T}"/> for client responses.</param>
-        /// <param name="responseStream"><see cref="IServerStreamWriter{T}"/> for server requests.</param>
-        /// <param name="context"><see cref="ServerCallContext"/> for the processor.</param>
+        /// <param name="callDispatcher"><see cref="IReverseCallDispatcher{TResponse, TRequest}"/> for server requests.</param>
+        /// <param name="eventProcessorId"><see cref="EventProcessorId"/> for the event processor.</param>
         /// <param name="targetStreamId"><see cref="StreamId"/> to write to after filtering.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FilterProcessor(
-            IAsyncStreamReader<FilterClientToRuntimeResponse> requestStream,
-            IServerStreamWriter<FilterRuntimeToClientRequest> responseStream,
-            ServerCallContext context,
+            IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher,
+            EventProcessorId eventProcessorId,
             StreamId targetStreamId,
             IWriteEventsToStreams eventsToStreamsWriter,
+            IExecutionContextManager executionContextManager,
             ILogger logger)
-            : base(targetStreamId, eventsToStreamsWriter, logger)
+            : base(eventProcessorId, targetStreamId, eventsToStreamsWriter, logger)
         {
-            _requestStream = requestStream;
-            _responseStream = responseStream;
-            _context = context;
+            _callDispatcher = callDispatcher;
+            _executionContextManager = executionContextManager;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
         public override async Task<IFilterResult> Filter(Store.CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId)
         {
-            await Task.CompletedTask.ConfigureAwait(false);
+            var message = new FilterRuntimeToClientRequest
+            {
+                Event = @event.ToProtobuf(),
+                ExecutionContext = _executionContextManager.Current.ToByteString()
+            };
+
+            _logger.Information($"Filter event that occurred @ {@event.Occurred}");
+            FilterClientToRuntimeResponse result = null;
+            await _callDispatcher.Call(message, response => result = response).ConfigureAwait(false);
+            _logger.Information($"Filter result : {result.IsIncluded}");
             return new SucceededFilteringResult(true, partitionId);
         }
     }

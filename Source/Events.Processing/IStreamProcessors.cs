@@ -21,6 +21,14 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
-        void Register(IEventProcessor eventProcessor, StreamId sourceStreamId);
+        /// <returns>The <see cref="StreamProcessor"/> that was registered.</returns>
+        StreamProcessor Register(IEventProcessor eventProcessor, StreamId sourceStreamId);
+
+        /// <summary>
+        /// Unregister a <see cref="IEventProcessor"/> from stream processing.
+        /// </summary>
+        /// <param name="eventProcessorId">The <see cref="EventProcessorId" /> of the event processor.</param>
+        /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
+        void Unregister(EventProcessorId eventProcessorId, StreamId sourceStreamId);
     }
 }

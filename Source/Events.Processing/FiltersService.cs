@@ -3,13 +3,17 @@
 
 extern alias contracts;
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
+using Dolittle.Collections;
+using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
-using Google.Protobuf;
+using Dolittle.Runtime.Tenancy;
+using Dolittle.Services;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.Events.Processing.Filters;
 
@@ -21,86 +25,103 @@ namespace Dolittle.Runtime.Events.Processing
     public class FiltersService : FiltersBase
     {
         readonly IExecutionContextManager _executionContextManager;
+        readonly ITenants _tenants;
+        readonly FactoryFor<IStreamProcessors> _streamProcessorsFactory;
+        readonly IWriteEventsToStreams _eventsToStreamsWriter;
+        readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiltersService"/> class.
         /// </summary>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
+        /// <param name="tenants">The <see cref="ITenants"/> system.</param>
+        /// <param name="streamProcessorsFactory"><see cref="IStreamProcessors"/> for registration management.</param>
+        /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
+        /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FiltersService(
             IExecutionContextManager executionContextManager,
+            ITenants tenants,
+            FactoryFor<IStreamProcessors> streamProcessorsFactory,
+            IWriteEventsToStreams eventsToStreamsWriter,
+            IReverseCallDispatchers reverseCallDispatchers,
             ILogger logger)
         {
             _executionContextManager = executionContextManager;
+            _tenants = tenants;
+            _streamProcessorsFactory = streamProcessorsFactory;
+            _eventsToStreamsWriter = eventsToStreamsWriter;
+            _reverseCallDispatchers = reverseCallDispatchers;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public override Task Connect(IAsyncStreamReader<FilterClientToRuntimeResponse> requestStream, IServerStreamWriter<FilterRuntimeToClientRequest> responseStream, ServerCallContext context)
+        public override async Task Connect(IAsyncStreamReader<FilterClientToRuntimeResponse> runtimeStream, IServerStreamWriter<FilterRuntimeToClientRequest> clientStream, ServerCallContext context)
         {
-            var filterArguments = context.GetArgumentsMessage<FilterArguments>();
-
-            var filterId = filterArguments.FilterId.To<EventProcessorId>();
-            var streamId = filterArguments.StreamId.To<StreamId>();
-            _logger.Information($"Filter client connected - '{filterId}' - '{streamId}' - Method: {context.Method}");
-
-            Task.Run(async () =>
+            EventProcessorId eventProcessorId = Guid.Empty;
+            StreamId streamId = Guid.Empty;
+            try
             {
-                while (await requestStream.MoveNext(context.CancellationToken).ConfigureAwait(false))
-                {
-                    if (context.CancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
+                var filterArguments = context.GetArgumentsMessage<FilterArguments>();
 
-                    _logger.Information($"Message received");
-                }
-            }).ConfigureAwait(false);
+                eventProcessorId = filterArguments.FilterId.To<EventProcessorId>();
+                streamId = filterArguments.StreamId.To<StreamId>();
+                _logger.Information($"Filter client connected - '{eventProcessorId}' - '{streamId}' - Method: {context.Method}");
 
-            Task.Run(async () =>
+                var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
+                    runtimeStream,
+                    clientStream,
+                    context,
+                    _ => _.CallNumber,
+                    _ => _.CallNumber);
+
+                RegisterForAllTenants(dispatcher, eventProcessorId, streamId);
+
+                await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
+            }
+            catch (Exception ex)
             {
-                while (true)
+                if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    await Task.Delay(1000).ConfigureAwait(false);
-                    if (context.CancellationToken.IsCancellationRequested)
-                    {
-                        break;
-                    }
-
-                    _logger.Information("Send to client");
-                    var filter = new FilterRuntimeToClientRequest();
-
-                    var current = _executionContextManager.Current;
-
-                    _logger.Information($"Tenant {current.Tenant} - Correlation {current.CorrelationId}");
-
-                    var currentMessage = new Execution.Contracts.ExecutionContext
-                    {
-                        Microservice = current.BoundedContext.ToProtobuf(),
-                        Tenant = current.Tenant.ToProtobuf(),
-                        CorrelationId = current.CorrelationId.ToProtobuf(),
-                    };
-
-                    currentMessage.Claims.AddRange(current.Claims.Select(_ => new Security.Contracts.Claim
-                    {
-                        Key = _.Name,
-                        Value = _.Value,
-                        ValueType = _.ValueType
-                    }));
-
-                    filter.ExecutionContext = currentMessage.ToByteString();
-
-                    await responseStream.WriteAsync(filter).ConfigureAwait(false);
+                    _logger.Error(ex, $"Error occurred while handling filter client '{eventProcessorId}'");
                 }
-            }).ConfigureAwait(false);
+            }
+            finally
+            {
+                UnregisterForAllTenants(eventProcessorId, streamId);
+                _logger.Information($"Filter client disconnected - '{eventProcessorId}'");
+            }
+        }
 
-            context.CancellationToken.ThrowIfCancellationRequested();
-            context.CancellationToken.WaitHandle.WaitOne();
+        void RegisterForAllTenants(IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher, EventProcessorId eventProcessorId, StreamId streamId)
+        {
+            var tenants = _tenants.All;
+            _logger.Information($"Registering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
+            tenants.ForEach(tenant =>
+            {
+                _executionContextManager.CurrentFor(tenant);
+                var filterProcessor = new FilterProcessor(
+                    callDispatcher,
+                    eventProcessorId,
+                    streamId,
+                    _eventsToStreamsWriter,
+                    _executionContextManager,
+                    _logger);
 
-            _logger.Information($"Filter client disconnected");
+                _streamProcessorsFactory().Register(filterProcessor, streamId);
+            });
+        }
 
-            return Task.CompletedTask;
+        void UnregisterForAllTenants(EventProcessorId eventProcessorId, StreamId streamId)
+        {
+            var tenants = _tenants.All;
+            _logger.Information($"Unregistering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
+            tenants.ForEach(tenant =>
+            {
+                _executionContextManager.CurrentFor(tenant);
+                _streamProcessorsFactory().Unregister(eventProcessorId, streamId);
+            });
         }
     }
 }

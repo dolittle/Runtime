@@ -9,6 +9,7 @@
     <ItemGroup>
         <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
+        <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
     </ItemGroup>
 

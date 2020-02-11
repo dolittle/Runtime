@@ -20,15 +20,17 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractFilterProcessor"/> class.
         /// </summary>
+        /// <param name="eventProcessorId"><see cref="EventProcessorId"/> for the event processor.</param>
         /// <param name="targetStreamId">The stream to to write included events in.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
         protected AbstractFilterProcessor(
+            EventProcessorId eventProcessorId,
             StreamId targetStreamId,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
         {
-            Identifier = targetStreamId.Value;
+            Identifier = eventProcessorId;
             _targetStreamId = targetStreamId;
             _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;

@@ -4,7 +4,6 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
@@ -22,7 +21,6 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
-        readonly TaskFactory _factory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Processing.StreamProcessors"/> class.
@@ -42,14 +40,13 @@ namespace Dolittle.Runtime.Events.Processing
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _executionContextManager = executionContextManager;
             _logger = logger;
-            _factory = new TaskFactory(TaskCreationOptions.DenyChildAttach, TaskContinuationOptions.DenyChildAttach);
         }
 
         /// <inheritdoc/>
         public IEnumerable<StreamProcessor> Processors => _streamProcessors.Select(_ => _.Value);
 
         /// <inheritdoc />
-        public void Register(IEventProcessor eventProcessor, StreamId sourceStreamId)
+        public StreamProcessor Register(IEventProcessor eventProcessor, StreamId sourceStreamId)
         {
             var tenant = _executionContextManager.Current.Tenant;
             var streamProcessor = new StreamProcessor(
@@ -61,13 +58,23 @@ namespace Dolittle.Runtime.Events.Processing
 
             if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))
             {
-                #pragma warning disable CA2008
-                _factory.StartNew(streamProcessor.BeginProcessing);
+                streamProcessor.Start();
                 _logger.Debug($"Started Stream Processor with key '{new StreamProcessorId(eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
+                return streamProcessor;
             }
-            else
+
+            throw new StreamProcessorKeyAlreadyRegistered(streamProcessor.Identifier);
+        }
+
+        /// <inheritdoc/>
+        public void Unregister(EventProcessorId eventProcessorId, StreamId sourceStreamId)
+        {
+            var identifier = new StreamProcessorId(eventProcessorId, sourceStreamId);
+            if (_streamProcessors.TryRemove(identifier, out var streamProcessor))
             {
-                throw new StreamProcessorKeyAlreadyRegistered(streamProcessor.Identifier);
+                _logger.Debug($"Stopping Stream Processor with key '{identifier}'");
+                streamProcessor.Stop();
+                streamProcessor.Dispose();
             }
         }
     }
