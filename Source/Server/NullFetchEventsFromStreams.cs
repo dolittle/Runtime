@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Execution;
@@ -17,7 +18,7 @@ namespace Dolittle.Runtime.Server
     public class NullFetchEventsFromStreams : IFetchEventsFromStreams
     {
         /// <inheritdoc/>
-        public Task<CommittedEventWithPartition> Fetch(StreamId streamId, StreamPosition streamPosition)
+        public Task<CommittedEventWithPartition> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
         {
             var committedEvent = new Events.Store.CommittedEvent(
                 EventLogVersion.Initial,
@@ -33,7 +34,7 @@ namespace Dolittle.Runtime.Server
         }
 
         /// <inheritdoc/>
-        public Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition)
+        public Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
         {
             return Task.FromResult(StreamPosition.Start);
         }
