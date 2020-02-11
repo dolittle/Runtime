@@ -28,18 +28,23 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="cause">The link to the cause of the Event.</param>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
-        public CommittedAggregateEvent(EventSourceId eventSource, Artifact aggregateRoot, AggregateRootVersion aggregateRootVersion, EventLogVersion eventLogVersion, DateTimeOffset occurred, CorrelationId correlationId, Microservice microservice, TenantId tenant, Cause cause, Artifact type, string content)
-            : base(eventLogVersion, occurred, correlationId, microservice, tenant, cause, type, content)
+        public CommittedAggregateEvent(
+            EventSourceId eventSource,
+            Artifact aggregateRoot,
+            AggregateRootVersion aggregateRootVersion,
+            EventLogVersion eventLogVersion,
+            DateTimeOffset occurred,
+            CorrelationId correlationId,
+            Microservice microservice,
+            TenantId tenant,
+            Cause cause,
+            Artifact type,
+            string content)
+            : base(eventSource, eventLogVersion, occurred, correlationId, microservice, tenant, cause, type, content)
         {
-            EventSource = eventSource;
             AggregateRoot = aggregateRoot;
             AggregateRootVersion = aggregateRootVersion;
         }
-
-        /// <summary>
-        /// Gets the Event Source that the Event was applied to.
-        /// </summary>
-        public EventSourceId EventSource { get; }
 
         /// <summary>
         /// Gets the <see cref="Artifact"/> representing the type of the Aggregate Root that applied the Event to the Event Source.

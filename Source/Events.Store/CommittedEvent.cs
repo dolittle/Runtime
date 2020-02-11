@@ -17,6 +17,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedEvent"/> class.
         /// </summary>
+        /// <param name="eventSource">The <see cref="EventSource" />.</param>
         /// <param name="eventLogVersion">The version of the Event Log the Event was committed to.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
         /// <param name="correlationId">The <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system.</param>
@@ -25,8 +26,18 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="cause">The link to the cause of the Event.</param>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
-        public CommittedEvent(EventLogVersion eventLogVersion, DateTimeOffset occurred, CorrelationId correlationId, Microservice microservice, TenantId tenant, Cause cause, Artifact type, string content)
+        public CommittedEvent(
+            EventSourceId eventSource,
+            EventLogVersion eventLogVersion,
+            DateTimeOffset occurred,
+            CorrelationId correlationId,
+            Microservice microservice,
+            TenantId tenant,
+            Cause cause,
+            Artifact type,
+            string content)
         {
+            EventSource = eventSource;
             EventLogVersion = eventLogVersion;
             Occurred = occurred;
             CorrelationId = correlationId;
@@ -36,6 +47,11 @@ namespace Dolittle.Runtime.Events.Store
             Type = type;
             Content = content;
         }
+
+        /// <summary>
+        /// Gets the <see cref="EventSource" />. that the Event was applied to.
+        /// </summary>
+        public EventSourceId EventSource { get; }
 
         /// <summary>
         /// Gets the version of the Event Log the Event was committed to.
