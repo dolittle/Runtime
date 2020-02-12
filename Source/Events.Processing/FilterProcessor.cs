@@ -25,15 +25,15 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
         /// </summary>
-        /// <param name="callDispatcher"><see cref="IReverseCallDispatcher{TResponse, TRequest}"/> for server requests.</param>
         /// <param name="eventProcessorId"><see cref="EventProcessorId"/> for the event processor.</param>
+        /// <param name="callDispatcher"><see cref="IReverseCallDispatcher{TResponse, TRequest}"/> for server requests.</param>
         /// <param name="targetStreamId"><see cref="StreamId"/> to write to after filtering.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FilterProcessor(
-            IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher,
             EventProcessorId eventProcessorId,
+            IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher,
             StreamId targetStreamId,
             IWriteEventsToStreams eventsToStreamsWriter,
             IExecutionContextManager executionContextManager,
@@ -54,10 +54,10 @@ namespace Dolittle.Runtime.Events.Processing
                 ExecutionContext = _executionContextManager.Current.ToByteString()
             };
 
-            _logger.Information($"Filter event that occurred @ {@event.Occurred}");
+            _logger.Debug($"Filter event that occurred @ {@event.Occurred}");
             FilterClientToRuntimeResponse result = null;
             await _callDispatcher.Call(message, response => result = response).ConfigureAwait(false);
-            _logger.Information($"Filter result : {result.IsIncluded}");
+            _logger.Debug($"Filter result : {result.IsIncluded}");
             return new SucceededFilteringResult(true, partitionId);
         }
     }

@@ -20,7 +20,7 @@ using static contracts::Dolittle.Runtime.Events.Processing.Filters;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents the implementation of.
+    /// Represents the implementation of <see creF="FiltersBase"/>.
     /// </summary>
     public class FiltersService : FiltersBase
     {
@@ -57,7 +57,10 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <inheritdoc/>
-        public override async Task Connect(IAsyncStreamReader<FilterClientToRuntimeResponse> runtimeStream, IServerStreamWriter<FilterRuntimeToClientRequest> clientStream, ServerCallContext context)
+        public override async Task Connect(
+            IAsyncStreamReader<FilterClientToRuntimeResponse> runtimeStream,
+            IServerStreamWriter<FilterRuntimeToClientRequest> clientStream,
+            ServerCallContext context)
         {
             EventProcessorId eventProcessorId = Guid.Empty;
             StreamId streamId = Guid.Empty;
@@ -67,7 +70,7 @@ namespace Dolittle.Runtime.Events.Processing
 
                 eventProcessorId = filterArguments.FilterId.To<EventProcessorId>();
                 streamId = filterArguments.StreamId.To<StreamId>();
-                _logger.Information($"Filter client connected - '{eventProcessorId}' - '{streamId}' - Method: {context.Method}");
+                _logger.Debug($"Filter client connected - '{eventProcessorId}' - '{streamId}' - Method: {context.Method}");
 
                 var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
                     runtimeStream,
@@ -90,20 +93,23 @@ namespace Dolittle.Runtime.Events.Processing
             finally
             {
                 UnregisterForAllTenants(eventProcessorId, streamId);
-                _logger.Information($"Filter client disconnected - '{eventProcessorId}'");
+                _logger.Debug($"Filter client disconnected - '{eventProcessorId}'");
             }
         }
 
-        void RegisterForAllTenants(IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher, EventProcessorId eventProcessorId, StreamId streamId)
+        void RegisterForAllTenants(
+            IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher,
+            EventProcessorId eventProcessorId,
+            StreamId streamId)
         {
             var tenants = _tenants.All;
-            _logger.Information($"Registering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
+            _logger.Debug($"Registering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
                 var filterProcessor = new FilterProcessor(
-                    callDispatcher,
                     eventProcessorId,
+                    callDispatcher,
                     streamId,
                     _eventsToStreamsWriter,
                     _executionContextManager,
@@ -116,7 +122,7 @@ namespace Dolittle.Runtime.Events.Processing
         void UnregisterForAllTenants(EventProcessorId eventProcessorId, StreamId streamId)
         {
             var tenants = _tenants.All;
-            _logger.Information($"Unregistering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
+            _logger.Debug($"Unregistering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
