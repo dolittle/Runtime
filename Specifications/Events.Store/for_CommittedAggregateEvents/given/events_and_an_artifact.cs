@@ -31,9 +31,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents.given
 
         Establish context = () =>
         {
-            event_one = new CommittedAggregateEvent(event_source_id, aggregate_artifact, 0, 0, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "one");
-            event_two = new CommittedAggregateEvent(event_source_id, aggregate_artifact, 1, 1, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "two");
-            event_three = new CommittedAggregateEvent(event_source_id, aggregate_artifact, 2, 2, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "three");
+            event_one = new CommittedAggregateEvent(aggregate_artifact, 0, 0, DateTimeOffset.UtcNow, event_source_id, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "one");
+            event_two = new CommittedAggregateEvent(aggregate_artifact, 1, 1, DateTimeOffset.UtcNow, event_source_id, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "two");
+            event_three = new CommittedAggregateEvent(aggregate_artifact, 2, 2, DateTimeOffset.UtcNow, event_source_id, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "three");
         };
     }
 }

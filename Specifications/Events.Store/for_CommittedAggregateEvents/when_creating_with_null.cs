@@ -11,10 +11,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
         static CommittedAggregateEvents events;
         static Exception exception;
 
-        Because of = () => exception = Catch.Exception(() =>
-        {
-            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version_after, new[] { event_one, null, event_three });
-        });
+        Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version_before, aggregate_version_after, new[] { event_one, null, event_three }));
 
         It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
         It should_not_be_created = () => events.ShouldBeNull();

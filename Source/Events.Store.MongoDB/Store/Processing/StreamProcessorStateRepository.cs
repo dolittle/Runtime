@@ -1,0 +1,203 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using Dolittle.Logging;
+using Dolittle.Runtime.Events.Processing;
+using MongoDB.Driver;
+
+namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
+{
+    /// <summary>
+    /// Represents an implementation of <see cref="IStreamProcessorStateRepository" />.
+    /// </summary>
+    public class StreamProcessorStateRepository : IStreamProcessorStateRepository
+    {
+        readonly FilterDefinitionBuilder<StreamProcessorState> _streamProcessorFilter = Builders<StreamProcessorState>.Filter;
+        readonly UpdateDefinitionBuilder<StreamProcessorState> _streamProcessorUpdate = Builders<StreamProcessorState>.Update;
+        readonly EventStoreConnection _connection;
+        readonly ILogger _logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamProcessorStateRepository"/> class.
+        /// </summary>
+        /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
+        /// <param name="logger">An <see cref="ILogger"/>.</param>
+        public StreamProcessorStateRepository(EventStoreConnection connection, ILogger logger)
+        {
+            _connection = connection;
+            _logger = logger;
+        }
+
+        /// <inheritdoc/>
+        public async Task<Runtime.Events.Processing.StreamProcessorState> GetOrAddNew(Runtime.Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var states = _connection.StreamProcessorStates;
+                var state = await states.Find(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    .FirstOrDefaultAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                if (state == default) state = StreamProcessorState.NewFromId(streamProcessorId);
+
+                await states.InsertOneAsync(state, null, cancellationToken).ConfigureAwait(false);
+
+                return state.ToRuntimeRepresentation();
+            }
+            catch (MongoDuplicateKeyException)
+            {
+                throw new StreamProcessorKeyAlreadyRegistered(streamProcessorId);
+            }
+            catch (MongoWriteException exception)
+            {
+                if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                {
+                    throw new StreamProcessorKeyAlreadyRegistered(streamProcessorId);
+                }
+
+                throw;
+            }
+            catch (MongoBulkWriteException exception)
+            {
+                foreach (var error in exception.WriteErrors)
+                {
+                    if (error.Category == ServerErrorCategory.DuplicateKey)
+                    {
+                        throw new StreamProcessorKeyAlreadyRegistered(streamProcessorId);
+                    }
+                }
+
+                throw;
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Runtime.Events.Processing.StreamProcessorState> IncrementPosition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var states = _connection.StreamProcessorStates;
+                var state = await states.Find(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    .FirstOrDefaultAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
+
+                state.Position++;
+
+                var replaceResult = await states.ReplaceOneAsync(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
+                    state,
+                    null as ReplaceOptions,
+                    cancellationToken).ConfigureAwait(false);
+
+                if (replaceResult.MatchedCount == 0) throw new StreamProcessorNotFound(streamProcessorId);
+
+                return state.ToRuntimeRepresentation();
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Runtime.Events.Processing.StreamProcessorState> AddFailingPartition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var states = _connection.StreamProcessorStates;
+                var state = await states.Find(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    .FirstOrDefaultAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
+
+                if (state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionAlreadyExists(streamProcessorId, partitionId);
+
+                state = await states.FindOneAndUpdateAsync(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
+                    _streamProcessorUpdate.AddToSet(_ => _.FailingPartitions, new KeyValuePair<Guid, FailingPartitionState>(partitionId, new FailingPartitionState(position, retryTime))),
+                    new FindOneAndUpdateOptions<StreamProcessorState, StreamProcessorState> { ReturnDocument = ReturnDocument.After },
+                    cancellationToken).ConfigureAwait(false);
+
+                return state.ToRuntimeRepresentation();
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Runtime.Events.Processing.StreamProcessorState> RemoveFailingPartition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var states = _connection.StreamProcessorStates;
+                var state = await states.Find(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    .FirstOrDefaultAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
+
+                if (!state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
+
+                state.FailingPartitions.Remove(partitionId);
+                var replaceResult = await states.ReplaceOneAsync(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
+                    state,
+                    null as ReplaceOptions,
+                    cancellationToken).ConfigureAwait(false);
+
+                if (replaceResult.MatchedCount == 0) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
+
+                return state.ToRuntimeRepresentation();
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Runtime.Events.Processing.StreamProcessorState> SetFailingPartitionState(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, Runtime.Events.Processing.FailingPartitionState failingPartitionState, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var states = _connection.StreamProcessorStates;
+                var state = await states.Find(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    .FirstOrDefaultAsync(cancellationToken)
+                    .ConfigureAwait(false);
+                if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
+
+                if (!state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
+
+                state.FailingPartitions[partitionId] = new FailingPartitionState(failingPartitionState.Position, failingPartitionState.RetryTime);
+
+                var replaceResult = await states.ReplaceOneAsync(
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
+                    state,
+                    null as ReplaceOptions,
+                    cancellationToken).ConfigureAwait(false);
+
+                if (replaceResult.MatchedCount == 0) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
+
+                return state.ToRuntimeRepresentation();
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+    }
+}
