@@ -16,24 +16,6 @@ namespace Dolittle.Runtime.Events.Processing
         {
         }
 
-        public static IRemoteProcessorService a_remote_processor_service(IProcessingResult result)
-        {
-            var handler_service = a_remote_processor_mock();
-            handler_service.Setup(_ => _.Process(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
-            return handler_service.Object;
-        }
-
-        public static Mock<IRemoteProcessorService> a_remote_processor_mock() => new Moq.Mock<IRemoteProcessorService>();
-
-        public static IRemoteFilterService a_remote_filter_service(IFilterResult result)
-        {
-            var handler_service = a_remote_filter_mock();
-            handler_service.Setup(_ => _.Filter(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<EventProcessorId>())).Returns(Task.FromResult(result));
-            return handler_service.Object;
-        }
-
-        public static Mock<IRemoteFilterService> a_remote_filter_mock() => new Moq.Mock<IRemoteFilterService>();
-
         public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, IProcessingResult result) => an_event_processor_mock(id, (result, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<Store.CommittedEvent>()));
 
         public static Mock<IEventProcessor> an_event_processor_mock(EventProcessorId id, params (IProcessingResult result, PartitionId partition_Id, Store.CommittedEvent @event)[] event_and_result_pairs)
