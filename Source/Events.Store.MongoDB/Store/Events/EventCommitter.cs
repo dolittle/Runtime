@@ -154,13 +154,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             }
             catch (MongoDuplicateKeyException)
             {
-                throw new EventLogDuplicateKeyError(version);
+                throw new StreamPositionOccupied(version.Value, Runtime.Events.Processing.StreamId.AllStreamId);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new EventLogDuplicateKeyError(version);
+                    throw new StreamPositionOccupied(version.Value, Runtime.Events.Processing.StreamId.AllStreamId);
                 }
 
                 throw;
@@ -171,7 +171,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new EventLogDuplicateKeyError(version);
+                        throw new StreamPositionOccupied(version.Value, Runtime.Events.Processing.StreamId.AllStreamId);
                     }
                 }
 

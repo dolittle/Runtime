@@ -33,19 +33,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
+            StreamPosition streamPosition = null;
             try
             {
                 using var session = await _connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
-
                 await session.WithTransactionAsync(
                     async (transaction, cancellationToken) =>
                     {
                         var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
-                        var numDocuments = await stream.CountDocumentsAsync(
+                        streamPosition = (StreamPosition)await stream.CountDocumentsAsync(
                             transaction,
                             _streamEventFilter.Empty).ConfigureAwait(false);
 
-                        var streamPosition = new StreamPosition((uint)numDocuments);
                         await stream.InsertOneAsync(
                             transaction,
                             @event.ToStoreRepresentation(streamPosition, partitionId),
@@ -58,6 +57,31 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             catch (MongoWaitQueueFullException ex)
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+             catch (MongoDuplicateKeyException)
+            {
+                throw new StreamPositionOccupied(streamPosition, streamId);
+            }
+            catch (MongoWriteException exception)
+            {
+                if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
+                {
+                    throw new StreamPositionOccupied(streamPosition, streamId);
+                }
+
+                throw;
+            }
+            catch (MongoBulkWriteException exception)
+            {
+                foreach (var error in exception.WriteErrors)
+                {
+                    if (error.Category == ServerErrorCategory.DuplicateKey)
+                    {
+                        throw new StreamPositionOccupied(streamPosition, streamId);
+                    }
+                }
+
+                throw;
             }
         }
     }
