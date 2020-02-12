@@ -13,6 +13,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
     public class AggregateRoot
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="AggregateRoot"/> class.
+        /// </summary>
+        /// <param name="eventSource">The event source id.</param>
+        /// <param name="aggregateType">The type of the aggregate root.</param>
+        /// <param name="version">The version of the aggregate root.</param>
+        public AggregateRoot(Guid eventSource, Guid aggregateType, uint version)
+        {
+            EventSource = eventSource;
+            AggregateType = aggregateType;
+            Version = version;
+        }
+
+        /// <summary>
         /// Gets or sets the id of the Event Source.
         /// </summary>
         public Guid EventSource { get; set; }

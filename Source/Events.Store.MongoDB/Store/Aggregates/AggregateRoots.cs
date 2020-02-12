@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         }
 
         /// <inheritdoc/>
-        public Task IncrementVersionFor(
+        public Task<AggregateRoot> IncrementVersionFor(
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             };
         }
 
-        async Task WriteFirstAggregateRootDocument(
+        async Task<AggregateRoot> WriteFirstAggregateRootDocument(
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -90,15 +90,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         {
             try
             {
+                var aggregateRootDocument = new AggregateRoot(eventSource, aggregateRoot, nextVersion);
                 await _aggregates.InsertOneAsync(
                     transaction,
-                    new AggregateRoot
-                    {
-                        EventSource = eventSource,
-                        AggregateType = aggregateRoot,
-                        Version = nextVersion,
-                    },
+                    aggregateRootDocument,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
+                return aggregateRootDocument;
             }
             catch (MongoDuplicateKeyException)
             {
@@ -142,7 +139,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             }
         }
 
-        async Task UpdateExistingAggregateRootDocument(
+        async Task<AggregateRoot> UpdateExistingAggregateRootDocument(
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -163,7 +160,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                 new UpdateOptions { IsUpsert = false },
                 cancellationToken).ConfigureAwait(false);
 
-            if (result.ModifiedCount != 0)
+            if (result.ModifiedCount == 0)
             {
                 var currentVersion = await FetchVersionFor(
                     transaction,
@@ -172,6 +169,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     cancellationToken).ConfigureAwait(false);
                 throw new AggregateRootConcurrencyConflict(currentVersion, expectedVersion);
             }
+
+            if (result.ModifiedCount > 1) throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot);
+            return new AggregateRoot(eventSource, aggregateRoot, nextVersion);
         }
 
         void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)

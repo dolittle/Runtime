@@ -22,8 +22,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// <param name="expectedVersion">The <see cref="AggregateRootVersion" />.</param>
         /// <param name="nextVersion">The new version of the aggregate root instance to persist.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The asynchronous operation of incrementing the version for an aggregate root.</returns>
-        Task IncrementVersionFor(
+        /// <returns>The new <see cref="AggregateRoot" />.</returns>
+        Task<AggregateRoot> IncrementVersionFor(
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
