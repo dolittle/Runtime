@@ -1,12 +1,9 @@
 ---
 title: Overview
-url: "/runtime/runtime/metrics/"
 description: Overview on metrics
 keywords: Metrics
 author: Dolittle
 weight: 1
-aliases:
-    -  "/runtime/runtime/metrics/"
 ---
 
 The Dolittle runtime exposes metrics that gives you insight into the runtime.
