@@ -30,7 +30,9 @@ namespace Dolittle.Runtime.Events.Processing
             {
                 EventLogVersion = @event.EventLogVersion,
                 Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
+                EventSourceId = @event.EventSource.ToProtobuf(),
                 CorrelationId = @event.CorrelationId.ToProtobuf(),
+
                 Microservice = @event.Microservice.ToProtobuf(),
                 Tenant = @event.Tenant.ToProtobuf(),
                 Cause = new grpcEvents.Cause
@@ -57,6 +59,7 @@ namespace Dolittle.Runtime.Events.Processing
             return new Store.CommittedEvent(
                 @event.EventLogVersion,
                 @event.Occurred.ToDateTimeOffset(),
+                @event.EventSourceId.To<EventSourceId>(),
                 @event.CorrelationId.To<CorrelationId>(),
                 @event.Microservice.To<Microservice>(),
                 @event.Tenant.To<TenantId>(),
