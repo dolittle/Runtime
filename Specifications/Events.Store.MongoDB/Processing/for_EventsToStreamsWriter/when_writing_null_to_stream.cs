@@ -29,5 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWr
         Because of = () => exception = Catch.Exception(() => events_to_streams_writer.Write(null, stream_id, partition).GetAwaiter().GetResult());
 
         It should_throw_an_exception = () => exception.ShouldNotBeNull();
+
+        It should_throw_EventCanNotBeNull = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
     }
 }

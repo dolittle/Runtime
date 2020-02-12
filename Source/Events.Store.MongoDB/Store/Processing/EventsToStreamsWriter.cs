@@ -33,6 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
+            if (@event == null) throw new EventCanNotBeNull();
             StreamPosition streamPosition = null;
             try
             {
