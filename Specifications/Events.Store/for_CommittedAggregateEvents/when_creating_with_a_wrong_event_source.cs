@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 
         Establish context = () =>
         {
-            wrong_event_source_event = new CommittedAggregateEvent(wrong_event_source_id, aggregate_artifact, aggregate_version_after + 1, 3, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "wrong");
+            wrong_event_source_event = new CommittedAggregateEvent(aggregate_artifact, aggregate_version_after + 1, 3, DateTimeOffset.UtcNow, wrong_event_source_id, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "wrong");
         };
 
         Because of = () => exception = Catch.Exception(() =>
