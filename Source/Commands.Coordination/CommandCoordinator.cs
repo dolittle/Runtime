@@ -62,34 +62,34 @@ namespace Dolittle.Runtime.Commands.Coordination
             {
                 using (_localizer.BeginScope())
                 {
-                    _logger.Information($"Handle command of type {command.Type}");
+                    _logger.Debug($"Handle command of type {command.Type}");
 
                     commandResult = CommandResult.ForCommand(command);
 
-                    _logger.Trace("Authorize");
+                    _logger.Debug("Authorize");
                     var authorizationResult = _commandSecurityManager.Authorize(command);
                     if (!authorizationResult.IsAuthorized)
                     {
-                        _logger.Trace("Command not authorized");
+                        _logger.Debug("Command not authorized");
                         commandResult.SecurityMessages = authorizationResult.BuildFailedAuthorizationMessages();
                         commandContext.Rollback();
                         return commandResult;
                     }
 
-                    _logger.Trace("Validate");
+                    _logger.Debug("Validate");
                     var validationResult = _commandValidationService.Validate(command);
                     commandResult.ValidationResults = validationResult.ValidationResults;
                     commandResult.CommandValidationMessages = validationResult.CommandErrorMessages;
 
                     if (commandResult.Success)
                     {
-                        _logger.Trace("Command is considered valid");
+                        _logger.Debug("Command is considered valid");
                         try
                         {
-                            _logger.Trace("Handle the command");
+                            _logger.Debug("Handle the command");
                             _commandHandlerManager.Handle(command);
 
-                            _logger.Trace("Collect any broken rules");
+                            _logger.Debug("Collect any broken rules");
                             commandResult.BrokenRules = commandContext.GetAggregateRootsBeingTracked()
                                 .SelectMany(_ => _.BrokenRules.Select(__ => new BrokenRuleResult(
                                         __.Rule.Name,
@@ -97,7 +97,7 @@ namespace Dolittle.Runtime.Commands.Coordination
                                         __.Instance?.ToString() ?? "[Not Set]",
                                         __.Causes)));
 
-                            _logger.Trace("Commit transaction");
+                            _logger.Debug("Commit transaction");
                             commandContext.Commit();
                         }
                         catch (TargetInvocationException ex)
@@ -115,7 +115,7 @@ namespace Dolittle.Runtime.Commands.Coordination
                     }
                     else
                     {
-                        _logger.Information("Command was not successful, rolling back");
+                        _logger.Debug("Command was not successful, rolling back");
                         commandContext.Rollback();
                     }
                 }

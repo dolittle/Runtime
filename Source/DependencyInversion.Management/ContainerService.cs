@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.DependencyInversion.Management
         /// <inheritdoc/>
         public override Task<Bindings> GetBindings(GetBindingsRequest request, ServerCallContext context)
         {
-            _logger.Information("Getting all bindings");
+            _logger.Debug("Getting all bindings");
 
             var bindings = new Bindings();
             bindings.Bindings_.AddRange(PostContainerBootStage.AllBindings);
