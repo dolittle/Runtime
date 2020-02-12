@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Dolittle.ResourceTypes.Configuration;
-using Dolittle.Runtime.Events.MongoDB;
 using Mongo2Go;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -28,14 +27,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             var configurationForMock = new Mock<IConfigurationFor<EventStoreConfiguration>>();
             configurationForMock.Setup(_ => _.Instance).Returns(new EventStoreConfiguration
             {
-                ConnectionString = _runner.ConnectionString,
+                Servers = new string[] { "localhost" },
                 Database = _databaseName
             });
 
-            Connection = new Connection(configurationForMock.Object);
+            Connection = new DatabaseConnection(configurationForMock.Object);
         }
 
-        public Connection Connection { get; }
+        public DatabaseConnection Connection { get; }
 
         public static IList<T> ReadBsonFile<T>(string fileName)
         {
@@ -47,11 +46,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         {
             Connection.Database.Client.DropDatabase(_databaseName);
             _runner.Dispose();
-        }
-
-        internal IMongoCollection<T> GetCollection<T>()
-        {
-            return _collections.GetOrAdd(typeof(T), Connection.Database.GetCollection<T>(typeof(T).Name)) as IMongoCollection<T>;
         }
     }
 }
