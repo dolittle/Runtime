@@ -11,10 +11,12 @@
     <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Tenancy" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Events\Events.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
   </ItemGroup>
 
 </Project>
