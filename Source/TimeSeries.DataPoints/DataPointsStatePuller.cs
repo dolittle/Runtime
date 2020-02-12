@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
 
         async Task Pull()
         {
-            _logger.Information($"Pull from '{_endPoint.Target}'");
+            _logger.Debug($"Pull from '{_endPoint.Target}'");
             var dataPoints = await _client.GetAllAsync(new Empty());
             _processors.Process(dataPoints.DataPoints_);
         }

@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Heads
                 var head = _heads.SingleOrDefault(_ => _.HeadId == headId);
                 if (head != null)
                 {
-                    _logger.Information($"Disconnecting head '{headId}'");
+                    _logger.Debug($"Disconnecting head '{headId}'");
                     _heads?.Remove(head);
                 }
             }
