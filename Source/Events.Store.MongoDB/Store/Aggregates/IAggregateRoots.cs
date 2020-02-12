@@ -16,7 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// <summary>
         /// Increments the version of the aggregate root instance in the event store.
         /// </summary>
-        /// <param name="aggregates">The <see cref="IMongoCollection{AggregateRoot}" />.</param>
         /// <param name="transaction">The <see cref="IClientSessionHandle" />.</param>
         /// <param name="eventSource">The <see cref="EventSourceId" />.</param>
         /// <param name="aggregateRoot">The <see cref="ArtifactId" />.</param>
@@ -25,7 +24,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The asynchronous operation of incrementing the version for an aggregate root.</returns>
         Task IncrementVersionFor(
-            IMongoCollection<AggregateRoot> aggregates,
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -36,14 +34,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// <summary>
         /// Fetches the current version of the aggregate root instance in the event store.
         /// </summary>
-        /// <param name="aggregates">The <see cref="IMongoCollection{AggregateRoot}" />.</param>
         /// <param name="transaction">The <see cref="IClientSessionHandle" />.</param>
         /// <param name="eventSource">The <see cref="EventSourceId" />.</param>
         /// <param name="aggregateRoot">The <see cref="ArtifactId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The current <see cref="AggregateRootVersion" /> for an aggregate root instance.</returns>
         Task<AggregateRootVersion> FetchVersionFor(
-            IMongoCollection<AggregateRoot> aggregates,
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,

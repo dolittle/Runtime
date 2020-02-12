@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Processing;
+
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {
     /// <summary>
@@ -9,14 +11,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     public static class Constants
     {
         /// <summary>
-        /// The collection where events in the event log are stored.
+        /// The collection where stream processor states are stored.
         /// </summary>
-        public static readonly string EventLogCollection = "eventlog";
-
-        /// <summary>
-        /// The collection where events in streams are stored.
-        /// </summary>
-        public static readonly string StreamEventCollection = "stream_events";
+        public static readonly string StreamProcessorStateCollection = "stream-processor-states";
 
         /// <summary>
         /// The collection where aggregate root instances are stored.
@@ -25,8 +22,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public static readonly string AggregateRootInstanceCollection = "aggregates";
 
         /// <summary>
-        /// The collection where stream processor states are stored.
+        /// Gets the collection where events in the event log are stored.
         /// </summary>
-        public static readonly string StreamProcessorStateCollection = "stream_processor_states";
+        public static string AllStreamCollection => CollectionNameForStream(StreamId.AllStreamId);
+
+        /// <summary>
+        /// Gets the collection name for a stream.
+        /// </summary>
+        /// <param name="streamId">The <see cref="StreamId" />.</param>
+        /// <returns>The event stream collection name.</returns>
+        public static string CollectionNameForStream(StreamId streamId) => $"stream-{streamId.Value}";
     }
 }

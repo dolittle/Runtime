@@ -15,10 +15,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
     {
         readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
         readonly UpdateDefinitionBuilder<AggregateRoot> _update = Builders<AggregateRoot>.Update;
+        readonly IMongoCollection<AggregateRoot> _aggregates;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AggregateRoots"/> class.
+        /// </summary>
+        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
+        public AggregateRoots(EventStoreConnection connection)
+        {
+            _aggregates = connection.Aggregates;
+        }
 
         /// <inheritdoc/>
         public Task IncrementVersionFor(
-            IMongoCollection<AggregateRoot> aggregates,
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -31,7 +40,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             if (expectedVersion == AggregateRootVersion.Initial)
             {
                 return WriteFirstAggregateRootDocument(
-                    aggregates,
                     transaction,
                     eventSource,
                     aggregateRoot,
@@ -42,7 +50,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             else
             {
                 return UpdateExistingAggregateRootDocument(
-                    aggregates,
                     transaction,
                     eventSource,
                     aggregateRoot,
@@ -54,7 +61,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 
         /// <inheritdoc/>
         public async Task<AggregateRootVersion> FetchVersionFor(
-            IMongoCollection<AggregateRoot> aggregates,
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -62,7 +68,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         {
             var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
                 & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
-            var aggregateDocuments = await aggregates.Find(
+            var aggregateDocuments = await _aggregates.Find(
                 transaction,
                 eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
 
@@ -75,7 +81,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         }
 
         async Task WriteFirstAggregateRootDocument(
-            IMongoCollection<AggregateRoot> aggregates,
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -85,7 +90,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         {
             try
             {
-                await aggregates.InsertOneAsync(
+                await _aggregates.InsertOneAsync(
                     transaction,
                     new AggregateRoot
                     {
@@ -98,7 +103,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             catch (MongoDuplicateKeyException)
             {
                 var currentVersion = await FetchVersionFor(
-                    aggregates,
                     transaction,
                     eventSource,
                     aggregateRoot,
@@ -110,7 +114,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
                     var currentVersion = await FetchVersionFor(
-                        aggregates,
                         transaction,
                         eventSource,
                         aggregateRoot,
@@ -127,7 +130,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
                         var currentVersion = await FetchVersionFor(
-                            aggregates,
                             transaction,
                             eventSource,
                             aggregateRoot,
@@ -141,7 +143,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         }
 
         async Task UpdateExistingAggregateRootDocument(
-            IMongoCollection<AggregateRoot> aggregates,
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
@@ -155,7 +156,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     & _filter.Eq(_ => _.Version, expectedVersion.Value);
 
             var updateDefinition = _update.Set(_ => _.Version, nextVersion.Value);
-            var result = await aggregates.UpdateOneAsync(
+            var result = await _aggregates.UpdateOneAsync(
                 transaction,
                 aggregateRootFilter,
                 updateDefinition,
@@ -165,7 +166,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             if (result.ModifiedCount != 0)
             {
                 var currentVersion = await FetchVersionFor(
-                    aggregates,
                     transaction,
                     eventSource,
                     aggregateRoot,

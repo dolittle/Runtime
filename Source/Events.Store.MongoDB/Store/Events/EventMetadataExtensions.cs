@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
     /// Extension methods for <see cref="EventMetadata" />.
@@ -14,16 +14,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
         /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
         /// <returns>The converted <see cref="EventMetadata" />.</returns>
         public static EventMetadata GetEventMetadata(this CommittedEvent committedEvent) =>
-            new EventMetadata
-            {
-                CausePosition = committedEvent.Cause.Position,
-                CauseType = committedEvent.Cause.Type,
-                Correlation = committedEvent.CorrelationId,
-                Microservice = committedEvent.Microservice,
-                Occurred = committedEvent.Occurred,
-                Tenant = committedEvent.Tenant,
-                TypeGeneration = committedEvent.Type.Generation,
-                TypeId = committedEvent.Type.Id
-            };
+            new EventMetadata(
+                committedEvent.Occurred,
+                committedEvent.EventSource,
+                committedEvent.CorrelationId,
+                committedEvent.Microservice,
+                committedEvent.Tenant,
+                committedEvent.Cause.Type,
+                committedEvent.Cause.Position,
+                committedEvent.Type.Id,
+                committedEvent.Type.Generation);
     }
 }

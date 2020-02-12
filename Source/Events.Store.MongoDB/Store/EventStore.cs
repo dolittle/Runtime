@@ -9,7 +9,7 @@ using Dolittle.Artifacts;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
-using Dolittle.Runtime.Events.Store.MongoDB.EventLog;
+using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 return await session.WithTransactionAsync(
                     async (transaction, cancel) =>
                     {
-                        var eventLogVersion = (uint)await _connection.EventLog.CountDocumentsAsync(
+                        var eventLogVersion = (uint)await _connection.AllStream.CountDocumentsAsync(
                             transaction,
                             _eventFilter.Empty,
                             cancellationToken: cancel).ConfigureAwait(false);
@@ -65,10 +65,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                         foreach (var @event in events)
                         {
                             var committedEvent = await _eventCommitter.CommitEvent(
-                                _connection.EventLog,
                                 transaction,
                                 eventLogVersion,
-                                DateTimeOffset.Now,
+                                DateTimeOffset.UtcNow,
                                 _executionContextManager.Current,
                                 new Cause(CauseType.Command, 0),
                                 @event,
@@ -96,7 +95,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 return await session.WithTransactionAsync(
                     async (transaction, cancel) =>
                     {
-                        var eventLogVersion = (uint)await _connection.EventLog.CountDocumentsAsync(
+                        var eventLogVersion = (uint)await _connection.AllStream.CountDocumentsAsync(
                             transaction,
                             _eventFilter.Empty,
                             cancellationToken: cancel).ConfigureAwait(false);
@@ -107,13 +106,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                         foreach (var @event in events)
                         {
                             var committedEvent = await _eventCommitter.CommitAggregateEvent(
-                                _connection.EventLog,
                                 transaction,
-                                events.EventSource,
                                 events.AggregateRoot,
                                 aggregateRootVersion,
                                 eventLogVersion,
-                                DateTimeOffset.Now,
+                                DateTimeOffset.UtcNow,
+                                events.EventSource,
                                 _executionContextManager.Current,
                                 new Cause(CauseType.Command, 0),
                                 @event,
@@ -124,7 +122,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                         }
 
                         await _aggregateRoots.IncrementVersionFor(
-                            _connection.Aggregates,
                             transaction,
                             events.EventSource,
                             events.AggregateRoot.Id,
@@ -151,7 +148,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                     async (transaction, cancel) =>
                     {
                         var version = await _aggregateRoots.FetchVersionFor(
-                        _connection.Aggregates,
                         transaction,
                         eventSource,
                         aggregateRoot,
@@ -159,10 +155,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                         if (version > AggregateRootVersion.Initial)
                         {
                             var filter = _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
-                                & _eventFilter.Eq(_ => _.Aggregate.EventSourceId, eventSource.Value)
+                                & _eventFilter.Eq(_ => _.Metadata.EventSource, eventSource.Value)
                                 & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
                                 & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
-                            var events = await _connection.EventLog
+                            var events = await _connection.AllStream
                                 .Find(transaction, filter)
                                 .Sort(Builders<Event>.Sort.Ascending(_ => _.Aggregate.Version))
                                 .Project(_ => _.ToCommittedAggregateEvent())

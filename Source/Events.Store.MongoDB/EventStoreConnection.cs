@@ -1,12 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
+using System.Threading.Tasks;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
-using Dolittle.Runtime.Events.Store.MongoDB.EventLog;
+using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing;
-using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -32,10 +33,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
             MongoClient = connection.MongoClient;
 
-            EventLog = connection.Database.GetCollection<Event>(Constants.EventLogCollection);
+            AllStream = connection.Database.GetCollection<Event>(Constants.AllStreamCollection);
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
             StreamProcessorStates = connection.Database.GetCollection<StreamProcessorState>(Constants.StreamProcessorStateCollection);
-            StreamEvents = connection.Database.GetCollection<StreamEvent>(Constants.StreamEventCollection);
 
             CreateCollectionsAndIndexes();
         }
@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <summary>
         /// Gets the <see cref="IMongoCollection{Event}"/> where Events are stored.
         /// </summary>
-        public IMongoCollection<Event> EventLog { get; }
+        public IMongoCollection<Event> AllStream { get; }
 
         /// <summary>
         /// Gets the <see cref="IMongoCollection{AggregateRoot}"/> where Aggregate Roots are stored.
@@ -61,44 +61,51 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public IMongoCollection<StreamProcessorState> StreamProcessorStates { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{StreamEvent}" /> where <see cref="StreamEvent" >stream events</see> are stored.
+        /// Gets the <see cref="IMongoCollection{Event}" /> that represents a stream of events.
         /// </summary>
-        public IMongoCollection<StreamEvent> StreamEvents { get; }
+        /// <param name="streamId">The <see cref="Runtime.Events.Processing.StreamId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The <see cref="IMongoCollection{Event}" />.</returns>
+        public async Task<IMongoCollection<Event>> GetStreamCollectionAsync(Runtime.Events.Processing.StreamId streamId, CancellationToken cancellationToken = default)
+        {
+            var collection = _connection.Database.GetCollection<Event>(Constants.CollectionNameForStream(streamId));
+            await CreateCollectionsAndIndexesForStreamAsync(collection, cancellationToken).ConfigureAwait(false);
+            return collection;
+        }
 
         void CreateCollectionsAndIndexes()
         {
-            CreateCollectionsAndIndexesForEventLog();
-            CreateCollectionsAndIndexesForStreamEvents();
+            CreateCollectionsAndIndexesForStream(AllStream);
             CreateCollectionsAndIndexesForAggregates();
             CreateCollectionsAndIndexesForStreamProcessorStates();
         }
 
-        void CreateCollectionsAndIndexesForEventLog()
+        void CreateCollectionsAndIndexesForStream(IMongoCollection<Event> stream)
         {
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
+            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
                 Builders<Event>.IndexKeys
-                    .Ascending(_ => _.Aggregate.EventSourceId)));
+                    .Ascending(_ => _.Metadata.EventSource)));
 
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
+            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
                 Builders<Event>.IndexKeys
-                    .Ascending(_ => _.Aggregate.EventSourceId)
+                    .Ascending(_ => _.Metadata.EventSource)
                     .Ascending(_ => _.Aggregate.TypeId)));
         }
 
-        void CreateCollectionsAndIndexesForStreamEvents()
+        async Task CreateCollectionsAndIndexesForStreamAsync(IMongoCollection<Event> stream, CancellationToken cancellationToken = default)
         {
-            StreamEvents.Indexes.CreateOne(new CreateIndexModel<StreamEvent>(
-                Builders<StreamEvent>.IndexKeys
-                    .Ascending(_ => _.StreamIdAndPosition)));
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<Event>(
+                    Builders<Event>.IndexKeys
+                        .Ascending(_ => _.Metadata.EventSource)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
 
-            StreamEvents.Indexes.CreateOne(new CreateIndexModel<StreamEvent>(
-                Builders<StreamEvent>.IndexKeys
-                    .Ascending(_ => _.StreamIdAndPosition.StreamId)));
-
-            StreamEvents.Indexes.CreateOne(new CreateIndexModel<StreamEvent>(
-                Builders<StreamEvent>.IndexKeys
-                    .Ascending(_ => _.StreamIdAndPosition)
-                    .Ascending(_ => _.PartitionId)));
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<Event>(
+                    Builders<Event>.IndexKeys
+                        .Ascending(_ => _.Metadata.EventSource)
+                        .Ascending(_ => _.Aggregate.TypeId)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         void CreateCollectionsAndIndexesForAggregates()

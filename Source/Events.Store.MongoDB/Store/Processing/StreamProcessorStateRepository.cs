@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Events.Processing.StreamProcessorState> GetOrAddNew(Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.StreamProcessorState> GetOrAddNew(Runtime.Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Events.Processing.StreamProcessorState> IncrementPosition(Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.StreamProcessorState> IncrementPosition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Events.Processing.StreamProcessorState> AddFailingPartition(Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.StreamProcessorState> AddFailingPartition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -138,7 +138,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Events.Processing.StreamProcessorState> RemoveFailingPartition(Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.StreamProcessorState> RemoveFailingPartition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -169,7 +169,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Events.Processing.StreamProcessorState> SetFailingPartitionState(Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, Events.Processing.FailingPartitionState failingPartitionState, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.StreamProcessorState> SetFailingPartitionState(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, Runtime.Events.Processing.FailingPartitionState failingPartitionState, CancellationToken cancellationToken = default)
         {
             try
             {

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Store.MongoDB.Streams;
+using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
     /// </summary>
     public class EventsToStreamsWriter : IWriteEventsToStreams
     {
-        readonly FilterDefinitionBuilder<StreamEvent> _streamEventFilter = Builders<StreamEvent>.Filter;
+        readonly FilterDefinitionBuilder<Event> _streamEventFilter = Builders<Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -38,19 +38,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                 using var session = await _connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
 
                 await session.WithTransactionAsync(
-                    async (transaction, cancel) =>
+                    async (transaction, cancellationToken) =>
                     {
-                        var events = _connection.StreamEvents;
-                        var numDocuments = await events.CountDocumentsAsync(
+                        var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
+                        var numDocuments = await stream.CountDocumentsAsync(
                             transaction,
-                            _streamEventFilter.Eq(_ => _.StreamIdAndPosition.StreamId, streamId.Value)).ConfigureAwait(false);
+                            _streamEventFilter.Empty).ConfigureAwait(false);
 
                         var streamPosition = new StreamPosition((uint)numDocuments);
-                        await events.InsertOneAsync(
+                        await stream.InsertOneAsync(
                             transaction,
-                            @event.ToStreamEvent(streamId, streamPosition, partitionId),
-                            null,
-                            cancel).ConfigureAwait(false);
+                            @event.ToStoreRepresentation(streamPosition, partitionId),
+                            cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },
                     null,

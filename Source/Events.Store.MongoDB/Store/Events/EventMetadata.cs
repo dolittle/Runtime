@@ -8,7 +8,7 @@ using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
     /// Represents the platform generated information about an event that is stored alongside the domain specific data in the event store.
@@ -16,9 +16,40 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
     public class EventMetadata
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="EventMetadata"/> class.
+        /// </summary>
+        /// <param name="occurred">The date time offset of when the event occurred.</param>
+        /// <param name="eventSource">The event source that applied the event.</param>
+        /// <param name="correlation">The correlation.</param>
+        /// <param name="microservice">The microservice.</param>
+        /// <param name="tenant">The tenant.</param>
+        /// <param name="causeType">The type of the cause.</param>
+        /// <param name="causePosition">The position of the cause.</param>
+        /// <param name="typeId">The id of the event artifact type.</param>
+        /// <param name="typeGeneration">The generation of the event artifact.</param>
+        public EventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration)
+        {
+            Occurred = occurred;
+            EventSource = eventSource;
+            Correlation = correlation;
+            Microservice = microservice;
+            Tenant = tenant;
+            CauseType = causeType;
+            CausePosition = causePosition;
+            TypeId = typeId;
+            TypeGeneration = typeGeneration;
+        }
+
+        /// <summary>
         /// Gets or sets the <see cref="DateTimeOffset"/> of when the event was committed to the event store.
         /// </summary>
+        [BsonRepresentation(BsonType.String)]
         public DateTimeOffset Occurred { get; set; }
+
+        /// <summary>
+        /// Gets or sets the event source id.
+        /// </summary>
+        public Guid EventSource { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="CorrelationId"/> of the event.

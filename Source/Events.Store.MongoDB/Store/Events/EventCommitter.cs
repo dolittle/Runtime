@@ -11,16 +11,26 @@ using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventCommitter" />.
     /// </summary>
     public class EventCommitter : IEventCommitter
     {
+        readonly IMongoCollection<Event> _allStream;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventCommitter"/> class.
+        /// </summary>
+        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
+        public EventCommitter(EventStoreConnection connection)
+        {
+            _allStream = connection.AllStream;
+        }
+
         /// <inheritdoc/>
         public async Task<CommittedEvent> CommitEvent(
-            IMongoCollection<Event> events,
             IClientSessionHandle transaction,
             EventLogVersion version,
             DateTimeOffset occurred,
@@ -32,12 +42,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
             var correlation = executionContext.CorrelationId;
             Microservice microservice = executionContext.BoundedContext.Value;
             var tenant = executionContext.Tenant;
+            var eventSource = EventSourceId.NotSet;
 
             await InsertEvent(
-                events,
                 transaction,
                 version,
                 occurred,
+                eventSource,
                 @event,
                 new AggregateMetadata(),
                 correlation,
@@ -49,6 +60,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
             return new CommittedEvent(
                 version,
                 occurred,
+                eventSource,
                 correlation,
                 microservice,
                 tenant,
@@ -59,13 +71,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
 
         /// <inheritdoc/>
         public async Task<CommittedAggregateEvent> CommitAggregateEvent(
-            IMongoCollection<Event> events,
             IClientSessionHandle transaction,
-            EventSourceId eventSource,
             Artifact aggregateRoot,
             AggregateRootVersion aggregateRootVersion,
             EventLogVersion version,
             DateTimeOffset occurred,
+            EventSourceId eventSource,
             Dolittle.Execution.ExecutionContext executionContext,
             Cause cause,
             UncommittedEvent @event,
@@ -75,15 +86,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
             Microservice microservice = executionContext.BoundedContext.Value;
             var tenant = executionContext.Tenant;
             await InsertEvent(
-                events,
                 transaction,
                 version,
                 occurred,
+                eventSource,
                 @event,
                 new AggregateMetadata
                 {
                     WasAppliedByAggregate = true,
-                    EventSourceId = eventSource,
                     TypeId = aggregateRoot.Id,
                     TypeGeneration = aggregateRoot.Generation,
                     Version = aggregateRootVersion
@@ -94,11 +104,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
                 cause,
                 cancellationToken).ConfigureAwait(false);
             return new CommittedAggregateEvent(
-                eventSource,
                 aggregateRoot,
                 aggregateRootVersion,
                 version,
                 occurred,
+                eventSource,
                 correlation,
                 microservice,
                 tenant,
@@ -108,10 +118,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
         }
 
         async Task InsertEvent(
-            IMongoCollection<Event> events,
             IClientSessionHandle transaction,
             EventLogVersion version,
             DateTimeOffset occurred,
+            EventSourceId eventSource,
             UncommittedEvent @event,
             AggregateMetadata aggregate,
             CorrelationId correlation,
@@ -122,25 +132,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventLog
         {
             try
             {
-                await events.InsertOneAsync(
+                await _allStream.InsertOneAsync(
                     transaction,
-                    new Event
-                    {
-                        EventLogVersion = version,
-                        Metadata = new EventMetadata
-                        {
-                            Occurred = occurred,
-                            Correlation = correlation,
-                            Microservice = microservice,
-                            Tenant = tenant,
-                            CauseType = cause.Type,
-                            CausePosition = cause.Position,
-                            TypeId = @event.Type.Id,
-                            TypeGeneration = @event.Type.Generation,
-                        },
-                        Aggregate = aggregate,
-                        Content = BsonDocument.Parse(@event.Content),
-                    },
+                    new Event(
+                        version,
+                        version,
+                        Runtime.Events.Processing.PartitionId.NotSet,
+                        new EventMetadata(
+                            occurred,
+                            eventSource,
+                            correlation,
+                            microservice,
+                            tenant,
+                            cause.Type,
+                            cause.Position,
+                            @event.Type.Id,
+                            @event.Type.Generation),
+                        aggregate,
+                        BsonDocument.Parse(@event.Content)),
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (MongoDuplicateKeyException)
