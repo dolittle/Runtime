@@ -21,13 +21,14 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="eventSource">The <see cref="EventSourceId"/> that the Events were applied to.</param>
         /// <param name="aggregateRoot">The <see cref="ArtifactId"/> representing the type of the Aggregate Root that applied the Event to the Event Source.</param>
-        /// <param name="aggregateRootVersion">The version of the <see cref="AggregateRoot"/> that applied the Events.</param>
+        /// <param name="oldAggregateRootVersion">The version of the <see cref="AggregateRoot"/> that applied the Events.</param>
+        /// <param name="newAggregateRootVersion">The new version of the <see cref="AggregateRoot"/> that applied the Events.</param>
         /// <param name="events">The <see cref="CommittedAggregateEvent">events</see>.</param>
-        public CommittedAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion aggregateRootVersion, IReadOnlyList<CommittedAggregateEvent> events)
+        public CommittedAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion oldAggregateRootVersion, AggregateRootVersion newAggregateRootVersion, IReadOnlyList<CommittedAggregateEvent> events)
         {
             EventSource = eventSource;
             AggregateRoot = aggregateRoot;
-            AggregateRootVersion = AggregateRootVersion.Initial;
+            AggregateRootVersion = oldAggregateRootVersion;
 
             for (var i = 0; i < events.Count; i++)
             {
@@ -40,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store
                 AggregateRootVersion++;
             }
 
-            ThrowIfEventsAreMissingForExpectedVersion(aggregateRootVersion);
+            ThrowIfEventsAreMissingForExpectedVersion(newAggregateRootVersion);
 
             _events = new NullFreeList<CommittedAggregateEvent>(events);
         }

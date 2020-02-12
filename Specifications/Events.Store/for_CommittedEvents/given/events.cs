@@ -26,9 +26,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents.given
 
         Establish context = () =>
         {
-            event_one = new CommittedEvent(0, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "one");
-            event_two = new CommittedEvent(1, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "two");
-            event_three = new CommittedEvent(2, DateTimeOffset.Now, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "three");
+            event_one = new CommittedEvent(0, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "one");
+            event_two = new CommittedEvent(1, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "two");
+            event_three = new CommittedEvent(2, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "three");
         };
     }
 }

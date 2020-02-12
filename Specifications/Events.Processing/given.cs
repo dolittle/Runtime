@@ -40,7 +40,8 @@ namespace Dolittle.Runtime.Events.Processing
 
         public static Store.CommittedEvent a_committed_event => new Store.CommittedEvent(
             0,
-            DateTimeOffset.Now,
+            DateTimeOffset.UtcNow,
+            EventSourceId.NotSet,
             Guid.NewGuid(),
             Guid.NewGuid(),
             Guid.NewGuid(),
