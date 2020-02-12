@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 {
     public static class metadata
     {
-        public static EventMetadata random_event_metadata() =>
+        public static EventMetadata random_event_metadata =>
             new EventMetadata(
                 DateTimeOffset.UtcNow,
                 Guid.NewGuid(),
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 1,
                 version);
 
-        public static AggregateMetadata aggregate_metadata_from_non_aggregate_event() =>
+        public static AggregateMetadata aggregate_metadata_from_non_aggregate_event =>
             new AggregateMetadata();
     }
 }
