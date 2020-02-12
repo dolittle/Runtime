@@ -13,15 +13,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
         static CommittedAggregateEvents events;
         static Exception exception;
 
-        Establish context = () =>
-        {
-            wrong_event_source_event = new CommittedAggregateEvent(aggregate_artifact, aggregate_version_after + 1, 3, DateTimeOffset.UtcNow, wrong_event_source_id, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "wrong");
-        };
+        Establish context = () => wrong_event_source_event = new CommittedAggregateEvent(aggregate_artifact, aggregate_version_after + 1, 3, DateTimeOffset.UtcNow, wrong_event_source_id, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "wrong");
 
-        Because of = () => exception = Catch.Exception(() =>
-        {
-            events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version_after + 1, new[] { event_one, event_two, event_three, wrong_event_source_event });
-        });
+        Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version_before, aggregate_version_after + 1, new[] { event_one, event_two, event_three, wrong_event_source_event }));
 
         It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventWasAppliedToOtherEventSource>();
         It should_not_be_created = () => events.ShouldBeNull();
