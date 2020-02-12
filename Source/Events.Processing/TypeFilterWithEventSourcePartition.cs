@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Processing
             var outPartitionId = PartitionId.NotSet;
             if (_definition.Partitioned)
             {
-                outPartitionId = @event.EventSource;
+                outPartitionId = @event.EventSource.Value;
             }
 
             var filterResult = new SucceededFilteringResult(included, outPartitionId);
