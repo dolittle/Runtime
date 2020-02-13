@@ -19,6 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoots.wh
             aggregate_roots = new AggregateRoots(an_event_store_connection);
             event_source_id = Guid.NewGuid();
             aggregate_root = Guid.NewGuid();
+            next_version = 3;
             using var session = an_event_store_connection.MongoClient.StartSession();
             aggregate_roots.IncrementVersionFor(session, event_source_id, aggregate_root, AggregateRootVersion.Initial, next_version).GetAwaiter().GetResult();
         };
