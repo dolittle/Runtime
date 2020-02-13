@@ -34,6 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         public async Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             if (@event == null) throw new EventCanNotBeNull();
+            ThrowIfWritingToAllStream(streamId);
             StreamPosition streamPosition = null;
             try
             {
@@ -84,6 +85,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
 
                 throw;
             }
+        }
+
+        void ThrowIfWritingToAllStream(StreamId streamId)
+        {
+            if (streamId.Value == StreamId.AllStreamId.Value) throw new CannotWriteCommittedEventToAllStream();
         }
     }
 }
