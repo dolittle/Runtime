@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
@@ -17,7 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
     public class StreamProcessorStateRepository : IStreamProcessorStateRepository
     {
         readonly FilterDefinitionBuilder<StreamProcessorState> _streamProcessorFilter = Builders<StreamProcessorState>.Filter;
-        readonly UpdateDefinitionBuilder<StreamProcessorState> _streamProcessorUpdate = Builders<StreamProcessorState>.Update;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -98,8 +96,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
                     state,
-                    null as ReplaceOptions,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 if (replaceResult.MatchedCount == 0) throw new StreamProcessorNotFound(streamProcessorId);
 
