@@ -10,5 +10,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsFromStreams
         protected static an_event_store_connection an_event_store_connection;
 
         Establish context = () => an_event_store_connection = new an_event_store_connection(new a_mongo_db_connection());
+        Cleanup cleanup = () => an_event_store_connection.Dispose();
     }
 }

@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 {
     public static class ShouldExtensions
     {
-        public static void ShouldBeStoredWithCorrectStoreRepresentation(this CommittedEvent committedEvent, Event storedEvent, StreamPosition streamPosition, PartitionId partition)
+        public static CommittedEvent ShouldBeStoredWithCorrectStoreRepresentation(this CommittedEvent committedEvent, Event storedEvent, StreamPosition streamPosition, PartitionId partition)
         {
             Ensure.IsNotNull(nameof(committedEvent), committedEvent);
             Ensure.IsNotNull(nameof(storedEvent), storedEvent);
@@ -35,9 +35,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.Aggregate.TypeGeneration.ShouldEqual(committedEventStoreRepresentation.Aggregate.TypeGeneration);
             storedEvent.Aggregate.TypeId.ShouldEqual(committedEventStoreRepresentation.Aggregate.TypeId);
             storedEvent.Aggregate.Version.ShouldEqual(committedEventStoreRepresentation.Aggregate.Version);
+
+            return committedEvent;
         }
 
-        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, CommittedEvent otherEvent)
+        public static CommittedEvent ShouldBeTheSameAs(this CommittedEvent committedEvent, CommittedEvent otherEvent)
         {
             Ensure.IsNotNull(nameof(committedEvent), committedEvent);
             Ensure.IsNotNull(nameof(otherEvent), otherEvent);
@@ -51,6 +53,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             otherEvent.Occurred.ShouldEqual(committedEvent.Occurred);
             otherEvent.Tenant.ShouldEqual(committedEvent.Tenant);
             otherEvent.Type.ShouldEqual(committedEvent.Type);
+
+            return committedEvent;
         }
     }
 }

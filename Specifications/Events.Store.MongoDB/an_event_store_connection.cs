@@ -16,9 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             _runner = runner;
         }
 
-        ~an_event_store_connection()
-        {
-            _runner.Dispose();
-        }
+        public void Dispose() => _runner.Dispose();
     }
 }
