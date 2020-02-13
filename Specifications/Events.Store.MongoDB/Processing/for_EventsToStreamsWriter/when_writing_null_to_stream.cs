@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWr
 {
     public class when_writing_null_to_stream : given.all_dependencies
     {
-        static EventsToStreamsWriter events_to_streams_writer = new EventsToStreamsWriter(an_event_store_connection, Moq.Mock.Of<ILogger>());
+        static EventsToStreamsWriter events_to_streams_writer;
         static StreamId stream_id;
         static PartitionId partition;
         static Exception exception;

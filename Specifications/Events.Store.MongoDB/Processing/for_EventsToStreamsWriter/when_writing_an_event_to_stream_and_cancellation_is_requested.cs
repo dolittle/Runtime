@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWr
 {
     public class when_writing_an_event_to_stream_and_cancellation_is_requested : given.all_dependencies
     {
-        static EventsToStreamsWriter events_to_streams_writer = new EventsToStreamsWriter(an_event_store_connection, Moq.Mock.Of<ILogger>());
+        static EventsToStreamsWriter events_to_streams_writer;
         static CommittedEvent committed_event;
         static StreamId stream_id;
         static PartitionId partition;

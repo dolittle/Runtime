@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWr
     {
         static readonly StreamId all_stream = StreamId.AllStreamId;
         static readonly PartitionId partition = PartitionId.NotSet;
-        static EventsToStreamsWriter events_to_streams_writer = new EventsToStreamsWriter(an_event_store_connection, Moq.Mock.Of<ILogger>());
+        static EventsToStreamsWriter events_to_streams_writer;
         static CommittedEvent committed_event;
         static Exception exception;
 
