@@ -36,5 +36,21 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.Aggregate.TypeId.ShouldEqual(committedEventStoreRepresentation.Aggregate.TypeId);
             storedEvent.Aggregate.Version.ShouldEqual(committedEventStoreRepresentation.Aggregate.Version);
         }
+
+        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, CommittedEvent otherEvent)
+        {
+            Ensure.IsNotNull(nameof(committedEvent), committedEvent);
+            Ensure.IsNotNull(nameof(otherEvent), otherEvent);
+
+            otherEvent.Cause.ShouldEqual(committedEvent.Cause);
+            otherEvent.Content.ShouldEqual(committedEvent.Content);
+            otherEvent.CorrelationId.ShouldEqual(committedEvent.CorrelationId);
+            otherEvent.EventLogVersion.ShouldEqual(committedEvent.EventLogVersion);
+            otherEvent.EventSource.ShouldEqual(committedEvent.EventSource);
+            otherEvent.Microservice.ShouldEqual(committedEvent.Microservice);
+            otherEvent.Occurred.ShouldEqual(committedEvent.Occurred);
+            otherEvent.Tenant.ShouldEqual(committedEvent.Tenant);
+            otherEvent.Type.ShouldEqual(committedEvent.Type);
+        }
     }
 }
