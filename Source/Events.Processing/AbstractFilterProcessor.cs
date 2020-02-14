@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Processing
             _targetStreamId = targetStreamId;
             _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
-            _logMessagePrefix = $"Remote Filter Processor '{Identifier}' with target stream '{_targetStreamId}'";
+            _logMessagePrefix = $"Filter Processor '{Identifier}' with target stream '{_targetStreamId}'";
         }
 
         /// <inheritdoc />

@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
         readonly FactoryFor<IStreamProcessors> _streamProcessorsFactory;
-        readonly IWriteEventsToStreams _eventsToStreamsWriter;
+        readonly FactoryFor<IWriteEventsToStreams> _eventsToStreamsWriterFactory;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly ILogger _logger;
 
@@ -37,22 +37,22 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
-        /// <param name="streamProcessorsFactory"><see cref="IStreamProcessors"/> for registration management.</param>
-        /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
+        /// <param name="streamProcessorsFactory"><see cref="FactoryFor{T}"/> the <see cref="IStreamProcessors"/> for registration management.</param>
+        /// <param name="eventsToStreamsWriterFactory"><see cref="FactoryFor{T}"/> the  <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public EventHandlersService(
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             FactoryFor<IStreamProcessors> streamProcessorsFactory,
-            IWriteEventsToStreams eventsToStreamsWriter,
+            FactoryFor<IWriteEventsToStreams> eventsToStreamsWriterFactory,
             IReverseCallDispatchers reverseCallDispatchers,
             ILogger logger)
         {
             _executionContextManager = executionContextManager;
             _tenants = tenants;
             _streamProcessorsFactory = streamProcessorsFactory;
-            _eventsToStreamsWriter = eventsToStreamsWriter;
+            _eventsToStreamsWriterFactory = eventsToStreamsWriterFactory;
             _reverseCallDispatchers = reverseCallDispatchers;
             _logger = logger;
         }
@@ -121,7 +121,7 @@ namespace Dolittle.Runtime.Events.Processing
                                     eventProcessorId,
                                     targetStreamId,
                                     definition,
-                                    _eventsToStreamsWriter,
+                                    _eventsToStreamsWriterFactory(),
                                     _logger);
 
                 _streamProcessorsFactory().Register(filter, sourceStreamId);

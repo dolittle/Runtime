@@ -2,9 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Tenancy;
 
 #pragma warning disable CA2008
 
@@ -26,12 +28,14 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
+        /// <param name="tenantId">The <see cref="TenantId"/> the <see cref="StreamProcessor"/> belongs to.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public StreamProcessor(
+            TenantId tenantId,
             StreamId sourceStreamId,
             IEventProcessor processor,
             IStreamProcessorStateRepository streamProcessorStateRepository,
@@ -43,7 +47,8 @@ namespace Dolittle.Runtime.Events.Processing
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStateRepository = streamProcessorStateRepository;
             Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
-            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' with source stream '{Identifier.SourceStreamId}'";
+            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
+            CurrentState = StreamProcessorState.New;
         }
 
         /// <summary>
@@ -59,13 +64,12 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Gets the current <see cref="StreamProcessorState" />.
         /// </summary>
-        public StreamProcessorState CurrentState { get; private set; } = StreamProcessorState.New;
+        public StreamProcessorState CurrentState { get; private set; }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            _cancellationTokenSource?.Dispose();
-            _cancellationTokenSource = null;
+            _cancellationTokenSource.Dispose();
         }
 
         /// <summary>
@@ -73,9 +77,9 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         public void Start()
         {
-            _task = Task.Factory.StartNew(BeginProcessing, TaskCreationOptions.DenyChildAttach);
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+            _task = Task.Factory.StartNew(BeginProcessing, TaskCreationOptions.DenyChildAttach);
         }
 
         /// <summary>
@@ -95,12 +99,12 @@ namespace Dolittle.Runtime.Events.Processing
             try
             {
                 CurrentState = await GetPersistedCurrentState().ConfigureAwait(false);
-                while (!_cancellationTokenSource.IsCancellationRequested)
+                do
                 {
                     await CatchupFailingPartitions().ConfigureAwait(false);
 
                     CommittedEventWithPartition eventAndPartition = default;
-                    while (eventAndPartition == default)
+                    while (eventAndPartition == default && !_cancellationTokenSource.IsCancellationRequested)
                     {
                         try
                         {
@@ -121,7 +125,8 @@ namespace Dolittle.Runtime.Events.Processing
                         var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.PartitionId).ConfigureAwait(false);
                         if (processingResult.Succeeded)
                         {
-                            CurrentState = await IncrementPosition().ConfigureAwait(false);
+                            var currentState = await IncrementPosition().ConfigureAwait(false);
+                            CurrentState = currentState;
                         }
                         else if (processingResult is IRetryProcessingResult retryProcessingResult)
                         {
@@ -133,6 +138,7 @@ namespace Dolittle.Runtime.Events.Processing
                         }
                     }
                 }
+                while (!_cancellationTokenSource.IsCancellationRequested);
             }
             catch (Exception ex)
             {
@@ -145,7 +151,8 @@ namespace Dolittle.Runtime.Events.Processing
 
         async Task CatchupFailingPartitions()
         {
-            foreach (var kvp in CurrentState.FailingPartitions)
+            var failingPartitions = CurrentState.FailingPartitions.ToList();
+            foreach (var kvp in failingPartitions)
             {
                 var partitionId = kvp.Key;
                 var failingPartitionState = kvp.Value;
