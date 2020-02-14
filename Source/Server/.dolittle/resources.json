@@ -11,21 +11,6 @@
             ],
             "database": "event_store"
         }
-    },
-
-    "08831584-e016-42f6-bc5e-c4f098fed42b": {
-        "readModels": {
-            "host": "mongodb://localhost:27017",
-            "database": "read_model_database",
-            "useSSL": false
-        },
-        "eventStore": {
-            "servers": [
-                "localhost"
-            ],
-            "database": "event_store"
-        }
     }
-
 }
 
