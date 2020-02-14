@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
@@ -17,7 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
     public class StreamProcessorStateRepository : IStreamProcessorStateRepository
     {
         readonly FilterDefinitionBuilder<StreamProcessorState> _streamProcessorFilter = Builders<StreamProcessorState>.Filter;
-        readonly UpdateDefinitionBuilder<StreamProcessorState> _streamProcessorUpdate = Builders<StreamProcessorState>.Update;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -42,9 +40,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
-                if (state == default) state = StreamProcessorState.NewFromId(streamProcessorId);
-
-                await states.InsertOneAsync(state, null, cancellationToken).ConfigureAwait(false);
+                if (state == default)
+                {
+                    state = StreamProcessorState.NewFromId(streamProcessorId);
+                    await states.InsertOneAsync(state, null, cancellationToken).ConfigureAwait(false);
+                }
 
                 return state.ToRuntimeRepresentation();
             }
@@ -96,8 +96,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
                     state,
-                    null as ReplaceOptions,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 if (replaceResult.MatchedCount == 0) throw new StreamProcessorNotFound(streamProcessorId);
 
@@ -114,20 +113,22 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         {
             try
             {
+                var id = new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
                 var states = _connection.StreamProcessorStates;
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
                 if (state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionAlreadyExists(streamProcessorId, partitionId);
+                state.FailingPartitions.Add(partitionId, new FailingPartitionState(position, retryTime));
+                var replaceResult = await states.ReplaceOneAsync(
+                    _streamProcessorFilter.Eq(_ => _.Id, id),
+                    state,
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
-                state = await states.FindOneAndUpdateAsync(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
-                    _streamProcessorUpdate.AddToSet(_ => _.FailingPartitions, new KeyValuePair<Guid, FailingPartitionState>(partitionId, new FailingPartitionState(position, retryTime))),
-                    new FindOneAndUpdateOptions<StreamProcessorState, StreamProcessorState> { ReturnDocument = ReturnDocument.After },
-                    cancellationToken).ConfigureAwait(false);
+                if (replaceResult.MatchedCount == 0) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
 
                 return state.ToRuntimeRepresentation();
             }
@@ -155,8 +156,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
                     state,
-                    null as ReplaceOptions,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 if (replaceResult.MatchedCount == 0) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
 
@@ -187,8 +187,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
                     state,
-                    null as ReplaceOptions,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
 
                 if (replaceResult.MatchedCount == 0) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
 
