@@ -50,6 +50,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
             var tenant = _executionContextManager.Current.Tenant;
             var streamProcessor = new StreamProcessor(
+                tenant,
                 sourceStreamId,
                 eventProcessor,
                 _streamProcessorStateRepository,
