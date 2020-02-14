@@ -102,7 +102,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<Event>(
                     Builders<Event>.IndexKeys
-                        .Ascending(_ => _.Metadata.EventSource),
+                        .Ascending(_ => _.EventLogVersion),
                     new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
