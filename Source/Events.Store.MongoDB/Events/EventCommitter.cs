@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Execution;
+using Dolittle.Runtime.Events.Processing;
 using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -77,7 +78,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             EventLogVersion version,
             DateTimeOffset occurred,
             EventSourceId eventSource,
-            Dolittle.Execution.ExecutionContext executionContext,
+            Execution.ExecutionContext executionContext,
             Cause cause,
             UncommittedEvent @event,
             CancellationToken cancellationToken = default)
@@ -137,7 +138,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     new Event(
                         version,
                         version,
-                        Runtime.Events.Processing.PartitionId.NotSet,
+                        PartitionId.NotSet,
                         new EventMetadata(
                             occurred,
                             eventSource,
@@ -154,13 +155,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             }
             catch (MongoDuplicateKeyException)
             {
-                throw new StreamPositionOccupied(version.Value, Runtime.Events.Processing.StreamId.AllStreamId);
+                throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new StreamPositionOccupied(version.Value, Runtime.Events.Processing.StreamId.AllStreamId);
+                    throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId);
                 }
 
                 throw;
@@ -171,7 +172,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new StreamPositionOccupied(version.Value, Runtime.Events.Processing.StreamId.AllStreamId);
+                        throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId);
                     }
                 }
 
