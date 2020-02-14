@@ -51,6 +51,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <inheritdoc/>
         public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken = default)
         {
+            ThrowIfNoEventsToCommit(events);
             try
             {
                 using var session = await _connection.MongoClient.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -89,6 +90,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <inheritdoc/>
         public async Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken = default)
         {
+            ThrowIfNoEventsToCommit(events);
             try
             {
                 using var session = await _connection.MongoClient.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -192,6 +194,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <inheritdoc/>
         public void Dispose()
         {
+        }
+
+        void ThrowIfNoEventsToCommit(UncommittedEvents events)
+        {
+            if (!events.HasEvents) throw new NoEventsToCommit();
         }
     }
 }

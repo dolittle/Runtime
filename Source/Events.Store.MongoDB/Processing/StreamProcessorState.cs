@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.Options;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
 {
@@ -39,6 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <summary>
         /// Gets or sets the failing partitions.
         /// </summary>
+        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
         public IDictionary<Guid, FailingPartitionState> FailingPartitions { get; set; }
 
         /// <summary>
