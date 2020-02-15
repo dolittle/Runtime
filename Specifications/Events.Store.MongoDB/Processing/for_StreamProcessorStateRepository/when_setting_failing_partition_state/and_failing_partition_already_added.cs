@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorStateRepository.when_setting_failing_partition_state
@@ -10,19 +11,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
     public class and_failing_partition_already_added : given.all_dependencies
     {
         static StreamProcessorStateRepository repository;
-        static Runtime.Events.Processing.PartitionId partition;
-        static Runtime.Events.Processing.StreamProcessorId stream_processor_id;
-        static Runtime.Events.Processing.StreamProcessorState initial_state;
-        static Runtime.Events.Processing.FailingPartitionState new_failing_partition_state;
-        static Runtime.Events.Processing.StreamProcessorState result;
+        static PartitionId partition;
+        static Runtime.Events.Processing.Streams.StreamProcessorId stream_processor_id;
+        static Runtime.Events.Processing.Streams.StreamProcessorState initial_state;
+        static Runtime.Events.Processing.Streams.FailingPartitionState new_failing_partition_state;
+        static Runtime.Events.Processing.Streams.StreamProcessorState result;
 
         Establish context = () =>
         {
             repository = new StreamProcessorStateRepository(an_event_store_connection, Moq.Mock.Of<ILogger>());
-            initial_state = Runtime.Events.Processing.StreamProcessorState.New;
+            initial_state = Runtime.Events.Processing.Streams.StreamProcessorState.New;
             partition = Guid.NewGuid();
-            new_failing_partition_state = new Runtime.Events.Processing.FailingPartitionState { Position = 1U, RetryTime = DateTimeOffset.UtcNow };
-            stream_processor_id = new Runtime.Events.Processing.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
+            new_failing_partition_state = new Runtime.Events.Processing.Streams.FailingPartitionState { Position = 1U, RetryTime = DateTimeOffset.UtcNow };
+            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
             repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
             repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow).GetAwaiter().GetResult();
         };
