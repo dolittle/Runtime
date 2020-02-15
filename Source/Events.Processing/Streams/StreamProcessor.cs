@@ -104,7 +104,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 {
                     await CatchupFailingPartitions().ConfigureAwait(false);
 
-                    CommittedEventWithPartition eventAndPartition = default;
+                    StreamEvent eventAndPartition = default;
                     while (eventAndPartition == default && !_cancellationTokenSource.IsCancellationRequested)
                     {
                         try
@@ -117,13 +117,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                     }
 
-                    if (CurrentState.FailingPartitions.Keys.Contains(eventAndPartition.PartitionId))
+                    if (CurrentState.FailingPartitions.Keys.Contains(eventAndPartition.Partition))
                     {
                         CurrentState = await IncrementPosition().ConfigureAwait(false);
                     }
                     else
                     {
-                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.PartitionId).ConfigureAwait(false);
+                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.Partition).ConfigureAwait(false);
                         if (processingResult.Succeeded)
                         {
                             var currentState = await IncrementPosition().ConfigureAwait(false);
@@ -131,11 +131,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                         else if (processingResult is IRetryProcessingResult retryProcessingResult)
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.PartitionId, retryProcessingResult.RetryTimeout).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, retryProcessingResult.RetryTimeout).ConfigureAwait(false);
                         }
                         else
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.PartitionId, DateTimeOffset.MaxValue).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, DateTimeOffset.MaxValue).ConfigureAwait(false);
                         }
                     }
                 }
@@ -165,7 +165,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         if (!ShouldRetryProcessing(failingPartitionState)) break;
 
                         var eventAndPartition = await FetchEventWithPartitionAtPosition(nextPosition).ConfigureAwait(false);
-                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.PartitionId).ConfigureAwait(false);
+                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.Partition).ConfigureAwait(false);
 
                         if (processingResult.Succeeded)
                         {
@@ -232,9 +232,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return newFailingPartitionState;
         }
 
-        Task<CommittedEventWithPartition> FetchNextEventWithPartitionToProcess() => FetchEventWithPartitionAtPosition(CurrentState.Position);
+        Task<StreamEvent> FetchNextEventWithPartitionToProcess() => FetchEventWithPartitionAtPosition(CurrentState.Position);
 
-        Task<CommittedEventWithPartition> FetchEventWithPartitionAtPosition(StreamPosition position)
+        Task<StreamEvent> FetchEventWithPartitionAtPosition(StreamPosition position)
         {
             _logger.Debug($"{_logMessagePrefix} is fetching event at position '{position.Value}'.");
             return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, position);

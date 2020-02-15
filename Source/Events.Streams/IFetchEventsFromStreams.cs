@@ -17,8 +17,8 @@ namespace Dolittle.Runtime.Events.Streams
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
         /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="CommittedEventWithPartition" />.</returns>
-        Task<CommittedEventWithPartition> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
+        /// <returns>The <see cref="StreamEvent" />.</returns>
+        Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Finds the <see cref="StreamPosition" /> of the next event to process in a <see cref="StreamId" /> for a <see cref="PartitionId" />.
