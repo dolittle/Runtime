@@ -45,10 +45,10 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
         /// <inheritdoc/>
         public void Start()
         {
-            _logger.Information($"Setting up DataPointsStatePullers for {_configuration.EndPoints.Count()} endpoints");
+            _logger.Debug($"Setting up DataPointsStatePullers for {_configuration.EndPoints.Count()} endpoints");
             _configuration.EndPoints.ForEach(_ =>
             {
-                _logger.Information($"Starting a DataPointsStatePuller to pull from '{_.Target}' with interval {_.Interval}");
+                _logger.Debug($"Starting a DataPointsStatePuller to pull from '{_.Target}' with interval {_.Interval}");
                 _pullers.Add(new DataPointsStatePuller(_, _processors, _timers, _logger));
             });
         }

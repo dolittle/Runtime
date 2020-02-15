@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.TimeSeries.Connectors
             PushConnector pushConnector = null;
             try
             {
-                _logger.Information($"Register connector : '{pushConnectorName}' with Id: '{id}'");
+                _logger.Debug($"Register connector : '{pushConnectorName}' with Id: '{id}'");
                 pushConnector = new PushConnector(id, pushConnectorName);
                 _pushConnectors.Register(pushConnector);
 

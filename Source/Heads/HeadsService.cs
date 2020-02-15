@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Heads
             Timer timer = null;
             try
             {
-                _logger.Information($"Head connected '{headId}'");
+                _logger.Debug($"Head connected '{headId}'");
 
                 var connectionTime = _systemClock.GetCurrentTime();
                 var client = new Head(

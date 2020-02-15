@@ -37,14 +37,14 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
         /// <inheritdoc/>
         public void Register(DataPointProcessor dataPointProcessor)
         {
-            _logger.Information($"Registering '{dataPointProcessor.Id}'");
+            _logger.Debug($"Registering '{dataPointProcessor.Id}'");
             lock (_processors) _processors.Add(dataPointProcessor);
         }
 
         /// <inheritdoc/>
         public void Unregister(DataPointProcessor dataPointProcessor)
         {
-            _logger.Information($"Unregistering '{dataPointProcessor.Id}'");
+            _logger.Debug($"Unregistering '{dataPointProcessor.Id}'");
             lock (_processors) _processors.Remove(dataPointProcessor);
         }
 

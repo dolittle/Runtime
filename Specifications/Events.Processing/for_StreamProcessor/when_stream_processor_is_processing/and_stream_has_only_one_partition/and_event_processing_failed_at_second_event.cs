@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new CommittedEventWithPartition(first_event, partition_id)));
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 1, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new CommittedEventWithPartition(second_event, partition_id)));
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 2, Moq.It.IsAny<CancellationToken>())).Throws(new Exception());
-            stream_processor = new StreamProcessor(source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, Moq.Mock.Of<ILogger>());
+            stream_processor = new StreamProcessor(tenant_id, source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, Moq.Mock.Of<ILogger>());
         };
 
         Because of = () => stream_processor.BeginProcessing().Wait();

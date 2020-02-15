@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.TimeSeries.Connectors
         /// <inheritdoc/>
         public void Register(PullConnector connector)
         {
-            _logger.Information($"Register '{connector.Id}'");
+            _logger.Debug($"Register '{connector.Id}'");
             _connectors[connector.Id] = connector;
         }
 
@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.TimeSeries.Connectors
         {
             if (_connectors.ContainsKey(connector.Id))
             {
-                _logger.Information($"Unregister '{connector.Id}'");
+                _logger.Debug($"Unregister '{connector.Id}'");
                 _connectors.TryRemove(connector.Id, out PullConnector _);
             }
             else

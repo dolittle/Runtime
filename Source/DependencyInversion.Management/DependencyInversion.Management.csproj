@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" alias="contracts" />
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
     <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)"/>
     <PackageReference Include="Dolittle.DependencyInversion.Booting" Version="$(FundamentalsVersion)"/>
   </ItemGroup>

@@ -4,7 +4,7 @@
 extern alias contracts;
 
 using System.Collections.Generic;
-using Dolittle.Runtime.Heads;
+using Dolittle.Runtime.Services;
 using Dolittle.Services;
 
 namespace Dolittle.Runtime.TimeSeries.Identity

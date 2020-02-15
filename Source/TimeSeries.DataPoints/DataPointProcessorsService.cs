@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
 
             try
             {
-                _logger.Information($"Register processor with identifier '{id}'");
+                _logger.Debug($"Register processor with identifier '{id}'");
                 dataPointProcessor = new DataPointProcessor(id);
                 _dataPointProcessors.Register(dataPointProcessor);
 
@@ -62,7 +62,7 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
                 {
                     dataPointProcessor.Received -= Received;
 
-                    _logger.Information($"Unregister processor with identifier '{id}'");
+                    _logger.Debug($"Unregister processor with identifier '{id}'");
                     _dataPointProcessors.Unregister(dataPointProcessor);
                 }
             }
@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
         {
             if (!dataPoints.Any()) return;
 
-            _logger.Information("Process datapoint");
+            _logger.Debug("Process datapoint");
 
             try
             {

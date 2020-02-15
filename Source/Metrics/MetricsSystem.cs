@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Metrics
         public void Start()
         {
             const string path = "metrics/";
-            _logger.Information($"Starting metric server on port {_configuration.Port} on path '{path}'");
+            _logger.Debug($"Starting metric server on port {_configuration.Port} on path '{path}'");
             _server = new MetricServer(hostname: "*", port: _configuration.Port, url: path, registry: _collectorRegistry);
             _server.Start();
         }
