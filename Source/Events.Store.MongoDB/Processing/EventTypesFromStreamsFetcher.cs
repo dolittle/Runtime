@@ -38,19 +38,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             ThrowIfInvalidRange(fromPosition, toPosition);
             try
             {
-                using var session = await _connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
-                return await session.WithTransactionAsync(
-                    async (transaction, cancellationToken) =>
-                    {
-                        var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
-                        var eventTypes = await stream
-                            .Find(transaction, _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
-                            .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
-                            .ToListAsync(cancellationToken).ConfigureAwait(false);
-                        return new HashSet<Artifact>(eventTypes);
-                    },
-                    null,
-                    cancellationToken).ConfigureAwait(false);
+                var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
+                var eventTypes = await stream
+                    .Find(_streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+                return new HashSet<Artifact>(eventTypes);
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -64,19 +57,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             ThrowIfInvalidRange(fromPosition, toPosition);
             try
             {
-                using var session = await _connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
-                return await session.WithTransactionAsync(
-                    async (transaction, cancellationToken) =>
-                    {
-                        var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
-                        var eventTypes = await stream
-                            .Find(transaction, _streamEventFilter.Eq(_ => _.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
-                            .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
-                            .ToListAsync(cancellationToken).ConfigureAwait(false);
-                        return new HashSet<Artifact>(eventTypes);
-                    },
-                    null,
-                    cancellationToken).ConfigureAwait(false);
+                var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
+                var eventTypes = await stream
+                    .Find(_streamEventFilter.Eq(_ => _.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+                return new HashSet<Artifact>(eventTypes);
             }
             catch (MongoWaitQueueFullException ex)
             {
