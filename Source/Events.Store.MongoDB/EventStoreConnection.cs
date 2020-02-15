@@ -88,6 +88,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
             stream.Indexes.CreateOne(new CreateIndexModel<Event>(
                 Builders<Event>.IndexKeys
+                    .Ascending(_ => _.Partition)));
+
+            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
+                Builders<Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)
                     .Ascending(_ => _.Aggregate.TypeId)));
         }
@@ -98,6 +102,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 new CreateIndexModel<Event>(
                     Builders<Event>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<Event>(
+                    Builders<Event>.IndexKeys
+                        .Ascending(_ => _.Partition)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
