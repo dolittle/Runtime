@@ -22,8 +22,8 @@ namespace Dolittle.Runtime.Events.Processing
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
         readonly string _logMessagePrefix;
+        readonly CancellationTokenSource _cancellationTokenSource;
         Task _task;
-        CancellationTokenSource _cancellationTokenSource;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
@@ -49,6 +49,8 @@ namespace Dolittle.Runtime.Events.Processing
             Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
             _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
             CurrentState = StreamProcessorState.New;
+            _cancellationTokenSource = new CancellationTokenSource();
+            _cancellationTokenSource.Token.ThrowIfCancellationRequested();
         }
 
         /// <summary>
@@ -77,8 +79,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         public void Start()
         {
-            _cancellationTokenSource = new CancellationTokenSource();
-            _cancellationTokenSource.Token.ThrowIfCancellationRequested();
             _task = Task.Factory.StartNew(BeginProcessing, TaskCreationOptions.DenyChildAttach);
         }
 
