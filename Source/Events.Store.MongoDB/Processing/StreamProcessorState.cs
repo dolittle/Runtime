@@ -3,13 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using Dolittle.Runtime.Events.Processing.Streams;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Options;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
 {
     /// <summary>
-    /// Represents the state of an <see cref="Runtime.Events.Processing.StreamProcessor" />.
+    /// Represents the state of an <see cref="StreamProcessor" />.
     /// </summary>
     public class StreamProcessorState
     {
@@ -44,10 +45,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         public IDictionary<Guid, FailingPartitionState> FailingPartitions { get; set; }
 
         /// <summary>
-        /// Creates a new, initial, <see cref="StreamProcessorState" /> from a <see cref="Runtime.Events.Processing.EventProcessorId" />.
+        /// Creates a new, initial, <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" /> from a <see cref="Runtime.Events.Processing.EventProcessorId" />.
         /// </summary>
-        /// <param name="id">The <see cref="Runtime.Events.Processing.StreamProcessorId" />.</param>
+        /// <param name="id">The <see cref="StreamProcessorId" />.</param>
         /// <returns>The new initial <see cref="StreamProcessorState" />.</returns>
-        public static StreamProcessorState NewFromId(Runtime.Events.Processing.StreamProcessorId id) => new StreamProcessorState(new StreamProcessorId(id.EventProcessorId, id.SourceStreamId), 0, new Dictionary<Guid, FailingPartitionState>());
+        public static StreamProcessorState NewFromId(Runtime.Events.Processing.Streams.StreamProcessorId id) => new StreamProcessorState(new StreamProcessorId(id.EventProcessorId, id.SourceStreamId), 0, new Dictionary<Guid, FailingPartitionState>());
     }
 }

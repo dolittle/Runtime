@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Execution;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Driver;

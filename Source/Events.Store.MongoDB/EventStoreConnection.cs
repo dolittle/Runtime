@@ -8,6 +8,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing;
+using Dolittle.Runtime.Events.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -63,12 +64,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <summary>
         /// Gets the <see cref="IMongoCollection{Event}" /> that represents a stream of events.
         /// </summary>
-        /// <param name="streamId">The <see cref="Runtime.Events.Processing.StreamId" />.</param>
+        /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IMongoCollection{Event}" />.</returns>
-        public async Task<IMongoCollection<Event>> GetStreamCollectionAsync(Runtime.Events.Processing.StreamId streamId, CancellationToken cancellationToken = default)
+        public async Task<IMongoCollection<Event>> GetStreamCollectionAsync(StreamId stream, CancellationToken cancellationToken = default)
         {
-            var collection = _connection.Database.GetCollection<Event>(Constants.CollectionNameForStream(streamId));
+            var collection = _connection.Database.GetCollection<Event>(Constants.CollectionNameForStream(stream));
             await CreateCollectionsAndIndexesForStreamAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }

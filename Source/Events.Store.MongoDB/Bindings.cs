@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.DependencyInversion;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing;
+using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {

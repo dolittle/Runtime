@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Streams;
 using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
@@ -51,13 +51,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                       @event.Content.ToString());
 
         /// <summary>
-        /// Converts a <see cref="Event" /> to <see cref="CommittedEventWithPartition" />.
+        /// Converts a <see cref="Event" /> to <see cref="StreamEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
+        /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="partition">The <see cref="PartitionId" />.</param>
-        /// <returns>The converted <see cref="CommittedAggregateEvent" />.</returns>
-        public static CommittedEventWithPartition ToCommittedEventWithPartition(this Event @event, PartitionId partition) =>
-            new CommittedEventWithPartition(@event.ToCommittedEvent(), partition);
+        /// <returns>The converted <see cref="StreamEvent" />.</returns>
+        public static StreamEvent ToStreamEvent(this Event @event, StreamId stream, PartitionId partition) =>
+            new StreamEvent(@event.ToCommittedEvent(), stream, partition);
 
         /// <summary>
         /// Converts a <see cref="CommittedEvent" /> to <see cref="Event" />.

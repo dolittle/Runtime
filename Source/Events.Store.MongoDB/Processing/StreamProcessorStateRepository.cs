@@ -5,7 +5,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
@@ -31,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.StreamProcessorState> GetOrAddNew(Runtime.Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> GetOrAddNew(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -80,7 +81,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.StreamProcessorState> IncrementPosition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> IncrementPosition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -109,7 +110,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.StreamProcessorState> AddFailingPartition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> AddFailingPartition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -139,7 +140,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.StreamProcessorState> RemoveFailingPartition(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> RemoveFailingPartition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -169,7 +170,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.StreamProcessorState> SetFailingPartitionState(Runtime.Events.Processing.StreamProcessorId streamProcessorId, PartitionId partitionId, Runtime.Events.Processing.FailingPartitionState failingPartitionState, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> SetFailingPartitionState(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, PartitionId partitionId, Runtime.Events.Processing.Streams.FailingPartitionState failingPartitionState, CancellationToken cancellationToken = default)
         {
             try
             {
