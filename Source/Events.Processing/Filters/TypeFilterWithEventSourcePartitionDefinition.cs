@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Dolittle.Artifacts;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents the definition for <see cref="TypeFilterWithEventSourcePartition"/>.

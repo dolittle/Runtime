@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents a <see cref="AbstractFilterProcessor"/> that filters by known event types and can partition using an <see cref="EventSourceId"/>.

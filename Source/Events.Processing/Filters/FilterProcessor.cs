@@ -12,7 +12,7 @@ using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
 using Google.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents a default implementation of <see cref="AbstractFilterProcessor"/>.

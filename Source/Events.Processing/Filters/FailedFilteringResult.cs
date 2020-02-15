@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFilterResult" /> where filtering failed.

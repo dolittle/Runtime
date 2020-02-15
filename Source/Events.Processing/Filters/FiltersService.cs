@@ -19,7 +19,7 @@ using Dolittle.Services;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.Events.Processing.Filters;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents the implementation of <see creF="FiltersBase"/>.
