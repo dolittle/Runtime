@@ -131,11 +131,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                         else if (processingResult is IRetryProcessingResult retryProcessingResult)
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.PartitionId, retryProcessingResult.RetryTimeout, retryProcessingResult.FailureReason).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, retryProcessingResult.RetryTimeout, retryProcessingResult.FailureReason).ConfigureAwait(false);
                         }
                         else
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.PartitionId, DateTimeOffset.MaxValue, processingResult.FailureReason).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, DateTimeOffset.MaxValue, processingResult.FailureReason).ConfigureAwait(false);
                         }
                     }
                 }
