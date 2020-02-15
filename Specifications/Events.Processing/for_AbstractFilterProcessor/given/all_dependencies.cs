@@ -22,16 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.for_AbstractFilterProcessor.given
 
         Establish context = () =>
         {
-            committed_event = new Store.CommittedEvent(
-                EventLogVersion.Initial,
-                DateTimeOffset.UtcNow,
-                EventSourceId.New(),
-                CorrelationId.New(),
-                Microservice.New(),
-                TenantId.Development,
-                new Cause(CauseType.Command, 0),
-                new Artifact(ArtifactId.New(), ArtifactGeneration.First),
-                "{\"something\":42}");
+            committed_event = committed_events.single();
 
             event_processor_id = Guid.NewGuid();
             stream_id = Guid.NewGuid();
