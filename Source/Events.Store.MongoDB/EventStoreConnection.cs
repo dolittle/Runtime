@@ -84,6 +84,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         {
             stream.Indexes.CreateOne(new CreateIndexModel<Event>(
                 Builders<Event>.IndexKeys
+                    .Ascending(_ => _.EventLogVersion),
+                new CreateIndexOptions { Unique = true }));
+
+            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
+                Builders<Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)));
 
             stream.Indexes.CreateOne(new CreateIndexModel<Event>(
@@ -98,6 +103,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         async Task CreateCollectionsAndIndexesForStreamAsync(IMongoCollection<Event> stream, CancellationToken cancellationToken = default)
         {
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<Event>(
+                    Builders<Event>.IndexKeys
+                        .Ascending(_ => _.EventLogVersion),
+                    new CreateIndexOptions { Unique = true }),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<Event>(
                     Builders<Event>.IndexKeys
