@@ -1,18 +1,19 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+    <Import Project="../../default.props"/>
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Events.Store.MongoDB</AssemblyName>
-    <RootNamespace>Dolittle.Runtime.Events.Store.MongoDB</RootNamespace>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Events.Store.MongoDB</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Events.Store.MongoDB</RootNamespace>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="MongoDB.Driver" Version="2.10.1"/>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="MongoDB.Driver" Version="2.10.1"/>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
-    <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
+        <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
+    </ItemGroup>
 </Project>
 

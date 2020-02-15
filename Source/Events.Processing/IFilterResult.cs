@@ -4,7 +4,7 @@
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Defines the result for the <see cref="IRemoteFilterService" />.
+    /// Defines the result for a filter.
     /// </summary>
     public interface IFilterResult : IProcessingResult
     {

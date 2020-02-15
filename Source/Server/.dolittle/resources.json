@@ -6,9 +6,11 @@
             "useSSL": false
         },
         "eventStore": {
-            "host": "mongodb://localhost:27017",
-            "database": "event_store",
-            "useSSL": false
+            "servers": [
+                "localhost"
+            ],
+            "database": "event_store"
         }
     }
 }
+

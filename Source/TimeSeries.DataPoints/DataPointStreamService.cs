@@ -37,13 +37,13 @@ namespace Dolittle.Runtime.TimeSeries.DataPoints
         /// <inheritdoc/>
         public override async Task<Empty> Open(IAsyncStreamReader<DataPoint> requestStream, ServerCallContext context)
         {
-            _logger.Information($"DataPointStream opened");
+            _logger.Debug($"DataPointStream opened");
             while (await requestStream.MoveNext().ConfigureAwait(false))
             {
                 _dataPointsState.Set(requestStream.Current);
             }
 
-            _logger.Information($"DataPointStream closed");
+            _logger.Debug($"DataPointStream closed");
 
             return new Empty();
         }

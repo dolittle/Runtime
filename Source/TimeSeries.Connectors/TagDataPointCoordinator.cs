@@ -50,11 +50,11 @@ namespace Dolittle.Runtime.TimeSeries.Connectors
             {
                 if (!_timeSeriesMapper.CanIdentify(connectorName, tagDataPoint.Tag))
                 {
-                    _logger.Information($"Unidentified tag '{tagDataPoint.Tag}' from '{connectorName}'");
+                    _logger.Debug($"Unidentified tag '{tagDataPoint.Tag}' from '{connectorName}'");
                 }
                 else
                 {
-                    _logger.Information("DataPoint received");
+                    _logger.Debug("DataPoint received");
                     var timeSeriesId = _timeSeriesMapper.Identify(connectorName, tagDataPoint.Tag);
 
                     var dataPoint = new DataPoint
