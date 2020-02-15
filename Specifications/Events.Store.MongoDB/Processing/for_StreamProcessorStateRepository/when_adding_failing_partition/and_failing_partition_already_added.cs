@@ -20,10 +20,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
             partition = Guid.NewGuid();
             stream_processor_id = new Runtime.Events.Processing.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
             repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
-            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow).GetAwaiter().GetResult();
+            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "").GetAwaiter().GetResult();
         };
 
-        Because of = () => exception = Catch.Exception(() => repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "").GetAwaiter().GetResult());
 
         It should_throw_an_exception = () => exception.ShouldNotBeNull();
         It should_fail_because_failing_partition_has_already_been_added = () => exception.ShouldBeOfExactType<Runtime.Events.Processing.FailingPartitionAlreadyExists>();

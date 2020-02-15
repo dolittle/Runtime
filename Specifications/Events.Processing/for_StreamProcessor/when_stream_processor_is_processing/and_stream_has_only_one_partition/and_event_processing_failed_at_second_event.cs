@@ -11,11 +11,12 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
 {
     public class and_event_processing_failed_at_second_event : given.all_dependencies
     {
+        const string reason = "some reason";
         static readonly PartitionId partition_id = PartitionId.NotSet;
         static readonly Store.CommittedEvent first_event = Processing.given.a_committed_event;
         static readonly Store.CommittedEvent second_event = Processing.given.a_committed_event;
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
-        static readonly Moq.Mock<IEventProcessor> event_processor_mock = Processing.given.an_event_processor_mock(event_processor_id, (new SucceededProcessingResult(), partition_id, first_event), (new FailedProcessingResult(), partition_id, second_event));
+        static readonly Moq.Mock<IEventProcessor> event_processor_mock = Processing.given.an_event_processor_mock(event_processor_id, (new SucceededProcessingResult(), partition_id, first_event), (new FailedProcessingResult(reason), partition_id, second_event));
         static StreamProcessor stream_processor;
         static Task task;
 
@@ -36,6 +37,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
         It should_have_one_failing_partition = () => stream_processor.CurrentState.FailingPartitions.Count.ShouldEqual(1);
         It should_have_the_correct_failing_partition = () => stream_processor.CurrentState.FailingPartitions.ContainsKey(partition_id).ShouldBeTrue();
         It should_have_the_correct_position_on_the_failing_partition = () => stream_processor.CurrentState.FailingPartitions[partition_id].Position.ShouldEqual(new StreamPosition(1));
+        It should_have_the_correct_reason_on_the_failing_partition = () => stream_processor.CurrentState.FailingPartitions[partition_id].Reason.ShouldEqual(reason);
         It should_have_the_correct_retry_time_on_the_failing_partition = () => stream_processor.CurrentState.FailingPartitions[partition_id].RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
     }
 }

@@ -21,10 +21,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
             repository = new StreamProcessorStateRepository(an_event_store_connection, Moq.Mock.Of<ILogger>());
             initial_state = Runtime.Events.Processing.StreamProcessorState.New;
             partition = Guid.NewGuid();
-            new_failing_partition_state = new Runtime.Events.Processing.FailingPartitionState { Position = 1U, RetryTime = DateTimeOffset.UtcNow };
+            new_failing_partition_state = new Runtime.Events.Processing.FailingPartitionState { Position = 1U, RetryTime = DateTimeOffset.UtcNow, Reason = "some new reason" };
             stream_processor_id = new Runtime.Events.Processing.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
             repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
-            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow).GetAwaiter().GetResult();
+            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "some old reason").GetAwaiter().GetResult();
         };
 
         Because of = () => result = repository.SetFailingPartitionState(stream_processor_id, partition, new_failing_partition_state).GetAwaiter().GetResult();
@@ -34,5 +34,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
         It should_have_one_failing_partition_with_partition = () => result.FailingPartitions.TryGetValue(partition, out var state).ShouldBeTrue();
         It should_have_one_failing_partition_with_correct_position = () => result.FailingPartitions[partition].Position.ShouldEqual(new_failing_partition_state.Position);
         It should_have_one_failing_partition_with_retry_time = () => result.FailingPartitions[partition].RetryTime.ShouldEqual(new_failing_partition_state.RetryTime);
+        It should_have_one_failing_partition_with_reason = () => result.FailingPartitions[partition].Reason.ShouldEqual(new_failing_partition_state.Reason);
     }
 }

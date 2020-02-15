@@ -13,5 +13,6 @@ namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
 
         It should_be_succeeded = () => result.Succeeded.ShouldEqual(true);
         It should_not_retry = () => result.Retry.ShouldEqual(false);
+        It should_have_no_reason = () => result.FailureReason.ShouldEqual(string.Empty);
     }
 }

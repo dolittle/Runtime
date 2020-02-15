@@ -9,6 +9,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
 {
     public class and_failing_partition_is_not_already_added : given.all_dependencies
     {
+        const string reason = "some reason";
         static StreamProcessorStateRepository repository;
         static Runtime.Events.Processing.PartitionId partition;
         static Runtime.Events.Processing.StreamProcessorId stream_processor_id;
@@ -28,12 +29,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
             repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
         };
 
-        Because of = () => result = repository.AddFailingPartition(stream_processor_id, partition, failing_partition_position, failing_partition_retry_time).GetAwaiter().GetResult();
+        Because of = () => result = repository.AddFailingPartition(stream_processor_id, partition, failing_partition_position, failing_partition_retry_time, reason).GetAwaiter().GetResult();
 
         It should_have_the_same_position = () => result.Position.ShouldEqual(initial_state.Position);
         It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);
         It should_have_one_failing_partition_with_the_correct_partition_id = () => result.FailingPartitions.TryGetValue(partition, out var state).ShouldBeTrue();
         It should_have_one_failing_partition_with_the_correct_position = () => result.FailingPartitions[partition].Position.ShouldEqual(failing_partition_position);
         It should_have_one_failing_partition_with_the_correct_retry_time = () => result.FailingPartitions[partition].RetryTime.ShouldEqual(failing_partition_retry_time);
+        It should_have_one_failing_partition_with_the_correct_reason = () => result.FailingPartitions[partition].Reason.ShouldEqual(reason);
     }
 }
