@@ -250,7 +250,7 @@ namespace Dolittle.Runtime.Events.Processing
         async Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, DateTimeOffset retryTime, string reason, StreamPosition position)
         {
             _logger.Debug($"{_logMessagePrefix} is setting retry time '{retryTime}' and position '{position.Value}' for partition '{partitionId.Value}'");
-            var newFailingPartitionState = new FailingPartitionState { Position = position, RetryTime = retryTime, Reason = reason  };
+            var newFailingPartitionState = new FailingPartitionState { Position = position, RetryTime = retryTime, Reason = reason };
             CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
                 Identifier,
                 partitionId,
