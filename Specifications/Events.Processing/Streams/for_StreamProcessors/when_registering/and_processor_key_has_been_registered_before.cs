@@ -4,11 +4,12 @@
 using System;
 using System.Globalization;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Security;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_StreamProcessors.when_registering
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_registering
 {
     public class and_processor_key_has_been_registered_before : given.all_dependencies
     {

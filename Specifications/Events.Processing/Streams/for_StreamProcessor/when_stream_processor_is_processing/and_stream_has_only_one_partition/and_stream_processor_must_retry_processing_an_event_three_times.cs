@@ -5,9 +5,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_processor_is_processing.and_stream_has_only_one_partition
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_stream_processor_is_processing.and_stream_has_only_one_partition
 {
     public class and_stream_processor_must_retry_processing_an_event_three_times : given.all_dependencies
     {
@@ -30,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
 
         Establish context = () =>
         {
-            next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new CommittedEventWithPartition(first_event, partition_id)));
+            next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new StreamEvent(first_event, Guid.NewGuid(), partition_id)));
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 1, Moq.It.IsAny<CancellationToken>())).Throws(new Exception());
             next_event_fetcher.Setup(_ => _.FindNext(Moq.It.IsAny<StreamId>(), partition_id, 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new StreamPosition(0)));
             next_event_fetcher.Setup(_ => _.FindNext(Moq.It.IsAny<StreamId>(), partition_id, Moq.It.IsInRange(new StreamPosition(1), new StreamPosition(uint.MaxValue), Moq.Range.Inclusive), Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new StreamPosition(uint.MaxValue)));

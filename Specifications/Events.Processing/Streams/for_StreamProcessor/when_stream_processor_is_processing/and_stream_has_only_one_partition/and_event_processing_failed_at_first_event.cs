@@ -5,9 +5,10 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_processor_is_processing.and_stream_has_only_one_partition
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_stream_processor_is_processing.and_stream_has_only_one_partition
 {
     public class and_event_processing_failed_at_first_event : given.all_dependencies
     {
@@ -20,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
 
         Establish context = () =>
         {
-            var event_with_partition = new CommittedEventWithPartition(first_event, partition_id);
+            var event_with_partition = new StreamEvent(first_event, Guid.NewGuid(), partition_id);
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(event_with_partition));
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 1, Moq.It.IsAny<CancellationToken>())).Throws(new Exception());
             stream_processor = new StreamProcessor(tenant_id, source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, Moq.Mock.Of<ILogger>());

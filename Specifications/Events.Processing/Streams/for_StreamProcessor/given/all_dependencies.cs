@@ -2,11 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.given
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given
 {
     public class all_dependencies
     {

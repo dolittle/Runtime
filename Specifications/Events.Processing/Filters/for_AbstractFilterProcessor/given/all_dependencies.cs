@@ -2,15 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Applications;
-using Dolittle.Artifacts;
-using Dolittle.Execution;
 using Dolittle.Logging;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.for_AbstractFilterProcessor.given
+namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor.given
 {
     public class all_dependencies
     {

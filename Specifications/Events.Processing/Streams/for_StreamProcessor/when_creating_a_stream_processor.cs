@@ -3,9 +3,10 @@
 
 using System;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor
+namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor
 {
     public class when_creating_a_stream_processor : given.all_dependencies
     {

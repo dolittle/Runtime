@@ -3,11 +3,12 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Events.Processing.for_AbstractFilterProcessor.when_processing
+namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor.when_processing
 {
     public class and_event_is_included : given.all_dependencies
     {
