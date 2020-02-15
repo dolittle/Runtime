@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
             partition = Guid.NewGuid();
             stream_processor_id = new Runtime.Events.Processing.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
             repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
-            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow).GetAwaiter().GetResult();
+            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "reason").GetAwaiter().GetResult();
         };
 
         Because of = () => result = repository.RemoveFailingPartition(stream_processor_id, partition).GetAwaiter().GetResult();
