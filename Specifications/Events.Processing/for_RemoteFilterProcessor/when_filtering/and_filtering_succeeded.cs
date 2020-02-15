@@ -19,6 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.when_proc
 
         It should_succeed_processing = () => result.Succeeded.ShouldEqual(true);
         It should_not_retry_processing = () => result.Retry.ShouldEqual(false);
+        It should_have_no_reason = () => result.FailureReason.ShouldEqual(string.Empty);
         It should_be_an_IFilterResult = () => result.ShouldBeAssignableTo<IFilterResult>();
         It should_have_the_correct_is_included_value = () => (result as IFilterResult).IsIncluded.ShouldEqual(is_included);
         It should_have_the_correct_partition_value = () => (result as IFilterResult).Partition.ShouldEqual(partition_id);

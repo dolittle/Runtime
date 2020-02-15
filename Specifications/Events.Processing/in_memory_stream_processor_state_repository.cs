@@ -38,10 +38,10 @@ namespace Dolittle.Runtime.Events.Processing
             return Task.FromResult(newState);
         }
 
-        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
+        public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
-            newState.FailingPartitions.Add(partitionId, new FailingPartitionState { Position = position, RetryTime = retryTime });
+            newState.FailingPartitions.Add(partitionId, new FailingPartitionState { Position = position, RetryTime = retryTime, Reason = reason });
             states[streamProcessorId] = newState;
             return Task.FromResult(newState);
         }

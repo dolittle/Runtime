@@ -17,5 +17,6 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteEventProcessor.when_proce
 
         It should_not_succeed_processing = () => result.Succeeded.ShouldEqual(false);
         It should_not_retry_processing = () => result.Retry.ShouldEqual(false);
+        It should_have_the_correct_reason = () => result.FailureReason.ShouldEqual(reason);
     }
 }

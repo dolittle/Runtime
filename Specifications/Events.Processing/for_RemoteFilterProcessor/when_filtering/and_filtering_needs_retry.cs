@@ -9,16 +9,18 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteFilterProcessor.when_proc
 {
     public class and_filtering_needs_retry : given.all_dependencies
     {
+        static string reason = "some reason";
         static uint retry_timeout = 123;
         static RemoteFilterProcessor processing_processor;
         static IProcessingResult result;
 
-        Establish context = () => processing_processor = new RemoteFilterProcessor(target_stream_id, Processing.given.a_remote_filter_service(new RetryFilteringResult(retry_timeout)), event_to_stream_writer_mock.Object, Moq.Mock.Of<ILogger>());
+        Establish context = () => processing_processor = new RemoteFilterProcessor(target_stream_id, Processing.given.a_remote_filter_service(new RetryFilteringResult(retry_timeout, reason)), event_to_stream_writer_mock.Object, Moq.Mock.Of<ILogger>());
 
         Because of = async () => result = await processing_processor.Process(an_event, partition_id).ConfigureAwait(false);
 
         It should_not_succeed_processing = () => result.Succeeded.ShouldEqual(false);
         It should_retry_processing = () => result.Retry.ShouldEqual(true);
+        It should_have_the_correct_reason = () => result.FailureReason.ShouldEqual(reason);
         It should_be_of_assignable_to_IRetryFilteringResult = () => result.ShouldBeAssignableTo<IRetryFilteringResult>();
         It should_be_of_type_RetryFilteringResult = () => result.ShouldBeOfExactType<RetryFilteringResult>();
         It should_have_the_correct_timeout = () => (result as IRetryFilteringResult).RetryTimeout.ShouldEqual(retry_timeout);

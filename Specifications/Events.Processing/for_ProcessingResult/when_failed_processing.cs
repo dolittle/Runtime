@@ -7,11 +7,13 @@ namespace Dolittle.Runtime.Events.Processing.for_ProcessingResult
 {
     public class when_failed_processing
     {
+        const string reason = "some reason";
         static FailedProcessingResult result;
 
-        Because of = () => result = new FailedProcessingResult();
+        Because of = () => result = new FailedProcessingResult(reason);
 
         It should_not_be_succeeded = () => result.Succeeded.ShouldEqual(false);
         It should_not_retry = () => result.Retry.ShouldEqual(false);
+        It should_have_the_correct_reason = () => result.FailureReason.ShouldEqual(reason);
     }
 }

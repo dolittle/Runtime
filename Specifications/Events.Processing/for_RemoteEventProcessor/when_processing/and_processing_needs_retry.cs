@@ -19,5 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.for_RemoteEventProcessor.when_proce
         It should_retry_processing = () => result.Retry.ShouldEqual(true);
         It should_be_of_type_RetryProcessingResult = () => result.ShouldBeOfExactType<RetryProcessingResult>();
         It should_have_the_correct_timeout = () => (result as RetryProcessingResult).RetryTimeout.ShouldEqual(retry_timeout);
+        It should_have_the_correct_reason = () => result.FailureReason.ShouldEqual(reason);
     }
 }
