@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// </summary>
         /// <param name="state">The <see cref="FailingPartitionState" />.</param>
         /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.FailingPartitionState" />.</returns>
-        public static Runtime.Events.Processing.Streams.FailingPartitionState ToRuntimeRepresentation(this FailingPartitionState state) => new Runtime.Events.Processing.Streams.FailingPartitionState { Position = state.Position, RetryTime = state.RetryTime };
+        public static Runtime.Events.Processing.Streams.FailingPartitionState ToRuntimeRepresentation(this FailingPartitionState state) => new Runtime.Events.Processing.Streams.FailingPartitionState { Position = state.Position, RetryTime = state.RetryTime, Reason = state.Reason };
 
         /// <summary>
         /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" />.

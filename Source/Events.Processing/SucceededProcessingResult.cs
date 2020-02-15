@@ -13,5 +13,8 @@ namespace Dolittle.Runtime.Events.Processing
 
         /// <inheritdoc />
         public bool Retry => false;
+
+        /// <inheritdoc/>
+        public string FailureReason => string.Empty;
     }
 }

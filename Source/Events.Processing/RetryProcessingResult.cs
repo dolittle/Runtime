@@ -12,7 +12,15 @@ namespace Dolittle.Runtime.Events.Processing
         /// Initializes a new instance of the <see cref="RetryProcessingResult"/> class.
         /// </summary>
         /// <param name="retryTimeout">The retry timeout in milliseconds.</param>
-        public RetryProcessingResult(uint retryTimeout) => RetryTimeout = retryTimeout;
+        /// <param name="failureReason">The reason for failure.</param>
+        public RetryProcessingResult(uint retryTimeout, string failureReason)
+        {
+            RetryTimeout = retryTimeout;
+            FailureReason = failureReason;
+        }
+
+        /// <inheritdoc/>
+        public string FailureReason { get; }
 
         /// <inheritdoc />
         public bool Succeeded => false;

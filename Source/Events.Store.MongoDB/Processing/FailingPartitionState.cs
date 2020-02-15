@@ -17,10 +17,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// </summary>
         /// <param name="position">The position.</param>
         /// <param name="retryTime">The retry time.</param>
-        public FailingPartitionState(uint position, DateTimeOffset retryTime)
+        /// <param name="reason">The reason for failure.</param>
+        public FailingPartitionState(uint position, DateTimeOffset retryTime, string reason)
         {
             Position = position;
             RetryTime = retryTime;
+            Reason = reason;
         }
 
         /// <summary>
@@ -33,5 +35,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// </summary>
         [BsonRepresentation(BsonType.String)]
         public DateTimeOffset RetryTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the reason for failure.
+        /// </summary>
+        public string Reason { get; set; }
     }
 }

@@ -131,11 +131,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                         else if (processingResult is IRetryProcessingResult retryProcessingResult)
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, retryProcessingResult.RetryTimeout).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.PartitionId, retryProcessingResult.RetryTimeout, retryProcessingResult.FailureReason).ConfigureAwait(false);
                         }
                         else
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, DateTimeOffset.MaxValue).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.PartitionId, DateTimeOffset.MaxValue, processingResult.FailureReason).ConfigureAwait(false);
                         }
                     }
                 }
@@ -173,11 +173,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                         else if (processingResult is IRetryProcessingResult retryProcessingResult)
                         {
-                            failingPartitionState = await SetFailingPartitionState(partitionId, retryProcessingResult.RetryTimeout, nextPosition).ConfigureAwait(false);
+                            failingPartitionState = await SetFailingPartitionState(partitionId, retryProcessingResult.RetryTimeout, processingResult.FailureReason, nextPosition).ConfigureAwait(false);
                         }
                         else
                         {
-                            failingPartitionState = await SetFailingPartitionState(partitionId, DateTimeOffset.MaxValue, nextPosition).ConfigureAwait(false);
+                            failingPartitionState = await SetFailingPartitionState(partitionId, DateTimeOffset.MaxValue, processingResult.FailureReason, nextPosition).ConfigureAwait(false);
                         }
 
                         nextPosition = await FindPositionOfNextEventInPartition(partitionId, failingPartitionState.Position).ConfigureAwait(false);
@@ -188,12 +188,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
         }
 
-        Task<StreamProcessorState> AddFailingPartitionAndIncrementPosition(PartitionId partitionId, uint retryTimeout) => AddFailingPartitionAndIncrementPosition(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout));
+        Task<StreamProcessorState> AddFailingPartitionAndIncrementPosition(PartitionId partitionId, uint retryTimeout, string reason) => AddFailingPartitionAndIncrementPosition(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout), reason);
 
-        async Task<StreamProcessorState> AddFailingPartitionAndIncrementPosition(PartitionId partitionId, DateTimeOffset retryTime)
+        async Task<StreamProcessorState> AddFailingPartitionAndIncrementPosition(PartitionId partitionId, DateTimeOffset retryTime, string reason)
         {
             _logger.Debug($"{_logMessagePrefix} is adding failing partition '{partitionId}' with retry time '{retryTime}'");
-            await _streamProcessorStateRepository.AddFailingPartition(Identifier, partitionId, CurrentState.Position, retryTime).ConfigureAwait(false);
+            await _streamProcessorStateRepository.AddFailingPartition(Identifier, partitionId, CurrentState.Position, retryTime, reason).ConfigureAwait(false);
             return await IncrementPosition().ConfigureAwait(false);
         }
 
@@ -246,12 +246,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return _eventsFromStreamsFetcher.FindNext(Identifier.SourceStreamId, partitionId, fromPosition);
         }
 
-        Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, uint retryTimeout, StreamPosition position) => SetFailingPartitionState(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout), position);
+        Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, uint retryTimeout, string reason, StreamPosition position) => SetFailingPartitionState(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout), reason, position);
 
-        async Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, DateTimeOffset retryTime, StreamPosition position)
+        async Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, DateTimeOffset retryTime, string reason, StreamPosition position)
         {
             _logger.Debug($"{_logMessagePrefix} is setting retry time '{retryTime}' and position '{position.Value}' for partition '{partitionId.Value}'");
-            var newFailingPartitionState = new FailingPartitionState { Position = position, RetryTime = retryTime };
+            var newFailingPartitionState = new FailingPartitionState { Position = position, RetryTime = retryTime, Reason = reason };
             CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
                 Identifier,
                 partitionId,

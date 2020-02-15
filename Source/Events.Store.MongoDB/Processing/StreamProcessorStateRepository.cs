@@ -110,7 +110,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> AddFailingPartition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> AddFailingPartition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -123,7 +123,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
                 if (state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionAlreadyExists(streamProcessorId, partitionId);
-                state.FailingPartitions.Add(partitionId, new FailingPartitionState(position, retryTime));
+                state.FailingPartitions.Add(partitionId, new FailingPartitionState(position, retryTime, reason));
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, id),
                     state,
@@ -183,7 +183,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
 
                 if (!state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
 
-                state.FailingPartitions[partitionId] = new FailingPartitionState(failingPartitionState.Position, failingPartitionState.RetryTime);
+                state.FailingPartitions[partitionId] = new FailingPartitionState(failingPartitionState.Position, failingPartitionState.RetryTime, failingPartitionState.Reason);
 
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),

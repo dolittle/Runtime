@@ -21,5 +21,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Gets or sets the <see cref="DateTimeOffset" /> for when to retry processing.
         /// </summary>
         public DateTimeOffset RetryTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the reason for failure.
+        /// </summary>
+        public string Reason { get; set; }
     }
 }

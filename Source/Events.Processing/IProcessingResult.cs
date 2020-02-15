@@ -17,5 +17,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// Gets a value indicating whether to retry processing.
         /// </summary>
         bool Retry { get; }
+
+        /// <summary>
+        /// Gets the reason for failure.
+        /// </summary>
+        string FailureReason { get; }
     }
 }
