@@ -3,7 +3,7 @@
 
 using Dolittle.Artifacts;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Represent an Event that has not been committed to the Event Store.
