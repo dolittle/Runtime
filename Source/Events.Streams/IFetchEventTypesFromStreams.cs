@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
     /// Defines a system that can fetch <see cref="ArtifactId">event types</see> from <see cref="StreamId">streams</see>.

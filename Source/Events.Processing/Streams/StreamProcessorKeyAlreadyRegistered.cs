@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Exception that gets thrown when a <see cref="StreamProcessorId" /> is already registered.

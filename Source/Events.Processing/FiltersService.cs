@@ -12,6 +12,8 @@ using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Grpc.Core;

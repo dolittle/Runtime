@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 using Dolittle.Concepts;
+using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Represents a combination of <see cref="StreamPosition" /> and <see cref="IDictionary{PartitionId, FailingPartitionState}">states of failing partitions</see> that represents the state of an <see cref="StreamProcessor" />.

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Exception that gets thrown when a stream processor with a given <see cref="StreamProcessorId" /> was not found in the collection.

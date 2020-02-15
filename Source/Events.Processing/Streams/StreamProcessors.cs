@@ -7,8 +7,9 @@ using System.Linq;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Represents an implementation of <see cref="IStreamProcessors" />.
@@ -23,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Processing.StreamProcessors"/> class.
+        /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
         /// </summary>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>

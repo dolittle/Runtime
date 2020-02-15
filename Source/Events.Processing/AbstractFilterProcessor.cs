@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
 {

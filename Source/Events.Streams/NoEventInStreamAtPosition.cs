@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
     /// Exception that gets thrown when there was no event in <see cref="StreamId" /> at <see cref="StreamPosition" />.

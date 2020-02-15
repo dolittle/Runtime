@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Concepts;
+using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Represents a unique key for a <see cref="StreamProcessor" />.

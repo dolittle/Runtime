@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Processing;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
     /// Exception that gets thrown when <see cref="IWriteEventsToStreams" /> is attempting to write a committed event to the all stream.

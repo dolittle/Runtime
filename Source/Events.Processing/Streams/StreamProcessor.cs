@@ -6,11 +6,12 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
 #pragma warning disable CA2008
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Represents a system that processes a stream of events.

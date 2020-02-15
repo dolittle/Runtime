@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Artifacts;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
     /// Exception that gets thrown when a the <see cref="IWriteEventsToStreams" /> tries to write an event twice to a stream.

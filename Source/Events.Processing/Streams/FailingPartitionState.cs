@@ -3,8 +3,9 @@
 
 using System;
 using Dolittle.Concepts;
+using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Represents the state of a failing partition.
