@@ -1,9 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
@@ -61,7 +59,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId streamId, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId streamId, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
         {
             ThrowIfInvalidRange(fromPosition, toPosition);
             try
@@ -72,7 +70,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     {
                         var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                         var eventTypes = await stream
-                            .Find(transaction, _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                            .Find(transaction, _streamEventFilter.Eq(_ => _.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
                             .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                             .ToListAsync(cancellationToken).ConfigureAwait(false);
                         return new HashSet<Artifact>(eventTypes);
