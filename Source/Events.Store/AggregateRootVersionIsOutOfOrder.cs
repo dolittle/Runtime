@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Exception that gets thrown when a sequence of events are not valid for the Aggregate Root it is being used with.

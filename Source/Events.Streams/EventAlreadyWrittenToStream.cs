@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Artifacts;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Streams
 {

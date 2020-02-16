@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Represents the identification of an event source.

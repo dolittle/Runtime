@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Represents the types of causes that can cause the event to occur.

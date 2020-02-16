@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using Dolittle.Artifacts;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {

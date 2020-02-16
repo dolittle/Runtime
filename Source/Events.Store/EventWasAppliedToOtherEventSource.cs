@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Exception that gets thrown when an event is being used with an Event Source with a different <see cref="EventSourceId"/> than it was applied to.
