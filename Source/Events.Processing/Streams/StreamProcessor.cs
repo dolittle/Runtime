@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
@@ -104,12 +105,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 {
                     await CatchupFailingPartitions().ConfigureAwait(false);
 
-                    StreamEvent eventAndPartition = default;
-                    while (eventAndPartition == default && !_cancellationTokenSource.IsCancellationRequested)
+                    StreamEvent streamEvent = default;
+                    while (streamEvent == default && !_cancellationTokenSource.IsCancellationRequested)
                     {
                         try
                         {
-                            eventAndPartition = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
+                            streamEvent = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
                         }
                         catch (NoEventInStreamAtPosition)
                         {
@@ -117,25 +118,24 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                     }
 
-                    if (CurrentState.FailingPartitions.Keys.Contains(eventAndPartition.Partition))
+                    if (CurrentState.FailingPartitions.Keys.Contains(streamEvent.Partition))
                     {
                         CurrentState = await IncrementPosition().ConfigureAwait(false);
                     }
                     else
                     {
-                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.Partition).ConfigureAwait(false);
+                        var processingResult = await ProcessEvent(streamEvent.Event, streamEvent.Partition).ConfigureAwait(false);
                         if (processingResult.Succeeded)
                         {
-                            var currentState = await IncrementPosition().ConfigureAwait(false);
-                            CurrentState = currentState;
+                            CurrentState = await IncrementPosition().ConfigureAwait(false);
                         }
                         else if (processingResult is IRetryProcessingResult retryProcessingResult)
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, retryProcessingResult.RetryTimeout, retryProcessingResult.FailureReason).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(streamEvent.Partition, retryProcessingResult.RetryTimeout, retryProcessingResult.FailureReason).ConfigureAwait(false);
                         }
                         else
                         {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(eventAndPartition.Partition, DateTimeOffset.MaxValue, processingResult.FailureReason).ConfigureAwait(false);
+                            CurrentState = await AddFailingPartitionAndIncrementPosition(streamEvent.Partition, DateTimeOffset.MaxValue, processingResult.FailureReason).ConfigureAwait(false);
                         }
                     }
                 }
@@ -164,8 +164,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     {
                         if (!ShouldRetryProcessing(failingPartitionState)) break;
 
-                        var eventAndPartition = await FetchEventWithPartitionAtPosition(nextPosition).ConfigureAwait(false);
-                        var processingResult = await ProcessEvent(eventAndPartition.Event, eventAndPartition.Partition).ConfigureAwait(false);
+                        var streamEvent = await FetchEventWithPartitionAtPosition(nextPosition).ConfigureAwait(false);
+                        var processingResult = await ProcessEvent(streamEvent.Event, streamEvent.Partition).ConfigureAwait(false);
 
                         if (processingResult.Succeeded)
                         {
@@ -209,7 +209,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return _streamProcessorStateRepository.GetOrAddNew(Identifier);
         }
 
-        Task<IProcessingResult> ProcessEvent(Store.CommittedEvent @event, PartitionId partitionId)
+        Task<IProcessingResult> ProcessEvent(CommittedEvent @event, PartitionId partitionId)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' in partition '{partitionId.Value}'");
             return _processor.Process(@event, partitionId);

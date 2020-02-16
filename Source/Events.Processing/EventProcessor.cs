@@ -8,6 +8,7 @@ using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
 
@@ -47,7 +48,7 @@ namespace Dolittle.Runtime.Events.Processing
         public EventProcessorId Identifier { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 

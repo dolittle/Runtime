@@ -4,15 +4,16 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     public class in_memory_event_to_stream_writer : IWriteEventsToStreams
     {
-        readonly IDictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>> streams = new Dictionary<StreamId, IDictionary<PartitionId, IList<Store.CommittedEvent>>>();
+        readonly IDictionary<StreamId, IDictionary<PartitionId, IList<CommittedEvent>>> streams = new Dictionary<StreamId, IDictionary<PartitionId, IList<CommittedEvent>>>();
 
-        public Task Write(Store.CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
+        public Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             if (streams.ContainsKey(streamId))
             {
@@ -26,15 +27,15 @@ namespace Dolittle.Runtime.Events.Processing
                 }
                 else
                 {
-                    stream.Add(partitionId, new Store.CommittedEvent[] { @event });
+                    stream.Add(partitionId, new CommittedEvent[] { @event });
                     streams[streamId] = stream;
                 }
             }
             else
             {
-                streams.Add(streamId, new Dictionary<PartitionId, IList<Store.CommittedEvent>>
+                streams.Add(streamId, new Dictionary<PartitionId, IList<CommittedEvent>>
                 {
-                    { partitionId, new Store.CommittedEvent[] { @event } }
+                    { partitionId, new CommittedEvent[] { @event } }
                 });
             }
 

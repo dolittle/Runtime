@@ -16,16 +16,16 @@ using grpcEvents = contracts::Dolittle.Runtime.Events;
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Extensions for working with conversions between <see cref="Store.CommittedEvent"/> and <see cref="grpcEvents.CommittedEvent"/>.
+    /// Extensions for working with conversions between <see cref="CommittedEvent"/> and <see cref="grpcEvents.CommittedEvent"/>.
     /// </summary>
     public static class CommittedEventExtensions
     {
         /// <summary>
-        /// Convert to a protobuf message representation of <see cref="Store.CommittedEvent"/>.
+        /// Convert to a protobuf message representation of <see cref="CommittedEvent"/>.
         /// </summary>
-        /// <param name="event"><see cref="Store.CommittedEvent"/> to convert from.</param>
+        /// <param name="event"><see cref="CommittedEvent"/> to convert from.</param>
         /// <returns>Converted <see cref="grpcEvents.CommittedEvent"/>.</returns>
-        public static grpcEvents.CommittedEvent ToProtobuf(this Store.CommittedEvent @event)
+        public static grpcEvents.CommittedEvent ToProtobuf(this CommittedEvent @event)
         {
             return new grpcEvents.CommittedEvent
             {
@@ -51,13 +51,13 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <summary>
-        /// Convert to from <see cref="grpcEvents.CommittedEvent"/> to <see cref="Store.CommittedEvent"/>.
+        /// Convert to from <see cref="grpcEvents.CommittedEvent"/> to <see cref="CommittedEvent"/>.
         /// </summary>
         /// <param name="event"><see cref="grpcEvents.CommittedEvent"/> to convert from.</param>
-        /// <returns>Converted <see cref="Store.CommittedEvent"/>.</returns>
-        public static Store.CommittedEvent ToCommittedEvent(this grpcEvents.CommittedEvent @event)
+        /// <returns>Converted <see cref="CommittedEvent"/>.</returns>
+        public static CommittedEvent ToCommittedEvent(this grpcEvents.CommittedEvent @event)
         {
-            return new Store.CommittedEvent(
+            return new CommittedEvent(
                 @event.EventLogVersion,
                 @event.Occurred.ToDateTimeOffset(),
                 @event.EventSourceId.To<EventSourceId>(),

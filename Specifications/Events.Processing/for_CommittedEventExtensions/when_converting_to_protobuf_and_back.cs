@@ -1,14 +1,15 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.for_CommittedEventExtensions
 {
     public class when_converting_to_protobuf_and_back
     {
-        static Store.CommittedEvent committed_event;
-        static Store.CommittedEvent result;
+        static CommittedEvent committed_event;
+        static CommittedEvent result;
 
         Establish context = () => committed_event = committed_events.single();
 
