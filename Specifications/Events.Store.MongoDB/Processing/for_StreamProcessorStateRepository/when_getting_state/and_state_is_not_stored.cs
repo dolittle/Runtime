@@ -9,16 +9,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
 {
     public class and_state_is_not_stored : given.all_dependencies
     {
-        static Runtime.Events.Processing.StreamProcessorState initial_state;
+        static Runtime.Events.Processing.Streams.StreamProcessorState initial_state;
         static StreamProcessorStateRepository repository;
-        static Runtime.Events.Processing.StreamProcessorId stream_processor_id;
-        static Runtime.Events.Processing.StreamProcessorState result;
+        static Runtime.Events.Processing.Streams.StreamProcessorId stream_processor_id;
+        static Runtime.Events.Processing.Streams.StreamProcessorState result;
 
         Establish context = () =>
         {
             repository = new StreamProcessorStateRepository(an_event_store_connection, Moq.Mock.Of<ILogger>());
-            stream_processor_id = new Runtime.Events.Processing.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
-            initial_state = Runtime.Events.Processing.StreamProcessorState.New;
+            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
+            initial_state = Runtime.Events.Processing.Streams.StreamProcessorState.New;
         };
 
         Because of = () => result = repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();

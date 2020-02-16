@@ -4,8 +4,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using Dolittle.Runtime.Events.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
@@ -31,14 +31,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<CommittedEventWithPartition> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        public async Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
         {
             try
             {
                 var stream = streamId == StreamId.AllStreamId ? _connection.AllStream : await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var committedEventWithPartition = await stream.Find(
                     _eventFilter.Eq(_ => _.StreamPosition, streamPosition.Value))
-                    .Project(_ => _.ToCommittedEventWithPartition(_.Partition))
+                    .Project(_ => _.ToStreamEvent(streamId, _.Partition))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(streamId, streamPosition);
                 return committedEventWithPartition;

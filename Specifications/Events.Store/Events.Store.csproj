@@ -14,5 +14,4 @@
         <ProjectReference Include="..\..\Source\Events.Store\Events.Store.csproj" />
     </ItemGroup>
 
-
 </Project>

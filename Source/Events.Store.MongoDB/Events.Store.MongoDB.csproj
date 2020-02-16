@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
+        <ProjectReference Include="..\Events.Streams\Events.Streams.csproj" />
         <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
     </ItemGroup>
 </Project>

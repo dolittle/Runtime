@@ -15,6 +15,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Events\Events.csproj" />
+        <ProjectReference Include="..\Events.Streams\Events.Streams.csproj" />
         <ProjectReference Include="..\Services\Services.csproj" />
         <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
         <ProjectReference Include="..\Tenancy\Tenancy.csproj" />

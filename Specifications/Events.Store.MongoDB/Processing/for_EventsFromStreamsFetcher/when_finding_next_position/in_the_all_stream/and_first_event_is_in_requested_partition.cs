@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsFromStreamsFetcher.when_finding_next_position.in_the_all_stream

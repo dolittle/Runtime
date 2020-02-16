@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
+using Dolittle.Runtime.Events.Streams;
 using Moq;
 
 namespace Dolittle.Runtime.Events.Processing

@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsFromStreamsFetcher
@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsFromStreams
         static StreamId stream;
         static PartitionId partition;
         static CommittedEvent committed_event;
-        static CommittedEventWithPartition result;
+        static StreamEvent result;
 
         Establish context = () =>
         {
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsFromStreams
 
         It should_fetch_an_event = () => result.ShouldNotBeNull();
 
-        It should_fetch_event_with_the_correct_partition_id = () => result.PartitionId.ShouldEqual(partition);
+        It should_fetch_event_with_the_correct_partition_id = () => result.Partition.ShouldEqual(partition);
 
         It should_fetch_the_correct_event = () => result.Event.ShouldBeTheSameAs(result.Event);
     }
