@@ -5,6 +5,7 @@ using System;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Execution;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing

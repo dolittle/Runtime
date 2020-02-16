@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.ResourceTypes;
-using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Events
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Represents a <see cref="IAmAResourceType">resource type</see> for an event store.

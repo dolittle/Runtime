@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Streams
         /// <summary>
         /// Writes an event to a stream.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="event">The <see cref="Store.CommittedEvent" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>

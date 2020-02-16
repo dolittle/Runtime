@@ -3,12 +3,11 @@
 
 using System.Collections.Generic;
 using Dolittle.Artifacts;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represents a sequence of <see cref="IEvent"/>s applied by an AggregateRoot to an Event Source that have not been committed to the Event Store.
+    /// Represents a sequence of events applied by an AggregateRoot to an Event Source that have not been committed to the Event Store.
     /// </summary>
     public class UncommittedAggregateEvents : UncommittedEvents
     {

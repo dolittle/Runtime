@@ -7,6 +7,7 @@ using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Execution;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
 using Google.Protobuf.WellKnownTypes;
 using grpcArtifacts = contracts::Dolittle.Runtime.Artifacts;

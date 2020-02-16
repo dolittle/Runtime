@@ -3,12 +3,11 @@
 
 using System;
 using Dolittle.Artifacts;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Exception that gets thrown when an <see cref="IEvent"/> is being used with an Aggregate Root with a different <see cref="Type"/> than it was applied by.
+    /// Exception that gets thrown when an event is being used with an Aggregate Root with a different <see cref="Type"/> than it was applied by.
     /// </summary>
     public class EventWasAppliedByOtherAggregateRoot : ArgumentException
     {

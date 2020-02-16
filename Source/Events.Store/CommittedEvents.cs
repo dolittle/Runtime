@@ -4,12 +4,11 @@
 using System.Collections;
 using System.Collections.Generic;
 using Dolittle.Collections;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represents a sequence of <see cref="IEvent"/>s that have been committed to the Event Store.
+    /// Represents a sequence of events that have been committed to the Event Store.
     /// </summary>
     public class CommittedEvents : IReadOnlyList<CommittedEvent>
     {
