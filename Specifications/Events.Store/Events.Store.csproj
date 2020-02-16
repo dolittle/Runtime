@@ -1,14 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Events.Store.Specs</AssemblyName>
-  </PropertyGroup>
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Events.Store.Specs</AssemblyName>
+    </PropertyGroup>
 
-  <Import Project="../../specs.props"></Import>
+    <Import Project="../../specs.props"/>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\Source\Events.Store\Events.Store.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Source\Events.Store\Events.Store.csproj" />
+    </ItemGroup>
 
 
 </Project>

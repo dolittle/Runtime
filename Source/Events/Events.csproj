@@ -28,6 +28,5 @@
     <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
     <ProjectReference Include="..\Microservices\Microservices.csproj" />
     <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
-    <ProjectReference Include="..\Transactions\Transactions.csproj" />
   </ItemGroup>
 </Project>

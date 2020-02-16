@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.for_StreamProcessor.when_stream_pro
         static readonly Store.CommittedEvent first_event = Processing.given.a_committed_event;
         static readonly Store.CommittedEvent second_event = Processing.given.a_committed_event;
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
-        static readonly Moq.Mock<IEventProcessor> event_processor_mock = Processing.given.an_event_processor_mock(event_processor_id, (new SucceededProcessingResult(), partition_id, first_event), (new FailedProcessingResult(reason), partition_id, second_event));
+        static readonly Moq.Mock<IEventProcessor> event_processor_mock = Processing.given.an_event_processor(event_processor_id, (new SucceededProcessingResult(), partition_id, first_event), (new FailedProcessingResult(reason), partition_id, second_event));
         static StreamProcessor stream_processor;
         static Task task;
 

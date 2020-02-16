@@ -2,12 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Concepts;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Represents a link to an instance of a cause that caused <see cref="IEvent"/>s to occur.
+    /// Represents a link to an instance of a cause that caused the event to occur.
     /// </summary>
     public class Cause : Value<Cause>
     {

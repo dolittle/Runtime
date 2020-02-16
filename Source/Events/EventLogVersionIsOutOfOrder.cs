@@ -2,12 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Events;
 
 namespace Dolittle.Runtime.Events
 {
     /// <summary>
-    /// Exception that gets thrown when a sequence of <see cref="IEvent"/>s are not in the order they were committed to the Event Store.
+    /// Exception that gets thrown when a sequence of events are not in the order they were committed to the Event Store.
     /// </summary>s
     public class EventLogVersionIsOutOfOrder : ArgumentException
     {
