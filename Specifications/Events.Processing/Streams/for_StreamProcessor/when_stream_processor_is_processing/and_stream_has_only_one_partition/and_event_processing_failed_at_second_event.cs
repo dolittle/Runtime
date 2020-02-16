@@ -14,8 +14,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_st
     {
         const string reason = "some reason";
         static readonly PartitionId partition_id = PartitionId.NotSet;
-        static readonly Store.CommittedEvent first_event = Processing.given.a_committed_event;
-        static readonly Store.CommittedEvent second_event = Processing.given.a_committed_event;
+        static readonly Store.CommittedEvent first_event = committed_events.single();
+        static readonly Store.CommittedEvent second_event = committed_events.single();
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
         static readonly Moq.Mock<IEventProcessor> event_processor_mock = Processing.given.an_event_processor(event_processor_id, (new SucceededProcessingResult(), partition_id, first_event), (new FailedProcessingResult(reason), partition_id, second_event));
         static StreamProcessor stream_processor;

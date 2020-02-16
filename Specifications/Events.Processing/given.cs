@@ -12,6 +12,8 @@ namespace Dolittle.Runtime.Events.Processing
 {
     public static class given
     {
+        public static Mock<IEventProcessor> an_event_processor() => new Mock<IEventProcessor>();
+
         public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, IProcessingResult result) => an_event_processor(id, (result, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<Store.CommittedEvent>()));
 
         public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, params (IProcessingResult result, PartitionId partition_Id, Store.CommittedEvent @event)[] event_and_result_pairs)
@@ -30,19 +32,6 @@ namespace Dolittle.Runtime.Events.Processing
             return event_processor_mock;
         }
 
-        public static Mock<IFetchEventsFromStreams> a_next_event_fetcher_mock() => new Mock<IFetchEventsFromStreams>();
-
-        public static Mock<IEventProcessor> an_event_processor() => new Mock<IEventProcessor>();
-
-        public static Store.CommittedEvent a_committed_event => new Store.CommittedEvent(
-            0,
-            DateTimeOffset.UtcNow,
-            EventSourceId.NotSet,
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            new Cause(CauseType.Command, 0),
-            new Artifact(ArtifactId.New(), ArtifactGeneration.First),
-            "Event Content");
+        public static Mock<IFetchEventsFromStreams> a_next_event_fetcher() => new Mock<IFetchEventsFromStreams>();
     }
 }

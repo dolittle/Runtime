@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.given
         Establish context = () =>
         {
             execution_context_manager_mock = new Mock<IExecutionContextManager>();
-            next_event_fetcher_mock = Processing.given.a_next_event_fetcher_mock();
+            next_event_fetcher_mock = Processing.given.a_next_event_fetcher();
             stream_processor_state_repository = new in_memory_stream_processor_state_repository();
         };
     }
