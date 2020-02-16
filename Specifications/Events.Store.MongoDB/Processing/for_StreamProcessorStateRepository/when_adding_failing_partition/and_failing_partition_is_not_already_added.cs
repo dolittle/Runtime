@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorStateRepository.when_adding_failing_partition
@@ -11,21 +12,21 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_StreamProcessorSt
     {
         const string reason = "some reason";
         static StreamProcessorStateRepository repository;
-        static Runtime.Events.Processing.PartitionId partition;
-        static Runtime.Events.Processing.StreamProcessorId stream_processor_id;
-        static Runtime.Events.Processing.StreamProcessorState initial_state;
-        static Runtime.Events.Processing.StreamProcessorState result;
-        static Runtime.Events.Processing.StreamPosition failing_partition_position;
+        static PartitionId partition;
+        static Runtime.Events.Processing.Streams.StreamProcessorId stream_processor_id;
+        static Runtime.Events.Processing.Streams.StreamProcessorState initial_state;
+        static Runtime.Events.Processing.Streams.StreamProcessorState result;
+        static StreamPosition failing_partition_position;
         static DateTimeOffset failing_partition_retry_time;
 
         Establish context = () =>
         {
             repository = new StreamProcessorStateRepository(an_event_store_connection, Moq.Mock.Of<ILogger>());
             partition = Guid.NewGuid();
-            initial_state = Runtime.Events.Processing.StreamProcessorState.New;
+            initial_state = Runtime.Events.Processing.Streams.StreamProcessorState.New;
             failing_partition_position = 0U;
             failing_partition_retry_time = DateTimeOffset.UtcNow;
-            stream_processor_id = new Runtime.Events.Processing.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
+            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
             repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
         };
 

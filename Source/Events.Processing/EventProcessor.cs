@@ -8,6 +8,7 @@ using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
 
 namespace Dolittle.Runtime.Events.Processing

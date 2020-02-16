@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventTypesFromStreamsFetcher.when_fetching_event_types_in_range

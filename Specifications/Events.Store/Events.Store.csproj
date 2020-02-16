@@ -7,6 +7,10 @@
   <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\Source\Events.Store\Events.Store.csproj" />
   </ItemGroup>
 

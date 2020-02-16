@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
 {

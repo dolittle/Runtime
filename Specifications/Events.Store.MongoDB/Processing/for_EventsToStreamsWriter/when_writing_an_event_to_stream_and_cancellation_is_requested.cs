@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWriter

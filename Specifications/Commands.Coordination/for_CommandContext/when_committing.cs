@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Commands.Coordination.Specs.for_CommandContext
     {
         static UncommittedEvents event_stream;
 
-        Establish context = () => uncommitted_event_stream_coordinator.Setup(e => e.Commit(command_context.CorrelationId, Moq.It.IsAny<UncommittedEvents>())).Callback((CorrelationId i, UncommittedEvents s) => event_stream = s);
+        Establish context = () => uncommitted_event_stream_coordinator.Setup(e => e.Commit(command_context.CorrelationId, Moq.It.IsAny<UncommittedAggregateEvents>())).Callback((CorrelationId i, UncommittedEvents s) => event_stream = s);
 
         Because of = () => command_context.Commit();
 
