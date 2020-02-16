@@ -57,10 +57,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             };
 
             _logger.Debug($"Filter event that occurred @ {@event.Occurred}");
-            FilterClientToRuntimeResponse result = null;
-            await _callDispatcher.Call(message, response => result = response).ConfigureAwait(false);
+            IFilterResult result = null;
+            await _callDispatcher.Call(message, response => result = response.ToFilterResult()).ConfigureAwait(false);
             _logger.Debug($"Filter result : {result.IsIncluded}");
-            return new SucceededFilteringResult(true, partitionId);
+            return result;
         }
     }
 }

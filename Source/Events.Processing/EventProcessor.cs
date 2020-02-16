@@ -57,10 +57,10 @@ namespace Dolittle.Runtime.Events.Processing
                 Event = @event.ToProtobuf(),
                 ExecutionContext = _executionContextManager.Current.ToByteString()
             };
+            IProcessingResult result = null;
+            await _callDispatcher.Call(message, response => result = response.ToProcessingResult()).ConfigureAwait(false);
 
-            await _callDispatcher.Call(message, _ => { }).ConfigureAwait(false);
-
-            return new SucceededProcessingResult();
+            return result;
         }
     }
 }
