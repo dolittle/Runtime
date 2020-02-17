@@ -35,6 +35,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             MongoClient = connection.MongoClient;
 
             EventLog = connection.Database.GetCollection<Event>(Constants.EventLogCollection);
+            PublicEvents = connection.Database.GetCollection<PublicEvent>(Constants.PublicEventsCollection);
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
             StreamProcessorStates = connection.Database.GetCollection<StreamProcessorState>(Constants.StreamProcessorStateCollection);
 
@@ -50,6 +51,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// Gets the <see cref="IMongoCollection{Event}"/> where Events in the event log are stored.
         /// </summary>
         public IMongoCollection<Event> EventLog { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{PublicEvent}" /> where public Events are stored.
+        /// </summary>
+        public IMongoCollection<PublicEvent> PublicEvents { get; }
 
         /// <summary>
         /// Gets the <see cref="IMongoCollection{AggregateRoot}"/> where Aggregate Roots are stored.
@@ -86,11 +92,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         {
             EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
                 Builders<Event>.IndexKeys
-                    .Ascending(_ => _.EventLogVersion),
-                new CreateIndexOptions { Unique = true }));
-
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)));
 
             EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
@@ -101,19 +102,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         void CretaeCollectionsAndIndexesForPublicEvents()
         {
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
+            PublicEvents.Indexes.CreateOne(new CreateIndexModel<PublicEvent>(
+                Builders<PublicEvent>.IndexKeys
                     .Ascending(_ => _.EventLogVersion),
                 new CreateIndexOptions { Unique = true }));
-
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
-                    .Ascending(_ => _.Metadata.EventSource)));
-
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
-                    .Ascending(_ => _.Metadata.EventSource)
-                    .Ascending(_ => _.Aggregate.TypeId)));
         }
 
         async Task CreateCollectionsAndIndexesForStreamAsync(IMongoCollection<Events.StreamEvent> stream, CancellationToken cancellationToken = default)
