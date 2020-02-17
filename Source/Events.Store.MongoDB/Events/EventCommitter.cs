@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
         public EventCommitter(EventStoreConnection connection)
         {
-            _allStream = connection.AllStream;
+            _allStream = connection.EventLog;
         }
 
         /// <inheritdoc/>
@@ -67,6 +67,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 tenant,
                 cause,
                 @event.Type,
+                @event.Public,
                 @event.Content);
         }
 
@@ -115,6 +116,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 tenant,
                 cause,
                 @event.Type,
+                @event.Public,
                 @event.Content);
         }
 
@@ -137,8 +139,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     transaction,
                     new Event(
                         version,
-                        version,
-                        PartitionId.NotSet,
                         new EventMetadata(
                             occurred,
                             eventSource,
@@ -150,6 +150,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                             @event.Type.Id,
                             @event.Type.Generation),
                         aggregate,
+                        @event.Public,
                         BsonDocument.Parse(@event.Content)),
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }

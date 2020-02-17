@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
@@ -17,7 +18,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
     /// </summary>
     public class EventTypesFromStreamsFetcher : IFetchEventTypesFromStreams
     {
-        readonly FilterDefinitionBuilder<Event> _streamEventFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.StreamEvent> _streamEventFilter = Builders<MongoDB.Events.StreamEvent>.Filter;
+        readonly FilterDefinitionBuilder<Event> _eventLogFilter = Builders<Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -33,9 +35,58 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId streamId, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId streamId, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
         {
             ThrowIfInvalidRange(fromPosition, toPosition);
+            if (streamId == StreamId.AllStreamId) return FetchTypesInRangeFromEventLog(fromPosition.Value, toPosition.Value, cancellationToken);
+            return FetchTypesInRangeFromStream(streamId, fromPosition, toPosition, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId streamId, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        {
+            ThrowIfInvalidRange(fromPosition, toPosition);
+            if (streamId == StreamId.AllStreamId) return FetchTypesInRangeAndPartitionFromEventLog(partition, fromPosition.Value, toPosition.Value, cancellationToken);
+            return FetchTypesInRangeAndPartitionFromStream(streamId, partition, fromPosition, toPosition, cancellationToken);
+        }
+
+        async Task<IEnumerable<Artifact>> FetchTypesInRangeFromEventLog(EventLogVersion fromPosition, EventLogVersion toPosition, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var eventLog = _connection.EventLog;
+                var eventTypes = await eventLog
+                    .Find(_eventLogFilter.Gte(_ => _.EventLogVersion, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogVersion, toPosition.Value))
+                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+                return new HashSet<Artifact>(eventTypes);
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartitionFromEventLog(PartitionId partition, EventLogVersion fromPosition, EventLogVersion toPosition, CancellationToken cancellationToken)
+        {
+            if (partition != PartitionId.NotSet) return Enumerable.Empty<Artifact>();
+            try
+            {
+                var eventLog = _connection.EventLog;
+                var eventTypes = await eventLog
+                    .Find(_eventLogFilter.Gte(_ => _.EventLogVersion, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogVersion, toPosition.Value))
+                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+                return new HashSet<Artifact>(eventTypes);
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        async Task<IEnumerable<Artifact>> FetchTypesInRangeFromStream(StreamId streamId, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken)
+        {
             try
             {
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
@@ -51,10 +102,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId streamId, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartitionFromStream(StreamId streamId, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken)
         {
-            ThrowIfInvalidRange(fromPosition, toPosition);
             try
             {
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);

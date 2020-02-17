@@ -66,6 +66,7 @@ namespace Dolittle.Runtime.Events.Store
                 @event.Tenant.To<TenantId>(),
                 new Cause((CauseType)@event.Cause.Type, @event.Cause.Position),
                 new Artifact(@event.Type.Id.To<ArtifactId>(), @event.Type.Generation),
+                @event.Public,
                 @event.Content);
         }
     }

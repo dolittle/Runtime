@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
-            { typeof(Dolittle.Runtime.Events.Store.IEventStore), typeof(Store.MongoDB.EventStore) },
+            { typeof(IEventStore), typeof(EventStore) },
         };
 
         /// <inheritdoc/>

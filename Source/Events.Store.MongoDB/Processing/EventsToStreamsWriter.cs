@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
     /// </summary>
     public class EventsToStreamsWriter : IWriteEventsToStreams
     {
-        readonly FilterDefinitionBuilder<Event> _streamEventFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.StreamEvent> _streamEventFilter = Builders<MongoDB.Events.StreamEvent>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -43,13 +43,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     async (transaction, cancellationToken) =>
                     {
                         var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
-                        streamPosition = (StreamPosition)await stream.CountDocumentsAsync(
+                        streamPosition = (uint)await stream.CountDocumentsAsync(
                             transaction,
                             _streamEventFilter.Empty).ConfigureAwait(false);
 
                         await stream.InsertOneAsync(
                             transaction,
-                            @event.ToStoreRepresentation(streamPosition, partitionId),
+                            @event.ToStoreStreamEvent(streamPosition, partitionId),
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },

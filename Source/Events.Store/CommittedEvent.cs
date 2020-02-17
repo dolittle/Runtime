@@ -25,6 +25,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="tenant">The <see cref="TenantId"/> within which the Event occurred.</param>
         /// <param name="cause">The link to the cause of the Event.</param>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
+        /// <param name="isPublic">Whether this Event is public.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
         public CommittedEvent(
             EventLogVersion eventLogVersion,
@@ -35,6 +36,7 @@ namespace Dolittle.Runtime.Events.Store
             TenantId tenant,
             Cause cause,
             Artifact type,
+            bool isPublic,
             string content)
         {
             EventLogVersion = eventLogVersion;
@@ -45,6 +47,7 @@ namespace Dolittle.Runtime.Events.Store
             Tenant = tenant;
             Cause = cause;
             Type = type;
+            Public = isPublic;
             Content = content;
         }
 
@@ -87,6 +90,11 @@ namespace Dolittle.Runtime.Events.Store
         /// Gets the <see cref="Artifact"/> representing the type of the Event.
         /// </summary>
         public Artifact Type { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the Event is public.
+        /// </summary>
+        public bool Public { get; }
 
         /// <summary>
         /// Gets the content of the Event represented as a JSON-encoded <see cref="string"/>.

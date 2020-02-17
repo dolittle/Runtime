@@ -11,20 +11,25 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     public static class Constants
     {
         /// <summary>
-        /// The collection where stream processor states are stored.
+        /// The collection name where stream processor states are stored.
         /// </summary>
-        public static readonly string StreamProcessorStateCollection = "stream-processor-states";
+        public const string StreamProcessorStateCollection = "stream-processor-states";
 
         /// <summary>
-        /// The collection where aggregate root instances are stored.
+        /// The collection name where aggregate root instances are stored.
         /// These documents are used to ensure optimistic concurrency transaction boundaries.
         /// </summary>
-        public static readonly string AggregateRootInstanceCollection = "aggregates";
+        public const string AggregateRootInstanceCollection = "aggregates";
 
         /// <summary>
-        /// Gets the collection where events in the event log are stored.
+        /// Gets the collection name where events in the event log are stored.
         /// </summary>
-        public static string AllStreamCollection => CollectionNameForStream(StreamId.AllStreamId);
+        public const string EventLogCollection = "event-log";
+
+        /// <summary>
+        /// Gets the collection name where public events are stored.
+        /// </summary>
+        public const string PublicEventsCollection = "public-events";
 
         /// <summary>
         /// Gets the collection name for a stream.

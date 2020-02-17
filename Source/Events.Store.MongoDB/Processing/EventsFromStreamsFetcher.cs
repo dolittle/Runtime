@@ -15,7 +15,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
     /// </summary>
     public class EventsFromStreamsFetcher : IFetchEventsFromStreams
     {
-        readonly FilterDefinitionBuilder<Event> _eventFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.StreamEvent> _streamEventFilter = Builders<MongoDB.Events.StreamEvent>.Filter;
+        readonly FilterDefinitionBuilder<Event> _eventLogFilter = Builders<Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -31,14 +32,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        public Task<Streams.StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        {
+            if (streamId == StreamId.AllStreamId) return FetchFromEventLog(streamPosition.Value, cancellationToken);
+            else return FetchFromStream(streamId, streamPosition, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
+        {
+            if (streamId == StreamId.AllStreamId) return FindNextInEventLog(fromPosition.Value, cancellationToken);
+            else return FindNextInStream(streamId, partitionId, fromPosition, cancellationToken);
+        }
+
+        async Task<Streams.StreamEvent> FetchFromStream(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             try
             {
-                var stream = streamId == StreamId.AllStreamId ? _connection.AllStream : await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
+                var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var committedEventWithPartition = await stream.Find(
-                    _eventFilter.Eq(_ => _.StreamPosition, streamPosition.Value))
-                    .Project(_ => _.ToStreamEvent(streamId, _.Partition))
+                    _streamEventFilter.Eq(_ => _.StreamPosition, streamPosition.Value))
+                    .Project(_ => _.ToRuntimeStreamEvent(streamId))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(streamId, streamPosition);
                 return committedEventWithPartition;
@@ -49,21 +63,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             }
         }
 
-        /// <inheritdoc/>
-        public Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
-        {
-            if (streamId == StreamId.AllStreamId) return FindNextInAllStream(fromPosition, cancellationToken);
-            else return FindNextInEventStreams(streamId, partitionId, fromPosition, cancellationToken);
-        }
-
-        async Task<StreamPosition> FindNextInAllStream(StreamPosition fromPosition, CancellationToken cancellationToken)
+        async Task<Streams.StreamEvent> FetchFromEventLog(EventLogVersion eventLogVersion, CancellationToken cancellationToken)
         {
             try
             {
-                var @event = await _connection.AllStream.Find(
-                    Builders<Event>.Filter.Eq(_ => _.StreamPosition, fromPosition.Value))
+                var eventLog = _connection.EventLog;
+                var committedEventWithPartition = await eventLog.Find(
+                    _eventLogFilter.Eq(_ => _.EventLogVersion, eventLogVersion.Value))
+                    .Project(_ => _.ToRuntimeStreamEvent())
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                return @event != default ? @event.StreamPosition : uint.MaxValue;
+                if (committedEventWithPartition == default) throw new NoEventAtEventLogVersion(eventLogVersion);
+                return committedEventWithPartition;
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -71,14 +81,29 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             }
         }
 
-        async Task<StreamPosition> FindNextInEventStreams(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken)
+        async Task<StreamPosition> FindNextInEventLog(EventLogVersion fromPosition, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var @event = await _connection.EventLog.Find(
+                    _eventLogFilter.Eq(_ => _.EventLogVersion, fromPosition.Value))
+                    .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                return @event != default ? @event.EventLogVersion : uint.MaxValue;
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        async Task<StreamPosition> FindNextInStream(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken)
         {
             try
             {
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var streamEvent = await stream.Find(
-                    _eventFilter.Eq(_ => _.Partition, partitionId.Value)
-                    & _eventFilter.Gte(_ => _.StreamPosition, fromPosition.Value))
+                    _streamEventFilter.Eq(_ => _.Partition, partitionId.Value)
+                    & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 return streamEvent != default ? streamEvent.StreamPosition : uint.MaxValue;
             }

@@ -1,27 +1,32 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
-    /// Represents an event stored in the MongoDB event store.
+    /// Represents an event stored in a stream in the MongoDB event store.
     /// </summary>
-    public class Event
+    public class StreamEvent
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="Event"/> class.
+        /// Initializes a new instance of the <see cref="StreamEvent"/> class.
         /// </summary>
+        /// <param name="streamPosition">The position in the stream.</param>
         /// <param name="eventLogVersion">The event log version this event comes from.</param>
+        /// <param name="partition">The partition that this event is in.</param>
         /// <param name="metadata">The The event metadata.</param>
         /// <param name="aggregate">The aggregate metadata.</param>
-        /// <param name="isPublic">Whether this Event is public.</param>
+        /// <param name="isPublic">Whether the Event is public.</param>
         /// <param name="content">The event content.</param>
-        public Event(uint eventLogVersion, EventMetadata metadata, AggregateMetadata aggregate, bool isPublic, BsonDocument content)
+        public StreamEvent(uint streamPosition, uint eventLogVersion, Guid partition, EventMetadata metadata, AggregateMetadata aggregate, bool isPublic, BsonDocument content)
         {
+            StreamPosition = streamPosition;
             EventLogVersion = eventLogVersion;
+            Partition = partition;
             Metadata = metadata;
             Aggregate = aggregate;
             Public = isPublic;
@@ -29,10 +34,20 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         }
 
         /// <summary>
-        /// Gets or sets the event log version of the event.
+        /// Gets or sets stream position.
         /// </summary>
         [BsonId]
+        public uint StreamPosition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the event log version of the event.
+        /// </summary>
         public uint EventLogVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the partition that the event belongs in.
+        /// </summary>
+        public Guid Partition { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="EventMetadata"/> containing the platform generated event information.
@@ -45,7 +60,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public AggregateMetadata Aggregate { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether this is a public Event.
+        /// Gets or sets a value indicating whether the Event is public.
         /// </summary>
         public bool Public { get; set; }
 

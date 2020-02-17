@@ -27,6 +27,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="tenant">The <see cref="TenantId"/> within which the Event occurred.</param>
         /// <param name="cause">The link to the cause of the Event.</param>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
+        /// <param name="isPublic">Whether this Event is public.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
         public CommittedAggregateEvent(
             Artifact aggregateRoot,
@@ -39,8 +40,9 @@ namespace Dolittle.Runtime.Events.Store
             TenantId tenant,
             Cause cause,
             Artifact type,
+            bool isPublic,
             string content)
-            : base(eventLogVersion, occurred, eventSource, correlationId, microservice, tenant, cause, type, content)
+            : base(eventLogVersion, occurred, eventSource, correlationId, microservice, tenant, cause, type, isPublic, content)
         {
             AggregateRoot = aggregateRoot;
             AggregateRootVersion = aggregateRootVersion;
