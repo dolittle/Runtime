@@ -21,6 +21,7 @@ namespace Dolittle.Runtime.Events.Processing
                 TenantId.Development,
                 new Cause(CauseType.Command, 0),
                 new Artifact(ArtifactId.New(), ArtifactGeneration.First),
+                false,
                 "{\"something\":42}");
     }
 }

@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 using MongoDB.Driver;
@@ -16,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWr
         static CommittedAggregateEvent committed_aggregate_event;
         static StreamId stream_id;
         static PartitionId partition;
-        static IMongoCollection<Event> stream;
+        static IMongoCollection<MongoDB.Events.StreamEvent> stream;
 
         Establish context = () =>
         {
@@ -29,10 +28,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWr
 
         Because of = () => events_to_streams_writer.Write(committed_aggregate_event, stream_id, partition).GetAwaiter().GetResult();
 
-        It should_have_written_one_event_to_stream = () => stream.Find(filters.an_event_filter.Empty).ToList().Count.ShouldEqual(1);
+        It should_have_written_one_event_to_stream = () => stream.Find(filters.a_stream_event_filter.Empty).ToList().Count.ShouldEqual(1);
 
-        It should_have_stored_one_event_at_position_zero = () => stream.Find(filters.an_event_filter.Eq(_ => _.StreamPosition, 0U)).SingleOrDefault().ShouldNotBeNull();
+        It should_have_stored_one_event_at_position_zero = () => stream.Find(filters.a_stream_event_filter.Eq(_ => _.StreamPosition, 0U)).SingleOrDefault().ShouldNotBeNull();
 
-        It should_have_stored_the_event_with_exactly_the_same_data_as_committed_event = () => committed_aggregate_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.an_event_filter.Empty).First(), 0, partition);
+        It should_have_stored_the_event_with_exactly_the_same_data_as_committed_event = () => committed_aggregate_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.a_stream_event_filter.Empty).First(), 0, partition);
     }
 }

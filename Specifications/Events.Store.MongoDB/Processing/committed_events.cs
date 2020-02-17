@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 Guid.NewGuid(),
                 new Cause(CauseType.Command, 0),
                 new Artifact(Guid.NewGuid(), 1),
+                false,
                 events.some_event_content);
 
         public static CommittedEvent a_committed_event(EventLogVersion event_log_version) =>
@@ -32,6 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 Guid.NewGuid(),
                 new Cause(CauseType.Command, 0),
                 new Artifact(Guid.NewGuid(), 1),
+                false,
                 events.some_event_content);
 
         public static CommittedAggregateEvent a_committed_aggregate_event_with_type(EventLogVersion event_log_version, ArtifactId aggregate, EventSourceId event_source, AggregateRootVersion aggregate_root_version, Artifact event_type) =>
@@ -46,6 +48,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 Guid.NewGuid(),
                 new Cause(CauseType.Command, 0),
                 event_type,
+                false,
                 events.some_event_content);
 
         public static CommittedEvent a_committed_event_with_type(EventLogVersion event_log_version, Artifact event_type) =>
@@ -58,6 +61,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 Guid.NewGuid(),
                 new Cause(CauseType.Command, 0),
                 event_type,
+                false,
                 events.some_event_content);
     }
 }

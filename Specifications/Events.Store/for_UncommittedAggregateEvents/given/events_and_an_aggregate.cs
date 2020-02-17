@@ -9,6 +9,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents.giv
 {
     public abstract class events_and_an_aggregate
     {
+        public const bool is_public = false;
         public static EventSourceId event_source_id = Guid.Parse("a96d181c-cf8b-4bc9-a576-20be48166101");
         public static Artifact aggregate_artifact = new Artifact(Guid.Parse("28238ebc-6454-4229-8891-5798ecb1875f"), ArtifactGeneration.First);
         public static AggregateRootVersion aggregate_version = AggregateRootVersion.Initial;
@@ -22,9 +23,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents.giv
 
         Establish context = () =>
         {
-            event_one = new UncommittedEvent(event_a_artifact, "one");
-            event_two = new UncommittedEvent(event_a_artifact, "two");
-            event_three = new UncommittedEvent(event_b_artifact, "three");
+            event_one = new UncommittedEvent(event_a_artifact, is_public, "one");
+            event_two = new UncommittedEvent(event_a_artifact, is_public, "two");
+            event_three = new UncommittedEvent(event_b_artifact, is_public, "three");
         };
     }
 }

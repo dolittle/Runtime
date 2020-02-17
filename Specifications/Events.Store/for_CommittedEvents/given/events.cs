@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents.given
 {
     public abstract class events
     {
+        public const bool is_public = false;
         public static CorrelationId correlation_id = Guid.Parse("4a52a13f-4f74-4ee8-a74d-d1b4b6076d8c");
         public static Microservice microservice_id = Guid.Parse("5d352805-d550-4b12-af6c-58c1e898c84d");
         public static TenantId tenant_id = Guid.Parse("17cda67e-76b9-4c49-bab7-954beb70d357");
@@ -26,9 +27,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents.given
 
         Establish context = () =>
         {
-            event_one = new CommittedEvent(0, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "one");
-            event_two = new CommittedEvent(1, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, "two");
-            event_three = new CommittedEvent(2, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "three");
+            event_one = new CommittedEvent(0, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, is_public, "one");
+            event_two = new CommittedEvent(1, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_a_artifact, is_public, "two");
+            event_three = new CommittedEvent(2, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, is_public, "three");
         };
     }
 }

@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.for_EventStore.given
 {
     public class all_dependencies
     {
-        protected static UncommittedEvent an_uncommitted_event => new UncommittedEvent(new Artifacts.Artifact(Guid.NewGuid(), 0), events.some_event_content);
+        protected static UncommittedEvent an_uncommitted_event => new UncommittedEvent(new Artifacts.Artifact(Guid.NewGuid(), 0), false, events.some_event_content);
 
         protected static an_event_store_connection an_event_store_connection;
         protected static Mock<IExecutionContextManager> execution_context_manager;

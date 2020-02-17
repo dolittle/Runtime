@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <inheritdoc/>
         public Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
         {
-            if (streamId == StreamId.AllStreamId) return FindNextInEventLog(fromPosition.Value, cancellationToken);
+            if (streamId == StreamId.AllStreamId) return FindNextInEventLog(partitionId, fromPosition.Value, cancellationToken);
             else return FindNextInStream(streamId, partitionId, fromPosition, cancellationToken);
         }
 
@@ -81,8 +81,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             }
         }
 
-        async Task<StreamPosition> FindNextInEventLog(EventLogVersion fromPosition, CancellationToken cancellationToken)
+        async Task<StreamPosition> FindNextInEventLog(PartitionId partitionId, EventLogVersion fromPosition, CancellationToken cancellationToken)
         {
+            if (partitionId != PartitionId.NotSet) return uint.MaxValue;
             try
             {
                 var @event = await _connection.EventLog.Find(
