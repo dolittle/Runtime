@@ -13,7 +13,7 @@ using Google.Protobuf.WellKnownTypes;
 using grpcArtifacts = contracts::Dolittle.Runtime.Artifacts;
 using grpcEvents = contracts::Dolittle.Runtime.Events;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Extensions for working with conversions between <see cref="CommittedEvent"/> and <see cref="grpcEvents.CommittedEvent"/>.
