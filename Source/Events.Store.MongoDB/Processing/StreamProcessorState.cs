@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <summary>
         /// Gets or sets the failing partitions.
         /// </summary>
-        [BsonDictionaryOptions(DictionaryRepresentation.ArrayOfDocuments)]
+        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public IDictionary<Guid, FailingPartitionState> FailingPartitions { get; set; }
 
         /// <summary>
