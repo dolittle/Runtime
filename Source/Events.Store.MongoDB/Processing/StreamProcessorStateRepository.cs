@@ -122,8 +122,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     .ConfigureAwait(false);
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
-                if (state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionAlreadyExists(streamProcessorId, partitionId);
-                state.FailingPartitions.Add(partitionId, new FailingPartitionState(position, retryTime, reason));
+                if (state.FailingPartitions.ContainsKey(partitionId.Value.ToString())) throw new FailingPartitionAlreadyExists(streamProcessorId, partitionId);
+                state.FailingPartitions.Add(partitionId.Value.ToString(), new FailingPartitionState(position, retryTime, reason));
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, id),
                     state,
@@ -151,9 +151,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     .ConfigureAwait(false);
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
-                if (!state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
+                if (!state.FailingPartitions.ContainsKey(partitionId.Value.ToString())) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
 
-                state.FailingPartitions.Remove(partitionId);
+                state.FailingPartitions.Remove(partitionId.Value.ToString());
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
                     state,
@@ -181,9 +181,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     .ConfigureAwait(false);
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
-                if (!state.FailingPartitions.ContainsKey(partitionId)) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
+                if (!state.FailingPartitions.ContainsKey(partitionId.Value.ToString())) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
 
-                state.FailingPartitions[partitionId] = new FailingPartitionState(failingPartitionState.Position, failingPartitionState.RetryTime, failingPartitionState.Reason);
+                state.FailingPartitions[partitionId.Value.ToString()] = new FailingPartitionState(failingPartitionState.Position, failingPartitionState.RetryTime, failingPartitionState.Reason);
 
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),

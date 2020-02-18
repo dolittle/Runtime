@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Linq;
 using Dolittle.Runtime.Events.Streams;
 
@@ -31,6 +32,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <param name="state">The <see cref="StreamProcessorState" />.</param>
         /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" />.</returns>
         public static Runtime.Events.Processing.Streams.StreamProcessorState ToRuntimeRepresentation(this StreamProcessorState state) =>
-            new Runtime.Events.Processing.Streams.StreamProcessorState(state.Position, state.FailingPartitions.ToDictionary(_ => new PartitionId { Value = _.Key }, _ => _.Value.ToRuntimeRepresentation()));
+            new Runtime.Events.Processing.Streams.StreamProcessorState(state.Position, state.FailingPartitions.ToDictionary(_ => new PartitionId { Value = Guid.Parse(_.Key) }, _ => _.Value.ToRuntimeRepresentation()));
     }
 }
