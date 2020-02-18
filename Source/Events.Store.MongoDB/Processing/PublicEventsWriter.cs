@@ -1,68 +1,40 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
-using Dolittle.Types;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IWriteEventsToStreams" />.
+    /// Represents an implementation of <see cref="AbstractEventsToWellKnownStreamsWriter" /> that can write events to the public events stream.
     /// </summary>
-    public class EventsToStreamsWriter : IWriteEventsToStreams
+    public class PublicEventsWriter : AbstractEventsToWellKnownStreamsWriter
     {
-        readonly IEnumerable<ICanWriteEventsToWellKnownStreams> _wellKnownStreamWriters;
-        readonly FilterDefinitionBuilder<MongoDB.Events.StreamEvent> _streamEventFilter = Builders<MongoDB.Events.StreamEvent>.Filter;
+        readonly FilterDefinitionBuilder<PublicEvent> _streamEventFilter = Builders<PublicEvent>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventsToStreamsWriter"/> class.
+        /// Initializes a new instance of the <see cref="PublicEventsWriter"/> class.
         /// </summary>
-        /// <param name="wellKnownStreamWriters">The instances of <see cref="ICanWriteEventsToWellKnownStreams" />.</param>
         /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventsToStreamsWriter(
-            IInstancesOf<ICanWriteEventsToWellKnownStreams> wellKnownStreamWriters,
-            EventStoreConnection connection,
-            ILogger logger)
+        public PublicEventsWriter(EventStoreConnection connection, ILogger logger)
+            : base(new StreamId[] { StreamId.PublicEventsId })
         {
-            _wellKnownStreamWriters = wellKnownStreamWriters;
             _connection = connection;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public Task Write(CommittedEvent @event, StreamId stream, PartitionId partition, CancellationToken cancellationToken = default)
+        public override async Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
-            if (TryGetWriter(stream, out var writer)) return writer.Write(@event, stream, partition, cancellationToken);
-            return WriteToStream(@event, stream, partition, cancellationToken);
-        }
-
-        bool TryGetWriter(StreamId stream, out ICanWriteEventsToWellKnownStreams writer)
-        {
-            writer = null;
-            foreach (var instance in _wellKnownStreamWriters)
-            {
-                if (instance.CanWriteToStream(stream))
-                {
-                    if (writer != null) throw new MultipleWellKnownStreamWriters(stream);
-                    writer = instance;
-                }
-            }
-
-            return writer != null;
-        }
-
-        async Task WriteToStream(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken)
-        {
-            ThrowIfWritingToAllStream(streamId);
+            if (!CanWriteToStream(streamId)) throw new EventsToWellKnownStreamsWriterCannotWriteToStream(this, streamId);
             StreamPosition streamPosition = null;
             try
             {
@@ -70,14 +42,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                 await session.WithTransactionAsync(
                     async (transaction, cancellationToken) =>
                     {
-                        var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
-                        streamPosition = (uint)await stream.CountDocumentsAsync(
+                        streamPosition = (uint)await _connection.PublicEvents.CountDocumentsAsync(
                             transaction,
                             _streamEventFilter.Empty).ConfigureAwait(false);
 
-                        await stream.InsertOneAsync(
+                        await _connection.PublicEvents.InsertOneAsync(
                             transaction,
-                            @event.ToStoreStreamEvent(streamPosition, partitionId),
+                            @event.ToPublicEvent(streamPosition),
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },
@@ -113,11 +84,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
 
                 throw;
             }
-        }
-
-        void ThrowIfWritingToAllStream(StreamId streamId)
-        {
-            if (streamId.Value == StreamId.AllStreamId.Value) throw new CannotWriteCommittedEventToAllStream();
         }
     }
 }
