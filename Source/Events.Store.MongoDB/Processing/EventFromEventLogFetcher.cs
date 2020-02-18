@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
         public EventFromEventLogFetcher(EventStoreConnection connection, ILogger logger)
-            : base(new StreamId[] { StreamId.PublicEventsId })
+            : base(new StreamId[] { StreamId.AllStreamId })
         {
             _connection = connection;
             _logger = logger;
@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     _eventLogFilter.Eq(_ => _.EventLogVersion, streamPosition.Value))
                     .Project(_ => _.ToRuntimeStreamEvent())
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                if (committedEventWithPartition == default) throw new NoEventAtEventLogVersion(streamPosition.Value);
+                if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(StreamId.AllStreamId, streamPosition.Value);
                 return committedEventWithPartition;
             }
             catch (MongoWaitQueueFullException ex)

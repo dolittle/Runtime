@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
         /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
         public PublicEventTypesFetcher(EventStoreConnection connection, ILogger logger)
-            : base(new StreamId[] { StreamId.AllStreamId })
+            : base(new StreamId[] { StreamId.PublicEventsId })
         {
             _connection = connection;
             _logger = logger;
