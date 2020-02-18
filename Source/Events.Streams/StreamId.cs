@@ -12,9 +12,14 @@ namespace Dolittle.Runtime.Events.Streams
     public class StreamId : ConceptAs<Guid>
     {
         /// <summary>
-        /// Represents a all stream <see cref="StreamId"/>.
+        /// Represents the all stream <see cref="StreamId"/>.
         /// </summary>
         public static StreamId AllStreamId = Guid.Empty;
+
+        /// <summary>
+        /// Represents the public events stream <see cref="StreamId" />.
+        /// </summary>
+        public static StreamId PublicEventsId = Guid.Parse("5352cc2d-e772-4d21-b6b0-1782bbc9e64a");
 
         /// <summary>
         /// Implicitly convert from a <see cref="Guid"/> to a <see cref="StreamId"/>.

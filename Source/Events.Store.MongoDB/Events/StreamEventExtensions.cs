@@ -8,7 +8,7 @@ using MongoDB.Bson;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
-    /// Extension methods for <see cref="Event" />.
+    /// Extension methods for <see cref="MongoDB.Events.StreamEvent" />.
     /// </summary>
     public static class StreamEventExtensions
     {
