@@ -8,6 +8,7 @@ namespace Dolittle.Runtime.Metrics
     /// <summary>
     /// Represents the <see cref="IConfigurationObject"/> for Metrics.
     /// </summary>
+    [Name("metrics")]
     public class MetricsConfiguration : IConfigurationObject
     {
         /// <summary>
