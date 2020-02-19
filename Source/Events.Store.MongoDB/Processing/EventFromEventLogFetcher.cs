@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
                     _eventLogFilter.Eq(_ => _.EventLogVersion, streamPosition.Value))
                     .Project(_ => _.ToRuntimeStreamEvent())
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(StreamId.AllStreamId, streamPosition.Value);
+                if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(StreamId.AllStreamId, streamPosition);
                 return committedEventWithPartition;
             }
             catch (MongoWaitQueueFullException ex)
