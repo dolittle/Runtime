@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Applications;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
@@ -80,6 +81,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             return collection;
         }
 
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{ReceivedEvent}" /> that represents a collection of the events received from a microservice.
+        /// </summary>
+        /// <param name="microservice">The <see cref="Microservice" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
+        public async Task<IMongoCollection<ReceivedEvent>> GetReceivedEventsCollectionAsync(Microservice microservice, CancellationToken cancellationToken = default)
+        {
+            var collection = _connection.Database.GetCollection<ReceivedEvent>(Constants.CollectionNameForReceivedEvents(microservice));
+            await CreateCollectionsAndIndexesForReceivedEventsAsync(collection, cancellationToken).ConfigureAwait(false);
+            return collection;
+        }
+
         void CreateCollectionsAndIndexes()
         {
             CreateCollectionsAndIndexesForEventLog();
@@ -134,6 +148,28 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                     Builders<MongoDB.Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)
                         .Ascending(_ => _.Aggregate.TypeId)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task CreateCollectionsAndIndexesForReceivedEventsAsync(IMongoCollection<ReceivedEvent> stream, CancellationToken cancellationToken = default)
+        {
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<ReceivedEvent>(
+                    Builders<ReceivedEvent>.IndexKeys
+                        .Ascending(_ => _.EventLogVersion),
+                    new CreateIndexOptions { Unique = true }),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<ReceivedEvent>(
+                    Builders<ReceivedEvent>.IndexKeys
+                        .Ascending(_ => _.Metadata.EventSource)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<ReceivedEvent>(
+                    Builders<ReceivedEvent>.IndexKeys
+                        .Ascending(_ => _.FromTenant)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 

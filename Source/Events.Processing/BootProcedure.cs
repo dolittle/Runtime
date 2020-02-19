@@ -23,6 +23,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly ITenants _tenants;
         readonly FactoryFor<IStreamProcessors> _getStreamProcessors;
         readonly FactoryFor<IWriteEventsToStreams> _getStreamWriter;
+        readonly IEventHorizonClient _eventHorizonClient;
         readonly ILogger _logger;
 
         /// <summary>
@@ -32,18 +33,21 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="tenants">The <see cref="ITenants" />.</param>
         /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
         /// <param name="getStreamWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
+        /// <param name="eventHorizonClient">The <see cref="IEventHorizonClient" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public BootProcedure(
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             FactoryFor<IStreamProcessors> getStreamProcessors,
             FactoryFor<IWriteEventsToStreams> getStreamWriter,
+            IEventHorizonClient eventHorizonClient,
             ILogger logger)
         {
             _getStreamProcessors = getStreamProcessors;
             _getStreamWriter = getStreamWriter;
             _logger = logger;
             _executionContextManager = executionContextManager;
+            _eventHorizonClient = eventHorizonClient;
             _tenants = tenants;
         }
 
@@ -54,6 +58,7 @@ namespace Dolittle.Runtime.Events.Processing
         public void Perform()
         {
             CreateStreamProcessors();
+            _eventHorizonClient.Subscribe();
         }
 
         void CreateStreamProcessors()
@@ -70,9 +75,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
             _logger.Debug($"Registering stream processor for the public event stream for tenant {tenant}");
             var filter = new PublicEventFilter(_getStreamWriter(), _logger);
-            var eventHorizon = new EventHorizon.EventHorizon(_logger);
             _getStreamProcessors().Register(filter, StreamId.AllStreamId);
-            _getStreamProcessors().Register(eventHorizon, StreamId.PublicEventsId);
         }
     }
 }

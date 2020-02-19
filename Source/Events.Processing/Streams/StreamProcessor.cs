@@ -116,6 +116,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         {
                             await Task.Delay(1000).ConfigureAwait(false);
                         }
+                        catch (EventStoreUnavailable)
+                        {
+                            await Task.Delay(1000).ConfigureAwait(false);
+                        }
                     }
 
                     if (CurrentState.FailingPartitions.Keys.Contains(streamEvent.Partition))

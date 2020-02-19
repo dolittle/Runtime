@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Applications;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -37,5 +38,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <returns>The event stream collection name.</returns>
         public static string CollectionNameForStream(StreamId streamId) => $"stream-{streamId.Value}";
+
+        /// <summary>
+        /// Gets the collection name for a stream.
+        /// </summary>
+        /// <param name="microservice">The <see cref="Microservice" />.</param>
+        /// <returns>The event stream collection name.</returns>
+        public static string CollectionNameForReceivedEvents(Microservice microservice) => $"received-events-{microservice.Value}";
     }
 }
