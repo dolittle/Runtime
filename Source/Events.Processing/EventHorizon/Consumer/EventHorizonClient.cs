@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Applications;
+using Dolittle.Applications.Configuration;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
@@ -28,6 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
     public class EventHorizonClient : IEventHorizonClient
     {
         readonly EventHorizonsConfiguration _eventHorizons;
+        readonly BoundedContextConfiguration _boundedContextConfiguration;
         readonly grpc.EventHorizon.EventHorizonClient _client;
         readonly IExecutionContextManager _executionContextManager;
         readonly FactoryFor<StreamProcessors> _getStreamProcessors;
@@ -39,6 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         /// Initializes a new instance of the <see cref="EventHorizonClient"/> class.
         /// </summary>
         /// <param name="eventHorizons">The <see cref="EventHorizonsConfiguration" />.</param>
+        /// <param name="boundedContextConfiguration">The <see cref="BoundedContextConfiguration" />.</param>
         /// <param name="client">The grpc client.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
@@ -47,6 +50,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventHorizonClient(
             EventHorizonsConfiguration eventHorizons,
+            BoundedContextConfiguration boundedContextConfiguration,
             grpc.EventHorizon.EventHorizonClient client,
             IExecutionContextManager executionContextManager,
             FactoryFor<StreamProcessors> getStreamProcessors,
@@ -55,6 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
             ILogger logger)
         {
             _eventHorizons = eventHorizons;
+            _boundedContextConfiguration = boundedContextConfiguration;
             _client = client;
             _executionContextManager = executionContextManager;
             _getStreamProcessors = getStreamProcessors;
@@ -82,7 +87,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
                     _client.Subscribe(
                         new EventHorizonSubscriberToPublisherRequest
                         {
-                            Microservice = _executionContextManager.Current.BoundedContext.Value.ToProtobuf(),
+                            Microservice = _boundedContextConfiguration.BoundedContext.Value.ToProtobuf(),
                             ProducerTenant = producer.ToProtobuf(),
                             SubscriberTenant = subscriber.ToProtobuf(),
                             PublicEventsVersion = publicEventsVersion.Value
@@ -98,15 +103,19 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
 
                 while (!tokenSource.IsCancellationRequested)
                 {
-                    await Task.Delay(50).ConfigureAwait(false);
+                    await Task.Delay(5000).ConfigureAwait(false);
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.Warning($"DIsconnecting Event Horizon to microservice '{microservice}' and tenant '{producer}'");
+                if (!tokenSource.IsCancellationRequested)
+                {
+                    _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{microservice}' and tenant '{producer}'");
+                }
             }
             finally
             {
+                _logger.Warning($"Disconnecting Event Horizon to microservice '{microservice}' and tenant '{producer}'");
                 tokenSource.Dispose();
                 streamProcessor?.Dispose();
             }

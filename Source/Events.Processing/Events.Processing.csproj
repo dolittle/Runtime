@@ -15,6 +15,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
         <ProjectReference Include="..\Events.Streams\Events.Streams.csproj" />
         <ProjectReference Include="..\Services\Services.csproj" />
         <ProjectReference Include="..\Events.Store\Events.Store.csproj" />

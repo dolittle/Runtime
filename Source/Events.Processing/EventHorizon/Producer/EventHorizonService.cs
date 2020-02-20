@@ -96,12 +96,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Error(ex, $"Error occurred while handling event horizon from microservice '{microservice}'");
+                    _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{microservice}' and tenant '{subscriber}' from tenant '{producer}'");
                 }
             }
             finally
             {
-                _logger.Information($"Event horizons for microservice from microservice '{microservice}' and tenant '{subscriber}' to tenant '{producer}'");
+                _logger.Warning($"Disconnecting Event Horizon to microservice '{microservice}' and tenant '{subscriber}' from tenant '{producer}'");
             }
         }
 
