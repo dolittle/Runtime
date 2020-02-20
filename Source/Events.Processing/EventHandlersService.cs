@@ -115,6 +115,7 @@ namespace Dolittle.Runtime.Events.Processing
             var tenants = _tenants.All;
             var targetStreamId = (StreamId)eventProcessorId.Value;
 
+            ThrowIfIllegalTargetStream(targetStreamId);
             var definition = new TypeFilterWithEventSourcePartitionDefinition(
                 eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>()),
                 eventHandlerArguments.Partitioned);
@@ -153,6 +154,12 @@ namespace Dolittle.Runtime.Events.Processing
                 _streamProcessorsFactory().Unregister(eventProcessorId, sourceStreamId);
                 _streamProcessorsFactory().Unregister(eventProcessorId, eventProcessorId.Value);
             });
+        }
+
+        void ThrowIfIllegalTargetStream(StreamId stream)
+        {
+            if (stream == StreamId.AllStreamId) throw new FilterCannotWriteToEventLog();
+            if (stream == StreamId.PublicEventsId) throw new FilterCannotWriteToPublicEvents();
         }
     }
 }

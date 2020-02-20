@@ -76,6 +76,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
                 eventProcessorId = filterArguments.FilterId.To<EventProcessorId>();
                 streamId = filterArguments.StreamId.To<StreamId>();
+                ThrowIfIllegalTargetStream(streamId);
                 _logger.Debug($"Filter client connected - '{eventProcessorId}' - '{streamId}' - Method: {context.Method}");
 
                 var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
@@ -134,6 +135,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _executionContextManager.CurrentFor(tenant);
                 _streamProcessorsFactory().Unregister(eventProcessorId, streamId);
             });
+        }
+
+        void ThrowIfIllegalTargetStream(StreamId stream)
+        {
+            if (stream == StreamId.AllStreamId) throw new FilterCannotWriteToEventLog();
+            if (stream == StreamId.PublicEventsId) throw new FilterCannotWriteToPublicEvents();
         }
     }
 }
