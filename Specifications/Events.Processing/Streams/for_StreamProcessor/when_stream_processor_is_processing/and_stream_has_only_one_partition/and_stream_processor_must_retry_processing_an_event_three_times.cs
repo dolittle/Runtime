@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_st
         static readonly EventProcessorId event_processor_id = Guid.NewGuid();
 
         static readonly Moq.Mock<IEventProcessor> event_processor_mock =
-            Processing.given.an_event_processor(event_processor_id, (@event, partitionId) =>
+            Processing.given.an_event_processor(event_processor_id, (@event, partitionId, token) =>
                 {
                     if (count == 2) return Task.FromResult<IProcessingResult>(new FailedProcessingResult(failure_reason));
                     count++;

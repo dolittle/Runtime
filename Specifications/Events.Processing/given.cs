@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Processing
             return event_processor_mock;
         }
 
-        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, Func<CommittedEvent, PartitionId, Task<IProcessingResult>> callback)
+        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, Func<CommittedEvent, PartitionId, CancellationToken, Task<IProcessingResult>> callback)
         {
             var event_processor_mock = an_event_processor();
             event_processor_mock.SetupGet(_ => _.Identifier).Returns(id);
