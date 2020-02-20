@@ -32,6 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         readonly FactoryFor<IWriteEventsToStreams> _eventsToStreamsWriterFactory;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly ILogger _logger;
+        readonly FactoryFor<IFetchEventsFromStreams> _eventsFromStreamsFetcherFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiltersService"/> class.
@@ -40,6 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
         /// <param name="streamProcessorsFactory"><see cref="FactoryFor{T}"/> the <see cref="IStreamProcessors"/> for registration management.</param>
         /// <param name="eventsToStreamsWriterFactory"><see cref="FactoryFor{T}"/> the <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
+        /// <param name="eventsFromStreamsFetcherFactory"><see cref="FactoryFor{T}"/> the <see cref="IFetchEventsFromStreams">fetcher</see> for fetching events.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FiltersService(
@@ -47,6 +49,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             ITenants tenants,
             FactoryFor<IStreamProcessors> streamProcessorsFactory,
             FactoryFor<IWriteEventsToStreams> eventsToStreamsWriterFactory,
+            FactoryFor<IFetchEventsFromStreams> eventsFromStreamsFetcherFactory,
             IReverseCallDispatchers reverseCallDispatchers,
             ILogger logger)
         {
@@ -56,6 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _eventsToStreamsWriterFactory = eventsToStreamsWriterFactory;
             _reverseCallDispatchers = reverseCallDispatchers;
             _logger = logger;
+            _eventsFromStreamsFetcherFactory = eventsFromStreamsFetcherFactory;
         }
 
         /// <inheritdoc/>
@@ -117,7 +121,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _executionContextManager,
                     _logger);
 
-                _streamProcessorsFactory().Register(filterProcessor, streamId);
+                _streamProcessorsFactory().Register(filterProcessor, _eventsFromStreamsFetcherFactory(), streamId);
             });
         }
 

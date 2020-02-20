@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
@@ -48,20 +49,21 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation of filtering an event.</returns>
-        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
+        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
-            var result = await Filter(@event, partitionId, Identifier).ConfigureAwait(false);
+            var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
             _logger.Debug($"{_logMessagePrefix} filtered event '{@event.Type.Id.Value}' for partition '{partitionId.Value}' with result 'Succeeded' = {result.Succeeded}");
 
             if (result.Succeeded && result.IsIncluded)
             {
                 _logger.Debug($"{_logMessagePrefix} writing event '{@event.Type.Id.Value}' to stream '{_targetStreamId.Value}' in partition '{partitionId.Value}'");
-                await _eventsToStreamsWriter.Write(@event, _targetStreamId, result.Partition).ConfigureAwait(false);
+                await _eventsToStreamsWriter.Write(@event, _targetStreamId, result.Partition, cancellationToken).ConfigureAwait(false);
             }
 
             return result;

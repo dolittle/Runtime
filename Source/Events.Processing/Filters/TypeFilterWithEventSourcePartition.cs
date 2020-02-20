@@ -5,6 +5,7 @@ extern alias contracts;
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
@@ -39,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId)
+        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
             try
             {
