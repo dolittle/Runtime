@@ -9,7 +9,6 @@ using Dolittle.Runtime.Events.Processing.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.EventHorizon
@@ -53,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.EventHorizon
 
                         await receivedEvents.InsertOneAsync(
                             transaction,
-                            new ReceivedEvent(streamPosition, @event.EventLogVersion, @event.GetEventMetadata(), tenant, BsonDocument.Parse(@event.Content)),
+                            @event.ToReceivedEvent(streamPosition, tenant),
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },

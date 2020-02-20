@@ -11,14 +11,16 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
-    /// Represents the platform generated information about an event that is stored alongside the domain specific data in the event store.
+    /// Represents the Event metadata for a <see cref="StreamEvent" />.
     /// </summary>
-    public class EventMetadata
+    public class StreamEventMetadata
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventMetadata"/> class.
+        /// Initializes a new instance of the <see cref="StreamEventMetadata"/> class.
         /// </summary>
+        /// <param name="eventLogVersion">The event log version.</param>
         /// <param name="occurred">The date time offset of when the event occurred.</param>
+        /// <param name="partition">The partition that this Event belongs in.</param>
         /// <param name="eventSource">The event source that applied the event.</param>
         /// <param name="correlation">The correlation.</param>
         /// <param name="microservice">The microservice.</param>
@@ -28,9 +30,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
         /// <param name="isPublic">Whether the Event is public.</param>
-        public EventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration, bool isPublic)
+        public StreamEventMetadata(uint eventLogVersion, DateTimeOffset occurred, Guid partition, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration, bool isPublic)
         {
+            EventLogVersion = eventLogVersion;
             Occurred = occurred;
+            Partition = partition;
             EventSource = eventSource;
             Correlation = correlation;
             Microservice = microservice;
@@ -43,10 +47,20 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         }
 
         /// <summary>
+        /// Gets or sets the event log version of the event.
+        /// </summary>
+        public uint EventLogVersion { get; set; }
+
+        /// <summary>
         /// Gets or sets the <see cref="DateTimeOffset"/> of when the event was committed to the event store.
         /// </summary>
         [BsonRepresentation(BsonType.String)]
         public DateTimeOffset Occurred { get; set; }
+
+        /// <summary>
+        /// Gets or sets the partition that the event belongs in.
+        /// </summary>
+        public Guid Partition { get; set; }
 
         /// <summary>
         /// Gets or sets the event source id.

@@ -91,7 +91,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing
             {
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var streamEvent = await stream.Find(
-                    _streamEventFilter.Eq(_ => _.Partition, partitionId.Value)
+                    _streamEventFilter.Eq(_ => _.Metadata.Partition, partitionId.Value)
                     & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 return streamEvent != default ? streamEvent.StreamPosition : uint.MaxValue;

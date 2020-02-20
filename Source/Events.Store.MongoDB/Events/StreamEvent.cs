@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -16,20 +15,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Initializes a new instance of the <see cref="StreamEvent"/> class.
         /// </summary>
         /// <param name="streamPosition">The position in the stream.</param>
-        /// <param name="eventLogVersion">The event log version this event comes from.</param>
-        /// <param name="partition">The partition that this event is in.</param>
-        /// <param name="metadata">The The event metadata.</param>
+        /// <param name="metadata">The event metadata.</param>
         /// <param name="aggregate">The aggregate metadata.</param>
-        /// <param name="isPublic">Whether the Event is public.</param>
         /// <param name="content">The event content.</param>
-        public StreamEvent(uint streamPosition, uint eventLogVersion, Guid partition, EventMetadata metadata, AggregateMetadata aggregate, bool isPublic, BsonDocument content)
+        public StreamEvent(uint streamPosition, StreamEventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
         {
             StreamPosition = streamPosition;
-            EventLogVersion = eventLogVersion;
-            Partition = partition;
             Metadata = metadata;
             Aggregate = aggregate;
-            Public = isPublic;
             Content = content;
         }
 
@@ -40,29 +33,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public uint StreamPosition { get; set; }
 
         /// <summary>
-        /// Gets or sets the event log version of the event.
+        /// Gets or sets the <see cref="StreamEventMetadata"/> containing the platform generated event information.
         /// </summary>
-        public uint EventLogVersion { get; set; }
-
-        /// <summary>
-        /// Gets or sets the partition that the event belongs in.
-        /// </summary>
-        public Guid Partition { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="EventMetadata"/> containing the platform generated event information.
-        /// </summary>
-        public EventMetadata Metadata { get; set; }
+        public StreamEventMetadata Metadata { get; set; }
 
         /// <summary>
         /// Gets or sets the event sourcing specific <see cref="AggregateMetadata"/>.
         /// </summary>
         public AggregateMetadata Aggregate { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the Event is public.
-        /// </summary>
-        public bool Public { get; set; }
 
         /// <summary>
         /// Gets or sets the domain specific event data.

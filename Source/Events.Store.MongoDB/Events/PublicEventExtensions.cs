@@ -12,13 +12,31 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     public static class PublicEventExtensions
     {
         /// <summary>
+        /// Gets the <see cref="PublicEventMetadata"/> from the <see cref="CommittedEvent"/>.
+        /// </summary>
+        /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
+        /// <returns>The converted <see cref="PublicEventMetadata" />.</returns>
+        public static PublicEventMetadata GetPublicEventMetadata(this CommittedEvent committedEvent) =>
+            new PublicEventMetadata(
+                committedEvent.EventLogVersion,
+                committedEvent.Occurred,
+                committedEvent.EventSource,
+                committedEvent.CorrelationId,
+                committedEvent.Microservice,
+                committedEvent.Tenant,
+                committedEvent.Cause.Type,
+                committedEvent.Cause.Position,
+                committedEvent.Type.Id,
+                committedEvent.Type.Generation);
+
+        /// <summary>
         /// Converts a <see cref="PublicEvent" /> to a <see cref="CommittedEvent" />.
         /// </summary>
         /// <param name="publicEvent">The <see cref="PublicEvent" />.</param>
         /// <returns>The converted <see cref="CommittedEvent" />.</returns>
         public static CommittedEvent ToCommittedEvent(this PublicEvent publicEvent) =>
             new CommittedEvent(
-                publicEvent.EventLogVersion,
+                publicEvent.Metadata.EventLogVersion,
                 publicEvent.Metadata.Occurred,
                 publicEvent.Metadata.EventSource,
                 publicEvent.Metadata.Correlation,
@@ -46,8 +64,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static PublicEvent ToPublicEvent(this CommittedEvent committedEvent, StreamPosition streamPosition) =>
             new PublicEvent(
                 streamPosition,
-                committedEvent.EventLogVersion,
-                committedEvent.GetEventMetadata(),
+                committedEvent.GetPublicEventMetadata(),
                 BsonDocument.Parse(committedEvent.Content));
     }
 }

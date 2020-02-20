@@ -11,35 +11,33 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
-    /// Represents the platform generated information about an event that is stored alongside the domain specific data in the event store.
+    /// Represents the metadata of an Event that has been received by another microservice.
     /// </summary>
-    public class EventMetadata
+    public class ReceivedEventMetadata
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventMetadata"/> class.
+        /// Initializes a new instance of the <see cref="ReceivedEventMetadata"/> class.
         /// </summary>
         /// <param name="occurred">The date time offset of when the event occurred.</param>
         /// <param name="eventSource">The event source that applied the event.</param>
         /// <param name="correlation">The correlation.</param>
-        /// <param name="microservice">The microservice.</param>
-        /// <param name="tenant">The tenant.</param>
-        /// <param name="causeType">The type of the cause.</param>
-        /// <param name="causePosition">The position of the cause.</param>
-        /// <param name="typeId">The id of the event artifact type.</param>
+        /// <param name="microservice">The microservice that produced the event.</param>
+        /// <param name="receiverTenant">The tenant that received the event.</param>
+        /// <param name="producerTenant">The tenant that produced the event.</param>
+        /// <param name="originEventLogVersion">The event log version that the Event had in the microservice that it came from.</param>
+        /// <param name="typeId">The type id of the event artifact.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
-        /// <param name="isPublic">Whether the Event is public.</param>
-        public EventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration, bool isPublic)
+        public ReceivedEventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid receiverTenant, Guid producerTenant, uint originEventLogVersion, Guid typeId, int typeGeneration)
         {
             Occurred = occurred;
             EventSource = eventSource;
             Correlation = correlation;
             Microservice = microservice;
-            Tenant = tenant;
-            CauseType = causeType;
-            CausePosition = causePosition;
+            ReceiverTenant = receiverTenant;
+            ProducerTenant = producerTenant;
+            OriginEventLogVersion = originEventLogVersion;
             TypeId = typeId;
             TypeGeneration = typeGeneration;
-            Public = isPublic;
         }
 
         /// <summary>
@@ -54,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public Guid EventSource { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="CorrelationId"/> of the event.
+        /// Gets or sets the newly generated <see cref="CorrelationId"/> of the event.
         /// </summary>
         public Guid Correlation { get; set; }
 
@@ -64,20 +62,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public Guid Microservice { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="TenantId"/> that the event was produced in.
+        /// Gets or sets the <see cref="TenantId"/> that the Event was received by.
         /// </summary>
-        public Guid Tenant { get; set; }
+        public Guid ReceiverTenant { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="CauseType"/> identifying the <see cref="Cause"/> of the event.
+        /// Gets or sets the <see cref="TenantId"/> that the Event was produced by.
         /// </summary>
-        [BsonRepresentation(BsonType.String)]
-        public CauseType CauseType { get; set; }
+        public Guid ProducerTenant { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="CauseLogPosition"/> identifying the <see cref="Cause"/> of the event.
+        /// Gets or sets the event log version that the Event had in the microservice that it came from.
         /// </summary>
-        public uint CausePosition { get; set; }
+        public uint OriginEventLogVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ArtifactId"/> of the <see cref="Artifact"/> identitying the type of the event.
@@ -88,10 +85,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the <see cref="ArtifactGeneration"/> of the <see cref="Artifact"/> identifying the type of the event.
         /// </summary>
         public int TypeGeneration { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this is a public Event.
-        /// </summary>
-        public bool Public { get; set; }
     }
 }

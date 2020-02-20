@@ -17,14 +17,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="eventLogVersion">The event log version this event comes from.</param>
         /// <param name="metadata">The The event metadata.</param>
         /// <param name="aggregate">The aggregate metadata.</param>
-        /// <param name="isPublic">Whether this Event is public.</param>
         /// <param name="content">The event content.</param>
-        public Event(uint eventLogVersion, EventMetadata metadata, AggregateMetadata aggregate, bool isPublic, BsonDocument content)
+        public Event(uint eventLogVersion, EventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
         {
             EventLogVersion = eventLogVersion;
             Metadata = metadata;
             Aggregate = aggregate;
-            Public = isPublic;
             Content = content;
         }
 
@@ -43,11 +41,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the event sourcing specific <see cref="AggregateMetadata"/>.
         /// </summary>
         public AggregateMetadata Aggregate { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this is a public Event.
-        /// </summary>
-        public bool Public { get; set; }
 
         /// <summary>
         /// Gets or sets the domain specific event data.

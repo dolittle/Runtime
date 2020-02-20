@@ -118,7 +118,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         {
             PublicEvents.Indexes.CreateOne(new CreateIndexModel<PublicEvent>(
                 Builders<PublicEvent>.IndexKeys
-                    .Ascending(_ => _.EventLogVersion),
+                    .Ascending(_ => _.Metadata.EventLogVersion),
                 new CreateIndexOptions { Unique = true }));
         }
 
@@ -127,7 +127,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Events.StreamEvent>(
                     Builders<MongoDB.Events.StreamEvent>.IndexKeys
-                        .Ascending(_ => _.EventLogVersion),
+                        .Ascending(_ => _.Metadata.EventLogVersion),
                     new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -140,7 +140,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Events.StreamEvent>(
                     Builders<MongoDB.Events.StreamEvent>.IndexKeys
-                        .Ascending(_ => _.Partition)),
+                        .Ascending(_ => _.Metadata.Partition)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
@@ -156,7 +156,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<ReceivedEvent>(
                     Builders<ReceivedEvent>.IndexKeys
-                        .Ascending(_ => _.EventLogVersion),
+                        .Ascending(_ => _.Metadata.OriginEventLogVersion)
+                        .Ascending(_ => _.Metadata.Microservice)
+                        .Ascending(_ => _.Metadata.ProducerTenant),
                     new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -169,7 +171,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<ReceivedEvent>(
                     Builders<ReceivedEvent>.IndexKeys
-                        .Ascending(_ => _.FromTenant)),
+                        .Ascending(_ => _.Metadata.ProducerTenant)
+                        .Ascending(_ => _.Metadata.Microservice)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 

@@ -11,13 +11,14 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
-    /// Represents the platform generated information about an event that is stored alongside the domain specific data in the event store.
+    /// Represents the Event metadata for <see cref="PublicEvent" />.
     /// </summary>
-    public class EventMetadata
+    public class PublicEventMetadata
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventMetadata"/> class.
+        /// Initializes a new instance of the <see cref="PublicEventMetadata"/> class.
         /// </summary>
+        /// <param name="eventLogVersion">The event log version of this public event.</param>
         /// <param name="occurred">The date time offset of when the event occurred.</param>
         /// <param name="eventSource">The event source that applied the event.</param>
         /// <param name="correlation">The correlation.</param>
@@ -27,9 +28,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="causePosition">The position of the cause.</param>
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
-        /// <param name="isPublic">Whether the Event is public.</param>
-        public EventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration, bool isPublic)
+        public PublicEventMetadata(uint eventLogVersion, DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration)
         {
+            EventLogVersion = eventLogVersion;
             Occurred = occurred;
             EventSource = eventSource;
             Correlation = correlation;
@@ -39,8 +40,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             CausePosition = causePosition;
             TypeId = typeId;
             TypeGeneration = typeGeneration;
-            Public = isPublic;
         }
+
+        /// <summary>
+        /// Gets or sets the event log version of the event.
+        /// </summary>
+        public uint EventLogVersion { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="DateTimeOffset"/> of when the event was committed to the event store.
@@ -88,10 +93,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the <see cref="ArtifactGeneration"/> of the <see cref="Artifact"/> identifying the type of the event.
         /// </summary>
         public int TypeGeneration { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this is a public Event.
-        /// </summary>
-        public bool Public { get; set; }
     }
 }

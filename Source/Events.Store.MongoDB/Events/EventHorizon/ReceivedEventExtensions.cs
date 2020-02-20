@@ -14,21 +14,39 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     public static class ReceivedEventExtensions
     {
         /// <summary>
+        /// Gets the <see cref="ReceivedEventMetadata"/> from the <see cref="CommittedEvent"/>.
+        /// </summary>
+        /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
+        /// <param name="producerTenant">The <see cref="TenantId" /> that produced the event.</param>
+        /// <returns>The converted <see cref="ReceivedEventMetadata" />.</returns>
+        public static ReceivedEventMetadata GetReceivedEventMetadata(this CommittedEvent committedEvent, TenantId producerTenant) =>
+            new ReceivedEventMetadata(
+                committedEvent.Occurred,
+                committedEvent.EventSource,
+                committedEvent.CorrelationId,
+                committedEvent.Microservice,
+                committedEvent.Tenant,
+                producerTenant,
+                committedEvent.EventLogVersion,
+                committedEvent.Type.Id,
+                committedEvent.Type.Generation);
+
+        /// <summary>
         /// Converts a <see cref="ReceivedEvent" /> to a <see cref="CommittedEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="ReceivedEvent" />.</param>
         /// <returns>The converted <see cref="CommittedEvent" />.</returns>
         public static CommittedEvent ToCommittedEvent(this ReceivedEvent @event) =>
             new CommittedEvent(
-                @event.EventLogVersion,
+                @event.StreamPosition,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
                 @event.Metadata.Correlation,
                 @event.Metadata.Microservice,
-                @event.Metadata.Tenant,
-                new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
+                @event.Metadata.ReceiverTenant,
+                new Cause(CauseType.Event, 0),
                 new Artifacts.Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                true,
+                false,
                 @event.Content.ToString());
 
         /// <summary>
@@ -45,14 +63,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// </summary>
         /// <param name="committedEvent">The <see cref="CommittedEvent" />.</param>
         /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
-        /// <param name="fromTenant">The <see cref="TenantId" />.</param>
+        /// <param name="producerTenant">The <see cref="TenantId" />.</param>
         /// <returns>The converted <see cref="ReceivedEvent" />.</returns>
-        public static ReceivedEvent ToPublicEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, TenantId fromTenant) =>
+        public static ReceivedEvent ToReceivedEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, TenantId producerTenant) =>
             new ReceivedEvent(
                 streamPosition,
-                committedEvent.EventLogVersion,
-                committedEvent.GetEventMetadata(),
-                fromTenant,
+                committedEvent.GetReceivedEventMetadata(producerTenant),
                 BsonDocument.Parse(committedEvent.Content));
     }
 }

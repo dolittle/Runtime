@@ -13,6 +13,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     public static class StreamEventExtensions
     {
         /// <summary>
+        /// Gets the <see cref="StreamEventMetadata"/> from the <see cref="CommittedEvent"/>.
+        /// </summary>
+        /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
+        /// <param name="partition">The <see cref="PartitionId" />.</param>
+        /// <returns>The converted <see cref="StreamEventMetadata" />.</returns>
+        public static StreamEventMetadata GetStreamEventMetadata(this CommittedEvent committedEvent, PartitionId partition) =>
+            new StreamEventMetadata(
+                committedEvent.EventLogVersion,
+                committedEvent.Occurred,
+                partition.Value,
+                committedEvent.EventSource,
+                committedEvent.CorrelationId,
+                committedEvent.Microservice,
+                committedEvent.Tenant,
+                committedEvent.Cause.Type,
+                committedEvent.Cause.Position,
+                committedEvent.Type.Id,
+                committedEvent.Type.Generation,
+                committedEvent.Public);
+
+        /// <summary>
         /// Converts a <see cref="Event" /> to <see cref="CommittedAggregateEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
@@ -21,7 +42,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new CommittedAggregateEvent(
                 new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
                 @event.Aggregate.Version,
-                @event.EventLogVersion,
+                @event.Metadata.EventLogVersion,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
                 @event.Metadata.Correlation,
@@ -29,7 +50,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.Metadata.Tenant,
                 new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                @event.Public,
+                @event.Metadata.Public,
                 @event.Content.ToString());
 
         /// <summary>
@@ -41,7 +62,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             @event.Aggregate.WasAppliedByAggregate ?
                 @event.ToCommittedAggregateEvent()
                 : new CommittedEvent(
-                    @event.EventLogVersion,
+                    @event.Metadata.EventLogVersion,
                     @event.Metadata.Occurred,
                     @event.Metadata.EventSource,
                     @event.Metadata.Correlation,
@@ -49,7 +70,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     @event.Metadata.Tenant,
                     new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                     new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                    @event.Public,
+                    @event.Metadata.Public,
                     @event.Content.ToString());
 
         /// <summary>
@@ -59,7 +80,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <returns>The converted <see cref="StreamEvent" />.</returns>
         public static Streams.StreamEvent ToRuntimeStreamEvent(this MongoDB.Events.StreamEvent @event, StreamId stream) =>
-            new Streams.StreamEvent(@event.ToCommittedEvent(), stream, @event.Partition);
+            new Streams.StreamEvent(@event.ToCommittedEvent(), stream, @event.Metadata.Partition);
 
         /// <summary>
         /// Converts a <see cref="CommittedEvent" /> to <see cref="Event" />.
@@ -71,11 +92,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static MongoDB.Events.StreamEvent ToStoreStreamEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
             new MongoDB.Events.StreamEvent(
                 streamPosition,
-                committedEvent.EventLogVersion,
-                partition,
-                committedEvent.GetEventMetadata(),
+                committedEvent.GetStreamEventMetadata(partition),
                 committedEvent.GetAggregateMetadata(),
-                committedEvent.Public,
                 BsonDocument.Parse(committedEvent.Content));
     }
 }
