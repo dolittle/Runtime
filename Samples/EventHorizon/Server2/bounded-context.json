@@ -1,0 +1,19 @@
+{
+    "application": "c6912245-892f-4eef-9c3e-7fd410268c40",
+    "boundedContext": "64eecce2-aae5-4ec6-8932-68752ee0b1e3",
+    "boundedContextName": "[UNSET]",
+    "resources": {
+      "readModels": {
+        "production": "MongoDB",
+        "development": "MongoDB"
+      },
+      "eventStore": {
+        "production": "MongoDB",
+        "development": "MongoDB"
+      }
+    },
+      "core": {
+      "language": "csharp"
+    },
+    "interaction": []
+  }
