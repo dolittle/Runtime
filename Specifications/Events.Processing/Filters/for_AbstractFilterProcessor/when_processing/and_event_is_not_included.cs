@@ -18,7 +18,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
         Establish context = () => filter_processor.Setup(_ => _.Filter(
             Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
-            Moq.It.IsAny<EventProcessorId>()))
+            Moq.It.IsAny<EventProcessorId>(),
+            Moq.It.IsAny<CancellationToken>()))
             .Returns(Task.FromResult<IFilterResult>(new SucceededFilteringResult(false, PartitionId.NotSet)));
 
         Because of = () => result = filter_processor.Object.Process(committed_event, PartitionId.NotSet).Result as IFilterResult;

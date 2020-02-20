@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor
         static readonly Moq.Mock<IEventProcessor> event_processor_mock = Processing.given.an_event_processor(event_processor_id, new SucceededProcessingResult());
         static StreamProcessor stream_processor;
 
-        Because of = () => stream_processor = new StreamProcessor(tenant_id, source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, Moq.Mock.Of<ILogger>());
+        Because of = () => stream_processor = new StreamProcessor(tenant_id, source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, default, Moq.Mock.Of<ILogger>());
 
         It should_have_the_correct_event_processor_id = () => stream_processor.EventProcessorId.ShouldEqual(event_processor_mock.Object.Identifier);
         It should_have_the_correct_key = () => stream_processor.Identifier.ShouldEqual(new StreamProcessorId(event_processor_mock.Object.Identifier, source_stream_id));

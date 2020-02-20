@@ -27,14 +27,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_st
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 0, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new StreamEvent(first_event, Guid.NewGuid(), partition_id)));
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 1, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(new StreamEvent(second_event, Guid.NewGuid(), partition_id)));
             next_event_fetcher.Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), 2, Moq.It.IsAny<CancellationToken>())).Throws(new Exception());
-            stream_processor = new StreamProcessor(tenant_id, source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, Moq.Mock.Of<ILogger>());
+            stream_processor = new StreamProcessor(tenant_id, source_stream_id, event_processor_mock.Object, stream_processor_state_repository, next_event_fetcher.Object, default, Moq.Mock.Of<ILogger>());
         };
 
         Because of = () => stream_processor.BeginProcessing().Wait();
 
-        It should_process_two_events = () => event_processor_mock.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>()), Moq.Times.Exactly(2));
-        It should_process_first_event = () => event_processor_mock.Verify(_ => _.Process(first_event, partition_id), Moq.Times.Once());
-        It should_process_second_event = () => event_processor_mock.Verify(_ => _.Process(second_event, partition_id), Moq.Times.Once());
+        It should_process_two_events = () => event_processor_mock.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
+        It should_process_first_event = () => event_processor_mock.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
+        It should_process_second_event = () => event_processor_mock.Verify(_ => _.Process(second_event, partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
         It should_have_current_position_equal_1 = () => stream_processor.CurrentState.Position.ShouldEqual(new StreamPosition(2));
         It should_have_one_failing_partition = () => stream_processor.CurrentState.FailingPartitions.Count.ShouldEqual(1);
         It should_have_the_correct_failing_partition = () => stream_processor.CurrentState.FailingPartitions.ContainsKey(partition_id).ShouldBeTrue();
