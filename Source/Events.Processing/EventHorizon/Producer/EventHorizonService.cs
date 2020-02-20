@@ -110,7 +110,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
                 publicEvent.Event.EventLogVersion,
                 publicEvent.Event.Occurred,
                 publicEvent.Event.EventSource,
-                CorrelationId.New(),
+                publicEvent.Event.CorrelationId,
                 publicEvent.Event.Microservice,
                 subscriber,
                 publicEvent.Event.Cause,

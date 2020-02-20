@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Applications;
+using Dolittle.Execution;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 using MongoDB.Bson;
@@ -18,12 +19,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// </summary>
         /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
         /// <param name="producerTenant">The <see cref="TenantId" /> that produced the event.</param>
+        /// <param name="correlation">The <see cref="CorrelationId" />.</param>
         /// <returns>The converted <see cref="ReceivedEventMetadata" />.</returns>
-        public static ReceivedEventMetadata GetReceivedEventMetadata(this CommittedEvent committedEvent, TenantId producerTenant) =>
+        public static ReceivedEventMetadata GetReceivedEventMetadata(this CommittedEvent committedEvent, TenantId producerTenant, CorrelationId correlation) =>
             new ReceivedEventMetadata(
                 committedEvent.Occurred,
                 committedEvent.EventSource,
-                committedEvent.CorrelationId,
+                correlation,
                 committedEvent.Microservice,
                 committedEvent.Tenant,
                 producerTenant,
@@ -65,10 +67,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
         /// <param name="producerTenant">The <see cref="TenantId" />.</param>
         /// <returns>The converted <see cref="ReceivedEvent" />.</returns>
-        public static ReceivedEvent ToReceivedEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, TenantId producerTenant) =>
+        public static ReceivedEvent ToNewReceivedEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, TenantId producerTenant) =>
             new ReceivedEvent(
                 streamPosition,
-                committedEvent.GetReceivedEventMetadata(producerTenant),
+                committedEvent.GetReceivedEventMetadata(producerTenant, CorrelationId.New()),
                 BsonDocument.Parse(committedEvent.Content));
     }
 }
