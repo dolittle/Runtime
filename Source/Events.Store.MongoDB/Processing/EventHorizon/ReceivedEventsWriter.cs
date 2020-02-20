@@ -15,34 +15,25 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.EventHorizon
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IReceivedEvents" />.
+    /// Represents an implementation of <see cref="IWriteReceivedEvents" />.
     /// </summary>
-    public class ReceivedEvents : IReceivedEvents
+    public class ReceivedEventsWriter : IWriteReceivedEvents
     {
         readonly FilterDefinitionBuilder<ReceivedEvent> _streamEventFilter = Builders<ReceivedEvent>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReceivedEvents"/> class.
+        /// Initializes a new instance of the <see cref="ReceivedEventsWriter"/> class.
         /// </summary>
         /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public ReceivedEvents(
+        public ReceivedEventsWriter(
             EventStoreConnection connection,
             ILogger logger)
         {
             _connection = connection;
             _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public async Task<StreamPosition> GetVersionForTenant(Microservice microservice, TenantId tenant, CancellationToken cancellationToken)
-        {
-            var receivedEvents = await _connection.GetReceivedEventsCollectionAsync(microservice, cancellationToken).ConfigureAwait(false);
-            return (StreamPosition)await receivedEvents.CountDocumentsAsync(
-                            _streamEventFilter.Eq(_ => _.FromTenant, tenant.Value),
-                            cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
