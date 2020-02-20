@@ -17,7 +17,6 @@ using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
-using Grpc.Core;
 using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
 namespace Dolittle.Runtime.Events.Processing.EventHorizon
@@ -32,7 +31,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         readonly grpc.EventHorizon.EventHorizonClient _client;
         readonly IExecutionContextManager _executionContextManager;
         readonly FactoryFor<StreamProcessors> _getStreamProcessors;
-        readonly FactoryFor<IReceivedEvents> _getReceivedEvents;
+        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
+        readonly FactoryFor<IWriteReceivedEvents> _getReceivedEventsWriter;
         readonly ILogger _logger;
 
         /// <summary>
@@ -41,22 +41,25 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         /// <param name="eventHorizons">The <see cref="EventHorizonsConfiguration" />.</param>
         /// <param name="client">The grpc client.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="getStreamProcessors">The <see cref="FactoryFor{StreamProcessors}" />.</param>
-        /// <param name="getReceivedEvents">The <see cref="IReceivedEvents" />.</param>
+        /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
+        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{IStreamProcessorStateRepository}" />.</param>
+        /// <param name="getReceivedEventsWriter">The <see cref="FactoryFor{IWriteReceivedEvents}" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventHorizonClient(
             EventHorizonsConfiguration eventHorizons,
             grpc.EventHorizon.EventHorizonClient client,
             IExecutionContextManager executionContextManager,
             FactoryFor<StreamProcessors> getStreamProcessors,
-            FactoryFor<IReceivedEvents> getReceivedEvents,
+            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
+            FactoryFor<IWriteReceivedEvents> getReceivedEventsWriter,
             ILogger logger)
         {
             _eventHorizons = eventHorizons;
             _client = client;
             _executionContextManager = executionContextManager;
             _getStreamProcessors = getStreamProcessors;
-            _getReceivedEvents = getReceivedEvents;
+            _getStreamProcessorStates = getStreamProcessorStates;
+            _getReceivedEventsWriter = getReceivedEventsWriter;
             _logger = logger;
         }
 
@@ -69,42 +72,44 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         /// <inheritdoc/>
         public async Task StartSubscription(Microservice microservice, TenantId producer, TenantId subscriber)
         {
+            StreamProcessor streamProcessor = null;
             var tokenSource = new CancellationTokenSource();
-            var token = tokenSource.Token;
-            _executionContextManager.CurrentFor(subscriber);
-            var publicEventsVersion = await _getReceivedEvents().GetVersionForTenant(microservice, producer, token).ConfigureAwait(false);
+            try
+            {
+                _executionContextManager.CurrentFor(subscriber);
+                var publicEventsVersion = (await _getStreamProcessorStates().GetOrAddNew(new StreamProcessorId(producer.Value, microservice.Value)).ConfigureAwait(false)).Position;
+                var eventsFetcher = new EventsFromEventHorizonFetcher(
+                    _client.Subscribe(
+                        new EventHorizonSubscriberToPublisherRequest
+                        {
+                            Microservice = _executionContextManager.Current.BoundedContext.Value.ToProtobuf(),
+                            ProducerTenant = producer.ToProtobuf(),
+                            SubscriberTenant = subscriber.ToProtobuf(),
+                            PublicEventsVersion = publicEventsVersion.Value
+                        },
+                        cancellationToken: tokenSource.Token),
+                    publicEventsVersion);
 
-            var request = new EventHorizonSubscriberToPublisherRequest
-            {
-                Microservice = microservice.ToProtobuf(),
-                ProducerTenant = producer.ToProtobuf(),
-                SubscriberTenant = subscriber.ToProtobuf(),
-                PublicEventsVersion = publicEventsVersion.Value
-            };
-            var call = _client.Subscribe(request, cancellationToken: token);
-            var stream = call.ResponseStream;
-            while (!token.IsCancellationRequested)
-            {
-                try
+                streamProcessor = _getStreamProcessors().Register(
+                    new ReceivedEventsProcessor(microservice, producer, _getReceivedEventsWriter(), _logger),
+                    eventsFetcher,
+                    microservice.Value,
+                    tokenSource);
+
+                while (!tokenSource.IsCancellationRequested)
                 {
-                    if (!await stream.MoveNext().ConfigureAwait(false)) break;
-                    _executionContextManager.CurrentFor(subscriber);
-                    var @event = stream.Current.Event.ToCommittedEvent();
-                    _logger.Information($"Tenant '{subscriber}' received public event '{@event.Type.Id}' from microservice '{microservice}' and tenant '{producer}'");
-                    await _getReceivedEvents().Write(@event, microservice, producer, token).ConfigureAwait(false);
-                }
-                catch (RpcException e) when (e.StatusCode == Grpc.Core.StatusCode.NotFound)
-                {
-                    await Task.Delay(1000).ConfigureAwait(false);
-                }
-                catch (Exception e)
-                {
-                    _logger.Error(e, $"Error while handling event from microservice '{microservice}' and tenant '{producer}'");
-                    return;
+                    await Task.Delay(50).ConfigureAwait(false);
                 }
             }
-
-            tokenSource.Dispose();
+            catch (Exception)
+            {
+                _logger.Warning($"DIsconnecting Event Horizon to microservice '{microservice}' and tenant '{producer}'");
+            }
+            finally
+            {
+                tokenSource.Dispose();
+                streamProcessor?.Dispose();
+            }
         }
 
         void SubscribeToMicroService(Microservice microservice, Subscriptions subscriptions) => subscriptions.ForEach(_ => SubscribeToTenantInMicroService(microservice, _.Key, _.Value));
