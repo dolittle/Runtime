@@ -77,47 +77,59 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         /// <inheritdoc/>
         public async Task StartSubscription(Microservice microservice, TenantId producer, TenantId subscriber)
         {
-            StreamProcessor streamProcessor = null;
-            var tokenSource = new CancellationTokenSource();
-            try
+            while (true)
             {
-                _executionContextManager.CurrentFor(subscriber);
-                var publicEventsVersion = (await _getStreamProcessorStates().GetOrAddNew(new StreamProcessorId(producer.Value, microservice.Value)).ConfigureAwait(false)).Position;
-                var eventsFetcher = new EventsFromEventHorizonFetcher(
-                    _client.Subscribe(
-                        new EventHorizonSubscriberToPublisherRequest
-                        {
-                            Microservice = _boundedContextConfiguration.BoundedContext.Value.ToProtobuf(),
-                            ProducerTenant = producer.ToProtobuf(),
-                            SubscriberTenant = subscriber.ToProtobuf(),
-                            PublicEventsVersion = publicEventsVersion.Value
-                        },
-                        cancellationToken: tokenSource.Token),
-                    publicEventsVersion);
-
-                streamProcessor = _getStreamProcessors().Register(
-                    new ReceivedEventsProcessor(microservice, producer, _getReceivedEventsWriter(), _logger),
-                    eventsFetcher,
-                    microservice.Value,
-                    tokenSource);
-
-                while (!tokenSource.IsCancellationRequested)
+                var streamProcessorId = new StreamProcessorId(producer.Value, microservice.Value);
+                _logger.Debug($"Tenant '{subscriber}' is subscribing to events from tenant '{producer} in microservice '{microservice}'");
+                try
                 {
-                    await Task.Delay(5000).ConfigureAwait(false);
+#pragma warning disable CA2000
+                    var tokenSource = new CancellationTokenSource();
+                    _executionContextManager.CurrentFor(subscriber);
+                    var publicEventsVersion = (await _getStreamProcessorStates().GetOrAddNew(streamProcessorId).ConfigureAwait(false)).Position;
+                    var eventsFetcher = new EventsFromEventHorizonFetcher(
+                        _client.Subscribe(
+                            new EventHorizonSubscriberToPublisherRequest
+                            {
+                                Microservice = _boundedContextConfiguration.BoundedContext.Value.ToProtobuf(),
+                                ProducerTenant = producer.ToProtobuf(),
+                                SubscriberTenant = subscriber.ToProtobuf(),
+                                PublicEventsVersion = publicEventsVersion.Value
+                            },
+                            cancellationToken: tokenSource.Token),
+                        () =>
+                        {
+                            if (!tokenSource.IsCancellationRequested)
+                            {
+                                _logger.Debug($"Canceling cancellation token source for Event Horizon from tenant '{subscriber}' to tenant '{producer}' in microservice '{microservice}'");
+                                tokenSource.Cancel();
+                            }
+                        },
+                        _logger);
+                    _getStreamProcessors().Register(
+                        new ReceivedEventsProcessor(microservice, producer, _getReceivedEventsWriter(), _logger),
+                        eventsFetcher,
+                        microservice.Value,
+                        tokenSource);
+#pragma warning restore CA2000
+
+                    while (!tokenSource.IsCancellationRequested)
+                    {
+                        await Task.Delay(5000).ConfigureAwait(false);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                if (!tokenSource.IsCancellationRequested)
+                catch (Exception ex)
                 {
                     _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{microservice}' and tenant '{producer}'");
                 }
-            }
-            finally
-            {
-                _logger.Warning($"Disconnecting Event Horizon to microservice '{microservice}' and tenant '{producer}'");
-                tokenSource.Dispose();
-                streamProcessor?.Dispose();
+                finally
+                {
+                    _logger.Debug($"Disconnecting Event Horizon from tenant '{subscriber}' to microservice '{microservice}' and tenant '{producer}'");
+                    _executionContextManager.CurrentFor(subscriber);
+                    _getStreamProcessors().Unregister(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
+                }
+
+                await Task.Delay(5000).ConfigureAwait(false);
             }
         }
 

@@ -3,10 +3,10 @@
 extern alias contracts;
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
+using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Grpc.Core;
@@ -18,46 +18,49 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
     /// </summary>
     public class EventsFromEventHorizonFetcher : IFetchEventsFromStreams
     {
-        readonly StreamPosition _streamBeginning;
         readonly AsyncServerStreamingCall<EventHorizonPublisherToSubscriberResponse> _call;
-        readonly IList<CommittedEvent> _events;
+        readonly Action _onUnavailableConnection;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsFromEventHorizonFetcher"/> class.
         /// </summary>
         /// <param name="call">The call.</param>
-        /// <param name="streamBeginning">The beginning position of the stream.</param>
+        /// <param name="onUnavailableConnection">On no connection.</param>
+        /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventsFromEventHorizonFetcher(
             AsyncServerStreamingCall<EventHorizonPublisherToSubscriberResponse> call,
-            StreamPosition streamBeginning)
+            Action onUnavailableConnection,
+            ILogger logger)
         {
             _call = call;
-            _streamBeginning = streamBeginning;
-            _events = new List<CommittedEvent>();
+            _logger = logger;
+            _onUnavailableConnection = onUnavailableConnection;
         }
 
         /// <inheritdoc/>
-        public async Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        public async Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             try
             {
-                if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new EventStoreUnavailable("event horizon is down",  new Exception("Event horizon is down."));
-                _events.Add(_call.ResponseStream.Current.Event.ToCommittedEvent());
-                var index = (int)(streamPosition.Value - _streamBeginning.Value);
-                if (index >= _events.Count) throw new NoEventInStreamAtPosition(streamId, streamPosition);
-                return new StreamEvent(_events[index], streamId, PartitionId.NotSet);
+                if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(streamId, streamPosition);
+
+                return new StreamEvent(
+                    @_call.ResponseStream.Current.Event.ToCommittedEvent(),
+                    streamId,
+                    PartitionId.NotSet);
             }
-            catch (Exception ex)
+            catch (RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.Unavailable)
             {
-                throw new EventStoreUnavailable("Cannot get event from event horizon", ex);
+                _onUnavailableConnection();
+                throw;
             }
         }
 
         /// <inheritdoc/>
         public Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
         {
-            var index = (int)(fromPosition.Value - _streamBeginning.Value);
-            return Task.FromResult(index < 0 || index >= _events.Count ? new StreamPosition(uint.MaxValue) : new StreamPosition((uint)index));
+            return Task.FromResult<StreamPosition>(uint.MaxValue);
         }
     }
 }
