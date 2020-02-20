@@ -23,6 +23,7 @@ namespace Dolittle.Runtime.Events.Processing
         readonly ITenants _tenants;
         readonly FactoryFor<IStreamProcessors> _getStreamProcessors;
         readonly FactoryFor<IWriteEventsToStreams> _getStreamWriter;
+        readonly FactoryFor<IFetchEventsFromStreams> _getStreamFetcher;
         readonly IEventHorizonClient _eventHorizonClient;
         readonly ILogger _logger;
 
@@ -33,6 +34,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="tenants">The <see cref="ITenants" />.</param>
         /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
         /// <param name="getStreamWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
+        /// <param name="getStreamFetcher">The <see cref="FactoryFor{IFetchEventsFromStreams}" />.</param>
         /// <param name="eventHorizonClient">The <see cref="IEventHorizonClient" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public BootProcedure(
@@ -40,11 +42,13 @@ namespace Dolittle.Runtime.Events.Processing
             ITenants tenants,
             FactoryFor<IStreamProcessors> getStreamProcessors,
             FactoryFor<IWriteEventsToStreams> getStreamWriter,
+            FactoryFor<IFetchEventsFromStreams> getStreamFetcher,
             IEventHorizonClient eventHorizonClient,
             ILogger logger)
         {
             _getStreamProcessors = getStreamProcessors;
             _getStreamWriter = getStreamWriter;
+            _getStreamFetcher = getStreamFetcher;
             _logger = logger;
             _executionContextManager = executionContextManager;
             _eventHorizonClient = eventHorizonClient;
@@ -75,7 +79,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
             _logger.Debug($"Registering stream processor for the public event stream for tenant {tenant}");
             var filter = new PublicEventFilter(_getStreamWriter(), _logger);
-            _getStreamProcessors().Register(filter, StreamId.AllStreamId);
+            _getStreamProcessors().Register(filter, _getStreamFetcher(), StreamId.AllStreamId);
         }
     }
 }
