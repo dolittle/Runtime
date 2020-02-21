@@ -158,8 +158,7 @@ namespace Dolittle.Runtime.Events.Processing
 
         void ThrowIfIllegalTargetStream(StreamId stream)
         {
-            if (stream == StreamId.AllStreamId) throw new FilterCannotWriteToEventLog();
-            if (stream == StreamId.PublicEventsId) throw new FilterCannotWriteToPublicEvents();
+            if (stream.IsNonWriteable) throw new CannotFilterToNonWriteableStream(stream);
         }
     }
 }
