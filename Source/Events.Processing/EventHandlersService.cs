@@ -75,17 +75,17 @@ namespace Dolittle.Runtime.Events.Processing
             ServerCallContext context)
         {
             EventProcessorId eventProcessorId = Guid.Empty;
-            StreamId sourceStreamId = Guid.Empty;
+            StreamId sourceStream = Guid.Empty;
 
             try
             {
                 var eventHandlerArguments = context.GetArgumentsMessage<EventHandlerArguments>();
                 eventProcessorId = eventHandlerArguments.EventHandlerId.To<EventProcessorId>();
-                sourceStreamId = eventHandlerArguments.StreamId.To<StreamId>();
-                _logger.Debug($"EventHandler client connected with id '{eventProcessorId}' for stream '{sourceStreamId}'");
-                var targetStreamId = new StreamId { Value = eventProcessorId };
+                sourceStream = eventHandlerArguments.StreamId.To<StreamId>();
+                _logger.Debug($"EventHandler client connected with id '{eventProcessorId}' for stream '{sourceStream}'");
+                var targetStream = new StreamId { Value = eventProcessorId };
 
-                ThrowIfIllegalTargetStream(targetStreamId);
+                ThrowIfIllegalTargetStream(targetStream);
 
                 var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
                     runtimeStream,
@@ -93,9 +93,10 @@ namespace Dolittle.Runtime.Events.Processing
                     context,
                     _ => _.CallNumber,
                     _ => _.CallNumber);
-                var filterDefinition = await CreateAndValidateTypePartitionFilterDefinition(eventHandlerArguments, eventProcessorId, targetStreamId).ConfigureAwait(false);
-                RegisterStreamProcessorsForAllTenants(filterDefinition, dispatcher, eventProcessorId, sourceStreamId, targetStreamId);
-                await RegisterTypePartitionFilterDefinitions(eventProcessorId, targetStreamId, filterDefinition).ConfigureAwait(false);
+                var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(
+                    eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>()),
+                    eventHandlerArguments.Partitioned);
+                await RegisterForAllTenants(filterDefinition, dispatcher, eventProcessorId, sourceStream, targetStream).ConfigureAwait(false);
                 await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -107,27 +108,12 @@ namespace Dolittle.Runtime.Events.Processing
             }
             finally
             {
-                UnregisterForAllTenants(eventProcessorId, sourceStreamId);
+                UnregisterForAllTenants(eventProcessorId, sourceStream);
                 _logger.Debug($"EventHandler client disconnected for '{eventProcessorId}'");
             }
         }
 
-        async Task<TypeFilterWithEventSourcePartitionDefinition> CreateAndValidateTypePartitionFilterDefinition(EventHandlerArguments eventHandlerArguments, EventProcessorId eventProcessor, StreamId sourceStream)
-        {
-            var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(
-                eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>()),
-                eventHandlerArguments.Partitioned);
-
-            foreach (var tenant in _tenants.All)
-            {
-                _executionContextManager.CurrentFor(tenant);
-                await _typePartitionFilterRegistry.Validate(eventProcessor.Value, sourceStream, filterDefinition).ConfigureAwait(false);
-            }
-
-            return filterDefinition;
-        }
-
-        void RegisterStreamProcessorsForAllTenants(
+        async Task RegisterForAllTenants(
             TypeFilterWithEventSourcePartitionDefinition filterDefinition,
             IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> callDispatcher,
             EventProcessorId eventProcessorId,
@@ -135,35 +121,34 @@ namespace Dolittle.Runtime.Events.Processing
             StreamId targetStreamId)
         {
             _logger.Debug($"Registering event handler '{eventProcessorId}' for stream '{sourceStreamId}' for {_tenants.All.Count()} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
-            _tenants.All.ForEach(tenant =>
-            {
-                _executionContextManager.CurrentFor(tenant);
-
-                var filter = new TypeFilterWithEventSourcePartition(
-                                    eventProcessorId,
-                                    targetStreamId,
-                                    filterDefinition,
-                                    _eventsToStreamsWriterFactory(),
-                                    _logger);
-
-                _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId);
-
-                var eventProcessor = new EventProcessor(
-                    eventProcessorId,
-                    callDispatcher,
-                    _executionContextManager,
-                    _logger);
-
-                _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId);
-            });
-        }
-
-        async Task RegisterTypePartitionFilterDefinitions(EventProcessorId eventProcessor, StreamId sourceStream, TypeFilterWithEventSourcePartitionDefinition filterDefinition)
-        {
             foreach (var tenant in _tenants.All)
             {
-                _executionContextManager.CurrentFor(tenant);
-                await _typePartitionFilterRegistry.Register(eventProcessor.Value, sourceStream, filterDefinition).ConfigureAwait(false);
+                try
+                {
+                    _executionContextManager.CurrentFor(tenant);
+                    await _typePartitionFilterRegistry.Validate(targetStreamId, sourceStreamId, filterDefinition).ConfigureAwait(false);
+                    var filter = new TypeFilterWithEventSourcePartition(
+                                        eventProcessorId,
+                                        targetStreamId,
+                                        filterDefinition,
+                                        _eventsToStreamsWriterFactory(),
+                                        _logger);
+
+                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId);
+
+                    var eventProcessor = new EventProcessor(
+                        eventProcessorId,
+                        callDispatcher,
+                        _executionContextManager,
+                        _logger);
+
+                    _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId);
+                    await _typePartitionFilterRegistry.Register(targetStreamId, sourceStreamId, filterDefinition).ConfigureAwait(false);
+                }
+                catch (TypeFilterDefinitionDoesNotMatchPersistedDefinition ex)
+                {
+                    _logger.Error(ex, $"Type partition filter definition does not match for tenant '{tenant}'. Not registering stream processors.");
+                }
             }
         }
 

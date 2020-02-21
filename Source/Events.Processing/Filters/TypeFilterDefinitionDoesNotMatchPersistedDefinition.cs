@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Exception that gets thrown when a type filter definition that does not match the previously persisted definition is being registered.

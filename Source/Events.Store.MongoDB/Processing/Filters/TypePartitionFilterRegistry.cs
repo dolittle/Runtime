@@ -34,6 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         {
             try
             {
+                _logger.Information($"{targetStream} - {sourceStream}");
                 var document = TypePartitionFilterDefinition.FromDefinition(definition, targetStream, sourceStream);
                 await _connection.TypePartitionFilterDefinitions
                     .ReplaceOneAsync(
@@ -68,6 +69,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         {
             try
             {
+                _logger.Information($"{targetStream} - {sourceStream}");
                 var document = TypePartitionFilterDefinition.FromDefinition(definition, targetStream, sourceStream);
                 var storedDefinition = await _connection.TypePartitionFilterDefinitions
                     .Find(
