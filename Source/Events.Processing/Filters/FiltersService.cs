@@ -122,6 +122,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _executionContextManager,
                     _logger);
 
+                // TODO: This is wrong, here streamId is both source and target
                 _streamProcessorsFactory().Register(filterProcessor, _eventsFromStreamsFetcherFactory(), streamId);
             });
         }

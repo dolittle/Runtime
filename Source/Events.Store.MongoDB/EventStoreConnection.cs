@@ -9,6 +9,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing;
+using Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters;
 using Dolittle.Runtime.Events.Streams;
 using MongoDB.Driver;
 
@@ -39,6 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             PublicEvents = connection.Database.GetCollection<PublicEvent>(Constants.PublicEventsCollection);
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
             StreamProcessorStates = connection.Database.GetCollection<StreamProcessorState>(Constants.StreamProcessorStateCollection);
+            TypePartitionFilterDefinitions = connection.Database.GetCollection<TypePartitionFilterDefinition>(Constants.TypePartitionFilterDefinitionCollection);
 
             CreateCollectionsAndIndexes();
         }
@@ -67,6 +69,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// Gets the <see cref="IMongoCollection{StreamProcessorState}" /> where <see cref="StreamProcessorState" >stream processor states</see> are stored.
         /// </summary>
         public IMongoCollection<StreamProcessorState> StreamProcessorStates { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{TypePartitionFilterDefinition}" /> where <see cref="TypePartitionFilterDefinition" >type partition filter definitions</see> are stored.
+        /// </summary>
+        public IMongoCollection<TypePartitionFilterDefinition> TypePartitionFilterDefinitions { get; }
 
         /// <summary>
         /// Gets the <see cref="IMongoCollection{StreamEvent}" /> that represents a stream of events.
@@ -100,6 +107,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             CretaeCollectionsAndIndexesForPublicEvents();
             CreateCollectionsAndIndexesForAggregates();
             CreateCollectionsAndIndexesForStreamProcessorStates();
+            CreateCollectionsAndIndexesForTypePartitionFilterDefinitions();
         }
 
         void CreateCollectionsAndIndexesForEventLog()
@@ -189,6 +197,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         {
             StreamProcessorStates.Indexes.CreateOne(new CreateIndexModel<StreamProcessorState>(
                 Builders<StreamProcessorState>.IndexKeys
+                    .Ascending(_ => _.Id)));
+        }
+
+        void CreateCollectionsAndIndexesForTypePartitionFilterDefinitions()
+        {
+            TypePartitionFilterDefinitions.Indexes.CreateOne(new CreateIndexModel<TypePartitionFilterDefinition>(
+                Builders<TypePartitionFilterDefinition>.IndexKeys
                     .Ascending(_ => _.Id)));
         }
     }

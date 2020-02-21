@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
+        readonly ITypePartitionFilterRegistry _typePartitionFilterRegistry;
         readonly FactoryFor<IStreamProcessors> _streamProcessorsFactory;
         readonly FactoryFor<IWriteEventsToStreams> _eventsToStreamsWriterFactory;
         readonly FactoryFor<IFetchEventsFromStreams> _eventsFromStreamsFetcherFactory;
@@ -41,6 +42,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
+        /// <param name="typePartitionFilterRegistry">The <see cref="ITypePartitionFilterRegistry"/>.</param>
         /// <param name="streamProcessorsFactory"><see cref="FactoryFor{T}"/> the <see cref="IStreamProcessors"/> for registration management.</param>
         /// <param name="eventsToStreamsWriterFactory"><see cref="FactoryFor{T}"/> the  <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="eventsFromStreamsFetcherFactory"><see cref="FactoryFor{T}"/> the  <see cref="IFetchEventsFromStreams">fetcher</see> for writing events.</param>
@@ -49,6 +51,7 @@ namespace Dolittle.Runtime.Events.Processing
         public EventHandlersService(
             IExecutionContextManager executionContextManager,
             ITenants tenants,
+            ITypePartitionFilterRegistry typePartitionFilterRegistry,
             FactoryFor<IStreamProcessors> streamProcessorsFactory,
             FactoryFor<IWriteEventsToStreams> eventsToStreamsWriterFactory,
             FactoryFor<IFetchEventsFromStreams> eventsFromStreamsFetcherFactory,
@@ -57,6 +60,7 @@ namespace Dolittle.Runtime.Events.Processing
         {
             _executionContextManager = executionContextManager;
             _tenants = tenants;
+            _typePartitionFilterRegistry = typePartitionFilterRegistry;
             _streamProcessorsFactory = streamProcessorsFactory;
             _eventsToStreamsWriterFactory = eventsToStreamsWriterFactory;
             _eventsFromStreamsFetcherFactory = eventsFromStreamsFetcherFactory;
@@ -71,15 +75,17 @@ namespace Dolittle.Runtime.Events.Processing
             ServerCallContext context)
         {
             EventProcessorId eventProcessorId = Guid.Empty;
-            StreamId streamId = Guid.Empty;
+            StreamId sourceStreamId = Guid.Empty;
 
             try
             {
                 var eventHandlerArguments = context.GetArgumentsMessage<EventHandlerArguments>();
                 eventProcessorId = eventHandlerArguments.EventHandlerId.To<EventProcessorId>();
-                streamId = eventHandlerArguments.StreamId.To<StreamId>();
+                sourceStreamId = eventHandlerArguments.StreamId.To<StreamId>();
+                _logger.Debug($"EventHandler client connected with id '{eventProcessorId}' for stream '{sourceStreamId}'");
+                var targetStreamId = new StreamId { Value = eventProcessorId };
 
-                _logger.Debug($"EventHandler client connected with id '{eventProcessorId}' for stream '{streamId}'");
+                ThrowIfIllegalTargetStream(targetStreamId);
 
                 var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
                     runtimeStream,
@@ -87,9 +93,9 @@ namespace Dolittle.Runtime.Events.Processing
                     context,
                     _ => _.CallNumber,
                     _ => _.CallNumber);
-
-                RegisterForAllTenants(eventHandlerArguments, dispatcher, eventProcessorId, streamId);
-
+                var filterDefinition = await CreateAndValidateTypePartitionFilterDefinition(eventHandlerArguments, eventProcessorId, targetStreamId).ConfigureAwait(false);
+                RegisterStreamProcessorsForAllTenants(filterDefinition, dispatcher, eventProcessorId, sourceStreamId, targetStreamId);
+                await RegisterTypePartitionFilterDefinitions(eventProcessorId, targetStreamId, filterDefinition).ConfigureAwait(false);
                 await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -101,34 +107,42 @@ namespace Dolittle.Runtime.Events.Processing
             }
             finally
             {
-                UnregisterForAllTenants(eventProcessorId, streamId);
+                UnregisterForAllTenants(eventProcessorId, sourceStreamId);
                 _logger.Debug($"EventHandler client disconnected for '{eventProcessorId}'");
             }
         }
 
-        void RegisterForAllTenants(
-            EventHandlerArguments eventHandlerArguments,
-            IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> callDispatcher,
-            EventProcessorId eventProcessorId,
-            StreamId sourceStreamId)
+        async Task<TypeFilterWithEventSourcePartitionDefinition> CreateAndValidateTypePartitionFilterDefinition(EventHandlerArguments eventHandlerArguments, EventProcessorId eventProcessor, StreamId sourceStream)
         {
-            var tenants = _tenants.All;
-            var targetStreamId = (StreamId)eventProcessorId.Value;
-
-            ThrowIfIllegalTargetStream(targetStreamId);
-            var definition = new TypeFilterWithEventSourcePartitionDefinition(
+            var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(
                 eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>()),
                 eventHandlerArguments.Partitioned);
 
-            _logger.Debug($"Registering event handler '{eventProcessorId}' for stream '{sourceStreamId}' for {tenants.Count()} tenants - types : '{string.Join(",", definition.Types)}'");
-            tenants.ForEach(tenant =>
+            foreach (var tenant in _tenants.All)
+            {
+                _executionContextManager.CurrentFor(tenant);
+                await _typePartitionFilterRegistry.Validate(eventProcessor.Value, sourceStream, filterDefinition).ConfigureAwait(false);
+            }
+
+            return filterDefinition;
+        }
+
+        void RegisterStreamProcessorsForAllTenants(
+            TypeFilterWithEventSourcePartitionDefinition filterDefinition,
+            IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> callDispatcher,
+            EventProcessorId eventProcessorId,
+            StreamId sourceStreamId,
+            StreamId targetStreamId)
+        {
+            _logger.Debug($"Registering event handler '{eventProcessorId}' for stream '{sourceStreamId}' for {_tenants.All.Count()} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
+            _tenants.All.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
 
                 var filter = new TypeFilterWithEventSourcePartition(
                                     eventProcessorId,
                                     targetStreamId,
-                                    definition,
+                                    filterDefinition,
                                     _eventsToStreamsWriterFactory(),
                                     _logger);
 
@@ -142,6 +156,15 @@ namespace Dolittle.Runtime.Events.Processing
 
                 _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId);
             });
+        }
+
+        async Task RegisterTypePartitionFilterDefinitions(EventProcessorId eventProcessor, StreamId sourceStream, TypeFilterWithEventSourcePartitionDefinition filterDefinition)
+        {
+            foreach (var tenant in _tenants.All)
+            {
+                _executionContextManager.CurrentFor(tenant);
+                await _typePartitionFilterRegistry.Register(eventProcessor.Value, sourceStream, filterDefinition).ConfigureAwait(false);
+            }
         }
 
         void UnregisterForAllTenants(EventProcessorId eventProcessorId, StreamId sourceStreamId)

@@ -17,6 +17,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public const string StreamProcessorStateCollection = "stream-processor-states";
 
         /// <summary>
+        /// The collection name where stream processor states are stored.
+        /// </summary>
+        public const string TypePartitionFilterDefinitionCollection = "type-partition-filters";
+
+        /// <summary>
         /// The collection name where aggregate root instances are stored.
         /// These documents are used to ensure optimistic concurrency transaction boundaries.
         /// </summary>
