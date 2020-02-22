@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
@@ -25,6 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
         readonly string _logMessagePrefix;
         readonly CancellationTokenSource _cancellationTokenSource;
+        readonly IStreamProcessorStates _streamProcessorStates;
         Task _task;
 
         /// <summary>
@@ -33,6 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="tenantId">The <see cref="TenantId"/> the <see cref="StreamProcessor"/> belongs to.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="cancellationTokenSource">The <see cref="CancellationTokenSource" />.</param>
@@ -41,6 +42,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             TenantId tenantId,
             StreamId sourceStreamId,
             IEventProcessor processor,
+            IStreamProcessorStates streamProcessorStates,
             IStreamProcessorStateRepository streamProcessorStateRepository,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             CancellationTokenSource cancellationTokenSource,
@@ -55,6 +57,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             CurrentState = StreamProcessorState.New;
             _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
             _cancellationTokenSource.Token.ThrowIfCancellationRequested();
+            _streamProcessorStates = streamProcessorStates;
         }
 
         /// <summary>
@@ -105,7 +108,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 CurrentState = await GetPersistedCurrentState().ConfigureAwait(false);
                 do
                 {
-                    await CatchupFailingPartitions().ConfigureAwait(false);
+                    await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationTokenSource.Token).ConfigureAwait(false);
 
                     StreamEvent streamEvent = default;
                     while (streamEvent == default && !_cancellationTokenSource.IsCancellationRequested)
@@ -136,18 +139,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     else
                     {
                         var processingResult = await ProcessEvent(streamEvent.Event, streamEvent.Partition).ConfigureAwait(false);
-                        if (processingResult.Succeeded)
-                        {
-                            CurrentState = await IncrementPosition().ConfigureAwait(false);
-                        }
-                        else if (processingResult is IRetryProcessingResult retryProcessingResult)
-                        {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(streamEvent.Partition, retryProcessingResult.RetryTimeout, retryProcessingResult.FailureReason).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            CurrentState = await AddFailingPartitionAndIncrementPosition(streamEvent.Partition, DateTimeOffset.MaxValue, processingResult.FailureReason).ConfigureAwait(false);
-                        }
+
+                        await _streamProcessorStates.HandleProcessingResult(Identifier, processingResult, CurrentState.Position, _cancellationTokenSource.Token).ConfigureAwait(false);
                     }
                 }
                 while (!_cancellationTokenSource.IsCancellationRequested);
@@ -161,57 +154,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
         }
 
-        async Task CatchupFailingPartitions()
+        Task<StreamProcessorState> IncrementPosition()
         {
-            var failingPartitions = CurrentState.FailingPartitions.ToList();
-            foreach (var kvp in failingPartitions)
-            {
-                var partitionId = kvp.Key;
-                var failingPartitionState = kvp.Value;
-                if (ShouldRetryProcessing(failingPartitionState))
-                {
-                    var nextPosition = await FindPositionOfNextEventInPartition(partitionId, failingPartitionState.Position).ConfigureAwait(false);
-                    while (ShouldProcessNextEventInPartition(nextPosition))
-                    {
-                        if (!ShouldRetryProcessing(failingPartitionState)) break;
-
-                        var streamEvent = await FetchEventWithPartitionAtPosition(nextPosition).ConfigureAwait(false);
-                        var processingResult = await ProcessEvent(streamEvent.Event, streamEvent.Partition).ConfigureAwait(false);
-
-                        if (processingResult.Succeeded)
-                        {
-                            failingPartitionState = await ChangePositionInFailingPartition(partitionId, failingPartitionState.Position, nextPosition.Increment()).ConfigureAwait(false);
-                        }
-                        else if (processingResult is IRetryProcessingResult retryProcessingResult)
-                        {
-                            failingPartitionState = await SetFailingPartitionState(partitionId, retryProcessingResult.RetryTimeout, processingResult.FailureReason, nextPosition).ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            failingPartitionState = await SetFailingPartitionState(partitionId, DateTimeOffset.MaxValue, processingResult.FailureReason, nextPosition).ConfigureAwait(false);
-                        }
-
-                        nextPosition = await FindPositionOfNextEventInPartition(partitionId, failingPartitionState.Position).ConfigureAwait(false);
-                    }
-
-                    if (ShouldRetryProcessing(failingPartitionState)) CurrentState = await RemoveFailingPartition(partitionId).ConfigureAwait(false);
-                }
-            }
-        }
-
-        Task<StreamProcessorState> AddFailingPartitionAndIncrementPosition(PartitionId partitionId, uint retryTimeout, string reason) => AddFailingPartitionAndIncrementPosition(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout), reason);
-
-        async Task<StreamProcessorState> AddFailingPartitionAndIncrementPosition(PartitionId partitionId, DateTimeOffset retryTime, string reason)
-        {
-            _logger.Debug($"{_logMessagePrefix} is adding failing partition '{partitionId}' with retry time '{retryTime}'");
-            await _streamProcessorStateRepository.AddFailingPartition(Identifier, partitionId, CurrentState.Position, retryTime, reason, _cancellationTokenSource.Token).ConfigureAwait(false);
-            return await IncrementPosition().ConfigureAwait(false);
-        }
-
-        Task<StreamProcessorState> RemoveFailingPartition(PartitionId partitionId)
-        {
-            _logger.Debug($"{_logMessagePrefix} is removing failing partition '{partitionId}'");
-            return _streamProcessorStateRepository.RemoveFailingPartition(Identifier, partitionId, _cancellationTokenSource.Token);
+            _logger.Debug($"{_logMessagePrefix} is incrementing its position from '{CurrentState.Position.Value}' to '{CurrentState.Position.Increment().Value}'");
+            return _streamProcessorStateRepository.IncrementPosition(Identifier, _cancellationTokenSource.Token);
         }
 
         Task<StreamProcessorState> GetPersistedCurrentState()
@@ -220,62 +166,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return _streamProcessorStateRepository.GetOrAddNew(Identifier, _cancellationTokenSource.Token);
         }
 
+        Task<StreamEvent> FetchNextEventWithPartitionToProcess()
+        {
+            _logger.Debug($" Stream Processor '{Identifier}' is fetching event at position '{CurrentState.Position}'.");
+            return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, CurrentState.Position, _cancellationTokenSource.Token);
+        }
+
         Task<IProcessingResult> ProcessEvent(CommittedEvent @event, PartitionId partitionId)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' in partition '{partitionId.Value}'");
             return _processor.Process(@event, partitionId, _cancellationTokenSource.Token);
         }
-
-        Task<StreamProcessorState> IncrementPosition()
-        {
-            _logger.Debug($"{_logMessagePrefix} is incrementing its position from '{CurrentState.Position.Value}' to '{CurrentState.Position.Increment().Value}'");
-            return _streamProcessorStateRepository.IncrementPosition(Identifier, _cancellationTokenSource.Token);
-        }
-
-        async Task<FailingPartitionState> ChangePositionInFailingPartition(PartitionId partitionId, StreamPosition oldPosition, StreamPosition newPosition)
-        {
-            _logger.Debug($"{_logMessagePrefix} is chaning its position from '{oldPosition.Value}' to '{newPosition.Value}' in partition'{partitionId.Value}'");
-            var newFailingPartitionState = new FailingPartitionState { Position = newPosition, RetryTime = DateTimeOffset.MinValue };
-            CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
-                Identifier,
-                partitionId,
-                newFailingPartitionState,
-                _cancellationTokenSource.Token).ConfigureAwait(false);
-            return newFailingPartitionState;
-        }
-
-        Task<StreamEvent> FetchNextEventWithPartitionToProcess() => FetchEventWithPartitionAtPosition(CurrentState.Position);
-
-        Task<StreamEvent> FetchEventWithPartitionAtPosition(StreamPosition position)
-        {
-            _logger.Debug($"{_logMessagePrefix} is fetching event at position '{position.Value}'.");
-            return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, position, _cancellationTokenSource.Token);
-        }
-
-        Task<StreamPosition> FindPositionOfNextEventInPartition(PartitionId partitionId, StreamPosition fromPosition)
-        {
-            _logger.Debug($"{_logMessagePrefix} is fetching next event to process in partition '{partitionId}' from position '{fromPosition}'.");
-            return _eventsFromStreamsFetcher.FindNext(Identifier.SourceStreamId, partitionId, fromPosition, _cancellationTokenSource.Token);
-        }
-
-        Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, uint retryTimeout, string reason, StreamPosition position) => SetFailingPartitionState(partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout), reason, position);
-
-        async Task<FailingPartitionState> SetFailingPartitionState(PartitionId partitionId, DateTimeOffset retryTime, string reason, StreamPosition position)
-        {
-            _logger.Debug($"{_logMessagePrefix} is setting retry time '{retryTime}' and position '{position.Value}' for partition '{partitionId.Value}'");
-            var newFailingPartitionState = new FailingPartitionState { Position = position, RetryTime = retryTime, Reason = reason };
-            CurrentState = await _streamProcessorStateRepository.SetFailingPartitionState(
-                Identifier,
-                partitionId,
-                newFailingPartitionState,
-                _cancellationTokenSource.Token)
-                .ConfigureAwait(false);
-
-            return newFailingPartitionState;
-        }
-
-        bool ShouldProcessNextEventInPartition(StreamPosition position) => position.Value < CurrentState.Position.Value;
-
-        bool ShouldRetryProcessing(FailingPartitionState state) => DateTimeOffset.UtcNow.CompareTo(state.RetryTime) >= 0;
     }
 }
