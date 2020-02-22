@@ -117,12 +117,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 var filterProcessor = new FilterProcessor(
                     eventProcessorId,
                     callDispatcher,
-                    streamId,
+                    eventProcessorId.Value,
                     _eventsToStreamsWriterFactory(),
                     _executionContextManager,
                     _logger);
 
-                // TODO: This is wrong, here streamId is both source and target
                 _streamProcessorsFactory().Register(filterProcessor, _eventsFromStreamsFetcherFactory(), streamId);
             });
         }
