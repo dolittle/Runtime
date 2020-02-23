@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IEventProcessor _processor;
         readonly ILogger _logger;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
-        readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
         readonly string _logMessagePrefix;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly IStreamProcessorStates _streamProcessorStates;
@@ -34,7 +33,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
-        /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="cancellationTokenSource">The <see cref="CancellationTokenSource" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
@@ -43,7 +41,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             StreamId sourceStreamId,
             IEventProcessor processor,
             IStreamProcessorStates streamProcessorStates,
-            IStreamProcessorStateRepository streamProcessorStateRepository,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             CancellationTokenSource cancellationTokenSource,
             ILogger logger)
@@ -51,7 +48,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _processor = processor;
             _logger = logger;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
-            _streamProcessorStateRepository = streamProcessorStateRepository;
             Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
             _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
             CurrentState = StreamProcessorState.New;
@@ -144,7 +140,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         Task<StreamEvent> FetchNextEventWithPartitionToProcess()
         {
-            _logger.Debug($" Stream Processor '{Identifier}' is fetching event at position '{CurrentState.Position}'.");
+            _logger.Debug($"{_logMessagePrefix} is fetching event at position '{CurrentState.Position}'.");
             return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, CurrentState.Position, _cancellationTokenSource.Token);
         }
     }

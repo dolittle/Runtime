@@ -55,7 +55,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 tenant,
                 sourceStreamId,
                 eventProcessor,
-                _streamProcessorStateRepository,
+                new StreamProcessorStates(
+                    new FailingPartitions(_streamProcessorStateRepository, eventsFromStreamsFetcher, _logger),
+                    _streamProcessorStateRepository,
+                    _logger),
                 eventsFromStreamsFetcher,
                 cancellationTokenSource,
                 _logger);
