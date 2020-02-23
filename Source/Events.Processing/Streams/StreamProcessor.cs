@@ -105,7 +105,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             try
             {
-                CurrentState = await GetPersistedCurrentState().ConfigureAwait(false);
+                CurrentState = await _streamProcessorStates.GetStoredStateFor(Identifier, _cancellationTokenSource.Token).ConfigureAwait(false);
                 do
                 {
                     await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationTokenSource.Token).ConfigureAwait(false);
@@ -127,21 +127,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                     }
 
-                    if (_cancellationTokenSource.IsCancellationRequested)
-                    {
-                        break;
-                    }
+                    if (_cancellationTokenSource.IsCancellationRequested) break;
 
-                    if (CurrentState.FailingPartitions.Keys.Contains(streamEvent.Partition))
-                    {
-                        CurrentState = await IncrementPosition().ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        var processingResult = await ProcessEvent(streamEvent.Event, streamEvent.Partition).ConfigureAwait(false);
-
-                        await _streamProcessorStates.HandleProcessingResult(Identifier, processingResult, CurrentState.Position, _cancellationTokenSource.Token).ConfigureAwait(false);
-                    }
+                    CurrentState = await _streamProcessorStates.ProcessEventAndChangeStateFor(Identifier, _processor, streamEvent, CurrentState, _cancellationTokenSource.Token).ConfigureAwait(false);
                 }
                 while (!_cancellationTokenSource.IsCancellationRequested);
             }
@@ -154,28 +142,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
         }
 
-        Task<StreamProcessorState> IncrementPosition()
-        {
-            _logger.Debug($"{_logMessagePrefix} is incrementing its position from '{CurrentState.Position.Value}' to '{CurrentState.Position.Increment().Value}'");
-            return _streamProcessorStateRepository.IncrementPosition(Identifier, _cancellationTokenSource.Token);
-        }
-
-        Task<StreamProcessorState> GetPersistedCurrentState()
-        {
-            _logger.Debug($"{_logMessagePrefix} is getting the persisted state for this stream processor.");
-            return _streamProcessorStateRepository.GetOrAddNew(Identifier, _cancellationTokenSource.Token);
-        }
-
         Task<StreamEvent> FetchNextEventWithPartitionToProcess()
         {
             _logger.Debug($" Stream Processor '{Identifier}' is fetching event at position '{CurrentState.Position}'.");
             return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, CurrentState.Position, _cancellationTokenSource.Token);
-        }
-
-        Task<IProcessingResult> ProcessEvent(CommittedEvent @event, PartitionId partitionId)
-        {
-            _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' in partition '{partitionId.Value}'");
-            return _processor.Process(@event, partitionId, _cancellationTokenSource.Token);
         }
     }
 }

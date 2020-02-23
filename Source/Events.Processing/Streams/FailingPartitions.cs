@@ -37,6 +37,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc/>
+        public Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, PartitionId partition, StreamPosition position, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default)
+        {
+            _logger.Debug($"Adding failing partition '{partition}' with retry time '{retryTime}' to stream processor '{streamProcessorId}' because of: {reason}");
+            return _streamProcessorStates.AddFailingPartition(streamProcessorId, partition, position, retryTime, reason, cancellationToken);
+        }
+
+        /// <inheritdoc/>
         public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken = default)
         {
             var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
@@ -75,13 +82,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
 
             return streamProcessorState;
-        }
-
-        /// <inheritdoc/>
-        public Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, PartitionId partition, StreamPosition position, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default)
-        {
-            _logger.Debug($"Adding failing partition '{partition}' with retry time '{retryTime}' to stream processor '{streamProcessorId}'");
-            return _streamProcessorStates.AddFailingPartition(streamProcessorId, partition, position, retryTime, reason, cancellationToken);
         }
 
         Task<StreamProcessorState> RemoveFailingPartition(StreamProcessorId streamProcessorId, PartitionId partition, CancellationToken cancellationToken)
