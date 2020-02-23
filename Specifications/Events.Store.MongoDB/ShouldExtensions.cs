@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             Ensure.IsNotNull(nameof(storedEvent), storedEvent);
             var committedEventStoreRepresentation = committedEvent.ToStoreStreamEvent(streamPosition, partition);
 
-            storedEvent.EventLogVersion.ShouldEqual(committedEventStoreRepresentation.EventLogVersion);
+            storedEvent.EventLogVersion.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogVersion);
             storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
 
             storedEvent.Metadata.CausePosition.ShouldEqual(committedEventStoreRepresentation.Metadata.CausePosition);
@@ -43,10 +43,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             Ensure.IsNotNull(nameof(storedEvent), storedEvent);
             var committedEventStoreRepresentation = committedEvent.ToStoreStreamEvent(streamPosition, partition);
 
-            storedEvent.EventLogVersion.ShouldEqual(committedEventStoreRepresentation.EventLogVersion);
+            storedEvent.Metadata.EventLogVersion.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogVersion);
             storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
             storedEvent.StreamPosition.ShouldEqual(committedEventStoreRepresentation.StreamPosition);
-            storedEvent.Partition.ShouldEqual(committedEventStoreRepresentation.Partition);
+            storedEvent.Metadata.Partition.ShouldEqual(committedEventStoreRepresentation.Metadata.Partition);
 
             storedEvent.Metadata.CausePosition.ShouldEqual(committedEventStoreRepresentation.Metadata.CausePosition);
             storedEvent.Metadata.CauseType.ShouldEqual(committedEventStoreRepresentation.Metadata.CauseType);
