@@ -54,6 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 if (ShouldRetryProcessing(failingPartitionState))
                 {
                     var nextPosition = await FindPositionOfNextEventInPartition(streamProcessorId, partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
+                    _logger.Debug($"Catching up partition '{partition}' in Stream Processor '{streamProcessorId}' starting at position {nextPosition}");
                     while (ShouldProcessNextEventInPartition(nextPosition, streamProcessorState.Position))
                     {
                         if (!ShouldRetryProcessing(failingPartitionState)) break;
@@ -77,6 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         nextPosition = await FindPositionOfNextEventInPartition(streamProcessorId, partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
                     }
 
+                    _logger.Debug($"Done catching up partition '{partition}' in Stream Processor '{streamProcessorId}'");
                     if (ShouldRetryProcessing(failingPartitionState)) streamProcessorState = await RemoveFailingPartition(streamProcessorId, partition, cancellationToken).ConfigureAwait(false);
                 }
             }
