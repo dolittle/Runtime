@@ -104,13 +104,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 CurrentState = await _streamProcessorStates.GetStoredStateFor(Identifier, _cancellationTokenSource.Token).ConfigureAwait(false);
                 do
                 {
-                    await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationTokenSource.Token).ConfigureAwait(false);
-
                     StreamEvent streamEvent = default;
                     while (streamEvent == default && !_cancellationTokenSource.IsCancellationRequested)
                     {
                         try
                         {
+                            CurrentState = await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationTokenSource.Token).ConfigureAwait(false);
                             streamEvent = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
                         }
                         catch (NoEventInStreamAtPosition)
