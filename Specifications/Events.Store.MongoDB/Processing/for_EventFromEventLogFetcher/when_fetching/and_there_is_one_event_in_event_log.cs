@@ -5,9 +5,9 @@ using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventFromEventLogFetcher.when_fetching_from.all_stream
+namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventFromEventLogFetcher.when_fetching
 {
-    public class and_there_is_an_event_at_position : given.all_dependencies
+    public class and_there_is_one_event_in_event_log : given.all_dependencies
     {
         static Events.Event stored_event;
         static Streams.StreamEvent result;

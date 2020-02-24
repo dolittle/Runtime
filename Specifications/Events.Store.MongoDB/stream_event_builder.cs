@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using Dolittle.Runtime.Events.Streams;
 using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -35,6 +36,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public stream_event_builder with_content(BsonDocument document)
         {
             _instance.Content = document;
+            return this;
+        }
+
+        public stream_event_builder with_partition(PartitionId partition)
+        {
+            _instance.Metadata.Partition = partition;
+            return this;
+        }
+
+        public stream_event_builder with_event_log_version(EventLogVersion event_log_version)
+        {
+            _instance.Metadata.EventLogVersion = event_log_version;
             return this;
         }
     }

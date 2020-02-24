@@ -8,15 +8,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 {
     public static class metadata
     {
-        public static event_metadata_builder new_random_event_metadata => new event_metadata_builder();
+        public static event_metadata_builder new_event_metadata => new event_metadata_builder();
 
         public static EventMetadata random_event_metadata => new event_metadata_builder().build();
 
-        public static stream_event_metadata_builder new_random_stream_event_metadata => new stream_event_metadata_builder();
+        public static stream_event_metadata_builder new_stream_event_metadata => new stream_event_metadata_builder();
 
         public static StreamEventMetadata random_stream_event_metadata => new stream_event_metadata_builder().build();
 
-        public static public_event_metadata_builder new_random_public_event_metadata => new public_event_metadata_builder();
+        public static public_event_metadata_builder new_public_event_metadata => new public_event_metadata_builder();
 
         public static PublicEventMetadata random_public_event_metadata => new public_event_metadata_builder().build();
 

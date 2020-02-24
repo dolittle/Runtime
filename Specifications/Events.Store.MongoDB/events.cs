@@ -28,8 +28,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static Events.StreamEvent a_stream_event_not_from_aggregate(uint stream_position) => new stream_event_builder(stream_position).build();
 
-        public static public_event_builder new_public_event(uint stream_position, uint aggregate_version) => new public_event_builder(stream_position);
+        public static public_event_builder new_public_event(uint stream_position) => new public_event_builder(stream_position);
 
-        public static PublicEvent a_public_event(uint stream_position, uint aggregate_version) => new public_event_builder(stream_position).build();
+        public static PublicEvent a_public_event(uint stream_position) => new public_event_builder(stream_position).build();
     }
 }
