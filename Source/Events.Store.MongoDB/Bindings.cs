@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             builder.Bind<IFetchEventTypesFromStreams>().To<EventTypesFromStreamsFetcher>();
             builder.Bind<IStreamProcessorStateRepository>().To<StreamProcessorStateRepository>();
             builder.Bind<IWriteReceivedEvents>().To<ReceivedEventsWriter>();
-            builder.Bind<ITypePartitionFilterRegistry>().To<TypePartitionFilterRegistry>();
+            builder.Bind<IFilterValidator>().To<FilterValidator>();
         }
     }
 }
