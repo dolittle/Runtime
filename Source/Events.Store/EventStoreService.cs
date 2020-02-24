@@ -40,16 +40,34 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <inheritdoc/>
-        public override async Task<EventCommitResponse> Commit(grpc.UncommittedEvents request, ServerCallContext context)
+        public override async Task<grpc.EventCommitResponse> Commit(grpc.UncommittedEvents request, ServerCallContext context)
         {
             _logger.Debug($"Events received : {request.Events.Count}");
-            return await Task.FromResult(new EventCommitResponse()).ConfigureAwait(false);
+            var response = new EventCommitResponse { Reason = string.Empty };
+            try
+            {
+                var events = request.Events.Select(_ => new UncommittedEvent(new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Content));
+                var uncommittedEvents = new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
+                var committedEvents = await _eventStoreFactory().CommitEvents(uncommittedEvents, context.CancellationToken).ConfigureAwait(false);
+                response.Success = true;
+                response.Events = committedEvents.ToProtobuf();
+                _logger.Information("Events are committed");
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Reason = $"Error message: {ex.Message}\nStack Trace: {ex.StackTrace}";
+                _logger.Error(ex, "Error committing");
+            }
+
+            return response;
         }
 
         /// <inheritdoc/>
-        public override async Task<EventCommitResponse> CommitForAggregate(grpc.UncommittedAggregateEvents request, ServerCallContext context)
+        public override async Task<grpc.AggregateEventCommitResponse> CommitForAggregate(grpc.UncommittedAggregateEvents request, ServerCallContext context)
         {
             _logger.Information("Events for Aggregate received");
+            var response = new grpc.AggregateEventCommitResponse { Reason = string.Empty };
             try
             {
                 var events = request.Events.Select(_ => new UncommittedEvent(new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Content));
@@ -62,22 +80,43 @@ namespace Dolittle.Runtime.Events.Store
                     request.Version,
                     new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
 
-                await _eventStoreFactory().CommitAggregateEvents(uncommittedAggregateEvents).ConfigureAwait(false);
+                var committedEvents = await _eventStoreFactory().CommitAggregateEvents(uncommittedAggregateEvents, context.CancellationToken).ConfigureAwait(false);
+                response.Events = committedEvents.ToProtobuf();
+                response.Success = true;
                 _logger.Information("Events for Aggregate committed");
             }
             catch (Exception ex)
             {
+                response.Success = false;
+                response.Reason = $"Error message: {ex.Message}\nStack Trace: {ex.StackTrace}";
                 _logger.Error(ex, "Error committing");
             }
 
-            return await Task.FromResult(new EventCommitResponse()).ConfigureAwait(false);
+            return response;
         }
 
         /// <inheritdoc/>
-        public override async Task<grpc.CommittedAggregateEvents> FetchForAggregate(Aggregate request, ServerCallContext context)
+        public override async Task<grpc.FetchForAggregateResponse> FetchForAggregate(grpc.Aggregate request, ServerCallContext context)
         {
             _logger.Debug("Fetch for Aggregate");
-            return await Task.FromResult(new grpc.CommittedAggregateEvents()).ConfigureAwait(false);
+            var aggregate = request.Id.To<ArtifactId>();
+            var eventSource = request.Id.To<EventSourceId>();
+
+            var response = new grpc.FetchForAggregateResponse { Reason = string.Empty };
+            try
+            {
+                var committedAggregateEvents = await _eventStoreFactory().FetchForAggregate(eventSource, aggregate, context.CancellationToken).ConfigureAwait(false);
+                response.Success = true;
+                response.Events = committedAggregateEvents.ToProtobuf();
+            }
+            catch (Exception ex)
+            {
+                response.Success = false;
+                response.Reason = $"Error message: {ex.Message}\nStack Trace: {ex.StackTrace}";
+                _logger.Error(ex, $"Error fetching for aggregate '{aggregate.Value}'");
+            }
+
+            return response;
         }
     }
 }

@@ -3,11 +3,12 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
-    /// Defines a system that can fetch <see cref="Store.CommittedEvent">events</see> from <see cref="StreamId">streams</see>.
+    /// Defines a system that can fetch <see cref="CommittedEvent">events</see> from <see cref="StreamId">streams</see>.
     /// </summary>
     public interface IFetchEventsFromStreams
     {

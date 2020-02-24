@@ -3,6 +3,7 @@
 
 extern alias contracts;
 
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Logging;
@@ -38,17 +39,24 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public override Task<IFilterResult> Filter(Store.CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId)
+        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId)
         {
-            var included = _definition.Types.Contains(@event.Type.Id);
-            var outPartitionId = PartitionId.NotSet;
-            if (_definition.Partitioned)
+            try
             {
-                outPartitionId = @event.EventSource.Value;
-            }
+                var included = _definition.Types.Contains(@event.Type.Id);
+                var outPartitionId = PartitionId.NotSet;
+                if (_definition.Partitioned)
+                {
+                    outPartitionId = @event.EventSource.Value;
+                }
 
-            var filterResult = new SucceededFilteringResult(included, outPartitionId);
-            return Task.FromResult<IFilterResult>(filterResult);
+                var filterResult = new SucceededFilteringResult(included, outPartitionId);
+                return await Task.FromResult(filterResult).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                return await Task.FromResult(new FailedFilteringResult($"Failure Message: {ex.Message}\nStack Trace: {ex.StackTrace}")).ConfigureAwait(false);
+            }
         }
     }
 }

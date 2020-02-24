@@ -8,6 +8,7 @@ using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
 using Google.Protobuf;
@@ -47,7 +48,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public override async Task<IFilterResult> Filter(Store.CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId)
+        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId)
         {
             var message = new FilterRuntimeToClientRequest
             {
@@ -56,10 +57,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             };
 
             _logger.Debug($"Filter event that occurred @ {@event.Occurred}");
-            FilterClientToRuntimeResponse result = null;
-            await _callDispatcher.Call(message, response => result = response).ConfigureAwait(false);
+            IFilterResult result = null;
+            await _callDispatcher.Call(message, response => result = response.ToFilterResult()).ConfigureAwait(false);
             _logger.Debug($"Filter result : {result.IsIncluded}");
-            return new SucceededFilteringResult(true, partitionId);
+            return result;
         }
     }
 }

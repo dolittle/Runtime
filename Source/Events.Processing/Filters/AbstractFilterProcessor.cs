@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -44,14 +45,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Filters the event.
         /// </summary>
-        /// <param name="event">The <see cref="Store.CommittedEvent" />.</param>
+        /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation of filtering an event.</returns>
-        public abstract Task<IFilterResult> Filter(Store.CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
+        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(Store.CommittedEvent @event, PartitionId partitionId)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId)
         {
             _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
             var result = await Filter(@event, partitionId, Identifier).ConfigureAwait(false);

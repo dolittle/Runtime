@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 using Moq;
@@ -15,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
         static IFilterResult result;
 
         Establish context = () => filter_processor.Setup(_ => _.Filter(
-            Moq.It.IsAny<Store.CommittedEvent>(),
+            Moq.It.IsAny<CommittedEvent>(),
             Moq.It.IsAny<PartitionId>(),
             Moq.It.IsAny<EventProcessorId>()))
             .Returns(Task.FromResult<IFilterResult>(new SucceededFilteringResult(true, PartitionId.NotSet)));

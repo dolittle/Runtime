@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Dolittle.Collections;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Moq;
 
@@ -13,9 +14,9 @@ namespace Dolittle.Runtime.Events.Processing
     {
         public static Mock<IEventProcessor> an_event_processor() => new Mock<IEventProcessor>();
 
-        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, IProcessingResult result) => an_event_processor(id, (result, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<Store.CommittedEvent>()));
+        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, IProcessingResult result) => an_event_processor(id, (result, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CommittedEvent>()));
 
-        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, params (IProcessingResult result, PartitionId partition_Id, Store.CommittedEvent @event)[] event_and_result_pairs)
+        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, params (IProcessingResult result, PartitionId partition_Id, CommittedEvent @event)[] event_and_result_pairs)
         {
             var event_processor_mock = an_event_processor();
             event_processor_mock.SetupGet(_ => _.Identifier).Returns(id);
@@ -23,11 +24,11 @@ namespace Dolittle.Runtime.Events.Processing
             return event_processor_mock;
         }
 
-        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, Func<Store.CommittedEvent, PartitionId, Task<IProcessingResult>> callback)
+        public static Mock<IEventProcessor> an_event_processor(EventProcessorId id, Func<CommittedEvent, PartitionId, Task<IProcessingResult>> callback)
         {
             var event_processor_mock = an_event_processor();
             event_processor_mock.SetupGet(_ => _.Identifier).Returns(id);
-            event_processor_mock.Setup(_ => _.Process(Moq.It.IsAny<Store.CommittedEvent>(), Moq.It.IsAny<PartitionId>())).Returns(callback);
+            event_processor_mock.Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>())).Returns(callback);
             return event_processor_mock;
         }
 

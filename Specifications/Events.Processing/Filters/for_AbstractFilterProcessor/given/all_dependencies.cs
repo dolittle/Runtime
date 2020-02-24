@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 using Moq;
@@ -15,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
         protected static StreamId stream_id;
         protected static Mock<IWriteEventsToStreams> events_to_streams_writer;
         protected static Mock<AbstractFilterProcessor> filter_processor;
-        protected static Store.CommittedEvent committed_event;
+        protected static CommittedEvent committed_event;
 
         Establish context = () =>
         {
