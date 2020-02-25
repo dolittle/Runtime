@@ -3,6 +3,7 @@
 extern alias contracts;
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
@@ -55,6 +56,12 @@ namespace Dolittle.Runtime.EventHorizon
                 _onUnavailableConnection();
                 throw;
             }
+        }
+
+        /// <inheritdoc/>
+        public Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPosition fromPostition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        {
+            throw new CannotFetchRangeOfEventsFromEventHorizon();
         }
 
         /// <inheritdoc/>

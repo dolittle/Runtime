@@ -74,6 +74,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the event log version that the Event had in the microservice that it came from.
         /// </summary>
+        [BsonRepresentation(BsonType.Int64)]
         public uint OriginEventLogVersion { get; set; }
 
         /// <summary>

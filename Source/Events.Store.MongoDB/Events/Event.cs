@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the event log version of the event.
         /// </summary>
         [BsonId]
+        [BsonRepresentation(BsonType.Int64)]
         public uint EventLogVersion { get; set; }
 
         /// <summary>

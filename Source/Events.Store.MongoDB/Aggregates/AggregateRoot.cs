@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
@@ -38,6 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// <summary>
         /// Gets or sets the version of the Aggregate Root.
         /// </summary>
+        [BsonRepresentation(BsonType.Int64)]
         public uint Version { get; set; }
     }
 }

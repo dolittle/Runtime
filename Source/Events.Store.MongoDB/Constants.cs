@@ -23,6 +23,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public const string AggregateRootInstanceCollection = "aggregates";
 
         /// <summary>
+        /// The collection name where type partition filters are stored.
+        /// </summary>
+        public const string TypePartitionFilterDefinitionCollection = "type-partition-filters";
+
+        /// <summary>
         /// Gets the collection name where events in the event log are stored.
         /// </summary>
         public const string EventLogCollection = "event-log";

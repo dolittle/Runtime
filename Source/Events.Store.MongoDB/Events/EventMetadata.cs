@@ -77,6 +77,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the <see cref="CauseLogPosition"/> identifying the <see cref="Cause"/> of the event.
         /// </summary>
+        [BsonRepresentation(BsonType.Int64)]
         public uint CausePosition { get; set; }
 
         /// <summary>

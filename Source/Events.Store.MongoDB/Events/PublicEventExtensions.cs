@@ -48,12 +48,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 publicEvent.Content.ToString());
 
         /// <summary>
-        /// Converts a <see cref="PublicEvent" /> to a <see cref="Streams.StreamEvent" />.
+        /// Converts a <see cref="PublicEvent" /> to a <see cref="Runtime.Events.Streams.StreamEvent" />.
         /// </summary>
         /// <param name="publicEvent">The <see cref="PublicEvent" />.</param>
-        /// <returns>The converted <see cref="Streams.StreamEvent" />.</returns>
-        public static Streams.StreamEvent ToRuntimeStreamEvent(this PublicEvent publicEvent) =>
-            new Streams.StreamEvent(publicEvent.ToCommittedEvent(), StreamId.PublicEventsId, PartitionId.NotSet);
+        /// <returns>The converted <see cref="Runtime.Events.Streams.StreamEvent" />.</returns>
+        public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this PublicEvent publicEvent) =>
+            new Runtime.Events.Streams.StreamEvent(publicEvent.ToCommittedEvent(), StreamId.PublicEventsId, PartitionId.NotSet);
 
         /// <summary>
         /// Converts a <see cref="CommittedEvent" /> to a <see cref="PublicEvent" />.

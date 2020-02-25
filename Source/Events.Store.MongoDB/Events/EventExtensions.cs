@@ -70,11 +70,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                       @event.Content.ToString());
 
         /// <summary>
-        /// Converts a <see cref="Event" /> to a <see cref="Streams.StreamEvent" />.
+        /// Converts a <see cref="Event" /> to a <see cref="Runtime.Events.Streams.StreamEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
-        /// <returns>The converted <see cref="Streams.StreamEvent" />.</returns>
-        public static Streams.StreamEvent ToRuntimeStreamEvent(this Event @event) =>
-            new Streams.StreamEvent(@event.ToCommittedEvent(), StreamId.AllStreamId, PartitionId.NotSet);
+        /// <returns>The converted <see cref="Runtime.Events.Streams.StreamEvent" />.</returns>
+        public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this Event @event) =>
+            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), StreamId.AllStreamId, PartitionId.NotSet);
     }
 }

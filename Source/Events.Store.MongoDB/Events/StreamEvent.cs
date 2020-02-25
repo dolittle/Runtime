@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets stream position.
         /// </summary>
         [BsonId]
+        [BsonRepresentation(BsonType.Int64)]
         public uint StreamPosition { get; set; }
 
         /// <summary>

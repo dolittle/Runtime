@@ -52,13 +52,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.Content.ToString());
 
         /// <summary>
-        /// Converts a <see cref="ReceivedEvent" /> to a <see cref="Streams.StreamEvent" />.
+        /// Converts a <see cref="ReceivedEvent" /> to a <see cref="Runtime.Events.Streams.StreamEvent" />.
         /// </summary>
         /// <param name="publicEvent">The <see cref="ReceivedEvent" />.</param>
         /// <param name="microservice">The <see cref="Microservice" />.</param>
-        /// <returns>The converted <see cref="Streams.StreamEvent" />.</returns>
-        public static Streams.StreamEvent ToRuntimeStreamEvent(this ReceivedEvent publicEvent, Microservice microservice) =>
-            new Streams.StreamEvent(publicEvent.ToCommittedEvent(), microservice.Value, PartitionId.NotSet);
+        /// <returns>The converted <see cref="Runtime.Events.Streams.StreamEvent" />.</returns>
+        public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this ReceivedEvent publicEvent, Microservice microservice) =>
+            new Runtime.Events.Streams.StreamEvent(publicEvent.ToCommittedEvent(), microservice.Value, PartitionId.NotSet);
 
         /// <summary>
         /// Converts a <see cref="CommittedEvent" /> to a <see cref="ReceivedEvent" />.
