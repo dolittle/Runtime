@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Defines a system for handling inncomming public events from other microservices.

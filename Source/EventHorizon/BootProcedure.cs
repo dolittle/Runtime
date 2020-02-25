@@ -6,13 +6,12 @@ using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Performs the boot procedure for the processing of events.

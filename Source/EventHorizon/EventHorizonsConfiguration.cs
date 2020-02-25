@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using Dolittle.Applications;
 using Dolittle.Configuration;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Represents the configuration for hosts by <see cref="EventHorizonsConfiguration"/>.

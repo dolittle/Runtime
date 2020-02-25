@@ -20,7 +20,7 @@ using Dolittle.Tenancy;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.Events.Processing.EventHorizon;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Represents the implementation of <see creF="FiltersBase"/>.

@@ -6,11 +6,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessor" />.

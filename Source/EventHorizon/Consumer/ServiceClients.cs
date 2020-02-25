@@ -8,7 +8,7 @@ using Dolittle.Services;
 using Dolittle.Services.Clients;
 using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Represents something that knows about service clients.

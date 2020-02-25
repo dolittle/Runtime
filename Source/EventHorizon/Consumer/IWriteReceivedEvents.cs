@@ -7,7 +7,7 @@ using Dolittle.Applications;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Defines a system that knows about received events.

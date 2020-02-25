@@ -4,16 +4,17 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
-    /// Represents a <see cref="AbstractFilterProcessor"/> that filters public events.
+    /// Represents a <see cref="AbstractFilterProcessor{T}"/> that filters public events.
     /// </summary>
-    public class PublicEventFilter : AbstractFilterProcessor
+    public class PublicEventFilter : AbstractFilterProcessor<IFilterDefinition>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicEventFilter"/> class.
@@ -23,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         public PublicEventFilter(
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
-            : base(StreamId.PublicEventsId.Value, StreamId.PublicEventsId, eventsToStreamsWriter, logger)
+            : base(new PublicEventFilterDefinition(), eventsToStreamsWriter, logger)
         {
         }
 

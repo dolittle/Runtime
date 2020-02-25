@@ -11,7 +11,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFetchEventsFromStreams" />.

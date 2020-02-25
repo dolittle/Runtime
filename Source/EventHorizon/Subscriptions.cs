@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Represents the subscriptions for a microservice.
