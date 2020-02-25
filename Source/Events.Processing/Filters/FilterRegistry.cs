@@ -42,15 +42,30 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public async Task Register<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken = default)
             where TDefinition : IFilterDefinition
         {
+            _logger.Debug($"Registering filter defintion of type {typeof(TDefinition).FullName} on source stream '{filter.Definition.SourceStream}' and target stream '{filter.Definition.TargetStream}'");
             if (!_registeredFilters.TryAdd(filter.Definition.TargetStream, filter)) throw new FilterForStreamAlreadyRegistered(filter.Definition.TargetStream);
             await _filterValidators.Validate(filter, cancellationToken).ConfigureAwait(false);
-            var repository = _container.Get<IFilterDefinitionRepositoryFor<TDefinition>>();
-            if (repository != null) await repository.PersistFilter(filter.Definition, cancellationToken).ConfigureAwait(false);
+            IFilterDefinitionRepositoryFor<TDefinition> repository = null;
+            try
+            {
+                repository = _container.Get<IFilterDefinitionRepositoryFor<TDefinition>>();
+            }
+            catch (Exception)
+            {
+                _logger.Debug($"No persisted filter repository for filter definition of type {typeof(TDefinition).FullName}");
+            }
+
+            if (repository != null)
+            {
+                _logger.Debug($"Persisting filter defintion of type {typeof(TDefinition).FullName} on source stream '{filter.Definition.SourceStream}' and target stream '{filter.Definition.TargetStream}'");
+                await repository.PersistFilter(filter.Definition, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         /// <inheritdoc/>
         public void Unregister(StreamId targetStream)
         {
+            _logger.Debug($"Unregistering filter on target stream '{targetStream}'");
             if (!_registeredFilters.ContainsKey(targetStream)) throw new NoFilterRegisteredForStream(targetStream);
             _registeredFilters.Remove(targetStream, out var _);
         }
@@ -58,15 +73,29 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public Task RemoveIfPersisted(StreamId targetStream, CancellationToken cancellationToken = default)
         {
+            _logger.Debug($"Removing persisted filter definition on target stream '{targetStream}' if persisted");
             if (!_registeredFilters.TryGetValue(targetStream, out var filterProcessor)) throw new NoFilterRegisteredForStream(targetStream);
-            var repository = GetPersistedFilterDefinitionRemoverFromFilterProcessor(filterProcessor);
-            if (repository != null) return repository.RemovePersistedFilter(targetStream, cancellationToken);
+            var filterDefinitionType = GetFilterDefinitionTypeFromEventProcessor(filterProcessor);
+            ICanRemovePersistedFilterDefinition persistedFilterRemover;
+            try
+            {
+                persistedFilterRemover = GetPersistedFilterDefinitionRemoverForDefinitionType(filterDefinitionType);
+            }
+            catch (Exception)
+            {
+                _logger.Debug($"No filter definition repository for filter definition of type '{filterDefinitionType.FullName}'");
+                return Task.CompletedTask;
+            }
+
+            if (persistedFilterRemover != null)
+            {
+                _logger.Debug($"Removing persisted filter defintion of type '{filterDefinitionType.FullName}' on target stream '{targetStream}'");
+                return persistedFilterRemover.RemovePersistedFilter(targetStream, cancellationToken);
+            }
+
+            _logger.Debug($"No filter definition repository for filter definition of type '{filterDefinitionType.FullName}'");
             return Task.CompletedTask;
         }
-
-        ICanRemovePersistedFilterDefinition GetPersistedFilterDefinitionRemoverFromFilterProcessor(IEventProcessor processor) =>
-            GetPersistedFilterDefinitionRemoverForDefinitionType(
-                GetFilterDefinitionTypeFromEventProcessor(processor));
 
         Type GetFilterDefinitionTypeFromEventProcessor(IEventProcessor processor) =>
             processor.GetType().GetGenericArguments().First();

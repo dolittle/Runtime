@@ -5,6 +5,7 @@ extern alias contracts;
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Collections;
@@ -28,17 +29,19 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
+        readonly FactoryFor<IFilterRegistry> _filterRegistryFactory;
         readonly FactoryFor<IStreamProcessors> _streamProcessorsFactory;
         readonly FactoryFor<IWriteEventsToStreams> _eventsToStreamsWriterFactory;
+        readonly FactoryFor<IFetchEventsFromStreams> _eventsFromStreamsFetcherFactory;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly ILogger _logger;
-        readonly FactoryFor<IFetchEventsFromStreams> _eventsFromStreamsFetcherFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiltersService"/> class.
         /// </summary>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
+        /// <param name="filterRegistryFactory">The <see cref="FactoryFor{T}" /> the <see cref="IFilterRegistry" />.</param>
         /// <param name="streamProcessorsFactory"><see cref="FactoryFor{T}"/> the <see cref="IStreamProcessors"/> for registration management.</param>
         /// <param name="eventsToStreamsWriterFactory"><see cref="FactoryFor{T}"/> the <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="eventsFromStreamsFetcherFactory"><see cref="FactoryFor{T}"/> the <see cref="IFetchEventsFromStreams">fetcher</see> for fetching events.</param>
@@ -47,6 +50,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FiltersService(
             IExecutionContextManager executionContextManager,
             ITenants tenants,
+            FactoryFor<IFilterRegistry> filterRegistryFactory,
             FactoryFor<IStreamProcessors> streamProcessorsFactory,
             FactoryFor<IWriteEventsToStreams> eventsToStreamsWriterFactory,
             FactoryFor<IFetchEventsFromStreams> eventsFromStreamsFetcherFactory,
@@ -55,6 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             _executionContextManager = executionContextManager;
             _tenants = tenants;
+            _filterRegistryFactory = filterRegistryFactory;
             _streamProcessorsFactory = streamProcessorsFactory;
             _eventsToStreamsWriterFactory = eventsToStreamsWriterFactory;
             _reverseCallDispatchers = reverseCallDispatchers;
@@ -86,7 +91,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _ => _.CallNumber,
                     _ => _.CallNumber);
 
-                RegisterForAllTenants(dispatcher, eventProcessorId, streamId);
+                await RegisterForAllTenants(dispatcher, eventProcessorId, streamId, context.CancellationToken).ConfigureAwait(false);
 
                 await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
             }
@@ -104,34 +109,44 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
         }
 
-        void RegisterForAllTenants(
+        async Task RegisterForAllTenants(
             IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher,
             EventProcessorId eventProcessorId,
-            StreamId streamId)
+            StreamId streamId,
+            CancellationToken cancellationToken)
         {
-            var tenants = _tenants.All;
-            _logger.Debug($"Registering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
-            tenants.ForEach(tenant =>
-            {
-                _executionContextManager.CurrentFor(tenant);
-                var filterProcessor = new FilterProcessor(
-                    new RemoteFilterDefinition(streamId, eventProcessorId.Value),
-                    callDispatcher,
-                    _eventsToStreamsWriterFactory(),
-                    _executionContextManager,
-                    _logger);
+            _logger.Debug($"Registering filter '{eventProcessorId}' for stream '{streamId}' for {_tenants.All.Count()} tenants");
 
-                _streamProcessorsFactory().Register(filterProcessor, _eventsFromStreamsFetcherFactory(), streamId);
-            });
+            foreach (var tenant in _tenants.All)
+            {
+                try
+                {
+                    _executionContextManager.CurrentFor(tenant);
+                    var filter = new FilterProcessor(
+                        new RemoteFilterDefinition(streamId, eventProcessorId.Value),
+                        callDispatcher,
+                        _eventsToStreamsWriterFactory(),
+                        _executionContextManager,
+                        _logger);
+
+                    await _filterRegistryFactory().Register(filter, cancellationToken).ConfigureAwait(false);
+                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), streamId);
+                }
+                catch (IllegalFilterTransformation ex)
+                {
+                    _logger.Error(ex, $"The filter for stream '{eventProcessorId}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
+                }
+            }
         }
 
         void UnregisterForAllTenants(EventProcessorId eventProcessorId, StreamId streamId)
         {
             var tenants = _tenants.All;
-            _logger.Debug($"Unregistering filter '{eventProcessorId}' for stream '{streamId}' for {tenants.Count()} tenants");
+            _logger.Debug($"Unregistering filter '{eventProcessorId}' on stream '{streamId}' for {tenants.Count()} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
+                _filterRegistryFactory().Unregister(eventProcessorId.Value);
                 _streamProcessorsFactory().Unregister(eventProcessorId, streamId);
             });
         }
