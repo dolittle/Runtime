@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     .Find(_eventLogFilter.Gte(_ => _.EventLogVersion, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogVersion, toPosition.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return new HashSet<Artifact>(eventTypes);
+                return eventTypes;
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     .Find(_eventLogFilter.Gte(_ => _.EventLogVersion, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogVersion, toPosition.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return new HashSet<Artifact>(eventTypes);
+                return eventTypes;
             }
             catch (MongoWaitQueueFullException ex)
             {

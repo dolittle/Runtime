@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     .Find(_streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return new HashSet<Artifact>(eventTypes);
+                return eventTypes;
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -95,7 +95,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     .Find(_streamEventFilter.Eq(_ => _.Metadata.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return new HashSet<Artifact>(eventTypes);
+                return eventTypes;
             }
             catch (MongoWaitQueueFullException ex)
             {
