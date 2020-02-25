@@ -17,9 +17,9 @@ using Google.Protobuf;
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
-    /// Represents a default implementation of <see cref="AbstractFilterProcessor"/>.
+    /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
     /// </summary>
-    public class FilterProcessor : AbstractFilterProcessor
+    public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
     {
         readonly IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> _callDispatcher;
         readonly IExecutionContextManager _executionContextManager;
@@ -28,20 +28,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
         /// </summary>
-        /// <param name="eventProcessorId"><see cref="EventProcessorId"/> for the event processor.</param>
+        /// <param name="definition">The <see cref="RemoteFilterDefinition"/>.</param>
         /// <param name="callDispatcher"><see cref="IReverseCallDispatcher{TResponse, TRequest}"/> for server requests.</param>
-        /// <param name="targetStreamId"><see cref="StreamId"/> to write to after filtering.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FilterProcessor(
-            EventProcessorId eventProcessorId,
+            RemoteFilterDefinition definition,
             IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> callDispatcher,
-            StreamId targetStreamId,
             IWriteEventsToStreams eventsToStreamsWriter,
             IExecutionContextManager executionContextManager,
             ILogger logger)
-            : base(eventProcessorId, targetStreamId, eventsToStreamsWriter, logger)
+            : base(definition, eventsToStreamsWriter, logger)
         {
             _callDispatcher = callDispatcher;
             _executionContextManager = executionContextManager;

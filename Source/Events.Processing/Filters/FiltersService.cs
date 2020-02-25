@@ -115,9 +115,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 _executionContextManager.CurrentFor(tenant);
                 var filterProcessor = new FilterProcessor(
-                    eventProcessorId,
+                    new RemoteFilterDefinition(streamId, eventProcessorId.Value),
                     callDispatcher,
-                    eventProcessorId.Value,
                     _eventsToStreamsWriterFactory(),
                     _executionContextManager,
                     _logger);

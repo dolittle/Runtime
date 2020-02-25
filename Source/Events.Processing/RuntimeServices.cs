@@ -25,7 +25,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="filtersService">The <see cref="FiltersService"/>.</param>
         /// <param name="eventHandlers">The <see cref="EventHandlersService"/>.</param>
-        /// <param name="eventHorizon">The <see cref="EventHorizonService" />.</param>
         public RuntimeServices(FiltersService filtersService, EventHandlersService eventHandlers)
         {
             _filtersService = filtersService;

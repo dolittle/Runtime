@@ -14,29 +14,22 @@ using Dolittle.Runtime.Events.Streams;
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
-    /// Represents a <see cref="AbstractFilterProcessor"/> that filters by known event types and can partition using an <see cref="EventSourceId"/>.
+    /// Represents a <see cref="AbstractFilterProcessor{T}"/> that filters by known event types and can partition using an <see cref="EventSourceId"/>.
     /// </summary>
-    public class TypeFilterWithEventSourcePartition : AbstractFilterProcessor
+    public class TypeFilterWithEventSourcePartition : AbstractFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>
     {
-        readonly TypeFilterWithEventSourcePartitionDefinition _definition;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartition"/> class.
         /// </summary>
-        /// <param name="eventProcessorId"><see cref="EventProcessorId"/> for the event processor.</param>
-        /// <param name="targetStreamId"><see cref="StreamId"/> to write to after filtering.</param>
-        /// <param name="definition"><see cref="TypeFilterWithEventSourcePartitionDefinition">Definition</see> for the filter.</param>
+        /// <param name="definition">The<see cref="TypeFilterWithEventSourcePartitionDefinition"/>.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public TypeFilterWithEventSourcePartition(
-            EventProcessorId eventProcessorId,
-            StreamId targetStreamId,
             TypeFilterWithEventSourcePartitionDefinition definition,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
-            : base(eventProcessorId, targetStreamId, eventsToStreamsWriter, logger)
+            : base(definition, eventsToStreamsWriter, logger)
         {
-            _definition = definition;
         }
 
         /// <inheritdoc/>
@@ -44,9 +37,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             try
             {
-                var included = _definition.Types.Contains(@event.Type.Id);
+                var included = Definition.Types.Contains(@event.Type.Id);
                 var outPartitionId = PartitionId.NotSet;
-                if (_definition.Partitioned)
+                if (Definition.Partitioned)
                 {
                     outPartitionId = @event.EventSource.Value;
                 }

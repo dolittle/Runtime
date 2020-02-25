@@ -13,57 +13,51 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessor" />that processes the filtering of an event.
     /// </summary>
-    public abstract class AbstractFilterProcessor : IEventProcessor
+    /// <typeparam name="TDefinition">The <see cref="IFilterDefinition" />.</typeparam>
+    public abstract class AbstractFilterProcessor<TDefinition> : IFilterProcessor<TDefinition>
+        where TDefinition : IFilterDefinition
     {
-        readonly StreamId _targetStreamId;
         readonly IWriteEventsToStreams _eventsToStreamsWriter;
         readonly ILogger _logger;
         readonly string _logMessagePrefix;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AbstractFilterProcessor"/> class.
+        /// Initializes a new instance of the <see cref="AbstractFilterProcessor{T}"/> class.
         /// </summary>
-        /// <param name="eventProcessorId"><see cref="EventProcessorId"/> for the event processor.</param>
-        /// <param name="targetStreamId">The stream to to write included events in.</param>
+        /// <param name="filterDefinition">The <see typeparam="TDefinition"/> <see cref="IFilterDefinition" /> for the filter processor.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
         protected AbstractFilterProcessor(
-            EventProcessorId eventProcessorId,
-            StreamId targetStreamId,
+            TDefinition filterDefinition,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
         {
-            Identifier = eventProcessorId;
-            _targetStreamId = targetStreamId;
+            Definition = filterDefinition;
             _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
-            _logMessagePrefix = $"Filter Processor '{Identifier}' with target stream '{_targetStreamId}'";
+            _logMessagePrefix = $"Filter Processor '{Identifier}' with source stream '{Definition.SourceStream}'";
         }
 
-        /// <inheritdoc />
-        public EventProcessorId Identifier { get; }
+        /// <inheritdoc/>
+        public TDefinition Definition { get; }
 
-        /// <summary>
-        /// Filters the event.
-        /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
-        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
-        /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation of filtering an event.</returns>
+        /// <inheritdoc />
+        public EventProcessorId Identifier => Definition.TargetStream.Value;
+
+        /// <inheritdoc/>
         public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken);
 
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
-            _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
+            _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId}'");
             var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
-            _logger.Debug($"{_logMessagePrefix} filtered event '{@event.Type.Id.Value}' for partition '{partitionId.Value}' with result 'Succeeded' = {result.Succeeded}");
+            _logger.Debug($"{_logMessagePrefix} filtered event '{@event.Type.Id}' for partition '{partitionId}' with result 'Succeeded' = {result.Succeeded}");
 
             if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug($"{_logMessagePrefix} writing event '{@event.Type.Id.Value}' to stream '{_targetStreamId.Value}' in partition '{partitionId.Value}'");
-                await _eventsToStreamsWriter.Write(@event, _targetStreamId, result.Partition, cancellationToken).ConfigureAwait(false);
+                _logger.Debug($"{_logMessagePrefix} writing event '{@event.Type.Id}' to stream '{Definition.TargetStream}' in partition '{partitionId}'");
+                await _eventsToStreamsWriter.Write(@event, Definition.TargetStream, result.Partition, cancellationToken).ConfigureAwait(false);
             }
 
             return result;

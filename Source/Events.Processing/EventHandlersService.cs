@@ -5,6 +5,7 @@ extern alias contracts;
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Artifacts;
@@ -30,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
-        readonly FactoryFor<IFilters> _getFilters;
+        readonly FactoryFor<IFilterRegistry> _getFilters;
         readonly FactoryFor<IStreamProcessors> _streamProcessorsFactory;
         readonly FactoryFor<IWriteEventsToStreams> _eventsToStreamsWriterFactory;
         readonly FactoryFor<IFetchEventsFromStreams> _eventsFromStreamsFetcherFactory;
@@ -42,7 +43,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
-        /// <param name="getFilters">The <see cref="FactoryFor{T}"/> the <see cref="IFilters" />.</param>
+        /// <param name="getFilters">The <see cref="FactoryFor{T}"/> the <see cref="IFilterRegistry" />.</param>
         /// <param name="streamProcessorsFactory"><see cref="FactoryFor{T}"/> the <see cref="IStreamProcessors"/> for registration management.</param>
         /// <param name="eventsToStreamsWriterFactory"><see cref="FactoryFor{T}"/> the  <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="eventsFromStreamsFetcherFactory"><see cref="FactoryFor{T}"/> the  <see cref="IFetchEventsFromStreams">fetcher</see> for writing events.</param>
@@ -51,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing
         public EventHandlersService(
             IExecutionContextManager executionContextManager,
             ITenants tenants,
-            FactoryFor<IFilters> getFilters,
+            FactoryFor<IFilterRegistry> getFilters,
             FactoryFor<IStreamProcessors> streamProcessorsFactory,
             FactoryFor<IWriteEventsToStreams> eventsToStreamsWriterFactory,
             FactoryFor<IFetchEventsFromStreams> eventsFromStreamsFetcherFactory,
@@ -98,7 +99,7 @@ namespace Dolittle.Runtime.Events.Processing
                     targetStream,
                     eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>()),
                     eventHandlerArguments.Partitioned);
-                await RegisterForAllTenants(filterDefinition, dispatcher, eventProcessorId, sourceStream, targetStream).ConfigureAwait(false);
+                await RegisterForAllTenants(filterDefinition, dispatcher, eventProcessorId, sourceStream, targetStream, context.CancellationToken).ConfigureAwait(false);
                 await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -120,7 +121,8 @@ namespace Dolittle.Runtime.Events.Processing
             IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> callDispatcher,
             EventProcessorId eventProcessorId,
             StreamId sourceStreamId,
-            StreamId targetStreamId)
+            StreamId targetStreamId,
+            CancellationToken cancellationToken)
         {
             _logger.Debug($"Registering event handler '{eventProcessorId}' for stream '{sourceStreamId}' for {_tenants.All.Count()} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
             foreach (var tenant in _tenants.All)
@@ -129,12 +131,10 @@ namespace Dolittle.Runtime.Events.Processing
                 {
                     _executionContextManager.CurrentFor(tenant);
                     var filter = new TypeFilterWithEventSourcePartition(
-                                        eventProcessorId,
-                                        targetStreamId,
                                         filterDefinition,
                                         _eventsToStreamsWriterFactory(),
                                         _logger);
-                    await _getFilters().Register(filterDefinition, filter).ConfigureAwait(false);
+                    await _getFilters().Register(filter, cancellationToken).ConfigureAwait(false);
 
                     _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId);
 
@@ -159,8 +159,8 @@ namespace Dolittle.Runtime.Events.Processing
             _logger.Debug($"Unregistering filter '{eventProcessorId}' for stream '{sourceStream}' for {tenants.Count()} tenants");
             tenants.ForEach(tenant =>
             {
-                _getFilters().Remove(sourceStream, eventProcessorId.Value);
                 _executionContextManager.CurrentFor(tenant);
+                _getFilters().Unregister(eventProcessorId.Value);
                 _streamProcessorsFactory().Unregister(eventProcessorId, sourceStream);
                 _streamProcessorsFactory().Unregister(eventProcessorId, eventProcessorId.Value);
             });
