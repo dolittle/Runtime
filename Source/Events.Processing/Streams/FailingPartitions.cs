@@ -46,6 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <inheritdoc/>
         public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken = default)
         {
+            if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = await _streamProcessorStates.GetOrAddNew(streamProcessorId).ConfigureAwait(false);
             var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
             foreach (var kvp in failingPartitionsList)
             {
