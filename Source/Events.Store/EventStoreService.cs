@@ -71,13 +71,13 @@ namespace Dolittle.Runtime.Events.Store
             try
             {
                 var events = request.Events.Select(_ => new UncommittedEvent(new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
-                var eventSourceId = request.EventSourceId.To<EventSourceId>();
+                var eventSourceId = request.EventSource.To<EventSourceId>();
                 var aggregateRoot = new Artifact(request.AggregateRoot.To<ArtifactId>(), ArtifactGeneration.First);
 
                 var uncommittedAggregateEvents = new UncommittedAggregateEvents(
                     eventSourceId,
                     aggregateRoot,
-                    request.Version,
+                    request.AggregateRootVersion,
                     new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
 
                 var committedEvents = await _eventStoreFactory().CommitAggregateEvents(uncommittedAggregateEvents, context.CancellationToken).ConfigureAwait(false);

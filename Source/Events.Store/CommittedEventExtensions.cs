@@ -31,8 +31,8 @@ namespace Dolittle.Runtime.Events.Store
             {
                 EventLogSequenceNumber = @event.EventLogSequenceNumber,
                 Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-                EventSourceId = @event.EventSource.ToProtobuf(),
-                CorrelationId = @event.CorrelationId.ToProtobuf(),
+                EventSource = @event.EventSource.ToProtobuf(),
+                Correlation = @event.CorrelationId.ToProtobuf(),
 
                 Microservice = @event.Microservice.ToProtobuf(),
                 Tenant = @event.Tenant.ToProtobuf(),
@@ -60,8 +60,8 @@ namespace Dolittle.Runtime.Events.Store
             return new CommittedEvent(
                 @event.EventLogSequenceNumber,
                 @event.Occurred.ToDateTimeOffset(),
-                @event.EventSourceId.To<EventSourceId>(),
-                @event.CorrelationId.To<CorrelationId>(),
+                @event.EventSource.To<EventSourceId>(),
+                @event.Correlation.To<CorrelationId>(),
                 @event.Microservice.To<Microservice>(),
                 @event.Tenant.To<TenantId>(),
                 new Cause((CauseType)@event.Cause.Type, @event.Cause.Position),
