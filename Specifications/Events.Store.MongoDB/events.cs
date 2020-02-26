@@ -12,13 +12,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static BsonDocument some_event_content_bson_document => BsonDocument.Parse("{\"something\": \"text\"}");
 
-        public static event_builder new_event(uint event_log_version, uint aggregate_version) => new event_builder(event_log_version, aggregate_version);
+        public static event_builder new_event(uint event_log_sequence_number, uint aggregate_version) => new event_builder(event_log_sequence_number, aggregate_version);
 
-        public static event_builder new_event_not_from_aggregate(uint event_log_version) => new event_builder(event_log_version);
+        public static event_builder new_event_not_from_aggregate(uint event_log_sequence_number) => new event_builder(event_log_sequence_number);
 
-        public static Event an_event(uint event_log_version, uint aggregate_version) => new event_builder(event_log_version, aggregate_version).build();
+        public static Event an_event(uint event_log_sequence_number, uint aggregate_version) => new event_builder(event_log_sequence_number, aggregate_version).build();
 
-        public static Event an_event_not_from_aggregate(uint event_log_version) => new event_builder(event_log_version).build();
+        public static Event an_event_not_from_aggregate(uint event_log_sequence_number) => new event_builder(event_log_sequence_number).build();
 
         public static stream_event_builder new_stream_event(uint stream_position, uint aggregate_version) => new stream_event_builder(stream_position, aggregate_version);
 

@@ -6,7 +6,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents
 {
-    public class when_creating_with_out_of_order_event_log_version : given.events
+    public class when_creating_with_out_of_order_event_log_sequence_number : given.events
     {
         static CommittedEvent out_of_order_event;
         static CommittedEvents events;
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents
             events = new CommittedEvents(new[] { out_of_order_event, event_one, event_two, event_three });
         });
 
-        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventLogVersionIsOutOfOrder>();
+        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventLogSequenceIsOutOfOrder>();
         It should_not_be_created = () => events.ShouldBeNull();
     }
 }

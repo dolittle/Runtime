@@ -14,24 +14,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="Event"/> class.
         /// </summary>
-        /// <param name="eventLogVersion">The event log version this event comes from.</param>
+        /// <param name="eventLogSequenceNumber">The event log sequence number of this event.</param>
         /// <param name="metadata">The The event metadata.</param>
         /// <param name="aggregate">The aggregate metadata.</param>
         /// <param name="content">The event content.</param>
-        public Event(uint eventLogVersion, EventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
+        public Event(uint eventLogSequenceNumber, EventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
         {
-            EventLogVersion = eventLogVersion;
+            EventLogSequenceNumber = eventLogSequenceNumber;
             Metadata = metadata;
             Aggregate = aggregate;
             Content = content;
         }
 
         /// <summary>
-        /// Gets or sets the event log version of the event.
+        /// Gets or sets the event log sequence number of the event.
         /// </summary>
         [BsonId]
         [BsonRepresentation(BsonType.Int64)]
-        public uint EventLogVersion { get; set; }
+        public uint EventLogSequenceNumber { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="EventMetadata"/> containing the platform generated event information.

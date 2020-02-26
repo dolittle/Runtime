@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamEventMetadata"/> class.
         /// </summary>
-        /// <param name="eventLogVersion">The event log version.</param>
+        /// <param name="eventLogSequenceNumber">The event log sequence number.</param>
         /// <param name="occurred">The date time offset of when the event occurred.</param>
         /// <param name="partition">The partition that this Event belongs in.</param>
         /// <param name="eventSource">The event source that applied the event.</param>
@@ -30,9 +30,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
         /// <param name="isPublic">Whether the Event is public.</param>
-        public StreamEventMetadata(uint eventLogVersion, DateTimeOffset occurred, Guid partition, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration, bool isPublic)
+        public StreamEventMetadata(uint eventLogSequenceNumber, DateTimeOffset occurred, Guid partition, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration, bool isPublic)
         {
-            EventLogVersion = eventLogVersion;
+            EventLogSequenceNumber = eventLogSequenceNumber;
             Occurred = occurred;
             Partition = partition;
             EventSource = eventSource;
@@ -47,10 +47,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         }
 
         /// <summary>
-        /// Gets or sets the event log version of the event.
+        /// Gets or sets the event log sequence number of the event.
         /// </summary>
         [BsonRepresentation(BsonType.Int64)]
-        public uint EventLogVersion { get; set; }
+        public uint EventLogSequenceNumber { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="DateTimeOffset"/> of when the event was committed to the event store.

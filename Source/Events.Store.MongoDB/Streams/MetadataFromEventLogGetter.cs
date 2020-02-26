@@ -34,17 +34,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<EventLogVersion> GetLastProcessedEventLogVersion(StreamId stream, CancellationToken cancellationToken)
+        public override async Task<EventLogSequenceNumber> GetLastProcessedEventLogSequenceNumber(StreamId stream, CancellationToken cancellationToken)
         {
             try
             {
-                var eventLogVersions = await _connection.EventLog.Find(_eventLogFilter.Empty)
-                    .SortByDescending(_ => _.EventLogVersion)
-                    .Project(_ => _.EventLogVersion)
+                var eventLogSequenceNumbers = await _connection.EventLog.Find(_eventLogFilter.Empty)
+                    .SortByDescending(_ => _.EventLogSequenceNumber)
+                    .Project(_ => _.EventLogSequenceNumber)
                     .Limit(1)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
-                if (eventLogVersions.Count == 0) return null;
-                return eventLogVersions[0];
+                if (eventLogSequenceNumbers.Count == 0) return null;
+                return eventLogSequenceNumbers[0];
             }
             catch (MongoWaitQueueFullException ex)
             {

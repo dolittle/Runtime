@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Events.Store
                 ThrowIfEventWasAppliedToOtherEventSource(@event);
                 ThrowIfEventWasAppliedByOtherAggregateRoot(@event);
                 ThrowIfAggreggateRootVersionIsOutOfOrder(@event);
-                if (i > 0) ThrowIfEventLogVersionIsOutOfOrder(@event, events[i - 1]);
+                if (i > 0) ThrowIfEventLogSequenceIsOutOfOrder(@event, events[i - 1]);
                 AggregateRootVersion++;
             }
 
@@ -97,9 +97,9 @@ namespace Dolittle.Runtime.Events.Store
             if (@event.AggregateRootVersion != AggregateRootVersion) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, AggregateRootVersion);
         }
 
-        void ThrowIfEventLogVersionIsOutOfOrder(CommittedAggregateEvent @event, CommittedAggregateEvent previousEvent)
+        void ThrowIfEventLogSequenceIsOutOfOrder(CommittedAggregateEvent @event, CommittedAggregateEvent previousEvent)
         {
-            if (@event.EventLogVersion != previousEvent.EventLogVersion + 1) throw new EventLogVersionIsOutOfOrder(@event.EventLogVersion, previousEvent.EventLogVersion + 1);
+            if (@event.EventLogSequenceNumber != previousEvent.EventLogSequenceNumber + 1) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber + 1);
         }
 
         void ThrowIfEventsAreMissingForExpectedVersion(AggregateRootVersion aggregateRootVersion)

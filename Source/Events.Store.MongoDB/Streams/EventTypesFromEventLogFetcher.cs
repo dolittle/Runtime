@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             try
             {
                 var eventTypes = await _connection.EventLog
-                    .Find(_eventLogFilter.Gte(_ => _.EventLogVersion, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogVersion, toPosition.Value))
+                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, toPosition.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;
@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             try
             {
                 var eventTypes = await _connection.EventLog
-                    .Find(_eventLogFilter.Gte(_ => _.EventLogVersion, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogVersion, toPosition.Value))
+                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, toPosition.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;

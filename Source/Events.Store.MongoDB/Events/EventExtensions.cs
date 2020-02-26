@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new CommittedAggregateEvent(
                 new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
                 @event.Aggregate.Version,
-                @event.EventLogVersion,
+                @event.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
                 @event.Metadata.Correlation,
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             @event.Aggregate.WasAppliedByAggregate ?
                 @event.ToCommittedAggregateEvent()
                 : new CommittedEvent(
-                      @event.EventLogVersion,
+                      @event.EventLogSequenceNumber,
                       @event.Metadata.Occurred,
                       @event.Metadata.EventSource,
                       @event.Metadata.Correlation,

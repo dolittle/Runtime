@@ -65,13 +65,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
             }
              catch (MongoDuplicateKeyException)
             {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogVersion, producerMicroservice.Value);
+                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, producerMicroservice.Value);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogVersion, producerMicroservice.Value);
+                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, producerMicroservice.Value);
                 }
 
                 throw;
@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogVersion, producerMicroservice.Value);
+                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, producerMicroservice.Value);
                     }
                 }
 

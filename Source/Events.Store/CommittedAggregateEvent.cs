@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="aggregateRoot">The <see cref="Artifact"/> representing the type of the Aggregate Root that applied the Event to the Event Source.</param>
         /// <param name="aggregateRootVersion">The version of the <see cref="AggregateRoot"/> that applied the Event.</param>
-        /// <param name="eventLogVersion">The version of the Event Log the Event was committed to.</param>
+        /// <param name="eventLogSequenceNumber">The version of the Event Log the Event was committed to.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
         /// <param name="eventSource">The Event Source that the Event was applied to.</param>
         /// <param name="correlationId">The <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system.</param>
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store
         public CommittedAggregateEvent(
             Artifact aggregateRoot,
             AggregateRootVersion aggregateRootVersion,
-            EventLogVersion eventLogVersion,
+            EventLogSequenceNumber eventLogSequenceNumber,
             DateTimeOffset occurred,
             EventSourceId eventSource,
             CorrelationId correlationId,
@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Store
             Artifact type,
             bool isPublic,
             string content)
-            : base(eventLogVersion, occurred, eventSource, correlationId, microservice, tenant, cause, type, isPublic, content)
+            : base(eventLogSequenceNumber, occurred, eventSource, correlationId, microservice, tenant, cause, type, isPublic, content)
         {
             AggregateRoot = aggregateRoot;
             AggregateRootVersion = aggregateRootVersion;

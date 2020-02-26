@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             try
             {
                 var committedEventWithPartition = await _connection.EventLog.Find(
-                    _eventLogFilter.Eq(_ => _.EventLogVersion, streamPosition.Value))
+                    _eventLogFilter.Eq(_ => _.EventLogSequenceNumber, streamPosition.Value))
                     .Project(_ => _.ToRuntimeStreamEvent())
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(StreamId.AllStreamId, streamPosition);
@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
                 var events = await _connection.EventLog.Find(
-                    _eventLogFilter.Gte(_ => _.EventLogVersion, fromPostition.Value) & _eventLogFilter.Lte(_ => _.EventLogVersion, toPosition.Value))
+                    _eventLogFilter.Gte(_ => _.EventLogSequenceNumber, fromPostition.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, toPosition.Value))
                     .Limit(limit)
                     .Project(_ => _.ToRuntimeStreamEvent())
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -80,9 +80,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             try
             {
                 var @event = await _connection.EventLog.Find(
-                    _eventLogFilter.Eq(_ => _.EventLogVersion, fromPosition.Value))
+                    _eventLogFilter.Eq(_ => _.EventLogSequenceNumber, fromPosition.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                return @event != default ? @event.EventLogVersion : uint.MaxValue;
+                return @event != default ? @event.EventLogSequenceNumber : uint.MaxValue;
             }
             catch (MongoWaitQueueFullException ex)
             {

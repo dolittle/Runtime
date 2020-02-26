@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 return await session.WithTransactionAsync(
                     async (transaction, cancel) =>
                     {
-                        var eventLogVersion = (uint)await _connection.EventLog.CountDocumentsAsync(
+                        var eventLogSequenceNumber = (uint)await _connection.EventLog.CountDocumentsAsync(
                             transaction,
                             _eventFilter.Empty,
                             cancellationToken: cancel).ConfigureAwait(false);
@@ -67,14 +67,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                         {
                             var committedEvent = await _eventCommitter.CommitEvent(
                                 transaction,
-                                eventLogVersion,
+                                eventLogSequenceNumber,
                                 DateTimeOffset.UtcNow,
                                 _executionContextManager.Current,
                                 new Cause(CauseType.Command, 0),
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
-                            eventLogVersion++;
+                            eventLogSequenceNumber++;
                         }
 
                         return new CommittedEvents(committedEvents);
@@ -97,7 +97,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 return await session.WithTransactionAsync(
                     async (transaction, cancel) =>
                     {
-                        var eventLogVersion = (uint)await _connection.EventLog.CountDocumentsAsync(
+                        var eventLogSequenceNumber = (uint)await _connection.EventLog.CountDocumentsAsync(
                             transaction,
                             _eventFilter.Empty,
                             cancellationToken: cancel).ConfigureAwait(false);
@@ -111,7 +111,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 transaction,
                                 events.AggregateRoot,
                                 aggregateRootVersion,
-                                eventLogVersion,
+                                eventLogSequenceNumber,
                                 DateTimeOffset.UtcNow,
                                 events.EventSource,
                                 _executionContextManager.Current,
@@ -119,7 +119,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
-                            eventLogVersion++;
+                            eventLogSequenceNumber++;
                             aggregateRootVersion++;
                         }
 

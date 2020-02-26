@@ -63,8 +63,8 @@ namespace Dolittle.Runtime.EventHorizon
                 microservice = subscription.Microservice.To<Microservice>();
                 subscriber = subscription.SubscriberTenant.To<TenantId>();
                 producer = subscription.ProducerTenant.To<TenantId>();
-                var publicEventsVersion = subscription.PublicEventsVersion;
-                _logger.Information($"Inncomming Event Horizon subscription from microservice '{microservice}' and tenant '{subscriber}' to tenant '{producer}' starting at version '{publicEventsVersion}'");
+                var publicEventsPosition = subscription.PublicEventsPosition;
+                _logger.Information($"Inncomming Event Horizon subscription from microservice '{microservice}' and tenant '{subscriber}' to tenant '{producer}' starting at position '{publicEventsPosition}'");
 
                 if (!_tenants.All.Contains(producer)) throw new ProducerTenantDoesNotExist(producer, microservice);
 
@@ -73,14 +73,14 @@ namespace Dolittle.Runtime.EventHorizon
                     try
                     {
                         _executionContextManager.CurrentFor(producer);
-                        var publicEvent = await _getEventsFromStreamsFetcher().Fetch(StreamId.PublicEventsId, publicEventsVersion, context.CancellationToken).ConfigureAwait(false);
+                        var publicEvent = await _getEventsFromStreamsFetcher().Fetch(StreamId.PublicEventsId, publicEventsPosition, context.CancellationToken).ConfigureAwait(false);
                         var convertedEvent = ConvertPublicEvent(publicEvent, subscriber);
                         var response = new EventHorizonPublisherToSubscriberResponse
                         {
                             Event = convertedEvent.ToProtobuf()
                         };
                         await responseStream.WriteAsync(response).ConfigureAwait(false);
-                        publicEventsVersion++;
+                        publicEventsPosition++;
                     }
                     catch (NoEventInStreamAtPosition)
                     {
@@ -107,7 +107,7 @@ namespace Dolittle.Runtime.EventHorizon
 
         CommittedEvent ConvertPublicEvent(StreamEvent publicEvent, TenantId subscriber) =>
             new CommittedEvent(
-                publicEvent.Event.EventLogVersion,
+                publicEvent.Event.EventLogSequenceNumber,
                 publicEvent.Event.Occurred,
                 publicEvent.Event.EventSource,
                 publicEvent.Event.CorrelationId,

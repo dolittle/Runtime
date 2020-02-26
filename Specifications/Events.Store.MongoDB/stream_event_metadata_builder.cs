@@ -27,9 +27,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public StreamEventMetadata build() => _instance;
 
-        public stream_event_metadata_builder with_event_log_version(uint event_log_version)
+        public stream_event_metadata_builder with_event_log_sequence_number(uint event_log_sequence_number)
         {
-            _instance.EventLogVersion = event_log_version;
+            _instance.EventLogSequenceNumber = event_log_sequence_number;
             return this;
         }
 

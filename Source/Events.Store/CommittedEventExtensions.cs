@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store
         {
             return new grpcEvents.CommittedEvent
             {
-                EventLogVersion = @event.EventLogVersion,
+                EventLogSequenceNumber = @event.EventLogSequenceNumber,
                 Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
                 EventSourceId = @event.EventSource.ToProtobuf(),
                 CorrelationId = @event.CorrelationId.ToProtobuf(),
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Store
         public static CommittedEvent ToCommittedEvent(this grpcEvents.CommittedEvent @event)
         {
             return new CommittedEvent(
-                @event.EventLogVersion,
+                @event.EventLogSequenceNumber,
                 @event.Occurred.ToDateTimeOffset(),
                 @event.EventSourceId.To<EventSourceId>(),
                 @event.CorrelationId.To<CorrelationId>(),

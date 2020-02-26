@@ -3,12 +3,13 @@
 
 using System;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsToStreamsWriter
 {
-    public class when_writing_two_events_with_same_event_log_version_to_stream : given.all_dependencies
+    public class when_writing_two_events_with_same_event_log_sequence_number_to_stream : given.all_dependencies
     {
         static EventsToStreamsWriter events_to_streams_writer;
         static CommittedEvent first_committed_event;
