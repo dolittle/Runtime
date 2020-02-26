@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             foreach (var @event in committedEvents.Select(_ => _.Event))
             {
                 var processingResult = await filter.Filter(@event, PartitionId.NotSet, filter.Identifier, cancellationToken).ConfigureAwait(false);
-                if (processingResult.Succeeded) artifactsFromEventLog.Add(@event.Type);
+                if (processingResult.IsIncluded) artifactsFromEventLog.Add(@event.Type);
             }
 
             if (!ArtifactListsAreTheSame(artifactsFromStream, artifactsFromEventLog)) throw new IllegalFilterTransformation(filter.Definition.TargetStream, filter.Definition.SourceStream);

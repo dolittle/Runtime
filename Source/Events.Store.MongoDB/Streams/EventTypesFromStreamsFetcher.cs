@@ -73,9 +73,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
+                var maxNumEvents = toPosition.Value - fromPosition.Value + 1U;
+                int? limit = (int)maxNumEvents;
+                if (limit < 0) limit = null;
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var eventTypes = await stream
                     .Find(_streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Limit(limit)
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;
@@ -90,9 +94,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
+                var maxNumEvents = toPosition.Value - fromPosition.Value + 1U;
+                int? limit = (int)maxNumEvents;
+                if (limit < 0) limit = null;
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var eventTypes = await stream
                     .Find(_streamEventFilter.Eq(_ => _.Metadata.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Limit(limit)
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;

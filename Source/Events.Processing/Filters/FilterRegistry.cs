@@ -50,9 +50,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 repository = _container.Get<IFilterDefinitionRepositoryFor<TDefinition>>();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.Debug($"No persisted filter repository for filter definition of type {typeof(TDefinition).FullName}");
+                _logger.Error(ex, $"No persisted filter repository for filter definition of type {typeof(TDefinition).FullName}");
             }
 
             if (repository != null)
@@ -81,9 +81,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 persistedFilterRemover = GetPersistedFilterDefinitionRemoverForDefinitionType(filterDefinitionType);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.Debug($"No filter definition repository for filter definition of type '{filterDefinitionType.FullName}'");
+                _logger.Error(ex, $"No filter definition repository for filter definition of type '{filterDefinitionType.FullName}'");
                 return Task.CompletedTask;
             }
 

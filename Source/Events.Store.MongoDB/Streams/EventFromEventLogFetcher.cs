@@ -56,7 +56,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                ThrowIfIllegalRange(fromPostition, toPosition);
                 var maxNumEvents = toPosition.Value - fromPostition.Value + 1U;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
@@ -89,11 +88,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
-        }
-
-        void ThrowIfIllegalRange(StreamPosition fromPosition, StreamPosition toPosition)
-        {
-            if (fromPosition.Value > toPosition.Value) throw new InvalidStreamPositionRange(fromPosition, toPosition);
         }
     }
 }

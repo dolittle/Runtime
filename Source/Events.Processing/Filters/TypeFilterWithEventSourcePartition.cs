@@ -18,6 +18,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// </summary>
     public class TypeFilterWithEventSourcePartition : AbstractFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>
     {
+        readonly ILogger _logger;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartition"/> class.
         /// </summary>
@@ -30,6 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             ILogger logger)
             : base(definition, eventsToStreamsWriter, logger)
         {
+            _logger = logger;
         }
 
         /// <inheritdoc/>

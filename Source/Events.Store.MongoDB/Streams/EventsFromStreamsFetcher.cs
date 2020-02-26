@@ -48,6 +48,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <inheritdoc/>
         public Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(StreamId stream, StreamPosition fromPostition, StreamPosition toPosition, CancellationToken cancellationToken = default)
         {
+            ThrowIfIllegalRange(fromPostition, toPosition);
             if (TryGetFetcher(stream, out var fetcher)) return fetcher.FetchRange(stream, fromPostition, toPosition, cancellationToken);
             return FetchRangeFromStream(stream, fromPostition, toPosition, cancellationToken);
         }
@@ -96,7 +97,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                ThrowIfIllegalRange(fromPostition, toPosition);
                 var maxNumEvents = toPosition.Value - fromPostition.Value + 1U;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
