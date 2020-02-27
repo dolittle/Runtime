@@ -21,7 +21,12 @@ namespace Dolittle.Runtime.Events.Store
         /// <returns>The converted <see cref="grpc.CommittedAggregateEvents" />.</returns>
         public static grpc.CommittedAggregateEvents ToProtobuf(this CommittedAggregateEvents committedAggregateEvents)
         {
-            var protobuf = new grpc.CommittedAggregateEvents { AggregateRootVersion = committedAggregateEvents.AggregateRootVersion.Value, AggregateRoot = committedAggregateEvents.AggregateRoot.Value.ToProtobuf() };
+            var protobuf = new grpc.CommittedAggregateEvents
+            {
+                AggregateRootVersion = committedAggregateEvents.AggregateRootVersion.Value,
+                AggregateRoot = committedAggregateEvents.AggregateRoot.Value.ToProtobuf(),
+                EventSource = committedAggregateEvents.EventSource.ToProtobuf()
+            };
             protobuf.Events.AddRange(committedAggregateEvents.AsEnumerable().ToProtobuf());
             return protobuf;
         }
