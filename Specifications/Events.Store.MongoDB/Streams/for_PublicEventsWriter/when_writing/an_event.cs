@@ -28,6 +28,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
 
         It should_have_stored_one_event_at_position_zero = () => stream.Find(filters.public_event_filter.Eq(_ => _.StreamPosition, 0U)).SingleOrDefault().ShouldNotBeNull();
 
-        It should_have_stored_the_event_with_exactly_the_same_data_as_committed_event = () => committed_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.public_event_filter.Empty).First(), 0, partition);
+        It should_have_stored_the_event_with_exactly_the_same_data_as_committed_event = () => committed_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.public_event_filter.Empty).First(), 0);
     }
 }

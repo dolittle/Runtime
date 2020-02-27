@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 using MongoDB.Driver;
@@ -14,29 +15,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
         static CommittedEvent first_committed_event;
         static CommittedEvent second_committed_event;
         static StreamId stream_id;
-        static PartitionId partition;
-        static IMongoCollection<MongoDB.Events.StreamEvent> stream;
+        static IMongoCollection<PublicEvent> stream;
 
         Establish context = () =>
         {
             first_committed_event = committed_events.a_committed_event(0);
             second_committed_event = committed_events.a_committed_event(1);
             stream_id = Guid.NewGuid();
-            partition = Guid.NewGuid();
-            stream = an_event_store_connection.GetStreamCollectionAsync(stream_id).GetAwaiter().GetResult();
+            stream = an_event_store_connection.PublicEvents;
         };
 
         Because of = () =>
         {
             Task.WaitAll(
-                public_events_writer.Write(first_committed_event, stream_id, partition),
-                public_events_writer.Write(second_committed_event, stream_id, partition));
+                public_events_writer.Write(first_committed_event, stream_id, PartitionId.NotSet),
+                public_events_writer.Write(second_committed_event, stream_id, PartitionId.NotSet));
         };
 
-        It should_have_written_two_events_to_stream = () => stream.Find(filters.a_stream_event_filter.Empty).ToList().Count.ShouldEqual(2);
-        It should_have_stored_event_at_position_zero = () => stream.Find(filters.a_stream_event_filter.Eq(_ => _.StreamPosition, 0U)).SingleOrDefault().ShouldNotBeNull();
-        It should_have_stored_event_at_position_one = () => stream.Find(filters.a_stream_event_filter.Eq(_ => _.StreamPosition, 1U)).SingleOrDefault().ShouldNotBeNull();
-        It should_have_stored_the_first_event_with_exactly_the_same_data_as_first_committed_event = () => first_committed_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.a_stream_event_filter.Empty).First(), 0, partition);
-        It should_have_stored_the_second_event_with_exactly_the_same_data_as_second_committed_event = () => second_committed_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.a_stream_event_filter.Empty).ToList()[1], 1, partition);
+        It should_have_written_two_events_to_stream = () => stream.Find(filters.public_event_filter.Empty).ToList().Count.ShouldEqual(2);
+        It should_have_stored_event_at_position_zero = () => stream.Find(filters.public_event_filter.Eq(_ => _.StreamPosition, 0U)).SingleOrDefault().ShouldNotBeNull();
+        It should_have_stored_event_at_position_one = () => stream.Find(filters.public_event_filter.Eq(_ => _.StreamPosition, 1U)).SingleOrDefault().ShouldNotBeNull();
+        It should_have_stored_the_first_event_with_exactly_the_same_data_as_first_committed_event = () => first_committed_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.public_event_filter.Empty).First(), 0);
+        It should_have_stored_the_second_event_with_exactly_the_same_data_as_second_committed_event = () => second_committed_event.ShouldBeStoredWithCorrectStoreRepresentation(stream.Find(filters.public_event_filter.Empty).ToList()[1], 1);
     }
 }
