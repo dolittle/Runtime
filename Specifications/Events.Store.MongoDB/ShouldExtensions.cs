@@ -66,6 +66,29 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             return committedEvent;
         }
 
+        public static CommittedEvent ShouldBeStoredWithCorrectStoreRepresentation(this CommittedEvent committedEvent, PublicEvent storedEvent, StreamPosition streamPosition)
+        {
+            Ensure.IsNotNull(nameof(committedEvent), committedEvent);
+            Ensure.IsNotNull(nameof(storedEvent), storedEvent);
+            var committedEventStoreRepresentation = committedEvent.ToStoreStreamEvent(streamPosition, PartitionId.NotSet);
+
+            storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogSequenceNumber);
+            storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
+            storedEvent.StreamPosition.ShouldEqual(committedEventStoreRepresentation.StreamPosition);
+
+            storedEvent.Metadata.CausePosition.ShouldEqual(committedEventStoreRepresentation.Metadata.CausePosition);
+            storedEvent.Metadata.CauseType.ShouldEqual(committedEventStoreRepresentation.Metadata.CauseType);
+            storedEvent.Metadata.Correlation.ShouldEqual(committedEventStoreRepresentation.Metadata.Correlation);
+            storedEvent.Metadata.EventSource.ShouldEqual(committedEventStoreRepresentation.Metadata.EventSource);
+            storedEvent.Metadata.Microservice.ShouldEqual(committedEventStoreRepresentation.Metadata.Microservice);
+            storedEvent.Metadata.Occurred.ShouldEqual(committedEventStoreRepresentation.Metadata.Occurred);
+            storedEvent.Metadata.Tenant.ShouldEqual(committedEventStoreRepresentation.Metadata.Tenant);
+            storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeGeneration);
+            storedEvent.Metadata.TypeId.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeId);
+
+            return committedEvent;
+        }
+
         public static CommittedEvent ShouldBeTheSameAs(this CommittedEvent committedEvent, CommittedEvent otherEvent)
         {
             Ensure.IsNotNull(nameof(committedEvent), committedEvent);
