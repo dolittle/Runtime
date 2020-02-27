@@ -18,8 +18,8 @@ namespace Dolittle.Runtime.EventHorizon
         /// <param name="microservice">The <see cref="Microservice" />.</param>
         /// <param name="subscriber">The <see cref="TenantId" /> that is subscribing.</param>
         /// <param name="producer">The <see cref="TenantId" /> that is subscribed to.</param>
-        /// <param name="publicEventsVersion">The <see cref="StreamPosition" /> in the public events stream to start distributing events from.</param>
-        void Subscribe(Microservice microservice, TenantId subscriber, TenantId producer, StreamPosition publicEventsVersion);
+        /// <param name="publicEventsPosition">The <see cref="StreamPosition" /> in the public events stream to start distributing events from.</param>
+        void Subscribe(Microservice microservice, TenantId subscriber, TenantId producer, StreamPosition publicEventsPosition);
 
         /// <summary>
         /// Unsubscribes a <see cref="TenantId" /> in a <see cref="Microservice" /> from the public events.

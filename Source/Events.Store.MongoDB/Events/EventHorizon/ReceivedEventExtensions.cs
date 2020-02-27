@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.Microservice,
                 committedEvent.Tenant,
                 producerTenant,
-                committedEvent.EventLogVersion,
+                committedEvent.EventLogSequenceNumber,
                 committedEvent.Type.Id,
                 committedEvent.Type.Generation);
 

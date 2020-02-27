@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing
     public static class committed_events
     {
         public static CommittedEvent single() => new CommittedEvent(
-                EventLogVersion.Initial,
+                EventLogSequenceNumber.Initial,
                 DateTimeOffset.UtcNow,
                 EventSourceId.New(),
                 CorrelationId.New(),

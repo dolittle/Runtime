@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.for_EventsFromStreams
             stream = Guid.NewGuid();
             partition = Guid.NewGuid();
             stored_event = events.new_stream_event_not_from_aggregate(0)
-                .with_event_log_version(0)
+                .with_event_log_sequence_number(0)
                 .with_partition(partition).build();
 
             an_event_store_connection.GetStreamCollectionAsync(stream).GetAwaiter().GetResult().InsertOne(stored_event);

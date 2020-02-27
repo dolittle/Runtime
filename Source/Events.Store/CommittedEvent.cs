@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedEvent"/> class.
         /// </summary>
-        /// <param name="eventLogVersion">The version of the Event Log the Event was committed to.</param>
+        /// <param name="eventLogSequenceNumber">The sequence number of the Event Log the Event was committed to.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
         /// <param name="eventSource">The <see cref="EventSource" />.</param>
         /// <param name="correlationId">The <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system.</param>
@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="isPublic">Whether this Event is public.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
         public CommittedEvent(
-            EventLogVersion eventLogVersion,
+            EventLogSequenceNumber eventLogSequenceNumber,
             DateTimeOffset occurred,
             EventSourceId eventSource,
             CorrelationId correlationId,
@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Store
             bool isPublic,
             string content)
         {
-            EventLogVersion = eventLogVersion;
+            EventLogSequenceNumber = eventLogSequenceNumber;
             Occurred = occurred;
             EventSource = eventSource;
             CorrelationId = correlationId;
@@ -57,9 +57,9 @@ namespace Dolittle.Runtime.Events.Store
         public EventSourceId EventSource { get; }
 
         /// <summary>
-        /// Gets the version of the Event Log the Event was committed to.
+        /// Gets the sequence number of the Event Log the Event was committed to.
         /// </summary>
-        public EventLogVersion EventLogVersion { get; }
+        public EventLogSequenceNumber EventLogSequenceNumber { get; }
 
         /// <summary>
         /// Gets the <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.

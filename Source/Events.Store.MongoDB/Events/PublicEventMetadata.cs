@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicEventMetadata"/> class.
         /// </summary>
-        /// <param name="eventLogVersion">The event log version of this public event.</param>
+        /// <param name="eventLogSequenceNumber">The event log sequence number of this public event.</param>
         /// <param name="occurred">The date time offset of when the event occurred.</param>
         /// <param name="eventSource">The event source that applied the event.</param>
         /// <param name="correlation">The correlation.</param>
@@ -28,9 +28,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="causePosition">The position of the cause.</param>
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
-        public PublicEventMetadata(uint eventLogVersion, DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration)
+        public PublicEventMetadata(uint eventLogSequenceNumber, DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration)
         {
-            EventLogVersion = eventLogVersion;
+            EventLogSequenceNumber = eventLogSequenceNumber;
             Occurred = occurred;
             EventSource = eventSource;
             Correlation = correlation;
@@ -43,10 +43,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         }
 
         /// <summary>
-        /// Gets or sets the event log version of the event.
+        /// Gets or sets the event log sequence number of the event.
         /// </summary>
         [BsonRepresentation(BsonType.Int64)]
-        public uint EventLogVersion { get; set; }
+        public uint EventLogSequenceNumber { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="DateTimeOffset"/> of when the event was committed to the event store.

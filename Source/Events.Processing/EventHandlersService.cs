@@ -81,8 +81,8 @@ namespace Dolittle.Runtime.Events.Processing
             try
             {
                 var eventHandlerArguments = context.GetArgumentsMessage<EventHandlerArguments>();
-                eventProcessorId = eventHandlerArguments.EventHandlerId.To<EventProcessorId>();
-                sourceStream = eventHandlerArguments.StreamId.To<StreamId>();
+                eventProcessorId = eventHandlerArguments.EventHandler.To<EventProcessorId>();
+                sourceStream = eventHandlerArguments.Stream.To<StreamId>();
                 _logger.Debug($"EventHandler client connected with id '{eventProcessorId}' for stream '{sourceStream}'");
                 var targetStream = new StreamId { Value = eventProcessorId };
 

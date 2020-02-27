@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             Ensure.IsNotNull(nameof(storedEvent), storedEvent);
             var committedEventStoreRepresentation = committedEvent.ToStoreStreamEvent(streamPosition, partition);
 
-            storedEvent.EventLogVersion.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogVersion);
+            storedEvent.EventLogSequenceNumber.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogSequenceNumber);
             storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
 
             storedEvent.Metadata.CausePosition.ShouldEqual(committedEventStoreRepresentation.Metadata.CausePosition);
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             Ensure.IsNotNull(nameof(storedEvent), storedEvent);
             var committedEventStoreRepresentation = committedEvent.ToStoreStreamEvent(streamPosition, partition);
 
-            storedEvent.Metadata.EventLogVersion.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogVersion);
+            storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogSequenceNumber);
             storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
             storedEvent.StreamPosition.ShouldEqual(committedEventStoreRepresentation.StreamPosition);
             storedEvent.Metadata.Partition.ShouldEqual(committedEventStoreRepresentation.Metadata.Partition);
@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             otherEvent.Cause.ShouldEqual(committedEvent.Cause);
             otherEvent.Content.ShouldEqual(committedEvent.Content);
             otherEvent.CorrelationId.ShouldEqual(committedEvent.CorrelationId);
-            otherEvent.EventLogVersion.ShouldEqual(committedEvent.EventLogVersion);
+            otherEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber);
             otherEvent.EventSource.ShouldEqual(committedEvent.EventSource);
             otherEvent.Microservice.ShouldEqual(committedEvent.Microservice);
             otherEvent.Occurred.ShouldEqual(committedEvent.Occurred);

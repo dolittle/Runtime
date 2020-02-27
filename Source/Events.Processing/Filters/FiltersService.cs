@@ -79,8 +79,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 var filterArguments = context.GetArgumentsMessage<FilterArguments>();
 
-                eventProcessorId = filterArguments.FilterId.To<EventProcessorId>();
-                streamId = filterArguments.StreamId.To<StreamId>();
+                eventProcessorId = filterArguments.Filter.To<EventProcessorId>();
+                streamId = filterArguments.Stream.To<StreamId>();
                 ThrowIfIllegalTargetStream(streamId);
                 _logger.Debug($"Filter client connected - '{eventProcessorId}' - '{streamId}' - Method: {context.Method}");
 

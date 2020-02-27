@@ -6,7 +6,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 {
-    public class when_creating_with_an_out_of_order_event_log_version : given.events_and_an_artifact
+    public class when_creating_with_an_out_of_order_event_log_sequence_number : given.events_and_an_artifact
     {
         static CommittedAggregateEvent out_of_order_event;
         static CommittedAggregateEvents events;
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 
         Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version_before, aggregate_version_after + 1, new[] { event_one, event_two, event_three, out_of_order_event }));
 
-        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventLogVersionIsOutOfOrder>();
+        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventLogSequenceIsOutOfOrder>();
         It should_not_be_created = () => events.ShouldBeNull();
     }
 }

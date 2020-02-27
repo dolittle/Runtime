@@ -86,7 +86,7 @@ namespace Dolittle.Runtime.EventHorizon
 #pragma warning disable CA2000
                     var tokenSource = new CancellationTokenSource();
                     _executionContextManager.CurrentFor(subscriber);
-                    var publicEventsVersion = (await _getStreamProcessorStates().GetOrAddNew(streamProcessorId).ConfigureAwait(false)).Position;
+                    var publicEventsPosition = (await _getStreamProcessorStates().GetOrAddNew(streamProcessorId).ConfigureAwait(false)).Position;
                     var eventsFetcher = new EventsFromEventHorizonFetcher(
                         _client.Subscribe(
                             new EventHorizonSubscriberToPublisherRequest
@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.EventHorizon
                                 Microservice = _boundedContextConfiguration.BoundedContext.Value.ToProtobuf(),
                                 ProducerTenant = producer.ToProtobuf(),
                                 SubscriberTenant = subscriber.ToProtobuf(),
-                                PublicEventsVersion = publicEventsVersion.Value
+                                PublicEventsPosition = publicEventsPosition.Value
                             },
                             cancellationToken: tokenSource.Token),
                         () =>

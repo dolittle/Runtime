@@ -24,10 +24,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="microservice">The microservice that produced the event.</param>
         /// <param name="receiverTenant">The tenant that received the event.</param>
         /// <param name="producerTenant">The tenant that produced the event.</param>
-        /// <param name="originEventLogVersion">The event log version that the Event had in the microservice that it came from.</param>
+        /// <param name="originEventLogSequenceNumber">The event log sequence number that the Event had in the microservice that it came from.</param>
         /// <param name="typeId">The type id of the event artifact.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
-        public ReceivedEventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid receiverTenant, Guid producerTenant, uint originEventLogVersion, Guid typeId, int typeGeneration)
+        public ReceivedEventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid receiverTenant, Guid producerTenant, uint originEventLogSequenceNumber, Guid typeId, int typeGeneration)
         {
             Occurred = occurred;
             EventSource = eventSource;
@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Microservice = microservice;
             ReceiverTenant = receiverTenant;
             ProducerTenant = producerTenant;
-            OriginEventLogVersion = originEventLogVersion;
+            OriginEventLogSequenceNumber = originEventLogSequenceNumber;
             TypeId = typeId;
             TypeGeneration = typeGeneration;
         }
@@ -72,10 +72,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public Guid ProducerTenant { get; set; }
 
         /// <summary>
-        /// Gets or sets the event log version that the Event had in the microservice that it came from.
+        /// Gets or sets the event log sequence number that the Event had in the microservice that it came from.
         /// </summary>
         [BsonRepresentation(BsonType.Int64)]
-        public uint OriginEventLogVersion { get; set; }
+        public uint OriginEventLogSequenceNumber { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ArtifactId"/> of the <see cref="Artifact"/> identitying the type of the event.

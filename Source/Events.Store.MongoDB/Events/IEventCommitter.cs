@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Commits a single <see cref="UncommittedEvent"/> to the event log.
         /// </summary>
         /// <param name="transaction">The <see cref="IClientSessionHandle" />.</param>
-        /// <param name="version">The expected next <see cref="EventLogVersion"/> of the event log.</param>
+        /// <param name="sequenceNumber">The expected next <see cref="EventLogSequenceNumber"/> of the event log.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset"/> when the event occurred.</param>
         /// <param name="executionContext">The <see cref="Dolittle.Execution.ExecutionContext" />.</param>
         /// <param name="cause">The <see cref="Cause" />.</param>
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <returns>The <see cref="CommittedEvent" />.</returns>
         Task<CommittedEvent> CommitEvent(
             IClientSessionHandle transaction,
-            EventLogVersion version,
+            EventLogSequenceNumber sequenceNumber,
             DateTimeOffset occurred,
             Dolittle.Execution.ExecutionContext executionContext,
             Cause cause,
@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="transaction">The <see cref="IClientSessionHandle" />.</param>
         /// <param name="aggregateRoot">The <see cref="Artifact"/> identifying the type of the aggregate root that applied the event.</param>
         /// <param name="aggregateRootVersion">The <see cref="AggregateRootVersion"/> of the aggregate root that applied the event.</param>
-        /// <param name="version">The expected next <see cref="EventLogVersion"/> of the event log.</param>
+        /// <param name="version">The expected next <see cref="EventLogSequenceNumber"/> of the event log.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset"/> when the event occurred.</param>
         /// <param name="eventSource">The <see cref="EventSourceId"/> the event was applied to.</param>
         /// <param name="executionContext">The <see cref="Dolittle.Execution.ExecutionContext" />.</param>
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             IClientSessionHandle transaction,
             Artifact aggregateRoot,
             AggregateRootVersion aggregateRootVersion,
-            EventLogVersion version,
+            EventLogSequenceNumber version,
             DateTimeOffset occurred,
             EventSourceId eventSource,
             Dolittle.Execution.ExecutionContext executionContext,

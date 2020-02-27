@@ -61,13 +61,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
              catch (MongoDuplicateKeyException)
             {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogVersion, streamId);
+                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, streamId);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogVersion, streamId);
+                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, streamId);
                 }
 
                 throw;
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogVersion, streamId);
+                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, streamId);
                     }
                 }
 

@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <returns>The converted <see cref="PublicEventMetadata" />.</returns>
         public static PublicEventMetadata GetPublicEventMetadata(this CommittedEvent committedEvent) =>
             new PublicEventMetadata(
-                committedEvent.EventLogVersion,
+                committedEvent.EventLogSequenceNumber,
                 committedEvent.Occurred,
                 committedEvent.EventSource,
                 committedEvent.CorrelationId,
@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <returns>The converted <see cref="CommittedEvent" />.</returns>
         public static CommittedEvent ToCommittedEvent(this PublicEvent publicEvent) =>
             new CommittedEvent(
-                publicEvent.Metadata.EventLogVersion,
+                publicEvent.Metadata.EventLogSequenceNumber,
                 publicEvent.Metadata.Occurred,
                 publicEvent.Metadata.EventSource,
                 publicEvent.Metadata.Correlation,

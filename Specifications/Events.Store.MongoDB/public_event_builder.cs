@@ -29,9 +29,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             return this;
         }
 
-        public public_event_builder with_event_log_version(EventLogVersion event_log_version)
+        public public_event_builder with_event_log_sequence_number(EventLogSequenceNumber event_log_sequence_number)
         {
-            _instance.Metadata.EventLogVersion = event_log_version;
+            _instance.Metadata.EventLogSequenceNumber = event_log_sequence_number;
             return this;
         }
     }

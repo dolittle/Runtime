@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Store
             {
                 var @event = events[i];
                 ThrowIfEventIsNull(@event);
-                if (i > 0) ThrowIfEventLogVersionIsOutOfOrder(@event, events[i - 1]);
+                if (i > 0) ThrowIfEventLogSequenceIsOutOfOrder(@event, events[i - 1]);
             }
 
             _events = new NullFreeList<CommittedEvent>(events);
@@ -54,9 +54,9 @@ namespace Dolittle.Runtime.Events.Store
             if (@event == null) throw new EventCanNotBeNull();
         }
 
-        void ThrowIfEventLogVersionIsOutOfOrder(CommittedEvent @event, CommittedEvent previousEvent)
+        void ThrowIfEventLogSequenceIsOutOfOrder(CommittedEvent @event, CommittedEvent previousEvent)
         {
-            if (@event.EventLogVersion != previousEvent.EventLogVersion + 1) throw new EventLogVersionIsOutOfOrder(@event.EventLogVersion, previousEvent.EventLogVersion + 1);
+            if (@event.EventLogSequenceNumber != previousEvent.EventLogSequenceNumber + 1) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber + 1);
         }
     }
 }

@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.for_CommittedEventExtensions
 
         Because of = () => result = committed_event.ToProtobuf().ToCommittedEvent();
 
-        It should_hold_same_event_log_version = () => result.EventLogVersion.ShouldEqual(committed_event.EventLogVersion);
+        It should_hold_same_event_log_sequence_number = () => result.EventLogSequenceNumber.ShouldEqual(committed_event.EventLogSequenceNumber);
         It should_hold_same_occurred = () => result.Occurred.ShouldEqual(committed_event.Occurred);
         It should_hold_same_event_source_id = () => result.EventSource.ShouldEqual(committed_event.EventSource);
         It should_hold_same_correlation_id = () => result.CorrelationId.ShouldEqual(committed_event.CorrelationId);

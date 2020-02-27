@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter
     public class when_committing_event : given.all_dependencies
     {
         static EventCommitter event_committer;
-        static EventLogVersion event_log_version;
+        static EventLogSequenceNumber event_log_sequence_number;
         static DateTimeOffset occurred;
         static Cause cause;
         static CommittedEvent result;
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter
         Establish context = () =>
         {
             event_committer = new EventCommitter(an_event_store_connection);
-            event_log_version = 0;
+            event_log_sequence_number = 0;
             occurred = DateTimeOffset.UtcNow;
             cause = new Cause(CauseType.Command, 0U);
         };
@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter
         Because of = () =>
         {
             using var session = an_event_store_connection.MongoClient.StartSession();
-            result = event_committer.CommitEvent(session, event_log_version, occurred, execution_context, cause, uncommitted_event).GetAwaiter().GetResult();
+            result = event_committer.CommitEvent(session, event_log_sequence_number, occurred, execution_context, cause, uncommitted_event).GetAwaiter().GetResult();
             persisted_event = an_event_store_connection.EventLog.Find(filters.an_event_filter.Empty).FirstOrDefault();
         };
 
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter
         It should_be_the_same_artifact = () => result.Type.ShouldEqual(uncommitted_event.Type);
         It should_have_the_correct_cause = () => result.Cause.ShouldEqual(cause);
         It should_have_the_correct_correlation_id = () => result.CorrelationId.ShouldEqual(execution_context.CorrelationId);
-        It should_have_event_log_version_zero = () => result.EventLogVersion.Value.ShouldEqual(0U);
+        It should_have_event_log_sequence_number_zero = () => result.EventLogSequenceNumber.Value.ShouldEqual(0U);
         It should_have_a_not_set_event_source = () => result.EventSource.ShouldEqual(EventSourceId.NotSet);
         It should_have_the_correct_microservice = () => result.Microservice.Value.ShouldEqual(execution_context.BoundedContext.Value);
         It should_have_the_correct_occurred_time = () => result.Occurred.ShouldEqual(occurred);
