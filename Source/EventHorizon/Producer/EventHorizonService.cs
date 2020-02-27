@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.EventHorizon
                 subscriber = subscription.SubscriberTenant.To<TenantId>();
                 producer = subscription.ProducerTenant.To<TenantId>();
                 var publicEventsPosition = subscription.PublicEventsPosition;
-                _logger.Information($"Incomming Event Horizon subscription from microservice '{microservice}' and tenant '{subscriber}' to tenant '{producer}' starting at version '{publicEventsPosition}'");
+                _logger.Information($"Incomming Event Horizon subscription from microservice '{microservice}' and tenant '{subscriber}' to tenant '{producer}' starting at position '{publicEventsPosition}'");
 
                 if (!_tenants.All.Contains(producer)) throw new ProducerTenantDoesNotExist(producer, microservice);
 
