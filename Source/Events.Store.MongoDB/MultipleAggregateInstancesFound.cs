@@ -6,7 +6,7 @@ using Dolittle.Artifacts;
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {
     /// <summary>
-    /// Exception that geths thrown when multiple versions of a single aggregate root instance is found in the MongoDB.
+    /// Exception that gets thrown when multiple versions of a single aggregate root instance is found in the MongoDB.
     /// </summary>
     public class MultipleAggregateInstancesFound : EventStoreConsistencyError
     {

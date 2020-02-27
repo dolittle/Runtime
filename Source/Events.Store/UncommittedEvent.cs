@@ -14,10 +14,12 @@ namespace Dolittle.Runtime.Events.Store
         /// Initializes a new instance of the <see cref="UncommittedEvent"/> class.
         /// </summary>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
+        /// <param name="isPublic">Whether the Event is public.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
-        public UncommittedEvent(Artifact type, string content)
+        public UncommittedEvent(Artifact type, bool isPublic, string content)
         {
             Type = type;
+            Public = isPublic;
             Content = content;
         }
 
@@ -25,6 +27,11 @@ namespace Dolittle.Runtime.Events.Store
         /// Gets the <see cref="Artifact"/> representing the type of the Event.
         /// </summary>
         public Artifact Type { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the Event is public.
+        /// </summary>
+        public bool Public { get; }
 
         /// <summary>
         /// Gets the content of the Event represented as a JSON-encoded <see cref="string"/>.

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Threading;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -21,9 +22,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Registers and starts a <see cref="StreamProcessor" />.
         /// </summary>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
+        /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
+        /// <param name="cancellationTokenSource">The <see cref="CancellationTokenSource" />.</param>
         /// <returns>The <see cref="StreamProcessor"/> that was registered.</returns>
-        StreamProcessor Register(IEventProcessor eventProcessor, StreamId sourceStreamId);
+        StreamProcessor Register(IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, StreamId sourceStreamId, CancellationTokenSource cancellationTokenSource = default);
 
         /// <summary>
         /// Unregister a <see cref="IEventProcessor"/> from stream processing.

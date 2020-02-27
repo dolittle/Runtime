@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 return await session.WithTransactionAsync(
                     async (transaction, cancel) =>
                     {
-                        var eventLogVersion = (uint)await _connection.AllStream.CountDocumentsAsync(
+                        var eventLogVersion = (uint)await _connection.EventLog.CountDocumentsAsync(
                             transaction,
                             _eventFilter.Empty,
                             cancellationToken: cancel).ConfigureAwait(false);
@@ -97,7 +97,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 return await session.WithTransactionAsync(
                     async (transaction, cancel) =>
                     {
-                        var eventLogVersion = (uint)await _connection.AllStream.CountDocumentsAsync(
+                        var eventLogVersion = (uint)await _connection.EventLog.CountDocumentsAsync(
                             transaction,
                             _eventFilter.Empty,
                             cancellationToken: cancel).ConfigureAwait(false);
@@ -160,7 +160,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 & _eventFilter.Eq(_ => _.Metadata.EventSource, eventSource.Value)
                                 & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
                                 & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
-                            var events = await _connection.AllStream
+                            var events = await _connection.EventLog
                                 .Find(transaction, filter)
                                 .Sort(Builders<Event>.Sort.Ascending(_ => _.Aggregate.Version))
                                 .Project(_ => _.ToCommittedAggregateEvent())

@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents
 
         Establish context = () =>
         {
-            out_of_order_event = new CommittedEvent(4, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, "wrong");
+            out_of_order_event = new CommittedEvent(4, DateTimeOffset.UtcNow, EventSourceId.NotSet, correlation_id, microservice_id, tenant_id, cause, event_b_artifact, is_public, "wrong");
         };
 
         Because of = () => exception = Catch.Exception(() =>

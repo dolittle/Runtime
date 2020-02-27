@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter
         {
             using var session = an_event_store_connection.MongoClient.StartSession();
             result = event_committer.CommitAggregateEvent(session, aggregate_root, aggregate_root_version, event_log_version, occurred, event_source, execution_context, cause, uncommitted_event).GetAwaiter().GetResult();
-            persisted_event = an_event_store_connection.AllStream.Find(filters.an_event_filter.Empty).FirstOrDefault();
+            persisted_event = an_event_store_connection.EventLog.Find(filters.an_event_filter.Empty).FirstOrDefault();
         };
 
         It should_return_committed_event = () => result.ShouldNotBeNull();

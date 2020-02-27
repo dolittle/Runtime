@@ -3,6 +3,7 @@
 
 extern alias contracts;
 
+using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Execution;
@@ -48,7 +49,7 @@ namespace Dolittle.Runtime.Events.Processing
         public EventProcessorId Identifier { get; }
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 

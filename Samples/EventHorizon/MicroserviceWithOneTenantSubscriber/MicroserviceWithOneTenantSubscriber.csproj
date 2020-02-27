@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Samples.EventHorizon.MicroserviceWithOneTenantSubscriber</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <ItemGroup>
+      <ProjectReference Include="..\..\..\Source\Server\Server.csproj" />
+  </ItemGroup>
+
+</Project>

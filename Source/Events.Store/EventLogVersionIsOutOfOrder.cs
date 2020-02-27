@@ -7,7 +7,7 @@ namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Exception that gets thrown when a sequence of events are not in the order they were committed to the Event Store.
-    /// </summary>s
+    /// </summary>
     public class EventLogVersionIsOutOfOrder : ArgumentException
     {
         /// <summary>

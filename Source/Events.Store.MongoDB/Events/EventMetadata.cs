@@ -27,7 +27,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="causePosition">The position of the cause.</param>
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
-        public EventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration)
+        /// <param name="isPublic">Whether the Event is public.</param>
+        public EventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid tenant, CauseType causeType, uint causePosition, Guid typeId, int typeGeneration, bool isPublic)
         {
             Occurred = occurred;
             EventSource = eventSource;
@@ -38,6 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             CausePosition = causePosition;
             TypeId = typeId;
             TypeGeneration = typeGeneration;
+            Public = isPublic;
         }
 
         /// <summary>
@@ -75,6 +77,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the <see cref="CauseLogPosition"/> identifying the <see cref="Cause"/> of the event.
         /// </summary>
+        [BsonRepresentation(BsonType.Int64)]
         public uint CausePosition { get; set; }
 
         /// <summary>
@@ -86,5 +89,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the <see cref="ArtifactGeneration"/> of the <see cref="Artifact"/> identifying the type of the event.
         /// </summary>
         public int TypeGeneration { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether this is a public Event.
+        /// </summary>
+        public bool Public { get; set; }
     }
 }

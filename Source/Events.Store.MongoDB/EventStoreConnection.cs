@@ -3,11 +3,13 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Applications;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Runtime.Events.Store.MongoDB.Processing;
+using Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters;
+using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Streams;
 using MongoDB.Driver;
 
@@ -34,9 +36,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
             MongoClient = connection.MongoClient;
 
-            AllStream = connection.Database.GetCollection<Event>(Constants.AllStreamCollection);
+            EventLog = connection.Database.GetCollection<Event>(Constants.EventLogCollection);
+            PublicEvents = connection.Database.GetCollection<PublicEvent>(Constants.PublicEventsCollection);
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
             StreamProcessorStates = connection.Database.GetCollection<StreamProcessorState>(Constants.StreamProcessorStateCollection);
+            TypePartitionFilterDefinitions = connection.Database.GetCollection<TypePartitionFilterDefinition>(Constants.TypePartitionFilterDefinitionCollection);
 
             CreateCollectionsAndIndexes();
         }
@@ -47,9 +51,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public IMongoClient MongoClient { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{Event}"/> where Events are stored.
+        /// Gets the <see cref="IMongoCollection{Event}"/> where Events in the event log are stored.
         /// </summary>
-        public IMongoCollection<Event> AllStream { get; }
+        public IMongoCollection<Event> EventLog { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{PublicEvent}" /> where public Events are stored.
+        /// </summary>
+        public IMongoCollection<PublicEvent> PublicEvents { get; }
 
         /// <summary>
         /// Gets the <see cref="IMongoCollection{AggregateRoot}"/> where Aggregate Roots are stored.
@@ -62,72 +71,116 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public IMongoCollection<StreamProcessorState> StreamProcessorStates { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{Event}" /> that represents a stream of events.
+        /// Gets the <see cref="IMongoCollection{TDocument}" /> for <see cref="TypePartitionFilterDefinition" />.
+        /// </summary>
+        public IMongoCollection<TypePartitionFilterDefinition> TypePartitionFilterDefinitions { get; }
+
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{StreamEvent}" /> that represents a stream of events.
         /// </summary>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="IMongoCollection{Event}" />.</returns>
-        public async Task<IMongoCollection<Event>> GetStreamCollectionAsync(StreamId stream, CancellationToken cancellationToken = default)
+        /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
+        public async Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetStreamCollectionAsync(StreamId stream, CancellationToken cancellationToken = default)
         {
-            var collection = _connection.Database.GetCollection<Event>(Constants.CollectionNameForStream(stream));
+            var collection = _connection.Database.GetCollection<MongoDB.Events.StreamEvent>(Constants.CollectionNameForStream(stream));
             await CreateCollectionsAndIndexesForStreamAsync(collection, cancellationToken).ConfigureAwait(false);
+            return collection;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{ReceivedEvent}" /> that represents a collection of the events received from a microservice.
+        /// </summary>
+        /// <param name="microservice">The <see cref="Microservice" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
+        public async Task<IMongoCollection<ReceivedEvent>> GetReceivedEventsCollectionAsync(Microservice microservice, CancellationToken cancellationToken = default)
+        {
+            var collection = _connection.Database.GetCollection<ReceivedEvent>(Constants.CollectionNameForReceivedEvents(microservice));
+            await CreateCollectionsAndIndexesForReceivedEventsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
         void CreateCollectionsAndIndexes()
         {
-            CreateCollectionsAndIndexesForStream(AllStream);
+            CreateCollectionsAndIndexesForEventLog();
+            CretaeCollectionsAndIndexesForPublicEvents();
             CreateCollectionsAndIndexesForAggregates();
             CreateCollectionsAndIndexesForStreamProcessorStates();
+            CreateCollectionsAndIndexesForTypePartitionFilterDefinitions();
         }
 
-        void CreateCollectionsAndIndexesForStream(IMongoCollection<Event> stream)
+        void CreateCollectionsAndIndexesForEventLog()
         {
-            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
-                    .Ascending(_ => _.EventLogVersion),
-                new CreateIndexOptions { Unique = true }));
-
-            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
+            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
                 Builders<Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)));
 
-            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
-                    .Ascending(_ => _.Partition)));
-
-            stream.Indexes.CreateOne(new CreateIndexModel<Event>(
+            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
                 Builders<Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)
                     .Ascending(_ => _.Aggregate.TypeId)));
         }
 
-        async Task CreateCollectionsAndIndexesForStreamAsync(IMongoCollection<Event> stream, CancellationToken cancellationToken = default)
+        void CretaeCollectionsAndIndexesForPublicEvents()
+        {
+            PublicEvents.Indexes.CreateOne(new CreateIndexModel<PublicEvent>(
+                Builders<PublicEvent>.IndexKeys
+                    .Ascending(_ => _.Metadata.EventLogVersion),
+                new CreateIndexOptions { Unique = true }));
+        }
+
+        async Task CreateCollectionsAndIndexesForStreamAsync(IMongoCollection<Events.StreamEvent> stream, CancellationToken cancellationToken = default)
         {
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<Event>(
-                    Builders<Event>.IndexKeys
-                        .Ascending(_ => _.EventLogVersion),
+                new CreateIndexModel<MongoDB.Events.StreamEvent>(
+                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
+                        .Ascending(_ => _.Metadata.EventLogVersion),
                     new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<Event>(
-                    Builders<Event>.IndexKeys
+                new CreateIndexModel<MongoDB.Events.StreamEvent>(
+                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<Event>(
-                    Builders<Event>.IndexKeys
-                        .Ascending(_ => _.Partition)),
+                new CreateIndexModel<MongoDB.Events.StreamEvent>(
+                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
+                        .Ascending(_ => _.Metadata.Partition)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<Event>(
-                    Builders<Event>.IndexKeys
+                new CreateIndexModel<MongoDB.Events.StreamEvent>(
+                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)
                         .Ascending(_ => _.Aggregate.TypeId)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task CreateCollectionsAndIndexesForReceivedEventsAsync(IMongoCollection<ReceivedEvent> stream, CancellationToken cancellationToken = default)
+        {
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<ReceivedEvent>(
+                    Builders<ReceivedEvent>.IndexKeys
+                        .Ascending(_ => _.Metadata.OriginEventLogVersion)
+                        .Ascending(_ => _.Metadata.Microservice)
+                        .Ascending(_ => _.Metadata.ProducerTenant),
+                    new CreateIndexOptions { Unique = true }),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<ReceivedEvent>(
+                    Builders<ReceivedEvent>.IndexKeys
+                        .Ascending(_ => _.Metadata.EventSource)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<ReceivedEvent>(
+                    Builders<ReceivedEvent>.IndexKeys
+                        .Ascending(_ => _.Metadata.ProducerTenant)
+                        .Ascending(_ => _.Metadata.Microservice)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
@@ -145,6 +198,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             StreamProcessorStates.Indexes.CreateOne(new CreateIndexModel<StreamProcessorState>(
                 Builders<StreamProcessorState>.IndexKeys
                     .Ascending(_ => _.Id)));
+        }
+
+        void CreateCollectionsAndIndexesForTypePartitionFilterDefinitions()
+        {
+            TypePartitionFilterDefinitions.Indexes.CreateOne(new CreateIndexModel<TypePartitionFilterDefinition>(
+                Builders<TypePartitionFilterDefinition>.IndexKeys
+                    .Ascending(_ => _.TargetStream)));
         }
     }
 }

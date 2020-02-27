@@ -3,6 +3,8 @@
 
 using System;
 using Dolittle.Artifacts;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
@@ -51,6 +53,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the aggregate root version.
         /// </summary>
+        [BsonRepresentation(BsonType.Int64)]
         public uint Version { get; set; }
     }
 }

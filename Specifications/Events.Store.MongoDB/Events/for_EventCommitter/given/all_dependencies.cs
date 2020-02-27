@@ -11,6 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter.given
 {
     public class all_dependencies
     {
+        protected const bool is_public = false;
         protected static an_event_store_connection an_event_store_connection;
         protected static ExecutionContext execution_context;
         protected static UncommittedEvent uncommitted_event;
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter.given
                 Guid.NewGuid(),
                 Claims.Empty,
                 CultureInfo.InvariantCulture);
-            uncommitted_event = new UncommittedEvent(new Artifacts.Artifact(Guid.NewGuid(), 0), events.some_event_content);
+            uncommitted_event = new UncommittedEvent(new Artifacts.Artifact(Guid.NewGuid(), 0), is_public, events.some_event_content);
         };
 
         Cleanup cleanup = () => an_event_store_connection.Dispose();

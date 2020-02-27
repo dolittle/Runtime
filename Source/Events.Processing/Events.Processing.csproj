@@ -10,10 +10,13 @@
         <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
+        <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
+        <PackageReference Include="Dolittle.Services.Clients" Version="$(FundamentalsVersion)" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
         <ProjectReference Include="..\Events.Streams\Events.Streams.csproj" />
         <ProjectReference Include="..\Services\Services.csproj" />
         <ProjectReference Include="..\Events.Store\Events.Store.csproj" />

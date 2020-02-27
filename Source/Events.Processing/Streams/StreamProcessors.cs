@@ -4,6 +4,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
@@ -19,7 +20,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     {
         readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
-        readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
@@ -27,18 +27,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
         /// </summary>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public StreamProcessors(
             IStreamProcessorStateRepository streamProcessorStateRepository,
-            IFetchEventsFromStreams eventsFromStreamsFetcher,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
             _streamProcessorStateRepository = streamProcessorStateRepository;
-            _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _executionContextManager = executionContextManager;
             _logger = logger;
         }
@@ -47,15 +44,23 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public IEnumerable<StreamProcessor> Processors => _streamProcessors.Select(_ => _.Value);
 
         /// <inheritdoc />
-        public StreamProcessor Register(IEventProcessor eventProcessor, StreamId sourceStreamId)
+        public StreamProcessor Register(
+            IEventProcessor eventProcessor,
+            IFetchEventsFromStreams eventsFromStreamsFetcher,
+            StreamId sourceStreamId,
+            CancellationTokenSource cancellationTokenSource = default)
         {
             var tenant = _executionContextManager.Current.Tenant;
             var streamProcessor = new StreamProcessor(
                 tenant,
                 sourceStreamId,
                 eventProcessor,
-                _streamProcessorStateRepository,
-                _eventsFromStreamsFetcher,
+                new StreamProcessorStates(
+                    new FailingPartitions(_streamProcessorStateRepository, eventsFromStreamsFetcher, _logger),
+                    _streamProcessorStateRepository,
+                    _logger),
+                eventsFromStreamsFetcher,
+                cancellationTokenSource,
                 _logger);
 
             if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))

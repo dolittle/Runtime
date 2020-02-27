@@ -3,7 +3,6 @@
 
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Streams;
-using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
@@ -12,6 +11,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public static class EventExtensions
     {
+        /// <summary>
+        /// Gets the <see cref="EventMetadata"/> from the <see cref="CommittedEvent"/>.
+        /// </summary>
+        /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
+        /// <returns>The converted <see cref="EventMetadata" />.</returns>
+        public static EventMetadata GetEventMetadata(this CommittedEvent committedEvent) =>
+            new EventMetadata(
+                committedEvent.Occurred,
+                committedEvent.EventSource,
+                committedEvent.CorrelationId,
+                committedEvent.Microservice,
+                committedEvent.Tenant,
+                committedEvent.Cause.Type,
+                committedEvent.Cause.Position,
+                committedEvent.Type.Id,
+                committedEvent.Type.Generation,
+                committedEvent.Public);
+
         /// <summary>
         /// Converts a <see cref="Event" /> to <see cref="CommittedAggregateEvent" />.
         /// </summary>
@@ -29,6 +46,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.Metadata.Tenant,
                 new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
+                @event.Metadata.Public,
                 @event.Content.ToString());
 
         /// <summary>
@@ -48,32 +66,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                       @event.Metadata.Tenant,
                       new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                       new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
+                      @event.Metadata.Public,
                       @event.Content.ToString());
 
         /// <summary>
-        /// Converts a <see cref="Event" /> to <see cref="StreamEvent" />.
+        /// Converts a <see cref="Event" /> to a <see cref="Runtime.Events.Streams.StreamEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
-        /// <param name="stream">The <see cref="StreamId" />.</param>
-        /// <param name="partition">The <see cref="PartitionId" />.</param>
-        /// <returns>The converted <see cref="StreamEvent" />.</returns>
-        public static StreamEvent ToStreamEvent(this Event @event, StreamId stream, PartitionId partition) =>
-            new StreamEvent(@event.ToCommittedEvent(), stream, partition);
-
-        /// <summary>
-        /// Converts a <see cref="CommittedEvent" /> to <see cref="Event" />.
-        /// </summary>
-        /// <param name="committedEvent">The <see cref="CommittedEvent" />.</param>
-        /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
-        /// <param name="partition">The <see cref="PartitionId" />.</param>
-        /// <returns>The converted <see cref="Event" />.</returns>
-        public static Event ToStoreRepresentation(this CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
-            new Event(
-                streamPosition,
-                committedEvent.EventLogVersion,
-                partition,
-                committedEvent.GetEventMetadata(),
-                committedEvent.GetAggregateMetadata(),
-                BsonDocument.Parse(committedEvent.Content));
+        /// <returns>The converted <see cref="Runtime.Events.Streams.StreamEvent" />.</returns>
+        public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this Event @event) =>
+            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), StreamId.AllStreamId, PartitionId.NotSet);
     }
 }

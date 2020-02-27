@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
@@ -20,6 +21,16 @@ namespace Dolittle.Runtime.Events.Streams
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamEvent" />.</returns>
         Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Fetch a range of events from a position to another in a stream.
+        /// </summary>
+        /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
+        /// <param name="fromPostition">The inclusive from <see cref="StreamPosition" />.</param>
+        /// <param name="toPosition">The inclusive to <see cref="StreamPosition" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The <see cref="IEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
+        Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPosition fromPostition, StreamPosition toPosition, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Finds the <see cref="StreamPosition" /> of the next event to process in a <see cref="StreamId" /> for a <see cref="PartitionId" />.
