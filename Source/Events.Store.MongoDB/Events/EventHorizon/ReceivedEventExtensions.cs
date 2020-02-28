@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Applications;
-using Dolittle.Execution;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 using MongoDB.Bson;
@@ -19,13 +18,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// </summary>
         /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
         /// <param name="producerTenant">The <see cref="TenantId" /> that produced the event.</param>
-        /// <param name="correlation">The <see cref="CorrelationId" />.</param>
         /// <returns>The converted <see cref="ReceivedEventMetadata" />.</returns>
-        public static ReceivedEventMetadata GetReceivedEventMetadata(this CommittedEvent committedEvent, TenantId producerTenant, CorrelationId correlation) =>
+        public static ReceivedEventMetadata GetReceivedEventMetadata(this CommittedEvent committedEvent, TenantId producerTenant) =>
             new ReceivedEventMetadata(
                 committedEvent.Occurred,
                 committedEvent.EventSource,
-                correlation,
+                committedEvent.CorrelationId,
                 committedEvent.Microservice,
                 committedEvent.Tenant,
                 producerTenant,
@@ -70,7 +68,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static ReceivedEvent ToNewReceivedEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, TenantId producerTenant) =>
             new ReceivedEvent(
                 streamPosition,
-                committedEvent.GetReceivedEventMetadata(producerTenant, CorrelationId.New()),
+                committedEvent.GetReceivedEventMetadata(producerTenant),
                 BsonDocument.Parse(committedEvent.Content));
     }
 }
