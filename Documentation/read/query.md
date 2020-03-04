@@ -3,6 +3,8 @@ title: Query
 description: About Queries
 keywords: query, ddd, read, queryfor, 
 author: einari, smithmx
+aliases:
+    - /runtime/runtime/read/query
 ---
 
 # Query

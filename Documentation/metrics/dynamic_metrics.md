@@ -4,6 +4,8 @@ description: How to provide dynamic metrics that gets exposed
 keywords: Metrics
 author: Dolittle
 weight: 3
+aliases:
+    - /runtime/runtime/metrics/dynamic_metrics
 ---
 Sometimes you don't know ahead of time what metrics you will be exposing.
 Instead of using the [provider model]({{< relref providing_metrics >}}),

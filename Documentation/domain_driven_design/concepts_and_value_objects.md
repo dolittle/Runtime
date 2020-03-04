@@ -3,6 +3,8 @@ title: About Concepts and Value Objects
 description: Learn about Concepts and Value Objects in Dolittle
 keywords: domain-driven-design
 author: einari, smithmx, tomasekeli
+aliases:
+    - /runtime/runtime/domain_driven_design/concepts_and_value_objects
 ---
 
 # Background

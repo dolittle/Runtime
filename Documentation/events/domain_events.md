@@ -3,6 +3,8 @@ title: Domain Events
 description: Description of Domain Events
 keywords: Overview, Domain Events
 author: smithmx
+aliases:
+    - /runtime/runtime/events/domain_events
 ---
 
 ## Definition
