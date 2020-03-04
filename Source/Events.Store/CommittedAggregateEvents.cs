@@ -32,6 +32,7 @@ namespace Dolittle.Runtime.Events.Store
                 var @event = events[i];
                 ThrowIfEventIsNull(@event);
                 ThrowIfEventWasAppliedToOtherEventSource(@event);
+                ThrowIfEventWasAppliedByOtherAggregateRoot(@event);
                 ThrowIfAggreggateRootVersionIsOutOfOrder(@event);
                 if (i > 0) ThrowIfEventLogSequenceIsOutOfOrder(@event, events[i - 1]);
             }
@@ -74,6 +75,11 @@ namespace Dolittle.Runtime.Events.Store
         void ThrowIfEventWasAppliedToOtherEventSource(CommittedAggregateEvent @event)
         {
             if (@event.EventSource != EventSource) throw new EventWasAppliedToOtherEventSource(@event.EventSource, EventSource);
+        }
+
+        void ThrowIfEventWasAppliedByOtherAggregateRoot(CommittedAggregateEvent @event)
+        {
+            if (@event.AggregateRoot.Id != AggregateRoot) throw new EventWasAppliedByOtherAggregateRoot(@event.AggregateRoot.Id, AggregateRoot);
         }
 
         void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvent @event)

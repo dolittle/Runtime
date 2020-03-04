@@ -3,12 +3,8 @@
 
 extern alias contracts;
 
-using Dolittle.Applications;
-using Dolittle.Artifacts;
-using Dolittle.Execution;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Tenancy;
 using Google.Protobuf.WellKnownTypes;
 using grpcArtifacts = contracts::Dolittle.Runtime.Artifacts;
 using grpcEvents = contracts::Dolittle.Runtime.Events;
@@ -49,27 +45,6 @@ namespace Dolittle.Runtime.Events.Store
                 },
                 Content = @event.Content
             };
-        }
-
-        /// <summary>
-        /// Convert to from <see cref="grpcEvents.CommittedAggregateEvent"/> to <see cref="CommittedAggregateEvent"/>.
-        /// </summary>
-        /// <param name="event"><see cref="grpcEvents.CommittedAggregateEvent"/> to convert from.</param>
-        /// <returns>Converted <see cref="CommittedAggregateEvent"/>.</returns>
-        public static CommittedEvent ToCommittedEvent(this grpcEvents.CommittedAggregateEvent @event)
-        {
-            return new CommittedAggregateEvent(
-                @event.EventLogSequenceNumber,
-                @event.AggregateRootVersion,
-                @event.Occurred.ToDateTimeOffset(),
-                @event.EventSource.To<EventSourceId>(),
-                @event.Correlation.To<CorrelationId>(),
-                @event.Microservice.To<Microservice>(),
-                @event.Tenant.To<TenantId>(),
-                new Cause((CauseType)@event.Cause.Type, @event.Cause.Position),
-                new Artifact(@event.Type.Id.To<ArtifactId>(), @event.Type.Generation),
-                @event.Public,
-                @event.Content);
         }
     }
 }

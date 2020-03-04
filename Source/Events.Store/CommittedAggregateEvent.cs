@@ -17,6 +17,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedAggregateEvent"/> class.
         /// </summary>
+        /// <param name="aggregateRoot">The aggregate root <see cref="Artifact" />.</param>
         /// <param name="aggregateRootVersion">The version of the aggregate root that applied the Event.</param>
         /// <param name="eventLogSequenceNumber">The version of the Event Log the Event was committed to.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
@@ -29,6 +30,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="isPublic">Whether this Event is public.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
         public CommittedAggregateEvent(
+            Artifact aggregateRoot,
             AggregateRootVersion aggregateRootVersion,
             EventLogSequenceNumber eventLogSequenceNumber,
             DateTimeOffset occurred,
@@ -42,8 +44,14 @@ namespace Dolittle.Runtime.Events.Store
             string content)
             : base(eventLogSequenceNumber, occurred, eventSource, correlationId, microservice, tenant, cause, type, isPublic, content)
         {
+            AggregateRoot = aggregateRoot;
             AggregateRootVersion = aggregateRootVersion;
         }
+
+        /// <summary>
+        /// Gets the aggregate root that this Event was committed to.
+        /// </summary>
+        public Artifact AggregateRoot { get; }
 
         /// <summary>
         /// Gets the version of the aggregate root after the Event was applied.
