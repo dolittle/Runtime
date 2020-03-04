@@ -35,6 +35,7 @@ namespace Dolittle.Runtime.Events.Store
                 ThrowIfEventWasAppliedByOtherAggregateRoot(@event);
                 ThrowIfAggreggateRootVersionIsOutOfOrder(@event);
                 if (i > 0) ThrowIfEventLogSequenceIsOutOfOrder(@event, events[i - 1]);
+                _currentCheckedVersion++;
             }
 
             _events = new NullFreeList<CommittedAggregateEvent>(events);
@@ -84,7 +85,7 @@ namespace Dolittle.Runtime.Events.Store
 
         void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvent @event)
         {
-            if (@event.AggregateRootVersion != _currentCheckedVersion++) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, _currentCheckedVersion - 1);
+            if (@event.AggregateRootVersion != _currentCheckedVersion) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, _currentCheckedVersion);
         }
 
         void ThrowIfEventLogSequenceIsOutOfOrder(CommittedAggregateEvent @event, CommittedAggregateEvent previousEvent)
