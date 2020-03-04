@@ -3,6 +3,8 @@ title: Convention over Configuration
 description: Learn about how Dolittle looks at convention over configuration and vice versa
 keywords: Runtime
 author: einari
+aliases:
+    - /runtime/runtime/principles/convention_over_configuration
 ---
 
 For a team to deliver consistency in the codebase, one should aim for a recipe that makes it easy to the right thing and

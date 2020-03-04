@@ -3,6 +3,8 @@ title: Aggregates and Aggregate Roots
 description: About Aggregates and Aggregate Roots
 keywords: domain-driven-design
 author: einari, smithmx
+aliases:
+    - /runtime/runtime/domain_driven_design/aggregate_root
 ---
 
 # Background
