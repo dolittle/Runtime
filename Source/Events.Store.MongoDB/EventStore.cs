@@ -123,14 +123,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             aggregateRootVersion++;
                         }
 
-                        var newAggregateRoot = await _aggregateRoots.IncrementVersionFor(
+                        await _aggregateRoots.IncrementVersionFor(
                             transaction,
                             events.EventSource,
                             events.AggregateRoot.Id,
                             events.ExpectedAggregateRootVersion,
                             aggregateRootVersion,
                             cancel).ConfigureAwait(false);
-                        return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, events.ExpectedAggregateRootVersion, newAggregateRoot.Version, committedEvents);
+                        return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }
@@ -169,8 +169,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             return new CommittedAggregateEvents(
                                 eventSource,
                                 aggregateRoot,
-                                AggregateRootVersion.Initial,
-                                version,
                                 events);
                         }
                         else
@@ -178,8 +176,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             return new CommittedAggregateEvents(
                                 eventSource,
                                 aggregateRoot,
-                                AggregateRootVersion.Initial,
-                                AggregateRootVersion.Initial,
                                 Array.Empty<CommittedAggregateEvent>());
                         }
                     },
