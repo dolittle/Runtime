@@ -35,13 +35,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             try
             {
                 var eventTypes = await _connection.EventLog
-                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, toPosition.Value))
+                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, range.From.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, range.To.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;
@@ -53,14 +53,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             if (partition != PartitionId.NotSet) return Enumerable.Empty<Artifact>();
             try
             {
                 var eventTypes = await _connection.EventLog
-                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, fromPosition.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, toPosition.Value))
+                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, range.From.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, range.To.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;

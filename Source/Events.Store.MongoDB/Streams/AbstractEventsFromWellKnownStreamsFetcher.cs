@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public abstract Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
-        public abstract Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default);
+        public abstract Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
         public abstract Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default);

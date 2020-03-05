@@ -35,13 +35,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             try
             {
                 var eventTypes = await _connection.PublicEvents
-                    .Find(_publicEventsFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _publicEventsFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Find(_publicEventsFilter.Gte(_ => _.StreamPosition, range.From.Value) & _publicEventsFilter.Lte(_ => _.StreamPosition, range.To.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;
@@ -53,14 +53,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             if (partition != PartitionId.NotSet) return Enumerable.Empty<Artifact>();
             try
             {
                 var eventTypes = await _connection.PublicEvents
-                    .Find(_publicEventsFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _publicEventsFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Find(_publicEventsFilter.Gte(_ => _.StreamPosition, range.From.Value) & _publicEventsFilter.Lte(_ => _.StreamPosition, range.To.Value))
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return eventTypes;
