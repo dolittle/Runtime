@@ -52,6 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var message = new FilterRuntimeToClientRequest
             {
                 Event = @event.ToProtobuf(),
+                Partition = partitionId.ToProtobuf(),
                 ExecutionContext = _executionContextManager.Current.ToByteString()
             };
 

@@ -10,15 +10,15 @@ using Dolittle.Tenancy;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represent an Event that was applied to an Event Source by an <see cref="AggregateRoot"/> and is committed to the Event Store.
+    /// Represent an Event that was applied to an Event Source by an aggregate root and is committed to the Event Store.
     /// </summary>
     public class CommittedAggregateEvent : CommittedEvent
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedAggregateEvent"/> class.
         /// </summary>
-        /// <param name="aggregateRoot">The <see cref="Artifact"/> representing the type of the Aggregate Root that applied the Event to the Event Source.</param>
-        /// <param name="aggregateRootVersion">The version of the <see cref="AggregateRoot"/> that applied the Event.</param>
+        /// <param name="aggregateRoot">The aggregate root <see cref="Artifact" />.</param>
+        /// <param name="aggregateRootVersion">The version of the aggregate root that applied the Event.</param>
         /// <param name="eventLogSequenceNumber">The version of the Event Log the Event was committed to.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
         /// <param name="eventSource">The Event Source that the Event was applied to.</param>
@@ -49,12 +49,12 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <summary>
-        /// Gets the <see cref="Artifact"/> representing the type of the Aggregate Root that applied the Event to the Event Source.
+        /// Gets the aggregate root that this Event was committed to.
         /// </summary>
         public Artifact AggregateRoot { get; }
 
         /// <summary>
-        /// Gets the version of the <see cref="AggregateRoot"/> that applied the Event.
+        /// Gets the version of the aggregate root after the Event was applied.
         /// </summary>
         public AggregateRootVersion AggregateRootVersion { get; }
     }

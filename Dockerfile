@@ -30,9 +30,9 @@ RUN if [ "$CONFIGURATION" = "Debug" ] ; then apt-get update && \
 RUN if [ "$CONFIGURATION" = "debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
 
 WORKDIR /app
-COPY --from=build-env /app/Source/out ./
-COPY --from=build-env /app/Source/.dolittle ./.dolittle
+COPY --from=build-env /app/Source/Server/out ./
+COPY --from=build-env /app/Source/Server/.dolittle ./.dolittle
 
 EXPOSE 9700
 
-ENTRYPOINT ["dotnet", "Server.dll"]
+ENTRYPOINT ["dotnet", "Dolittle.Runtime.Server.dll"]

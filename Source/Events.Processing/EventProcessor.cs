@@ -56,6 +56,7 @@ namespace Dolittle.Runtime.Events.Processing
             var message = new EventHandlerRuntimeToClientRequest
             {
                 Event = @event.ToProtobuf(),
+                Partition = partitionId.ToProtobuf(),
                 ExecutionContext = _executionContextManager.Current.ToByteString()
             };
             IProcessingResult result = null;

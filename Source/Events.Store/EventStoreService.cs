@@ -99,8 +99,8 @@ namespace Dolittle.Runtime.Events.Store
         public override async Task<grpc.FetchForAggregateResponse> FetchForAggregate(grpc.Aggregate request, ServerCallContext context)
         {
             _logger.Debug("Fetch for Aggregate");
-            var aggregate = request.Id.To<ArtifactId>();
-            var eventSource = request.Id.To<EventSourceId>();
+            var aggregate = request.AggregateRoot.To<ArtifactId>();
+            var eventSource = request.EventSource.To<EventSourceId>();
 
             var response = new grpc.FetchForAggregateResponse { Reason = string.Empty };
             try

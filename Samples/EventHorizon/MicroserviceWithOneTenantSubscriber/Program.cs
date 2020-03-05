@@ -3,13 +3,13 @@
 
 using System.Threading.Tasks;
 
-namespace Dolittle.Runtime.Server
+namespace Dolittle.Runtime.Samples.MicroserviceWithOneTenantSubscriber
 {
     static class Program
     {
         static async Task Main()
         {
-            await Bootloader.Start().ConfigureAwait(false);
+            await Dolittle.Runtime.Server.BootLoader.Start();
         }
     }
 }
