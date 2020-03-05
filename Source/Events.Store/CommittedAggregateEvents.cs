@@ -14,33 +14,29 @@ namespace Dolittle.Runtime.Events.Store
     public class CommittedAggregateEvents : IReadOnlyList<CommittedAggregateEvent>
     {
         readonly NullFreeList<CommittedAggregateEvent> _events;
+        AggregateRootVersion _currentCheckedVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedAggregateEvents"/> class.
         /// </summary>
         /// <param name="eventSource">The <see cref="EventSourceId"/> that the Events were applied to.</param>
         /// <param name="aggregateRoot">The <see cref="ArtifactId"/> representing the type of the Aggregate Root that applied the Event to the Event Source.</param>
-        /// <param name="oldAggregateRootVersion">The version of the <see cref="AggregateRoot"/> that applied the Events.</param>
-        /// <param name="newAggregateRootVersion">The new version of the <see cref="AggregateRoot"/> that applied the Events.</param>
         /// <param name="events">The <see cref="CommittedAggregateEvent">events</see>.</param>
-        public CommittedAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion oldAggregateRootVersion, AggregateRootVersion newAggregateRootVersion, IReadOnlyList<CommittedAggregateEvent> events)
+        public CommittedAggregateEvents(EventSourceId eventSource, ArtifactId aggregateRoot, IReadOnlyList<CommittedAggregateEvent> events)
         {
             EventSource = eventSource;
             AggregateRoot = aggregateRoot;
-            AggregateRootVersion = oldAggregateRootVersion;
-
             for (var i = 0; i < events.Count; i++)
             {
+                if (i == 0) _currentCheckedVersion = events[0].AggregateRootVersion;
                 var @event = events[i];
                 ThrowIfEventIsNull(@event);
                 ThrowIfEventWasAppliedToOtherEventSource(@event);
                 ThrowIfEventWasAppliedByOtherAggregateRoot(@event);
                 ThrowIfAggreggateRootVersionIsOutOfOrder(@event);
                 if (i > 0) ThrowIfEventLogSequenceIsOutOfOrder(@event, events[i - 1]);
-                AggregateRootVersion++;
+                _currentCheckedVersion++;
             }
-
-            ThrowIfEventsAreMissingForExpectedVersion(newAggregateRootVersion);
 
             _events = new NullFreeList<CommittedAggregateEvent>(events);
         }
@@ -54,11 +50,6 @@ namespace Dolittle.Runtime.Events.Store
         /// Gets the <see cref="ArtifactId"/> representing the type of the Aggregate Root that applied the Event to the Event Source.
         /// </summary>
         public ArtifactId AggregateRoot { get; }
-
-        /// <summary>
-        /// Gets the version of the <see cref="AggregateRoot"/> after all the Events was applied.
-        /// </summary>
-        public AggregateRootVersion AggregateRootVersion { get; }
 
         /// <summary>
         /// Gets a value indicating whether or not there are any events in the committed sequence.
@@ -94,17 +85,12 @@ namespace Dolittle.Runtime.Events.Store
 
         void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvent @event)
         {
-            if (@event.AggregateRootVersion != AggregateRootVersion) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, AggregateRootVersion);
+            if (@event.AggregateRootVersion != _currentCheckedVersion) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, _currentCheckedVersion);
         }
 
         void ThrowIfEventLogSequenceIsOutOfOrder(CommittedAggregateEvent @event, CommittedAggregateEvent previousEvent)
         {
             if (@event.EventLogSequenceNumber != previousEvent.EventLogSequenceNumber + 1) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber + 1);
-        }
-
-        void ThrowIfEventsAreMissingForExpectedVersion(AggregateRootVersion aggregateRootVersion)
-        {
-            if (AggregateRootVersion != aggregateRootVersion) throw new MissingEventsForExpectedAggregateRootVersion(aggregateRootVersion, AggregateRootVersion);
         }
     }
 }
