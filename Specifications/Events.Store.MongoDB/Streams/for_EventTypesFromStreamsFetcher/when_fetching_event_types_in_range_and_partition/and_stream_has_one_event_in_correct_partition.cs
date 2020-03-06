@@ -5,8 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Artifacts;
-using Dolittle.Logging;
-
+using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
@@ -14,8 +13,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
 {
     public class and_stream_has_one_event_in_correct_partition : given.all_dependencies
     {
-        static EventsToStreamsWriter events_to_streams_writer;
-        static EventTypesFromStreamsFetcher event_types_from_streams;
         static StreamId stream;
         static PartitionId partition;
         static CommittedEvent committed_event;
@@ -23,15 +20,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
 
         Establish context = () =>
         {
-            events_to_streams_writer = new EventsToStreamsWriter(an_event_store_connection, Moq.Mock.Of<ILogger>());
-            event_types_from_streams = new EventTypesFromStreamsFetcher(an_event_store_connection, Moq.Mock.Of<ILogger>());
             stream = Guid.NewGuid();
             partition = Guid.NewGuid();
             committed_event = committed_events.a_committed_event(0U);
-            events_to_streams_writer.Write(committed_event, stream, partition).GetAwaiter().GetResult();
+            var events = an_event_store_connection.GetStreamCollectionAsync(stream).GetAwaiter().GetResult();
+            events.InsertOne(committed_event.ToStoreStreamEvent(0, partition));
         };
 
-        Because of = () => result = event_types_from_streams.FetchTypesInRangeAndPartition(stream, partition, 0U, 0U).GetAwaiter().GetResult();
+        Because of = () => result = event_types_from_streams.FetchTypesInRangeAndPartition(stream, partition, new StreamPositionRange(0U, 0U)).GetAwaiter().GetResult();
 
         It should_not_be_empty_list = () => result.ShouldNotBeEmpty();
         It should_get_one_event_type = () => result.Count().ShouldEqual(1);

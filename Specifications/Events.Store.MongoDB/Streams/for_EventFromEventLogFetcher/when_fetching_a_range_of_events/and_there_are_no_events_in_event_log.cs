@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventFromEventLogFet
     {
         static Exception exception;
 
-        Because of = () => exception = Catch.Exception(() => fetcher.Fetch(StreamId.AllStreamId, 0).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => fetcher.FetchRange(StreamId.AllStreamId, new StreamPositionRange(0, 1)).GetAwaiter().GetResult());
 
         It should_fail_because_there_are_no_events_in_the_stream = () => exception.ShouldBeOfExactType<NoEventInStreamAtPosition>();
     }

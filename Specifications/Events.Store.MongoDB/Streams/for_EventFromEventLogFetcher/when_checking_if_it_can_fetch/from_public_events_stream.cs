@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventFromEventLogFet
     {
         static bool result;
 
-        Because of = () => fetcher.CanFetchFromStream(StreamId.PublicEventsId);
+        Because of = () => result = fetcher.CanFetchFromStream(StreamId.PublicEventsId);
         It should_not_be_able_to_fetch = () => result.ShouldBeFalse();
     }
 }

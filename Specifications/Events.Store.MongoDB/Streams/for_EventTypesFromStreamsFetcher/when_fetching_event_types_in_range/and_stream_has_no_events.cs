@@ -4,8 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Artifacts;
-using Dolittle.Logging;
-
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 
@@ -13,17 +11,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
 {
     public class and_stream_has_no_events : given.all_dependencies
     {
-        static EventTypesFromStreamsFetcher event_types_from_streams;
         static StreamId stream;
         static IEnumerable<Artifact> result;
 
-        Establish context = () =>
-        {
-            event_types_from_streams = new EventTypesFromStreamsFetcher(an_event_store_connection, Moq.Mock.Of<ILogger>());
-            stream = Guid.NewGuid();
-        };
+        Establish context = () => stream = Guid.NewGuid();
 
-        Because of = () => result = event_types_from_streams.FetchTypesInRange(stream, 0U, 0U).GetAwaiter().GetResult();
+        Because of = () => result = event_types_from_streams.FetchTypesInRange(stream, new StreamPositionRange(0U, 0U)).GetAwaiter().GetResult();
 
         It should_return_empty_list = () => result.ShouldBeEmpty();
     }

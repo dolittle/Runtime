@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
     {
         static bool result;
 
-        Because of = () => public_events_writer.CanWriteToStream(StreamId.PublicEventsId);
+        Because of = () => result = public_events_writer.CanWriteToStream(StreamId.PublicEventsId);
         It should_be_able_to_write = () => result.ShouldBeTrue();
     }
 }
