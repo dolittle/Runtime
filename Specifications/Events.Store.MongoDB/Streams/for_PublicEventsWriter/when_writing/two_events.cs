@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
@@ -14,22 +13,20 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
     {
         static CommittedEvent first_committed_event;
         static CommittedEvent second_committed_event;
-        static StreamId stream_id;
         static IMongoCollection<PublicEvent> stream;
 
         Establish context = () =>
         {
             first_committed_event = committed_events.a_committed_event(0);
             second_committed_event = committed_events.a_committed_event(1);
-            stream_id = Guid.NewGuid();
             stream = an_event_store_connection.PublicEvents;
         };
 
         Because of = () =>
         {
             Task.WaitAll(
-                public_events_writer.Write(first_committed_event, stream_id, PartitionId.NotSet),
-                public_events_writer.Write(second_committed_event, stream_id, PartitionId.NotSet));
+                public_events_writer.Write(first_committed_event, StreamId.PublicEventsId, PartitionId.NotSet),
+                public_events_writer.Write(second_committed_event, StreamId.PublicEventsId, PartitionId.NotSet));
         };
 
         It should_have_written_two_events_to_stream = () => stream.Find(filters.public_event_filter.Empty).ToList().Count.ShouldEqual(2);

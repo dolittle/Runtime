@@ -11,7 +11,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
     {
         static CommittedEvent first_committed_event;
         static CommittedEvent second_committed_event;
-        static StreamId stream_id;
         static PartitionId partition;
         static Exception exception;
 
@@ -19,12 +18,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
         {
             first_committed_event = committed_events.a_committed_event(0);
             second_committed_event = committed_events.a_committed_event(0);
-            stream_id = Guid.NewGuid();
             partition = Guid.NewGuid();
-            public_events_writer.Write(first_committed_event, stream_id, partition).GetAwaiter().GetResult();
+            public_events_writer.Write(first_committed_event, StreamId.PublicEventsId, partition).GetAwaiter().GetResult();
         };
 
-        Because of = () => exception = Catch.Exception(() => public_events_writer.Write(second_committed_event, stream_id, partition).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => public_events_writer.Write(second_committed_event, StreamId.PublicEventsId, partition).GetAwaiter().GetResult());
 
         It should_thrown_an_exception = () => exception.ShouldNotBeNull();
         It should_fail_because_same_event_is_written_twice = () => exception.ShouldBeOfExactType<EventAlreadyWrittenToStream>();

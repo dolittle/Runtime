@@ -12,17 +12,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
     public class an_aggregate_event : given.all_dependencies
     {
         static CommittedAggregateEvent committed_aggregate_event;
-        static StreamId stream_id;
         static IMongoCollection<PublicEvent> stream;
 
         Establish context = () =>
         {
             committed_aggregate_event = committed_events.a_committed_aggregate_event(0, Guid.NewGuid(), Guid.NewGuid(), 0U);
-            stream_id = Guid.NewGuid();
             stream = an_event_store_connection.PublicEvents;
         };
 
-        Because of = () => public_events_writer.Write(committed_aggregate_event, stream_id, PartitionId.NotSet).GetAwaiter().GetResult();
+        Because of = () => public_events_writer.Write(committed_aggregate_event, StreamId.PublicEventsId, PartitionId.NotSet).GetAwaiter().GetResult();
 
         It should_have_written_one_event_to_stream = () => stream.Find(filters.public_event_filter.Empty).ToList().Count.ShouldEqual(1);
 

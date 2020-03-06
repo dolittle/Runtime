@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
@@ -12,17 +11,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter.w
     public class an_event : given.all_dependencies
     {
         static CommittedEvent committed_event;
-        static StreamId stream_id;
         static IMongoCollection<PublicEvent> stream;
 
         Establish context = () =>
         {
             committed_event = committed_events.a_committed_event(0);
-            stream_id = Guid.NewGuid();
             stream = an_event_store_connection.PublicEvents;
         };
 
-        Because of = () => public_events_writer.Write(committed_event, stream_id, PartitionId.NotSet).GetAwaiter().GetResult();
+        Because of = () => public_events_writer.Write(committed_event, StreamId.PublicEventsId, PartitionId.NotSet).GetAwaiter().GetResult();
 
         It should_have_written_one_event_to_stream = () => stream.Find(filters.public_event_filter.Empty).ToList().Count.ShouldEqual(1);
 

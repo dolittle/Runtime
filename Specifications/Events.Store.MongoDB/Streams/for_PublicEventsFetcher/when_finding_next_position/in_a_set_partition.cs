@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsFetcher.
     {
         static StreamPosition result;
 
-        Because of = () => result = fetcher.FindNext(StreamId.AllStreamId, Guid.NewGuid(), 0).GetAwaiter().GetResult();
+        Because of = () => result = fetcher.FindNext(StreamId.PublicEventsId, Guid.NewGuid(), 0).GetAwaiter().GetResult();
 
         It should_return_the_max_value = () => result.Value.ShouldEqual(uint.MaxValue);
     }

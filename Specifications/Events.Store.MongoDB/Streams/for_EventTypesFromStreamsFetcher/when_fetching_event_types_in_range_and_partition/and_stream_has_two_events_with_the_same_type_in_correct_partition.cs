@@ -35,7 +35,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
         Because of = () => result = event_types_from_streams.FetchTypesInRangeAndPartition(stream, partition, new StreamPositionRange(0U, 1U)).GetAwaiter().GetResult();
 
         It should_not_be_empty_list = () => result.ShouldNotBeEmpty();
-        It should_get_one_event_types = () => result.Count().ShouldEqual(1);
-        It should_have_the_correct_event_type = () => result.FirstOrDefault().ShouldEqual(event_type);
+        It should_get_two_event_types = () => result.Count().ShouldEqual(2);
+        It should_have_the_correct_first_event_type = () => result.ToList()[0].ShouldEqual(event_type);
+        It should_have_the_correct_second_event_type = () => result.ToList()[1].ShouldEqual(event_type);
     }
 }

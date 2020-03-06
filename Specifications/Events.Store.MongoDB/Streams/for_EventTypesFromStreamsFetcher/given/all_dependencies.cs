@@ -18,8 +18,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
         Establish context = () =>
         {
             an_event_store_connection = new an_event_store_connection(new a_mongo_db_connection());
-            event_types_from_event_log_fetcher = new Mock<EventTypesFromEventLogFetcher>();
-            public_event_types_fetcher = new Mock<PublicEventTypesFetcher>();
+            event_types_from_event_log_fetcher = new Mock<EventTypesFromEventLogFetcher>(an_event_store_connection, Mock.Of<ILogger>());
+            public_event_types_fetcher = new Mock<PublicEventTypesFetcher>(an_event_store_connection, Mock.Of<ILogger>());
             event_types_from_streams = new EventTypesFromStreamsFetcher(
                 new StaticInstancesOf<ICanFetchEventTypesFromWellKnownStreams>(event_types_from_event_log_fetcher.Object, public_event_types_fetcher.Object),
                 an_event_store_connection,

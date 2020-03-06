@@ -8,6 +8,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_PublicEventsWriter
 {
     public class when_creating_PublicEventsWriter : given.all_dependencies
     {
-        It should_only_have_all_stream_as_the_well_known_stream = () => public_events_writer.WellKnownStreams.ShouldContainOnly(StreamId.AllStreamId);
+        It should_only_have_all_stream_as_the_well_known_stream = () => public_events_writer.WellKnownStreams.ShouldContainOnly(StreamId.PublicEventsId);
     }
 }
