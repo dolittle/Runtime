@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
     {
         static CommittedAggregateEvents events;
 
-        Because of = () => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, aggregate_version_before, aggregate_version_before + 0, Array.Empty<CommittedAggregateEvent>());
+        Because of = () => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, Array.Empty<CommittedAggregateEvent>());
 
         It should_not_have_events = () => events.HasEvents.ShouldBeFalse();
         It should_have_a_count_of_zero = () => events.Count.ShouldEqual(0);
