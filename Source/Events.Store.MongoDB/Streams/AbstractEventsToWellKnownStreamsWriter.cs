@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="streams">The streams it can write to.</param>
         protected AbstractEventsToWellKnownStreamsWriter(IEnumerable<StreamId> streams)
         {
-            if (streams.Any(_ => _.IsNonWriteable)) throw new CannotCreateWellKnownStreamsWriterOnEventLog();
+            if (streams.Any(_ => _.Equals(StreamId.AllStreamId))) throw new CannotCreateWellKnownStreamsWriterOnEventLog();
             WellKnownStreams = streams;
         }
 

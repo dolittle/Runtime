@@ -37,6 +37,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <inheritdoc/>
         public override async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
+            ThrowIfIllegalRange(range);
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             try
             {
@@ -55,6 +56,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <inheritdoc/>
         public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
+            ThrowIfIllegalRange(range);
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             if (partition != PartitionId.NotSet) return Enumerable.Empty<Artifact>();
             try
@@ -69,6 +71,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
+        }
+
+        void ThrowIfIllegalRange(StreamPositionRange range)
+        {
+            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
         }
     }
 }
