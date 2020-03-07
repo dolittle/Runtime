@@ -13,14 +13,15 @@
     "start": "npx webpack-dev-server --open --watch --progress --hot"
   },
   "devDependencies": {
-    "aurelia-testing": "^1.0.0",
     "@dolittle/typescript.build": "^5.0.1",
     "@dolittle/typescript.webpack.aurelia": "^1.1.0",
+    "aurelia-testing": "^1.0.0",
+    "dotenv": "^6.1.0",
     "eslint": "^6.6.0",
     "eslint-config-prettier": "^6.6.0",
     "eslint-plugin-prettier": "^3.1.1",
-    "prettier": "^1.19.1",
-    "dotenv": "^6.1.0"
+    "office-ui-fabric-core": "^11.0.0",
+    "prettier": "^1.19.1"
   },
   "dependencies": {
     "@dunite/au-office-ui": "^2.0.2",
