@@ -8,7 +8,7 @@
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Common.Specs" Version="2.*"/>
-        <PackageReference Include="Dolittle.Types.Testing" Version="4.*"/>
+        <PackageReference Include="Dolittle.Types.Testing" Version="$(FundamentalsVersion)"/>
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
         <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.9.0" />
     </ItemGroup>

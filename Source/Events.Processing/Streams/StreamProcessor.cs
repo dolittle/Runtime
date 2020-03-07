@@ -114,7 +114,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                         catch (NoEventInStreamAtPosition)
                         {
-                            await Task.Delay(1000).ConfigureAwait(false);
+                            await Task.Delay(250).ConfigureAwait(false);
                         }
                         catch (EventStoreUnavailable)
                         {
