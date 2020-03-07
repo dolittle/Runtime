@@ -2,7 +2,12 @@
 
 <template>
     <require from="./layout.scss"></require>
+    <require from="../navigation"></require>
 
-    
-    <slot></slot>
+    <div class="ms-Grid" dir="ltr">
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-sm6 ms-md4 ms-lg2"><navigation></navigation></div>
+            <div class="ms-Grid-col ms-sm6 ms-md8 ms-lg10"><slot></slot></div>
+        </div>
+    </div>
 </template>

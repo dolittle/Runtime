@@ -36,6 +36,58 @@ loadTheme(myTheme);
 
 export function configure(config: FrameworkConfiguration) {
     config.globalResources([
-        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuCompoundButton')
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Utilities/DuMarqueeSelection'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuActionButton'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuCheckbox'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuChoiceGroup'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuComboBox'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuCommandBarButton'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuCompoundButton'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuContextualMenu'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuDefaultButton'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuDropdown'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuIconButton'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuLabel'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuSlider'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuSpinButton'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuTextField'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/BasicInputs/DuToggle'),
+
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Content/DuDetailsList'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Content/DuFacepile'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Content/DuGroupedList'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Content/DuPersona'),
+
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Navigation/DuBreadcrumb'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Navigation/DuCommandBar'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Navigation/DuNav'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Navigation/DuPivot'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Navigation/DuSearchBox'),
+
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Pickers/DuColorPicker'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Pickers/DuCompactPeoplePicker'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Pickers/DuDatePicker'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Pickers/DuListPeoplePicker'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Pickers/DuNormalPeoplePicker'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Pickers/DuTagPicker'),
+
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/ProgressValidation/DuMessageBar'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/ProgressValidation/DuProgressIndicator'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/ProgressValidation/DuSpinner'),
+
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuCallout'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuCoachmark'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDialog'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDialogFooter'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDocumentCard'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDocumentCardActions'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDocumentCardActivity'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDocumentCardLocation'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDocumentCardPreview'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuDocumentCardTitle'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuHoverCard'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuTeachingBubble'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuTeachingBubbleContent'),
+        PLATFORM.moduleName('@dunite/au-office-ui/resources/elements/Surfaces/DuToolTip')
     ]);
 }
