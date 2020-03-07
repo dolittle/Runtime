@@ -10,6 +10,7 @@ export function configure(aurelia: Aurelia) {
     aurelia.use
         .standardConfiguration()
         .feature(PLATFORM.moduleName('resources/index'))
+        .plugin(PLATFORM.moduleName('aurelia-animator-css'))
         .plugin(PLATFORM.moduleName('@dunite/au-office-ui'));
 
     aurelia.use.developmentLogging(environment.debug ? 'debug' : 'warn');

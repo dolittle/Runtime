@@ -2,7 +2,8 @@
 
 <!DOCTYPE html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <title><%- htmlWebpackPlugin.options.metadata.title %></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,17 +16,14 @@
     <link rel="apple-touch-icon" sizes="180x180" href="${require('./assets/icons/180x180_favicon_darkblue.png')}">
 
     <base href="<%- htmlWebpackPlugin.options.metadata.baseUrl %>">
-    <style>
-        body {
-          background-color: #2b2f34
-        }
-      </style>
-      <!-- imported CSS are concatenated and added automatically -->
-  </head>
-  <body aurelia-app="main">
+    <!-- imported CSS are concatenated and added automatically -->
+</head>
+
+<body aurelia-app="main" class="ms-Fabric">
     <% if (htmlWebpackPlugin.options.metadata.server) { %>
     <!-- Webpack Dev Server reload -->
     <script src="/webpack-dev-server.js"></script>
     <% } %>
-  </body>
+</body>
+
 </html>

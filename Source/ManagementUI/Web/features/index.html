@@ -2,4 +2,33 @@
 
 <template>
     <require from="./index.scss"></require>
+
+    <div class="ms-Fabric">
+
+        <div>
+            <div>
+            <div class="ms-font-m-plus">Standard</div>
+            <du-compound-button
+              text="Compound Button"
+              secondary-text="You can create an account here."
+            ></du-compound-button>
+          </div>
+            <div class="ms-font-m-plus">Primary</div>
+            <du-compound-button
+              text="Compound Button"
+              primary="true"
+              secondary-text="You can create an account here."
+            ></du-compound-button>
+          </div>
+            
+
+        <div class="ms-Grid" dir="ltr">
+            <div class="ms-Grid-row">
+                <div class="ms-Grid-col ms-sm6 ms-md4 ms-lg2"><span class="ms-font-su ms-fontColor-themePrimary">Big blue text</span></div>
+                <div class="ms-Grid-col ms-sm6 ms-md8 ms-lg10">B</div>
+            </div>
+        </div>
+    </div>
+
+
 </template>
