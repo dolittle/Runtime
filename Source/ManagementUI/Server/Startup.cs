@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 
 namespace Server
 {
@@ -17,8 +18,18 @@ namespace Server
     /// </summary>
     public class Startup
     {
+        readonly IWebHostEnvironment _hostingEnvironment;
         BootloaderResult _bootResult;
         ILoggerFactory _loggerFactory;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="hostingEnvironment">The <see cref="IWebHostEnvironment"/>.</param>
+        public Startup(IWebHostEnvironment hostingEnvironment)
+        {
+            _hostingEnvironment = hostingEnvironment;
+        }
 
         /// <summary>
         /// Configure services.
@@ -26,6 +37,12 @@ namespace Server
         /// <param name="services">Service collection to configure.</param>
         public void ConfigureServices(IServiceCollection services)
         {
+            if (_hostingEnvironment.IsDevelopment())
+            {
+                services.AddSwaggerGen(options =>
+                    options.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Version = "v1" }));
+            }
+
             _loggerFactory = LoggerFactory.Create(builder =>
             {
                 builder.AddConsole();
@@ -56,6 +73,8 @@ namespace Server
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1"));
             }
 
             app.UseDolittle();
