@@ -1,31 +1,33 @@
 {
-  "name": "web",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "tasks": "gulp --tasks --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
-    "build": "gulp build --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
-    "clean": "gulp clean --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
-    "test": "gulp test --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
-    "test:run": "gulp test-run --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
-    "webpack": "npx webpack --env.production --extractCss",
-    "webpack:dev": "npx webpack --extractCss",
-    "start": "npx webpack-dev-server --open --watch --progress --hot"
-  },
-  "devDependencies": {
-    "@dolittle/typescript.build": "^5.0.1",
-    "@dolittle/typescript.webpack.aurelia": "^1.1.0",
-    "aurelia-testing": "^1.0.0",
-    "dotenv": "^6.1.0",
-    "eslint": "^6.6.0",
-    "eslint-config-prettier": "^6.6.0",
-    "eslint-plugin-prettier": "^3.1.1",
-    "office-ui-fabric-core": "^11.0.0",
-    "prettier": "^1.19.1"
-  },
-  "dependencies": {
-    "@dunite/au-office-ui": "^2.0.2",
-    "aurelia-animator-css": "^1.0.4",
-    "aurelia-bootstrapper": "^2.3.2"
-  }
+    "name": "web",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "tasks": "gulp --tasks --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
+        "build": "gulp build --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
+        "clean": "gulp clean --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
+        "test": "gulp test --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
+        "test:run": "gulp test-run --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
+        "webpack": "npx webpack --env.production --extractCss",
+        "webpack:dev": "npx webpack --extractCss",
+        "start": "npx webpack-dev-server --open --watch --progress --hot"
+    },
+    "devDependencies": {
+        "@dolittle/rudiments": "2.0.7",
+        "@dolittle/typescript.build": "^5.0.1",
+        "@dolittle/typescript.webpack.aurelia": "^1.1.0",
+        "aurelia-testing": "^1.0.0",
+        "aurelia-fetch-client": "1.8.2",
+        "dotenv": "^6.1.0",
+        "eslint": "^6.6.0",
+        "eslint-config-prettier": "^6.6.0",
+        "eslint-plugin-prettier": "^3.1.1",
+        "office-ui-fabric-core": "^11.0.0",
+        "prettier": "^1.19.1"
+    },
+    "dependencies": {
+        "@dunite/au-office-ui": "^2.0.2",
+        "aurelia-animator-css": "^1.0.4",
+        "aurelia-bootstrapper": "^2.3.2"
+    }
 }
