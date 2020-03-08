@@ -9,7 +9,10 @@ export class App {
 
     configureRouter(config: RouterConfiguration, router: Router) {
         config.options.pushState = true;
-        config.map([{ route: '', name: 'Index', moduleId: PLATFORM.moduleName('index') }]);
+        config.map([
+            { route: ['', '/'], name: 'Index', moduleId: PLATFORM.moduleName('index'), nav: true },
+            { route: 'general/overview', name: 'General Overview', moduleId: PLATFORM.moduleName('general/overview'), nav: true }
+        ]);
 
         this.router = router;
     }

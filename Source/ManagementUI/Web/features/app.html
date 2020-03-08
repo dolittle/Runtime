@@ -3,5 +3,23 @@
 <template>
     <require from="./app.scss"></require>
 
-    <router-view containerless layout-view="Layouts/layout.html"></router-view>
+    <require from="navigation"></require>
+
+    <header class="app_header">
+        <a href="/" class="site_logo">
+            <img src="../assets/logo.svg" alt="">
+        </a>
+        <aside class="app_options">
+        </aside>
+    </header>    
+    
+    <div class="ms-Grid" dir="ltr">
+        <div class="ms-Grid-row">
+            <div class="ms-Grid-col ms-sm6 ms-md4 ms-lg2"><navigation></navigation></div>
+            <div class="ms-Grid-col ms-sm6 ms-md8 ms-lg10">
+                <router-view containerless layout-view="layouts/layout.html"></router-view>
+            </div>
+        </div>
+    </div>
+    
 </template>

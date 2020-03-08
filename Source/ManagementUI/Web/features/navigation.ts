@@ -5,12 +5,15 @@ import { Guid } from '@dolittle/rudiments';
 
 import { autoinject } from 'aurelia-dependency-injection';
 import { HttpClient } from 'aurelia-fetch-client';
+import { Router } from 'aurelia-router';
 
 import { Globals } from './globals';
 
 import { IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 
 import { INavLink } from 'office-ui-fabric-react/lib/Nav';
+
+// http://www.jeremyg.net/entry/create-a-menu-with-child-routes-using-aurelia
 
 @autoinject
 export class Navigation {
@@ -24,7 +27,8 @@ export class Navigation {
                     links: [
                         {
                             name: 'Overview',
-                            key: 'overview'
+                            key: 'overview',
+                            route: 'general/overview'
                         }
                     ]
                 },
@@ -90,6 +94,7 @@ export class Navigation {
     ];
 
     constructor(
+        private _router: Router,
         private _httpClient: HttpClient,
         private _globals: Globals) {
     }
@@ -108,6 +113,10 @@ export class Navigation {
     }
 
     itemClicked(element: any, link: INavLink) {
+        const routerLink = link as any;
+        if (routerLink.route) {
+            this._router.navigate(routerLink.route);
+        }
     }
 
     async loadTenants() {
