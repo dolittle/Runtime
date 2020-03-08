@@ -6,8 +6,6 @@
                  on-change.bind="tenantSelected"
                  options.one-time="tenants"></du-dropdown>
 
-    <h2>Features</h2>
-
-    <du-nav groups.bind="groups"></du-nav>
+    <du-nav groups.bind="groups" on-link-click.bind="itemClicked"></du-nav>
 
 </template>

@@ -10,77 +10,83 @@ import { Globals } from './globals';
 
 import { IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
 
+import { INavLink } from 'office-ui-fabric-react/lib/Nav';
+
 @autoinject
 export class Navigation {
     tenants: any[] = [];
 
     groups = [
         {
-            isExpanded: true,
             links: [
                 {
-                    key: 'runtimes',
-                    name: 'Runtimes',
-                    url: '#'
+                    name: 'General',
+                    links: [
+                        {
+                            name: 'Overview',
+                            key: 'overview'
+                        }
+                    ]
                 },
                 {
-                    key: 'heads',
-                    name: 'Heads',
-                    url: '#'
+                    name: 'Connections',
+                    links: [
+                        {
+                            name: 'Runtimes',
+                            key: 'runtimes'
+                        },
+                        {
+                            name: 'Heads',
+                            key: 'heads'
+                        }
+                    ],
+                },
+                {
+                    name: 'Event Store',
+                    links: [
+                        {
+                            name: 'Failing Partitions',
+                            key: 'failing_partitions'
+                        },
+                        {
+                            name: 'Aggregates',
+                            key: 'aggregates'
+                        },
+                        {
+                            name: 'Event Log',
+                            key: 'log'
+                        },
+                        {
+                            name: 'Streams',
+                            key: 'streams'
+                        },
+                        {
+                            name: 'Schemas',
+                            key: 'schemas'
+                        }
+                    ]
+                },
+                {
+                    name: 'TimeSeries',
+                    links: [
+                        {
+                            name: 'Connectors',
+                            key: 'connectors'
+                        },
+                        {
+                            name: 'Observers',
+                            key: 'observers'
+                        },
+                        {
+                            name: 'Identities',
+                            key: 'identities'
+                        }
+                    ]
                 }
             ],
-            name: 'Connections',
-            url: '#',
+
         },
-        {
-            isExpanded: true,
-            links: [
-                {
-                    key: 'aggregates',
-                    name: 'Aggregates',
-                    url: '#'
-                },
-                {
-                    key: 'log',
-                    name: 'Event Log',
-                    url: '#'
-                },
-                {
-                    key: 'streams',
-                    name: 'Streams',
-                    url: '#'
-                },
-                {
-                    key: 'schemas',
-                    name: 'Schemas',
-                    url: '#'
-                }
-            ],
-            name: 'Event Store',
-            url: '#',
-        },
-        {
-            isExpanded: true,
-            links: [
-                {
-                    key: 'connectors',
-                    name: 'Connectors',
-                    url: '#'
-                },
-                {
-                    key: 'observers',
-                    name: 'Observers',
-                    url: '#'
-                },
-                {
-                    key: 'identities',
-                    name: 'Identities',
-                    url: '#'
-                }
-            ],
-            name: 'TimeSeries',
-            url: '#',
-        }
+
     ];
 
     constructor(
@@ -99,6 +105,9 @@ export class Navigation {
 
     async attached() {
         await this.loadTenants();
+    }
+
+    itemClicked(element: any, link: INavLink) {
     }
 
     async loadTenants() {
