@@ -11,7 +11,8 @@ export class App {
         config.options.pushState = true;
         config.map([
             { route: ['', '/'], name: 'Index', moduleId: PLATFORM.moduleName('index'), nav: true },
-            { route: 'general/overview', name: 'General Overview', moduleId: PLATFORM.moduleName('general/overview'), nav: true }
+            { route: 'general/overview', name: 'General Overview', moduleId: PLATFORM.moduleName('general/overview'), nav: true },
+            { route: 'connections/runtimes', name: 'Runtime Connections', moduleId: PLATFORM.moduleName('connections/runtimes'), nav: true }
         ]);
 
         this.router = router;

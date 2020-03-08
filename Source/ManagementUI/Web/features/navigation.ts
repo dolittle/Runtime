@@ -28,7 +28,7 @@ export class Navigation {
                         {
                             name: 'Overview',
                             key: 'overview',
-                            route: 'general/overview'
+                            url: 'general/overview'
                         }
                     ]
                 },
@@ -37,11 +37,13 @@ export class Navigation {
                     links: [
                         {
                             name: 'Runtimes',
-                            key: 'runtimes'
+                            key: 'runtimes',
+                            url: 'connections/runtimes'
                         },
                         {
                             name: 'Heads',
-                            key: 'heads'
+                            key: 'heads',
+                            url: 'connections/heads'
                         }
                     ],
                 },
@@ -50,23 +52,28 @@ export class Navigation {
                     links: [
                         {
                             name: 'Failing Partitions',
-                            key: 'failing_partitions'
+                            key: 'failing-partitions',
+                            url: 'event-store/failing-partitions'
                         },
                         {
                             name: 'Aggregates',
-                            key: 'aggregates'
+                            key: 'aggregates',
+                            url: 'event-store/aggregates'
                         },
                         {
                             name: 'Event Log',
-                            key: 'log'
+                            key: 'log',
+                            url: 'event-store/log'
                         },
                         {
                             name: 'Streams',
-                            key: 'streams'
+                            key: 'streams',
+                            url: 'event-store/streams'
                         },
                         {
                             name: 'Schemas',
-                            key: 'schemas'
+                            key: 'schemas',
+                            url: 'event-store/schemas'
                         }
                     ]
                 },
@@ -75,15 +82,18 @@ export class Navigation {
                     links: [
                         {
                             name: 'Connectors',
-                            key: 'connectors'
+                            key: 'connectors',
+                            url: 'time-series/connectors'
                         },
                         {
                             name: 'Observers',
-                            key: 'observers'
+                            key: 'observers',
+                            url: 'time-series/observers'
                         },
                         {
                             name: 'Identities',
-                            key: 'identities'
+                            key: 'identities',
+                            url: 'time-series/identities'
                         }
                     ]
                 }
@@ -113,10 +123,6 @@ export class Navigation {
     }
 
     itemClicked(element: any, link: INavLink) {
-        const routerLink = link as any;
-        if (routerLink.route) {
-            this._router.navigate(routerLink.route);
-        }
     }
 
     async loadTenants() {
