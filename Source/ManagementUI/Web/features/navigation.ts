@@ -1,23 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { Guid } from '@dolittle/rudiments';
-
 import { autoinject } from 'aurelia-dependency-injection';
-import { HttpClient } from 'aurelia-fetch-client';
-import { Router } from 'aurelia-router';
-
-import { Globals } from './globals';
-
-import { IDropdownOption } from 'office-ui-fabric-react/lib/Dropdown';
-
-import { INavLink } from 'office-ui-fabric-react/lib/Nav';
 
 // http://www.jeremyg.net/entry/create-a-menu-with-child-routes-using-aurelia
 
 @autoinject
 export class Navigation {
-    tenants: any[] = [];
 
     groups = [
         {
@@ -100,40 +89,5 @@ export class Navigation {
             ],
 
         },
-
     ];
-
-    constructor(
-        private _router: Router,
-        private _httpClient: HttpClient,
-        private _globals: Globals) {
-    }
-
-    tenantSelected(event: any, option?: IDropdownOption, index?: number): void {
-        const tenant = Guid.parse(option?.key as string);
-        this._globals.currentTenant = tenant;
-    }
-
-    async refreshTenants() {
-        await this.loadTenants();
-    }
-
-    async attached() {
-        await this.loadTenants();
-    }
-
-    itemClicked(element: any, link: INavLink) {
-    }
-
-    async loadTenants() {
-        const result = await this._httpClient.get('/api/Tenants');
-        const tenants = await result.json() as any as any[];
-
-        tenants.forEach((tenant: any) => {
-            this.tenants.push({
-                key: tenant.value,
-                text: tenant.value,
-            });
-        });
-    }
 }
