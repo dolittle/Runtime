@@ -18,6 +18,11 @@ export class Navigation {
                             name: 'Overview',
                             key: 'overview',
                             url: 'general/overview'
+                        },
+                        {
+                            name: 'Metrics',
+                            key: 'metrics',
+                            url: 'general/metrics'
                         }
                     ]
                 },
