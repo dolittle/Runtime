@@ -35,6 +35,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.for_EventStore.when_committing_a
         It should_return_two_committed_events = () => result.Count.ShouldEqual(2);
         It should_have_the_correct_event_source = () => result.EventSource.ShouldEqual(event_source);
         It should_have_the_correct_aggregate_root = () => result.AggregateRoot.ShouldEqual(aggregate_root.Id);
-        It should_have_the_correct_aggregate_root_version = () => result.AggregateRootVersion.Value.ShouldEqual(aggregate_root_version + (uint)uncommitted_events.Count);
     }
 }

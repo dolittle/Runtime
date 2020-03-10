@@ -24,6 +24,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
 
         Because of = () => result = filter_processor.Object.Process(committed_event, PartitionId.NotSet).Result as IFilterResult;
 
-        It should_write_it_to_target_stream = () => events_to_streams_writer.Verify(_ => _.Write(committed_event, stream_id, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()), Times.Once);
+        It should_write_it_to_target_stream = () => events_to_streams_writer.Verify(_ => _.Write(committed_event, event_processor_id.Value, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()), Times.Once);
     }
 }

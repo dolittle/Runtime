@@ -9,9 +9,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 {
     public static class filters
     {
-        public static FilterDefinitionBuilder<Event> an_event_filter => Builders<Event>.Filter;
+        public static FilterDefinitionBuilder<Event> event_filter => Builders<Event>.Filter;
 
-        public static FilterDefinitionBuilder<MongoDB.Events.StreamEvent> a_stream_event_filter => Builders<MongoDB.Events.StreamEvent>.Filter;
+        public static FilterDefinitionBuilder<StreamEvent> stream_event_filter => Builders<StreamEvent>.Filter;
+
+        public static FilterDefinitionBuilder<PublicEvent> public_event_filter => Builders<PublicEvent>.Filter;
 
         public static FilterDefinitionBuilder<AggregateRoot> an_aggregate_filter => Builders<AggregateRoot>.Filter;
     }

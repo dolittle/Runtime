@@ -26,11 +26,10 @@ namespace Dolittle.Runtime.Events.Streams
         /// Fetch a range of events from a position to another in a stream.
         /// </summary>
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
-        /// <param name="fromPostition">The inclusive from <see cref="StreamPosition" />.</param>
-        /// <param name="toPosition">The inclusive to <see cref="StreamPosition" />.</param>
+        /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
-        Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPosition fromPostition, StreamPosition toPosition, CancellationToken cancellationToken = default);
+        Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Finds the <see cref="StreamPosition" /> of the next event to process in a <see cref="StreamId" /> for a <see cref="PartitionId" />.

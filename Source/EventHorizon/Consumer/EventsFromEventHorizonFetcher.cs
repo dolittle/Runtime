@@ -59,7 +59,7 @@ namespace Dolittle.Runtime.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPosition fromPostition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
             throw new CannotFetchRangeOfEventsFromEventHorizon();
         }

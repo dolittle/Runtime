@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public IFailingPartitions FailingPartitions { get; }
 
         /// <inheritdoc/>.
-        public Task<StreamProcessorState> GetStoredStateFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+        public Task<StreamProcessorState> GetStoredStateFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
         {
             _logger.Debug($"Getting stored stream processor state for Stream Processor '{streamProcessorId}'");
             return _streamProcessorStates.GetOrAddNew(streamProcessorId, cancellationToken);
