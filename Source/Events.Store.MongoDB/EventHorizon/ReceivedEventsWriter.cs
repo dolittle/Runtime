@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
 
                         await receivedEvents.InsertOneAsync(
                             transaction,
-                            @event.ToNewReceivedEvent(streamPosition, producerTenant),
+                            @event.ToNewReceivedEvent(streamPosition, producerMicroservice, producerTenant),
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },

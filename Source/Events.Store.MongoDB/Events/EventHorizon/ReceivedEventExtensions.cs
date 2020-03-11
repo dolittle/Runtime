@@ -17,14 +17,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets the <see cref="ReceivedEventMetadata"/> from the <see cref="CommittedEvent"/>.
         /// </summary>
         /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
+        /// <param name="producerMicroservice">The <see cref="Microservice" /> that produced the event.</param>
         /// <param name="producerTenant">The <see cref="TenantId" /> that produced the event.</param>
         /// <returns>The converted <see cref="ReceivedEventMetadata" />.</returns>
-        public static ReceivedEventMetadata GetReceivedEventMetadata(this CommittedEvent committedEvent, TenantId producerTenant) =>
+        public static ReceivedEventMetadata GetReceivedEventMetadata(this CommittedEvent committedEvent, Microservice producerMicroservice, TenantId producerTenant) =>
             new ReceivedEventMetadata(
                 committedEvent.Occurred,
                 committedEvent.EventSource,
                 committedEvent.CorrelationId,
-                committedEvent.Microservice,
+                producerMicroservice,
                 committedEvent.Tenant,
                 producerTenant,
                 committedEvent.EventLogSequenceNumber,
@@ -63,12 +64,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// </summary>
         /// <param name="committedEvent">The <see cref="CommittedEvent" />.</param>
         /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
+        /// <param name="producerMicroservice">The <see cref="Microservice" />.</param>
         /// <param name="producerTenant">The <see cref="TenantId" />.</param>
         /// <returns>The converted <see cref="ReceivedEvent" />.</returns>
-        public static ReceivedEvent ToNewReceivedEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, TenantId producerTenant) =>
+        public static ReceivedEvent ToNewReceivedEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, Microservice producerMicroservice, TenantId producerTenant) =>
             new ReceivedEvent(
                 streamPosition,
-                committedEvent.GetReceivedEventMetadata(producerTenant),
+                committedEvent.GetReceivedEventMetadata(producerMicroservice, producerTenant),
                 BsonDocument.Parse(committedEvent.Content));
     }
 }
