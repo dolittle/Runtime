@@ -32,5 +32,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon.for_ReceivedEventsW
 
         It should_have_written_one_event = () => received_events.CountDocuments(Builders<ReceivedEvent>.Filter.Empty).ShouldEqual(1);
         It should_have_written_event_with_the_correct_microservice = () => received_events.FindSync(Builders<ReceivedEvent>.Filter.Empty).FirstOrDefault().Metadata.Microservice.ShouldEqual(microservice.Value);
+        It should_have_written_event_with_the_correct_producer_tenant = () => received_events.FindSync(Builders<ReceivedEvent>.Filter.Empty).FirstOrDefault().Metadata.ProducerTenant.ShouldEqual(tenant.Value);
+        It should_have_written_event_with_the_correct_receiver_tenant = () => received_events.FindSync(Builders<ReceivedEvent>.Filter.Empty).FirstOrDefault().Metadata.ReceiverTenant.ShouldEqual(committed_event.Tenant.Value);
     }
 }
