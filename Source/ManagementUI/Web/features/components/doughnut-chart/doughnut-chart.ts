@@ -1,13 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { customElement, inject, processContent, ViewCompiler, ViewResources, BehaviorInstruction, TargetInstruction, ViewFactory } from 'aurelia-framework';
+import { BehaviorInstruction, customElement, inject, processContent, TargetInstruction, ViewCompiler, ViewResources } from 'aurelia-framework';
 
 import { Chart, ChartConfiguration } from 'chart.js';
 
 @inject(TargetInstruction)
 @customElement('doughnut-chart')
-@processContent(LineChart.processContent)
 export class LineChart {
     attached() {
         // const viewFactory = (targetInstruction.elementInstruction.type as any).viewFactory as ViewFactory;
@@ -22,7 +21,6 @@ export class LineChart {
             Chart.defaults.global.defaultFontFamily = fontFamily;
             Chart.defaults.global.defaultFontSize = 12;
             Chart.defaults.global.defaultFontStyle = 'bold';
-
 
             const context = canvas?.getContext('2d');
             if (context) {
@@ -63,8 +61,5 @@ export class LineChart {
                 });
             }
         }
-    }
-
-    static processContent(compiler: ViewCompiler, resources: ViewResources, node: HTMLElement, instruction: BehaviorInstruction) {
     }
 }
