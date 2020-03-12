@@ -5,6 +5,10 @@ import { FrameworkConfiguration } from 'aurelia-framework';
 import { PLATFORM } from 'aurelia-pal';
 import { createTheme, loadTheme } from 'office-ui-fabric-react/lib/Styling';
 
+import { initializeIcons } from '@uifabric/icons';
+
+initializeIcons();
+
 const myTheme = createTheme({
     palette: {
         themePrimary: '#ffcf00',

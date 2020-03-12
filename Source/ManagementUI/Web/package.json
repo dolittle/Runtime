@@ -28,6 +28,7 @@
     "dependencies": {
         "@dunite/au-office-ui": "^2.0.2",
         "@types/chart.js": "^2.9.15",
+        "@uifabric/icons": "^7.3.16",
         "aurelia-animator-css": "^1.0.4",
         "aurelia-bootstrapper": "^2.3.2",
         "chart.js": "^2.9.3"
