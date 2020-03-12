@@ -4,10 +4,10 @@
 extern alias contracts;
 
 using System.Collections.Generic;
-using Dolittle.Runtime.EventHorizon.Producer;
+using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Services;
 using Dolittle.Services;
-using grpc = contracts::Dolittle.Runtime.Events.Processing;
+using grpc = contracts::Dolittle.Runtime.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -17,26 +17,26 @@ namespace Dolittle.Runtime.EventHorizon
     /// </summary>
     public class RuntimeServices : ICanBindRuntimeServices
     {
-        readonly EventHorizonService _eventHorizon;
+        readonly SubscriptionsService _subscriptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
         /// </summary>
-        /// <param name="eventHorizon">The <see cref="EventHorizonService" />.</param>
-        public RuntimeServices(EventHorizonService eventHorizon)
+        /// <param name="subscriptions">The <see cref="SubscriptionsService" />.</param>
+        public RuntimeServices(SubscriptionsService subscriptions)
         {
-            _eventHorizon = eventHorizon;
+            _subscriptions = subscriptions;
         }
 
         /// <inheritdoc/>
-        public ServiceAspect Aspect => "Events.Processing";
+        public ServiceAspect Aspect => "EventHorizon";
 
         /// <inheritdoc/>
         public IEnumerable<Service> BindServices()
         {
             return new Service[]
             {
-                new Service(_eventHorizon, grpc.EventHorizon.BindService(_eventHorizon), grpc.EventHorizon.Descriptor)
+                new Service(_subscriptions, grpc.Subscriptions.BindService(_subscriptions), grpc.Subscriptions.Descriptor)
             };
         }
     }

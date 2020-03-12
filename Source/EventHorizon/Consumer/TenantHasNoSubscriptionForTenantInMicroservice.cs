@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// <summary>
     /// Exception that gets thrown when a tenant does not have a subscription towards a given tenant in a microservice.
     /// </summary>
-    public class TenantHasNoSubscriptionForTenantInMicroservice : InvalidlEventHorizonSubscriptionsConfiguration
+    public class TenantHasNoSubscriptionForTenantInMicroservice : InvalidEventHorizonSubscriptionsConfiguration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantHasNoSubscriptionForTenantInMicroservice"/> class.

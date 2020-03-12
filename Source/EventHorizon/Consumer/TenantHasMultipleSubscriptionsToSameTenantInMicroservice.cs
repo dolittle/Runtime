@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// <summary>
     /// Exception that gets thrown when a tenant is configured to have multiple subscriptions to the same tenant in a microservice.
     /// </summary>
-    public class TenantHasMultipleSubscriptionsToSameTenantInMicroservice : InvalidlEventHorizonSubscriptionsConfiguration
+    public class TenantHasMultipleSubscriptionsToSameTenantInMicroservice : InvalidEventHorizonSubscriptionsConfiguration
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TenantHasMultipleSubscriptionsToSameTenantInMicroservice"/> class.

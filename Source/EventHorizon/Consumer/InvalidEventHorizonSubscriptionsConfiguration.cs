@@ -4,15 +4,15 @@
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
-    /// Exception that gets thrown when there is an invalid <see cref="InvalidlEventHorizonSubscriptionsConfiguration" />.
+    /// Exception that gets thrown when there is an invalid event horizon subscriptions configuration.
     /// </summary>
-    public class InvalidlEventHorizonSubscriptionsConfiguration : InvalidEventHorizonConfiguration
+    public class InvalidEventHorizonSubscriptionsConfiguration : InvalidEventHorizonConfiguration
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidlEventHorizonSubscriptionsConfiguration"/> class.
+        /// Initializes a new instance of the <see cref="InvalidEventHorizonSubscriptionsConfiguration"/> class.
         /// </summary>
         /// <param name="reason">The <see cref="InvalidEventHorizonConfigurationReason" />.</param>
-        public InvalidlEventHorizonSubscriptionsConfiguration(InvalidEventHorizonConfigurationReason reason)
+        public InvalidEventHorizonSubscriptionsConfiguration(InvalidEventHorizonConfigurationReason reason)
             : base(EventHorizonSubscriptionsConfiguration.ConfigurationName, reason)
         {
         }

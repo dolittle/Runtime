@@ -6,7 +6,7 @@ using System;
 namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
-    /// Exception that gets thrown when there is an illegal <see cref="InvalidEventHorizonConfiguration" />.
+    /// Exception that gets thrown when there is an illegal event horizon configuration.
     /// </summary>
     public class InvalidEventHorizonConfiguration : Exception
     {

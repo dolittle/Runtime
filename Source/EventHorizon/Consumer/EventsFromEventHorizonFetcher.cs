@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing;
+using contracts::Dolittle.Runtime.EventHorizon;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// </summary>
     public class EventsFromEventHorizonFetcher : IFetchEventsFromStreams
     {
-        readonly AsyncServerStreamingCall<EventHorizonPublisherToSubscriberResponse> _call;
+        readonly AsyncServerStreamingCall<PublicEvent> _call;
         readonly Action _onUnavailableConnection;
         readonly ILogger _logger;
 
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="onUnavailableConnection">On no connection.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventsFromEventHorizonFetcher(
-            AsyncServerStreamingCall<EventHorizonPublisherToSubscriberResponse> call,
+            AsyncServerStreamingCall<PublicEvent> call,
             Action onUnavailableConnection,
             ILogger logger)
         {

@@ -22,8 +22,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         public TenantId Tenant { get; set; }
 
         /// <summary>
-        /// Gets or sets the key for the subscription.
+        /// Gets or sets the <see cref="EventHorizonConsent" /> for the tenant in microservice.
         /// </summary>
-        public string Key { get; set; }
+        public EventHorizonConsent Consent { get; set; }
     }
 }

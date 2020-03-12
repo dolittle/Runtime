@@ -11,16 +11,21 @@ namespace Dolittle.Runtime.EventHorizon.Producer
     /// <summary>
     /// Represents the configuration for event horizon consents.
     /// </summary>
-    [Name("event-horizon-consents")]
+    [Name(ConfigurationName)]
     public class EventHorizonConsentsConfiguration :
-        ReadOnlyDictionary<TenantId, EventHorizonConsentConfiguration>,
+        ReadOnlyDictionary<TenantId, IEnumerable<EventHorizonConsentConfiguration>>,
         IConfigurationObject
     {
         /// <summary>
+        /// The name of the configuration.
+        /// </summary>
+        public const string ConfigurationName = "event-horizon-consents";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="EventHorizonConsentsConfiguration"/> class.
         /// </summary>
-        /// <param name="configuration">Dictionary for <see cref="TenantId"/> with <see cref="EventHorizonConsentConfiguration"/>.</param>
-        public EventHorizonConsentsConfiguration(IDictionary<TenantId, EventHorizonConsentConfiguration> configuration)
+        /// <param name="configuration">Dictionary for <see cref="TenantId"/> with <see cref="IEnumerable{T}" /> of <see cref="EventHorizonConsentConfiguration"/>.</param>
+        public EventHorizonConsentsConfiguration(IDictionary<TenantId, IEnumerable<EventHorizonConsentConfiguration>> configuration)
             : base(configuration)
         {
         }

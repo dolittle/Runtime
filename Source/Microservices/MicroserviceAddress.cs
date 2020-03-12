@@ -13,11 +13,11 @@ namespace Dolittle.Runtime.Microservices
         /// <summary>
         /// Gets or sets the target host for the subscription.
         /// </summary>
-        public string Host { get; set; }
+        public MicroserviceHost Host { get; set; }
 
         /// <summary>
         /// Gets or sets the target port for the subscription.
         /// </summary>
-        public int Port { get; set; }
+        public MicroservicePort Port { get; set; }
     }
 }
