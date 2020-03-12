@@ -6,9 +6,9 @@ using System;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Exception that gets thrown when a sequence of events are not in the order they were committed to the Event Store.
+    /// Exception that gets thrown when a event log sequence numbers in a sequence of events are out of order, meaning that an event has a lower event log sequence number than the previous event.
     /// </summary>
-    public class EventLogSequenceIsOutOfOrder : ArgumentException
+    public class EventLogSequenceIsOutOfOrder : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventLogSequenceIsOutOfOrder"/> class.
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="sequenceNumber">The <see cref="EventLogSequenceNumber"/> the Event was committed to.</param>
         /// <param name="expectedSequenceNumber">Expected <see cref="EventLogSequenceNumber"/>.</param>
         public EventLogSequenceIsOutOfOrder(EventLogSequenceNumber sequenceNumber, EventLogSequenceNumber expectedSequenceNumber)
-            : base($"Event Log Sequence is out of order. Sequence number '{sequenceNumber}' from event does not match '{expectedSequenceNumber}'")
+            : base($"Event Log Sequence is out of order because Event Log Sequence Number '{sequenceNumber}' is not greater than '{expectedSequenceNumber}'. ")
         {
         }
     }

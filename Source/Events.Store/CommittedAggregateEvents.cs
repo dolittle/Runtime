@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store
     public class CommittedAggregateEvents : IReadOnlyList<CommittedAggregateEvent>
     {
         readonly NullFreeList<CommittedAggregateEvent> _events;
-        AggregateRootVersion _currentCheckedVersion;
+        readonly AggregateRootVersion _currentCheckedVersion;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedAggregateEvents"/> class.
@@ -90,7 +90,7 @@ namespace Dolittle.Runtime.Events.Store
 
         void ThrowIfEventLogSequenceIsOutOfOrder(CommittedAggregateEvent @event, CommittedAggregateEvent previousEvent)
         {
-            if (@event.EventLogSequenceNumber != previousEvent.EventLogSequenceNumber + 1) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber + 1);
+            if (@event.EventLogSequenceNumber <= previousEvent.EventLogSequenceNumber) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber);
         }
     }
 }
