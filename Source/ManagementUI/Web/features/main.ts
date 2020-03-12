@@ -16,7 +16,7 @@ export function configure(aurelia: Aurelia) {
         .plugin(PLATFORM.moduleName('aurelia-animator-css'))
         .plugin(PLATFORM.moduleName('@dunite/au-office-ui'));
 
-    const globals = new Globals()
+    const globals = new Globals();
     aurelia.container.registerInstance<Globals>(Globals, globals);
 
     aurelia.container.registerHandler<HttpClient>(HttpClient, () => {
