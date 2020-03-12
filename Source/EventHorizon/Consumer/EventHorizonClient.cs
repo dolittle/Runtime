@@ -4,11 +4,11 @@ extern alias contracts;
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Applications.Configuration;
-using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
@@ -75,7 +75,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public void Subscribe()
         {
-            _eventHorizons.ForEach(_ => SubscribeToMicroService(_.Key, _.Value));
+            var subscriptionsPerTenant = new Dictionary<TenantId, IEnumerable<EventHorizonSubscription>>();
+            foreach ((var subscriber, var eventHorizons) in _eventHorizons)
+            {
+                var subscriptions = eventHorizons.Select(_ => _eventHorizonSubscriptions.GetSubscriptionFor(subscriber, _.Microservice, _.Tenant));
+                subscriptionsPerTenant.Add(subscriber, subscriptions);
+            }
+
+            foreach ((var subscriber, var subscriptions) in subscriptionsPerTenant)
+            {
+                subscriptions.Select(_ => StartSubscription(subscriber, _));
+            }
         }
 
         /// <inheritdoc/>
@@ -137,14 +147,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
                 await Task.Delay(5000).ConfigureAwait(false);
             }
-        }
-
-        void SubscribeToMicroService(TenantId subscriberTenant, IEnumerable<EventHorizon> eventHorizons) =>
-            eventHorizons.ForEach(_ => SubscribeToMicroService(subscriberTenant, _eventHorizonSubscriptions.GetSubscriptionFor(subscriberTenant, _.Microservice, _.Tenant)));
-
-        void SubscribeToMicroService(TenantId subscriberTenant, EventHorizonSubscription subscription)
-        {
-            _ = StartSubscription(subscriberTenant, subscription);
         }
     }
 }
