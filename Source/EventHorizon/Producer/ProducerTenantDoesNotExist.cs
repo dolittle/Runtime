@@ -5,7 +5,7 @@ using System;
 using Dolittle.Applications;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
     /// Exception that gets thrown when a <see cref="Microservice" /> attempts to subscribe to a tenant that does not exist.

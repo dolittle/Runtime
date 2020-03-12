@@ -6,6 +6,8 @@ using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Tenancy;

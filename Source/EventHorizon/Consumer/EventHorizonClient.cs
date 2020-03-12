@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
-using Dolittle.Applications;
 using Dolittle.Applications.Configuration;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
@@ -17,10 +16,11 @@ using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Services.Clients;
 using Dolittle.Tenancy;
 using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventHorizonClient" />.
@@ -29,8 +29,9 @@ namespace Dolittle.Runtime.EventHorizon
     public class EventHorizonClient : IEventHorizonClient
     {
         readonly EventHorizonsConfiguration _eventHorizons;
+        readonly IEventHorizonSubscriptions _eventHorizonSubscriptions;
         readonly BoundedContextConfiguration _boundedContextConfiguration;
-        readonly grpc.EventHorizon.EventHorizonClient _client;
+        readonly IClientManager _clientManager;
         readonly IExecutionContextManager _executionContextManager;
         readonly FactoryFor<StreamProcessors> _getStreamProcessors;
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
@@ -42,7 +43,8 @@ namespace Dolittle.Runtime.EventHorizon
         /// </summary>
         /// <param name="eventHorizons">The <see cref="EventHorizonsConfiguration" />.</param>
         /// <param name="boundedContextConfiguration">The <see cref="BoundedContextConfiguration" />.</param>
-        /// <param name="client">The grpc client.</param>
+        /// <param name="eventHorizonSubscriptions">The <see cref="IEventHorizonSubscriptions" />.</param>
+        /// <param name="clientManager">The <see cref="IClientManager" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
         /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{IStreamProcessorStateRepository}" />.</param>
@@ -51,7 +53,8 @@ namespace Dolittle.Runtime.EventHorizon
         public EventHorizonClient(
             EventHorizonsConfiguration eventHorizons,
             BoundedContextConfiguration boundedContextConfiguration,
-            grpc.EventHorizon.EventHorizonClient client,
+            IEventHorizonSubscriptions eventHorizonSubscriptions,
+            IClientManager clientManager,
             IExecutionContextManager executionContextManager,
             FactoryFor<StreamProcessors> getStreamProcessors,
             FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
@@ -59,8 +62,9 @@ namespace Dolittle.Runtime.EventHorizon
             ILogger logger)
         {
             _eventHorizons = eventHorizons;
+            _eventHorizonSubscriptions = eventHorizonSubscriptions;
             _boundedContextConfiguration = boundedContextConfiguration;
-            _client = client;
+            _clientManager = clientManager;
             _executionContextManager = executionContextManager;
             _getStreamProcessors = getStreamProcessors;
             _getStreamProcessorStates = getStreamProcessorStates;
@@ -75,12 +79,14 @@ namespace Dolittle.Runtime.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task StartSubscription(Microservice microservice, TenantId producer, TenantId subscriber)
+        public async Task StartSubscription(TenantId subscriber, EventHorizonSubscription subscription)
         {
             while (true)
             {
+                var producer = subscription.Tenant;
+                var microservice = subscription.Microservice;
                 var streamProcessorId = new StreamProcessorId(producer.Value, microservice.Value);
-                _logger.Debug($"Tenant '{subscriber}' is subscribing to events from tenant '{producer} in microservice '{microservice}'");
+                _logger.Debug($"Tenant '{subscriber}' is subscribing to events from tenant '{producer} in microservice '{microservice}' on '{subscription.Host}:{subscription.Port}'");
                 try
                 {
 #pragma warning disable CA2000
@@ -88,7 +94,7 @@ namespace Dolittle.Runtime.EventHorizon
                     _executionContextManager.CurrentFor(subscriber);
                     var publicEventsPosition = (await _getStreamProcessorStates().GetOrAddNew(streamProcessorId).ConfigureAwait(false)).Position;
                     var eventsFetcher = new EventsFromEventHorizonFetcher(
-                        _client.Subscribe(
+                        _clientManager.Get<grpc.EventHorizon.EventHorizonClient>(subscription.Host, subscription.Port).Subscribe(
                             new EventHorizonSubscriberToPublisherRequest
                             {
                                 Microservice = _boundedContextConfiguration.BoundedContext.Value.ToProtobuf(),
@@ -133,11 +139,12 @@ namespace Dolittle.Runtime.EventHorizon
             }
         }
 
-        void SubscribeToMicroService(Microservice microservice, Subscriptions subscriptions) => subscriptions.ForEach(_ => SubscribeToTenantInMicroService(microservice, _.Key, _.Value));
+        void SubscribeToMicroService(TenantId subscriberTenant, IEnumerable<EventHorizon> eventHorizons) =>
+            eventHorizons.ForEach(_ => SubscribeToMicroService(subscriberTenant, _eventHorizonSubscriptions.GetSubscriptionFor(subscriberTenant, _.Microservice, _.Tenant)));
 
-        void SubscribeToTenantInMicroService(Microservice microservice, TenantId tenant, IEnumerable<TenantId> subscribers) => subscribers.ForEach(subscriber =>
+        void SubscribeToMicroService(TenantId subscriberTenant, EventHorizonSubscription subscription)
         {
-            var task = StartSubscription(microservice, tenant, subscriber);
-        });
+            _ = StartSubscription(subscriberTenant, subscription);
+        }
     }
 }

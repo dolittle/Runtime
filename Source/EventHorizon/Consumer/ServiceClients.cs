@@ -8,7 +8,7 @@ using Dolittle.Services;
 using Dolittle.Services.Clients;
 using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Represents something that knows about service clients.
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// <inheritdoc/>
         public IEnumerable<Client> Clients => new[]
         {
-            new Client(EndpointVisibility.Private, typeof(grpc.EventHorizon.EventHorizonClient), grpc.Filters.Descriptor),
+            new Client(EndpointVisibility.Public, typeof(grpc.EventHorizon.EventHorizonClient), grpc.Filters.Descriptor),
         };
     }
 }

@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
     /// Represents an implementation of <see cref="WellKnownStreamFilterDefinition" /> for the public events stream.

@@ -5,7 +5,7 @@ using Dolittle.Applications;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
     /// Defines a system that knows about subscribers on the event horizon.

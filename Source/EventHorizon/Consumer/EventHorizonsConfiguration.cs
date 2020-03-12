@@ -3,24 +3,24 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dolittle.Applications;
 using Dolittle.Configuration;
+using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Represents the configuration for hosts by <see cref="EventHorizonsConfiguration"/>.
     /// </summary>
     [Name("event-horizons")]
     public class EventHorizonsConfiguration :
-        ReadOnlyDictionary<Microservice, Subscriptions>,
+        ReadOnlyDictionary<TenantId, IReadOnlyList<EventHorizon>>,
         IConfigurationObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHorizonsConfiguration"/> class.
         /// </summary>
-        /// <param name="configuration">Dictionary for <see cref="Microservice"/> with <see cref="Subscriptions"/>.</param>
-        public EventHorizonsConfiguration(IDictionary<Microservice, Subscriptions> configuration)
+        /// <param name="configuration">Dictionary for <see cref="TenantId"/> with <see cref="IReadOnlyList{T}" /> of ><see cref="EventHorizon"/>.</param>
+        public EventHorizonsConfiguration(IDictionary<TenantId, IReadOnlyList<EventHorizon>> configuration)
             : base(configuration)
         {
         }

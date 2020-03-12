@@ -12,7 +12,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFetchEventsFromStreams" />.

@@ -4,6 +4,7 @@
 extern alias contracts;
 
 using System.Collections.Generic;
+using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Services;
 using Dolittle.Services;
 using grpc = contracts::Dolittle.Runtime.Events.Processing;

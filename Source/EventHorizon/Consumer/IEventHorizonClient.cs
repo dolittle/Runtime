@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Applications;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Defines a system for handling inncomming public events from other microservices.
@@ -20,10 +19,9 @@ namespace Dolittle.Runtime.EventHorizon
         /// <summary>
         /// Starts a subscription.
         /// </summary>
-        /// <param name="microservice">The <see cref="Microservice" />.</param>
-        /// <param name="producer">The producer <see cref="TenantId" />.</param>
         /// <param name="subscriber">The subscriber <see cref="TenantId" />.</param>
+        /// <param name="subscription">The <see cref="EventHorizonSubscription" />.</param>
         /// <returns>The task.</returns>
-        Task StartSubscription(Microservice microservice, TenantId producer, TenantId subscriber);
+        Task StartSubscription(TenantId subscriber, EventHorizonSubscription subscription);
     }
 }
