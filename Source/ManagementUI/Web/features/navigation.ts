@@ -17,12 +17,14 @@ export class Navigation {
                         {
                             name: 'Overview',
                             key: 'overview',
-                            url: 'general/overview'
+                            url: 'general/overview',
+                            icon: 'AutoRacing'
                         },
                         {
                             name: 'Metrics',
                             key: 'metrics',
-                            url: 'general/metrics'
+                            url: 'general/metrics',
+                            icon: 'Chart'
                         }
                     ]
                 },
@@ -32,12 +34,14 @@ export class Navigation {
                         {
                             name: 'Runtimes',
                             key: 'runtimes',
-                            url: 'connections/runtimes'
+                            url: 'connections/runtimes',
+                            icon: 'Communications'
                         },
                         {
                             name: 'Heads',
                             key: 'heads',
-                            url: 'connections/heads'
+                            url: 'connections/heads',
+                            icon: 'Communications'
                         }
                     ],
                 },
@@ -47,27 +51,32 @@ export class Navigation {
                         {
                             name: 'Failing Partitions',
                             key: 'failing-partitions',
-                            url: 'event-store/failing-partitions'
+                            url: 'event-store/failing-partitions',
+                            icon: 'ErrorBadge'
                         },
                         {
                             name: 'Aggregates',
                             key: 'aggregates',
-                            url: 'event-store/aggregates'
+                            url: 'event-store/aggregates',
+                            icon: 'AssessmentGroup'
                         },
                         {
                             name: 'Event Log',
                             key: 'log',
-                            url: 'event-store/log'
+                            url: 'event-store/log',
+                            icon: 'CustomList'
                         },
                         {
                             name: 'Streams',
                             key: 'streams',
-                            url: 'event-store/streams'
+                            url: 'event-store/streams',
+                            icon: 'DrillExpand'
                         },
                         {
                             name: 'Schemas',
                             key: 'schemas',
-                            url: 'event-store/schemas'
+                            url: 'event-store/schemas',
+                            icon: 'EntryView'
                         }
                     ]
                 },
@@ -77,17 +86,20 @@ export class Navigation {
                         {
                             name: 'Connectors',
                             key: 'connectors',
-                            url: 'time-series/connectors'
+                            url: 'time-series/connectors',
+                            icon: 'Plug'
                         },
                         {
                             name: 'Observers',
                             key: 'observers',
-                            url: 'time-series/observers'
+                            url: 'time-series/observers',
+                            icon: 'RedEye'
                         },
                         {
                             name: 'Identities',
                             key: 'identities',
-                            url: 'time-series/identities'
+                            url: 'time-series/identities',
+                            icon: 'IDBadge'
                         }
                     ]
                 }
