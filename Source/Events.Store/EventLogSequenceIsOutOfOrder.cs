@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="sequenceNumber">The <see cref="EventLogSequenceNumber"/> the Event was committed to.</param>
         /// <param name="expectedSequenceNumber">Expected <see cref="EventLogSequenceNumber"/>.</param>
         public EventLogSequenceIsOutOfOrder(EventLogSequenceNumber sequenceNumber, EventLogSequenceNumber expectedSequenceNumber)
-            : base($"Event Log Sequence is out of order because Event Log Sequence Number '{sequenceNumber}' is not greater than '{expectedSequenceNumber}'. ")
+            : base($"Event Log Sequence is out of order because Event Log Sequence Number '{sequenceNumber}' is not greater than '{expectedSequenceNumber}'.")
         {
         }
     }
