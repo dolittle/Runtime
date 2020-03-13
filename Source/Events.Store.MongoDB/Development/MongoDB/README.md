@@ -8,7 +8,7 @@ It builds on the [officially maintained Docker MongoDB image](https://hub.docker
 To start a new MongoDB server so that it is available on `localhost:27017`, run the following command in your favorite shell:
 
 ```shell
-$ docker run -d -p 27017:27017 dolittle/mongo
+$ docker run -d -p 27017:27017 dolittle/mongodb
 4a05adadc29a672c695a57cbd5fb87c120d1201eda5a7d6f4bc7c68c31c5dffd
 ```
 
@@ -17,7 +17,7 @@ Then verify that the container is running with:
 ```shell
 $ docker ps
 CONTAINER ID        IMAGE                  COMMAND                  CREATED             STATUS              PORTS                      NAMES
-4a05adadc29a        dolittle/mongo:4.2.2   "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes        0.0.0.0:27017->27017/tcp   objective_mendeleev
+4a05adadc29a        dolittle/mongodb:4.2.2   "docker-entrypoint.s…"   2 minutes ago       Up 2 minutes        0.0.0.0:27017->27017/tcp   objective_mendeleev
 ```
 
 ### Interacting with the MongoDB server

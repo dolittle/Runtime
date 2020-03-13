@@ -130,6 +130,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             events.ExpectedAggregateRootVersion,
                             aggregateRootVersion,
                             cancel).ConfigureAwait(false);
+
                         return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
