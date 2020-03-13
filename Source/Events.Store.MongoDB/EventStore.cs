@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
@@ -78,7 +77,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             eventLogSequenceNumber++;
                         }
 
-                        ThrowIfCommittedEventsSequenceIsNotIncrementalOrder(committedEvents.ToList());
                         return new CommittedEvents(committedEvents);
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -132,8 +130,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             events.ExpectedAggregateRootVersion,
                             aggregateRootVersion,
                             cancel).ConfigureAwait(false);
-                        ThrowIfCommittedEventsSequenceIsNotIncrementalOrder(committedEvents.Select(_ =>
-                            new CommittedEvent(_.EventLogSequenceNumber, _.Occurred, _.EventSource, _.CorrelationId, _.Microservice, _.Tenant, _.Cause, _.Type, _.Public, _.Content)).ToList());
+
                         return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -199,22 +196,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         void ThrowIfNoEventsToCommit(UncommittedEvents events)
         {
             if (!events.HasEvents) throw new NoEventsToCommit();
-        }
-
-        void ThrowIfCommittedEventsSequenceIsNotIncrementalOrder(IList<CommittedEvent> committedEvents)
-        {
-            for (int i = 0; i < committedEvents.Count; i++)
-            {
-                if (i > 0)
-                {
-                    ThrowIfCommittedEventsEventLogSequenceNumberIsNotIncremental(committedEvents[i].EventLogSequenceNumber, committedEvents[i - 1].EventLogSequenceNumber);
-                }
-            }
-        }
-
-        void ThrowIfCommittedEventsEventLogSequenceNumberIsNotIncremental(EventLogSequenceNumber number, EventLogSequenceNumber expectedNumber)
-        {
-            if (number != expectedNumber + 1) throw new EventLogSequenceIsNotInIncrementalOrder(number, expectedNumber);
         }
     }
 }
