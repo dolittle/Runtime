@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Events.Store
 
         void ThrowIfEventLogSequenceIsOutOfOrder(CommittedEvent @event, CommittedEvent previousEvent)
         {
-            if (@event.EventLogSequenceNumber != previousEvent.EventLogSequenceNumber + 1) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber + 1);
+            if (@event.EventLogSequenceNumber <= previousEvent.EventLogSequenceNumber) throw new EventLogSequenceIsOutOfOrder(@event.EventLogSequenceNumber, previousEvent.EventLogSequenceNumber);
         }
     }
 }
