@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, Microservice producerMicroservice, TenantId producerTenant, CancellationToken cancellationToken)
+        public async Task Write(CommittedEvent @event, Microservice producerMicroservice, TenantId producerTenant, CancellationToken cancellationToken = default)
         {
             StreamPosition streamPosition = null;
             try
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
 
                         await receivedEvents.InsertOneAsync(
                             transaction,
-                            @event.ToNewReceivedEvent(streamPosition, producerTenant),
+                            @event.ToNewReceivedEvent(streamPosition, producerMicroservice, producerTenant),
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },

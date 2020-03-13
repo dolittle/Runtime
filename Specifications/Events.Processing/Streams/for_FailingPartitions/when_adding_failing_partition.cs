@@ -8,7 +8,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions
 {
-    public class when_adding_failing_partition : given.all_dependencies
+    public class when_adding_failing_partition : given.an_instance_of_failing_partitions
     {
         static StreamProcessorId stream_processor_id;
         static PartitionId partition;
