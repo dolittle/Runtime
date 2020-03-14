@@ -35,6 +35,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         readonly Application _application;
         readonly Microservice _microservice;
         readonly IExecutionContextManager _executionContextManager;
+        readonly IEventHorizonConsents _eventHorizonConsents;
         readonly ITenants _tenants;
         readonly FactoryFor<IFetchEventsFromStreams> _getEventsFromStreamsFetcher;
         readonly ILogger _logger;
@@ -44,12 +45,14 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// </summary>
         /// <param name="boundedContextConfiguration">The <see cref="BoundedContextConfiguration" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
+        /// <param name="eventHorizonConsents">The <see cref="IEventHorizonConsents" />.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
         /// <param name="getEventsFromStreamsFetcher">The <see cref="FactoryFor{IFetchEventsFromStreams}" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConsumerService(
             BoundedContextConfiguration boundedContextConfiguration,
             IExecutionContextManager executionContextManager,
+            IEventHorizonConsents eventHorizonConsents,
             ITenants tenants,
             FactoryFor<IFetchEventsFromStreams> getEventsFromStreamsFetcher,
             ILogger logger)
@@ -57,26 +60,35 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _application = boundedContextConfiguration.Application;
             _microservice = boundedContextConfiguration.BoundedContext.Value;
             _executionContextManager = executionContextManager;
+            _eventHorizonConsents = eventHorizonConsents;
             _tenants = tenants;
             _getEventsFromStreamsFetcher = getEventsFromStreamsFetcher;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<PublicEvent> responseStream, ServerCallContext context)
+        public override Task<AcknowledgeResponse> AcknowledgeConsent(AcknowledgeRequest request, ServerCallContext context)
         {
-            Microservice consumerMicroservice = null;
-            TenantId subscriber = null;
-            TenantId producer = null;
+            ThrowIfWrongProducerMicroservice(request.Microservice.To<Microservice>());
+            _eventHorizonConsents.GetConsentConfigurationsFor(request.Tenant.To<TenantId>());
+            return Task.FromResult(new AcknowledgeResponse { Acknowledged = true });
+        }
+
+        /// <inheritdoc/>
+        public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<EventHorizonEvent> responseStream, ServerCallContext context)
+        {
+            EventHorizon eventHorizon = null;
             try
             {
-                consumerMicroservice = _executionContextManager.Current.BoundedContext.Value;
-                subscriber = _executionContextManager.Current.Tenant;
-                producer = subscription.Tenant.To<TenantId>();
+                eventHorizon = new EventHorizon(
+                    _executionContextManager.Current.BoundedContext.Value,
+                    _executionContextManager.Current.Tenant,
+                    _microservice,
+                    subscription.Tenant.To<TenantId>());
                 var publicEventsPosition = subscription.PublicEventsPosition;
-                _logger.Information($"Incomming Event Horizon subscription from microservice '{consumerMicroservice}' and tenant '{subscriber}' to tenant '{producer}' starting at position '{publicEventsPosition}'");
+                _logger.Information($"Incomming Event Horizon subscription from microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' to tenant '{eventHorizon.ProducerTenant}' starting at position '{publicEventsPosition}'");
 
-                if (!_tenants.All.Contains(producer)) throw new ProducerTenantDoesNotExist(producer, consumerMicroservice);
+                ThrowIfProducerTenantDoesNotExist(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant);
 
                 while (!context.CancellationToken.IsCancellationRequested)
                 {
@@ -86,31 +98,31 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         var culture = _executionContextManager.Current.Culture;
                         _executionContextManager.CurrentFor(new ExecutionContext(
                             _application,
-                            _microservice.Value,
-                            producer,
+                            eventHorizon.ProducerMicroservice.Value,
+                            eventHorizon.ProducerTenant,
                             environment,
                             CorrelationId.New(),
                             Claims.Empty,
                             culture));
                         var streamEvent = await _getEventsFromStreamsFetcher().Fetch(StreamId.PublicEventsId, publicEventsPosition, context.CancellationToken).ConfigureAwait(false);
-                        var publicEvent = new PublicEvent
+                        var eventHorizonEvent = new EventHorizonEvent
                         {
-                            ConsumerMicroservice = consumerMicroservice.ToProtobuf(),
-                            ConsumerTenant = subscriber.ToProtobuf(),
+                            ConsumerMicroservice = eventHorizon.ConsumerMicroservice.ToProtobuf(),
+                            ConsumerTenant = eventHorizon.ConsumerTenant.ToProtobuf(),
                             Content = streamEvent.Event.Content,
                             Correlation = streamEvent.Event.CorrelationId.ToProtobuf(),
                             EventLogSequenceNumber = streamEvent.Event.EventLogSequenceNumber,
                             EventSource = streamEvent.Event.EventSource.ToProtobuf(),
                             Occurred = Timestamp.FromDateTimeOffset(streamEvent.Event.Occurred),
-                            ProducerMicroservice = _microservice.ToProtobuf(),
-                            ProducerTenant = producer.ToProtobuf(),
+                            ProducerMicroservice = eventHorizon.ProducerMicroservice.ToProtobuf(),
+                            ProducerTenant = eventHorizon.ProducerTenant.ToProtobuf(),
                             Type = new grpcArtifacts.Artifact
                                 {
                                     Generation = streamEvent.Event.Type.Generation,
                                     Id = streamEvent.Event.Type.Id.ToProtobuf()
                                 }
                         };
-                        await responseStream.WriteAsync(publicEvent).ConfigureAwait(false);
+                        await responseStream.WriteAsync(eventHorizonEvent).ConfigureAwait(false);
                         publicEventsPosition++;
                     }
                     catch (NoEventInStreamAtPosition)
@@ -127,13 +139,23 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{consumerMicroservice}' and tenant '{subscriber}' from tenant '{producer}'");
+                    _logger.Error(ex, $"Error occurred in Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer tenant '{eventHorizon.ProducerTenant}'");
                 }
             }
             finally
             {
-                _logger.Warning($"Disconnecting Event Horizon to microservice '{consumerMicroservice}' and tenant '{subscriber}' from tenant '{producer}'");
+                _logger.Warning($"Disconnecting Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer tenant '{eventHorizon.ProducerTenant}'");
             }
+        }
+
+        void ThrowIfWrongProducerMicroservice(Microservice producerMicroservice)
+        {
+            if (_microservice != producerMicroservice) throw new WrongProducerMicroservice(producerMicroservice);
+        }
+
+        void ThrowIfProducerTenantDoesNotExist(TenantId producerTenant, Microservice consumerMicroservice, TenantId consumerTenant)
+        {
+            if (!_tenants.All.Contains(producerTenant)) throw new ProducerTenantDoesNotExist(producerTenant, consumerMicroservice, consumerTenant);
         }
     }
 }

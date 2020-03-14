@@ -3,25 +3,22 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Applications;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
-    /// Defines a system that knows about received events.
+    /// Defines a system that can write events from an event horizon.
     /// </summary>
-    public interface IWriteReceivedEvents
+    public interface IWriteEventHorizonEvents
     {
         /// <summary>
         /// Writes a received event.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
-        /// <param name="producerMicroservice">The <see cref="Microservice" />.</param>
-        /// <param name="producerTenant">The <see cref="TenantId" />.</param>
+        /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The task.</returns>
-        Task Write(CommittedEvent @event, Microservice producerMicroservice, TenantId producerTenant, CancellationToken cancellationToken = default);
+        Task Write(CommittedEvent @event, EventHorizon eventHorizon, CancellationToken cancellationToken = default);
     }
 }

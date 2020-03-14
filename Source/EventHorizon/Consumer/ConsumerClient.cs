@@ -5,7 +5,6 @@ extern alias contracts;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Applications;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
@@ -15,7 +14,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
-using Dolittle.Tenancy;
 using grpc = contracts::Dolittle.Runtime.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -26,16 +24,18 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [Singleton]
     public class ConsumerClient : IConsumerClient
     {
+        readonly IEventFromEventHorizonValidator _eventFromEventHorizonValidator;
         readonly IClientManager _clientManager;
         readonly IExecutionContextManager _executionContextManager;
         readonly FactoryFor<StreamProcessors> _getStreamProcessors;
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
-        readonly FactoryFor<IWriteReceivedEvents> _getReceivedEventsWriter;
+        readonly FactoryFor<IWriteEventHorizonEvents> _getReceivedEventsWriter;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsumerClient"/> class.
         /// </summary>
+        /// <param name="eventFromEventHorizonValidator">The <see cref="IEventFromEventHorizonValidator" />.</param>
         /// <param name="clientManager">The <see cref="IClientManager" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
@@ -43,13 +43,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="getReceivedEventsWriter">The <see cref="FactoryFor{IWriteReceivedEvents}" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
+            IEventFromEventHorizonValidator eventFromEventHorizonValidator,
             IClientManager clientManager,
             IExecutionContextManager executionContextManager,
             FactoryFor<StreamProcessors> getStreamProcessors,
             FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
-            FactoryFor<IWriteReceivedEvents> getReceivedEventsWriter,
+            FactoryFor<IWriteEventHorizonEvents> getReceivedEventsWriter,
             ILogger logger)
         {
+            _eventFromEventHorizonValidator = eventFromEventHorizonValidator;
             _clientManager = clientManager;
             _executionContextManager = executionContextManager;
             _getStreamProcessors = getStreamProcessors;
@@ -59,24 +61,33 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public async Task SubscribeTo(Microservice microservice, TenantId tenant, MicroserviceHost host, MicroservicePort port)
+        public void AcknowledgeConsent(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress)
+        {
+            var ackResponse = _clientManager
+                .Get<grpc.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
+                .AcknowledgeConsent(new grpc.AcknowledgeRequest { Microservice = eventHorizon.ProducerMicroservice.ToProtobuf(), Tenant = eventHorizon.ProducerTenant.ToProtobuf() });
+
+            if (!ackResponse.Acknowledged) throw new NoConsentForEventHorizon(eventHorizon);
+        }
+
+        /// <inheritdoc/>
+        public async Task SubscribeTo(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress)
         {
             while (true)
             {
-                var subscribingTenant = _executionContextManager.Current.Tenant;
-                var streamProcessorId = new StreamProcessorId(tenant.Value, microservice.Value);
-                _logger.Debug($"Tenant '{subscribingTenant}' is subscribing to events from tenant '{tenant} in microservice '{microservice}' on '{host}:{port}'");
+                var streamProcessorId = new StreamProcessorId(eventHorizon.ProducerTenant.Value, eventHorizon.ProducerMicroservice.Value);
+                _logger.Debug($"Tenant '{eventHorizon.ConsumerTenant}' is subscribing to events from tenant '{eventHorizon.ProducerTenant} in microservice '{eventHorizon.ProducerMicroservice}' on '{microserviceAddress.Host}:{microserviceAddress.Port}'");
                 try
                 {
 #pragma warning disable CA2000
                     var tokenSource = new CancellationTokenSource();
-                    _executionContextManager.CurrentFor(subscribingTenant);
                     var publicEventsPosition = (await _getStreamProcessorStates().GetOrAddNew(streamProcessorId).ConfigureAwait(false)).Position;
                     var eventsFetcher = new EventsFromEventHorizonFetcher(
-                        _clientManager.Get<grpc.Consumer.ConsumerClient>(host, port).Subscribe(
+                        (@event) => _eventFromEventHorizonValidator.Validate(@event, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant, eventHorizon.ProducerMicroservice, eventHorizon.ProducerTenant),
+                        _clientManager.Get<grpc.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port).Subscribe(
                             new grpc.ConsumerSubscription
                             {
-                                Tenant = tenant.ToProtobuf(),
+                                Tenant = eventHorizon.ProducerTenant.ToProtobuf(),
                                 PublicEventsPosition = publicEventsPosition.Value
                             },
                             cancellationToken: tokenSource.Token),
@@ -84,15 +95,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         {
                             if (!tokenSource.IsCancellationRequested)
                             {
-                                _logger.Debug($"Canceling cancellation token source for Event Horizon from tenant '{subscribingTenant}' to tenant '{tenant}' in microservice '{microservice}'");
+                                _logger.Debug($"Closing Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
                                 tokenSource.Cancel();
                             }
                         },
                         _logger);
                     _getStreamProcessors().Register(
-                        new ReceivedEventsProcessor(microservice, tenant, _getReceivedEventsWriter(), _logger),
+                        new EventHorizonEventProcessor(eventHorizon, _getReceivedEventsWriter(), _logger),
                         eventsFetcher,
-                        microservice.Value,
+                        eventHorizon.ProducerMicroservice.Value,
                         tokenSource);
 #pragma warning restore CA2000
 
@@ -103,12 +114,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 }
                 catch (Exception ex)
                 {
-                    _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{microservice}' and tenant '{tenant}'");
+                    _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
                 }
                 finally
                 {
-                    _logger.Debug($"Disconnecting Event Horizon from tenant '{subscribingTenant}' to microservice '{microservice}' and tenant '{tenant}'");
-                    _executionContextManager.CurrentFor(subscribingTenant);
+                    _logger.Debug($"Disconnecting Event Horizon from tenant '{eventHorizon.ConsumerTenant}' to microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
+                    _executionContextManager.CurrentFor(eventHorizon.ConsumerTenant);
                     _getStreamProcessors().Unregister(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
                 }
 

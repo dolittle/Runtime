@@ -4,7 +4,6 @@
 extern alias contracts;
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.EventHorizon;
 using Dolittle.Applications;
@@ -12,7 +11,6 @@ using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
-using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
@@ -58,28 +56,24 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public override Task<SubscriptionResponse> Subscribe(Subscription subscription, ServerCallContext context)
         {
-            Microservice producerMicroservice = null;
-            TenantId producerTenant = null;
+            EventHorizon eventHorizon = null;
             try
             {
-                producerMicroservice = subscription.Microservice.To<Microservice>();
-                producerTenant = subscription.Tenant.To<TenantId>();
-                ThrowIfProducerTenantDoesNotExist(producerTenant);
-                var microserviceAddress = _microservices.GetAddressFor(producerMicroservice);
-
-                _ = _consumerClient.SubscribeTo(producerMicroservice, producerTenant, microserviceAddress.Host, microserviceAddress.Port);
+                eventHorizon = new EventHorizon(
+                    _executionContextManager.Current.BoundedContext.Value,
+                    _executionContextManager.Current.Tenant,
+                    subscription.Microservice.To<Microservice>(),
+                    subscription.Tenant.To<TenantId>());
+                var microserviceAddress = _microservices.GetAddressFor(eventHorizon.ProducerMicroservice);
+                _consumerClient.AcknowledgeConsent(eventHorizon, microserviceAddress);
+                _ = _consumerClient.SubscribeTo(eventHorizon, microserviceAddress);
                 return Task.FromResult(new SubscriptionResponse { Success = true });
             }
             catch (Exception)
             {
-                _logger.Error($"Error while subscribing to tenant '{producerTenant}' in microservice '{producerMicroservice}'");
+                _logger.Error($"Error while subscribing to tenant '{eventHorizon.ProducerTenant}' in microservice '{eventHorizon.ProducerMicroservice}'");
                 return Task.FromResult(new SubscriptionResponse { Success = false });
             }
-        }
-
-        void ThrowIfProducerTenantDoesNotExist(TenantId producerTenant)
-        {
-            if (!_tenants.All.Contains(producerTenant)) throw new ProducerTenantDoesNotExist(producerTenant, _executionContextManager.Current.BoundedContext.Value);
         }
     }
 }

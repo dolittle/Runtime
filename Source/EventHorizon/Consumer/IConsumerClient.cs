@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Applications;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -14,13 +12,18 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public interface IConsumerClient
     {
         /// <summary>
+        /// Asks the producer microservice to acknowledge the consent.
+        /// </summary>
+        /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
+        /// <param name="microserviceAddress">The <see cref="MicroserviceAddress" /> of the microservice to connect to.</param>
+        void AcknowledgeConsent(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress);
+
+        /// <summary>
         /// Starts a subscription.
         /// </summary>
-        /// <param name="microservice">The <see cref="Microservice" /> to subscribe to.</param>
-        /// <param name="tenant">The <see cref="TenantId" /> to subscribe to.</param>
-        /// <param name="host">The <see cref="MicroserviceHost" /> of the microservice to connect to.</param>
-        /// <param name="port">The <see cref="MicroservicePort" /> of the microservice to connect.</param>
+        /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
+        /// <param name="microserviceAddress">The <see cref="MicroserviceAddress" /> of the microservice to connect to.</param>
         /// <returns>The task.</returns>
-        Task SubscribeTo(Microservice microservice, TenantId tenant, MicroserviceHost host, MicroservicePort port);
+        Task SubscribeTo(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress);
     }
 }

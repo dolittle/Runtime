@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.EventHorizon;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Grpc.Core;
 
@@ -19,21 +18,25 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// </summary>
     public class EventsFromEventHorizonFetcher : IFetchEventsFromStreams
     {
-        readonly AsyncServerStreamingCall<PublicEvent> _call;
+        readonly Action<EventHorizonEvent> _validateEvent;
+        readonly AsyncServerStreamingCall<EventHorizonEvent> _call;
         readonly Action _onUnavailableConnection;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsFromEventHorizonFetcher"/> class.
         /// </summary>
+        /// <param name="validateEvent">The <see cref="Action{T}" /> callback for whether an <see cref="EventHorizonEvent" /> is valid.</param>
         /// <param name="call">The call.</param>
         /// <param name="onUnavailableConnection">On no connection.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventsFromEventHorizonFetcher(
-            AsyncServerStreamingCall<PublicEvent> call,
+            Action<EventHorizonEvent> validateEvent,
+            AsyncServerStreamingCall<EventHorizonEvent> call,
             Action onUnavailableConnection,
             ILogger logger)
         {
+            _validateEvent = validateEvent;
             _call = call;
             _logger = logger;
             _onUnavailableConnection = onUnavailableConnection;
@@ -45,9 +48,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             try
             {
                 if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(streamId, streamPosition);
-
+                var @event = _call.ResponseStream.Current;
+                _validateEvent(@event);
                 return new StreamEvent(
-                    @_call.ResponseStream.Current.Event.ToCommittedEvent(),
+                    @event.ToCommittedEvent(),
                     streamId,
                     PartitionId.NotSet);
             }
