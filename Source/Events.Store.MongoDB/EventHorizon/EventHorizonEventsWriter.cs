@@ -3,31 +3,29 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Applications;
 using Dolittle.Logging;
-using Dolittle.Runtime.EventHorizon;
+using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
-using Dolittle.Tenancy;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IWriteReceivedEvents" />.
+    /// Represents an implementation of <see cref="IWriteEventHorizonEvents" />.
     /// </summary>
-    public class ReceivedEventsWriter : IWriteReceivedEvents
+    public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     {
-        readonly FilterDefinitionBuilder<ReceivedEvent> _streamEventFilter = Builders<ReceivedEvent>.Filter;
+        readonly FilterDefinitionBuilder<EventHorizonEvent> _streamEventFilter = Builders<EventHorizonEvent>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReceivedEventsWriter"/> class.
+        /// Initializes a new instance of the <see cref="EventHorizonEventsWriter"/> class.
         /// </summary>
         /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public ReceivedEventsWriter(
+        public EventHorizonEventsWriter(
             EventStoreConnection connection,
             ILogger logger)
         {
@@ -36,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, Microservice producerMicroservice, TenantId producerTenant, CancellationToken cancellationToken = default)
+        public async Task Write(CommittedEvent @event, Runtime.EventHorizon.EventHorizon eventHorizon, CancellationToken cancellationToken = default)
         {
             StreamPosition streamPosition = null;
             try
@@ -45,14 +43,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 await session.WithTransactionAsync(
                     async (transaction, cancellationToken) =>
                     {
-                        var receivedEvents = await _connection.GetReceivedEventsCollectionAsync(producerMicroservice, cancellationToken).ConfigureAwait(false);
-                        streamPosition = (uint)await receivedEvents.CountDocumentsAsync(
+                        var eventHorizonEvents = await _connection.GetEventHorizonEventsCollectionAsync(eventHorizon.ProducerMicroservice, cancellationToken).ConfigureAwait(false);
+                        streamPosition = (uint)await eventHorizonEvents.CountDocumentsAsync(
                             transaction,
                             _streamEventFilter.Empty).ConfigureAwait(false);
 
-                        await receivedEvents.InsertOneAsync(
+                        await eventHorizonEvents.InsertOneAsync(
                             transaction,
-                            @event.ToNewReceivedEvent(streamPosition, producerMicroservice, producerTenant),
+                            @event.ToNewEventHorizonEvent(streamPosition, eventHorizon),
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },
@@ -65,13 +63,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
             }
              catch (MongoDuplicateKeyException)
             {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, producerMicroservice.Value);
+                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, eventHorizon.ProducerMicroservice.Value);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, producerMicroservice.Value);
+                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, eventHorizon.ProducerMicroservice.Value);
                 }
 
                 throw;
@@ -82,7 +80,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, producerMicroservice.Value);
+                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, eventHorizon.ProducerMicroservice.Value);
                     }
                 }
 

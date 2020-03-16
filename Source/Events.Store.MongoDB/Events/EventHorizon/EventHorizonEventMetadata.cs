@@ -11,29 +11,29 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
-    /// Represents the metadata of an Event that has been received by another microservice.
+    /// Represents the metadata of an Event that has come through an event horizon from another microservice.
     /// </summary>
-    public class ReceivedEventMetadata
+    public class EventHorizonEventMetadata
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReceivedEventMetadata"/> class.
+        /// Initializes a new instance of the <see cref="EventHorizonEventMetadata"/> class.
         /// </summary>
         /// <param name="occurred">The date time offset of when the event occurred.</param>
         /// <param name="eventSource">The event source that applied the event.</param>
         /// <param name="correlation">The correlation.</param>
         /// <param name="microservice">The microservice that produced the event.</param>
-        /// <param name="receiverTenant">The tenant that received the event.</param>
+        /// <param name="consumerTenant">The tenant that consumed the event.</param>
         /// <param name="producerTenant">The tenant that produced the event.</param>
         /// <param name="originEventLogSequenceNumber">The event log sequence number that the Event had in the microservice that it came from.</param>
         /// <param name="typeId">The type id of the event artifact.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
-        public ReceivedEventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid receiverTenant, Guid producerTenant, uint originEventLogSequenceNumber, Guid typeId, int typeGeneration)
+        public EventHorizonEventMetadata(DateTimeOffset occurred, Guid eventSource, Guid correlation, Guid microservice, Guid consumerTenant, Guid producerTenant, uint originEventLogSequenceNumber, Guid typeId, int typeGeneration)
         {
             Occurred = occurred;
             EventSource = eventSource;
             Correlation = correlation;
             Microservice = microservice;
-            ReceiverTenant = receiverTenant;
+            ConsumerTenant = consumerTenant;
             ProducerTenant = producerTenant;
             OriginEventLogSequenceNumber = originEventLogSequenceNumber;
             TypeId = typeId;
@@ -62,9 +62,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public Guid Microservice { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="TenantId"/> that the Event was received by.
+        /// Gets or sets the <see cref="TenantId"/> that the Event was consumed by.
         /// </summary>
-        public Guid ReceiverTenant { get; set; }
+        public Guid ConsumerTenant { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="TenantId"/> that the Event was produced by.

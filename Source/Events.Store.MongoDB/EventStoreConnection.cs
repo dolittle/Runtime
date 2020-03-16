@@ -94,10 +94,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="microservice">The <see cref="Microservice" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
-        public async Task<IMongoCollection<ReceivedEvent>> GetReceivedEventsCollectionAsync(Microservice microservice, CancellationToken cancellationToken = default)
+        public async Task<IMongoCollection<EventHorizonEvent>> GetEventHorizonEventsCollectionAsync(Microservice microservice, CancellationToken cancellationToken = default)
         {
-            var collection = _connection.Database.GetCollection<ReceivedEvent>(Constants.CollectionNameForReceivedEvents(microservice));
-            await CreateCollectionsAndIndexesForReceivedEventsAsync(collection, cancellationToken).ConfigureAwait(false);
+            var collection = _connection.Database.GetCollection<EventHorizonEvent>(Constants.CollectionNameForReceivedEvents(microservice));
+            await CreateCollectionsAndIndexesForEventHorizonEventsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
@@ -159,11 +159,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        async Task CreateCollectionsAndIndexesForReceivedEventsAsync(IMongoCollection<ReceivedEvent> stream, CancellationToken cancellationToken = default)
+        async Task CreateCollectionsAndIndexesForEventHorizonEventsAsync(IMongoCollection<EventHorizonEvent> stream, CancellationToken cancellationToken = default)
         {
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<ReceivedEvent>(
-                    Builders<ReceivedEvent>.IndexKeys
+                new CreateIndexModel<EventHorizonEvent>(
+                    Builders<EventHorizonEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.OriginEventLogSequenceNumber)
                         .Ascending(_ => _.Metadata.Microservice)
                         .Ascending(_ => _.Metadata.ProducerTenant),
@@ -171,14 +171,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<ReceivedEvent>(
-                    Builders<ReceivedEvent>.IndexKeys
+                new CreateIndexModel<EventHorizonEvent>(
+                    Builders<EventHorizonEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<ReceivedEvent>(
-                    Builders<ReceivedEvent>.IndexKeys
+                new CreateIndexModel<EventHorizonEvent>(
+                    Builders<EventHorizonEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.ProducerTenant)
                         .Ascending(_ => _.Metadata.Microservice)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
