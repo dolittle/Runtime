@@ -2,7 +2,7 @@
   <Import Project="../../../default.props"/>
 
   <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Samples.EventHorizon.MicroserviceWithOneTenantSubscriber</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Samples.EventHorizon.MicroserviceWithOneTenantProducer</AssemblyName>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <LangVersion>latest</LangVersion>
@@ -10,9 +10,6 @@
 
   <ItemGroup>
       <ProjectReference Include="..\..\..\Source\Server\Server.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-      <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
   </ItemGroup>
 
 </Project>

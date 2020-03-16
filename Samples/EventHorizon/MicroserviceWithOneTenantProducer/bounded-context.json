@@ -1,7 +1,7 @@
 {
-  "application": "c6912245-892f-4eef-9c3e-7fd410268c40",
-  "boundedContext": "f39b1f61-d360-4675-b859-53c05c87c0e6",
-    "boundedContextName": "MicroserviceWithOneTenantSubscriber",
+    "application": "c6912245-892f-4eef-9c3e-7fd410268c40",
+    "boundedContext": "4e146c23-3b32-4eae-90bd-068f37844dc0",
+    "boundedContextName": "MicroserviceWithOneTenantProducer",
     "resources": {
       "readModels": {
         "production": "MongoDB",
