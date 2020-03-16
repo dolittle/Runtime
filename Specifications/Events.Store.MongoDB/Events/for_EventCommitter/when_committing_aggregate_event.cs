@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventCommitter
         It should_have_the_correct_correlation_id = () => result.CorrelationId.ShouldEqual(execution_context.CorrelationId);
         It should_have_event_log_sequence_number_zero = () => result.EventLogSequenceNumber.Value.ShouldEqual(0U);
         It should_have_a_not_set_event_source = () => result.EventSource.ShouldEqual(event_source);
-        It should_have_the_correct_microservice = () => result.Microservice.Value.ShouldEqual(execution_context.BoundedContext);
+        It should_have_the_correct_microservice = () => result.Microservice.ShouldEqual(execution_context.Microservice);
         It should_have_the_correct_occurred_time = () => result.Occurred.ShouldEqual(occurred);
         It should_have_the_correct_tenant = () => result.Tenant.ShouldEqual(execution_context.Tenant);
         It should_have_the_correct_aggregate_root = () => result.AggregateRoot.ShouldEqual(aggregate_root);

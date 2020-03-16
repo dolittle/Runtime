@@ -6,19 +6,19 @@ using Dolittle.Runtime.Events.Streams;
 using Machine.Specifications;
 using MongoDB.Bson;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Events.EventHorizon.for_ReceivedEvent
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events.EventHorizon.for_EventHorizonEventProcessor
 {
     public class when_creating_event
     {
         static StreamPosition position;
-        static ReceivedEventMetadata metadata;
+        static EventHorizonEventMetadata metadata;
         static BsonDocument content;
-        static ReceivedEvent @event;
+        static EventHorizonEvent @event;
 
         Establish context = () =>
         {
             position = 0;
-            metadata = new ReceivedEventMetadata(
+            metadata = new EventHorizonEventMetadata(
                 DateTimeOffset.Now,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.EventHorizon.for_Received
             content = new BsonDocument();
         };
 
-        Because of = () => @event = new ReceivedEvent(position, metadata, content);
+        Because of = () => @event = new EventHorizonEvent(position, metadata, content);
 
         It should_have_the_correct_position = () => @event.StreamPosition.ShouldEqual(position.Value);
         It should_have_the_correct_metadata = () => @event.Metadata.ShouldEqual(metadata);

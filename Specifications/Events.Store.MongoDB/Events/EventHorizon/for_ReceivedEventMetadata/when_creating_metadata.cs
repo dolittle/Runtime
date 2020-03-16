@@ -16,12 +16,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.EventHorizon.for_Received
         static EventSourceId event_source;
         static CorrelationId correlation;
         static Microservice microservice;
-        static TenantId receiver_tenant;
+        static TenantId consumer_tenant;
         static TenantId producer_tenant;
         static EventLogSequenceNumber origin_event_log_sequence_number;
         static ArtifactId type_id;
         static ArtifactGeneration type_generation;
-        static ReceivedEventMetadata metadata;
+        static EventHorizonEventMetadata metadata;
 
         Establish context = () =>
         {
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.EventHorizon.for_Received
             event_source = Guid.NewGuid();
             correlation = Guid.NewGuid();
             microservice = Guid.NewGuid();
-            receiver_tenant = Guid.NewGuid();
+            consumer_tenant = Guid.NewGuid();
             producer_tenant = Guid.NewGuid();
             origin_event_log_sequence_number = 0;
             type_id = Guid.NewGuid();
@@ -37,12 +37,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.EventHorizon.for_Received
         };
 
         Because of = () =>
-            metadata = new ReceivedEventMetadata(
+            metadata = new EventHorizonEventMetadata(
                 occurred,
                 event_source,
                 correlation,
                 microservice,
-                receiver_tenant,
+                consumer_tenant,
                 producer_tenant,
                 origin_event_log_sequence_number,
                 type_id,
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.EventHorizon.for_Received
         It should_have_the_correct_event_source = () => metadata.EventSource.ShouldEqual(event_source.Value);
         It should_have_the_correct_correlation = () => metadata.Correlation.ShouldEqual(correlation.Value);
         It should_have_the_correct_microservice = () => metadata.Microservice.ShouldEqual(microservice.Value);
-        It should_have_the_correct_receiver_tenant = () => metadata.ReceiverTenant.ShouldEqual(receiver_tenant.Value);
+        It should_have_the_correct_consumer_tenant = () => metadata.ConsumerTenant.ShouldEqual(consumer_tenant.Value);
         It should_have_the_correct_producer_tenant = () => metadata.ProducerTenant.ShouldEqual(producer_tenant.Value);
         It should_have_the_correct_origin_event_log_sequence_number = () => metadata.OriginEventLogSequenceNumber.ShouldEqual(origin_event_log_sequence_number.Value);
         It should_have_the_correct_type_id = () => metadata.TypeId.ShouldEqual(type_id.Value);
