@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             try
             {
                 eventHorizon = new EventHorizon(
-                    _executionContextManager.Current.BoundedContext.Value,
+                    _executionContextManager.Current.Microservice,
                     _executionContextManager.Current.Tenant,
                     subscription.Microservice.To<Microservice>(),
                     subscription.Tenant.To<TenantId>());

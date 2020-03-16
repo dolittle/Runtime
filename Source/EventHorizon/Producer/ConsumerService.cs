@@ -17,7 +17,6 @@ using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Tenancy;
-using Dolittle.Security;
 using Dolittle.Tenancy;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
@@ -58,7 +57,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             ILogger logger)
         {
             _application = boundedContextConfiguration.Application;
-            _microservice = boundedContextConfiguration.BoundedContext.Value;
+            _microservice = boundedContextConfiguration.BoundedContext;
             _executionContextManager = executionContextManager;
             _eventHorizonConsents = eventHorizonConsents;
             _tenants = tenants;
@@ -81,7 +80,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             try
             {
                 eventHorizon = new EventHorizon(
-                    _executionContextManager.Current.BoundedContext.Value,
+                    _executionContextManager.Current.Microservice.Value,
                     _executionContextManager.Current.Tenant,
                     _microservice,
                     subscription.Tenant.To<TenantId>());
@@ -94,16 +93,11 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 {
                     try
                     {
-                        var environment = _executionContextManager.Current.Environment;
-                        var culture = _executionContextManager.Current.Culture;
-                        _executionContextManager.CurrentFor(new ExecutionContext(
+                        _executionContextManager.CurrentFor(
                             _application,
                             eventHorizon.ProducerMicroservice.Value,
                             eventHorizon.ProducerTenant,
-                            environment,
-                            CorrelationId.New(),
-                            Claims.Empty,
-                            culture));
+                            _executionContextManager.Current.CorrelationId);
                         var streamEvent = await _getEventsFromStreamsFetcher().Fetch(StreamId.PublicEventsId, publicEventsPosition, context.CancellationToken).ConfigureAwait(false);
                         var eventHorizonEvent = new EventHorizonEvent
                         {

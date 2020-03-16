@@ -4,7 +4,7 @@
 namespace Dolittle.Applications.Configuration
 {
     /// <summary>
-    /// Represents the configuration for an interaction layer of the <see cref="BoundedContext"/>.
+    /// Represents the configuration for an interaction layer of the <see cref="Microservice"/>.
     /// </summary>
     public class InteractionLayerConfiguration
     {

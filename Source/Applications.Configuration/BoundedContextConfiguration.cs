@@ -8,7 +8,7 @@ using Dolittle.ResourceTypes;
 namespace Dolittle.Applications.Configuration
 {
     /// <summary>
-    /// Represents the definition of a <see cref="BoundedContext"/> for configuration.
+    /// Represents the definition of a <see cref="Microservice"/> for configuration.
     /// </summary>
     [Name("bounded-context")]
     public class BoundedContextConfiguration : IConfigurationObject
@@ -17,15 +17,15 @@ namespace Dolittle.Applications.Configuration
         /// Initializes a new instance of the <see cref="BoundedContextConfiguration"/> class.
         /// </summary>
         /// <param name="application"><see cref="Application"/> this belongs to.</param>
-        /// <param name="boundedContext"><see cref="BoundedContext"/> running.</param>
-        /// <param name="boundedContextName"><see cref="BoundedContextName">Name</see> of bounded context.</param>
+        /// <param name="boundedContext"><see cref="Microservice"/> running.</param>
+        /// <param name="boundedContextName"><see cref="MicroserviceName" /> of microservice.</param>
         /// <param name="core">The <see cref="CoreConfiguration"/>.</param>
         /// <param name="interaction">The <see cref="InteractionLayerConfiguration"/>.</param>
         /// <param name="resources">Resource configurations for different types.</param>
         public BoundedContextConfiguration(
             Application application,
-            BoundedContext boundedContext,
-            BoundedContextName boundedContextName,
+            Microservice boundedContext,
+            MicroserviceName boundedContextName,
             CoreConfiguration core,
             IEnumerable<InteractionLayerConfiguration> interaction,
             IDictionary<ResourceType, ResourceTypeImplementationConfiguration> resources)
@@ -44,14 +44,14 @@ namespace Dolittle.Applications.Configuration
         public Application Application { get; }
 
         /// <summary>
-        /// Gets the <see cref="BoundedContext"/>.
+        /// Gets the <see cref="Microservice"/>.
         /// </summary>
-        public BoundedContext BoundedContext { get; }
+        public Microservice BoundedContext { get; }
 
         /// <summary>
-        /// Gets the <see cref="BoundedContextName"/>.
+        /// Gets the <see cref="MicroserviceName"/>.
         /// </summary>
-        public BoundedContextName BoundedContextName { get; }
+        public MicroserviceName BoundedContextName { get; }
 
         /// <summary>
         /// Gets the <see cref="CoreConfiguration"/>.
