@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             try
             {
                 eventHorizon = new EventHorizon(
-                    _executionContextManager.Current.Microservice.Value,
+                    _executionContextManager.Current.Microservice,
                     _executionContextManager.Current.Tenant,
                     _microservice,
                     subscription.Tenant.To<TenantId>());
@@ -95,7 +95,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     {
                         _executionContextManager.CurrentFor(
                             _application,
-                            eventHorizon.ProducerMicroservice.Value,
+                            eventHorizon.ProducerMicroservice,
                             eventHorizon.ProducerTenant,
                             _executionContextManager.Current.CorrelationId);
                         var streamEvent = await _getEventsFromStreamsFetcher().Fetch(StreamId.PublicEventsId, publicEventsPosition, context.CancellationToken).ConfigureAwait(false);

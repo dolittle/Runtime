@@ -12,12 +12,12 @@ namespace Dolittle.Runtime.EventHorizon.Producer
     public class EventHorizonConsentConfiguration
     {
         /// <summary>
-        /// Gets or sets the <see cref="Microservice" /> to receive events from.
+        /// Gets or sets the <see cref="Microservice" /> to give consent to.
         /// </summary>
         public Microservice Microservice { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="TenantId" /> tenant to receive events from.
+        /// Gets or sets the <see cref="TenantId" /> tenant to give consent to.
         /// </summary>
         public TenantId Tenant { get; set; }
 

@@ -69,9 +69,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _ = _consumerClient.SubscribeTo(eventHorizon, microserviceAddress);
                 return Task.FromResult(new SubscriptionResponse { Success = true });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.Error($"Error while subscribing to tenant '{eventHorizon.ProducerTenant}' in microservice '{eventHorizon.ProducerMicroservice}'");
+                _logger.Error(ex, $"Error in subscription from tenant '{eventHorizon.ConsumerTenant}' in microservice '{eventHorizon.ConsumerMicroservice}' subscribing to tenant '{eventHorizon.ProducerTenant}' in microservice '{eventHorizon.ProducerMicroservice}'");
                 return Task.FromResult(new SubscriptionResponse { Success = false });
             }
         }

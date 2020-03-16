@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="producerTenant">The producer <see cref="TenantId" />.</param>
         /// <param name="reason">The <see cref="InvalidEventFromEventHorizonReason" />.</param>
         public InvalidEventFromEventHorizon(ArtifactId eventTypeId, Microservice producerMicroservice, TenantId producerTenant, InvalidEventFromEventHorizonReason reason)
-            : base($"Event '{eventTypeId}' from tenant '{producerTenant}' microservice '{producerMicroservice}' is invvalid. {reason}")
+            : base($"Event '{eventTypeId}' from tenant '{producerTenant}' in microservice '{producerMicroservice}' is invvalid. {reason}")
         {
         }
     }
