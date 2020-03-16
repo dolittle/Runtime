@@ -11,5 +11,8 @@
   <ItemGroup>
       <ProjectReference Include="..\..\..\Source\Server\Server.csproj" />
   </ItemGroup>
+  <ItemGroup>
+      <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
+  </ItemGroup>
 
 </Project>

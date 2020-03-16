@@ -4,7 +4,7 @@
 namespace Dolittle.Applications.Configuration
 {
     /// <summary>
-    /// Represents the configuration for the <see cref="BoundedContext"/> core.
+    /// Represents the configuration for the <see cref="Microservice"/> core.
     /// </summary>
     public class CoreConfiguration
     {
@@ -14,7 +14,7 @@ namespace Dolittle.Applications.Configuration
         public string Language { get; set; }
 
         /// <summary>
-        /// Gets or sets the entrypoint of the <see cref="BoundedContext"/>.
+        /// Gets or sets the entrypoint of the <see cref="Microservice"/>.
         /// </summary>
         public string EntryPoint { get; set; }
     }

@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             CancellationToken cancellationToken = default)
         {
             var correlation = executionContext.CorrelationId;
-            Microservice microservice = executionContext.BoundedContext.Value;
+            var microservice = executionContext.Microservice;
             var tenant = executionContext.Tenant;
             var eventSource = EventSourceId.NotSet;
 
@@ -85,7 +85,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             CancellationToken cancellationToken = default)
         {
             var correlation = executionContext.CorrelationId;
-            Microservice microservice = executionContext.BoundedContext.Value;
+            var microservice = executionContext.Microservice;
             var tenant = executionContext.Tenant;
             await InsertEvent(
                 transaction,

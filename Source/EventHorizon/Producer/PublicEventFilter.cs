@@ -9,7 +9,7 @@ using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
     /// Represents a <see cref="AbstractFilterProcessor{T}"/> that filters public events.

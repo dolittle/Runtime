@@ -49,6 +49,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <param name="microservice">The <see cref="Microservice" />.</param>
         /// <returns>The event stream collection name.</returns>
-        public static string CollectionNameForReceivedEvents(Microservice microservice) => $"received-events-{microservice.Value}";
+        public static string CollectionNameForReceivedEvents(Microservice microservice) => $"event-horizon-{microservice.Value}";
     }
 }

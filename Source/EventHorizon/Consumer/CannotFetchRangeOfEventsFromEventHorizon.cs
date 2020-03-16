@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Exception that gets thrown when something is attempting to fetch a range of events from an event horizon.

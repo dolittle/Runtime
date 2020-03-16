@@ -6,6 +6,7 @@ using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Tenancy;
@@ -23,7 +24,6 @@ namespace Dolittle.Runtime.EventHorizon
         readonly FactoryFor<IStreamProcessors> _getStreamProcessors;
         readonly FactoryFor<IWriteEventsToStreams> _getStreamWriter;
         readonly FactoryFor<IFetchEventsFromStreams> _getStreamFetcher;
-        readonly IEventHorizonClient _eventHorizonClient;
         readonly ILogger _logger;
 
         /// <summary>
@@ -34,7 +34,6 @@ namespace Dolittle.Runtime.EventHorizon
         /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
         /// <param name="getStreamWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
         /// <param name="getStreamFetcher">The <see cref="FactoryFor{IFetchEventsFromStreams}" />.</param>
-        /// <param name="eventHorizonClient">The <see cref="IEventHorizonClient" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public BootProcedure(
             IExecutionContextManager executionContextManager,
@@ -42,16 +41,14 @@ namespace Dolittle.Runtime.EventHorizon
             FactoryFor<IStreamProcessors> getStreamProcessors,
             FactoryFor<IWriteEventsToStreams> getStreamWriter,
             FactoryFor<IFetchEventsFromStreams> getStreamFetcher,
-            IEventHorizonClient eventHorizonClient,
             ILogger logger)
         {
             _getStreamProcessors = getStreamProcessors;
             _getStreamWriter = getStreamWriter;
             _getStreamFetcher = getStreamFetcher;
-            _logger = logger;
             _executionContextManager = executionContextManager;
-            _eventHorizonClient = eventHorizonClient;
             _tenants = tenants;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -61,7 +58,6 @@ namespace Dolittle.Runtime.EventHorizon
         public void Perform()
         {
             CreateStreamProcessors();
-            _eventHorizonClient.Subscribe();
         }
 
         void CreateStreamProcessors()
