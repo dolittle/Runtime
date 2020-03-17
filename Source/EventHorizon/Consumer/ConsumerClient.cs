@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IEventFromEventHorizonValidator _eventFromEventHorizonValidator;
         readonly IClientManager _clientManager;
         readonly IExecutionContextManager _executionContextManager;
-        readonly FactoryFor<StreamProcessors> _getStreamProcessors;
+        readonly FactoryFor<IStreamProcessors> _getStreamProcessors;
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
         readonly FactoryFor<IWriteEventHorizonEvents> _getReceivedEventsWriter;
         readonly ILogger _logger;
@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IEventFromEventHorizonValidator eventFromEventHorizonValidator,
             IClientManager clientManager,
             IExecutionContextManager executionContextManager,
-            FactoryFor<StreamProcessors> getStreamProcessors,
+            FactoryFor<IStreamProcessors> getStreamProcessors,
             FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
             FactoryFor<IWriteEventHorizonEvents> getReceivedEventsWriter,
             ILogger logger)
