@@ -53,8 +53,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         async Task ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
-            var persisted = await _filterDefinitionRepository.GetPersistedFilter(filter.Definition, cancellationToken).ConfigureAwait(false);
-            
             var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(new StreamProcessorId(filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken).ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;
             var artifactsFromTargetStream = await _eventTypesFromStreams.FetchTypesInRange(filter.Definition.TargetStream, new StreamPositionRange(StreamPosition.Start, uint.MaxValue), cancellationToken).ConfigureAwait(false);
