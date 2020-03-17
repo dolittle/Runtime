@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.EventHorizon.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../specs.props"></Import>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\EventHorizon\EventHorizon.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+  </ItemGroup>
+
+</Project>

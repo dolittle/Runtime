@@ -5,7 +5,7 @@ using System;
 using Dolittle.Applications;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
     /// Exception that gets thrown when a <see cref="Microservice" /> attempts to subscribe to a tenant that does not exist.
@@ -15,10 +15,11 @@ namespace Dolittle.Runtime.EventHorizon
         /// <summary>
         /// Initializes a new instance of the <see cref="ProducerTenantDoesNotExist"/> class.
         /// </summary>
-        /// <param name="producer">The tenant that procues the public events.</param>
-        /// <param name="microservice">The microservice that wants to subscribe to the tenant's public events.</param>
-        public ProducerTenantDoesNotExist(TenantId producer, Microservice microservice)
-            : base($"Microservice '{microservice}' attempts to subscribe to producer tenant '{producer}', but that tenant does not exist")
+        /// <param name="producerTenant">The producer <see cref="TenantId" />.</param>
+        /// <param name="consumerMicroservice">The consumer <see cref="Microservice" />.</param>
+        /// <param name="consumerTenant">The consumer <see cref="TenantId" />.</param>
+        public ProducerTenantDoesNotExist(TenantId producerTenant, Microservice consumerMicroservice, TenantId consumerTenant)
+            : base($"Tenant '{consumerTenant}' in microservice '{consumerMicroservice}' attempts to subscribe to producer tenant '{producerTenant}', but that tenant does not exist.")
         {
         }
     }

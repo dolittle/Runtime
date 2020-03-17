@@ -39,19 +39,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
-            ThrowIfInvalidRange(fromPosition, toPosition);
-            if (TryGetFetcher(stream, out var fetcher)) fetcher.FetchTypesInRange(stream, fromPosition, toPosition, cancellationToken);
-            return FetchTypesInRangeFromStream(stream, fromPosition, toPosition, cancellationToken);
+            ThrowIfInvalidRange(range);
+            if (TryGetFetcher(stream, out var fetcher)) fetcher.FetchTypesInRange(stream, range, cancellationToken);
+            return FetchTypesInRangeFromStream(stream, range, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
-            ThrowIfInvalidRange(fromPosition, toPosition);
-            if (TryGetFetcher(stream, out var fetcher)) fetcher.FetchTypesInRangeAndPartition(stream, partition, fromPosition, toPosition, cancellationToken);
-            return FetchTypesInRangeAndPartitionFromStream(stream, partition, fromPosition, toPosition, cancellationToken);
+            ThrowIfInvalidRange(range);
+            if (TryGetFetcher(stream, out var fetcher)) fetcher.FetchTypesInRangeAndPartition(stream, partition, range, cancellationToken);
+            return FetchTypesInRangeAndPartitionFromStream(stream, partition, range, cancellationToken);
         }
 
         bool TryGetFetcher(StreamId stream, out ICanFetchEventTypesFromWellKnownStreams fetcher)
@@ -69,16 +69,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             return fetcher != null;
         }
 
-        async Task<IEnumerable<Artifact>> FetchTypesInRangeFromStream(StreamId streamId, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken)
+        async Task<IEnumerable<Artifact>> FetchTypesInRangeFromStream(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken)
         {
             try
             {
-                var maxNumEvents = toPosition.Value - fromPosition.Value + 1U;
+                var maxNumEvents = range.To.Value - range.From.Value + 1U;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var eventTypes = await stream
-                    .Find(_streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Find(_streamEventFilter.Gte(_ => _.StreamPosition, range.From.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, range.To.Value))
                     .Limit(limit)
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -90,16 +90,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
         }
 
-        async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartitionFromStream(StreamId streamId, PartitionId partition, StreamPosition fromPosition, StreamPosition toPosition, CancellationToken cancellationToken)
+        async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartitionFromStream(StreamId streamId, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
         {
             try
             {
-                var maxNumEvents = toPosition.Value - fromPosition.Value + 1U;
+                var maxNumEvents = range.To.Value - range.From.Value + 1U;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var eventTypes = await stream
-                    .Find(_streamEventFilter.Eq(_ => _.Metadata.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    .Find(_streamEventFilter.Eq(_ => _.Metadata.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, range.From.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, range.To.Value))
                     .Limit(limit)
                     .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -111,9 +111,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
         }
 
-        void ThrowIfInvalidRange(StreamPosition fromPosition, StreamPosition toPosition)
+        void ThrowIfInvalidRange(StreamPositionRange range)
         {
-            if (fromPosition.Value > toPosition.Value) throw new InvalidStreamPositionRange(fromPosition, toPosition);
+            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
         }
     }
 }

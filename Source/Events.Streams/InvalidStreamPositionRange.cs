@@ -6,17 +6,17 @@ using System;
 namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
-    /// Exception that gets thrown when an invalid <see cref="StreamPosition" /> range is given.
+    /// Exception that gets thrown when there is an invalid <see cref="StreamPositionRange" />.
     /// </summary>
     public class InvalidStreamPositionRange : Exception
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="InvalidStreamPositionRange"/> class.
         /// </summary>
-        /// <param name="from">The from <see cref="StreamPosition" />.</param>
-        /// <param name="to">The to <see cref="StreamPosition" />.</param>
-        public InvalidStreamPositionRange(StreamPosition from, StreamPosition to)
-            : base($"From position '{from} is greater than '{to}'")
+        /// <param name="range">The <see cref="StreamPositionRange" />.</param>
+        /// <param name="reason"> The reason why this is an illegal range.</param>
+        public InvalidStreamPositionRange(StreamPositionRange range, InvalidStreamPositionRangeReason reason)
+            : base($"The range {range} is an invalid stream position range. {reason}")
         {
         }
     }

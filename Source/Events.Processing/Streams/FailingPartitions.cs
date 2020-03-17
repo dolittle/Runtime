@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         if (!ShouldRetryProcessing(failingPartitionState)) break;
 
                         var streamEvent = await FetchEventWithPartitionAtPosition(streamProcessorId, nextPosition, cancellationToken).ConfigureAwait(false);
-                        var processingResult = await ProcessEvent(eventProcessor, streamEvent.Event, streamEvent.Partition, cancellationToken).ConfigureAwait(false);
+                        var processingResult = await ProcessEvent(eventProcessor, streamEvent.Event, partition, cancellationToken).ConfigureAwait(false);
 
                         if (processingResult.Succeeded)
                         {
@@ -127,8 +127,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 streamProcessorId,
                 partitionId,
                 newFailingPartitionState,
-                cancellationToken)
-                .ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
 
             return (streamProcessorState, newFailingPartitionState);
         }

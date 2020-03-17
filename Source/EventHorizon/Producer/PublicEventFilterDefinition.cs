@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Streams;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
     /// Represents an implementation of <see cref="WellKnownStreamFilterDefinition" /> for the public events stream.
@@ -12,10 +12,15 @@ namespace Dolittle.Runtime.EventHorizon
     public class PublicEventFilterDefinition : WellKnownStreamFilterDefinition
     {
         /// <summary>
+        /// The name of the public events stream.
+        /// </summary>
+        public const string PublicEventsStreamName = "PublicEvents";
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PublicEventFilterDefinition"/> class.
         /// </summary>
         public PublicEventFilterDefinition()
-            : base(StreamId.AllStreamId, StreamId.PublicEventsId, "PublicEvents")
+            : base(StreamId.AllStreamId, StreamId.PublicEventsId, PublicEventsStreamName)
         {
         }
     }

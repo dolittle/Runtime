@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
@@ -98,7 +99,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         Type GetFilterDefinitionTypeFromEventProcessor(IEventProcessor processor) =>
-            processor.GetType().GetGenericArguments().First();
+            processor.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).First(_ => typeof(IFilterDefinition).IsAssignableFrom(_.PropertyType)).PropertyType;
 
         ICanRemovePersistedFilterDefinition GetPersistedFilterDefinitionRemoverForDefinitionType(Type filterDefinitionType) =>
             _container.Get(typeof(IFilterDefinitionRepositoryFor<>).MakeGenericType(filterDefinitionType)) as ICanRemovePersistedFilterDefinition;

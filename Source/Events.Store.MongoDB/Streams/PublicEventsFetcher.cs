@@ -52,15 +52,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(StreamId streamId, StreamPosition fromPostition, StreamPosition toPosition, CancellationToken cancellationToken)
+        public override async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
+            ThrowIfIllegalRange(range);
+            if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             try
             {
-                var maxNumEvents = toPosition.Value - fromPostition.Value + 1U;
+                var maxNumEvents = range.To.Value - range.From.Value + 1U;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
                 var events = await _connection.PublicEvents.Find(
-                    _publicEventsFilter.Gte(_ => _.StreamPosition, fromPostition.Value) & _publicEventsFilter.Lte(_ => _.StreamPosition, toPosition.Value))
+                    _publicEventsFilter.Gte(_ => _.StreamPosition, range.From.Value) & _publicEventsFilter.Lte(_ => _.StreamPosition, range.To.Value))
                     .Limit(limit)
                     .Project(_ => _.ToRuntimeStreamEvent())
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -80,7 +82,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             try
             {
                 var @event = await _connection.PublicEvents.Find(
-                    _publicEventsFilter.Eq(_ => _.StreamPosition, fromPosition.Value))
+                    _publicEventsFilter.Gte(_ => _.StreamPosition, fromPosition.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 return @event != default ? @event.StreamPosition : uint.MaxValue;
             }
@@ -88,6 +90,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
+        }
+
+        void ThrowIfIllegalRange(StreamPositionRange range)
+        {
+            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
         }
     }
 }
