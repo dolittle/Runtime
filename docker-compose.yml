@@ -7,10 +7,21 @@ services:
       - 27017:27017
   
   runtime:
-    image: dolittle/runtime:5.0.0-alpha.1
+    image: dolittle/runtime:5.0.0-alpha.4
     volumes:
       - ${PWD}/resources.json:/app/.dolittle/resources.json
     ports:
       - 9700:9700
       - 50052:50052
       - 50053:50053
+
+  envoy:
+    build:
+      context: ./
+      dockerfile: ./envoy/Dockerfile
+    image: dolittle/envoy
+    ports:
+      - 8080:8080
+      - 9901:9901
+    links:
+      - runtime

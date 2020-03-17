@@ -14,15 +14,21 @@ namespace Dolittle.Runtime.Heads
         /// Initializes a new instance of the <see cref="Head"/> class.
         /// </summary>
         /// <param name="headId"><see cref="HeadId"/> of the client.</param>
+        /// <param name="host">The hostname of the <see cref="Head"/>.</param>
         /// <param name="runtime">Runtime information from the client.</param>
+        /// <param name="version">Version of the <see cref="Head"/>.</param>
         /// <param name="connectionTime">Time of when client was connected.</param>
         public Head(
             HeadId headId,
+            string host,
             string runtime,
+            string version,
             DateTimeOffset connectionTime)
         {
             HeadId = headId;
+            Host = host;
             Runtime = runtime;
+            Version = version;
             ConnectionTime = connectionTime;
         }
 
@@ -37,9 +43,19 @@ namespace Dolittle.Runtime.Heads
         public HeadId HeadId { get; }
 
         /// <summary>
+        /// Gets the hostname for the <see cref="Head"/>.
+        /// </summary>
+        public string Host { get; }
+
+        /// <summary>
         /// Gets a string with runtime information from the client.
         /// </summary>
         public string Runtime { get; }
+
+        /// <summary>
+        /// Gets the version of the <see cref="Head"/>.
+        /// </summary>
+        public string Version { get; }
 
         /// <summary>
         /// Gets the time when client was connected.

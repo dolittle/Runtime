@@ -2,18 +2,18 @@
   <Import Project="../../default.props"/>
 
   <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Heads</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Tenancy.Management</AssemblyName>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="../Tenancy/Tenancy.csproj"/>
+    <ProjectReference Include="../Management/Management.csproj"/>
+  </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Metrics/Metrics.csproj"/>
-    <ProjectReference Include="../Services/Services.csproj"/>
-  </ItemGroup>
- 
-  <ItemGroup>
-    <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)"/>
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)"/>
     <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
-    <PackageReference Include="system.reactive" Version="4.3.2" />
   </ItemGroup>
+
+
 </Project>

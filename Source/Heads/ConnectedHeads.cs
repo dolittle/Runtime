@@ -1,12 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
-using Grpc.Core;
 
 namespace Dolittle.Runtime.Heads
 {
@@ -16,7 +14,6 @@ namespace Dolittle.Runtime.Heads
     [Singleton]
     public class ConnectedHeads : IConnectedHeads
     {
-        readonly List<Head> _heads = new List<Head>();
         readonly ILogger _logger;
 
         /// <summary>
@@ -29,21 +26,24 @@ namespace Dolittle.Runtime.Heads
         }
 
         /// <inheritdoc/>
+        public ObservableCollection<Head> All { get; } = new ObservableCollection<Head>();
+
+        /// <inheritdoc/>
         public void Connect(Head head)
         {
-            lock (_heads) _heads.Add(head);
+            lock (All) All.Add(head);
         }
 
         /// <inheritdoc/>
         public void Disconnect(HeadId headId)
         {
-            lock (_heads)
+            lock (All)
             {
-                var head = _heads.SingleOrDefault(_ => _.HeadId == headId);
+                var head = All.SingleOrDefault(_ => _.HeadId == headId);
                 if (head != null)
                 {
                     _logger.Debug($"Disconnecting head '{headId}'");
-                    _heads?.Remove(head);
+                    All.Remove(head);
                 }
             }
         }
@@ -51,39 +51,19 @@ namespace Dolittle.Runtime.Heads
         /// <inheritdoc/>
         public bool IsConnected(HeadId headId)
         {
-            lock (_heads)
+            lock (All)
             {
-                return _heads.Any(_ => _.HeadId == headId);
+                return All.Any(_ => _.HeadId == headId);
             }
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<Head> GetAll()
-        {
-            lock (_heads)
-            {
-                var heads = _heads.ToArray();
-                return heads;
-            }
-        }
-
-        /// <inheritdoc/>
-        public Head GetFor<TC>()
-            where TC : ClientBase
-        {
-            return _heads.Last();
-        }
-
-        /// <inheritdoc/>
-        public Head GetFor(Type type)
-        {
-            return _heads.Last();
         }
 
         /// <inheritdoc/>
         public Head GetById(HeadId headId)
         {
-            return _heads.SingleOrDefault(_ => _.HeadId == headId);
+            lock (All)
+            {
+                return All.SingleOrDefault(_ => _.HeadId == headId);
+            }
         }
     }
 }
