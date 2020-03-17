@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         async Task ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
-            var lastProcessedEventLogEvent = await _streamsMetadata.GetLastProcessedEventLogSequenceNumber(filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
+            var lastProcessedEventLogEvent = await _streamsMetadata.GetLastEventLogSequenceNumber(filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
             if (lastProcessedEventLogEvent == null) return;
             var artifactsFromStream = await _eventTypesFromStreams.FetchTypesInRange(filter.Definition.TargetStream, new StreamPositionRange(StreamPosition.Start, uint.MaxValue), cancellationToken).ConfigureAwait(false);
 

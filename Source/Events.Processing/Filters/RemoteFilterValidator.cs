@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public async Task Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken = default)
         {
-            var lastProcessedEventLogEvent = await _streamsMetadata.GetLastProcessedEventLogSequenceNumber(filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
+            var lastProcessedEventLogEvent = await _streamsMetadata.GetLastEventLogSequenceNumber(filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
             if (lastProcessedEventLogEvent == null) return;
             var artifactsFromStream = await _eventTypesFromStreams.FetchTypesInRange(
                 filter.Definition.TargetStream,

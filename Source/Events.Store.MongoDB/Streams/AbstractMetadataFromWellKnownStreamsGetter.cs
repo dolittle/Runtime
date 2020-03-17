@@ -27,6 +27,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public bool CanGetMetadataFromStream(StreamId stream) => WellKnownStreams.Contains(stream);
 
         /// <inheritdoc/>
-        public abstract Task<EventLogSequenceNumber> GetLastProcessedEventLogSequenceNumber(StreamId stream, CancellationToken cancellationToken = default);
+        public abstract Task<EventLogSequenceNumber> GetLastEventLogSequenceNumber(StreamId stream, CancellationToken cancellationToken = default);
     }
 }
