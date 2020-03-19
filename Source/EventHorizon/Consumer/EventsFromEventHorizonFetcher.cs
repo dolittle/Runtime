@@ -49,10 +49,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             try
             {
                 if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(streamId, streamPosition);
-                var @event = _call.ResponseStream.Current.Event;
+                var response = _call.ResponseStream.Current;
+                var @event = response.Event;
                 _validateEvent(@event);
                 return new StreamEvent(
                     @event.ToCommittedEvent(),
+                    response.EventStreamPosition,
                     streamId,
                     PartitionId.NotSet);
             }

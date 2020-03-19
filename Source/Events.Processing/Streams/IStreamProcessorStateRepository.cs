@@ -22,12 +22,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         Task<StreamProcessorState> GetOrAddNew(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Increments the <see cref="StreamPosition" /> for a <see cref="StreamProcessor" />.
+        /// Sets the <see cref="StreamPosition" /> to point to the next event to process for a <see cref="StreamProcessor" />.
         /// </summary>
         /// <param name="streamProcessorId">The unique<see cref="StreamProcessorId" /> key representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="nextEventToProcessPosition">The <see cref="StreamPosition" /> of the next event to process.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default);
+        Task<StreamProcessorState> SetNextEventToProcessPosition(StreamProcessorId streamProcessorId, StreamPosition nextEventToProcessPosition, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds a failing partition to the state.

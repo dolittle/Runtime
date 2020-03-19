@@ -48,10 +48,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             if (currentState.FailingPartitions.Keys.Contains(streamEvent.Partition))
             {
-                return await IncrementPosition(streamProcessorId, currentState.Position, cancellationToken).ConfigureAwait(false);
+                return await SetNextEventToProcessPosition(streamProcessorId, streamEvent.Position, streamEvent.Position.Increment(), cancellationToken).ConfigureAwait(false);
             }
 
-            _logger.Debug($"Processing event '{streamEvent.Event.Type.Id}' in partition '{streamEvent.Partition}' at position '{currentState.Position}' for Stream Processor '{streamProcessorId}'");
+            _logger.Debug($"Processing event '{streamEvent.Event.Type.Id}' in partition '{streamEvent.Partition}' at position '{streamEvent.Position}' for Stream Processor '{streamProcessorId}'");
 
             var processingResult = await eventProcessor.Process(streamEvent.Event, streamEvent.Partition, cancellationToken).ConfigureAwait(false);
             if (processingResult is IRetryProcessingResult retryProcessingResult)
@@ -59,7 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 await FailingPartitions.AddFailingPartitionFor(
                     streamProcessorId,
                     streamEvent.Partition,
-                    currentState.Position,
+                    streamEvent.Position,
                     DateTimeOffset.UtcNow.AddMilliseconds(retryProcessingResult.RetryTimeout),
                     retryProcessingResult.FailureReason,
                     cancellationToken).ConfigureAwait(false);
@@ -69,19 +69,19 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 await FailingPartitions.AddFailingPartitionFor(
                     streamProcessorId,
                     streamEvent.Partition,
-                    currentState.Position,
+                    streamEvent.Position,
                     DateTimeOffset.MaxValue,
                     processingResult.FailureReason,
                     cancellationToken).ConfigureAwait(false);
             }
 
-            return await IncrementPosition(streamProcessorId, currentState.Position, cancellationToken).ConfigureAwait(false);
+            return await SetNextEventToProcessPosition(streamProcessorId, streamEvent.Position, streamEvent.Position.Increment(), cancellationToken).ConfigureAwait(false);
         }
 
-        Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId, StreamPosition position, CancellationToken cancellationToken)
+        Task<StreamProcessorState> SetNextEventToProcessPosition(StreamProcessorId streamProcessorId, StreamPosition oldPosition, StreamPosition nextEventToProcessPosition, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Stream Processor '{streamProcessorId}' is incrementing its position from '{position}' to '{position.Increment()}'");
-            return _streamProcessorStates.IncrementPosition(streamProcessorId, cancellationToken);
+            _logger.Debug($"Stream Processor '{streamProcessorId}' is changing its position from '{oldPosition}' to '{nextEventToProcessPosition}'");
+            return _streamProcessorStates.SetNextEventToProcessPosition(streamProcessorId, nextEventToProcessPosition, cancellationToken);
         }
     }
 }
