@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Streams
 {
@@ -16,20 +17,22 @@ namespace Dolittle.Runtime.Events.Streams
         /// <summary>
         /// Fetch the unique <see cref="Artifact">event types</see> in an inclusive range in a <see cref="StreamId" />.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IEnumerable{Artifact}" /> event types.</returns>
-        Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Fetch the unique <see cref="Artifact">event types</see> in a an inclusive range in a <see cref="StreamId" /> and <see cref="PartitionId" />.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IEnumerable{Artifact}" /> event types.</returns>
-        Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId streamId, PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken = default);
+        Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken = default);
     }
 }
