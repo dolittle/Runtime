@@ -14,7 +14,7 @@ import { PanelType } from 'office-ui-fabric-react/lib/Panel';
 
 import { Guid } from '@dolittle/rudiments';
 
-import * as grpc from "grpc";
+import * as grpc from 'grpc';
 
 @autoinject
 export class Heads {

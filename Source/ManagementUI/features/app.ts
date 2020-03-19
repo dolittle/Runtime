@@ -14,7 +14,7 @@ import { TenantsClient } from '@dolittle/runtime.contracts.web/Tenancy.Managemen
 import { Tenant, TenantsRequest, TenantsResponse } from '@dolittle/runtime.contracts.web/Tenancy.Management/Tenants_pb';
 import { ClientFactory } from './ClientFactory';
 
-import * as grpc from "grpc";
+import * as grpc from 'grpc';
 
 @autoinject
 export class App {
