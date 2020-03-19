@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
-        /// <param name="tenantId">The <see cref="TenantId"/> the <see cref="StreamProcessor"/> belongs to.</param>
+        /// <param name="tenantId">The <see cref="TenantId"/>.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
@@ -48,12 +48,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _processor = processor;
             _logger = logger;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
-            Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
-            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
+            Identifier = new StreamProcessorId(_processor.Scope, _processor.Identifier, sourceStreamId);
             CurrentState = StreamProcessorState.New;
             _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
             _cancellationTokenSource.Token.ThrowIfCancellationRequested();
             _streamProcessorStates = streamProcessorStates;
+            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' in scope {Identifier.ScopeId} with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
         }
 
         /// <summary>
@@ -140,7 +140,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         Task<StreamEvent> FetchNextEventWithPartitionToProcess()
         {
             _logger.Debug($"{_logMessagePrefix} is fetching event at position '{CurrentState.Position}'.");
-            return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, CurrentState.Position, _cancellationTokenSource.Token);
+            return _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, CurrentState.Position, _cancellationTokenSource.Token);
         }
     }
 }

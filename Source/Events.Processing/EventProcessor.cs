@@ -28,22 +28,28 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="EventProcessor"/> class.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="id">The <see cref="EventProcessorId" />.</param>
         /// <param name="callDispatcher"><see cref="IReverseCallDispatcher{TResponse, TRequest}"/> for server requests.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
+            ScopeId scope,
             EventProcessorId id,
             IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> callDispatcher,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
+            Scope = scope;
             _callDispatcher = callDispatcher;
             _executionContextManager = executionContextManager;
             Identifier = id;
             _logger = logger;
             _logMessagePrefix = $"Event Processor '{Identifier}'";
         }
+
+        /// <inheritdoc />
+        public ScopeId Scope { get; }
 
         /// <inheritdoc />
         public EventProcessorId Identifier { get; }
