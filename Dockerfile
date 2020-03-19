@@ -16,7 +16,7 @@ RUN dotnet restore
 RUN dotnet publish -c $CONFIGURATION -o out
 
 
-FROM mcr.microsoft.com/dotnet/core/runtime:3.1 as base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 as base
 
 ARG CONFIGURATION=Release
 
