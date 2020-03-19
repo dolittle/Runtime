@@ -4,12 +4,11 @@
     "private": true,
     "scripts": {
         "tasks": "gulp --tasks --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
-        "build": "gulp build --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
         "clean": "gulp clean --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
         "test": "gulp test --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
         "test:run": "gulp test-run --gulpfile node_modules/@dolittle/typescript.build/Gulpfile.js",
-        "webpack": "npx webpack --env.production --extractCss",
-        "webpack:dev": "npx webpack --extractCss",
+        "build": "npx webpack --env.production",
+        "build:dev": "npx webpack --env.development",
         "start": "npx webpack-dev-server --open --watch --progress --hot"
     },
     "devDependencies": {
@@ -22,15 +21,17 @@
         "eslint-config-prettier": "^6.6.0",
         "eslint-plugin-prettier": "^3.1.1",
         "office-ui-fabric-core": "^11.0.0",
-        "prettier": "^1.19.1"
+        "prettier": "^1.19.1",
+        "webpack": "^4.42.0",
+        "webpack-cli": "^3.3.11"
     },
     "dependencies": {
+        "@dolittle/contracts": "^5.0.0-alpha.7",
         "@dolittle/rudiments": "^2.0.10",
+        "@dolittle/runtime.contracts.web": "^5.0.24",
+        "@dunite/au-office-ui": "^2.0.2",
         "@types/chart.js": "^2.9.15",
         "@types/google-protobuf": "^3.2.7",
-        "@dolittle/runtime.contracts.web": "^5.0.24",
-        "@dolittle/contracts": "^5.0.0-alpha.7",
-        "@dunite/au-office-ui": "^2.0.2",
         "@uifabric/icons": "^7.3.16",
         "aurelia-animator-css": "^1.0.4",
         "aurelia-bootstrapper": "^2.3.2",
