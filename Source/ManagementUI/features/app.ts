@@ -33,6 +33,7 @@ export class App {
         config.map([
             { route: ['', '/'], name: 'Index', moduleId: PLATFORM.moduleName('index'), nav: true },
             { route: 'general/overview', name: 'General Overview', moduleId: PLATFORM.moduleName('general/overview'), nav: true },
+            { route: 'general/metrics', name: 'Metrics', moduleId: PLATFORM.moduleName('general/metrics'), nav: true },
             { route: 'connections/runtimes', name: 'Runtime Connections', moduleId: PLATFORM.moduleName('connections/runtimes'), nav: true },
             { route: 'connections/heads', name: 'Connected Heads', moduleId: PLATFORM.moduleName('connections/heads'), nav: true }
         ]);
