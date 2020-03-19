@@ -64,12 +64,17 @@ namespace Dolittle.Runtime.Server
         /// <param name="env"><see cref="IWebHostEnvironment"/>.</param>
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+            app.UseDolittle();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
             app.UseRouting();
+
+            app.UseStaticFiles();
+
             app.UseGrpcWeb();
             app.UseCors();
 
@@ -79,7 +84,7 @@ namespace Dolittle.Runtime.Server
                 endpoints.MapGrpcService<Heads.Management.HeadsService>().EnableGrpcWeb().RequireCors("AllowAll");
             });
 
-            app.UseDolittle();
+            app.RunAsSinglePageApplication();
         }
 
         /// <inheritdoc/>
