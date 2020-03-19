@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 
 namespace Dolittle.Runtime.Server
@@ -24,8 +25,14 @@ namespace Dolittle.Runtime.Server
         /// </summary>
         /// <param name="args">Arguments for the process.</param>
         /// <returns>Host builder to build and run.</returns>
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var appConfig = new ConfigurationBuilder()
+                                    .AddJsonFile("appsettings.json")
+                                    .Build();
+
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(config => config.AddConfiguration(appConfig))
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
@@ -34,5 +41,6 @@ namespace Dolittle.Runtime.Server
                         .UseEnvironment("Development")
                         .UseStartup<Startup>();
                 });
+        }
     }
 }
