@@ -11,6 +11,7 @@ using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
@@ -64,9 +65,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     _executionContextManager.Current.Tenant,
                     subscription.Microservice.To<Microservice>(),
                     subscription.Tenant.To<TenantId>());
+                var partition = subscription.Partition.To<PartitionId>();
+                var publicStream = subscription.PublicStream.To<StreamId>();
                 var microserviceAddress = _microservices.GetAddressFor(eventHorizon.ProducerMicroservice);
-                _consumerClient.AcknowledgeConsent(eventHorizon, microserviceAddress);
-                _ = _consumerClient.SubscribeTo(eventHorizon, microserviceAddress);
+
+                _ = _consumerClient.SubscribeTo(eventHorizon, publicStream, partition, microserviceAddress);
                 return Task.FromResult(new SubscriptionResponse { Success = true });
             }
             catch (Exception ex)

@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.EventHorizon;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Grpc.Core;
 
@@ -19,7 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public class EventsFromEventHorizonFetcher : IFetchEventsFromStreams
     {
         readonly Action<EventHorizonEvent> _validateEvent;
-        readonly AsyncServerStreamingCall<EventHorizonEvent> _call;
+        readonly AsyncServerStreamingCall<ConsumerResponse> _call;
         readonly Action _onUnavailableConnection;
         readonly ILogger _logger;
 
@@ -32,7 +33,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventsFromEventHorizonFetcher(
             Action<EventHorizonEvent> validateEvent,
-            AsyncServerStreamingCall<EventHorizonEvent> call,
+            AsyncServerStreamingCall<ConsumerResponse> call,
             Action onUnavailableConnection,
             ILogger logger)
         {
@@ -43,12 +44,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public async Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
+        public async Task<StreamEvent> Fetch(ScopeId scopeId, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             try
             {
                 if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(streamId, streamPosition);
-                var @event = _call.ResponseStream.Current;
+                var @event = _call.ResponseStream.Current.Event;
                 _validateEvent(@event);
                 return new StreamEvent(
                     @event.ToCommittedEvent(),
@@ -63,13 +64,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scopeId, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
             throw new CannotFetchRangeOfEventsFromEventHorizon();
         }
 
         /// <inheritdoc/>
-        public Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
+        public Task<StreamPosition> FindNext(ScopeId scopeId, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
         {
             return Task.FromResult<StreamPosition>(uint.MaxValue);
         }

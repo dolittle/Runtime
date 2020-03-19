@@ -12,6 +12,7 @@ using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
 using grpc = contracts::Dolittle.Runtime.EventHorizon;
@@ -61,21 +62,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public void AcknowledgeConsent(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress)
-        {
-            var ackResponse = _clientManager
-                .Get<grpc.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
-                .AcknowledgeConsent(new grpc.AcknowledgeRequest { Microservice = eventHorizon.ProducerMicroservice.ToProtobuf(), Tenant = eventHorizon.ProducerTenant.ToProtobuf() });
-
-            if (!ackResponse.Acknowledged) throw new NoConsentForEventHorizon(eventHorizon);
-        }
-
-        /// <inheritdoc/>
-        public async Task SubscribeTo(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress)
+        public async Task SubscribeTo(EventHorizon eventHorizon, StreamId publicStream, PartitionId partition, MicroserviceAddress microserviceAddress)
         {
             while (true)
             {
-                var streamProcessorId = new StreamProcessorId(eventHorizon.ProducerTenant.Value, eventHorizon.ProducerMicroservice.Value);
+                var streamProcessorId = new StreamProcessorId(eventHorizon.ProducerMicroservice.Value, eventHorizon.ProducerTenant.Value, eventHorizon.ProducerMicroservice.Value);
                 _logger.Debug($"Tenant '{eventHorizon.ConsumerTenant}' is subscribing to events from tenant '{eventHorizon.ProducerTenant} in microservice '{eventHorizon.ProducerMicroservice}' on '{microserviceAddress.Host}:{microserviceAddress.Port}'");
                 try
                 {
@@ -88,7 +79,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                             new grpc.ConsumerSubscription
                             {
                                 Tenant = eventHorizon.ProducerTenant.ToProtobuf(),
-                                PublicEventsPosition = publicEventsPosition.Value
+                                PublicEventsPosition = publicEventsPosition.Value,
+                                PublicStream = publicStream.ToProtobuf(),
+                                Partition = partition.ToProtobuf()
                             },
                             cancellationToken: tokenSource.Token),
                         () =>
@@ -101,7 +94,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         },
                         _logger);
                     _getStreamProcessors().Register(
-                        new EventHorizonEventProcessor(eventHorizon, _getReceivedEventsWriter(), _logger),
+                        new EventHorizonEventProcessor(eventHorizon.ProducerMicroservice.Value, eventHorizon, _getReceivedEventsWriter(), _logger),
                         eventsFetcher,
                         eventHorizon.ProducerMicroservice.Value,
                         tokenSource);
@@ -120,7 +113,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 {
                     _logger.Debug($"Disconnecting Event Horizon from tenant '{eventHorizon.ConsumerTenant}' to microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
                     _executionContextManager.CurrentFor(eventHorizon.ConsumerTenant);
-                    _getStreamProcessors().Unregister(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
+                    _getStreamProcessors().Unregister(eventHorizon.ProducerMicroservice.Value, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
                 }
 
                 await Task.Delay(5000).ConfigureAwait(false);
