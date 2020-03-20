@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Applications;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
@@ -20,6 +21,16 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// Gets or sets the <see cref="TenantId" /> tenant to give consent to.
         /// </summary>
         public TenantId Tenant { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="StreamId" /> stream to give consent to.
+        /// </summary>
+        public StreamId Stream { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="PartitionId" /> partition in the stream to give consent to.
+        /// </summary>
+        public PartitionId Partition { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="EventHorizonConsent" /> for the tenant in microservice.
