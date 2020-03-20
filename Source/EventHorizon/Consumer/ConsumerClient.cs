@@ -62,12 +62,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public async Task SubscribeTo(EventHorizon eventHorizon, StreamId publicStream, PartitionId partition, MicroserviceAddress microserviceAddress)
+        public async Task SubscribeTo(EventHorizon eventHorizon, ScopeId scope, StreamId publicStream, PartitionId partition, MicroserviceAddress microserviceAddress)
         {
             while (true)
             {
-                var streamProcessorId = new StreamProcessorId(eventHorizon.ProducerMicroservice.Value, eventHorizon.ProducerTenant.Value, eventHorizon.ProducerMicroservice.Value);
-                _logger.Debug($"Tenant '{eventHorizon.ConsumerTenant}' is subscribing to events from tenant '{eventHorizon.ProducerTenant} in microservice '{eventHorizon.ProducerMicroservice}' on '{microserviceAddress.Host}:{microserviceAddress.Port}'");
+                var streamProcessorId = new StreamProcessorId(scope, eventHorizon.ProducerTenant.Value, eventHorizon.ProducerMicroservice.Value);
+                _logger.Debug($"Tenant '{eventHorizon.ConsumerTenant}' is subscribing to events from tenant '{eventHorizon.ProducerTenant} in microservice '{eventHorizon.ProducerMicroservice}' on '{microserviceAddress.Host}:{microserviceAddress.Port}' in scope {scope}");
                 try
                 {
 #pragma warning disable CA2000
@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         },
                         _logger);
                     _getStreamProcessors().Register(
-                        new EventHorizonEventProcessor(eventHorizon.ProducerMicroservice.Value, eventHorizon, _getReceivedEventsWriter(), _logger),
+                        new EventHorizonEventProcessor(scope, eventHorizon, _getReceivedEventsWriter(), _logger),
                         eventsFetcher,
                         eventHorizon.ProducerMicroservice.Value,
                         tokenSource);
