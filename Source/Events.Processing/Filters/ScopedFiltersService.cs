@@ -13,14 +13,14 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
 using Grpc.Core;
-using static contracts::Dolittle.Runtime.Events.Processing.Filters;
+using static contracts::Dolittle.Runtime.Events.Processing.ScopedFilters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
-    /// Represents the implementation of <see creF="FiltersBase"/>.
+    /// Represents the implementation of <see cref="ScopedFiltersBase"/>.
     /// </summary>
-    public class FiltersService : FiltersBase
+    public class ScopedFiltersService : ScopedFiltersBase
     {
         readonly IFilters _filters;
         readonly IExecutionContextManager _executionContextManager;
@@ -29,14 +29,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FiltersService"/> class.
+        /// Initializes a new instance of the <see cref="ScopedFiltersService"/> class.
         /// </summary>
         /// <param name="filters">The <see cref="IFilters" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="eventsToStreamsWriterFactory">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public FiltersService(
+        public ScopedFiltersService(
             IFilters filters,
             IExecutionContextManager executionContextManager,
             IReverseCallDispatchers reverseCallDispatchers,
@@ -52,14 +52,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public override Task Connect(
-            IAsyncStreamReader<FilterClientToRuntimeResponse> runtimeStream,
-            IServerStreamWriter<FilterRuntimeToClientRequest> clientStream,
+            IAsyncStreamReader<ScopedFilterClientToRuntimeResponse> runtimeStream,
+            IServerStreamWriter<ScopedFilterRuntimeToClientRequest> clientStream,
             ServerCallContext context)
         {
-            var filterArguments = context.GetArgumentsMessage<FilterArguments>();
+            var filterArguments = context.GetArgumentsMessage<ScopedFilterArguments>();
             var eventProcessorId = filterArguments.Filter.To<EventProcessorId>();
-            var streamId = StreamId.AllStreamId;
-            var scope = ScopeId.Default;
+            var sourceStream = StreamId.AllStreamId;
+            var scope = filterArguments.Scope.To<ScopeId>();
+            ThrowIfIllegalScope(scope);
 
             var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
                 runtimeStream,
@@ -67,24 +68,29 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
-            var eventProcessor = new FilterProcessor<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest>(
+            var eventProcessor = new FilterProcessor<ScopedFilterClientToRuntimeResponse, ScopedFilterRuntimeToClientRequest>(
                 scope,
-                new RemoteFilterDefinition(streamId, eventProcessorId.Value),
-                new FilterRequestHandler<FilterRuntimeToClientRequest, FilterClientToRuntimeResponse>(
+                new RemoteFilterDefinition(sourceStream, eventProcessorId.Value),
+                new FilterRequestHandler<ScopedFilterRuntimeToClientRequest, ScopedFilterClientToRuntimeResponse>(
                     dispatcher,
                     response => response.ToFilterResult()),
                 _eventsToStreamsWriterFactory(),
                 _executionContextManager,
-                (@event, partition, executionContext) => new FilterRequestProxy(@event, partition, executionContext),
+                (@event, partition, executionContext) => new ScopedFilterRequestProxy(@event, partition, executionContext),
                 _logger);
 
             return _filters.RegisterAndStartProcessing(
                 scope,
                 eventProcessorId,
-                streamId,
+                sourceStream,
                 dispatcher,
                 eventProcessor,
                 context.CancellationToken);
+        }
+
+        void ThrowIfIllegalScope(ScopeId scope)
+        {
+            if (scope.Equals(ScopeId.Default)) throw new InvalidScopeForScopedFilter(scope);
         }
     }
 }

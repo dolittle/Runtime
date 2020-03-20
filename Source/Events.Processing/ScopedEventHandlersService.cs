@@ -14,14 +14,14 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
 using Grpc.Core;
-using static contracts::Dolittle.Runtime.Events.Processing.EventHandlers;
+using static contracts::Dolittle.Runtime.Events.Processing.ScopedEventHandlers;
 
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents the implementation of <see cref="EventHandlersBase"/>.
+    /// Represents the implementation of <see cref="ScopedEventHandlersBase"/>.
     /// </summary>
-    public class EventHandlersService : EventHandlersBase
+    public class ScopedEventHandlersService : ScopedEventHandlersBase
     {
         readonly IEventHandlers _eventHandlers;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
@@ -29,13 +29,13 @@ namespace Dolittle.Runtime.Events.Processing
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
+        /// Initializes a new instance of the <see cref="ScopedEventHandlersService"/> class.
         /// </summary>
         /// <param name="eventHandlers">The <see cref="IEventHandlers" />.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public EventHandlersService(
+        public ScopedEventHandlersService(
             IEventHandlers eventHandlers,
             IReverseCallDispatchers reverseCallDispatchers,
             IExecutionContextManager executionContextManager,
@@ -49,13 +49,13 @@ namespace Dolittle.Runtime.Events.Processing
 
         /// <inheritdoc/>
         public override Task Connect(
-            IAsyncStreamReader<EventHandlerClientToRuntimeResponse> runtimeStream,
-            IServerStreamWriter<EventHandlerRuntimeToClientRequest> clientStream,
+            IAsyncStreamReader<ScopedEventHandlerClientToRuntimeResponse> runtimeStream,
+            IServerStreamWriter<ScopedEventHandlerRuntimeToClientRequest> clientStream,
             ServerCallContext context)
         {
             var sourceStream = StreamId.AllStreamId;
-            var scope = ScopeId.Default;
-            var eventHandlerArguments = context.GetArgumentsMessage<EventHandlerArguments>();
+            var eventHandlerArguments = context.GetArgumentsMessage<ScopedEventHandlerArguments>();
+            var scope = eventHandlerArguments.Scope.To<ScopeId>();
             var eventProcessorId = eventHandlerArguments.EventHandler.To<EventProcessorId>();
             var types = eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>());
             var partitioned = eventHandlerArguments.Partitioned;
@@ -65,14 +65,14 @@ namespace Dolittle.Runtime.Events.Processing
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
-            var eventProcessor = new EventProcessor<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest>(
+            var eventProcessor = new EventProcessor<ScopedEventHandlerClientToRuntimeResponse, ScopedEventHandlerRuntimeToClientRequest>(
                 scope,
                 eventProcessorId,
-                new EventHandlerProcessingRequestHandler<EventHandlerRuntimeToClientRequest, EventHandlerClientToRuntimeResponse>(
+                new EventHandlerProcessingRequestHandler<ScopedEventHandlerRuntimeToClientRequest, ScopedEventHandlerClientToRuntimeResponse>(
                     dispatcher,
                     response => response.ToProcessingResult()),
                 _executionContextManager,
-                (@event, partition, executionContext) => new EventHandlerProcessingRequestProxy(@event, partition, executionContext),
+                (@event, partition, executionContext) => new ScopedEventHandlerProcessingRequestProxy(@event, partition, executionContext),
                 _logger);
             return _eventHandlers.RegisterAndStartProcessing(
                 scope,

@@ -19,16 +19,22 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly FiltersService _filtersService;
         readonly EventHandlersService _eventHandlers;
+        readonly ScopedEventHandlersService _scopedEventHandlers;
+        readonly ScopedFiltersService _scopedFilters;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
         /// </summary>
         /// <param name="filtersService">The <see cref="FiltersService"/>.</param>
         /// <param name="eventHandlers">The <see cref="EventHandlersService"/>.</param>
-        public RuntimeServices(FiltersService filtersService, EventHandlersService eventHandlers)
+        /// <param name="scopedEventHandlers">The <see cref="ScopedEventHandlersService" />.</param>
+        /// <param name="scopedFilters">The <see cref="ScopedFiltersService" />.</param>
+        public RuntimeServices(FiltersService filtersService, EventHandlersService eventHandlers, ScopedEventHandlersService scopedEventHandlers, ScopedFiltersService scopedFilters)
         {
             _filtersService = filtersService;
             _eventHandlers = eventHandlers;
+            _scopedEventHandlers = scopedEventHandlers;
+            _scopedFilters = scopedFilters;
         }
 
         /// <inheritdoc/>
@@ -41,6 +47,8 @@ namespace Dolittle.Runtime.Events.Processing
             {
                 new Service(_filtersService, grpc.Filters.BindService(_filtersService), grpc.Filters.Descriptor),
                 new Service(_eventHandlers, grpc.EventHandlers.BindService(_eventHandlers), grpc.EventHandlers.Descriptor),
+                new Service(_scopedEventHandlers, grpc.ScopedEventHandlers.BindService(_scopedEventHandlers), grpc.ScopedEventHandlers.Descriptor),
+                new Service(_scopedFilters, grpc.ScopedFilters.BindService(_scopedFilters), grpc.ScopedFilters.Descriptor),
             };
         }
     }
