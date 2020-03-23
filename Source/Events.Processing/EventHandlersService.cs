@@ -126,7 +126,7 @@ namespace Dolittle.Runtime.Events.Processing
             StreamId targetStreamId,
             CancellationToken cancellationToken)
         {
-            _logger.Debug($"Registering event handler '{eventProcessorId}' in scope '{scope}' for stream '{sourceStreamId}' for {_tenants.All.Count()} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
+            _logger.Debug($"Registering event handler '{eventProcessorId}' in scope '{scope}' for stream '{sourceStreamId}' for {_tenants.All.Count} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
             foreach (var tenant in _tenants.All)
             {
                 try
@@ -160,7 +160,7 @@ namespace Dolittle.Runtime.Events.Processing
         void UnregisterForAllTenants(ScopeId scope, EventProcessorId eventProcessorId, StreamId sourceStream)
         {
             var tenants = _tenants.All;
-            _logger.Debug($"Unregistering filter '{eventProcessorId}' in scope '{scope}' for stream '{sourceStream}' for {tenants.Count()} tenants");
+            _logger.Debug($"Unregistering filter '{eventProcessorId}' in scope '{scope}' for stream '{sourceStream}' for {tenants.Count} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);

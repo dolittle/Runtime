@@ -3,10 +3,13 @@
 
 extern alias contracts;
 
-using System.Linq;
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.Heads;
 using contracts::Dolittle.Runtime.Heads.Management;
+using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Management;
+using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.Heads.Management.Heads;
 
@@ -18,34 +21,38 @@ namespace Dolittle.Runtime.Heads.Management
     public class HeadsService : HeadsBase
     {
         readonly IConnectedHeads _connectedHeads;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="HeadsService"/> class.
         /// </summary>
         /// <param name="connectedHeads">The <see cref="IConnectedHeads"/>.</param>
-        public HeadsService(IConnectedHeads connectedHeads)
+        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+        public HeadsService(IConnectedHeads connectedHeads, ILogger logger)
         {
             _connectedHeads = connectedHeads;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
-        public override Task<ConnectedHeadsResponse> GetConnectedHeads(ConnectedHeadsRequest request, ServerCallContext context)
+        public override async Task GetConnectedHeads(ConnectedHeadsRequest request, IServerStreamWriter<ConnectedHeadsResponse> responseStream, ServerCallContext context)
         {
-            var clients = _connectedHeads.GetAll();
-            var response = new ConnectedHeadsResponse();
-            response.Heads.AddRange(clients.Select(_ =>
-            {
-                return new ConnectedHead
+            await _connectedHeads.All.Forward(
+                responseStream,
+                context,
+                _ => _.Heads,
+                _ => new ConnectedHead
                 {
                     Head = new HeadInfo
                     {
                         HeadId = _.HeadId.ToProtobuf(),
-                        Runtime = _.Runtime
+                        Host = _.Host,
+                        Runtime = _.Runtime,
+                        Version = _.Version,
+                        ConnectionTime = Timestamp.FromDateTimeOffset(_.ConnectionTime)
                     },
                     ConnectionTime = _.ConnectionTime.ToUnixTimeMilliseconds()
-                };
-            }));
-            return Task.FromResult(response);
+                }).ConfigureAwait(false);
         }
     }
 }

@@ -4,7 +4,6 @@
 extern alias contracts;
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.EventHorizon;
 using Dolittle.Applications;
