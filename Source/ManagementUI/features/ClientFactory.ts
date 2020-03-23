@@ -7,7 +7,7 @@ import { ExecutionContext } from '@dolittle/contracts/Execution/ExecutionContext
 
 export class ClientFactory {
     create<T extends object>(type: any): T {
-        const instance = new type('http://localhost:5000', {} as any) as T;
+        const instance = new type('http://localhost:81', {} as any) as T;
 
         for (const property in (instance as any).__proto__) {
             if ((instance as any).__proto__.hasOwnProperty(property)) {
