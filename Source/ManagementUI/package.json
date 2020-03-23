@@ -28,7 +28,7 @@
     "dependencies": {
         "@dolittle/contracts": "^5.0.0-alpha.7",
         "@dolittle/rudiments": "^2.0.10",
-        "@dolittle/runtime.contracts.web": "^5.0.24",
+        "@dolittle/runtime.contracts.web": "^5.1.6",
         "@dunite/au-office-ui": "^2.0.2",
         "@types/chart.js": "^2.9.15",
         "@types/google-protobuf": "^3.2.7",
