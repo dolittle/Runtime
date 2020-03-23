@@ -25,6 +25,12 @@ export class Navigation {
                             key: 'metrics',
                             url: 'general/metrics',
                             icon: 'Chart'
+                        },
+                        {
+                            name: 'Logs',
+                            key: 'logs',
+                            url: 'general/logs',
+                            icon: 'ComplianceAudit'
                         }
                     ]
                 },
