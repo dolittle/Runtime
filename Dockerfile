@@ -1,3 +1,9 @@
+# DotNet Source - filtered
+FROM alpine AS dotnet-source
+WORKDIR /app
+COPY Source ./Source/
+RUN rm -rf Source/ManagementUI
+
 # DotNet Build
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS dotnet-build
 WORKDIR /app
@@ -7,8 +13,8 @@ ARG CONFIGURATION
 COPY default.props ./
 COPY versions.props ./
 COPY Runtime.sln ./
-#COPY Source/[^ManagementUI]* ./Source/
-COPY Source ./Source/
+COPY --from=dotnet-source /app/Source ./Source/
+
 COPY Specifications ./Specifications/
 
 WORKDIR /app/Source/Server
