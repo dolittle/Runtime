@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
@@ -103,7 +102,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.Debug($"Registering filter '{eventProcessorId}' in scope '{scope}' for stream for {_tenants.All.Count()} tenants");
+            _logger.Debug($"Registering filter '{eventProcessorId}' in scope '{scope}' for stream for {_tenants.All.Count} tenants");
 
             foreach (var tenant in _tenants.All)
             {
@@ -123,7 +122,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         void UnregisterForAllTenants(ScopeId scope, EventProcessorId eventProcessorId, StreamId streamId)
         {
             var tenants = _tenants.All;
-            _logger.Debug($"Unregistering filter '{eventProcessorId}' in scope '{scope}' on stream '{streamId}' for {tenants.Count()} tenants");
+            _logger.Debug($"Unregistering filter '{eventProcessorId}' in scope '{scope}' on stream '{streamId}' for {tenants.Count} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
