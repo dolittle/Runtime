@@ -4,7 +4,6 @@
 extern alias contracts;
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
@@ -115,7 +114,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             StreamId streamId,
             CancellationToken cancellationToken)
         {
-            _logger.Debug($"Registering filter '{eventProcessorId}' for stream '{streamId}' for {_tenants.All.Count()} tenants");
+            _logger.Debug($"Registering filter '{eventProcessorId}' for stream '{streamId}' for {_tenants.All.Count} tenants");
 
             foreach (var tenant in _tenants.All)
             {
@@ -142,7 +141,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         void UnregisterForAllTenants(EventProcessorId eventProcessorId, StreamId streamId)
         {
             var tenants = _tenants.All;
-            _logger.Debug($"Unregistering filter '{eventProcessorId}' on stream '{streamId}' for {tenants.Count()} tenants");
+            _logger.Debug($"Unregistering filter '{eventProcessorId}' on stream '{streamId}' for {tenants.Count} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
