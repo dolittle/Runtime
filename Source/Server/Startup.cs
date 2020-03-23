@@ -2,9 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using Autofac;
 using Dolittle.Booting;
 using Dolittle.DependencyInversion.Autofac;
+using Dolittle.DependencyInversion.Strategies;
+using Dolittle.Execution;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -46,6 +49,9 @@ namespace Dolittle.Runtime.Server
             }));
 
             _bootResult = services.AddDolittle(_loggerFactory);
+            ManagementLogAppender.LoggerFactory = _loggerFactory;
+            var loggingBootStageResult = _bootResult.BootStageResults.ToArray()[1];
+            ManagementLogAppender.ExecutionContextManager = ((Constant)loggingBootStageResult.Bindings.First(_ => _.Service == typeof(IExecutionContextManager)).Strategy).Target as IExecutionContextManager;
         }
 
         /// <summary>
@@ -82,6 +88,7 @@ namespace Dolittle.Runtime.Server
             {
                 endpoints.MapGrpcService<Tenancy.Management.TenantsService>().EnableGrpcWeb().RequireCors("AllowAll");
                 endpoints.MapGrpcService<Heads.Management.HeadsService>().EnableGrpcWeb().RequireCors("AllowAll");
+                endpoints.MapGrpcService<Logging.Management.LogService>().EnableGrpcWeb().RequireCors("AllowAll");
             });
 
             app.RunAsSinglePageApplication();
