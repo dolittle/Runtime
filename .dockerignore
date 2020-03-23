@@ -1,5 +1,5 @@
-Source/**/bin
-Source/**/obj
+**/bin
+**/obj
 Schemas
 Samples
 Packages
@@ -7,5 +7,4 @@ Documentation
 Build
 Artifacts
 .vscode
-Specifications/**/bin
-Specifications/**/obj
+**/node_modules
