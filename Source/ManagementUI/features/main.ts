@@ -38,5 +38,5 @@ export function configure(aurelia: Aurelia) {
         aurelia.use.plugin(PLATFORM.moduleName('aurelia-testing'));
     }
 
-    aurelia.start().then(() => aurelia.setRoot(PLATFORM.moduleName('App')));
+    aurelia.start().then(() => aurelia.setRoot(PLATFORM.moduleName('app')));
 }
