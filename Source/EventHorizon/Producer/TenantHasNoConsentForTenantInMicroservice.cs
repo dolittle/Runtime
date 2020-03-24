@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Applications;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
@@ -17,8 +18,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="publisherTenant">The publisher <see cref="TenantId" />.</param>
         /// <param name="microservice">The <see cref="Microservice" />.</param>
         /// <param name="subscriberTenant">The subscriber <see cref="TenantId" />.</param>
-        public TenantHasNoConsentForTenantInMicroservice(TenantId publisherTenant, Microservice microservice, TenantId subscriberTenant)
-            : base($"The tenant '{publisherTenant}' does not have any event horizon consents configured tenant '{subscriberTenant}' in microservice '{microservice}")
+        /// <param name="publicStream">The public <see cref="StreamId" />.</param>
+        /// <param name="publicStreamPartition">The <see cref="PartitionId" /> in the public stream.</param>
+        public TenantHasNoConsentForTenantInMicroservice(TenantId publisherTenant, Microservice microservice, TenantId subscriberTenant, StreamId publicStream, PartitionId publicStreamPartition)
+            : base($"The tenant '{publisherTenant}' does not have any event horizon consents configured for tenant '{subscriberTenant}' in microservice '{microservice}' to partition '{publicStreamPartition}' in public stream '{publicStream}'")
         {
         }
     }

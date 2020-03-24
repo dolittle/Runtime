@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Applications;
 using Dolittle.Lifecycle;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
@@ -27,13 +28,13 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         }
 
         /// <inheritdoc/>
-        public EventHorizonConsent GetConsentFor(TenantId publisherTenant, Microservice subscriberMicroservice, TenantId subscriberTenant)
+        public EventHorizonConsent GetConsentFor(TenantId publisherTenant, Microservice subscriberMicroservice, TenantId subscriberTenant, StreamId publicStream, PartitionId publicStreamPartition)
         {
             var consents = GetConsentConfigurationsFor(publisherTenant);
             if (!consents.Any()) throw new TenantHasNoEventHorizonConsents(publisherTenant);
-            var matchingConsents = consents.Where(_ => _.Microservice == subscriberMicroservice && _.Tenant == subscriberTenant);
-            if (matchingConsents.Count() > 1) throw new TenantHasMultipleConsentsForTenantInMicroservice(subscriberTenant, subscriberMicroservice, subscriberTenant);
-            if (!matchingConsents.Any()) throw new TenantHasNoConsentForTenantInMicroservice(subscriberTenant, subscriberMicroservice, subscriberTenant);
+            var matchingConsents = consents.Where(_ => _.Microservice == subscriberMicroservice && _.Tenant == subscriberTenant && _.Stream == publicStream && _.Partition == publicStreamPartition);
+            if (matchingConsents.Count() > 1) throw new TenantHasMultipleConsentsForTenantInMicroservice(subscriberTenant, subscriberMicroservice, subscriberTenant, publicStream, publicStreamPartition);
+            if (!matchingConsents.Any()) throw new TenantHasNoConsentForTenantInMicroservice(subscriberTenant, subscriberMicroservice, subscriberTenant, publicStream, publicStreamPartition);
 
             return matchingConsents.First().Consent;
         }

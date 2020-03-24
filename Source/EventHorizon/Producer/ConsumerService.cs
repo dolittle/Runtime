@@ -67,7 +67,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <inheritdoc/>
         public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<ConsumerResponse> responseStream, ServerCallContext context)
         {
-            _eventHorizonConsents.GetConsentConfigurationsFor(subscription.Tenant.To<TenantId>());
             var scope = ScopeId.Default;
             EventHorizon eventHorizon = null;
             try
@@ -85,6 +84,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 var partition = subscription.Partition.To<PartitionId>();
                 var publicStreamPosition = new StreamPosition(subscription.PublicEventsPosition);
 
+                ThrowIfConsentIsNotGiven(eventHorizon, publicStream, partition);
                 while (!context.CancellationToken.IsCancellationRequested)
                 {
                     _executionContextManager.CurrentFor(
@@ -144,9 +144,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             }
         }
 
-        void ThrowIfWrongProducerMicroservice(Microservice producerMicroservice)
+        void ThrowIfConsentIsNotGiven(EventHorizon eventHorizon, StreamId publicStream, PartitionId partition)
         {
-            if (_microservice != producerMicroservice) throw new WrongProducerMicroservice(producerMicroservice);
+            _eventHorizonConsents.GetConsentFor(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant, publicStream, partition);
         }
 
         void ThrowIfProducerTenantDoesNotExist(TenantId producerTenant, Microservice consumerMicroservice, TenantId consumerTenant)
