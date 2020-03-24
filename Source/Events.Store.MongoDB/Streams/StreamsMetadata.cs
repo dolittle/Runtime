@@ -38,10 +38,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public Task<EventLogSequenceNumber> GetLastProcessedEventLogSequenceNumber(StreamId stream, CancellationToken cancellationToken)
+        public Task<EventLogSequenceNumber> GetLastEventLogSequenceNumber(StreamId stream, CancellationToken cancellationToken)
         {
-            if (TryGetMetadataGetter(stream, out var getter)) return getter.GetLastProcessedEventLogSequenceNumber(stream, cancellationToken);
-            return GetLastProcessedEventLogSequenceNumberFromStream(stream, cancellationToken);
+            if (TryGetMetadataGetter(stream, out var getter)) return getter.GetLastEventLogSequenceNumber(stream, cancellationToken);
+            return GetLastEventLogSequenceNumberFromStream(stream, cancellationToken);
         }
 
         bool TryGetMetadataGetter(StreamId stream, out ICanGetMetadataFromWellKnownStreams getter)
@@ -59,15 +59,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             return getter != null;
         }
 
-        async Task<EventLogSequenceNumber> GetLastProcessedEventLogSequenceNumberFromStream(StreamId streamId, CancellationToken cancellationToken)
+        async Task<EventLogSequenceNumber> GetLastEventLogSequenceNumberFromStream(StreamId streamId, CancellationToken cancellationToken)
         {
             try
             {
                 var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                 var eventLogSequenceNumbers = await stream.Find(_streamEventFilter.Empty)
                     .SortByDescending(_ => _.Metadata.EventLogSequenceNumber)
-                    .Project(_ => _.Metadata.EventLogSequenceNumber)
                     .Limit(1)
+                    .Project(_ => _.Metadata.EventLogSequenceNumber)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 if (eventLogSequenceNumbers.Count == 0) return null;
                 return eventLogSequenceNumbers[0];
