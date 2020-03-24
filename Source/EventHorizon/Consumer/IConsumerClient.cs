@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Microservices;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -12,18 +13,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public interface IConsumerClient
     {
         /// <summary>
-        /// Asks the producer microservice to acknowledge the consent.
-        /// </summary>
-        /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
-        /// <param name="microserviceAddress">The <see cref="MicroserviceAddress" /> of the microservice to connect to.</param>
-        void AcknowledgeConsent(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress);
-
-        /// <summary>
         /// Starts a subscription.
         /// </summary>
         /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
+        /// <param name="publicStream">The public <see cref="StreamId" />.</param>
+        /// <param name="partition">The <see cref="PartitionId" />.</param>
         /// <param name="microserviceAddress">The <see cref="MicroserviceAddress" /> of the microservice to connect to.</param>
         /// <returns>The task.</returns>
-        Task SubscribeTo(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress);
+        Task SubscribeTo(EventHorizon eventHorizon, StreamId publicStream, PartitionId partition, MicroserviceAddress microserviceAddress);
     }
 }

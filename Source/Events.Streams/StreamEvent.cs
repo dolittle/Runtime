@@ -15,14 +15,21 @@ namespace Dolittle.Runtime.Events.Streams
         /// Initializes a new instance of the <see cref="StreamEvent"/> class.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="position">The <see cref="StreamPosition" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="partition">The <see cref="PartitionId" />.</param>
-        public StreamEvent(CommittedEvent @event, StreamId stream, PartitionId partition)
+        public StreamEvent(CommittedEvent @event, StreamPosition position, StreamId stream, PartitionId partition)
         {
             Event = @event;
+            Position = position;
             Stream = stream;
             Partition = partition;
         }
+
+        /// <summary>
+        /// Gets the <see cref="StreamPosition" /> of the event in its stream.
+        /// </summary>
+        public StreamPosition Position { get; }
 
         /// <summary>
         /// Gets the <see cref="CommittedEvent" />.

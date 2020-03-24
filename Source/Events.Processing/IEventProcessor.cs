@@ -14,6 +14,11 @@ namespace Dolittle.Runtime.Events.Processing
     public interface IEventProcessor
     {
         /// <summary>
+        /// Gets the <see cref="Scope" />.
+        /// </summary>
+        ScopeId Scope { get; }
+
+        /// <summary>
         /// Gets the identifier for the <see cref="IEventProcessor"/>.
         /// </summary>
         EventProcessorId Identifier { get; }

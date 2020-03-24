@@ -16,6 +16,7 @@ using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
@@ -76,13 +77,13 @@ namespace Dolittle.Runtime.Events.Processing
             ServerCallContext context)
         {
             EventProcessorId eventProcessorId = Guid.Empty;
-            StreamId sourceStream = Guid.Empty;
+            var sourceStream = StreamId.AllStreamId;
+            var scope = ScopeId.Default;
 
             try
             {
                 var eventHandlerArguments = context.GetArgumentsMessage<EventHandlerArguments>();
                 eventProcessorId = eventHandlerArguments.EventHandler.To<EventProcessorId>();
-                sourceStream = eventHandlerArguments.Stream.To<StreamId>();
                 _logger.Debug($"EventHandler client connected with id '{eventProcessorId}' for stream '{sourceStream}'");
                 var targetStream = new StreamId { Value = eventProcessorId };
 
@@ -99,7 +100,7 @@ namespace Dolittle.Runtime.Events.Processing
                     targetStream,
                     eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>()),
                     eventHandlerArguments.Partitioned);
-                await RegisterForAllTenants(filterDefinition, dispatcher, eventProcessorId, sourceStream, targetStream, context.CancellationToken).ConfigureAwait(false);
+                await RegisterForAllTenants(filterDefinition, dispatcher, scope, eventProcessorId, sourceStream, targetStream, context.CancellationToken).ConfigureAwait(false);
                 await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -111,7 +112,7 @@ namespace Dolittle.Runtime.Events.Processing
             }
             finally
             {
-                UnregisterForAllTenants(eventProcessorId, sourceStream);
+                UnregisterForAllTenants(scope, eventProcessorId, sourceStream);
                 _logger.Debug($"EventHandler client disconnected for '{eventProcessorId}'");
             }
         }
@@ -119,18 +120,20 @@ namespace Dolittle.Runtime.Events.Processing
         async Task RegisterForAllTenants(
             TypeFilterWithEventSourcePartitionDefinition filterDefinition,
             IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> callDispatcher,
+            ScopeId scope,
             EventProcessorId eventProcessorId,
             StreamId sourceStreamId,
             StreamId targetStreamId,
             CancellationToken cancellationToken)
         {
-            _logger.Debug($"Registering event handler '{eventProcessorId}' for stream '{sourceStreamId}' for {_tenants.All.Count} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
+            _logger.Debug($"Registering event handler '{eventProcessorId}' in scope '{scope}' for stream '{sourceStreamId}' for {_tenants.All.Count} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
             foreach (var tenant in _tenants.All)
             {
                 try
                 {
                     _executionContextManager.CurrentFor(tenant);
                     var filter = new TypeFilterWithEventSourcePartition(
+                                        scope,
                                         filterDefinition,
                                         _eventsToStreamsWriterFactory(),
                                         _logger);
@@ -139,6 +142,7 @@ namespace Dolittle.Runtime.Events.Processing
                     _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId);
 
                     var eventProcessor = new EventProcessor(
+                        scope,
                         eventProcessorId,
                         callDispatcher,
                         _executionContextManager,
@@ -148,21 +152,21 @@ namespace Dolittle.Runtime.Events.Processing
                 }
                 catch (IllegalFilterTransformation ex)
                 {
-                    _logger.Error(ex, $"The filter for stream '{targetStreamId}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
+                    _logger.Error(ex, $"The filter for stream '{targetStreamId}' in scope '{scope}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
                 }
             }
         }
 
-        void UnregisterForAllTenants(EventProcessorId eventProcessorId, StreamId sourceStream)
+        void UnregisterForAllTenants(ScopeId scope, EventProcessorId eventProcessorId, StreamId sourceStream)
         {
             var tenants = _tenants.All;
-            _logger.Debug($"Unregistering filter '{eventProcessorId}' for stream '{sourceStream}' for {tenants.Count} tenants");
+            _logger.Debug($"Unregistering filter '{eventProcessorId}' in scope '{scope}' for stream '{sourceStream}' for {tenants.Count} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
-                _getFilters().Unregister(eventProcessorId.Value);
-                _streamProcessorsFactory().Unregister(eventProcessorId, sourceStream);
-                _streamProcessorsFactory().Unregister(eventProcessorId, eventProcessorId.Value);
+                _getFilters().Unregister(scope, eventProcessorId.Value);
+                _streamProcessorsFactory().Unregister(scope, eventProcessorId, sourceStream);
+                _streamProcessorsFactory().Unregister(scope, eventProcessorId, eventProcessorId.Value);
             });
         }
 

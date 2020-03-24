@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <returns>The <see cref="CommittedEvent" />.</returns>
         public static CommittedEvent ToCommittedEvent(this EventHorizonEvent @event) =>
             new CommittedEvent(
-                @event.EventLogSequenceNumber,
+                uint.MaxValue,
                 @event.Occurred.ToDateTimeOffset(),
                 @event.EventSource.To<EventSourceId>(),
                 @event.Correlation.To<CorrelationId>(),
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 @event.ProducerTenant.To<TenantId>(),
                 new Cause(CauseType.Event, 0),
                 new Artifact(@event.Type.Id.To<ArtifactId>(), @event.Type.Generation),
-                true,
+                false,
                 @event.Content);
     }
 }

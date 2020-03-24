@@ -13,11 +13,12 @@ namespace Dolittle.Runtime.Events.Streams
     public interface IStreamsMetadata
     {
         /// <summary>
-        /// Gets the last processed <see cref="EventLogSequenceNumber" /> in a stream.
+        /// Gets the last <see cref="EventLogSequenceNumber" /> in a stream.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="EventLogSequenceNumber" /> or null if there are no events in the stream..</returns>
-        Task<EventLogSequenceNumber> GetLastProcessedEventLogSequenceNumber(StreamId stream, CancellationToken cancellationToken);
+        Task<EventLogSequenceNumber> GetLastEventLogSequenceNumber(ScopeId scope, StreamId stream, CancellationToken cancellationToken);
     }
 }

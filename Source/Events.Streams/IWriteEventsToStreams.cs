@@ -16,10 +16,11 @@ namespace Dolittle.Runtime.Events.Streams
         /// Writes an event to a stream.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task"/> representing whether the event was successfully written to the event store.</returns>
-        Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default);
+        Task Write(CommittedEvent @event, ScopeId scope, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default);
     }
 }

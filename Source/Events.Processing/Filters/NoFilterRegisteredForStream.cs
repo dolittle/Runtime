@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -13,9 +14,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="NoFilterRegisteredForStream"/> class.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
-        public NoFilterRegisteredForStream(StreamId streamId)
-            : base($"There are no filter registered for stream '{streamId}'")
+        public NoFilterRegisteredForStream(ScopeId scope, StreamId streamId)
+            : base($"There are no filter registered for stream '{streamId}' in scope '{scope}'")
         {
         }
     }
