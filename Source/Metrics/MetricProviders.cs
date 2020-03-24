@@ -32,7 +32,8 @@ namespace Dolittle.Runtime.Metrics
         /// <inheritdoc/>
         public IEnumerable<Collector> Provide()
         {
-            return _providers.SelectMany(_ => _.Provide(_metricFactory));
+            var collectors = _providers.SelectMany(_ => _.Provide(_metricFactory)).ToArray();
+            return collectors;
         }
     }
 }

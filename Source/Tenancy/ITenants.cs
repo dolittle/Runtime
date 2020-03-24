@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Tenancy
@@ -14,6 +14,6 @@ namespace Dolittle.Runtime.Tenancy
         /// <summary>
         /// Gets all available tenants represented by their <see cref="TenantId"/>.
         /// </summary>
-        IEnumerable<TenantId> All { get; }
+        ObservableCollection<TenantId> All { get; }
     }
 }
