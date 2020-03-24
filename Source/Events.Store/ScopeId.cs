@@ -19,6 +19,11 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Initializes a new instance of the <see cref="ScopeId"/> class.
         /// </summary>
+        public ScopeId() => Value = Guid.Empty;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScopeId"/> class.
+        /// </summary>
         /// <param name="id"><see cref="Guid"/> value.</param>
         public ScopeId(Guid id) => Value = id;
 

@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             _logger.Information($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_eventHorizon.ProducerMicroservice}' and tenant '{_eventHorizon.ProducerTenant}'");
 
-            await _receivedEventsWriter.Write(@event, _eventHorizon, cancellationToken).ConfigureAwait(false);
+            await _receivedEventsWriter.Write(@event, Scope, _eventHorizon, cancellationToken).ConfigureAwait(false);
             return new SucceededProcessingResult();
         }
     }
