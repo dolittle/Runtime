@@ -108,6 +108,8 @@ namespace Dolittle.Runtime.Events.Processing
                 {
                     _logger.Error(ex, $"Error occurred while processing event handler '{eventProcessorId}'");
                 }
+
+                throw;
             }
             finally
             {
@@ -149,6 +151,7 @@ namespace Dolittle.Runtime.Events.Processing
                 catch (IllegalFilterTransformation ex)
                 {
                     _logger.Error(ex, $"The filter for stream '{targetStreamId}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
+                    throw;
                 }
             }
         }
