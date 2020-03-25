@@ -16,13 +16,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// <summary>
     /// Represents a system that processes a stream of events.
     /// </summary>
-    public class StreamProcessor : IDisposable
+    public class StreamProcessor
     {
         readonly IEventProcessor _processor;
         readonly ILogger _logger;
+        readonly CancellationToken _cancellationToken;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly string _logMessagePrefix;
-        readonly CancellationTokenSource _cancellationTokenSource;
         readonly IStreamProcessorStates _streamProcessorStates;
         Task _task;
 
@@ -34,26 +34,25 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
-        /// <param name="cancellationTokenSource">The <see cref="CancellationTokenSource" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public StreamProcessor(
             TenantId tenantId,
             StreamId sourceStreamId,
             IEventProcessor processor,
             IStreamProcessorStates streamProcessorStates,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
-            CancellationTokenSource cancellationTokenSource,
-            ILogger logger)
+            ILogger logger,
+            CancellationToken cancellationToken = default)
         {
             _processor = processor;
-            _logger = logger;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
-            Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
             _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
-            CurrentState = StreamProcessorState.New;
-            _cancellationTokenSource = cancellationTokenSource ?? new CancellationTokenSource();
-            _cancellationTokenSource.Token.ThrowIfCancellationRequested();
             _streamProcessorStates = streamProcessorStates;
+            _logger = logger;
+            _cancellationToken = cancellationToken;
+            Identifier = new StreamProcessorId(_processor.Identifier, sourceStreamId);
+            CurrentState = StreamProcessorState.New;
         }
 
         /// <summary>
@@ -71,26 +70,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// </summary>
         public StreamProcessorState CurrentState { get; private set; }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            _cancellationTokenSource.Dispose();
-        }
-
         /// <summary>
         /// Start processing.
         /// </summary>
         public void Start()
         {
             _task = Task.Factory.StartNew(BeginProcessing, TaskCreationOptions.DenyChildAttach);
-        }
-
-        /// <summary>
-        /// Stop processing.
-        /// </summary>
-        public void Stop()
-        {
-            _cancellationTokenSource.Cancel();
         }
 
         /// <summary>
@@ -101,15 +86,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             try
             {
-                CurrentState = await _streamProcessorStates.GetStoredStateFor(Identifier, _cancellationTokenSource.Token).ConfigureAwait(false);
+                CurrentState = await _streamProcessorStates.GetStoredStateFor(Identifier, _cancellationToken).ConfigureAwait(false);
                 do
                 {
                     StreamEvent streamEvent = default;
-                    while (streamEvent == default && !_cancellationTokenSource.IsCancellationRequested)
+                    while (streamEvent == default && !_cancellationToken.IsCancellationRequested)
                     {
                         try
                         {
-                            CurrentState = await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationTokenSource.Token).ConfigureAwait(false);
+                            CurrentState = await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationToken).ConfigureAwait(false);
                             streamEvent = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
                         }
                         catch (NoEventInStreamAtPosition)
@@ -122,15 +107,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                     }
 
-                    if (_cancellationTokenSource.IsCancellationRequested) break;
+                    if (_cancellationToken.IsCancellationRequested) break;
 
-                    CurrentState = await _streamProcessorStates.ProcessEventAndChangeStateFor(Identifier, _processor, streamEvent, CurrentState, _cancellationTokenSource.Token).ConfigureAwait(false);
+                    CurrentState = await _streamProcessorStates.ProcessEventAndChangeStateFor(Identifier, _processor, streamEvent, CurrentState, _cancellationToken).ConfigureAwait(false);
                 }
-                while (!_cancellationTokenSource.IsCancellationRequested);
+                while (!_cancellationToken.IsCancellationRequested);
             }
             catch (Exception ex)
             {
-                if (!_cancellationTokenSource.IsCancellationRequested)
+                if (!_cancellationToken.IsCancellationRequested)
                 {
                     _logger.Error($"{_logMessagePrefix} failed - {ex}");
                 }
@@ -140,7 +125,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         Task<StreamEvent> FetchNextEventWithPartitionToProcess()
         {
             _logger.Debug($"{_logMessagePrefix} is fetching event at position '{CurrentState.Position}'.");
-            return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, CurrentState.Position, _cancellationTokenSource.Token);
+            return _eventsFromStreamsFetcher.Fetch(Identifier.SourceStreamId, CurrentState.Position, _cancellationToken);
         }
     }
 }

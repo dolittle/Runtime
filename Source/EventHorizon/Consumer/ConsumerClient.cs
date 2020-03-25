@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public void AcknowledgeConsent(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress)
+        public void AcknowledgeConsent(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress, CancellationToken cancellationToken)
         {
             var ackResponse = _clientManager
                 .Get<grpc.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public async Task SubscribeTo(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress)
+        public async Task SubscribeTo(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress, CancellationToken cancellationToken)
         {
             while (true)
             {
@@ -80,7 +80,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 try
                 {
 #pragma warning disable CA2000
-                    var tokenSource = new CancellationTokenSource();
                     var publicEventsPosition = (await _getStreamProcessorStates().GetOrAddNew(streamProcessorId).ConfigureAwait(false)).Position;
                     var eventsFetcher = new EventsFromEventHorizonFetcher(
                         (@event) => _eventFromEventHorizonValidator.Validate(@event, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant, eventHorizon.ProducerMicroservice, eventHorizon.ProducerTenant),
@@ -90,13 +89,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                                 Tenant = eventHorizon.ProducerTenant.ToProtobuf(),
                                 PublicEventsPosition = publicEventsPosition.Value
                             },
-                            cancellationToken: tokenSource.Token),
+                            cancellationToken: cancellationToken),
                         () =>
                         {
-                            if (!tokenSource.IsCancellationRequested)
+                            if (!cancellationToken.IsCancellationRequested)
                             {
                                 _logger.Debug($"Closing Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
-                                tokenSource.Cancel();
                             }
                         },
                         _logger);
@@ -104,10 +102,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         new EventHorizonEventProcessor(eventHorizon, _getReceivedEventsWriter(), _logger),
                         eventsFetcher,
                         eventHorizon.ProducerMicroservice.Value,
-                        tokenSource);
+                        cancellationToken);
 #pragma warning restore CA2000
 
-                    while (!tokenSource.IsCancellationRequested)
+                    while (!cancellationToken.IsCancellationRequested)
                     {
                         await Task.Delay(5000).ConfigureAwait(false);
                     }
@@ -115,6 +113,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 catch (Exception ex)
                 {
                     _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
+                    throw;
                 }
                 finally
                 {
