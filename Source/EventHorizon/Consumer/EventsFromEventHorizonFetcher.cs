@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 extern alias contracts;
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,50 +18,36 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// </summary>
     public class EventsFromEventHorizonFetcher : IFetchEventsFromStreams
     {
-        readonly Action<EventHorizonEvent> _validateEvent;
-        readonly AsyncServerStreamingCall<ConsumerResponse> _call;
-        readonly Action _onUnavailableConnection;
+        readonly EventHorizon _eventHorizon;
+        readonly AsyncServerStreamingCall<EventHorizonEvent> _call;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsFromEventHorizonFetcher"/> class.
         /// </summary>
-        /// <param name="validateEvent">The <see cref="Action{T}" /> callback for whether an <see cref="EventHorizonEvent" /> is valid.</param>
-        /// <param name="call">The call.</param>
-        /// <param name="onUnavailableConnection">On no connection.</param>
+        /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
+        /// <param name="call">The <see cref="AsyncServerStreamingCall{TResponse}" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventsFromEventHorizonFetcher(
-            Action<EventHorizonEvent> validateEvent,
-            AsyncServerStreamingCall<ConsumerResponse> call,
-            Action onUnavailableConnection,
+            EventHorizon eventHorizon,
+            AsyncServerStreamingCall<EventHorizonEvent> call,
             ILogger logger)
         {
-            _validateEvent = validateEvent;
+            _eventHorizon = eventHorizon;
             _call = call;
             _logger = logger;
-            _onUnavailableConnection = onUnavailableConnection;
         }
 
         /// <inheritdoc/>
         public async Task<StreamEvent> Fetch(ScopeId scopeId, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
-            try
-            {
-                if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(streamId, streamPosition);
-                var response = _call.ResponseStream.Current;
-                var @event = response.Event;
-                _validateEvent(@event);
-                return new StreamEvent(
-                    @event.ToCommittedEvent(),
-                    response.EventStreamPosition,
-                    streamId,
-                    PartitionId.NotSet);
-            }
-            catch (RpcException ex) when (ex.StatusCode == Grpc.Core.StatusCode.Unavailable)
-            {
-                _onUnavailableConnection();
-                throw;
-            }
+            if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(streamId, streamPosition);
+            var @event = _call.ResponseStream.Current;
+            return new StreamEvent(
+                @event.ToCommittedEvent(_eventHorizon.ProducerMicroservice, _eventHorizon.ConsumerTenant),
+                @event.StreamSequenceNumber,
+                streamId,
+                PartitionId.NotSet);
         }
 
         /// <inheritdoc/>

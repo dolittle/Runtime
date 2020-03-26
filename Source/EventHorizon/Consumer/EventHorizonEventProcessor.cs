@@ -4,6 +4,7 @@ extern alias contracts;
 
 using System.Threading;
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
@@ -46,12 +47,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         public EventProcessorId Identifier => _eventHorizon.ProducerTenant.Value;
 
         /// <inheritdoc/>
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, RetryProcessingState retryProcessingState, CancellationToken cancellationToken)
         {
             _logger.Information($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_eventHorizon.ProducerMicroservice}' and tenant '{_eventHorizon.ProducerTenant}'");
 
             await _receivedEventsWriter.Write(@event, Scope, _eventHorizon, cancellationToken).ConfigureAwait(false);
-            return new SucceededProcessingResult();
+            return new ProcessingResult();
         }
     }
 }

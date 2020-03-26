@@ -25,7 +25,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [Singleton]
     public class ConsumerClient : IConsumerClient
     {
-        readonly IEventFromEventHorizonValidator _eventFromEventHorizonValidator;
         readonly IClientManager _clientManager;
         readonly IExecutionContextManager _executionContextManager;
         readonly FactoryFor<IStreamProcessors> _getStreamProcessors;
@@ -36,7 +35,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsumerClient"/> class.
         /// </summary>
-        /// <param name="eventFromEventHorizonValidator">The <see cref="IEventFromEventHorizonValidator" />.</param>
         /// <param name="clientManager">The <see cref="IClientManager" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
@@ -44,7 +42,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="getReceivedEventsWriter">The <see cref="FactoryFor{IWriteReceivedEvents}" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
-            IEventFromEventHorizonValidator eventFromEventHorizonValidator,
             IClientManager clientManager,
             IExecutionContextManager executionContextManager,
             FactoryFor<IStreamProcessors> getStreamProcessors,
@@ -52,7 +49,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             FactoryFor<IWriteEventHorizonEvents> getReceivedEventsWriter,
             ILogger logger)
         {
-            _eventFromEventHorizonValidator = eventFromEventHorizonValidator;
             _clientManager = clientManager;
             _executionContextManager = executionContextManager;
             _getStreamProcessors = getStreamProcessors;
@@ -70,33 +66,26 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _logger.Debug($"Tenant '{eventHorizon.ConsumerTenant}' is subscribing to events from tenant '{eventHorizon.ProducerTenant} in microservice '{eventHorizon.ProducerMicroservice}' on '{microserviceAddress.Host}:{microserviceAddress.Port}' in scope {scope}");
                 try
                 {
-#pragma warning disable CA2000
                     var publicEventsPosition = (await _getStreamProcessorStates().GetOrAddNew(streamProcessorId).ConfigureAwait(false)).Position;
-                    var eventsFetcher = new EventsFromEventHorizonFetcher(
-                        (@event) => _eventFromEventHorizonValidator.Validate(@event, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant, eventHorizon.ProducerMicroservice, eventHorizon.ProducerTenant),
-                        _clientManager.Get<grpc.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port).Subscribe(
+                    var call = _clientManager
+                        .Get<grpc.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
+                        .Subscribe(
                             new grpc.ConsumerSubscription
                             {
                                 Tenant = eventHorizon.ProducerTenant.ToProtobuf(),
                                 LastReceived = (int)publicEventsPosition.Value - 1,
                                 Stream = publicStream.ToProtobuf(),
                                 Partition = partition.ToProtobuf()
-                            },
-                            cancellationToken: cancellationToken),
-                        () =>
-                        {
-                            if (!cancellationToken.IsCancellationRequested)
-                            {
-                                _logger.Debug($"Closing Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
-                            }
-                        },
+                            }, cancellationToken: cancellationToken);
+                    var eventsFetcher = new EventsFromEventHorizonFetcher(
+                        eventHorizon,
+                        call,
                         _logger);
                     _getStreamProcessors().Register(
                         new EventHorizonEventProcessor(scope, eventHorizon, _getReceivedEventsWriter(), _logger),
                         eventsFetcher,
                         eventHorizon.ProducerMicroservice.Value,
                         cancellationToken);
-#pragma warning restore CA2000
 
                     while (!cancellationToken.IsCancellationRequested)
                     {
