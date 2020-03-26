@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             EventProcessorId id,
             EventHandlerProcessingRequestHandler<TRequest, TResponse> processingRequestHandler,
             IExecutionContextManager executionContextManager,
-            Func<CommittedEvent, PartitionId, Dolittle.Execution.ExecutionContext, ProcessingRequestProxy<TRequest>> createProxy,
+            Func<CommittedEvent, PartitionId, Execution.ExecutionContext, ProcessingRequestProxy<TRequest>> createProxy,
             ILogger logger)
         {
             Scope = scope;

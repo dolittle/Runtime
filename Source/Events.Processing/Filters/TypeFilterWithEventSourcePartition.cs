@@ -49,12 +49,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     outPartitionId = @event.EventSource.Value;
                 }
 
-                var filterResult = new SucceededFilteringResult(included, outPartitionId);
+                var filterResult = new FilteringResult(included, outPartitionId);
                 return await Task.FromResult(filterResult).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                return await Task.FromResult(new FailedFilteringResult($"Failure Message: {ex.Message}\nStack Trace: {ex.StackTrace}")).ConfigureAwait(false);
+                return await Task.FromResult(
+                    new FilteringResult(
+                        new ProcessorFailure(ProcessorFailureType.Persistent, $"Failure Message: {ex.Message}\nStack Trace: {ex.StackTrace}"))).ConfigureAwait(false);
             }
         }
     }

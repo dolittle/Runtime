@@ -97,6 +97,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     _logger.Error(ex, $"Error occurred while processing event handler '{eventProcessorId}' in scope '{scope}'");
                 }
+
+                throw;
             }
             finally
             {
@@ -127,8 +129,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                                         _logger);
                     await _getFilters().Register(filter, cancellationToken).ConfigureAwait(false);
 
-                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId);
-                    _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId);
+                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId, cancellationToken);
+                    _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId, cancellationToken);
                 }
                 catch (IllegalFilterTransformation ex)
                 {
