@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -25,15 +26,17 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// De registers the filter that targets the given <see cref="StreamId" />..
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="targetStream">The target <see cref="StreamId" />.</param>
-        void Unregister(StreamId targetStream);
+        void Unregister(ScopeId scope, StreamId targetStream);
 
         /// <summary>
         /// Removes the persisted filter if it is persisted.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="targetStream">The target <see cref="StreamId"/> of the filter to remove.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The task of removing a persisted filter.</returns>
-        Task RemoveIfPersisted(StreamId targetStream, CancellationToken cancellationToken = default);
+        Task RemoveIfPersisted(ScopeId scope, StreamId targetStream, CancellationToken cancellationToken = default);
     }
 }

@@ -18,8 +18,9 @@ namespace Dolittle.Runtime.Events.Streams
         /// <param name="eventType">The event.</param>
         /// <param name="eventLogSequenceNumber">The event log sequence number of the event.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
-        public EventAlreadyWrittenToStream(ArtifactId eventType, EventLogSequenceNumber eventLogSequenceNumber, StreamId stream)
-            : base($"Event '{eventType}' with event log sequence number '{eventLogSequenceNumber}' has already been written to stream '{stream}'")
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        public EventAlreadyWrittenToStream(ArtifactId eventType, EventLogSequenceNumber eventLogSequenceNumber, StreamId stream, ScopeId scope)
+            : base($"Event '{eventType}' with event log sequence number '{eventLogSequenceNumber}' has already been written to stream '{stream}' in scope '{scope}'")
         {
         }
     }

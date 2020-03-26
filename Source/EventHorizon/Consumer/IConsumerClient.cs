@@ -3,6 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Microservices;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -13,20 +15,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public interface IConsumerClient
     {
         /// <summary>
-        /// Asks the producer microservice to acknowledge the consent.
-        /// </summary>
-        /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
-        /// <param name="microserviceAddress">The <see cref="MicroserviceAddress" /> of the microservice to connect to.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        void AcknowledgeConsent(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress, CancellationToken cancellationToken = default);
-
-        /// <summary>
         /// Starts a subscription.
         /// </summary>
         /// <param name="eventHorizon">The <see cref="EventHorizon" />.</param>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <param name="publicStream">The public <see cref="StreamId" />.</param>
+        /// <param name="partition">The <see cref="PartitionId" />.</param>
         /// <param name="microserviceAddress">The <see cref="MicroserviceAddress" /> of the microservice to connect to.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The task.</returns>
-        Task SubscribeTo(EventHorizon eventHorizon, MicroserviceAddress microserviceAddress, CancellationToken cancellationToken = default);
+        Task SubscribeTo(EventHorizon eventHorizon, ScopeId scope, StreamId publicStream, PartitionId partition, MicroserviceAddress microserviceAddress, CancellationToken cancellationToken = default);
     }
 }

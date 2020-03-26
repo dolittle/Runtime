@@ -8,6 +8,7 @@ using System.Threading;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -66,7 +67,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))
             {
                 streamProcessor.Start();
-                _logger.Debug($"Started Stream Processor with key '{new StreamProcessorId(eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
+                _logger.Debug($"Started Stream Processor with key '{new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
                 return streamProcessor;
             }
 
@@ -74,9 +75,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public void Unregister(EventProcessorId eventProcessorId, StreamId sourceStreamId)
+        public void Unregister(ScopeId scopeId, EventProcessorId eventProcessorId, StreamId sourceStreamId)
         {
-            var identifier = new StreamProcessorId(eventProcessorId, sourceStreamId);
+            var identifier = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamId);
             if (_streamProcessors.TryRemove(identifier, out var _))
             {
                 _logger.Debug($"Stopping Stream Processor with key '{identifier}'");

@@ -24,19 +24,25 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractFilterProcessor{T}"/> class.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="filterDefinition">The <see typeparam="TDefinition"/> <see cref="IFilterDefinition" /> for the filter processor.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="FactoryFor{IWriteEventsToStreams}" />.</param>
         /// <param name="logger"><see cref="ILogger" />.</param>
         protected AbstractFilterProcessor(
+            ScopeId scope,
             TDefinition filterDefinition,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
         {
+            Scope = scope;
             Definition = filterDefinition;
             _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
-            _logMessagePrefix = $"Filter Processor '{Identifier}' with source stream '{Definition.SourceStream}'";
+            _logMessagePrefix = $"Filter Processor '{Identifier}' in scope '{Scope}' with source stream '{Definition.SourceStream}'";
         }
+
+        /// <inheritdoc/>
+        public ScopeId Scope { get; }
 
         /// <inheritdoc/>
         public TDefinition Definition { get; }
@@ -57,7 +63,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             if (result.Succeeded && result.IsIncluded)
             {
                 _logger.Debug($"{_logMessagePrefix} writing event '{@event.Type.Id}' to stream '{Definition.TargetStream}' in partition '{partitionId}'");
-                await _eventsToStreamsWriter.Write(@event, Definition.TargetStream, result.Partition, cancellationToken).ConfigureAwait(false);
+                await _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken).ConfigureAwait(false);
             }
 
             return result;

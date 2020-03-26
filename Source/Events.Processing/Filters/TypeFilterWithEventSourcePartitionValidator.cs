@@ -53,10 +53,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         async Task ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
-            var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(new StreamProcessorId(filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken).ConfigureAwait(false);
+            var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken).ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;
-            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchTypesInRange(filter.Definition.TargetStream, new StreamPositionRange(StreamPosition.Start, uint.MaxValue), cancellationToken).ConfigureAwait(false);
-            var sourceStreamEvents = lastUnProcessedEventPosition == 0 ? Enumerable.Empty<StreamEvent>() : await _eventsFromStreams.FetchRange(filter.Definition.SourceStream, new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition - 1), cancellationToken).ConfigureAwait(false);
+            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchTypesInRange(filter.Scope, filter.Definition.TargetStream, new StreamPositionRange(StreamPosition.Start, uint.MaxValue), cancellationToken).ConfigureAwait(false);
+            var sourceStreamEvents = lastUnProcessedEventPosition == 0 ? Enumerable.Empty<StreamEvent>() : await _eventsFromStreams.FetchRange(filter.Scope, filter.Definition.SourceStream, new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition - 1), cancellationToken).ConfigureAwait(false);
             var artifactsFromSourceStream = new List<Artifact>();
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (processingResult.IsIncluded) artifactsFromSourceStream.Add(@event.Type);
             }
 
-            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream)) throw new IllegalFilterTransformation(filter.Definition.TargetStream, filter.Definition.SourceStream);
+            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream)) throw new IllegalFilterTransformation(filter.Scope, filter.Definition.TargetStream, filter.Definition.SourceStream);
         }
 
         bool ArtifactListsAreTheSame(IEnumerable<Artifact> oldList, IEnumerable<Artifact> newList) =>

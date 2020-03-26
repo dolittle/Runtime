@@ -15,9 +15,10 @@ namespace Dolittle.Runtime.Events.Streams
         /// <summary>
         /// Gets the last <see cref="EventLogSequenceNumber" /> in a stream.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="EventLogSequenceNumber" /> or null if there are no events in the stream..</returns>
-        Task<EventLogSequenceNumber> GetLastEventLogSequenceNumber(StreamId stream, CancellationToken cancellationToken);
+        Task<EventLogSequenceNumber> GetLastEventLogSequenceNumber(ScopeId scope, StreamId stream, CancellationToken cancellationToken);
     }
 }

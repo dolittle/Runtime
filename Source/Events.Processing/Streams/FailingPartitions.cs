@@ -108,13 +108,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         Task<StreamEvent> FetchEventWithPartitionAtPosition(StreamProcessorId streamProcessorId, StreamPosition position, CancellationToken cancellationToken)
         {
             _logger.Debug($"Failing partition in Stream Processor '{streamProcessorId}' is fetching event at position '{position}'.");
-            return _eventsFromStreamsFetcher.Fetch(streamProcessorId.SourceStreamId, position, cancellationToken);
+            return _eventsFromStreamsFetcher.Fetch(streamProcessorId.ScopeId, streamProcessorId.SourceStreamId, position, cancellationToken);
         }
 
         Task<StreamPosition> FindPositionOfNextEventInPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken)
         {
             _logger.Debug($"Fetching next event to process in partition '{partitionId}' from position '{fromPosition}'.");
-            return _eventsFromStreamsFetcher.FindNext(streamProcessorId.SourceStreamId, partitionId, fromPosition, cancellationToken);
+            return _eventsFromStreamsFetcher.FindNext(streamProcessorId.ScopeId, streamProcessorId.SourceStreamId, partitionId, fromPosition, cancellationToken);
         }
 
         Task<(StreamProcessorState, FailingPartitionState)> SetFailingPartitionState(StreamProcessorId streamProcessorId, PartitionId partitionId, uint retryTimeout, string reason, StreamPosition position, CancellationToken cancellationToken) => SetFailingPartitionState(streamProcessorId, partitionId, DateTimeOffset.UtcNow.AddMilliseconds(retryTimeout), reason, position, cancellationToken);
