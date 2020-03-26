@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Services;
 using Google.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
     /// <summary>
     /// Represents a system that can handle event handler processing requests.

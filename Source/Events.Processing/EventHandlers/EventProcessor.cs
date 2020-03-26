@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Google.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessor" />that processes the handling of an event.

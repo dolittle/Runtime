@@ -5,19 +5,19 @@ extern alias contracts;
 
 using contracts::Dolittle.Runtime.Events.Processing;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
     /// <summary>
-    /// Extension methods for <see cref="ScopedEventHandlerClientToRuntimeResponse" />.
+    /// Extension methods for <see cref="EventHandlerClientToRuntimeResponse" />.
     /// </summary>
-    public static class ScopedEventHandlerClientToRuntimeResponseExtensions
+    public static class EventHandlerClientToRuntimeResponseExtensions
     {
         /// <summary>
-        /// Converts the <see cref="ScopedEventHandlerClientToRuntimeResponse" /> to a <see cref="IProcessingResult" />.
+        /// Converts the <see cref="EventHandlerClientToRuntimeResponse" /> to a <see cref="IProcessingResult" />.
         /// </summary>
-        /// <param name="response">The <see cref="ScopedEventHandlerClientToRuntimeResponse" />.</param>
+        /// <param name="response">The <see cref="EventHandlerClientToRuntimeResponse" />.</param>
         /// <returns>The converted <see cref="IProcessingResult" />.</returns>
-        public static IProcessingResult ToProcessingResult(this ScopedEventHandlerClientToRuntimeResponse response)
+        public static IProcessingResult ToProcessingResult(this EventHandlerClientToRuntimeResponse response)
         {
             if (!response.Succeeded && !response.Retry) return new FailedProcessingResult(response.FailureReason ?? string.Empty);
             else if (!response.Succeeded && response.Retry) return new RetryProcessingResult(response.RetryTimeout, response.FailureReason ?? string.Empty);

@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
 using Google.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
     /// <summary>
     /// Defines a system that knows how to register and start event handlers.

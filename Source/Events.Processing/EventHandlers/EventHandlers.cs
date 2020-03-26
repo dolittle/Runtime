@@ -20,7 +20,7 @@ using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Google.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventHandlers" />.

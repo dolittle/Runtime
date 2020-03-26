@@ -10,26 +10,26 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Google.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
     /// <summary>
-    /// Represents an implementation of <see cref="ProcessingRequestProxy{TRequest}" /> for <see cref="ScopedFilterRuntimeToClientRequest" />.
+    /// Represents an implementation of <see cref="ProcessingRequestProxy{TRequest}" /> for <see cref="EventHandlerRuntimeToClientRequest" />.
     /// </summary>
-    public class ScopedFilterRequestProxy : ProcessingRequestProxy<ScopedFilterRuntimeToClientRequest>
+    public class EventHandlerProcessingRequestProxy : ProcessingRequestProxy<EventHandlerRuntimeToClientRequest>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ScopedFilterRequestProxy"/> class.
+        /// Initializes a new instance of the <see cref="EventHandlerProcessingRequestProxy"/> class.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="partition">The <see cref="PartitionId" />.</param>
         /// <param name="executionContext">The <see cref="ExecutionContext "/>.</param>
-        public ScopedFilterRequestProxy(CommittedEvent @event, PartitionId partition, ExecutionContext executionContext)
+        public EventHandlerProcessingRequestProxy(CommittedEvent @event, PartitionId partition, ExecutionContext executionContext)
             : base(@event, partition, executionContext)
         {
         }
 
         /// <inheritdoc/>
-        public override ScopedFilterRuntimeToClientRequest ToProcessingRequest() =>
-            new ScopedFilterRuntimeToClientRequest { Event = Event.ToProtobuf(), Partition = Partition.ToProtobuf(), ExecutionContext = ExecutionContext.ToByteString() };
+        public override EventHandlerRuntimeToClientRequest ToProcessingRequest() =>
+            new EventHandlerRuntimeToClientRequest { Event = Event.ToProtobuf(), Partition = Partition.ToProtobuf(), ExecutionContext = ExecutionContext.ToByteString() };
     }
 }
