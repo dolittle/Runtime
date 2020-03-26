@@ -1,13 +1,17 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+extern alias contracts;
+
 using System.Threading;
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
+using Dolittle.Services;
 using Google.Protobuf;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
@@ -15,40 +19,32 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessor" />that processes the handling of an event.
     /// </summary>
-    /// <typeparam name="TResponse">The response <see cref="IMessage" /> type.</typeparam>
-    /// <typeparam name="TRequest">The request <see cref="IMessage" /> type.</typeparam>
-    public class EventProcessor<TResponse, TRequest> : IEventProcessor
-        where TResponse : IMessage
-        where TRequest : IMessage
+    public class EventProcessor : IEventProcessor
     {
-        readonly EventHandlerProcessingRequestHandler<TRequest, TResponse> _processingRequestHandler;
+        readonly IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> _dispatcher;
         readonly IExecutionContextManager _executionContextManager;
-        readonly Func<CommittedEvent, PartitionId, Execution.ExecutionContext, ProcessingRequestProxy<TRequest>> _createProxy;
         readonly ILogger _logger;
         readonly string _logMessagePrefix;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EventProcessor{TResponse, TRequest}"/> class.
+        /// Initializes a new instance of the <see cref="EventProcessor"/> class.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="id">The <see cref="EventProcessorId" />.</param>
-        /// <param name="processingRequestHandler"><see cref="EventHandlerProcessingRequestHandler{TRequest, TResponse}"/> that handles the processing requests.</param>
+        /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TRequest, TResponse}"/> dispatcher.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
-        /// <param name="createProxy">The callback for creating the proxy object.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
             ScopeId scope,
             EventProcessorId id,
-            EventHandlerProcessingRequestHandler<TRequest, TResponse> processingRequestHandler,
+            IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> dispatcher,
             IExecutionContextManager executionContextManager,
-            Func<CommittedEvent, PartitionId, Execution.ExecutionContext, ProcessingRequestProxy<TRequest>> createProxy,
             ILogger logger)
         {
             Scope = scope;
             Identifier = id;
-            _processingRequestHandler = processingRequestHandler;
+            _dispatcher = dispatcher;
             _executionContextManager = executionContextManager;
-            _createProxy = createProxy;
             _logger = logger;
             _logMessagePrefix = $"Event Processor '{Identifier}'";
         }
@@ -60,11 +56,20 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public EventProcessorId Identifier { get; }
 
         /// <inheritdoc />
-        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken = default)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 
-            return _processingRequestHandler.Process(_createProxy(@event, partitionId, _executionContextManager.Current));
+            var request = new EventHandlerRuntimeToClientRequest
+                {
+                    Event = @event.ToProtobuf(),
+                    Partition = partitionId.ToProtobuf(),
+                    ExecutionContext = _executionContextManager.Current.ToByteString()
+                };
+
+            ProcessingResult result = null;
+            await _dispatcher.Call(request, response => result = response).ConfigureAwait(false);
+            return result;
         }
     }
 }

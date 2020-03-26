@@ -65,14 +65,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
-            var eventProcessor = new EventProcessor<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest>(
+            var eventProcessor = new EventProcessor(
                 scope,
                 eventProcessorId,
-                new EventHandlerProcessingRequestHandler<EventHandlerRuntimeToClientRequest, EventHandlerClientToRuntimeResponse>(
-                    dispatcher,
-                    response => response.ToProcessingResult()),
+                dispatcher,
                 _executionContextManager,
-                (@event, partition, executionContext) => new EventHandlerProcessingRequestProxy(@event, partition, executionContext),
                 _logger);
             return _eventHandlers.RegisterAndStartProcessing(
                 scope,
