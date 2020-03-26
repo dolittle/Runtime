@@ -55,8 +55,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc />
         public EventProcessorId Identifier { get; }
 
+        #nullable enable
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken = default)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, RetryProcessingState? retryProcessingState, CancellationToken cancellationToken = default)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 
@@ -64,12 +65,13 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     Event = @event.ToProtobuf(),
                     Partition = partitionId.ToProtobuf(),
-                    ExecutionContext = _executionContextManager.Current.ToByteString()
+                    ExecutionContext = _executionContextManager.Current.ToByteString(),
+                    RetryProcessingState = retryProcessingState
                 };
 
-            ProcessingResult result = null;
+            ProcessingResult? result = null;
             await _dispatcher.Call(request, response => result = response).ConfigureAwait(false);
-            return result;
+            return result!;
         }
     }
 }

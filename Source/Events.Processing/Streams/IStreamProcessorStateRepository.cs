@@ -36,11 +36,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="position">The <see cref="StreamPosition" /> of the failing event.</param>
+        /// <param name="failureType">The <see cref="ProcessorFailureType" />.</param>
         /// <param name="retryTime">The <see cref="DateTimeOffset" /> point in time to retry processing.</param>
         /// <param name="reason">The reason for failure.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted <see cref="StreamProcessorState" />for this <see cref="StreamProcessor" />.</returns>
-        Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default);
+        Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, ProcessorFailureType failureType, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Adds a failing partition to the state.

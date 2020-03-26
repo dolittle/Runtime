@@ -67,15 +67,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
-            var eventProcessor = new FilterProcessor<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest>(
+            var eventProcessor = new FilterProcessor(
                 scope,
                 new RemoteFilterDefinition(streamId, eventProcessorId.Value),
-                new FilterRequestHandler<FilterRuntimeToClientRequest, FilterClientToRuntimeResponse>(
-                    dispatcher,
-                    response => response.ToFilterResult()),
+                dispatcher,
                 _eventsToStreamsWriterFactory(),
                 _executionContextManager,
-                (@event, partition, executionContext) => new FilterRequestProxy(@event, partition, executionContext),
                 _logger);
 
             return _filters.RegisterAndStartProcessing(

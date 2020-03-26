@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
@@ -37,8 +38,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger = logger;
         }
 
+        #nullable enable
         /// <inheritdoc/>
-        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
+        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, RetryProcessingState? retryProcessing, CancellationToken cancellationToken)
         {
             try
             {

@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var artifactsFromSourceStream = new List<Artifact>();
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {
-                var processingResult = await filter.Filter(@event, PartitionId.NotSet, filter.Identifier, cancellationToken).ConfigureAwait(false);
+                var processingResult = await filter.Filter(@event, PartitionId.NotSet, filter.Identifier, null, cancellationToken).ConfigureAwait(false);
                 if (processingResult.IsIncluded) artifactsFromSourceStream.Add(@event.Type);
             }
 

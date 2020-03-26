@@ -1,12 +1,15 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+extern alias contracts;
+
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
+using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -50,14 +53,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc />
         public EventProcessorId Identifier => Definition.TargetStream.Value;
 
+        #nullable enable
         /// <inheritdoc/>
-        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken);
+        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken = default)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken = default)
         {
             _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId}'");
-            var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
+            var result = await Filter(@event, partitionId, Identifier, retryProcessingState, cancellationToken).ConfigureAwait(false);
             _logger.Debug($"{_logMessagePrefix} filtered event '{@event.Type.Id}' for partition '{partitionId}' with result 'Succeeded' = {result.Succeeded}");
 
             if (result.Succeeded && result.IsIncluded)
