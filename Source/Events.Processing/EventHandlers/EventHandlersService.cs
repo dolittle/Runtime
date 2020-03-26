@@ -54,9 +54,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             ServerCallContext context)
         {
             var sourceStream = StreamId.AllStreamId;
-            var scope = ScopeId.Default;
             var eventHandlerArguments = context.GetArgumentsMessage<EventHandlerArguments>();
             var eventProcessorId = eventHandlerArguments.EventHandler.To<EventProcessorId>();
+            var scope = eventHandlerArguments.Scope.To<ScopeId>();
             var types = eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>());
             var partitioned = eventHandlerArguments.Partitioned;
             var dispatcher = _reverseCallDispatchers.GetDispatcherFor(

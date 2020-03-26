@@ -71,9 +71,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
                 _ => _.CallNumber);
             var eventProcessor = new PublicFilterProcessor(
                 new RemoteFilterDefinition(streamId, eventProcessorId.Value),
-                new FilterRequestHandler<PublicFilterRuntimeToClientRequest, PublicFilterClientToRuntimeResponse>(
-                    dispatcher,
-                    response => response.ToFilterResult()),
+                dispatcher,
                 _getEventsToPublicStreamsWriter(),
                 _executionContextManager,
                 _logger);

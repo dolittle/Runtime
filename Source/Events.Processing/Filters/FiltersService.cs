@@ -58,8 +58,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             var filterArguments = context.GetArgumentsMessage<FilterArguments>();
             var eventProcessorId = filterArguments.Filter.To<EventProcessorId>();
+            var scope = filterArguments.Scope.To<ScopeId>();
             var streamId = StreamId.AllStreamId;
-            var scope = ScopeId.Default;
 
             var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
                 runtimeStream,

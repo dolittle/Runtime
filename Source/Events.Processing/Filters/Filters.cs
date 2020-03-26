@@ -86,6 +86,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 {
                     _logger.Error(ex, $"Error occurred while handling filter client '{eventProcessorId}'");
                 }
+
+                throw;
             }
             finally
             {

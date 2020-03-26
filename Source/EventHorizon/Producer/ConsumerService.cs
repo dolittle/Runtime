@@ -65,7 +65,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         }
 
         /// <inheritdoc/>
-        public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<ConsumerResponse> responseStream, ServerCallContext context)
+        public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<EventHorizonEvent> responseStream, ServerCallContext context)
         {
             var scope = ScopeId.Default;
             EventHorizon eventHorizon = null;
@@ -76,13 +76,13 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     _executionContextManager.Current.Tenant,
                     _microservice,
                     subscription.Tenant.To<TenantId>());
-                var publicEventsPosition = subscription.PublicEventsPosition;
-                _logger.Information($"Incomming Event Horizon subscription from microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' to tenant '{eventHorizon.ProducerTenant}' starting at position '{publicEventsPosition}'");
+                var lastReceivedPosition = subscription.LastReceived; // -1 if not received any events
+                _logger.Information($"Incomming Event Horizon subscription from microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' to tenant '{eventHorizon.ProducerTenant}' starting at position '{lastReceivedPosition}'");
 
                 ThrowIfProducerTenantDoesNotExist(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant);
-                var publicStream = subscription.PublicStream.To<StreamId>();
+                var publicStream = subscription.Stream.To<StreamId>();
                 var partition = subscription.Partition.To<PartitionId>();
-                var publicStreamPosition = new StreamPosition(subscription.PublicEventsPosition);
+                var publicStreamPosition = new StreamPosition((ulong)(lastReceivedPosition + 1));
 
                 ThrowIfConsentIsNotGiven(eventHorizon, publicStream, partition);
                 while (!context.CancellationToken.IsCancellationRequested)
@@ -99,26 +99,17 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         var streamEvent = await _getEventsFromPublicStreamsFetcher().Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
                         var eventHorizonEvent = new EventHorizonEvent
                         {
-                            ConsumerMicroservice = eventHorizon.ConsumerMicroservice.ToProtobuf(),
-                            ConsumerTenant = eventHorizon.ConsumerTenant.ToProtobuf(),
                             Content = streamEvent.Event.Content,
                             Correlation = streamEvent.Event.CorrelationId.ToProtobuf(),
                             EventSource = streamEvent.Event.EventSource.ToProtobuf(),
                             Occurred = Timestamp.FromDateTimeOffset(streamEvent.Event.Occurred),
-                            ProducerMicroservice = eventHorizon.ProducerMicroservice.ToProtobuf(),
-                            ProducerTenant = eventHorizon.ProducerTenant.ToProtobuf(),
                             Type = new grpcArtifacts.Artifact
                                 {
                                     Generation = streamEvent.Event.Type.Generation,
                                     Id = streamEvent.Event.Type.Id.ToProtobuf()
                                 }
                         };
-                        await responseStream.WriteAsync(
-                            new ConsumerResponse
-                            {
-                                EventStreamPosition = streamPosition,
-                                Event = eventHorizonEvent
-                            }).ConfigureAwait(false);
+                        await responseStream.WriteAsync(eventHorizonEvent).ConfigureAwait(false);
                         publicStreamPosition = streamPosition.Increment();
                     }
                     catch (NoEventInStreamAtPosition)
@@ -137,6 +128,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 {
                     _logger.Error(ex, $"Error occurred in Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer tenant '{eventHorizon.ProducerTenant}'");
                 }
+
+                throw;
             }
             finally
             {
