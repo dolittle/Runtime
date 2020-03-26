@@ -77,7 +77,7 @@ namespace Dolittle.Runtime.Events.Store
                 var uncommittedAggregateEvents = new UncommittedAggregateEvents(
                     eventSourceId,
                     aggregateRoot,
-                    request.AggregateRootVersion,
+                    request.ExpectedAggregateRootVersion,
                     new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
 
                 var committedEvents = await _eventStoreFactory().CommitAggregateEvents(uncommittedAggregateEvents, context.CancellationToken).ConfigureAwait(false);

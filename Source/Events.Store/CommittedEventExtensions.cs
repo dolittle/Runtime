@@ -38,8 +38,8 @@ namespace Dolittle.Runtime.Events.Store
                 Tenant = @event.Tenant.ToProtobuf(),
                 Cause = new grpcEvents.Cause
                 {
-                    Type = (int)@event.Cause.Type,
-                    Position = @event.Cause.Position
+                    Type = (grpcEvents.Cause.Types.CauseType)@event.Cause.Type,
+                    SequenceNumber = @event.Cause.Position
                 },
                 Type = new grpcArtifacts.Artifact
                 {
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Store
                 @event.Correlation.To<CorrelationId>(),
                 @event.Microservice.To<Microservice>(),
                 @event.Tenant.To<TenantId>(),
-                new Cause((CauseType)@event.Cause.Type, @event.Cause.Position),
+                new Cause((CauseType)@event.Cause.Type, @event.Cause.SequenceNumber),
                 new Artifact(@event.Type.Id.To<ArtifactId>(), @event.Type.Generation),
                 @event.Public,
                 @event.Content);

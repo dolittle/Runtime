@@ -8,12 +8,12 @@ namespace Dolittle.Runtime.Events.Store
     /// <summary>
     /// Represents a position of a <see cref="Cause"/> in a log as a natural number.
     /// </summary>
-    public class CauseLogPosition : ConceptAs<uint>
+    public class CauseLogPosition : ConceptAs<ulong>
     {
         /// <summary>
-        /// Implicitly convert a <see cref="uint"/> to an <see cref="CauseLogPosition"/>.
+        /// Implicitly convert a <see cref="ulong"/> to an <see cref="CauseLogPosition"/>.
         /// </summary>
         /// <param name="number">The number.</param>
-        public static implicit operator CauseLogPosition(uint number) => new CauseLogPosition { Value = number };
+        public static implicit operator CauseLogPosition(ulong number) => new CauseLogPosition { Value = number };
     }
 }
