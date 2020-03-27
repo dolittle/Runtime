@@ -3,6 +3,8 @@
         {
             "microservice": "f39b1f61-d360-4675-b859-53c05c87c0e6",
             "tenant": "445f8ea8-1a6f-40d7-b2fc-796dba92dc44",
+            "stream": "eb356fbc-59f1-486a-909f-1a20eb1e9ee5",
+            "partition": "00000000-0000-0000-0000-000000000000",
             "consent": "09e64562-bdc0-4925-8dd0-112dca540553"
         }
     ]
