@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <param name="sourceStream">The source <see cref="StreamId" />.</param>
         /// <param name="dispatcher">The call dispatcher.</param>
-        /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
+        /// <param name="createEventProcessor">The callback for creating the <see cref="IEventProcessor" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A task.</returns>
         Task RegisterAndStartProcessing<TResponse, TRequest, TFilterDefinition>(
@@ -34,7 +35,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             EventProcessorId eventProcessorId,
             StreamId sourceStream,
             IReverseCallDispatcher<TResponse, TRequest> dispatcher,
-            IFilterProcessor<TFilterDefinition> eventProcessor,
+            Func<IFilterProcessor<TFilterDefinition>> createEventProcessor,
             CancellationToken cancellationToken)
             where TResponse : IMessage
             where TRequest : IMessage

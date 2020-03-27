@@ -69,7 +69,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
-            var eventProcessor = new PublicFilterProcessor(
+
+            PublicFilterProcessor createEventProcessor() => new PublicFilterProcessor(
                 new RemoteFilterDefinition(streamId, eventProcessorId.Value),
                 dispatcher,
                 _getEventsToPublicStreamsWriter(),
@@ -81,7 +82,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
                 eventProcessorId,
                 streamId,
                 dispatcher,
-                eventProcessor,
+                createEventProcessor,
                 context.CancellationToken);
         }
     }

@@ -47,12 +47,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             _processor = processor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
-            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' in scope {Identifier.ScopeId} with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
             _streamProcessorStates = streamProcessorStates;
             _logger = logger;
             _cancellationToken = cancellationToken;
             Identifier = new StreamProcessorId(_processor.Scope, _processor.Identifier, sourceStreamId);
             CurrentState = StreamProcessorState.New;
+            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' in scope {Identifier.ScopeId} with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
         }
 
         /// <summary>

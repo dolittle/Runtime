@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public PublicFilterProcessor(
-            RemoteFilterDefinition definition,
+            PublicFilterDefinition definition,
             IReverseCallDispatcher<PublicFilterClientToRuntimeResponse, PublicFilterRuntimeToClientRequest> dispatcher,
             IWriteEventsToPublicStreams eventsToPublicStreamsWriter,
             IExecutionContextManager executionContextManager,

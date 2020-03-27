@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
-            var eventProcessor = new FilterProcessor(
+            FilterProcessor createEventProcessor() => new FilterProcessor(
                 scope,
                 new RemoteFilterDefinition(streamId, eventProcessorId.Value),
                 dispatcher,
@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 eventProcessorId,
                 streamId,
                 dispatcher,
-                eventProcessor,
+                createEventProcessor,
                 context.CancellationToken);
         }
     }

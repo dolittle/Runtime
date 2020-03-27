@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             EventProcessorId eventProcessorId,
             StreamId sourceStream,
             IReverseCallDispatcher<TResponse, TRequest> dispatcher,
-            IFilterProcessor<TFilterDefinition> filter,
+            Func<IFilterProcessor<TFilterDefinition>> createFilter,
             CancellationToken cancellationToken)
             where TResponse : IMessage
             where TRequest : IMessage
@@ -76,7 +76,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 ThrowIfIllegalTargetStream(streamId);
                 _logger.Debug($"Registering filter '{eventProcessorId}' in scope '{scope}'");
 
-                await RegisterForAllTenants(scope, eventProcessorId, streamId, filter, cancellationToken).ConfigureAwait(false);
+                await RegisterForAllTenants(scope, eventProcessorId, streamId, createFilter, cancellationToken).ConfigureAwait(false);
 
                 await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
             }
@@ -100,7 +100,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             ScopeId scope,
             EventProcessorId eventProcessorId,
             StreamId streamId,
-            IFilterProcessor<TFilterDefinition> filter,
+            Func<IFilterProcessor<TFilterDefinition>> createFilter,
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
@@ -111,6 +111,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 try
                 {
                     _executionContextManager.CurrentFor(tenant);
+                    var filter = createFilter();
                     await _filterRegistryFactory().Register(filter, cancellationToken).ConfigureAwait(false);
                     _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), streamId);
                 }
