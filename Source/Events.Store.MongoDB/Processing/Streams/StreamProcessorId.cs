@@ -14,13 +14,20 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessorId"/> class.
         /// </summary>
+        /// <param name="scopeId">The scope id.</param>
         /// <param name="eventProcessorId">The event processor id.</param>
         /// <param name="sourceStreamId">The source stream id.</param>
-        public StreamProcessorId(Guid eventProcessorId, Guid sourceStreamId)
+        public StreamProcessorId(ScopeId scopeId, Guid eventProcessorId, Guid sourceStreamId)
         {
+            ScopeId = scopeId;
             EventProcessorId = eventProcessorId;
             SourceStreamId = sourceStreamId;
         }
+
+        /// <summary>
+        /// Gets or sets the scope id.
+        /// </summary>
+        public Guid ScopeId { get; set; }
 
         /// <summary>
         /// Gets or sets the event processor id.

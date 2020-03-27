@@ -123,7 +123,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     _streamEventFilter.Eq(_ => _.Metadata.Partition, partitionId.Value)
                     & _streamEventFilter.Gte(_ => _.StreamPosition, fromPosition.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                return streamEvent != default ? streamEvent.StreamPosition : uint.MaxValue;
+                return streamEvent != default ? streamEvent.StreamPosition : ulong.MaxValue;
             }
             catch (MongoWaitQueueFullException ex)
             {

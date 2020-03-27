@@ -7,6 +7,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
     /// </summary>
     public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     {
-        readonly FilterDefinitionBuilder<EventHorizonEvent> _streamEventFilter = Builders<EventHorizonEvent>.Filter;
+        readonly FilterDefinitionBuilder<Event> _eventFilter = Builders<Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -34,23 +35,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, Runtime.EventHorizon.EventHorizon eventHorizon, CancellationToken cancellationToken = default)
+        public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken = default)
         {
             StreamPosition streamPosition = null;
             try
             {
+                var eventHorizonEvents = await _connection.GetScopedEventLogAsync(scope, cancellationToken).ConfigureAwait(false);
                 using var session = await _connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
                 await session.WithTransactionAsync(
                     async (transaction, cancellationToken) =>
                     {
-                        var eventHorizonEvents = await _connection.GetEventHorizonEventsCollectionAsync(eventHorizon.ProducerMicroservice, cancellationToken).ConfigureAwait(false);
-                        streamPosition = (uint)await eventHorizonEvents.CountDocumentsAsync(
+                        streamPosition = (ulong)await eventHorizonEvents.CountDocumentsAsync(
                             transaction,
-                            _streamEventFilter.Empty).ConfigureAwait(false);
+                            _eventFilter.Empty).ConfigureAwait(false);
 
+                        var storedEvent = CreateEventFromEventHorizonEvent(@event, streamPosition.Value);
                         await eventHorizonEvents.InsertOneAsync(
                             transaction,
-                            @event.ToNewEventHorizonEvent(streamPosition, eventHorizon),
+                            storedEvent,
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },
@@ -63,13 +65,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
             }
              catch (MongoDuplicateKeyException)
             {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, eventHorizon.ProducerMicroservice.Value);
+                throw new EventAlreadyWrittenToStream(@event.Type.Id, streamPosition.Value, StreamId.AllStreamId, scope);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, eventHorizon.ProducerMicroservice.Value);
+                    throw new EventAlreadyWrittenToStream(@event.Type.Id, streamPosition.Value, StreamId.AllStreamId, scope);
                 }
 
                 throw;
@@ -80,12 +82,30 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, eventHorizon.ProducerMicroservice.Value);
+                        throw new EventAlreadyWrittenToStream(@event.Type.Id, streamPosition.Value, StreamId.AllStreamId, scope);
                     }
                 }
 
                 throw;
             }
         }
+
+        Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>
+            new Event(
+                sequenceNumber,
+                new Events.ExecutionContext(
+                    @event.CorrelationId,
+                    @event.Microservice,
+                    @event.Tenant),
+                new EventMetadata(
+                    @event.Occurred,
+                    @event.EventSource,
+                    @event.Cause.Type,
+                    @event.Cause.Position,
+                    @event.Type.Id,
+                    @event.Type.Generation,
+                    @event.Public),
+                new AggregateMetadata(),
+                BsonDocument.Parse(@event.Content));
     }
 }

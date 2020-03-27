@@ -16,17 +16,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets the <see cref="StreamEventMetadata"/> from the <see cref="CommittedEvent"/>.
         /// </summary>
         /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
-        /// <param name="partition">The <see cref="PartitionId" />.</param>
         /// <returns>The converted <see cref="StreamEventMetadata" />.</returns>
-        public static StreamEventMetadata GetStreamEventMetadata(this CommittedEvent committedEvent, PartitionId partition) =>
+        public static StreamEventMetadata GetStreamEventMetadata(this CommittedEvent committedEvent) =>
             new StreamEventMetadata(
                 committedEvent.EventLogSequenceNumber,
                 committedEvent.Occurred,
-                partition.Value,
                 committedEvent.EventSource,
-                committedEvent.CorrelationId,
-                committedEvent.Microservice,
-                committedEvent.Tenant,
                 committedEvent.Cause.Type,
                 committedEvent.Cause.Position,
                 committedEvent.Type.Id,
@@ -45,9 +40,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.Metadata.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
-                @event.Metadata.Correlation,
-                @event.Metadata.Microservice,
-                @event.Metadata.Tenant,
+                @event.ExecutionContext.Correlation,
+                @event.ExecutionContext.Microservice,
+                @event.ExecutionContext.Tenant,
                 new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
@@ -65,9 +60,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     @event.Metadata.EventLogSequenceNumber,
                     @event.Metadata.Occurred,
                     @event.Metadata.EventSource,
-                    @event.Metadata.Correlation,
-                    @event.Metadata.Microservice,
-                    @event.Metadata.Tenant,
+                    @event.ExecutionContext.Correlation,
+                    @event.ExecutionContext.Microservice,
+                    @event.ExecutionContext.Tenant,
                     new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                     new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                     @event.Metadata.Public,
@@ -80,7 +75,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <returns>The converted <see cref="StreamEvent" />.</returns>
         public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this MongoDB.Events.StreamEvent @event, StreamId stream) =>
-            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), stream, @event.Metadata.Partition);
+            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition);
 
         /// <summary>
         /// Converts a <see cref="CommittedEvent" /> to <see cref="Event" />.
@@ -92,7 +87,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static MongoDB.Events.StreamEvent ToStoreStreamEvent(this CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
             new MongoDB.Events.StreamEvent(
                 streamPosition,
-                committedEvent.GetStreamEventMetadata(partition),
+                partition,
+                new ExecutionContext(
+                    committedEvent.CorrelationId,
+                    committedEvent.Microservice,
+                    committedEvent.Tenant),
+                committedEvent.GetStreamEventMetadata(),
                 committedEvent.GetAggregateMetadata(),
                 BsonDocument.Parse(committedEvent.Content));
     }

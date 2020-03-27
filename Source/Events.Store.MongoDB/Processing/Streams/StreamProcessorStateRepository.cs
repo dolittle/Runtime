@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Streams;
 using MongoDB.Driver;
@@ -38,7 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             {
                 var states = _connection.StreamProcessorStates;
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default)
@@ -81,13 +82,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> IncrementPosition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> SetNextEventToProcessPosition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, StreamPosition position, CancellationToken cancellationToken = default)
         {
             try
             {
+                var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
                 var states = _connection.StreamProcessorStates;
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
@@ -95,7 +97,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 state.Position++;
 
                 var replaceResult = await states.ReplaceOneAsync(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
+                    _streamProcessorFilter.Eq(_ => _.Id, id),
                     state,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -110,11 +112,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> AddFailingPartition(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> AddFailingPartition(
+            Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId,
+            PartitionId partitionId,
+            StreamPosition position,
+            ProcessorFailureType failureType,
+            DateTimeOffset retryTime,
+            string reason,
+            CancellationToken cancellationToken = default)
         {
             try
             {
-                var id = new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
+                var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
                 var states = _connection.StreamProcessorStates;
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
@@ -123,7 +132,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
                 if (state.FailingPartitions.ContainsKey(partitionId.Value.ToString())) throw new FailingPartitionAlreadyExists(streamProcessorId, partitionId);
-                state.FailingPartitions.Add(partitionId.Value.ToString(), new FailingPartitionState(position, retryTime, reason));
+                state.FailingPartitions.Add(partitionId.Value.ToString(), new FailingPartitionState(position, retryTime, reason, failureType, 1));
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, id),
                     state,
@@ -144,9 +153,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         {
             try
             {
+                var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
                 var states = _connection.StreamProcessorStates;
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
@@ -155,7 +165,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
                 state.FailingPartitions.Remove(partitionId.Value.ToString());
                 var replaceResult = await states.ReplaceOneAsync(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
+                    _streamProcessorFilter.Eq(_ => _.Id, id),
                     state,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
 
@@ -174,19 +184,25 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         {
             try
             {
+                var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
                 var states = _connection.StreamProcessorStates;
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
                 if (!state.FailingPartitions.ContainsKey(partitionId.Value.ToString())) throw new FailingPartitionDoesNotExist(streamProcessorId, partitionId);
 
-                state.FailingPartitions[partitionId.Value.ToString()] = new FailingPartitionState(failingPartitionState.Position, failingPartitionState.RetryTime, failingPartitionState.Reason);
+                state.FailingPartitions[partitionId.Value.ToString()] = new FailingPartitionState(
+                                                                                failingPartitionState.Position,
+                                                                                failingPartitionState.RetryTime,
+                                                                                failingPartitionState.Reason,
+                                                                                failingPartitionState.FailureType,
+                                                                                failingPartitionState.ProcessingAttempts);
 
                 var replaceResult = await states.ReplaceOneAsync(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)),
+                    _streamProcessorFilter.Eq(_ => _.Id, id),
                     state,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
 

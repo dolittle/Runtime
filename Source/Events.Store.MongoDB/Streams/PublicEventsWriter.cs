@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 await session.WithTransactionAsync(
                     async (transaction, cancellationToken) =>
                     {
-                        streamPosition = (uint)await _connection.PublicEvents.CountDocumentsAsync(
+                        streamPosition = (ulong)await _connection.PublicEvents.CountDocumentsAsync(
                             transaction,
                             _streamEventFilter.Empty).ConfigureAwait(false);
 

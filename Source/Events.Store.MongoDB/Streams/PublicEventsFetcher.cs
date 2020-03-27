@@ -78,13 +78,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public override async Task<StreamPosition> FindNext(StreamId stream, PartitionId partition, StreamPosition fromPosition, CancellationToken cancellationToken = default)
         {
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
-            if (partition != PartitionId.NotSet) return uint.MaxValue;
+            if (partition != PartitionId.NotSet) return ulong.MaxValue;
             try
             {
                 var @event = await _connection.PublicEvents.Find(
                     _publicEventsFilter.Gte(_ => _.StreamPosition, fromPosition.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                return @event != default ? @event.StreamPosition : uint.MaxValue;
+                return @event != default ? @event.StreamPosition : ulong.MaxValue;
             }
             catch (MongoWaitQueueFullException ex)
             {

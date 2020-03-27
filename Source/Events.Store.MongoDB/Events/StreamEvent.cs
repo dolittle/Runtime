@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using Dolittle.Runtime.Events.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -15,12 +17,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Initializes a new instance of the <see cref="StreamEvent"/> class.
         /// </summary>
         /// <param name="streamPosition">The position in the stream.</param>
+        /// <param name="partition">The partition id.</param>
+        /// <param name="executionContext">The execution context.</param>
         /// <param name="metadata">The event metadata.</param>
         /// <param name="aggregate">The aggregate metadata.</param>
         /// <param name="content">The event content.</param>
-        public StreamEvent(uint streamPosition, StreamEventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
+        public StreamEvent(ulong streamPosition, PartitionId partition, ExecutionContext executionContext, StreamEventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
         {
             StreamPosition = streamPosition;
+            Partition = partition;
+            ExecutionContext = executionContext;
             Metadata = metadata;
             Aggregate = aggregate;
             Content = content;
@@ -30,8 +36,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets stream position.
         /// </summary>
         [BsonId]
-        [BsonRepresentation(BsonType.Int64)]
-        public uint StreamPosition { get; set; }
+        [BsonRepresentation(BsonType.Decimal128)]
+        public ulong StreamPosition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the partition id.
+        /// </summary>
+        public Guid Partition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the execution context.
+        /// </summary>
+        public ExecutionContext ExecutionContext { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="StreamEventMetadata"/> containing the platform generated event information.
