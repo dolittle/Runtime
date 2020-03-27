@@ -67,7 +67,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <inheritdoc/>
         public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<EventHorizonEvent> responseStream, ServerCallContext context)
         {
-            var scope = ScopeId.Default;
             EventHorizon eventHorizon = null;
             try
             {
