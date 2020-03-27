@@ -69,14 +69,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public IMongoCollection<TypePartitionFilterDefinition> TypePartitionFilterDefinitions { get; }
 
         /// <summary>
+        /// Gets the correct <see cref="IMongoCollection{TDocument}" /> for <see cref="Events.StreamEvent" />.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <param name="stream">The <see cref="StreamId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The collection.</returns>
+        public Task<IMongoCollection<Events.StreamEvent>> GetStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken = default) =>
+            scope == ScopeId.Default ? GetStreamCollection(stream, cancellationToken) : GetScopedStreamCollection(scope, stream, cancellationToken);
+
+        /// <summary>
         /// Gets the <see cref="IMongoCollection{StreamEvent}" /> that represents a stream of events.
         /// </summary>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
-        public async Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetStreamCollectionAsync(StreamId stream, CancellationToken cancellationToken = default)
+        public async Task<IMongoCollection<Events.StreamEvent>> GetStreamCollection(StreamId stream, CancellationToken cancellationToken = default)
         {
-            var collection = _connection.Database.GetCollection<MongoDB.Events.StreamEvent>(Constants.CollectionNameForStream(stream));
+            var collection = _connection.Database.GetCollection<Events.StreamEvent>(Constants.CollectionNameForStream(stream));
             await CreateCollectionsAndIndexesForStreamEventsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
@@ -88,25 +98,21 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
-        public async Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetScopedStreamAsync(ScopeId scope, StreamId stream, CancellationToken cancellationToken = default)
+        public async Task<IMongoCollection<Events.StreamEvent>> GetScopedStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken = default)
         {
-            var collection = _connection.Database.GetCollection<MongoDB.Events.StreamEvent>(Constants.CollectionNameForScopedStream(scope, stream));
+            var collection = _connection.Database.GetCollection<Events.StreamEvent>(Constants.CollectionNameForScopedStream(scope, stream));
             await CreateCollectionsAndIndexesForStreamEventsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{StreamEvent}" /> that represents a stream of events.
+        /// Gets the correct event log <see cref="IMongoCollection{TDocument}" /> for <see cref="Event" />.
         /// </summary>
-        /// <param name="stream">The <see cref="StreamId" />.</param>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
-        public async Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetPublicStreamCollectionAsync(StreamId stream, CancellationToken cancellationToken = default)
-        {
-            var collection = _connection.Database.GetCollection<MongoDB.Events.StreamEvent>(Constants.CollectionNameForPublicStream(stream));
-            await CreateCollectionsAndIndexesForStreamEventsAsync(collection, cancellationToken).ConfigureAwait(false);
-            return collection;
-        }
+        /// <returns>The collection.</returns>
+        public Task<IMongoCollection<Event>> GetEventLogCollection(ScopeId scope, CancellationToken cancellationToken) =>
+            scope == ScopeId.Default ? Task.FromResult(EventLog) : GetScopedEventLog(scope, cancellationToken);
 
         /// <summary>
         /// Gets the <see cref="IMongoCollection{ReceivedEvent}" /> that represents a collection of the events received from a microservice.
@@ -114,10 +120,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
-        public async Task<IMongoCollection<Event>> GetScopedEventLogAsync(ScopeId scope, CancellationToken cancellationToken = default)
+        public async Task<IMongoCollection<Event>> GetScopedEventLog(ScopeId scope, CancellationToken cancellationToken = default)
         {
             var collection = _connection.Database.GetCollection<Event>(Constants.CollectionNameForScopedEventLog(scope));
             await CreateCollectionsAndIndexesForEventLogAsync(collection, cancellationToken).ConfigureAwait(false);
+            return collection;
+        }
+
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{StreamEvent}" /> that represents a stream of events.
+        /// </summary>
+        /// <param name="stream">The <see cref="StreamId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
+        public async Task<IMongoCollection<Events.StreamEvent>> GetPublicStreamCollection(StreamId stream, CancellationToken cancellationToken = default)
+        {
+            var collection = _connection.Database.GetCollection<Events.StreamEvent>(Constants.CollectionNameForPublicStream(stream));
+            await CreateCollectionsAndIndexesForStreamEventsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 

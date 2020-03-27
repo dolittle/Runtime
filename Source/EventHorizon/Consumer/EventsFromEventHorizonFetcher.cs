@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public async Task<StreamEvent> Fetch(ScopeId scopeId, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
-            if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(streamId, streamPosition);
+            if (!await _call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false)) throw new NoEventInStreamAtPosition(scopeId, streamId, streamPosition);
             var @event = _call.ResponseStream.Current;
             return new StreamEvent(
                 @event.ToCommittedEvent(_eventHorizon.ProducerMicroservice, _eventHorizon.ConsumerTenant),

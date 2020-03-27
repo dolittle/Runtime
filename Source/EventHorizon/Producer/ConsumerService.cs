@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     try
                     {
                         var streamPosition = await _getEventsFromPublicStreamsFetcher().FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
-                        if (streamPosition == uint.MaxValue) throw new NoEventInStreamAtPosition(publicStream, publicStreamPosition);
+                        if (streamPosition == uint.MaxValue) throw new NoEventInStreamAtPosition(ScopeId.Default, publicStream, publicStreamPosition);
                         var streamEvent = await _getEventsFromPublicStreamsFetcher().Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
                         var eventHorizonEvent = new EventHorizonEvent
                         {

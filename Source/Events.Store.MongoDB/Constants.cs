@@ -32,11 +32,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public const string EventLogCollection = "event-log";
 
         /// <summary>
-        /// Gets the collection name where public events are stored.
-        /// </summary>
-        public const string PublicEventsCollection = "public-events";
-
-        /// <summary>
         /// Gets the collection name for a stream.
         /// </summary>
         /// <param name="streamId">The <see cref="StreamId" />.</param>

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Streams;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -37,57 +38,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken = default)
         {
-            StreamPosition streamPosition = null;
-            try
-            {
-                var eventHorizonEvents = await _connection.GetScopedEventLogAsync(scope, cancellationToken).ConfigureAwait(false);
-                using var session = await _connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
-                await session.WithTransactionAsync(
-                    async (transaction, cancellationToken) =>
-                    {
-                        streamPosition = (ulong)await eventHorizonEvents.CountDocumentsAsync(
-                            transaction,
-                            _eventFilter.Empty).ConfigureAwait(false);
-
-                        var storedEvent = CreateEventFromEventHorizonEvent(@event, streamPosition.Value);
-                        await eventHorizonEvents.InsertOneAsync(
-                            transaction,
-                            storedEvent,
-                            cancellationToken: cancellationToken).ConfigureAwait(false);
-                        return Task.CompletedTask;
-                    },
-                    null,
-                    cancellationToken).ConfigureAwait(false);
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-             catch (MongoDuplicateKeyException)
-            {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, streamPosition.Value, StreamId.AllStreamId, scope);
-            }
-            catch (MongoWriteException exception)
-            {
-                if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
-                {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, streamPosition.Value, StreamId.AllStreamId, scope);
-                }
-
-                throw;
-            }
-            catch (MongoBulkWriteException exception)
-            {
-                foreach (var error in exception.WriteErrors)
-                {
-                    if (error.Category == ServerErrorCategory.DuplicateKey)
-                    {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, streamPosition.Value, StreamId.AllStreamId, scope);
-                    }
-                }
-
-                throw;
-            }
+            await EventsToStreamsWriter.Write(
+                _connection,
+                await _connection.GetScopedEventLog(scope, cancellationToken).ConfigureAwait(false),
+                _eventFilter,
+                streamPosition => CreateEventFromEventHorizonEvent(@event, streamPosition.Value),
+                scope,
+                StreamId.AllStreamId,
+                @event.Type.Id,
+                cancellationToken).ConfigureAwait(false);
         }
 
         Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>

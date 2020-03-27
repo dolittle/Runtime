@@ -1,13 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Artifacts;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Streams;
-using Dolittle.Types;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
@@ -17,72 +17,74 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// </summary>
     public class EventsToStreamsWriter : IWriteEventsToStreams
     {
-        readonly IEnumerable<ICanWriteEventsToWellKnownStreams> _wellKnownStreamWriters;
-        readonly FilterDefinitionBuilder<MongoDB.Events.StreamEvent> _streamEventFilter = Builders<MongoDB.Events.StreamEvent>.Filter;
+        readonly FilterDefinitionBuilder<Events.StreamEvent> _streamEventFilter = Builders<Events.StreamEvent>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsToStreamsWriter"/> class.
         /// </summary>
-        /// <param name="wellKnownStreamWriters">The instances of <see cref="ICanWriteEventsToWellKnownStreams" />.</param>
         /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
         public EventsToStreamsWriter(
-            IInstancesOf<ICanWriteEventsToWellKnownStreams> wellKnownStreamWriters,
             EventStoreConnection connection,
             ILogger logger)
         {
-            _wellKnownStreamWriters = wellKnownStreamWriters;
             _connection = connection;
             _logger = logger;
         }
 
-        /// <inheritdoc/>
-        public Task Write(CommittedEvent @event, StreamId stream, PartitionId partition, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Throws an exception if attempting to write to event log stream.
+        /// </summary>
+        /// <param name="streamId">The <see cref="StreamId" />.</param>
+        public static void ThrowIfWritingToAllStream(StreamId streamId)
         {
-            if (TryGetWriter(stream, out var writer)) return writer.Write(@event, stream, partition, cancellationToken);
-            return WriteToStream(@event, stream, partition, cancellationToken);
+            if (streamId.Value == StreamId.AllStreamId.Value) throw new CannotWriteCommittedEventToAllStream();
         }
 
-        bool TryGetWriter(StreamId stream, out ICanWriteEventsToWellKnownStreams writer)
+        /// <summary>
+        /// Writes an event to a stream collection.
+        /// </summary>
+        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
+        /// <param name="stream">The <see cref="IMongoCollection{TDocument}" /> to write to.</param>
+        /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" /> for the event type.</param>
+        /// <param name="createStoreEvent">The callback that creates the event to store.</param>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <param name="streamId">The <see cref="StreamId" />.</param>
+        /// <param name="eventType">The <see cref="ArtifactId" /> of the event.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <typeparam name="TEvent">The type of the stored event.</typeparam>
+        /// <returns>A task representing the write transaction.</returns>
+        public static async Task Write<TEvent>(
+            EventStoreConnection connection,
+            IMongoCollection<TEvent> stream,
+            FilterDefinitionBuilder<TEvent> filter,
+            Func<StreamPosition, TEvent> createStoreEvent,
+            ScopeId scope,
+            StreamId streamId,
+            ArtifactId eventType,
+            CancellationToken cancellationToken = default)
+            where TEvent : class
         {
-            writer = null;
-            foreach (var instance in _wellKnownStreamWriters)
-            {
-                if (instance.CanWriteToStream(stream))
-                {
-                    if (writer != null) throw new MultipleWellKnownStreamWriters(stream);
-                    writer = instance;
-                }
-            }
-
-            return writer != null;
-        }
-
-        async Task WriteToStream(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken)
-        {
-            ThrowIfWritingToAllStream(streamId);
             StreamPosition streamPosition = null;
             try
             {
-                using var session = await _connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
+                using var session = await connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
                 await session.WithTransactionAsync(
                     async (transaction, cancellationToken) =>
                     {
-                        var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
                         streamPosition = (ulong)await stream.CountDocumentsAsync(
                             transaction,
-                            _streamEventFilter.Empty).ConfigureAwait(false);
+                            filter.Empty).ConfigureAwait(false);
 
                         await stream.InsertOneAsync(
                             transaction,
-                            @event.ToStoreStreamEvent(streamPosition, partitionId),
+                            createStoreEvent(streamPosition),
                             cancellationToken: cancellationToken).ConfigureAwait(false);
                         return Task.CompletedTask;
                     },
-                    null,
-                    cancellationToken).ConfigureAwait(false);
+                    cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -90,13 +92,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
              catch (MongoDuplicateKeyException)
             {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, streamId);
+                throw new EventAlreadyWrittenToStream(eventType, streamPosition.Value, streamId, scope);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, streamId);
+                    throw new EventAlreadyWrittenToStream(eventType, streamPosition.Value, streamId, scope);
                 }
 
                 throw;
@@ -107,7 +109,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, @event.EventLogSequenceNumber, streamId);
+                        throw new EventAlreadyWrittenToStream(eventType, streamPosition.Value, streamId, scope);
                     }
                 }
 
@@ -115,9 +117,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
         }
 
-        void ThrowIfWritingToAllStream(StreamId streamId)
+        /// <inheritdoc/>
+        public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken = default)
         {
-            if (streamId.Value == StreamId.AllStreamId.Value) throw new CannotWriteCommittedEventToAllStream();
+            ThrowIfWritingToAllStream(stream);
+            await Write(
+                _connection,
+                await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
+                _streamEventFilter,
+                streamPosition => @event.ToStoreStreamEvent(streamPosition, partition),
+                scope,
+                stream,
+                @event.Type.Id,
+                cancellationToken).ConfigureAwait(false);
         }
     }
 }
