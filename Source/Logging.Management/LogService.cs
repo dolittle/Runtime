@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Logging.Management;
+using Dolittle.Collections;
 using Dolittle.Logging.Json;
 using Dolittle.Protobuf;
 using Google.Protobuf.WellKnownTypes;
@@ -34,8 +35,9 @@ namespace Dolittle.Runtime.Logging.Management
         }
 
         /// <inheritdoc/>
-        public override async Task Listen(Empty request, IServerStreamWriter<LogMessages> responseStream, ServerCallContext context)
+        public override async Task Listen(Empty request, IServerStreamWriter<LogMessage> responseStream, ServerCallContext context)
         {
+            var queue = new Queue<LogMessage>();
             using var autoResetEvent = new AutoResetEvent(false);
 
             void StateChanged(object sender, NotifyCollectionChangedEventArgs args)
@@ -48,8 +50,7 @@ namespace Dolittle.Runtime.Logging.Management
                         items.Add(item as JsonLogMessage);
                     }
 
-                    var messages = GetLogMessagesFrom(items);
-                    responseStream.WriteAsync(messages).Wait();
+                    GetLogMessagesFrom(items).ForEach(queue.Enqueue);
                 }
             }
 
@@ -61,22 +62,25 @@ namespace Dolittle.Runtime.Logging.Management
 
                 while (!context.CancellationToken.IsCancellationRequested)
                 {
-                    await responseStream.WriteAsync(GetLogMessagesFrom(_logManager.Messages)).ConfigureAwait(false);
+                    while (queue.Count > 0)
+                    {
+                        await responseStream.WriteAsync(queue.Dequeue()).ConfigureAwait(false);
+                    }
+
                     autoResetEvent.WaitOne();
                 }
             }
             finally
             {
-                _logManager.Messages.CollectionChanged += StateChanged;
+                _logManager.Messages.CollectionChanged -= StateChanged;
             }
 
             await Task.CompletedTask.ConfigureAwait(false);
         }
 
-        LogMessages GetLogMessagesFrom(IEnumerable<JsonLogMessage> messages)
+        IEnumerable<LogMessage> GetLogMessagesFrom(IEnumerable<JsonLogMessage> messages)
         {
-            var logMessages = new LogMessages();
-            var converted = messages.Select(_ => new LogMessage
+            return messages.Select(_ => new LogMessage
             {
                 Application = _.Application.ToProtobuf(),
                 Microservice = _.Microservice.ToProtobuf(),
@@ -86,14 +90,11 @@ namespace Dolittle.Runtime.Logging.Management
                 Timestamp = Timestamp.FromDateTimeOffset(_.Timestamp),
                 LogLevel = _.LogLevel,
                 FilePath = _.FilePath,
-                LineNumber = _.LineNumber,
+                LineNumber = $"{_.LineNumber}",
                 Member = _.Member,
                 Message = _.Message,
                 StackTrace = _.StackTrace
-            });
-
-            logMessages.Messages.Add(converted);
-            return logMessages;
+            }).ToList();
         }
     }
 }
