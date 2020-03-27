@@ -62,16 +62,14 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
             var eventProcessorId = filterArguments.Filter.To<EventProcessorId>();
             var streamId = StreamId.AllStreamId;
             var scope = ScopeId.Default;
-
             var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
                 runtimeStream,
                 clientStream,
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
-
             PublicFilterProcessor createEventProcessor() => new PublicFilterProcessor(
-                new RemoteFilterDefinition(streamId, eventProcessorId.Value),
+                new PublicFilterDefinition(streamId, eventProcessorId.Value),
                 dispatcher,
                 _getEventsToPublicStreamsWriter(),
                 _executionContextManager,

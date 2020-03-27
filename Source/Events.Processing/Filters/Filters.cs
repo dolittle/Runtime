@@ -70,13 +70,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             where TRequest : IMessage
             where TFilterDefinition : IFilterDefinition
         {
-            var streamId = new StreamId { Value = eventProcessorId };
+            var targetStream = new StreamId { Value = eventProcessorId };
             try
             {
-                ThrowIfIllegalTargetStream(streamId);
+                ThrowIfIllegalTargetStream(targetStream);
                 _logger.Debug($"Registering filter '{eventProcessorId}' in scope '{scope}'");
 
-                await RegisterForAllTenants(scope, eventProcessorId, streamId, createFilter, cancellationToken).ConfigureAwait(false);
+                await RegisterForAllTenants(scope, sourceStream, targetStream, createFilter, cancellationToken).ConfigureAwait(false);
 
                 await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
             }
@@ -91,20 +91,20 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
             finally
             {
-                UnregisterForAllTenants(scope, eventProcessorId, streamId);
+                UnregisterForAllTenants(scope, sourceStream, targetStream);
                 _logger.Debug($"Filter client disconnected - '{eventProcessorId}'");
             }
         }
 
         async Task RegisterForAllTenants<TFilterDefinition>(
             ScopeId scope,
-            EventProcessorId eventProcessorId,
-            StreamId streamId,
+            StreamId sourceStream,
+            StreamId targetStream,
             Func<IFilterProcessor<TFilterDefinition>> createFilter,
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.Debug($"Registering filter '{eventProcessorId}' in scope '{scope}' for stream for {_tenants.All.Count} tenants");
+            _logger.Debug($"Registering filter with source stream '{sourceStream}' and target stream '{targetStream}' in scope '{scope}' for stream for {_tenants.All.Count} tenants");
 
             foreach (var tenant in _tenants.All)
             {
@@ -113,24 +113,24 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _executionContextManager.CurrentFor(tenant);
                     var filter = createFilter();
                     await _filterRegistryFactory().Register(filter, cancellationToken).ConfigureAwait(false);
-                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), streamId);
+                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStream);
                 }
                 catch (IllegalFilterTransformation ex)
                 {
-                    _logger.Error(ex, $"The filter for stream '{eventProcessorId}' in scope '{scope}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
+                    _logger.Error(ex, $"The filter with source stream '{sourceStream}' and target stream '{targetStream}' in scope '{scope}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
                 }
             }
         }
 
-        void UnregisterForAllTenants(ScopeId scope, EventProcessorId eventProcessorId, StreamId streamId)
+        void UnregisterForAllTenants(ScopeId scope, StreamId sourceStream, StreamId targetStream)
         {
             var tenants = _tenants.All;
-            _logger.Debug($"Unregistering filter '{eventProcessorId}' in scope '{scope}' on stream '{streamId}' for {tenants.Count} tenants");
+            _logger.Debug($"Unregistering filter with source stream '{sourceStream}' and target stream '{targetStream}' in scope '{scope}' for {tenants.Count} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
-                _filterRegistryFactory().Unregister(scope, eventProcessorId.Value);
-                _streamProcessorsFactory().Unregister(scope, eventProcessorId, streamId);
+                _filterRegistryFactory().Unregister(scope, targetStream);
+                _streamProcessorsFactory().Unregister(scope, targetStream.Value, sourceStream);
             });
         }
 

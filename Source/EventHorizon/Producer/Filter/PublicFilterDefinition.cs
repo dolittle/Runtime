@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
     /// <summary>
     /// Represents an implementation of <see cref="IFilterDefinition" /> for a public filter.
     /// </summary>
-    public class PublicFilterDefinition : RemoteFilterDefinition
+    public class PublicFilterDefinition : IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicFilterDefinition"/> class.
@@ -17,8 +17,15 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
         /// <param name="sourceStream">The source <see cref="StreamId" />.</param>
         /// <param name="targetStream">The target <see cref="StreamId" />.</param>
         public PublicFilterDefinition(StreamId sourceStream, StreamId targetStream)
-            : base(sourceStream, targetStream)
         {
+            SourceStream = sourceStream;
+            TargetStream = targetStream;
         }
+
+        /// <inheritdoc/>
+        public StreamId SourceStream { get; }
+
+        /// <inheritdoc/>
+        public StreamId TargetStream { get; }
     }
 }

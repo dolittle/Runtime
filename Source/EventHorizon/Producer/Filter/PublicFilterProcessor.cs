@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
     /// <summary>
     /// Represents an implementation of <see cref="AbstractFilterProcessor{TDefinition}" /> for processing events through a public events filter.
     /// </summary>
-    public class PublicFilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
+    public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinition>
     {
         readonly IReverseCallDispatcher<PublicFilterClientToRuntimeResponse, PublicFilterRuntimeToClientRequest> _dispatcher;
         readonly IExecutionContextManager _executionContextManager;
