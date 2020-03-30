@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IEventProcessor eventProcessor,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             StreamId sourceStreamId,
-            CancellationTokenSource cancellationTokenSource = default)
+            CancellationToken cancellationToken)
         {
             var tenant = _executionContextManager.Current.Tenant;
             var streamProcessor = new StreamProcessor(
@@ -60,8 +60,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     _streamProcessorStateRepository,
                     _logger),
                 eventsFromStreamsFetcher,
-                cancellationTokenSource,
-                _logger);
+                _logger,
+                cancellationToken);
 
             if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))
             {
@@ -77,11 +77,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public void Unregister(EventProcessorId eventProcessorId, StreamId sourceStreamId)
         {
             var identifier = new StreamProcessorId(eventProcessorId, sourceStreamId);
-            if (_streamProcessors.TryRemove(identifier, out var streamProcessor))
+            if (_streamProcessors.TryRemove(identifier, out var _))
             {
                 _logger.Debug($"Stopping Stream Processor with key '{identifier}'");
-                streamProcessor.Stop();
-                streamProcessor.Dispose();
             }
         }
     }

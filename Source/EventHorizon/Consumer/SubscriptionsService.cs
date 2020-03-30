@@ -65,8 +65,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     subscription.Microservice.To<Microservice>(),
                     subscription.Tenant.To<TenantId>());
                 var microserviceAddress = _microservices.GetAddressFor(eventHorizon.ProducerMicroservice);
-                _consumerClient.AcknowledgeConsent(eventHorizon, microserviceAddress);
-                _ = _consumerClient.SubscribeTo(eventHorizon, microserviceAddress);
+                _consumerClient.AcknowledgeConsent(eventHorizon, microserviceAddress, context.CancellationToken);
+                _ = _consumerClient.SubscribeTo(eventHorizon, microserviceAddress, context.CancellationToken);
                 return Task.FromResult(new SubscriptionResponse { Success = true });
             }
             catch (Exception ex)

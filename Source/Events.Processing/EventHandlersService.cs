@@ -138,7 +138,7 @@ namespace Dolittle.Runtime.Events.Processing
                                         _logger);
                     await _getFilters().Register(filter, cancellationToken).ConfigureAwait(false);
 
-                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId);
+                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId, cancellationToken);
 
                     var eventProcessor = new EventProcessor(
                         eventProcessorId,
@@ -146,7 +146,7 @@ namespace Dolittle.Runtime.Events.Processing
                         _executionContextManager,
                         _logger);
 
-                    _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId);
+                    _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId, cancellationToken);
                 }
                 catch (IllegalFilterTransformation ex)
                 {
