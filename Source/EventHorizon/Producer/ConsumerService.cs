@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         readonly IExecutionContextManager _executionContextManager;
         readonly IEventHorizonConsents _eventHorizonConsents;
         readonly ITenants _tenants;
-        readonly FactoryFor<IFetchEventsFromStreams> _getEventsFromStreamsFetcher;
+        readonly FactoryFor<IFetchEventsFromPublicStreams> _getEventsFromPublicStreamsFetcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -45,14 +45,14 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="eventHorizonConsents">The <see cref="IEventHorizonConsents" />.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
-        /// <param name="getEventsFromStreamsFetcher">The <see cref="FactoryFor{IFetchEventsFromStreams}" />.</param>
+        /// <param name="getEventsFromPublicStreamsFetcher">The <see cref="FactoryFor{T}" /> <see cref="IFetchEventsFromPublicStreams" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConsumerService(
             BoundedContextConfiguration boundedContextConfiguration,
             IExecutionContextManager executionContextManager,
             IEventHorizonConsents eventHorizonConsents,
             ITenants tenants,
-            FactoryFor<IFetchEventsFromStreams> getEventsFromStreamsFetcher,
+            FactoryFor<IFetchEventsFromPublicStreams> getEventsFromPublicStreamsFetcher,
             ILogger logger)
         {
             _application = boundedContextConfiguration.Application;
@@ -60,16 +60,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _executionContextManager = executionContextManager;
             _eventHorizonConsents = eventHorizonConsents;
             _tenants = tenants;
-            _getEventsFromStreamsFetcher = getEventsFromStreamsFetcher;
+            _getEventsFromPublicStreamsFetcher = getEventsFromPublicStreamsFetcher;
             _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public override Task<AcknowledgeResponse> AcknowledgeConsent(AcknowledgeRequest request, ServerCallContext context)
-        {
-            ThrowIfWrongProducerMicroservice(request.Microservice.To<Microservice>());
-            _eventHorizonConsents.GetConsentConfigurationsFor(request.Tenant.To<TenantId>());
-            return Task.FromResult(new AcknowledgeResponse { Acknowledged = true });
         }
 
         /// <inheritdoc/>
@@ -83,32 +75,33 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     _executionContextManager.Current.Tenant,
                     _microservice,
                     subscription.Tenant.To<TenantId>());
-                var publicEventsPosition = subscription.PublicEventsPosition;
-                _logger.Information($"Incomming Event Horizon subscription from microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' to tenant '{eventHorizon.ProducerTenant}' starting at position '{publicEventsPosition}'");
+                var lastReceivedPosition = subscription.LastReceived; // -1 if not received any events
+                _logger.Information($"Incomming Event Horizon subscription from microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' to tenant '{eventHorizon.ProducerTenant}' starting at position '{lastReceivedPosition}'");
 
                 ThrowIfProducerTenantDoesNotExist(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant);
+                var publicStream = subscription.Stream.To<StreamId>();
+                var partition = subscription.Partition.To<PartitionId>();
+                var publicStreamPosition = new StreamPosition((ulong)(lastReceivedPosition + 1));
 
+                ThrowIfConsentIsNotGiven(eventHorizon, publicStream, partition);
                 while (!context.CancellationToken.IsCancellationRequested)
                 {
+                    _executionContextManager.CurrentFor(
+                        _application,
+                        eventHorizon.ProducerMicroservice,
+                        eventHorizon.ProducerTenant,
+                        _executionContextManager.Current.CorrelationId);
                     try
                     {
-                        _executionContextManager.CurrentFor(
-                            _application,
-                            eventHorizon.ProducerMicroservice,
-                            eventHorizon.ProducerTenant,
-                            _executionContextManager.Current.CorrelationId);
-                        var streamEvent = await _getEventsFromStreamsFetcher().Fetch(StreamId.PublicEventsId, publicEventsPosition, context.CancellationToken).ConfigureAwait(false);
+                        var streamPosition = await _getEventsFromPublicStreamsFetcher().FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
+                        if (streamPosition == uint.MaxValue) throw new NoEventInStreamAtPosition(ScopeId.Default, publicStream, publicStreamPosition);
+                        var streamEvent = await _getEventsFromPublicStreamsFetcher().Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
                         var eventHorizonEvent = new EventHorizonEvent
                         {
-                            ConsumerMicroservice = eventHorizon.ConsumerMicroservice.ToProtobuf(),
-                            ConsumerTenant = eventHorizon.ConsumerTenant.ToProtobuf(),
                             Content = streamEvent.Event.Content,
                             Correlation = streamEvent.Event.CorrelationId.ToProtobuf(),
-                            EventLogSequenceNumber = streamEvent.Event.EventLogSequenceNumber,
                             EventSource = streamEvent.Event.EventSource.ToProtobuf(),
                             Occurred = Timestamp.FromDateTimeOffset(streamEvent.Event.Occurred),
-                            ProducerMicroservice = eventHorizon.ProducerMicroservice.ToProtobuf(),
-                            ProducerTenant = eventHorizon.ProducerTenant.ToProtobuf(),
                             Type = new grpcArtifacts.Artifact
                                 {
                                     Generation = streamEvent.Event.Type.Generation,
@@ -116,7 +109,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                                 }
                         };
                         await responseStream.WriteAsync(eventHorizonEvent).ConfigureAwait(false);
-                        publicEventsPosition++;
+                        publicStreamPosition = streamPosition.Increment();
                     }
                     catch (NoEventInStreamAtPosition)
                     {
@@ -134,6 +127,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 {
                     _logger.Error(ex, $"Error occurred in Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer tenant '{eventHorizon.ProducerTenant}'");
                 }
+
+                throw;
             }
             finally
             {
@@ -141,9 +136,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             }
         }
 
-        void ThrowIfWrongProducerMicroservice(Microservice producerMicroservice)
+        void ThrowIfConsentIsNotGiven(EventHorizon eventHorizon, StreamId publicStream, PartitionId partition)
         {
-            if (_microservice != producerMicroservice) throw new WrongProducerMicroservice(producerMicroservice);
+            _eventHorizonConsents.GetConsentFor(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant, publicStream, partition);
         }
 
         void ThrowIfProducerTenantDoesNotExist(TenantId producerTenant, Microservice consumerMicroservice, TenantId consumerTenant)

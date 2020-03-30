@@ -1,8 +1,8 @@
 {
     "public": {
-        "port": 50050
+        "port": 50052
     },
     "private": {
-        "port": 50051
+        "port": 50053
     }
 }

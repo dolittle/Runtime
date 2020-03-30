@@ -139,12 +139,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     transaction,
                     new Event(
                         version,
+                        new ExecutionContext(
+                            correlation,
+                            microservice,
+                            tenant),
                         new EventMetadata(
                             occurred,
                             eventSource,
-                            correlation,
-                            microservice,
-                            tenant,
                             cause.Type,
                             cause.Position,
                             @event.Type.Id,
@@ -156,13 +157,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             }
             catch (MongoDuplicateKeyException)
             {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId);
+                throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId, ScopeId.Default);
             }
             catch (MongoWriteException exception)
             {
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId);
+                    throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId, ScopeId.Default);
                 }
 
                 throw;
@@ -173,7 +174,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 {
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId);
+                        throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId, ScopeId.Default);
                     }
                 }
 

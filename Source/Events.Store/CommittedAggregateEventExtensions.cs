@@ -28,15 +28,14 @@ namespace Dolittle.Runtime.Events.Store
                 EventLogSequenceNumber = @event.EventLogSequenceNumber,
                 Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
                 AggregateRootVersion = @event.AggregateRootVersion,
-                EventSource = @event.EventSource.ToProtobuf(),
                 Correlation = @event.CorrelationId.ToProtobuf(),
 
                 Microservice = @event.Microservice.ToProtobuf(),
                 Tenant = @event.Tenant.ToProtobuf(),
                 Cause = new grpcEvents.Cause
                 {
-                    Type = (int)@event.Cause.Type,
-                    Position = @event.Cause.Position
+                    Type = (grpcEvents.Cause.Types.CauseType)@event.Cause.Type,
+                    SequenceNumber = @event.Cause.Position
                 },
                 Type = new grpcArtifacts.Artifact
                 {

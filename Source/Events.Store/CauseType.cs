@@ -8,6 +8,9 @@ namespace Dolittle.Runtime.Events.Store
     /// </summary>
     public enum CauseType
     {
+        /// <summary>Indicates that the event has an unknown cause.</summary>
+        Unknown = 0,
+
         /// <summary>Indicates that the event was caused by a Command.</summary>
         Command = 1,
 

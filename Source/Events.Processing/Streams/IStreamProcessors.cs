@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -31,8 +32,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Unregister a <see cref="IEventProcessor"/> from stream processing.
         /// </summary>
+        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" /> of the event processor.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
-        void Unregister(EventProcessorId eventProcessorId, StreamId sourceStreamId);
+        void Unregister(ScopeId scopeId, EventProcessorId eventProcessorId, StreamId sourceStreamId);
     }
 }

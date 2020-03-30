@@ -40,8 +40,7 @@ namespace Dolittle.Runtime.Samples.MicroserviceWithOneTenantSubscriber
                 Guid.Parse("4e146c23-3b32-4eae-90bd-068f37844dc0"),
                 TenantId.Development);
             var microserviceAddress = microservices.GetAddressFor(eventHorizon.ProducerMicroservice);
-            consumerClient.AcknowledgeConsent(eventHorizon, microserviceAddress);
-            _ = consumerClient.SubscribeTo(eventHorizon, microserviceAddress);
+            _ = consumerClient.SubscribeTo(eventHorizon, Guid.Parse("8a37fe70-654e-4e47-91e6-0c9103bd0519"), Guid.Parse("db7acf1e-a640-41f3-934f-f2f188e1b1e9"), Guid.Empty, microserviceAddress);
             await host.RunAsync().ConfigureAwait(false);
         }
     }

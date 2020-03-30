@@ -15,12 +15,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Initializes a new instance of the <see cref="Event"/> class.
         /// </summary>
         /// <param name="eventLogSequenceNumber">The event log sequence number of this event.</param>
-        /// <param name="metadata">The The event metadata.</param>
+        /// <param name="executionContext">The execution context.</param>
+        /// <param name="metadata">The event metadata.</param>
         /// <param name="aggregate">The aggregate metadata.</param>
         /// <param name="content">The event content.</param>
-        public Event(uint eventLogSequenceNumber, EventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
+        public Event(ulong eventLogSequenceNumber, ExecutionContext executionContext, EventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
         {
             EventLogSequenceNumber = eventLogSequenceNumber;
+            ExecutionContext = executionContext;
             Metadata = metadata;
             Aggregate = aggregate;
             Content = content;
@@ -30,11 +32,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the event log sequence number of the event.
         /// </summary>
         [BsonId]
-        [BsonRepresentation(BsonType.Int64)]
-        public uint EventLogSequenceNumber { get; set; }
+        [BsonRepresentation(BsonType.Decimal128)]
+        public ulong EventLogSequenceNumber { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="EventMetadata"/> containing the platform generated event information.
+        /// Gets or sets the execution context.
+        /// </summary>
+        public ExecutionContext ExecutionContext { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="EventMetadata"/> containing additional event information.
         /// </summary>
         public EventMetadata Metadata { get; set; }
 

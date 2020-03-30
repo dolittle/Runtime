@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -64,18 +65,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public void Unregister(StreamId targetStream)
+        public void Unregister(ScopeId scope, StreamId targetStream)
         {
             _logger.Debug($"Unregistering filter on target stream '{targetStream}'");
-            if (!_registeredFilters.ContainsKey(targetStream)) throw new NoFilterRegisteredForStream(targetStream);
+            if (!_registeredFilters.ContainsKey(targetStream)) throw new NoFilterRegisteredForStream(scope, targetStream);
             _registeredFilters.Remove(targetStream, out var _);
         }
 
         /// <inheritdoc/>
-        public Task RemoveIfPersisted(StreamId targetStream, CancellationToken cancellationToken = default)
+        public Task RemoveIfPersisted(ScopeId scope, StreamId targetStream, CancellationToken cancellationToken = default)
         {
             _logger.Debug($"Removing persisted filter definition on target stream '{targetStream}' if persisted");
-            if (!_registeredFilters.TryGetValue(targetStream, out var filterProcessor)) throw new NoFilterRegisteredForStream(targetStream);
+            if (!_registeredFilters.TryGetValue(targetStream, out var filterProcessor)) throw new NoFilterRegisteredForStream(scope, targetStream);
             var filterDefinitionType = GetFilterDefinitionTypeFromEventProcessor(filterProcessor);
             ICanRemovePersistedFilterDefinition persistedFilterRemover;
             try

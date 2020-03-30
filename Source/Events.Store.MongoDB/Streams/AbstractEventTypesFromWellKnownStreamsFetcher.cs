@@ -28,9 +28,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public bool CanFetchFromStream(StreamId stream) => WellKnownStreams.Contains(stream);
 
         /// <inheritdoc/>
-        public abstract Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default);
+        public abstract Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default);
 
         /// <inheritdoc/>
-        public abstract Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default);
+        public abstract Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default);
     }
 }

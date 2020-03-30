@@ -21,9 +21,18 @@ namespace Dolittle.Runtime.Server
     /// </summary>
     public class Startup : IDisposable
     {
+        readonly IWebHostEnvironment _env;
         ILoggerFactory _loggerFactory;
-
         BootloaderResult _bootResult;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Startup"/> class.
+        /// </summary>
+        /// <param name="env"><see cref="IWebHostEnvironment" />.</param>
+        public Startup(IWebHostEnvironment env)
+        {
+            _env = env;
+        }
 
         /// <summary>
         /// Configure all services.
@@ -48,7 +57,12 @@ namespace Dolittle.Runtime.Server
                         .WithExposedHeaders("Grpc-Status", "Grpc-Message");
             }));
 
-            _bootResult = services.AddDolittle(_loggerFactory);
+            _bootResult = services.AddDolittle(
+                builder =>
+                {
+                    if (_env.IsDevelopment()) builder.Development();
+                },
+                _loggerFactory);
             ManagementLogAppender.LoggerFactory = _loggerFactory;
             var loggingBootStageResult = _bootResult.BootStageResults.ToArray()[1];
             ManagementLogAppender.ExecutionContextManager = ((Constant)loggingBootStageResult.Bindings.First(_ => _.Service == typeof(IExecutionContextManager)).Strategy).Target as IExecutionContextManager;

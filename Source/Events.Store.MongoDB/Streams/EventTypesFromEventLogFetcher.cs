@@ -35,47 +35,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
-        {
-            ThrowIfIllegalRange(range);
-            if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
-            try
-            {
-                var eventTypes = await _connection.EventLog
-                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, range.From.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, range.To.Value))
-                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
-                    .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return eventTypes;
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-        }
+        public override Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default) =>
+            FetchTypesInRangeAndPartition(scope, stream, PartitionId.NotSet, range, cancellationToken);
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
-            ThrowIfIllegalRange(range);
+            EventTypesFromStreamsFetcher.ThrowIfIllegalRange(range);
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             if (partition != PartitionId.NotSet) return Enumerable.Empty<Artifact>();
-            try
-            {
-                var eventTypes = await _connection.EventLog
-                    .Find(_eventLogFilter.Gte(_ => _.EventLogSequenceNumber, range.From.Value) & _eventLogFilter.Lte(_ => _.EventLogSequenceNumber, range.To.Value))
-                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
-                    .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return eventTypes;
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-        }
-
-        void ThrowIfIllegalRange(StreamPositionRange range)
-        {
-            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
+            return await EventTypesFromStreamsFetcher.FetchTypesInRange(
+                await _connection.GetEventLogCollection(scope, cancellationToken).ConfigureAwait(false),
+                _eventLogFilter,
+                _eventLogFilter.Empty,
+                _ => _.EventLogSequenceNumber,
+                Builders<Event>.Projection.Expression(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)),
+                range,
+                cancellationToken).ConfigureAwait(false);
         }
     }
 }

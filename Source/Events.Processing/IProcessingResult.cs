@@ -18,9 +18,10 @@ namespace Dolittle.Runtime.Events.Processing
         /// </summary>
         bool Retry { get; }
 
+        #nullable enable
         /// <summary>
-        /// Gets the reason for failure.
+        /// Gets the nullable <see cref="ProcessorFailure" />.
         /// </summary>
-        string FailureReason { get; }
+        ProcessorFailure? Failure { get; }
     }
 }

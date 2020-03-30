@@ -1,7 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
@@ -18,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     public class EventTypesFromStreamsFetcher : IFetchEventTypesFromStreams
     {
         readonly IEnumerable<ICanFetchEventTypesFromWellKnownStreams> _wellKnownStreamFetchers;
-        readonly FilterDefinitionBuilder<MongoDB.Events.StreamEvent> _streamEventFilter = Builders<MongoDB.Events.StreamEvent>.Filter;
+        readonly FilterDefinitionBuilder<Events.StreamEvent> _streamEventFilter = Builders<Events.StreamEvent>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -38,20 +40,82 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             _logger = logger;
         }
 
-        /// <inheritdoc/>
-        public Task<IEnumerable<Artifact>> FetchTypesInRange(StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
+        /// <summary>
+        /// Throws exception if the <see cref="StreamPositionRange" /> is illegal.
+        /// </summary>
+        /// <param name="range">The <see cref="StreamPositionRange" />.</param>
+        public static void ThrowIfIllegalRange(StreamPositionRange range)
         {
-            ThrowIfInvalidRange(range);
-            if (TryGetFetcher(stream, out var fetcher)) fetcher.FetchTypesInRange(stream, range, cancellationToken);
-            return FetchTypesInRangeFromStream(stream, range, cancellationToken);
+            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
+        }
+
+        /// <summary>
+        /// Fetches a list of <see cref="Artifact" /> in a range.
+        /// </summary>
+        /// <typeparam name="TEvent">The type of the stored event.</typeparam>
+        /// <param name="stream">The <see cref="IMongoCollection{TDocument}" />.</param>
+        /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
+        /// <param name="eventsInPartitionFilter">The <see cref="FilterDefinition{TDocument}" /> for filtering events in the wanted partition.</param>
+        /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
+        /// <param name="projection">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="StreamEvent" />.</param>
+        /// <param name="range">The from <see cref="StreamPosition" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The position of the next event.</returns>
+        public static async Task<IEnumerable<Artifact>> FetchTypesInRange<TEvent>(
+            IMongoCollection<TEvent> stream,
+            FilterDefinitionBuilder<TEvent> filter,
+            FilterDefinition<TEvent> eventsInPartitionFilter,
+            Expression<Func<TEvent, ulong>> sequenceNumberExpression,
+            ProjectionDefinition<TEvent, Artifact> projection,
+            StreamPositionRange range,
+            CancellationToken cancellationToken)
+            where TEvent : class
+        {
+             try
+            {
+                var maxNumEvents = range.To.Value - range.From.Value + 1U;
+                int? limit = (int)maxNumEvents;
+                if (limit < 0) limit = null;
+                return await stream
+                    .Find(eventsInPartitionFilter & filter.Gte(sequenceNumberExpression, range.From.Value) & filter.Lte(sequenceNumberExpression, range.To.Value))
+                    .Limit(limit)
+                    .Project(projection)
+                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
         {
-            ThrowIfInvalidRange(range);
-            if (TryGetFetcher(stream, out var fetcher)) fetcher.FetchTypesInRangeAndPartition(stream, partition, range, cancellationToken);
-            return FetchTypesInRangeAndPartitionFromStream(stream, partition, range, cancellationToken);
+            ThrowIfIllegalRange(range);
+            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
+            return await FetchTypesInRange(
+                await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
+                _streamEventFilter,
+                _streamEventFilter.Empty,
+                _ => _.StreamPosition,
+                Builders<Events.StreamEvent>.Projection.Expression(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)),
+                range,
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
+        {
+            ThrowIfIllegalRange(range);
+            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRangeAndPartition(scope, stream, partition, range, cancellationToken).ConfigureAwait(false);
+            return await FetchTypesInRange(
+                await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
+                _streamEventFilter,
+                _streamEventFilter.Eq(_ => _.Partition, partition.Value),
+                _ => _.StreamPosition,
+                Builders<Events.StreamEvent>.Projection.Expression(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)),
+                range,
+                cancellationToken).ConfigureAwait(false);
         }
 
         bool TryGetFetcher(StreamId stream, out ICanFetchEventTypesFromWellKnownStreams fetcher)
@@ -67,53 +131,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
 
             return fetcher != null;
-        }
-
-        async Task<IEnumerable<Artifact>> FetchTypesInRangeFromStream(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var maxNumEvents = range.To.Value - range.From.Value + 1U;
-                int? limit = (int)maxNumEvents;
-                if (limit < 0) limit = null;
-                var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
-                var eventTypes = await stream
-                    .Find(_streamEventFilter.Gte(_ => _.StreamPosition, range.From.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, range.To.Value))
-                    .Limit(limit)
-                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
-                    .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return eventTypes;
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-        }
-
-        async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartitionFromStream(StreamId streamId, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var maxNumEvents = range.To.Value - range.From.Value + 1U;
-                int? limit = (int)maxNumEvents;
-                if (limit < 0) limit = null;
-                var stream = await _connection.GetStreamCollectionAsync(streamId, cancellationToken).ConfigureAwait(false);
-                var eventTypes = await stream
-                    .Find(_streamEventFilter.Eq(_ => _.Metadata.Partition, partition.Value) & _streamEventFilter.Gte(_ => _.StreamPosition, range.From.Value) & _streamEventFilter.Lte(_ => _.StreamPosition, range.To.Value))
-                    .Limit(limit)
-                    .Project(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration))
-                    .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return eventTypes;
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-        }
-
-        void ThrowIfInvalidRange(StreamPositionRange range)
-        {
-            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
         }
     }
 }

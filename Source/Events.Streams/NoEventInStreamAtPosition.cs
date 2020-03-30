@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.Events.Streams
 {
@@ -13,10 +14,11 @@ namespace Dolittle.Runtime.Events.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="NoEventInStreamAtPosition"/> class.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
-        public NoEventInStreamAtPosition(StreamId streamId, StreamPosition streamPosition)
-            : base($"No event in stream '{streamId.Value} at position '{streamPosition.Value}'")
+        public NoEventInStreamAtPosition(ScopeId scope, StreamId streamId, StreamPosition streamPosition)
+            : base($"No event in stream '{streamId.Value}' in scope '{scope}' at position '{streamPosition.Value}'")
         {
         }
     }

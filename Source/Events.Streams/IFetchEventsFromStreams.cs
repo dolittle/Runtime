@@ -16,29 +16,32 @@ namespace Dolittle.Runtime.Events.Streams
         /// <summary>
         /// Fetch the event at a given position in a stream.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
         /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamEvent" />.</returns>
-        Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
+        Task<StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Fetch a range of events from a position to another in a stream.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
-        Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
+        Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Finds the <see cref="StreamPosition" /> of the next event to process in a <see cref="StreamId" /> for a <see cref="PartitionId" />.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="fromPosition">The <see cref="StreamPosition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamPosition" />of the next event to process.</returns>
-        Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default);
+        Task<StreamPosition> FindNext(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default);
     }
 }

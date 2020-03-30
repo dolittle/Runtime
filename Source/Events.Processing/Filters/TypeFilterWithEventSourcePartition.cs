@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
@@ -23,20 +24,23 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartition"/> class.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="definition">The<see cref="TypeFilterWithEventSourcePartitionDefinition"/>.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public TypeFilterWithEventSourcePartition(
+            ScopeId scope,
             TypeFilterWithEventSourcePartitionDefinition definition,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
-            : base(definition, eventsToStreamsWriter, logger)
+            : base(scope, definition, eventsToStreamsWriter, logger)
         {
             _logger = logger;
         }
 
+        #nullable enable
         /// <inheritdoc/>
-        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
+        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, RetryProcessingState? retryProcessing, CancellationToken cancellationToken)
         {
             try
             {
@@ -47,12 +51,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     outPartitionId = @event.EventSource.Value;
                 }
 
-                var filterResult = new SucceededFilteringResult(included, outPartitionId);
+                var filterResult = new FilteringResult(included, outPartitionId);
                 return await Task.FromResult(filterResult).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
-                return await Task.FromResult(new FailedFilteringResult($"Failure Message: {ex.Message}\nStack Trace: {ex.StackTrace}")).ConfigureAwait(false);
+                return await Task.FromResult(
+                    new FilteringResult(
+                        new ProcessorFailure(ProcessorFailureType.Persistent, $"Failure Message: {ex.Message}\nStack Trace: {ex.StackTrace}"))).ConfigureAwait(false);
             }
         }
     }

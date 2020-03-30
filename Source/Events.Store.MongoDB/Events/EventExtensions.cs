@@ -20,9 +20,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new EventMetadata(
                 committedEvent.Occurred,
                 committedEvent.EventSource,
-                committedEvent.CorrelationId,
-                committedEvent.Microservice,
-                committedEvent.Tenant,
                 committedEvent.Cause.Type,
                 committedEvent.Cause.Position,
                 committedEvent.Type.Id,
@@ -41,9 +38,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
-                @event.Metadata.Correlation,
-                @event.Metadata.Microservice,
-                @event.Metadata.Tenant,
+                @event.ExecutionContext.Correlation,
+                @event.ExecutionContext.Microservice,
+                @event.ExecutionContext.Tenant,
                 new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
@@ -61,9 +58,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                       @event.EventLogSequenceNumber,
                       @event.Metadata.Occurred,
                       @event.Metadata.EventSource,
-                      @event.Metadata.Correlation,
-                      @event.Metadata.Microservice,
-                      @event.Metadata.Tenant,
+                      @event.ExecutionContext.Correlation,
+                      @event.ExecutionContext.Microservice,
+                      @event.ExecutionContext.Tenant,
                       new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
                       new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                       @event.Metadata.Public,
@@ -75,6 +72,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="event">The <see cref="Event" />.</param>
         /// <returns>The converted <see cref="Runtime.Events.Streams.StreamEvent" />.</returns>
         public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this Event @event) =>
-            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), StreamId.AllStreamId, PartitionId.NotSet);
+            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.AllStreamId, PartitionId.NotSet);
     }
 }

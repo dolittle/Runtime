@@ -2,14 +2,45 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using Autofac.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 
 namespace Dolittle.Runtime.Samples.MicroserviceWithOneTenantProducer
 {
     static class Program
     {
-        static async Task Main()
+        /// <summary>
+        /// Main method.
+        /// </summary>
+        /// <param name="args">Arguments for the process.</param>
+        public static async Task Main(string[] args) =>
+            await CreateHostBuilder(args)
+                .Build()
+                .RunAsync().ConfigureAwait(false);
+
+        /// <summary>
+        /// Create a host builder.
+        /// </summary>
+        /// <param name="args">Arguments for the process.</param>
+        /// <returns>Host builder to build and run.</returns>
+        public static IHostBuilder CreateHostBuilder(string[] args)
         {
-            await Server.Bootloader.Start().ConfigureAwait(false);
+            var appConfig = new ConfigurationBuilder()
+                                    .AddJsonFile("appsettings.json")
+                                    .Build();
+
+            return Host.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration(config => config.AddConfiguration(appConfig))
+                .UseEnvironment("Development")
+                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder
+                        .UseUrls("http://0.0.0.0:81")
+                        .UseStartup<Dolittle.Runtime.Server.Startup>();
+                });
         }
     }
 }

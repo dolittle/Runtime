@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="typeId">The artifact type id of the aggregate root.</param>
         /// <param name="typeGeneration">The artifact generation of the aggregate root.</param>
         /// <param name="version">The version of the aggregate root.</param>
-        public AggregateMetadata(bool wasAppliedByAggregate, Guid typeId, int typeGeneration, uint version)
+        public AggregateMetadata(bool wasAppliedByAggregate, Guid typeId, int typeGeneration, ulong version)
         {
             WasAppliedByAggregate = wasAppliedByAggregate;
             TypeId = typeId;
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the aggregate root version.
         /// </summary>
-        [BsonRepresentation(BsonType.Int64)]
-        public uint Version { get; set; }
+        [BsonRepresentation(BsonType.Decimal128)]
+        public ulong Version { get; set; }
     }
 }

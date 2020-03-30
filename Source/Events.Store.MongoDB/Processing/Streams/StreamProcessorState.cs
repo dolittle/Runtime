@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="id">The <see cref="StreamProcessorId" />.</param>
         /// <param name="position">The position.</param>
         /// <param name="failingPartitions">The states of the failing partitions.</param>
-        public StreamProcessorState(StreamProcessorId id, uint position, IDictionary<string, FailingPartitionState> failingPartitions)
+        public StreamProcessorState(StreamProcessorId id, ulong position, IDictionary<string, FailingPartitionState> failingPartitions)
         {
             Id = id;
             Position = position;
@@ -36,8 +36,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <summary>
         /// Gets or sets the position.
         /// </summary>
-        [BsonRepresentation(BsonType.Int64)]
-        public uint Position { get; set; }
+        [BsonRepresentation(BsonType.Decimal128)]
+        public ulong Position { get; set; }
 
         /// <summary>
         /// Gets or sets the failing partitions.
@@ -50,6 +50,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         /// <param name="id">The <see cref="StreamProcessorId" />.</param>
         /// <returns>The new initial <see cref="StreamProcessorState" />.</returns>
-        public static StreamProcessorState NewFromId(Runtime.Events.Processing.Streams.StreamProcessorId id) => new StreamProcessorState(new StreamProcessorId(id.EventProcessorId, id.SourceStreamId), 0, new Dictionary<string, FailingPartitionState>());
+        public static StreamProcessorState NewFromId(Runtime.Events.Processing.Streams.StreamProcessorId id) =>
+            new StreamProcessorState(
+                new StreamProcessorId(id.ScopeId, id.EventProcessorId, id.SourceStreamId),
+                0,
+                new Dictionary<string, FailingPartitionState>());
     }
 }
