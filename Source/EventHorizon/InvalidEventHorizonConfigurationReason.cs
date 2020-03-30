@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// Implicitly convert from <see cref="string"/> to <see cref="InvalidEventHorizonConfigurationReason"/>.
         /// </summary>
         /// <param name="reason"><see cref="string"/> representation.</param>
-        public static implicit operator InvalidEventHorizonConfigurationReason(string reason) => new InvalidEventHorizonConfigurationReason { Value = reason };
+        public static implicit operator InvalidEventHorizonConfigurationReason(string reason) =>
+            new InvalidEventHorizonConfigurationReason { Value = reason };
     }
 }

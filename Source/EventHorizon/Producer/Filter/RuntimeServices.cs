@@ -31,12 +31,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
         public ServiceAspect Aspect => "EventHorizon";
 
         /// <inheritdoc/>
-        public IEnumerable<Service> BindServices()
-        {
-            return new Service[]
+        public IEnumerable<Service> BindServices() =>
+            new Service[]
             {
                 new Service(_publicFilters, grpc.PublicFilters.BindService(_publicFilters), grpc.PublicFilters.Descriptor)
             };
-        }
     }
 }

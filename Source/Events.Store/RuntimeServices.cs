@@ -31,12 +31,10 @@ namespace Dolittle.Runtime.Events.Store
         public ServiceAspect Aspect => "Events";
 
         /// <inheritdoc/>
-        public IEnumerable<Service> BindServices()
-        {
-            return new Service[]
+        public IEnumerable<Service> BindServices() =>
+            new Service[]
             {
                 new Service(_eventStoreService, grpc.EventStore.BindService(_eventStoreService), grpc.EventStore.Descriptor)
             };
-        }
     }
 }

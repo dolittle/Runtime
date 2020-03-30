@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.Events.Store
         /// Implicitly convert a <see cref="ulong"/> to an <see cref="CauseLogPosition"/>.
         /// </summary>
         /// <param name="number">The number.</param>
-        public static implicit operator CauseLogPosition(ulong number) => new CauseLogPosition { Value = number };
+        public static implicit operator CauseLogPosition(ulong number) =>
+            new CauseLogPosition { Value = number };
     }
 }

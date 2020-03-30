@@ -35,6 +35,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// Implicitly converts the <see cref="EventHandlerClientToRuntimeResponse" /> to <see cref="ProcessingResult" />.
         /// </summary>
         /// <param name="response">The <see cref="EventHandlerClientToRuntimeResponse" />.</param>
-        public static implicit operator ProcessingResult(EventHandlerClientToRuntimeResponse response) => new ProcessingResult(response.Failed);
+        public static implicit operator ProcessingResult(EventHandlerClientToRuntimeResponse response) =>
+            new ProcessingResult(response.Failed);
     }
 }

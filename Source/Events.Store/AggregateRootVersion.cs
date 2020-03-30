@@ -19,6 +19,7 @@ namespace Dolittle.Runtime.Events.Store
         /// Implicitly convert a <see cref="ulong"/> to an <see cref="AggregateRootVersion"/>.
         /// </summary>
         /// <param name="number">The number.</param>
-        public static implicit operator AggregateRootVersion(ulong number) => new AggregateRootVersion { Value = number };
+        public static implicit operator AggregateRootVersion(ulong number) =>
+            new AggregateRootVersion { Value = number };
     }
 }

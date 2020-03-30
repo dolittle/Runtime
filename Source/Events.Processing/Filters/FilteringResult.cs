@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// <summary>
     /// Represents an implementation of <see cref="IFilterResult" />.
     /// </summary>
-    public partial class FilteringResult : IFilterResult
+    public class FilteringResult : IFilterResult
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FilteringResult"/> class.

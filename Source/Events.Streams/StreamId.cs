@@ -30,15 +30,14 @@ namespace Dolittle.Runtime.Events.Streams
         /// Implicitly convert from a <see cref="Guid"/> to a <see cref="StreamId"/>.
         /// </summary>
         /// <param name="streamId"><see cref="Guid"/> representation.</param>
-        public static implicit operator StreamId(Guid streamId) => new StreamId { Value = streamId };
+        public static implicit operator StreamId(Guid streamId) =>
+            new StreamId { Value = streamId };
 
         /// <summary>
         /// Creates a new instance of <see cref="StreamId"/> with a unique id.
         /// </summary>
         /// <returns>A new <see cref="StreamId"/>.</returns>
-        public static StreamId New()
-        {
-            return new StreamId { Value = Guid.NewGuid() };
-        }
+        public static StreamId New() =>
+            new StreamId { Value = Guid.NewGuid() };
     }
 }

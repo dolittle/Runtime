@@ -65,10 +65,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
             return result!;
         }
 
-        FilteringResult ResultFromResponse(PublicFilterClientToRuntimeResponse response)
-        {
-            if (response.Failed == null) return new FilteringResult(response.Success.IsIncluded, response.Success.Partition.To<PartitionId>());
-            return new FilteringResult(response.Failed);
-        }
+        FilteringResult ResultFromResponse(PublicFilterClientToRuntimeResponse response) =>
+            response.Failed == null ?
+            new FilteringResult(response.Success.IsIncluded, response.Success.Partition.To<PartitionId>())
+            : new FilteringResult(response.Failed);
     }
 }

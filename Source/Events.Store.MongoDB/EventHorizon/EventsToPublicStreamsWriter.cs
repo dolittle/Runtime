@@ -33,7 +33,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default) => Write(@event, ScopeId.Default, streamId, partitionId, cancellationToken);
+        public Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default) =>
+            Write(@event, ScopeId.Default, streamId, partitionId, cancellationToken);
 
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ScopeId scope, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)

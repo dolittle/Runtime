@@ -15,6 +15,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// Implicitly convert from <see cref="Guid"/> to <see cref="EventHorizonConsent"/>.
         /// </summary>
         /// <param name="reason"><see cref="Guid"/> representation.</param>
-        public static implicit operator EventHorizonConsent(Guid reason) => new EventHorizonConsent { Value = reason };
+        public static implicit operator EventHorizonConsent(Guid reason) =>
+            new EventHorizonConsent { Value = reason };
     }
 }

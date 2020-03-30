@@ -31,12 +31,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public ServiceAspect Aspect => "Events.Processing";
 
         /// <inheritdoc/>
-        public IEnumerable<Service> BindServices()
-        {
-            return new Service[]
+        public IEnumerable<Service> BindServices() =>
+            new Service[]
             {
                 new Service(_eventHandlers, grpc.EventHandlers.BindService(_eventHandlers), grpc.EventHandlers.Descriptor)
             };
-        }
     }
 }

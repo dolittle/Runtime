@@ -57,9 +57,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public Task<StreamPosition> FindNext(ScopeId scopeId, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default)
-        {
-            return Task.FromResult<StreamPosition>(uint.MaxValue);
-        }
+        public Task<StreamPosition> FindNext(ScopeId scopeId, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default) =>
+            Task.FromResult<StreamPosition>(uint.MaxValue);
     }
 }
