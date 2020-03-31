@@ -9,12 +9,12 @@ using Dolittle.Runtime.Events.Store;
 namespace Dolittle.Runtime.Events.Streams
 {
     /// <summary>
-    /// Defines a system that can fetch <see cref="CommittedEvent">events</see> from <see cref="StreamId">streams</see>.
+    /// Defines a system that can fetch <see cref="StreamEvent">events</see> from <see cref="StreamId">streams</see>.
     /// </summary>
     public interface IFetchEventsFromStreams
     {
         /// <summary>
-        /// Fetch the event at a given position in a stream.
+        /// Fetch the event at a given <see cref="StreamPosition" /> in a stream.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Streams
         Task<StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Fetch a range of events from a position to another in a stream.
+        /// Fetch a range of events in an incluse <see cref="StreamPositionRange" /> in a <see cref="StreamId">stream</see>.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId"><see cref="StreamId">the stream in the event store</see>.</param>
@@ -34,14 +34,15 @@ namespace Dolittle.Runtime.Events.Streams
         Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Finds the <see cref="StreamPosition" /> of the next event to process in a <see cref="StreamId" /> for a <see cref="PartitionId" />.
+        /// Gets the <see cref="StreamPosition" /> of the first event in a <see cref="StreamId" >stream</see> in a specific <see cref="PartitionId" /> starting search from the given <see cref="StreamPosition" />..
         /// </summary>
+        /// <remarks>If there are no more events in the stream from the given <see cref="StreamPosition" /> with the given <see cref="PartitionId" />, this will return the maximum value of <see cref="StreamPosition" />.</remarks>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="fromPosition">The <see cref="StreamPosition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="StreamPosition" />of the next event to process.</returns>
+        /// <returns>The <see cref="StreamPosition" /> of the first event with the given <see cref="PartitionId" /> from the given <see cref="StreamPosition" /> or returns the maximum value of <see cref="StreamPositionRange" /> if .</returns>
         Task<StreamPosition> FindNext(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default);
     }
 }
