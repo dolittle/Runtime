@@ -15,9 +15,6 @@ namespace Dolittle.Runtime.Heads
         /// Implicitly convert from <see cref="Guid"/> to <see cref="HeadId"/>.
         /// </summary>
         /// <param name="value"><see cref="HeadId"/> as <see cref="Guid"/>.</param>
-        public static implicit operator HeadId(Guid value)
-        {
-            return new HeadId { Value = value };
-        }
+        public static implicit operator HeadId(Guid value) => new HeadId { Value = value };
     }
 }
