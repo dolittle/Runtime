@@ -22,10 +22,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// Initializes a new instance of the <see cref="EventHorizonConsents"/> class.
         /// </summary>
         /// <param name="consentsConfiguration">The <see cref="EventHorizonConsentsConfiguration" />.</param>
-        public EventHorizonConsents(EventHorizonConsentsConfiguration consentsConfiguration)
-        {
+        public EventHorizonConsents(EventHorizonConsentsConfiguration consentsConfiguration) =>
             _consentsConfiguration = consentsConfiguration;
-        }
 
         /// <inheritdoc/>
         public EventHorizonConsent GetConsentFor(TenantId publisherTenant, Microservice subscriberMicroservice, TenantId subscriberTenant, StreamId publicStream, PartitionId publicStreamPartition)

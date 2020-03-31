@@ -34,15 +34,14 @@ namespace Dolittle.Runtime.Events.Store
         /// Implicitly convert from a <see cref="Guid"/> to an <see cref="EventSourceId"/>.
         /// </summary>
         /// <param name="eventId">EventSourceId as <see cref="Guid"/>.</param>
-        public static implicit operator EventSourceId(Guid eventId) => new EventSourceId { Value = eventId };
+        public static implicit operator EventSourceId(Guid eventId) =>
+            new EventSourceId { Value = eventId };
 
         /// <summary>
         /// Creates a new instance of <see cref="EventSourceId"/> with a unique id.
         /// </summary>
         /// <returns>A new <see cref="EventSourceId"/>.</returns>
-        public static EventSourceId New()
-        {
-            return new EventSourceId { Value = Guid.NewGuid() };
-        }
+        public static EventSourceId New() =>
+            new EventSourceId { Value = Guid.NewGuid() };
     }
 }

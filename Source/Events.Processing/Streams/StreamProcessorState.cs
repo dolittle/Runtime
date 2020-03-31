@@ -26,7 +26,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Gets a new, initial, <see cref="StreamProcessorState" />.
         /// </summary>
-        public static StreamProcessorState New => new StreamProcessorState(StreamPosition.Start, new Dictionary<PartitionId, FailingPartitionState>());
+        public static StreamProcessorState New =>
+            new StreamProcessorState(StreamPosition.Start, new Dictionary<PartitionId, FailingPartitionState>());
 
         /// <summary>
         /// Gets or sets the <see cref="StreamPosition" />.

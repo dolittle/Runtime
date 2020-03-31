@@ -48,7 +48,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken) => Fetch(streamId, streamPosition, cancellationToken);
+        public Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken) =>
+            Fetch(streamId, streamPosition, cancellationToken);
 
         /// <inheritdoc/>
         public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default)
@@ -64,7 +65,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken) => FetchRange(streamId, range, cancellationToken);
+        public Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken) =>
+            FetchRange(streamId, range, cancellationToken);
 
         /// <inheritdoc/>
         public async Task<StreamPosition> FindNext(StreamId streamId, PartitionId partition, StreamPosition fromPosition, CancellationToken cancellationToken)
@@ -80,6 +82,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task<StreamPosition> FindNext(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken) => FindNext(streamId, partitionId, fromPosition, cancellationToken);
+        public Task<StreamPosition> FindNext(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken) =>
+            FindNext(streamId, partitionId, fromPosition, cancellationToken);
     }
 }

@@ -42,7 +42,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public IEnumerable<StreamProcessor> Processors => _streamProcessors.Select(_ => _.Value);
+        public IEnumerable<StreamProcessor> Processors =>
+            _streamProcessors.Select(_ => _.Value);
 
         /// <inheritdoc />
         public StreamProcessor Register(

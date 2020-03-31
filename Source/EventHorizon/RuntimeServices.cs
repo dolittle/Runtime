@@ -32,12 +32,10 @@ namespace Dolittle.Runtime.EventHorizon
         public ServiceAspect Aspect => "EventHorizon";
 
         /// <inheritdoc/>
-        public IEnumerable<Service> BindServices()
-        {
-            return new Service[]
+        public IEnumerable<Service> BindServices() =>
+            new Service[]
             {
                 new Service(_subscriptions, grpc.Subscriptions.BindService(_subscriptions), grpc.Subscriptions.Descriptor)
             };
-        }
     }
 }

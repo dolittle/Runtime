@@ -16,9 +16,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public class ServiceClients : IKnowAboutClients
     {
         /// <inheritdoc/>
-        public IEnumerable<Client> Clients => new[]
-        {
-            new Client(EndpointVisibility.Public, typeof(grpc.Consumer.ConsumerClient), grpc.Consumer.Descriptor),
-        };
+        public IEnumerable<Client> Clients =>
+            new[]
+            {
+                new Client(EndpointVisibility.Public, typeof(grpc.Consumer.ConsumerClient), grpc.Consumer.Descriptor),
+            };
     }
 }
