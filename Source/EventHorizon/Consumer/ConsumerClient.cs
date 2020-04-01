@@ -58,10 +58,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public async Task SubscribeTo(EventHorizon eventHorizon, ScopeId scope, StreamId publicStream, PartitionId partition, MicroserviceAddress microserviceAddress, CancellationToken cancellationToken)
+        public async Task SubscribeTo(EventHorizon eventHorizon, ScopeId scope, StreamId publicStream, PartitionId partition, MicroserviceAddress microserviceAddress)
         {
             while (true)
             {
+                var cancellationTokenSource = new CancellationTokenSource();
+                cancellationTokenSource.Token.ThrowIfCancellationRequested();
                 var streamProcessorId = new StreamProcessorId(scope, eventHorizon.ProducerTenant.Value, eventHorizon.ProducerMicroservice.Value);
                 _logger.Debug($"Tenant '{eventHorizon.ConsumerTenant}' is subscribing to events from tenant '{eventHorizon.ProducerTenant} in microservice '{eventHorizon.ProducerMicroservice}' on '{microserviceAddress.Host}:{microserviceAddress.Port}' in scope {scope}");
                 try
@@ -76,7 +78,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                                 LastReceived = (int)publicEventsPosition.Value - 1,
                                 Stream = publicStream.ToProtobuf(),
                                 Partition = partition.ToProtobuf()
-                            }, cancellationToken: cancellationToken);
+                            }, cancellationToken: cancellationTokenSource.Token);
                     var eventsFetcher = new EventsFromEventHorizonFetcher(
                         eventHorizon,
                         call,
@@ -85,26 +87,24 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         new EventHorizonEventProcessor(scope, eventHorizon, _getReceivedEventsWriter(), _logger),
                         eventsFetcher,
                         eventHorizon.ProducerMicroservice.Value,
-                        cancellationToken);
+                        cancellationTokenSource.Token);
 
-                    while (!cancellationToken.IsCancellationRequested)
+                    while (!cancellationTokenSource.Token.IsCancellationRequested)
                     {
-                        await Task.Delay(5000).ConfigureAwait(false);
+                        await Task.Delay(1000).ConfigureAwait(false);
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.Error(ex, $"Error occurred while handling Event Horizon to microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
-                    throw;
                 }
                 finally
                 {
                     _logger.Debug($"Disconnecting Event Horizon from tenant '{eventHorizon.ConsumerTenant}' to microservice '{eventHorizon.ProducerMicroservice}' and tenant '{eventHorizon.ProducerTenant}'");
                     _executionContextManager.CurrentFor(eventHorizon.ConsumerTenant);
-                    _getStreamProcessors().Unregister(eventHorizon.ProducerMicroservice.Value, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
+                    _getStreamProcessors().Unregister(scope, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
+                    cancellationTokenSource.Dispose();
                 }
-
-                await Task.Delay(5000).ConfigureAwait(false);
             }
         }
     }

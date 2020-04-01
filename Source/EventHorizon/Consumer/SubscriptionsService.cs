@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 var publicStream = subscription.Stream.To<StreamId>();
                 var scope = subscription.Scope.To<ScopeId>();
                 var microserviceAddress = _microservices.GetAddressFor(eventHorizon.ProducerMicroservice);
-                _ = _consumerClient.SubscribeTo(eventHorizon, scope, publicStream, partition, microserviceAddress, context.CancellationToken);
+                _ = _consumerClient.SubscribeTo(eventHorizon, scope, publicStream, partition, microserviceAddress);
                 return Task.FromResult(new SubscriptionResponse { Success = true });
             }
             catch (Exception ex)
