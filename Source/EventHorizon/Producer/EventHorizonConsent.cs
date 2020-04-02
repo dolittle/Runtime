@@ -1,21 +1,40 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using Dolittle.Concepts;
+using Dolittle.Applications;
+using Dolittle.Runtime.Events.Streams;
+using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
-    /// Represents the consent between tenants in different microservices.
+    /// Represents the consent for an event horizon.
     /// </summary>
-    public class EventHorizonConsent : ConceptAs<Guid>
+    public class EventHorizonConsent
     {
         /// <summary>
-        /// Implicitly convert from <see cref="Guid"/> to <see cref="EventHorizonConsent"/>.
+        /// Gets or sets the <see cref="Microservice" /> to give consent to.
         /// </summary>
-        /// <param name="reason"><see cref="Guid"/> representation.</param>
-        public static implicit operator EventHorizonConsent(Guid reason) =>
-            new EventHorizonConsent { Value = reason };
+        public Microservice Microservice { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="TenantId" /> tenant to give consent to.
+        /// </summary>
+        public TenantId Tenant { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="StreamId" /> stream to give consent to.
+        /// </summary>
+        public StreamId Stream { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="PartitionId" /> partition in the stream to give consent to.
+        /// </summary>
+        public PartitionId Partition { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="EventHorizonConsentId" /> for the tenant in microservice.
+        /// </summary>
+        public EventHorizonConsentId Consent { get; set; }
     }
 }

@@ -6,14 +6,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Applications;
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
-using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
 using Grpc.Core;
@@ -25,16 +23,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// <summary>
     /// Represents an implementation of <see cref="IConsumerClient" />.
     /// </summary>
-    [Singleton]
     public class ConsumerClient : IConsumerClient
     {
         readonly IClientManager _clientManager;
         readonly ISubscriptions _subscriptions;
         readonly MicroservicesConfiguration _microservicesConfiguration;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly FactoryFor<IStreamProcessors> _getStreamProcessors;
-        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
-        readonly FactoryFor<IWriteEventHorizonEvents> _getReceivedEventsWriter;
+        readonly IStreamProcessors _streamProcessors;
+        readonly IStreamProcessorStateRepository _streamProcessorStates;
+        readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
         readonly ILogger _logger;
 
@@ -44,30 +40,27 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="clientManager">The <see cref="IClientManager" />.</param>
         /// <param name="subscriptions">The <see cref="ISubscriptions" />.</param>
         /// <param name="microservicesConfiguration">The <see cref="MicroservicesConfiguration" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="getStreamProcessors">The <see cref="FactoryFor{IStreamProcessors}" />.</param>
-        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{IStreamProcessorStateRepository}" />.</param>
-        /// <param name="getReceivedEventsWriter">The <see cref="FactoryFor{IWriteReceivedEvents}" />.</param>
+        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
             IClientManager clientManager,
             ISubscriptions subscriptions,
             MicroservicesConfiguration microservicesConfiguration,
-            IExecutionContextManager executionContextManager,
-            FactoryFor<IStreamProcessors> getStreamProcessors,
-            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
-            FactoryFor<IWriteEventHorizonEvents> getReceivedEventsWriter,
+            IStreamProcessors streamProcessors,
+            IStreamProcessorStateRepository streamProcessorStates,
+            IWriteEventHorizonEvents eventHorizonEventsWriter,
             IAsyncPolicyFor<ConsumerClient> policy,
             ILogger logger)
         {
             _clientManager = clientManager;
             _subscriptions = subscriptions;
             _microservicesConfiguration = microservicesConfiguration;
-            _executionContextManager = executionContextManager;
-            _getStreamProcessors = getStreamProcessors;
-            _getStreamProcessorStates = getStreamProcessorStates;
-            _getReceivedEventsWriter = getReceivedEventsWriter;
+            _streamProcessors = streamProcessors;
+            _streamProcessorStates = streamProcessorStates;
+            _eventHorizonEventsWriter = eventHorizonEventsWriter;
             _policy = policy;
             _logger = logger;
         }
@@ -88,22 +81,19 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 return new FailedSubscriptionResponse(message);
             }
 
-            var streamProcessorStates = _getStreamProcessorStates();
-            return await HandleSubscriptionResponse(
-                await Subscribe(subscription, microserviceAddress, streamProcessorStates).ConfigureAwait(false),
+            var call = await Subscribe(subscription, microserviceAddress).ConfigureAwait(false);
+            var response = await HandleSubscriptionResponse(
+                call.ResponseStream,
                 subscription).ConfigureAwait(false);
+
+            if (response.Success) StartProcessingEventHorizon(subscription, microserviceAddress, call.ResponseStream);
+            return response;
         }
 
-        bool TryAddNewSubscription(Subscription subscription) =>
-            _subscriptions.AddSubscription(subscription);
-
-        bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress) =>
-            _microservicesConfiguration.TryGetValue(producerMicroservice, out microserviceAddress);
-
-        async Task<AsyncServerStreamingCall<grpc.SubscriptionStreamMessage>> Subscribe(Subscription subscription, MicroserviceAddress microserviceAddress, IStreamProcessorStateRepository streamProcessorStates)
+        async Task<AsyncServerStreamingCall<grpc.SubscriptionStreamMessage>> Subscribe(Subscription subscription, MicroserviceAddress microserviceAddress)
         {
             _logger.Trace($"Tenant '{subscription.ConsumerTenant}' is subscribing to events from tenant '{subscription.ProducerTenant}' in microservice '{subscription.ProducerMicroservice}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
-            var currentStreamProcessorState = await streamProcessorStates.GetOrAddNew(new StreamProcessorId(
+            var currentStreamProcessorState = await _streamProcessorStates.GetOrAddNew(new StreamProcessorId(
                                                                                         subscription.Scope,
                                                                                         subscription.ProducerTenant.Value,
                                                                                         subscription.ProducerMicroservice.Value)).ConfigureAwait(false);
@@ -120,48 +110,80 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     });
         }
 
-        async Task<SubscriptionResponse> HandleSubscriptionResponse(AsyncServerStreamingCall<grpc.SubscriptionStreamMessage> call, Subscription subscription, IStreamProcessorStateRepository streamProcessorStates)
+        async Task<SubscriptionResponse> HandleSubscriptionResponse(IAsyncStreamReader<grpc.SubscriptionStreamMessage> responseStream, Subscription subscription)
         {
-            if (!await call.ResponseStream.MoveNext(CancellationToken.None).ConfigureAwait(false)
-                || call.ResponseStream.Current.MessageCase != grpc.SubscriptionStreamMessage.MessageOneofCase.SubscriptionResponse)
+            if (!await responseStream.MoveNext(CancellationToken.None).ConfigureAwait(false)
+                || responseStream.Current.MessageCase != grpc.SubscriptionStreamMessage.MessageOneofCase.SubscriptionResponse)
             {
                 var message = $"Did not receive subscription response when subscribing with subscription {subscription}";
                 _logger.Warning(message);
                 return new FailedSubscriptionResponse(message);
             }
 
-            var subscriptionResponse = call.ResponseStream.Current.SubscriptionResponse;
+            var subscriptionResponse = responseStream.Current.SubscriptionResponse;
             if (subscriptionResponse.Failure != null)
             {
                 return new FailedSubscriptionResponse(subscriptionResponse.Failure.Reason);
             }
 
-            _ = StartProcessingEventHorizon(subscription, call, streamProcessorStates);
-
             return new SuccessfulSubscriptionResponse();
         }
 
-        async Task StartProcessingEventHorizon(Subscription subscription, AsyncServerStreamingCall<grpc.SubscriptionStreamMessage> call, IStreamProcessorStateRepository streamProcessorStates)
+        void StartProcessingEventHorizon(Subscription subscription, MicroserviceAddress microserviceAddress, IAsyncStreamReader<grpc.SubscriptionStreamMessage> responseStream)
         {
-            using var cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.Token.ThrowIfCancellationRequested();
-            await _policy.Execute(
-                async (cancellationToken) =>
+            Task.Run(async () =>
                 {
-                    var queue = new AsyncProducerConsumerQueue<grpc.EventHorizonEvent>();
-                    var eventsFetcher = new EventsFromEventHorizonFetcher(subscription, queue, _logger);
-                    _getStreamProcessors().Register(
-                        new EventProcessor(subscription, _getReceivedEventsWriter(), _logger),
-                        eventsFetcher,
-                        subscription.ProducerMicroservice.Value,
-                        cancellationToken);
-
-                    while (!cancellationToken.IsCancellationRequested
-                        && await call.ResponseStream.MoveNext(cancellationToken).ConfigureAwait(false))
+                    var cancellationToken = CancellationToken.None;
+                    try
                     {
-                        await queue.EnqueueAsync(call.ResponseStream.Current.Event).ConfigureAwait(false);
+                        await ReadEventsFromEventHorizon(subscription, responseStream, cancellationToken).ConfigureAwait(false);
                     }
-                }, cancellationTokenSource.Token).ConfigureAwait(false);
+                    catch (Exception)
+                    {
+                        _logger.Debug($"");
+                        await _policy.Execute(
+                            async () =>
+                            {
+                                var call = await Subscribe(subscription, microserviceAddress).ConfigureAwait(false);
+                                var response = await HandleSubscriptionResponse(call.ResponseStream, subscription).ConfigureAwait(false);
+                                if (!response.Success) throw new Todo();
+                                await ReadEventsFromEventHorizon(subscription, call.ResponseStream, cancellationToken).ConfigureAwait(false);
+                            }).ConfigureAwait(false);
+                    }
+                });
         }
+
+        async Task ReadEventsFromEventHorizon(Subscription subscription, IAsyncStreamReader<grpc.SubscriptionStreamMessage> responseStream, CancellationToken cancellationToken)
+        {
+            var queue = new AsyncProducerConsumerQueue<StreamEvent>();
+            var eventsFetcher = new EventsFromEventHorizonFetcher(queue);
+            _streamProcessors.Register(
+                new EventProcessor(subscription, _eventHorizonEventsWriter, _logger),
+                eventsFetcher,
+                subscription.ProducerMicroservice.Value,
+                cancellationToken);
+
+            while (await responseStream.MoveNext(cancellationToken).ConfigureAwait(false))
+            {
+                if (responseStream.Current.MessageCase != grpc.SubscriptionStreamMessage.MessageOneofCase.Event)
+                {
+                    _logger.Warning($"");
+                    continue;
+                }
+
+                var @event = responseStream.Current.Event;
+                await queue.EnqueueAsync(new StreamEvent(
+                    @event.ToCommittedEvent(subscription.ProducerMicroservice, subscription.ConsumerTenant),
+                    @event.StreamSequenceNumber,
+                    StreamId.AllStreamId,
+                    PartitionId.NotSet)).ConfigureAwait(false);
+            }
+        }
+
+        bool TryAddNewSubscription(Subscription subscription) =>
+            _subscriptions.AddSubscription(subscription);
+
+        bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress) =>
+            _microservicesConfiguration.TryGetValue(producerMicroservice, out microserviceAddress);
     }
 }

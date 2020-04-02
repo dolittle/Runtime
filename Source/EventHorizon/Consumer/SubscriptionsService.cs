@@ -5,6 +5,7 @@ extern alias contracts;
 
 using System.Threading.Tasks;
 using Dolittle.Applications;
+using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
@@ -25,7 +26,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [Singleton]
     public class SubscriptionsService : SubscriptionsBase
     {
-        readonly IConsumerClient _consumerClient;
+        readonly FactoryFor<IConsumerClient> _getConsumerClient;
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
         readonly ILogger _logger;
@@ -33,17 +34,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
         /// </summary>
-        /// <param name="consumerClient">The <see cref="IConsumerClient" />.</param>
+        /// <param name="getConsumerClient">The <see cref="FactoryFor{T}" /><see cref="IConsumerClient" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public SubscriptionsService(
-            IConsumerClient consumerClient,
+            FactoryFor<IConsumerClient> getConsumerClient,
             IExecutionContextManager executionContextManager,
             ITenants tenants,
             ILogger logger)
         {
-            _consumerClient = consumerClient;
+            _getConsumerClient = getConsumerClient;
             _executionContextManager = executionContextManager;
             _tenants = tenants;
             _logger = logger;
@@ -60,7 +61,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 subscriptionRequest.Scope.To<ScopeId>(),
                 subscriptionRequest.Stream.To<StreamId>(),
                 subscriptionRequest.Partition.To<PartitionId>());
-            var subscriptionResponse = await _consumerClient.HandleSubscription(subscription).ConfigureAwait(false);
+            var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscription).ConfigureAwait(false);
 
             return subscriptionResponse.Success ?
                 new grpc.SubscriptionResponse()

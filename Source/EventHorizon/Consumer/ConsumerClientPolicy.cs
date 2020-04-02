@@ -29,9 +29,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         /// <inheritdoc/>
         public Polly.IAsyncPolicy Define() =>
-            Polly.Policy.Handle<Exception>(_ =>
+            Polly.Policy
+            .Handle<Exception>(_ =>
                 {
-                    _logger.Warning($"Lost connection to event horizon : {_.Message}\nTrying to reconnect to event horizon");
+                    _logger.Warning($"Unable to subscribe to event horizon : {_.Message}\nTrying to reconnect.");
                     return true;
                 })
                 .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(5));
