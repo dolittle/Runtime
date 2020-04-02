@@ -67,10 +67,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <inheritdoc/>
         public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<EventHorizonEvent> responseStream, ServerCallContext context)
         {
-            EventHorizon eventHorizon = null;
+            Subscription eventHorizon = null;
             try
             {
-                eventHorizon = new EventHorizon(
+                eventHorizon = new Subscription(
                     _executionContextManager.Current.Microservice,
                     _executionContextManager.Current.Tenant,
                     _microservice,
@@ -136,7 +136,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             }
         }
 
-        void ThrowIfConsentIsNotGiven(EventHorizon eventHorizon, StreamId publicStream, PartitionId partition)
+        void ThrowIfConsentIsNotGiven(Subscription eventHorizon, StreamId publicStream, PartitionId partition)
         {
             _eventHorizonConsents.GetConsentFor(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant, publicStream, partition);
         }

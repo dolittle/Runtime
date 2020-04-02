@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// <summary>
     /// Extension methods for <see cref="EventHorizonEvent" />.
     /// </summary>
-    public static class EventHorizonEventExtensions
+    public static class EventExtensions
     {
         /// <summary>
         /// Converts the <see cref="EventHorizonEvent" /> to <see cref="CommittedEvent" />.
