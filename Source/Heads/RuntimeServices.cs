@@ -30,12 +30,10 @@ namespace Dolittle.Runtime.Heads
         public ServiceAspect Aspect => "Application";
 
         /// <inheritdoc/>
-        public IEnumerable<Service> BindServices()
-        {
-            return new Service[]
+        public IEnumerable<Service> BindServices() =>
+            new Service[]
             {
                 new Service(_headsService, contracts::Dolittle.Runtime.Heads.Heads.BindService(_headsService), contracts::Dolittle.Runtime.Heads.Heads.Descriptor)
             };
-        }
     }
 }

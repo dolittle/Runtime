@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 eventLogSequenceNumber,
                                 DateTimeOffset.UtcNow,
                                 _executionContextManager.Current,
-                                new Cause(CauseType.Command, 0),
+                                new Cause(CauseType.Unknown, 0),
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
@@ -115,7 +115,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 DateTimeOffset.UtcNow,
                                 events.EventSource,
                                 _executionContextManager.Current,
-                                new Cause(CauseType.Command, 0),
+                                new Cause(CauseType.Unknown, 0),
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);

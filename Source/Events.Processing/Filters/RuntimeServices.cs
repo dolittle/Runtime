@@ -31,12 +31,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public ServiceAspect Aspect => "Events.Processing";
 
         /// <inheritdoc/>
-        public IEnumerable<Service> BindServices()
-        {
-            return new Service[]
+        public IEnumerable<Service> BindServices() =>
+            new Service[]
             {
                 new Service(_filtersService, grpc.Filters.BindService(_filtersService), grpc.Filters.Descriptor)
             };
-        }
     }
 }

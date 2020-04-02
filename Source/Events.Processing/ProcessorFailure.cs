@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcessorFailure"/> class.
         /// </summary>
-        /// <param name="type">The <see creff="ProcessorFailureType" />.</param>
+        /// <param name="type">The <see cref="ProcessorFailureType" />.</param>
         /// <param name="reason">The reason for the failure.</param>
         public ProcessorFailure(ProcessorFailureType type, string reason)
         {
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="ProcessorFailure"/> class.
         /// </summary>
-        /// <param name="type">The <see creff="ProcessorFailureType" />.</param>
+        /// <param name="type">The <see cref="ProcessorFailureType" />.</param>
         /// <param name="reason">The reason for the failure.</param>
         /// <param name="retry">Whether it should retry processing.</param>
         /// <param name="retryTimeout">The <see cref="TimeSpan" /> timeout for when to try processing again.</param>
