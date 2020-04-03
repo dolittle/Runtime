@@ -1,10 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Collections;
 using Dolittle.DependencyInversion;
+using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Types;
 
@@ -13,11 +17,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// <summary>
     /// Represents an implementation of <see cref="IFilterValidators" />.
     /// </summary>
+    [Singleton]
     public class FilterValidators : IFilterValidators
     {
         readonly ITypeFinder _typeFinder;
         readonly IContainer _container;
         readonly ILogger _logger;
+        readonly IDictionary<Type, Type> _filterDefinitionToValidatorMap = new Dictionary<Type, Type>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterValidators"/> class.
@@ -30,10 +36,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _typeFinder = typeFinder;
             _container = container;
             _logger = logger;
+            PopulateFilterValidatorMap();
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken = default)
+        public Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
             _logger.Trace($"Finding validator for filter '{filter.Definition.TargetStream}'");
@@ -47,18 +54,42 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             return Task.FromResult(new FilterValidationResult());
         }
 
-        bool TryGetValidatorFor<TDefinition>(out ICanValidateFilterFor<TDefinition> validator)
-            where TDefinition : IFilterDefinition
+        void PopulateFilterValidatorMap()
         {
-            var implementations = _typeFinder.FindMultiple(typeof(ICanValidateFilterFor<TDefinition>));
+            _typeFinder.FindMultiple<IFilterDefinition>().ForEach(filterDefinitionType =>
+            {
+                if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
+                {
+                    _logger.Trace($"Filter definition type {filterDefinitionType.FullName} can be validated by validator type {validatorType.FullName}");
+                    _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
+                }
+            });
+        }
+
+        bool TryGetValidatorTypeFor(Type filterDefinitionType, out Type validatorType)
+        {
+            var implementations = _typeFinder.FindMultiple(typeof(ICanValidateFilterFor<>).MakeGenericType(filterDefinitionType));
             if (implementations.Any())
             {
                 if (implementations.Count() > 1)
                 {
-                    _logger.Warning($"There are multiple validators that can validate filter defintion of type {typeof(TDefinition).FullName}:\n{string.Join("\n", implementations.Select(_ => _.FullName))}\nUsing the first validator.");
+                    _logger.Warning($"There are multiple validators that can validate filter defintion of type {filterDefinitionType.FullName}:\n{string.Join("\n", implementations.Select(_ => _.FullName))}\nUsing the first validator.");
                 }
 
-                validator = _container.Get(implementations.First()) as ICanValidateFilterFor<TDefinition>;
+                validatorType = implementations.First();
+                return true;
+            }
+
+            validatorType = null;
+            return false;
+        }
+
+        bool TryGetValidatorFor<TDefinition>(out ICanValidateFilterFor<TDefinition> validator)
+            where TDefinition : IFilterDefinition
+        {
+            if (_filterDefinitionToValidatorMap.TryGetValue(typeof(TDefinition), out var validatorType))
+            {
+                validator = _container.Get(validatorType) as ICanValidateFilterFor<TDefinition>;
                 return true;
             }
 
