@@ -12,7 +12,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Adds an event horizon subscription.
         /// </summary>
         /// <param name="subscription">The <see cref="Subscription "/>.</param>
-        /// <returns>False if the subscription already exists, false if not.</returns>
+        /// <returns>False if the subscription already exists, true if not.</returns>
         bool AddSubscription(Subscription subscription);
+
+        /// <summary>
+        /// Removes an event horizon subscription.
+        /// </summary>
+        /// <param name="subscription">The <see cref="Subscription "/>.</param>
+        /// <returns>False if the subscription does not already exists, true if it was successfully removed.</returns>
+        bool RemoveSubscription(Subscription subscription);
     }
 }
