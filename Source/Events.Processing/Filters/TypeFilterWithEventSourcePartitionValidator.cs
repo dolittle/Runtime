@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     [SingletonPerTenant]
     public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
     {
-        readonly IFilterDefinitionRepositoryFor<TypeFilterWithEventSourcePartitionDefinition> _filterDefinitionRepository;
+        readonly IFilterDefinitionRepository<TypeFilterWithEventSourcePartitionDefinition> _filterDefinitionRepository;
         readonly IFetchEventsFromStreams _eventsFromStreams;
         readonly IFetchEventTypesFromStreams _eventTypesFromStreams;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
@@ -28,13 +28,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
         /// </summary>
-        /// <param name="filterDefinitionRepository">The <see cref="IFilterDefinitionRepositoryFor{TDefinition}" /> for <see cref="TypeFilterWithEventSourcePartitionDefinition" />.</param>
+        /// <param name="filterDefinitionRepository">The <see cref="IFilterDefinitionRepository{TDefinition}" /> for <see cref="TypeFilterWithEventSourcePartitionDefinition" />.</param>
         /// <param name="eventsFromStreams">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="eventTypesFromStreams">The <see cref="IFetchEventTypesFromStreams" />.</param>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public TypeFilterWithEventSourcePartitionValidator(
-            IFilterDefinitionRepositoryFor<TypeFilterWithEventSourcePartitionDefinition> filterDefinitionRepository,
+            IFilterDefinitionRepository<TypeFilterWithEventSourcePartitionDefinition> filterDefinitionRepository,
             IFetchEventsFromStreams eventsFromStreams,
             IFetchEventTypesFromStreams eventTypesFromStreams,
             IStreamProcessorStateRepository streamProcessorStateRepository,
@@ -48,10 +48,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public Task Validate(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken = default) =>
+        public Task<FilterValidationResult> Validate(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken = default) =>
             ValidateBasedOffReFilteredStream(filter, cancellationToken);
 
-        async Task ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
+        async Task<FilterValidationResult> ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
             var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken).ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;
@@ -64,7 +64,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (processingResult.IsIncluded) artifactsFromSourceStream.Add(@event.Type);
             }
 
-            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream)) throw new IllegalFilterTransformation(filter.Scope, filter.Definition.TargetStream, filter.Definition.SourceStream);
+            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream))
+            {
+                return new FilterValidationResult($"The new stream generated from the filter does not match the old stream.");
+            }
+
+            return new FilterValidationResult();
         }
 
         bool ArtifactListsAreTheSame(IEnumerable<Artifact> oldList, IEnumerable<Artifact> newList) =>

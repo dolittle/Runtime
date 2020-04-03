@@ -7,26 +7,24 @@ using System.Threading.Tasks;
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
-    /// Defines a repository for <see cref="IFilterDefinition" /> of a specific type.
+    /// Defines a repository for <see cref="IFilterDefinition" >filter definitions</see>.
     /// </summary>
-    /// <typeparam name="TDefinition">The type of <see cref="IFilterDefinition" /> it can persist.</typeparam>
-    public interface IFilterDefinitionRepositoryFor<TDefinition> : ICanRemovePersistedFilterDefinition
-        where TDefinition : IFilterDefinition
+    public interface IFilterDefinitionRepository
     {
         /// <summary>
         /// Persists a <see cref="IFilterDefinition" />.
         /// </summary>
         /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The task of adding a persisted filter.</returns>
-        Task PersistFilter(TDefinition filterDefinition, CancellationToken cancellationToken = default);
+        /// <returns>The asynchronous operating of adding a persisted filter.</returns>
+        Task PersistFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the persisted <see cref="IFilterDefinition" />.
         /// </summary>
         /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The persisted filter definition or null if is not persisted.</returns>
-        Task<TDefinition> GetPersistedFilter(TDefinition filterDefinition, CancellationToken cancellationToken = default);
+        /// <returns>The persisted filter definition or the given <see cref="IFilterDefinition" /> if it is not persistable or if it has not been persisted yet.</returns>
+        Task<IFilterDefinition> GetPersistedFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken);
     }
 }

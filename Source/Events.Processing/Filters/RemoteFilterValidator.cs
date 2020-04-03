@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken = default)
+        public async Task<FilterValidationResult> Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken = default)
         {
             var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken).ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;
@@ -53,7 +53,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (processingResult.IsIncluded) artifactsFromSourceStream.Add(@event.Type);
             }
 
-            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream)) throw new IllegalFilterTransformation(filter.Scope, filter.Definition.TargetStream, filter.Definition.SourceStream);
+            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream))
+            {
+                return new FilterValidationResult($"The new stream generated from the filter does not match the old stream.");
+            }
+
+            return new FilterValidationResult();
         }
 
         bool ArtifactListsAreTheSame(IEnumerable<Artifact> oldList, IEnumerable<Artifact> newList) =>

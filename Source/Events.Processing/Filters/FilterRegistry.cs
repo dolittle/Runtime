@@ -1,17 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -24,6 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly ConcurrentDictionary<StreamId, IEventProcessor> _registeredFilters = new ConcurrentDictionary<StreamId, IEventProcessor>();
         readonly IFilterValidators _filterValidators;
+        readonly IFilterDefinitionRepository _filterDefinitions;
         readonly IContainer _container;
         readonly ILogger _logger;
 
@@ -31,78 +28,49 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Initializes a new instance of the <see cref="FilterRegistry"/> class.
         /// </summary>
         /// <param name="filterValidators">The <see cref="IFilterValidators" />.</param>
+        /// <param name="filterDefinitions">The <see cref="IFilterDefinitionRepository" />.</param>
         /// <param name="container">The <see cref="IContainer" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public FilterRegistry(IFilterValidators filterValidators, IContainer container, ILogger logger)
+        public FilterRegistry(IFilterValidators filterValidators, IFilterDefinitionRepository filterDefinitions, IContainer container, ILogger logger)
         {
             _filterValidators = filterValidators;
+            _filterDefinitions = filterDefinitions;
             _container = container;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public async Task Register<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken = default)
+        public async Task Register<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.Debug($"Registering filter defintion of type {typeof(TDefinition).FullName} on source stream '{filter.Definition.SourceStream}' and target stream '{filter.Definition.TargetStream}'");
-            if (!_registeredFilters.TryAdd(filter.Definition.TargetStream, filter)) throw new FilterForStreamAlreadyRegistered(filter.Definition.TargetStream);
-            await _filterValidators.Validate(filter, cancellationToken).ConfigureAwait(false);
-            IFilterDefinitionRepositoryFor<TDefinition> repository = null;
-            try
+            _logger.Trace($"Registering filter defintion of type {typeof(TDefinition).FullName} on source stream '{filter.Definition.SourceStream}' and target stream '{filter.Definition.TargetStream}'");
+            if (!_registeredFilters.TryAdd(filter.Definition.TargetStream, filter))
             {
-                repository = _container.Get<IFilterDefinitionRepositoryFor<TDefinition>>();
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"No persisted filter repository for filter definition of type {typeof(TDefinition).FullName}");
+                var message = $"Filter '{filter.Definition.TargetStream}' is already registered.";
+                _logger.Debug(message);
+                throw new CouldNotRegisterFilter(filter.Definition, message);
             }
 
-            if (repository != null)
+            var validationResult = await _filterValidators.Validate(filter, cancellationToken).ConfigureAwait(false);
+            if (!validationResult.Succeeded)
             {
-                _logger.Debug($"Persisting filter defintion of type {typeof(TDefinition).FullName} on source stream '{filter.Definition.SourceStream}' and target stream '{filter.Definition.TargetStream}'");
-                await repository.PersistFilter(filter.Definition, cancellationToken).ConfigureAwait(false);
+                var message = $"Filter '{filter.Definition.TargetStream}' failed validation: {validationResult.FailureReason}";
+                _logger.Debug(message);
+                throw new CouldNotRegisterFilter(filter.Definition, message);
+            }
+
+            if (filter.Definition.IsPersistable)
+            {
+                _logger.Trace($"Persisting filter defintion of type {typeof(TDefinition).FullName} on source stream '{filter.Definition.SourceStream}' and target stream '{filter.Definition.TargetStream}'");
+                await _filterDefinitions.PersistFilter(filter.Definition, cancellationToken).ConfigureAwait(false);
             }
         }
 
         /// <inheritdoc/>
-        public void Unregister(ScopeId scope, StreamId targetStream)
+        public void Unregister(StreamId targetStream)
         {
-            _logger.Debug($"Unregistering filter on target stream '{targetStream}'");
-            if (!_registeredFilters.ContainsKey(targetStream)) throw new NoFilterRegisteredForStream(scope, targetStream);
+            _logger.Trace($"Unregistering filter on target stream '{targetStream}'");
             _registeredFilters.Remove(targetStream, out var _);
         }
-
-        /// <inheritdoc/>
-        public Task RemoveIfPersisted(ScopeId scope, StreamId targetStream, CancellationToken cancellationToken = default)
-        {
-            _logger.Debug($"Removing persisted filter definition on target stream '{targetStream}' if persisted");
-            if (!_registeredFilters.TryGetValue(targetStream, out var filterProcessor)) throw new NoFilterRegisteredForStream(scope, targetStream);
-            var filterDefinitionType = GetFilterDefinitionTypeFromEventProcessor(filterProcessor);
-            ICanRemovePersistedFilterDefinition persistedFilterRemover;
-            try
-            {
-                persistedFilterRemover = GetPersistedFilterDefinitionRemoverForDefinitionType(filterDefinitionType);
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"No filter definition repository for filter definition of type '{filterDefinitionType.FullName}'");
-                return Task.CompletedTask;
-            }
-
-            if (persistedFilterRemover != null)
-            {
-                _logger.Debug($"Removing persisted filter defintion of type '{filterDefinitionType.FullName}' on target stream '{targetStream}'");
-                return persistedFilterRemover.RemovePersistedFilter(targetStream, cancellationToken);
-            }
-
-            _logger.Debug($"No filter definition repository for filter definition of type '{filterDefinitionType.FullName}'");
-            return Task.CompletedTask;
-        }
-
-        Type GetFilterDefinitionTypeFromEventProcessor(IEventProcessor processor) =>
-            processor.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).First(_ => typeof(IFilterDefinition).IsAssignableFrom(_.PropertyType)).PropertyType;
-
-        ICanRemovePersistedFilterDefinition GetPersistedFilterDefinitionRemoverForDefinitionType(Type filterDefinitionType) =>
-            _container.Get(typeof(IFilterDefinitionRepositoryFor<>).MakeGenericType(filterDefinitionType)) as ICanRemovePersistedFilterDefinition;
     }
 }

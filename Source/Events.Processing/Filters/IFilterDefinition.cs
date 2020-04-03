@@ -19,5 +19,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Gets the <see cref="StreamId" /> that the filter filters to.
         /// </summary>
         StreamId TargetStream { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="IFilterDefinition" /> is persitable.
+        /// </summary>
+        bool IsPersistable { get; }
     }
 }
