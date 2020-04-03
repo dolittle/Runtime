@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     [SingletonPerTenant]
     public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
     {
-        readonly IFilterDefinitionRepository<TypeFilterWithEventSourcePartitionDefinition> _filterDefinitionRepository;
         readonly IFetchEventsFromStreams _eventsFromStreams;
         readonly IFetchEventTypesFromStreams _eventTypesFromStreams;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
@@ -28,19 +27,16 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
         /// </summary>
-        /// <param name="filterDefinitionRepository">The <see cref="IFilterDefinitionRepository{TDefinition}" /> for <see cref="TypeFilterWithEventSourcePartitionDefinition" />.</param>
         /// <param name="eventsFromStreams">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="eventTypesFromStreams">The <see cref="IFetchEventTypesFromStreams" />.</param>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public TypeFilterWithEventSourcePartitionValidator(
-            IFilterDefinitionRepository<TypeFilterWithEventSourcePartitionDefinition> filterDefinitionRepository,
             IFetchEventsFromStreams eventsFromStreams,
             IFetchEventTypesFromStreams eventTypesFromStreams,
             IStreamProcessorStateRepository streamProcessorStateRepository,
             ILogger logger)
         {
-            _filterDefinitionRepository = filterDefinitionRepository;
             _eventsFromStreams = eventsFromStreams;
             _eventTypesFromStreams = eventTypesFromStreams;
             _streamProcessorStateRepository = streamProcessorStateRepository;
