@@ -16,5 +16,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         /// <inheritdoc/>
         public bool AddSubscription(Subscription subscription) => _subscriptions.Add(subscription);
+
+        /// <inheritdoc/>
+        public bool RemoveSubscription(Subscription subscription) => _subscriptions.Remove(subscription);
     }
 }
