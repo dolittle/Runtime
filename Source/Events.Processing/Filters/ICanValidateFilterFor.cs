@@ -18,24 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="filter">The <see cref="IFilterProcessor{TDefinition}" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The async operation of validating a filter.</returns>
+        /// <returns><see cref="FilterValidationResult" />.</returns>
         Task<FilterValidationResult> Validate(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken = default);
-    }
-
-    public class FilterValidationResult
-    {
-        public bool Succeeded { get; }
-        public 
-    }
-    /// <summary>
-    /// Represents the reason for why 
-    /// </summary>
-    public class FailedFilterValidationReason : Concepts.ConceptAs<string>
-    {
-        /// <summary>
-        /// Implicitly converts <see cref="string" /> to <see cref="FailedFilterValidationReason" />.
-        /// </summary>
-        /// <param name="reason">The value.</param>
-        public static implicit operator FailedFilterValidationReason(string reason) => new FailedFilterValidationReason { Value = reason };
     }
 }
