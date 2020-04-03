@@ -86,6 +86,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     return;
                 }
 
+                _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscrbed to tenant '{producerTenant}' starting at position '{lastReceivedPosition}' in partition '{partition}' in stream '{publicStream}'");
+
                 var publicStreamPosition = new StreamPosition((ulong)(lastReceivedPosition + 1));
                 _executionContextManager.CurrentFor(
                     _thisApplication,
@@ -143,6 +145,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
         grpcEventHorizon.SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
         {
+            _logger.Trace($"Checking if producer tenant '{producerTenant}' exists.");
             if (!ProducerTenantExists(producerTenant))
             {
                 var message = $"";
@@ -150,15 +153,29 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 return new grpcEventHorizon.SubscriptionResponse { Failure = new grpcEventHorizon.Failure { Reason = message } };
             }
 
+            if (!HasConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition))
+            {
+                var message = $"There are no consent configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'";
+                _logger.Debug(message);
+                return new grpcEventHorizon.SubscriptionResponse { Failure = new grpcEventHorizon.Failure { Reason = message } };
+            }
+
+            return new grpcEventHorizon.SubscriptionResponse();
+        }
+
+        bool HasConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
+        {
+            _logger.Trace($"Checking consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
+
             var consentsForSubscription = _eventHorizonConsents
                                             .GetConsentConfigurationsFor(producerTenant)
-                                            .Where(_ => _.Microservice == consumerTenant && _.Tenant == consumerTenant && _.Stream == publicStream && _.Partition == partition).ToArray();
+                                            .Where(_ => _.Microservice == consumerMicroservice && _.Tenant == consumerTenant && _.Stream == publicStream && _.Partition == partition).ToArray();
 
             if (consentsForSubscription.Length == 0)
             {
                 var message = $"There are no consent configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'";
                 _logger.Debug(message);
-                return new grpcEventHorizon.SubscriptionResponse { Failure = new grpcEventHorizon.Failure { Reason = message } };
+                return false;
             }
 
             if (consentsForSubscription.Length > 1)
@@ -166,7 +183,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 _logger.Warning($"There are multiple consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
             }
 
-            return new grpcEventHorizon.SubscriptionResponse();
+            return true;
         }
 
         bool ProducerTenantExists(TenantId producerTenant) =>

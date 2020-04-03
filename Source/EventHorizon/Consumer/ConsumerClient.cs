@@ -68,12 +68,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public async Task<SubscriptionResponse> HandleSubscription(Subscription subscription)
         {
+            _logger.Trace($"Adding subscription {subscription}");
             if (!TryAddNewSubscription(subscription))
             {
                 _logger.Trace($"Already subscribed to subscription {subscription}");
                 return new SuccessfulSubscriptionResponse();
             }
 
+            _logger.Trace($"Getting microservice address");
             if (!TryGetMicroserviceAddress(subscription.ProducerMicroservice, out var microserviceAddress))
             {
                 var message = $"There is no microservice configuration for the producer microservice '{subscription.ProducerMicroservice}'.";
@@ -81,18 +83,23 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 return new FailedSubscriptionResponse(message);
             }
 
-            var call = await Subscribe(subscription, microserviceAddress).ConfigureAwait(false);
-            var response = await HandleSubscriptionResponse(
-                call.ResponseStream,
-                subscription).ConfigureAwait(false);
+            _logger.Trace($"Got microservice address {microserviceAddress.Host}:{microserviceAddress.Port}");
+            AsyncServerStreamingCall<grpc.SubscriptionStreamMessage> call;
+            return await _policy.Execute(async () =>
+                {
+                    call = await Subscribe(subscription, microserviceAddress).ConfigureAwait(false);
+                    var response = await HandleSubscriptionResponse(
+                        call.ResponseStream,
+                        subscription).ConfigureAwait(false);
 
-            if (response.Success) StartProcessingEventHorizon(subscription, microserviceAddress, call.ResponseStream);
-            return response;
+                    if (response.Success) StartProcessingEventHorizon(subscription, microserviceAddress, call.ResponseStream);
+                    return response;
+                }).ConfigureAwait(false);
         }
 
         async Task<AsyncServerStreamingCall<grpc.SubscriptionStreamMessage>> Subscribe(Subscription subscription, MicroserviceAddress microserviceAddress)
         {
-            _logger.Trace($"Tenant '{subscription.ConsumerTenant}' is subscribing to events from tenant '{subscription.ProducerTenant}' in microservice '{subscription.ProducerMicroservice}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
+            _logger.Debug($"Tenant '{subscription.ConsumerTenant}' is subscribing to events from tenant '{subscription.ProducerTenant}' in microservice '{subscription.ProducerMicroservice}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
             var currentStreamProcessorState = await _streamProcessorStates.GetOrAddNew(new StreamProcessorId(
                                                                                         subscription.Scope,
                                                                                         subscription.ProducerTenant.Value,
@@ -123,9 +130,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var subscriptionResponse = responseStream.Current.SubscriptionResponse;
             if (subscriptionResponse.Failure != null)
             {
+                _logger.Warning($"Failed subscribing with subscription {subscription}. {subscriptionResponse.Failure.Reason}");
                 return new FailedSubscriptionResponse(subscriptionResponse.Failure.Reason);
             }
 
+            _logger.Trace($"Subscription response for subscription {subscription} was successful");
             return new SuccessfulSubscriptionResponse();
         }
 
@@ -138,9 +147,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     {
                         await ReadEventsFromEventHorizon(subscription, responseStream, cancellationToken).ConfigureAwait(false);
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        _logger.Debug($"");
+                        _logger.Debug($"Error while reading events from event horizon from subscription {subscription}.\nError: {ex.Message}\nReconnecting");
                         await _policy.Execute(
                             async () =>
                             {
@@ -167,7 +176,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             {
                 if (responseStream.Current.MessageCase != grpc.SubscriptionStreamMessage.MessageOneofCase.Event)
                 {
-                    _logger.Warning($"");
+                    _logger.Warning($"Expected the response to contain an event in subscription {subscription}. Getting next response");
                     continue;
                 }
 
