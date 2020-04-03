@@ -13,6 +13,7 @@
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
         <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Services.Clients" Version="$(FundamentalsVersion)" />
+        <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
     </ItemGroup>
 
     <ItemGroup>
