@@ -140,6 +140,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         void StartProcessingEventHorizon(Subscription subscription, MicroserviceAddress microserviceAddress, IAsyncStreamReader<grpc.SubscriptionStreamMessage> responseStream)
         {
+            _logger.Information($"Successfully subscribed with {subscription}. Waiting for events to process");
             Task.Run(async () =>
                 {
                     var cancellationToken = CancellationToken.None;
