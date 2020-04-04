@@ -116,7 +116,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IEventProcessor eventProcessor,
             CancellationToken cancellationToken)
         {
-            _logger.Debug($"Registering event handler '{eventProcessorId}' in scope '{scope}' for stream '{sourceStreamId}' for {_tenants.All.Count} tenants - types : '{string.Join(",", filterDefinition.Types)}'");
+            _logger.Trace($"Registering event handler '{eventProcessorId}' in scope '{scope}' for stream '{sourceStreamId}' for {_tenants.All.Count} tenants - types : '{string.Join(", ", filterDefinition.Types)}'");
             foreach (var tenant in _tenants.All)
             {
                 try
@@ -132,9 +132,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStreamId, cancellationToken);
                     _streamProcessorsFactory().Register(eventProcessor, _eventsFromStreamsFetcherFactory(), targetStreamId, cancellationToken);
                 }
-                catch (IllegalFilterTransformation ex)
+                catch (CouldNotRegisterFilter ex)
                 {
-                    _logger.Error(ex, $"The filter for stream '{targetStreamId}' in scope '{scope}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
+                    _logger.Error(ex, $"The filter for stream '{targetStreamId}' in scope '{scope}' for tenant '{tenant}'. '{ex.Message}'");
                 }
             }
         }
@@ -142,11 +142,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         void UnregisterForAllTenants(ScopeId scope, EventProcessorId eventProcessorId, StreamId sourceStream)
         {
             var tenants = _tenants.All;
-            _logger.Debug($"Unregistering filter '{eventProcessorId}' in scope '{scope}' for stream '{sourceStream}' for {tenants.Count} tenants");
+            _logger.Trace($"Unregistering filter '{eventProcessorId}' in scope '{scope}' for stream '{sourceStream}' for {tenants.Count} tenants");
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
-                _getFilters().Unregister(scope, eventProcessorId.Value);
+                _getFilters().Unregister(eventProcessorId.Value);
                 _streamProcessorsFactory().Unregister(scope, eventProcessorId, sourceStream);
                 _streamProcessorsFactory().Unregister(scope, eventProcessorId, eventProcessorId.Value);
             });

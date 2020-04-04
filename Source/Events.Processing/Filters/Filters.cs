@@ -115,9 +115,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     await _filterRegistryFactory().Register(filter, cancellationToken).ConfigureAwait(false);
                     _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStream);
                 }
-                catch (IllegalFilterTransformation ex)
+                catch (CouldNotRegisterFilter ex)
                 {
-                    _logger.Error(ex, $"The filter with source stream '{sourceStream}' and target stream '{targetStream}' in scope '{scope}' for tenant '{tenant}' does not produce the same stream as the previous filter for that stream. Not registering stream processors.");
+                    _logger.Error(ex, $"The filter for stream '{targetStream}' in scope '{scope}' for tenant '{tenant}'. '{ex.Message}'");
                 }
             }
         }
