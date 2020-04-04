@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
     /// Represents the implementation of <see creF="FiltersBase"/>.
     /// </summary>
     [Singleton]
-    public class ConsumerService : ConsumerBase
+    public class ConsumerService : ConsumerBase, IDisposable
     {
         readonly Application _thisApplication;
         readonly Microservice _thisMicroservice;
@@ -38,6 +38,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         readonly ITenants _tenants;
         readonly FactoryFor<IFetchEventsFromPublicStreams> _getEventsFromPublicStreamsFetcher;
         readonly ILogger _logger;
+
+        bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsumerService"/> class.
@@ -63,6 +65,20 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _tenants = tenants;
             _getEventsFromPublicStreamsFetcher = getEventsFromPublicStreamsFetcher;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="ConsumerService"/> class.
+        /// </summary>
+        ~ConsumerService()
+        {
+            Dispose();
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            _disposed = true;
         }
 
         /// <inheritdoc/>
@@ -95,12 +111,11 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     producerTenant,
                     _executionContextManager.Current.CorrelationId);
                 var publicEvents = _getEventsFromPublicStreamsFetcher();
-                while (!context.CancellationToken.IsCancellationRequested)
+                while (!context.CancellationToken.IsCancellationRequested && !_disposed)
                 {
                     try
                     {
-                        // TODO: Surround with policy for event store.
-                        var streamPosition = await publicEvents.FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false); // TODO: Replace with Fetch next in partition
+                        var streamPosition = await publicEvents.FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
                         if (streamPosition == uint.MaxValue) throw new NoEventInStreamAtPosition(ScopeId.Default, publicStream, publicStreamPosition);
                         var streamEvent = await publicEvents.Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
                         var eventHorizonEvent = new grpcEventHorizon.EventHorizonEvent
