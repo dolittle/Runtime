@@ -24,6 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly string _logMessagePrefix;
         readonly IStreamProcessorStates _streamProcessorStates;
+        readonly IStreamProcessors _streamProcessors;
         Task _task;
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
+        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public StreamProcessor(
@@ -42,12 +44,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IEventProcessor processor,
             IStreamProcessorStates streamProcessorStates,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
+            IStreamProcessors streamProcessors,
             ILogger logger,
             CancellationToken cancellationToken = default)
         {
             _processor = processor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;
+            _streamProcessors = streamProcessors;
             _logger = logger;
             _cancellationToken = cancellationToken;
             Identifier = new StreamProcessorId(_processor.Scope, _processor.Identifier, sourceStreamId);
@@ -87,6 +91,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             try
             {
                 CurrentState = await _streamProcessorStates.GetStoredStateFor(Identifier, _cancellationToken).ConfigureAwait(false);
+                using var ctr = _cancellationToken.Register(() => _streamProcessors.Unregister(Identifier.ScopeId, Identifier.EventProcessorId, Identifier.SourceStreamId));
                 do
                 {
                     StreamEvent streamEvent = default;
