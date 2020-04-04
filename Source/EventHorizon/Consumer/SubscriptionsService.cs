@@ -65,9 +65,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger.Information($"Incomming event horizon subscription request from head to runtime. {subscription}");
             var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscription).ConfigureAwait(false);
 
-            return subscriptionResponse.Success ?
-                    new grpc.SubscriptionResponse()
-                    : new grpc.SubscriptionResponse { Failure = new grpc.Failure { Reason = subscriptionResponse.FailureReason } };
+            return subscriptionResponse switch
+                {
+                    { Success: false } => new grpc.SubscriptionResponse { Failure = new grpc.Failure { Reason = subscriptionResponse.FailureReason } },
+                    _ => new grpc.SubscriptionResponse(),
+                };
         }
     }
 }
