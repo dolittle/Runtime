@@ -34,7 +34,6 @@ namespace Dolittle.Runtime.Server
             return Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(config => config.AddConfiguration(appConfig))
                 .UseDolittle()
-                .Build().Services.GetService()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
