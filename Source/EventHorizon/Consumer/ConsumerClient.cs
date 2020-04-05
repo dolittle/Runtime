@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// Represents an implementation of <see cref="IConsumerClient" />.
     /// </summary>
     [SingletonPerTenant]
-    public class ConsumerClient : IConsumerClient, IDisposable
+    public class ConsumerClient : IConsumerClient
     {
         readonly IClientManager _clientManager;
         readonly ISubscriptions _subscriptions;
@@ -37,6 +37,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly CancellationToken _token;
         readonly ILogger _logger;
+        bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsumerClient"/> class.
@@ -76,14 +77,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// </summary>
         ~ConsumerClient()
         {
-            Dispose();
+            Dispose(false);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (!_cancellationTokenSource.IsCancellationRequested) _cancellationTokenSource.Cancel();
-            _cancellationTokenSource.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <inheritdoc/>
@@ -116,6 +117,23 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     if (response.Success) StartProcessingEventHorizon(subscription, microserviceAddress, call.ResponseStream);
                     return response;
                 }, _token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Dispose resources.
+        /// </summary>
+        /// <param name="disposeManagedResources">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposeManagedResources)
+        {
+            if (_disposed) return;
+
+            _cancellationTokenSource.Cancel();
+            if (disposeManagedResources)
+            {
+                _cancellationTokenSource.Dispose();
+            }
+
+            _disposed = true;
         }
 
         async Task<AsyncServerStreamingCall<grpc.SubscriptionStreamMessage>> Subscribe(Subscription subscription, MicroserviceAddress microserviceAddress)
@@ -191,7 +209,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var eventsFetcher = new EventsFromEventHorizonFetcher(queue);
 
             using var streamProcessorCancellationSource = new CancellationTokenSource();
-            using var ctr = _token.Register(() => streamProcessorCancellationSource.Cancel());
+            using var cancellationTokenRegistration = _token.Register(() => streamProcessorCancellationSource.Cancel());
             _streamProcessors.Register(
                 new EventProcessor(subscription, _eventHorizonEventsWriter, _logger),
                 eventsFetcher,
@@ -217,7 +235,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     _token).ConfigureAwait(false);
             }
 
-            if (!streamProcessorCancellationSource.IsCancellationRequested) streamProcessorCancellationSource.Cancel();
+            streamProcessorCancellationSource.Cancel();
         }
 
         bool TryAddNewSubscription(Subscription subscription) =>
