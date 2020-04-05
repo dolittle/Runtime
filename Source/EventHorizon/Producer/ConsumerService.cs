@@ -80,7 +80,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-            _disposed = true;
         }
 
         /// <inheritdoc/>
