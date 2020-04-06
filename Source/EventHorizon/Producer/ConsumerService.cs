@@ -72,13 +72,14 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// </summary>
         ~ConsumerService()
         {
-            Dispose();
+            Dispose(false);
         }
 
         /// <inheritdoc/>
         public void Dispose()
         {
-            _disposed = true;
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         /// <inheritdoc/>
@@ -111,7 +112,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     producerTenant,
                     _executionContextManager.Current.CorrelationId);
                 var publicEvents = _getEventsFromPublicStreamsFetcher();
-                while (!context.CancellationToken.IsCancellationRequested && !_disposed)
+                while (!context.CancellationToken.IsCancellationRequested
+                    && !_disposed)
                 {
                     try
                     {
@@ -156,6 +158,17 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             {
                 _logger.Warning($"Disconnecting Event Horizon between consumer microservice '{consumerMicroservice}' and tenant '{consumerTenant}' and producer tenant '{producerTenant}'");
             }
+        }
+
+        /// <summary>
+        /// Dispose resources.
+        /// </summary>
+        /// <param name="disposeManagedResources">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposeManagedResources)
+        {
+            if (_disposed) return;
+
+            _disposed = true;
         }
 
         grpcEventHorizon.SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)

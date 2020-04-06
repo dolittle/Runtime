@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -8,7 +9,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// <summary>
     /// Defines a system for handling inncomming public events from other microservices.
     /// </summary>
-    public interface IConsumerClient
+    public interface IConsumerClient : IDisposable
     {
         /// <summary>
         /// Handles a subscription request.

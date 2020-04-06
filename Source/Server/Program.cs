@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Autofac.Extensions.DependencyInjection;
+using Dolittle.Hosting.Microsoft;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Server
 
             return Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration(config => config.AddConfiguration(appConfig))
-                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                .UseDolittle()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder

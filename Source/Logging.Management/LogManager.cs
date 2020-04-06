@@ -5,7 +5,6 @@ extern alias contracts;
 
 using System.Collections.ObjectModel;
 using Dolittle.Lifecycle;
-using Dolittle.Logging.Json;
 
 namespace Dolittle.Runtime.Logging.Management
 {
@@ -22,14 +21,14 @@ namespace Dolittle.Runtime.Logging.Management
         /// </summary>
         public LogManager()
         {
-            Messages = new ObservableCollection<JsonLogMessage>();
+            Messages = new ObservableCollection<string>();
         }
 
         /// <inheritdoc/>
-        public ObservableCollection<JsonLogMessage> Messages { get; }
+        public ObservableCollection<string> Messages { get; }
 
         /// <inheritdoc/>
-        public void Write(JsonLogMessage message)
+        public void Write(string message)
         {
             Messages.Add(message);
 
