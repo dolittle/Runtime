@@ -129,7 +129,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             tenants.ForEach(tenant =>
             {
                 _executionContextManager.CurrentFor(tenant);
-                _filterRegistryFactory().Unregister(scope, targetStream);
+                _filterRegistryFactory().Unregister(targetStream);
                 _streamProcessorsFactory().Unregister(scope, targetStream.Value, sourceStream);
             });
         }
