@@ -51,14 +51,41 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public override Task Connect(
-            IAsyncStreamReader<FilterClientToRuntimeResponse> runtimeStream,
-            IServerStreamWriter<FilterRuntimeToClientRequest> clientStream,
+        public override async Task Connect(
+            IAsyncStreamReader<FiltersClientToRuntimeStreamMessage> runtimeStream,
+            IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream,
             ServerCallContext context)
         {
-            var filterArguments = context.GetArgumentsMessage<FilterArguments>();
-            var eventProcessorId = filterArguments.Filter.To<EventProcessorId>();
-            var scope = filterArguments.Scope.To<ScopeId>();
+            if (!await runtimeStream.MoveNext(context.CancellationToken).ConfigureAwait(false))
+            {
+                const string message = "Filters connection requested but client-to-runtime stream did not contain any messages";
+                _logger.Warning(message);
+                await clientStream.WriteAsync(new FilterRuntimeToClientStreamMessage
+                    {
+                        RegistrationResponse = new FilterRegistrationResponse
+                        {
+                            Failure = new Failure { Reason = message }
+                        }
+                    }).ConfigureAwait(false);
+                return;
+            }
+
+            if (runtimeStream.Current.MessageCase != FiltersClientToRuntimeStreamMessage.MessageOneofCase.RegistrationRequest)
+            {
+                _logger.Warning("Filter connection requested but first message in request stream was not a filter registration request message");
+                await clientStream.WriteAsync(new FilterRuntimeToClientStreamMessage
+                    {
+                        RegistrationResponse = new FilterRegistrationResponse
+                        {
+                            Failure = new Failure { Reason = $"The first message in the Filters connection needs to be {typeof(FiltersRegistrationRequest).FullName}" }
+                        }
+                    }).ConfigureAwait(false);
+                return;
+            }
+
+            var registration = runtimeStream.Current.RegistrationRequest;
+            var eventProcessorId = registration.Filter.To<EventProcessorId>();
+            var scope = registration.Scope.To<ScopeId>();
             var streamId = StreamId.AllStreamId;
 
             var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
@@ -67,6 +94,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 context,
                 _ => _.CallNumber,
                 _ => _.CallNumber);
+
             FilterProcessor createEventProcessor() => new FilterProcessor(
                 scope,
                 new RemoteFilterDefinition(streamId, eventProcessorId.Value),
@@ -75,13 +103,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _executionContextManager,
                 _logger);
 
-            return _filters.RegisterAndStartProcessing(
+            await _filters.RegisterAndStartProcessing(
                 scope,
                 eventProcessorId,
                 streamId,
                 dispatcher,
                 createEventProcessor,
-                context.CancellationToken);
+                context.CancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
-        readonly IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> _dispatcher;
+        readonly IReverseCallDispatcher<EventHandlersClientToRuntimeStreamMessage, EventHandlerRuntimeToClientStreamMessage> _dispatcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
         readonly string _logMessagePrefix;
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public EventProcessor(
             ScopeId scope,
             EventProcessorId id,
-            IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> dispatcher,
+            IReverseCallDispatcher<EventHandlersClientToRuntimeStreamMessage, EventHandlerRuntimeToClientStreamMessage> dispatcher,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
@@ -55,23 +55,55 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc />
         public EventProcessorId Identifier { get; }
 
-        #nullable enable
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, RetryProcessingState? retryProcessingState, CancellationToken cancellationToken = default)
+        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 
-            var request = new EventHandlerRuntimeToClientRequest
+            var request = new HandleEventRequest
+                {
+                    Event = @event.ToProtobuf(),
+                    Partition = partitionId.ToProtobuf()
+                };
+            return Process(request, cancellationToken);
+        }
+
+        /// <inheritdoc/>
+        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+        {
+            _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}' again for the {retryCount}. time because: {failureReason}");
+            var request = new HandleEventRequest
                 {
                     Event = @event.ToProtobuf(),
                     Partition = partitionId.ToProtobuf(),
-                    ExecutionContext = _executionContextManager.Current.ToByteString(),
-                    RetryProcessingState = retryProcessingState
+                    RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
                 };
+            return Process(request, cancellationToken);
+        }
 
-            ProcessingResult? result = null;
-            await _dispatcher.Call(request, response => result = response).ConfigureAwait(false);
+#pragma warning disable CA1801
+        async Task<IProcessingResult> Process(HandleEventRequest request, CancellationToken cancellationToken)
+        {
+            IProcessingResult result = null;
+            await _dispatcher.Call(
+                new EventHandlerRuntimeToClientStreamMessage { HandleRequest = request, ExecutionContext = _executionContextManager.Current.ToByteString() },
+                response =>
+                {
+                    if (response.MessageCase != EventHandlersClientToRuntimeStreamMessage.MessageOneofCase.HandleResult)
+                    {
+                        result = response.HandleResult switch
+                            {
+                                { Failed: null } => new SuccessfulProcessing(),
+                                _ => new FailedProcessing(response.HandleResult.Failed.Reason, response.HandleResult.Failed.Retry, response.HandleResult.Failed.RetryTimeout.ToTimeSpan())
+                            };
+                    }
+                    else
+                    {
+                        result = new FailedProcessing("The response from the processing was of an unexpected response type.");
+                    }
+                }).ConfigureAwait(false);
             return result!;
         }
+#pragma warning restore CA1801
     }
 }

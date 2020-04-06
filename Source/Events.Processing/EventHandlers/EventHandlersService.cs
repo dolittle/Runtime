@@ -48,17 +48,46 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         }
 
         /// <inheritdoc/>
-        public override Task Connect(
-            IAsyncStreamReader<EventHandlerClientToRuntimeResponse> runtimeStream,
-            IServerStreamWriter<EventHandlerRuntimeToClientRequest> clientStream,
+        public override async Task Connect(
+            IAsyncStreamReader<EventHandlersClientToRuntimeStreamMessage> runtimeStream,
+            IServerStreamWriter<EventHandlerRuntimeToClientStreamMessage> clientStream,
             ServerCallContext context)
         {
+            if (!await runtimeStream.MoveNext(context.CancellationToken).ConfigureAwait(false))
+            {
+                const string message = "EventHandlers connection requested but client-to-runtime stream did not contain any messages";
+                _logger.Warning(message);
+                await clientStream.WriteAsync(new EventHandlerRuntimeToClientStreamMessage
+                    {
+                        RegistrationResponse = new EventHandlerRegistrationResponse
+                        {
+                            Failure = new Failure { Reason = message }
+                        }
+                    }).ConfigureAwait(false);
+                return;
+            }
+
+            if (runtimeStream.Current.MessageCase != EventHandlersClientToRuntimeStreamMessage.MessageOneofCase.RegistrationRequest)
+            {
+                const string message = "EventHandlers connection requested but first message in request stream was not an event handler registration request message";
+                _logger.Warning(message);
+                await clientStream.WriteAsync(new EventHandlerRuntimeToClientStreamMessage
+                    {
+                        RegistrationResponse = new EventHandlerRegistrationResponse
+                        {
+                            Failure = new Failure { Reason = $"The first message in the event handler connection needs to be {typeof(EventHandlersRegistrationRequest).FullName}" }
+                        }
+                    }).ConfigureAwait(false);
+                return;
+            }
+
             var sourceStream = StreamId.AllStreamId;
-            var eventHandlerArguments = context.GetArgumentsMessage<EventHandlerArguments>();
-            var eventProcessorId = eventHandlerArguments.EventHandler.To<EventProcessorId>();
-            var scope = eventHandlerArguments.Scope.To<ScopeId>();
-            var types = eventHandlerArguments.Types_.Select(_ => _.Id.To<ArtifactId>());
-            var partitioned = eventHandlerArguments.Partitioned;
+            var registration = runtimeStream.Current.RegistrationRequest;
+            var eventProcessorId = registration.EventHandler.To<EventProcessorId>();
+            var scope = registration.Scope.To<ScopeId>();
+            var types = registration.Types_.Select(_ => _.Id.To<ArtifactId>());
+            var partitioned = registration.Partitioned;
+
             var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
                 runtimeStream,
                 clientStream,
@@ -71,7 +100,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 dispatcher,
                 _executionContextManager,
                 _logger);
-            return _eventHandlers.RegisterAndStartProcessing(
+            await _eventHandlers.RegisterAndStartProcessing(
                 scope,
                 eventProcessorId,
                 sourceStream,
@@ -79,7 +108,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 partitioned,
                 dispatcher,
                 eventProcessor,
-                context.CancellationToken);
+                context.CancellationToken).ConfigureAwait(false);
         }
     }
 }

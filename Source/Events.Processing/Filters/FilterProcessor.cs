@@ -3,7 +3,6 @@
 
 extern alias contracts;
 
-using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Execution;
@@ -20,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// </summary>
     public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
     {
-        readonly IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> _dispatcher;
+        readonly IReverseCallDispatcher<FiltersClientToRuntimeStreamMessage, FilterRuntimeToClientStreamMessage> _dispatcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
@@ -36,7 +35,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FilterProcessor(
             ScopeId scope,
             RemoteFilterDefinition definition,
-            IReverseCallDispatcher<FilterClientToRuntimeResponse, FilterRuntimeToClientRequest> dispatcher,
+            IReverseCallDispatcher<FiltersClientToRuntimeStreamMessage, FilterRuntimeToClientStreamMessage> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
             IExecutionContextManager executionContextManager,
             ILogger logger)
@@ -47,21 +46,59 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger = logger;
         }
 
-        #nullable enable
         /// <inheritdoc/>
-        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, RetryProcessingState? retryProcessingState, CancellationToken cancellationToken)
+        public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId)
         {
             _logger.Debug($"Filter event that occurred @ {@event.Occurred}");
 
-            var request = new FilterRuntimeToClientRequest
+            var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),
                     Partition = partitionId.ToProtobuf(),
-                    ExecutionContext = _executionContextManager.Current.ToByteString(),
-                    RetryProcessingState = retryProcessingState
                 };
-            FilteringResult? result = null;
-            await _dispatcher.Call(request, response => result = response).ConfigureAwait(false);
+
+            return Filter(request);
+        }
+
+        /// <inheritdoc/>
+        public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount)
+        {
+            _logger.Debug($"Filter event that occurred @ {@event.Occurred}");
+
+            var request = new FilterEventRequest
+                {
+                    Event = @event.ToProtobuf(),
+                    Partition = partitionId.ToProtobuf(),
+                    RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+                };
+
+            return Filter(request);
+        }
+
+        async Task<IFilterResult> Filter(FilterEventRequest request)
+        {
+            IFilterResult result = null;
+            await _dispatcher.Call(
+                new FilterRuntimeToClientStreamMessage
+                {
+                    FilterRequest = request,
+                    ExecutionContext = _executionContextManager.Current.ToByteString()
+                },
+                response =>
+                {
+                    if (response.MessageCase != FiltersClientToRuntimeStreamMessage.MessageOneofCase.FilterResult)
+                    {
+                        result = response.FilterResult switch
+                            {
+                                { Failed: null } => new SuccessfulFiltering(response.FilterResult.Success.IsIncluded, response.FilterResult.Success.Partition.To<PartitionId>()),
+                                _ => new FailedFiltering(response.FilterResult.Failed.Reason, response.FilterResult.Failed.Retry, response.FilterResult.Failed.RetryTimeout.ToTimeSpan())
+                            };
+                    }
+                    else
+                    {
+                        result = new FailedFiltering("The response from the processing was of an unexpected response type.");
+                    }
+                }).ConfigureAwait(false);
             return result!;
         }
     }
