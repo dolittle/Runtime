@@ -1,15 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
-using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -53,24 +50,44 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc />
         public EventProcessorId Identifier => Definition.TargetStream.Value;
 
-        #nullable enable
         /// <inheritdoc/>
-        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken);
+        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
+
+        /// <inheritdoc/>
+        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount);
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken = default)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId}'");
-            var result = await Filter(@event, partitionId, Identifier, retryProcessingState, cancellationToken).ConfigureAwait(false);
-            _logger.Debug($"{_logMessagePrefix} filtered event '{@event.Type.Id}' for partition '{partitionId}' with result 'Succeeded' = {result.Succeeded}");
+            var result = await Filter(@event, partitionId, Identifier).ConfigureAwait(false);
 
+            await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
+
+            return result;
+        }
+
+        /// <inheritdoc/>
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+        {
+            _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId} again for the {retryCount}. time because: {failureReason}'");
+            var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount).ConfigureAwait(false);
+
+            await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
+
+            return result;
+        }
+
+        Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
+        {
+            _logger.Debug($"{_logMessagePrefix} filtered event '{@event.Type.Id}' for partition '{partitionId}' with result 'Succeeded' = {result.Succeeded}");
             if (result.Succeeded && result.IsIncluded)
             {
                 _logger.Debug($"{_logMessagePrefix} writing event '{@event.Type.Id}' to stream '{Definition.TargetStream}' in partition '{partitionId}'");
-                await _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken).ConfigureAwait(false);
+                return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
             }
 
-            return result;
+            return Task.CompletedTask;
         }
     }
 }
