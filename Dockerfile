@@ -1,14 +1,15 @@
 # DotNet Source - filtered
+
 FROM alpine AS dotnet-source
+ARG CONFIGURATION=Release
 WORKDIR /app
 COPY Source ./Source/
 RUN rm -rf Source/ManagementUI
 
 # DotNet Build
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS dotnet-build
+ARG CONFIGURATION=Release
 WORKDIR /app
-
-ARG CONFIGURATION
 
 COPY default.props ./
 COPY versions.props ./
@@ -19,10 +20,10 @@ COPY Specifications ./Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c $CONFIGURATION -o out
+RUN dotnet publish -c ${CONFIGURATION} -o out
 
 # Web Build
-FROM node AS web-build
+FROM node:13.12 AS web-build
 WORKDIR /app
 
 COPY tslint.json ./
@@ -36,7 +37,6 @@ RUN yarn build
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 as base
-
 ARG CONFIGURATION=Release
 
 RUN echo Configuration = $CONFIGURATION
