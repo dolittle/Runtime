@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="createEventProcessor">The callback for creating the <see cref="IEventProcessor" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A task.</returns>
-        Task RegisterAndStartProcessing<TResponse, TRequest, TFilterDefinition>(
+        Task Register<TFilterDefinition>(
             ScopeId scope,
             EventProcessorId eventProcessorId,
             StreamId sourceStream,
