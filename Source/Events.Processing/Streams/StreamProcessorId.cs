@@ -41,6 +41,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public StreamId SourceStreamId { get; set; }
 
         /// <inheritdoc />
-        public override string ToString() => $"{ScopeId} - {EventProcessorId} - {SourceStreamId}";
+        public override string ToString() => $"Scope: {ScopeId} Event Processor Id: {EventProcessorId} Source Stream: {SourceStreamId}";
     }
 }
