@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.ObjectModel;
-using Dolittle.Logging.Json;
 
 namespace Dolittle.Runtime.Logging.Management
 {
@@ -12,14 +11,14 @@ namespace Dolittle.Runtime.Logging.Management
     public interface ILogManager
     {
         /// <summary>
-        /// Gets a <see cref="ObservableCollection{T}"/> of <see cref="JsonLogMessage">log messages</see>.
+        /// Gets a <see cref="ObservableCollection{T}"/> of <see cref="string">log messages</see>.
         /// </summary>
-        ObservableCollection<JsonLogMessage> Messages { get; }
+        ObservableCollection<string> Messages { get; }
 
         /// <summary>
         /// Write a log message.
         /// </summary>
-        /// <param name="message"><see cref="JsonLogMessage"/> to write.</param>
-        void Write(JsonLogMessage message);
+        /// <param name="message"><see cref="string"/> message to write.</param>
+        void Write(string message);
     }
 }

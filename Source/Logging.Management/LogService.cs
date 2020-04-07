@@ -10,8 +10,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Logging.Management;
 using Dolittle.Collections;
-using Dolittle.Logging.Json;
-using Dolittle.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.Logging.Management.Log;
@@ -44,10 +42,10 @@ namespace Dolittle.Runtime.Logging.Management
             {
                 if (args.NewItems != default)
                 {
-                    var items = new List<JsonLogMessage>();
+                    var items = new List<string>();
                     foreach (var item in args.NewItems)
                     {
-                        items.Add(item as JsonLogMessage);
+                        items.Add(item as string);
                     }
 
                     GetLogMessagesFrom(items).ForEach(queue.Enqueue);
@@ -78,22 +76,11 @@ namespace Dolittle.Runtime.Logging.Management
             await Task.CompletedTask.ConfigureAwait(false);
         }
 
-        IEnumerable<LogMessage> GetLogMessagesFrom(IEnumerable<JsonLogMessage> messages)
+        IEnumerable<LogMessage> GetLogMessagesFrom(IEnumerable<string> messages)
         {
             return messages.Select(_ => new LogMessage
             {
-                Application = _.Application.ToProtobuf(),
-                Microservice = _.Microservice.ToProtobuf(),
-                Tenant = _.TenantId.ToProtobuf(),
-                CorrelationId = _.CorrelationId.ToProtobuf(),
-                Environment = _.Environment,
-                Timestamp = Timestamp.FromDateTimeOffset(_.Timestamp),
-                LogLevel = _.LogLevel,
-                FilePath = _.FilePath,
-                LineNumber = $"{_.LineNumber}",
-                Member = _.Member,
-                Message = _.Message,
-                StackTrace = _.StackTrace
+                Message = _
             }).ToList();
         }
     }
