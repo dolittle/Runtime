@@ -3,16 +3,23 @@
 
 extern alias contracts;
 
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Artifacts;
+using Dolittle.Collections;
+using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
+using Dolittle.Tenancy;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.Events.Processing.EventHandlers;
 
@@ -23,7 +30,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventHandlersService : EventHandlersBase
     {
-        readonly IEventHandlers _eventHandlers;
+        readonly ITenants _tenants;
+        readonly FactoryFor<IEventHandlers> _getEventHandlers;
+        readonly FactoryFor<IFilterDefinitionRepository> _getFilterDefinitions;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
@@ -31,17 +40,23 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
         /// </summary>
-        /// <param name="eventHandlers">The <see cref="IEventHandlers" />.</param>
+        /// <param name="tenants">The <see cref="ITenants" />.</param>
+        /// <param name="getEventHandlers">The <see cref="FactoryFor{T}" /> <see cref="IEventHandlers" />.</param>
+        /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitionRepository" />.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public EventHandlersService(
-            IEventHandlers eventHandlers,
+            ITenants tenants,
+            FactoryFor<IEventHandlers> getEventHandlers,
+            FactoryFor<IFilterDefinitionRepository> getFilterDefinitions,
             IReverseCallDispatchers reverseCallDispatchers,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
-            _eventHandlers = eventHandlers;
+            _tenants = tenants;
+            _getEventHandlers = getEventHandlers;
+            _getFilterDefinitions = getFilterDefinitions;
             _reverseCallDispatchers = reverseCallDispatchers;
             _executionContextManager = executionContextManager;
             _logger = logger;
@@ -53,62 +68,134 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IServerStreamWriter<EventHandlerRuntimeToClientStreamMessage> clientStream,
             ServerCallContext context)
         {
-            if (!await runtimeStream.MoveNext(context.CancellationToken).ConfigureAwait(false))
+            var hasRegistrationRequest = await HandleRegistrationRequest(runtimeStream, clientStream, context.CancellationToken).ConfigureAwait(false);
+            if (!hasRegistrationRequest) return;
+
+            var registration = runtimeStream.Current.RegistrationRequest;
+            if (registration.EventHandler.To<StreamId>().IsNonWriteable)
+            {
+                _logger.Warning("Received event handler registration request with Event Handler Id: '{eventHandlerId}' which is an invalid stream id", registration.EventHandler.ToGuid());
+                await WriteFailedRegistrationResponse(clientStream, $"Received event handler registration request with Event Handler Id: '{registration.EventHandler.ToGuid()}' which is an invalid stream id").ConfigureAwait(false);
+                return;
+            }
+
+            var dispatcher = _reverseCallDispatchers.GetDispatcherFor(runtimeStream, clientStream, context, _ => _.CallNumber, _ => _.CallNumber);
+            (var eventProcessor, var filterDefinition) = CreateEventProcessorAndFilterDefinition(registration, dispatcher);
+
+            var registrationResults = await RegisterStreamProcessorsForAllTenants(eventProcessor, filterDefinition, context.CancellationToken).ConfigureAwait(false);
+            try
+            {
+                var allRegistrationsSucceeded = await HandleRegistrationResults(registrationResults, clientStream, context.CancellationToken).ConfigureAwait(false);
+                if (!allRegistrationsSucceeded) return;
+
+                await WriteSuccessfulRegistrationResponse(clientStream).ConfigureAwait(false);
+
+                await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
+            }
+            finally
+            {
+                registrationResults
+                    .SelectMany(tenantAndResult => new[] { tenantAndResult.Item2.EventHandlerStreamProcessor, tenantAndResult.Item2.FilterStreamProcessor })
+                    .ForEach(_ => _.Dispose());
+            }
+        }
+
+        async Task<bool> HandleRegistrationResults(
+            IEnumerable<(TenantId, EventHandlerRegistrationResult)> registrationResults,
+            IServerStreamWriter<EventHandlerRuntimeToClientStreamMessage> clientStream,
+            CancellationToken cancellationToken)
+        {
+            var failedRegistrationReasons = registrationResults
+                                                .Where(tenantAndResult => tenantAndResult.Item2.Succeeded)
+                                                .Select(tenantAndResult => $"For tenant '{tenantAndResult.Item1}':\n\t{string.Join("\n\t", tenantAndResult.Item2.FailureReason.Value.Split("\n"))}");
+            if (failedRegistrationReasons.Any())
+            {
+                var failureMessage = $"Failed to register event handler:\n\t";
+                failureMessage += string.Join("\n\t", failedRegistrationReasons);
+                _logger.Warning(failureMessage);
+                await WriteFailedRegistrationResponse(clientStream, failureMessage).ConfigureAwait(false);
+                return false;
+            }
+
+            foreach ((var tenant, var result) in registrationResults)
+            {
+                _executionContextManager.CurrentFor(tenant);
+                var filterDefinitions = _getFilterDefinitions();
+                await filterDefinitions.PersistFilter(result.FilterProcessor.Definition, cancellationToken).ConfigureAwait(false);
+                _ = result.FilterStreamProcessor.Start();
+                _ = result.EventHandlerStreamProcessor.Start();
+            }
+
+            return true;
+        }
+
+        async Task<IEnumerable<(TenantId, EventHandlerRegistrationResult)>> RegisterStreamProcessorsForAllTenants(
+            IEventProcessor eventProcessor,
+            TypeFilterWithEventSourcePartitionDefinition filterDefinition,
+            CancellationToken cancellationToken)
+        {
+            var registrationResults = new List<(TenantId, EventHandlerRegistrationResult)>();
+            foreach (var tenant in _tenants.All)
+            {
+                _executionContextManager.CurrentFor(tenant);
+                var eventHandlers = _getEventHandlers();
+                var registrationResult = await eventHandlers.Register(filterDefinition, eventProcessor, cancellationToken).ConfigureAwait(false);
+                registrationResults.Add((tenant, registrationResult));
+            }
+
+            return registrationResults.AsEnumerable();
+        }
+
+        (IEventProcessor, TypeFilterWithEventSourcePartitionDefinition) CreateEventProcessorAndFilterDefinition(
+            EventHandlersRegistrationRequest registration,
+            IReverseCallDispatcher<EventHandlersClientToRuntimeStreamMessage, EventHandlerRuntimeToClientStreamMessage> dispatcher)
+        {
+            var sourceStream = StreamId.AllStreamId;
+            var eventHandlerId = registration.EventHandler.To<EventProcessorId>();
+            StreamId targetStream = eventHandlerId.Value;
+            var scope = registration.Scope.To<ScopeId>();
+            var types = registration.Types_.Select(_ => _.Id.To<ArtifactId>());
+            var partitioned = registration.Partitioned;
+
+            return (
+                new EventProcessor(scope, eventHandlerId, dispatcher, _executionContextManager, _logger),
+                new TypeFilterWithEventSourcePartitionDefinition(sourceStream, targetStream, types, partitioned));
+        }
+
+        async Task<bool> HandleRegistrationRequest(
+            IAsyncStreamReader<EventHandlersClientToRuntimeStreamMessage> runtimeStream,
+            IServerStreamWriter<EventHandlerRuntimeToClientStreamMessage> clientStream,
+            CancellationToken cancellationToken)
+        {
+            if (!await runtimeStream.MoveNext(cancellationToken).ConfigureAwait(false))
             {
                 const string message = "EventHandlers connection requested but client-to-runtime stream did not contain any messages";
                 _logger.Warning(message);
-                await clientStream.WriteAsync(new EventHandlerRuntimeToClientStreamMessage
-                    {
-                        RegistrationResponse = new EventHandlerRegistrationResponse
-                        {
-                            Failure = new Failure { Reason = message }
-                        }
-                    }).ConfigureAwait(false);
-                return;
+                await WriteFailedRegistrationResponse(clientStream, message).ConfigureAwait(false);
+                return false;
             }
 
             if (runtimeStream.Current.MessageCase != EventHandlersClientToRuntimeStreamMessage.MessageOneofCase.RegistrationRequest)
             {
                 const string message = "EventHandlers connection requested but first message in request stream was not an event handler registration request message";
                 _logger.Warning(message);
-                await clientStream.WriteAsync(new EventHandlerRuntimeToClientStreamMessage
-                    {
-                        RegistrationResponse = new EventHandlerRegistrationResponse
-                        {
-                            Failure = new Failure { Reason = $"The first message in the event handler connection needs to be {typeof(EventHandlersRegistrationRequest).FullName}" }
-                        }
-                    }).ConfigureAwait(false);
-                return;
+                await WriteFailedRegistrationResponse(clientStream, $"The first message in the event handler connection needs to be {typeof(EventHandlersRegistrationRequest).FullName}").ConfigureAwait(false);
+                return false;
             }
 
-            var sourceStream = StreamId.AllStreamId;
-            var registration = runtimeStream.Current.RegistrationRequest;
-            var eventProcessorId = registration.EventHandler.To<EventProcessorId>();
-            var scope = registration.Scope.To<ScopeId>();
-            var types = registration.Types_.Select(_ => _.Id.To<ArtifactId>());
-            var partitioned = registration.Partitioned;
-
-            var dispatcher = _reverseCallDispatchers.GetDispatcherFor(
-                runtimeStream,
-                clientStream,
-                context,
-                _ => _.CallNumber,
-                _ => _.CallNumber);
-            var eventProcessor = new EventProcessor(
-                scope,
-                eventProcessorId,
-                dispatcher,
-                _executionContextManager,
-                _logger);
-            await _eventHandlers.RegisterAndStartProcessing(
-                scope,
-                eventProcessorId,
-                sourceStream,
-                types,
-                partitioned,
-                dispatcher,
-                eventProcessor,
-                context.CancellationToken).ConfigureAwait(false);
+            return true;
         }
+
+        Task WriteFailedRegistrationResponse(IServerStreamWriter<EventHandlerRuntimeToClientStreamMessage> clientStream, string reason) =>
+            clientStream.WriteAsync(new EventHandlerRuntimeToClientStreamMessage
+                {
+                    RegistrationResponse = new EventHandlerRegistrationResponse
+                    {
+                        Failure = new Failure { Reason = reason }
+                    }
+                });
+
+        Task WriteSuccessfulRegistrationResponse(IServerStreamWriter<EventHandlerRuntimeToClientStreamMessage> clientStream) =>
+            clientStream.WriteAsync(new EventHandlerRuntimeToClientStreamMessage { RegistrationResponse = new EventHandlerRegistrationResponse() });
     }
 }
