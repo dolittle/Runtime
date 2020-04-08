@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     types,
                     partitioned);
                 await RegisterForAllTenants(filterDefinition, scope, eventProcessorId, sourceStream, targetStream, eventProcessor, cancellationToken).ConfigureAwait(false);
-                await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
+                await dispatcher.HandleCalls().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
