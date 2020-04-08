@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             EventHorizonConsentsConfiguration eventHorizonConsents,
             ITenants tenants,
             FactoryFor<IFetchEventsFromPublicStreams> getEventsFromPublicStreamsFetcher,
-            ILogger logger)
+            ILogger<ConsumerService> logger)
         {
             _thisApplication = boundedContextConfiguration.Application;
             _thisMicroservice = boundedContextConfiguration.BoundedContext;

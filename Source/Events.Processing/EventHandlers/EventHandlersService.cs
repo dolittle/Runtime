@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IEventHandlers eventHandlers,
             IReverseCallDispatchers reverseCallDispatchers,
             IExecutionContextManager executionContextManager,
-            ILogger logger)
+            ILogger<EventHandlersService> logger)
         {
             _eventHandlers = eventHandlers;
             _reverseCallDispatchers = reverseCallDispatchers;
