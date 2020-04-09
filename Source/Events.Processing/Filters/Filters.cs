@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
                 await RegisterForAllTenants(scope, sourceStream, targetStream, createFilter, cancellationToken).ConfigureAwait(false);
 
-                await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
+                await dispatcher.HandleCalls().ConfigureAwait(false);
             }
             catch (Exception ex)
             {

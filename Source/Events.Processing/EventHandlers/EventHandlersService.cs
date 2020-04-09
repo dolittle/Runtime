@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             FactoryFor<IFilterDefinitionRepository> getFilterDefinitions,
             IReverseCallDispatchers reverseCallDispatchers,
             IExecutionContextManager executionContextManager,
-            ILogger logger)
+            ILogger<EventHandlersService> logger)
         {
             _tenants = tenants;
             _getEventHandlers = getEventHandlers;
