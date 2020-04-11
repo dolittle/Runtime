@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.DependencyInversion.Management
         /// Initializes a new instance of the <see cref="ContainerService"/> class.
         /// </summary>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public ContainerService(ILogger logger)
+        public ContainerService(ILogger<ContainerService> logger)
         {
             _logger = logger;
         }

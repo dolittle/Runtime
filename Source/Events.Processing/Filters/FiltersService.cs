@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IExecutionContextManager executionContextManager,
             IReverseCallDispatchers reverseCallDispatchers,
             FactoryFor<IWriteEventsToStreams> eventsToStreamsWriterFactory,
-            ILogger logger)
+            ILogger<FiltersService> logger)
         {
             _filters = filters;
             _executionContextManager = executionContextManager;

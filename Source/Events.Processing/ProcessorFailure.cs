@@ -63,7 +63,11 @@ namespace Dolittle.Runtime.Events.Processing
         /// Implicitly converts the <see cref="grpc.ProcessorFailure" /> to <see cref="ProcessorFailure" />.
         /// </summary>
         /// <param name="failure">The <see cref="grpc.ProcessorFailure" />.</param>
-        public static implicit operator ProcessorFailure(grpc.ProcessorFailure failure) =>
-            failure == null ? null : new ProcessorFailure((ProcessorFailureType)failure.FailureType, failure.Reason, failure.Retry, failure.RetryTimeout.ToTimeSpan());
+        public static implicit operator ProcessorFailure(grpc.ProcessorFailure failure)
+        {
+            if (failure == null) return null;
+            if (failure.Retry) return new ProcessorFailure((ProcessorFailureType)failure.FailureType, failure.Reason, failure.Retry, failure.RetryTimeout.ToTimeSpan());
+            else return new ProcessorFailure((ProcessorFailureType)failure.FailureType, failure.Reason);
+        }
     }
 }

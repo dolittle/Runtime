@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Heads
         public HeadsService(
             IConnectedHeads connectedHeads,
             ISystemClock systemClock,
-            ILogger logger)
+            ILogger<HeadsService> logger)
         {
             _connectedHeads = connectedHeads;
             _systemClock = systemClock;

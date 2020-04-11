@@ -3,21 +3,20 @@
 
 extern alias contracts;
 
-using System;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.EventHorizon;
 using Dolittle.Applications;
+using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
-using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.EventHorizon.Subscriptions;
+using grpc = contracts::Dolittle.Runtime.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -27,57 +26,50 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [Singleton]
     public class SubscriptionsService : SubscriptionsBase
     {
-        readonly IConsumerClient _consumerClient;
+        readonly FactoryFor<IConsumerClient> _getConsumerClient;
         readonly IExecutionContextManager _executionContextManager;
         readonly ITenants _tenants;
-        readonly IMicroservices _microservices;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
         /// </summary>
-        /// <param name="consumerClient">The <see cref="IConsumerClient" />.</param>
+        /// <param name="getConsumerClient">The <see cref="FactoryFor{T}" /><see cref="IConsumerClient" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
-        /// <param name="microservices">The <see cref="IMicroservices" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public SubscriptionsService(
-            IConsumerClient consumerClient,
+            FactoryFor<IConsumerClient> getConsumerClient,
             IExecutionContextManager executionContextManager,
             ITenants tenants,
-            IMicroservices microservices,
-            ILogger logger)
+            ILogger<SubscriptionsService> logger)
         {
-            _consumerClient = consumerClient;
+            _getConsumerClient = getConsumerClient;
             _executionContextManager = executionContextManager;
             _tenants = tenants;
-            _microservices = microservices;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public override Task<SubscriptionResponse> Subscribe(Subscription subscription, ServerCallContext context)
+        public override async Task<grpc.SubscriptionResponse> Subscribe(grpc.Subscription subscriptionRequest, ServerCallContext context)
         {
-            EventHorizon eventHorizon = null;
-            try
-            {
-                eventHorizon = new EventHorizon(
-                    _executionContextManager.Current.Microservice,
-                    _executionContextManager.Current.Tenant,
-                    subscription.Microservice.To<Microservice>(),
-                    subscription.Tenant.To<TenantId>());
-                var partition = subscription.Partition.To<PartitionId>();
-                var publicStream = subscription.Stream.To<StreamId>();
-                var scope = subscription.Scope.To<ScopeId>();
-                var microserviceAddress = _microservices.GetAddressFor(eventHorizon.ProducerMicroservice);
-                _ = _consumerClient.SubscribeTo(eventHorizon, scope, publicStream, partition, microserviceAddress);
-                return Task.FromResult(new SubscriptionResponse { Success = true });
-            }
-            catch (Exception ex)
-            {
-                _logger.Error(ex, $"Error in subscription from tenant '{eventHorizon.ConsumerTenant}' in microservice '{eventHorizon.ConsumerMicroservice}' subscribing to tenant '{eventHorizon.ProducerTenant}' in microservice '{eventHorizon.ProducerMicroservice}'");
-                return Task.FromResult(new SubscriptionResponse());
-            }
+            var consumerTenant = _executionContextManager.Current.Tenant;
+            var subscription = new Subscription(
+                consumerTenant,
+                subscriptionRequest.Microservice.To<Microservice>(),
+                subscriptionRequest.Tenant.To<TenantId>(),
+                subscriptionRequest.Scope.To<ScopeId>(),
+                subscriptionRequest.Stream.To<StreamId>(),
+                subscriptionRequest.Partition.To<PartitionId>());
+
+            _logger.Information($"Incomming event horizon subscription request from head to runtime. {subscription}");
+            var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscription).ConfigureAwait(false);
+
+            return subscriptionResponse switch
+                {
+                    { Success: false } => new grpc.SubscriptionResponse { Failure = new grpc.Failure { Reason = subscriptionResponse.FailureReason } },
+                    _ => new grpc.SubscriptionResponse(),
+                };
         }
     }
 }

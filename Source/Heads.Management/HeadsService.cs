@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Heads.Management
         /// </summary>
         /// <param name="connectedHeads">The <see cref="IConnectedHeads"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public HeadsService(IConnectedHeads connectedHeads, ILogger logger)
+        public HeadsService(IConnectedHeads connectedHeads, ILogger<HeadsService> logger)
         {
             _connectedHeads = connectedHeads;
             _logger = logger;

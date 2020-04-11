@@ -4,8 +4,8 @@
 extern alias contracts;
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.EventHorizon;
 using Dolittle.Applications;
 using Dolittle.Applications.Configuration;
 using Dolittle.DependencyInversion;
@@ -21,6 +21,7 @@ using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.EventHorizon.Consumer;
 using grpcArtifacts = contracts::Dolittle.Runtime.Artifacts;
+using grpcEventHorizon = contracts::Dolittle.Runtime.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
 {
@@ -28,35 +29,37 @@ namespace Dolittle.Runtime.EventHorizon.Producer
     /// Represents the implementation of <see creF="FiltersBase"/>.
     /// </summary>
     [Singleton]
-    public class ConsumerService : ConsumerBase
+    public class ConsumerService : ConsumerBase, IDisposable
     {
-        readonly Application _application;
-        readonly Microservice _microservice;
+        readonly Application _thisApplication;
+        readonly Microservice _thisMicroservice;
         readonly IExecutionContextManager _executionContextManager;
-        readonly IEventHorizonConsents _eventHorizonConsents;
+        readonly EventHorizonConsentsConfiguration _eventHorizonConsents;
         readonly ITenants _tenants;
         readonly FactoryFor<IFetchEventsFromPublicStreams> _getEventsFromPublicStreamsFetcher;
         readonly ILogger _logger;
+
+        bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsumerService"/> class.
         /// </summary>
         /// <param name="boundedContextConfiguration">The <see cref="BoundedContextConfiguration" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
-        /// <param name="eventHorizonConsents">The <see cref="IEventHorizonConsents" />.</param>
+        /// <param name="eventHorizonConsents">The <see cref="EventHorizonConsentsConfiguration" />.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
         /// <param name="getEventsFromPublicStreamsFetcher">The <see cref="FactoryFor{T}" /> <see cref="IFetchEventsFromPublicStreams" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConsumerService(
             BoundedContextConfiguration boundedContextConfiguration,
             IExecutionContextManager executionContextManager,
-            IEventHorizonConsents eventHorizonConsents,
+            EventHorizonConsentsConfiguration eventHorizonConsents,
             ITenants tenants,
             FactoryFor<IFetchEventsFromPublicStreams> getEventsFromPublicStreamsFetcher,
-            ILogger logger)
+            ILogger<ConsumerService> logger)
         {
-            _application = boundedContextConfiguration.Application;
-            _microservice = boundedContextConfiguration.BoundedContext;
+            _thisApplication = boundedContextConfiguration.Application;
+            _thisMicroservice = boundedContextConfiguration.BoundedContext;
             _executionContextManager = executionContextManager;
             _eventHorizonConsents = eventHorizonConsents;
             _tenants = tenants;
@@ -64,39 +67,60 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _logger = logger;
         }
 
-        /// <inheritdoc/>
-        public override async Task Subscribe(ConsumerSubscription subscription, IServerStreamWriter<EventHorizonEvent> responseStream, ServerCallContext context)
+        /// <summary>
+        /// Finalizes an instance of the <see cref="ConsumerService"/> class.
+        /// </summary>
+        ~ConsumerService()
         {
-            EventHorizon eventHorizon = null;
+            Dispose(false);
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <inheritdoc/>
+        public override async Task Subscribe(grpcEventHorizon.ConsumerSubscription subscription, IServerStreamWriter<grpcEventHorizon.SubscriptionStreamMessage> responseStream, ServerCallContext context)
+        {
+            var consumerMicroservice = _executionContextManager.Current.Microservice;
+            var consumerTenant = _executionContextManager.Current.Tenant;
+            var producerTenant = subscription.Tenant.To<TenantId>();
+            var publicStream = subscription.Stream.To<StreamId>();
+            var partition = subscription.Partition.To<PartitionId>();
+            var lastReceivedPosition = subscription.LastReceived; // -1 if not received any events
+
+            _logger.Debug($"Incomming Event Horizon subscription from microservice '{consumerMicroservice}' and tenant '{consumerTenant}' to tenant '{producerTenant}' starting at position '{lastReceivedPosition}' in partition '{partition}' in stream '{publicStream}'");
             try
             {
-                eventHorizon = new EventHorizon(
-                    _executionContextManager.Current.Microservice,
-                    _executionContextManager.Current.Tenant,
-                    _microservice,
-                    subscription.Tenant.To<TenantId>());
-                var lastReceivedPosition = subscription.LastReceived; // -1 if not received any events
-                _logger.Information($"Incomming Event Horizon subscription from microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' to tenant '{eventHorizon.ProducerTenant}' starting at position '{lastReceivedPosition}'");
-
-                ThrowIfProducerTenantDoesNotExist(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant);
-                var publicStream = subscription.Stream.To<StreamId>();
-                var partition = subscription.Partition.To<PartitionId>();
-                var publicStreamPosition = new StreamPosition((ulong)(lastReceivedPosition + 1));
-
-                ThrowIfConsentIsNotGiven(eventHorizon, publicStream, partition);
-                while (!context.CancellationToken.IsCancellationRequested)
+                var subscriptionResponse = CreateSubscriptionResponse(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition);
+                await responseStream.WriteAsync(new grpcEventHorizon.SubscriptionStreamMessage { SubscriptionResponse = subscriptionResponse }).ConfigureAwait(false);
+                if (subscriptionResponse.Failure != null)
                 {
-                    _executionContextManager.CurrentFor(
-                        _application,
-                        eventHorizon.ProducerMicroservice,
-                        eventHorizon.ProducerTenant,
-                        _executionContextManager.Current.CorrelationId);
+                    _logger.Debug($"Denied subscription from microservice '{consumerMicroservice}' and tenant '{consumerTenant}' to partition '{partition}' in stream '{publicStream}' for tenant '{producerTenant}'");
+                    return;
+                }
+
+                _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscrbed to tenant '{producerTenant}' starting at position '{lastReceivedPosition}' in partition '{partition}' in stream '{publicStream}'");
+
+                var publicStreamPosition = new StreamPosition((ulong)(lastReceivedPosition + 1));
+                _executionContextManager.CurrentFor(
+                    _thisApplication,
+                    _thisMicroservice,
+                    producerTenant,
+                    _executionContextManager.Current.CorrelationId);
+                var publicEvents = _getEventsFromPublicStreamsFetcher();
+                while (!context.CancellationToken.IsCancellationRequested
+                    && !_disposed)
+                {
                     try
                     {
-                        var streamPosition = await _getEventsFromPublicStreamsFetcher().FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
+                        var streamPosition = await publicEvents.FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
                         if (streamPosition == uint.MaxValue) throw new NoEventInStreamAtPosition(ScopeId.Default, publicStream, publicStreamPosition);
-                        var streamEvent = await _getEventsFromPublicStreamsFetcher().Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
-                        var eventHorizonEvent = new EventHorizonEvent
+                        var streamEvent = await publicEvents.Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
+                        var eventHorizonEvent = new grpcEventHorizon.EventHorizonEvent
                         {
                             Content = streamEvent.Event.Content,
                             Correlation = streamEvent.Event.CorrelationId.ToProtobuf(),
@@ -108,7 +132,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                                     Id = streamEvent.Event.Type.Id.ToProtobuf()
                                 }
                         };
-                        await responseStream.WriteAsync(eventHorizonEvent).ConfigureAwait(false);
+                        await responseStream.WriteAsync(new grpcEventHorizon.SubscriptionStreamMessage { Event = eventHorizonEvent }).ConfigureAwait(false);
                         publicStreamPosition = streamPosition.Increment();
                     }
                     catch (NoEventInStreamAtPosition)
@@ -125,25 +149,72 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Error(ex, $"Error occurred in Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer tenant '{eventHorizon.ProducerTenant}'");
+                    _logger.Error(ex, $"Error occurred in Event Horizon between consumer microservice '{consumerMicroservice}' and tenant '{consumerTenant}' and producer tenant '{producerTenant}'");
                 }
 
                 throw;
             }
             finally
             {
-                _logger.Warning($"Disconnecting Event Horizon between consumer microservice '{eventHorizon.ConsumerMicroservice}' and tenant '{eventHorizon.ConsumerTenant}' and producer tenant '{eventHorizon.ProducerTenant}'");
+                _logger.Warning($"Disconnecting Event Horizon between consumer microservice '{consumerMicroservice}' and tenant '{consumerTenant}' and producer tenant '{producerTenant}'");
             }
         }
 
-        void ThrowIfConsentIsNotGiven(EventHorizon eventHorizon, StreamId publicStream, PartitionId partition)
+        /// <summary>
+        /// Dispose resources.
+        /// </summary>
+        /// <param name="disposeManagedResources">Whether to dispose managed resources.</param>
+        protected virtual void Dispose(bool disposeManagedResources)
         {
-            _eventHorizonConsents.GetConsentFor(eventHorizon.ProducerTenant, eventHorizon.ConsumerMicroservice, eventHorizon.ConsumerTenant, publicStream, partition);
+            if (_disposed) return;
+
+            _disposed = true;
         }
 
-        void ThrowIfProducerTenantDoesNotExist(TenantId producerTenant, Microservice consumerMicroservice, TenantId consumerTenant)
+        grpcEventHorizon.SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
         {
-            if (!_tenants.All.Contains(producerTenant)) throw new ProducerTenantDoesNotExist(producerTenant, consumerMicroservice, consumerTenant);
+            _logger.Trace($"Checking if producer tenant '{producerTenant}' exists.");
+            if (!ProducerTenantExists(producerTenant))
+            {
+                var message = $"";
+                _logger.Debug(message);
+                return new grpcEventHorizon.SubscriptionResponse { Failure = new grpcEventHorizon.Failure { Reason = message } };
+            }
+
+            if (!HasConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition))
+            {
+                var message = $"There are no consent configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'";
+                _logger.Debug(message);
+                return new grpcEventHorizon.SubscriptionResponse { Failure = new grpcEventHorizon.Failure { Reason = message } };
+            }
+
+            return new grpcEventHorizon.SubscriptionResponse();
         }
+
+        bool HasConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
+        {
+            _logger.Trace($"Checking consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
+
+            var consentsForSubscription = _eventHorizonConsents
+                                            .GetConsentConfigurationsFor(producerTenant)
+                                            .Where(_ => _.Microservice == consumerMicroservice && _.Tenant == consumerTenant && _.Stream == publicStream && _.Partition == partition).ToArray();
+
+            if (consentsForSubscription.Length == 0)
+            {
+                var message = $"There are no consent configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'";
+                _logger.Debug(message);
+                return false;
+            }
+
+            if (consentsForSubscription.Length > 1)
+            {
+                _logger.Warning($"There are multiple consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
+            }
+
+            return true;
+        }
+
+        bool ProducerTenantExists(TenantId producerTenant) =>
+            _tenants.All.Contains(producerTenant);
     }
 }

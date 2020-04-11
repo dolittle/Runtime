@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public EventStoreService(
             FactoryFor<IEventStore> eventStoreFactory,
-            ILogger logger)
+            ILogger<EventStoreService> logger)
         {
             _eventStoreFactory = eventStoreFactory;
             _logger = logger;

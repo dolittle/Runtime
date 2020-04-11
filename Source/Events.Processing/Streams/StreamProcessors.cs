@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _streamProcessors.Select(_ => _.Value);
 
         /// <inheritdoc />
-        public StreamProcessor Register(
+        public StreamProcessorRegistrationResult Register(
             IEventProcessor eventProcessor,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             StreamId sourceStreamId,
@@ -62,6 +62,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     _streamProcessorStateRepository,
                     _logger),
                 eventsFromStreamsFetcher,
+                this,
                 _logger,
                 cancellationToken);
 
@@ -69,10 +70,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 streamProcessor.Start();
                 _logger.Debug($"Started Stream Processor with key '{new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
-                return streamProcessor;
+                return new StreamProcessorRegistrationResult(true, streamProcessor);
             }
 
-            throw new StreamProcessorKeyAlreadyRegistered(streamProcessor.Identifier);
+            return new StreamProcessorRegistrationResult(false, _streamProcessors[streamProcessor.Identifier]);
         }
 
         /// <inheritdoc/>
