@@ -2,10 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Concepts;
-using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents the reason for why the registration of a filter failed.

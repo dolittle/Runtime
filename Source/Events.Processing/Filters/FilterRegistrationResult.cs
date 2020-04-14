@@ -1,35 +1,34 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents the registration result of the filter <see cref="StreamProcessor "/> for a filter.
     /// </summary>
+    /// <typeparam name="TFilterDefinition">The <see cref="IFilterDefinition" />.</typeparam>
     public class FilterRegistrationResult<TFilterDefinition>
+        where TFilterDefinition : IFilterDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FilterRegistrationResult"/> class.
+        /// Initializes a new instance of the <see cref="FilterRegistrationResult{T}"/> class.
         /// </summary>
         /// <param name="filterStreamProcessor">The <see cref="StreamProcessor" /> for the filter.</param>
-        /// <param name="eventHandlerStreamProcessor">The <see cref="StreamProcessor" /> for the event handler.</param>
         /// <param name="filterProcessor">The <see cref="IFilterProcessor{T}" />.</param>
-        public FilterRegistrationResult(StreamProcessor filterStreamProcessor, StreamProcessor eventHandlerStreamProcessor, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filterProcessor)
+        public FilterRegistrationResult(StreamProcessor filterStreamProcessor, IFilterProcessor<TFilterDefinition> filterProcessor)
         {
             Succeeded = true;
             FilterStreamProcessor = filterStreamProcessor;
-            EventHandlerStreamProcessor = eventHandlerStreamProcessor;
             FilterProcessor = filterProcessor;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FilterRegistrationResult"/> class.
+        /// Initializes a new instance of the <see cref="FilterRegistrationResult{T}"/> class.
         /// </summary>
-        /// <param name="failureReason">The <see cref="FailedEventHandlerRegistrationReason" />.</param>
-        public FilterRegistrationResult(FailedEventHandlerRegistrationReason failureReason)
+        /// <param name="failureReason">The <see cref="FailedFilterRegistrationReason" />.</param>
+        public FilterRegistrationResult(FailedFilterRegistrationReason failureReason)
         {
             Succeeded = false;
             FailureReason = failureReason;
@@ -46,18 +45,13 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public StreamProcessor FilterStreamProcessor { get; }
 
         /// <summary>
-        /// Gets the event handler <see cref="StreamProcessor" />.
+        /// Gets the <see cref="IFilterProcessor{T}" /> for TFilterDefinition.
         /// </summary>
-        public StreamProcessor EventHandlerStreamProcessor { get; }
-
-        /// <summary>
-        /// Gets the <see cref="IFilterProcessor{T}" /> for <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
-        /// </summary>
-        public IFilterProcessor<IFilterDefinition> FilterProcessor { get; }
+        public IFilterProcessor<TFilterDefinition> FilterProcessor { get; }
 
         /// <summary>
         /// Gets the reason for why the registration failed.
         /// </summary>
-        public FailedEventHandlerRegistrationReason FailureReason { get; }
+        public FailedFilterRegistrationReason FailureReason { get; }
     }
 }
