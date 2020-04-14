@@ -90,7 +90,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
                 await WriteSuccessfulRegistrationResponse(clientStream).ConfigureAwait(false);
 
-                await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
+                await dispatcher.HandleCalls().ConfigureAwait(false);
             }
             finally
             {
