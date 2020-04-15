@@ -113,7 +113,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _executionContextManager.CurrentFor(tenant);
                     var filter = createFilter();
                     await _filterRegistryFactory().Register(filter, cancellationToken).ConfigureAwait(false);
-                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStream);
+                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStream, cancellationToken);
                 }
                 catch (IllegalFilterTransformation ex)
                 {
