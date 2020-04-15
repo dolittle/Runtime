@@ -21,6 +21,6 @@ namespace Dolittle.Runtime.Events.Streams
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task"/> representing whether the event was successfully written to the event store.</returns>
-        Task Write(CommittedEvent @event, ScopeId scope, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default);
+        Task Write(CommittedEvent @event, ScopeId scope, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken);
     }
 }

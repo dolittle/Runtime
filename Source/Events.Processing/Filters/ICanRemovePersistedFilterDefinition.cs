@@ -18,6 +18,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="targetStream">The target <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The task of removing a persisted filter.</returns>
-        Task RemovePersistedFilter(StreamId targetStream, CancellationToken cancellationToken = default);
+        Task RemovePersistedFilter(StreamId targetStream, CancellationToken cancellationToken);
     }
 }

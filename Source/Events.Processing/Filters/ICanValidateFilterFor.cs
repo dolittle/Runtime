@@ -19,6 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="filter">The <see cref="IFilterProcessor{TDefinition}" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The async operation of validating a filter.</returns>
-        Task Validate(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken = default);
+        Task Validate(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken);
     }
 }

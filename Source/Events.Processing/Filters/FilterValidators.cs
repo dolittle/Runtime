@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public Task Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken = default)
+        public Task Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
             _logger.Debug($"Validating filter with filter definition type {typeof(TDefinition).FullName}");

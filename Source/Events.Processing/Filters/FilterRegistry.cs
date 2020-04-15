@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task Register<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken = default)
+        public async Task Register<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
             _logger.Debug($"Registering filter defintion of type {typeof(TDefinition).FullName} on source stream '{filter.Definition.SourceStream}' and target stream '{filter.Definition.TargetStream}'");
@@ -73,7 +73,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public Task RemoveIfPersisted(ScopeId scope, StreamId targetStream, CancellationToken cancellationToken = default)
+        public Task RemoveIfPersisted(ScopeId scope, StreamId targetStream, CancellationToken cancellationToken)
         {
             _logger.Debug($"Removing persisted filter definition on target stream '{targetStream}' if persisted");
             if (!_registeredFilters.TryGetValue(targetStream, out var filterProcessor)) throw new NoFilterRegisteredForStream(scope, targetStream);

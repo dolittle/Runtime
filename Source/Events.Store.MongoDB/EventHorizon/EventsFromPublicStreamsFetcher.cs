@@ -34,10 +34,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Streams.StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Streams.StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             var committedEventWithPartition = await EventsFromStreamsFetcher.Fetch(
-                await _connection.GetPublicStreamCollection(streamId).ConfigureAwait(false),
+                await _connection.GetPublicStreamCollection(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,
                 _ => _.StreamPosition,
                 Builders<Events.StreamEvent>.Projection.Expression(_ => _.ToRuntimeStreamEvent(streamId)),
@@ -52,11 +52,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
             Fetch(streamId, streamPosition, cancellationToken);
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken)
         {
             EventsFromStreamsFetcher.ThrowIfIllegalRange(range);
             return await EventsFromStreamsFetcher.FetchRange(
-                await _connection.GetPublicStreamCollection(streamId).ConfigureAwait(false),
+                await _connection.GetPublicStreamCollection(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,
                 _ => _.StreamPosition,
                 Builders<Events.StreamEvent>.Projection.Expression(_ => _.ToRuntimeStreamEvent(streamId)),
@@ -73,7 +73,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         {
             if (partition != PartitionId.NotSet) return ulong.MaxValue;
             return await EventsFromStreamsFetcher.FindNext(
-                await _connection.GetPublicStreamCollection(streamId).ConfigureAwait(false),
+                await _connection.GetPublicStreamCollection(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,
                 _filter.Empty,
                 _ => _.StreamPosition,

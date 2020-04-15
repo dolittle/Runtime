@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The stored <see cref="StreamProcessorState" />.</returns>
-        Task<StreamProcessorState> GetStoredStateFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default);
+        Task<StreamProcessorState> GetStoredStateFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Handles the processing an event for a <see cref="StreamProcessor" /> by changing the <see cref="StreamProcessorState" /> of the <see cref="StreamProcessor" /> according to the result of the processing.
@@ -34,6 +34,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="currentState">The current <see cref="StreamProcessorState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The new <see cref="StreamProcessorState" />.</returns>
-        Task<StreamProcessorState> ProcessEventAndChangeStateFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamEvent streamEvent, StreamProcessorState currentState, CancellationToken cancellationToken = default);
+        Task<StreamProcessorState> ProcessEventAndChangeStateFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamEvent streamEvent, StreamProcessorState currentState, CancellationToken cancellationToken);
     }
 }

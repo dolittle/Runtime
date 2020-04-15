@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
         #nullable enable
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, RetryProcessingState? retryProcessingState, CancellationToken cancellationToken = default)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, RetryProcessingState? retryProcessingState, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 

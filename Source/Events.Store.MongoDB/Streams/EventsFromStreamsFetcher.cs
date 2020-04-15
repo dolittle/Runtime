@@ -157,7 +157,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        public async Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             if (TryGetFetcher(stream, out var fetcher)) return await fetcher.Fetch(scope, stream, streamPosition, cancellationToken).ConfigureAwait(false);
             var streamEvents = await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false);
@@ -173,7 +173,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
         {
             ThrowIfIllegalRange(range);
             if (TryGetFetcher(stream, out var fetcher)) return await fetcher.FetchRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
@@ -188,7 +188,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<StreamPosition> FindNext(ScopeId scope, StreamId stream, PartitionId partition, StreamPosition fromPosition, CancellationToken cancellationToken = default)
+        public async Task<StreamPosition> FindNext(ScopeId scope, StreamId stream, PartitionId partition, StreamPosition fromPosition, CancellationToken cancellationToken)
         {
             if (TryGetFetcher(stream, out var fetcher)) return await fetcher.FindNext(scope, stream, partition, fromPosition, cancellationToken).ConfigureAwait(false);
             var streamEvents = await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false);

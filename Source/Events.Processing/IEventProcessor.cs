@@ -35,6 +35,6 @@ namespace Dolittle.Runtime.Events.Processing
         /// <param name="retryProcessingState"><see cref="grpc.RetryProcessingState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns><see cref="IProcessingResult" />.</returns>
-        Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken = default);
+        Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken);
     }
 }
