@@ -19,6 +19,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The task.</returns>
-        Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken = default);
+        Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken);
     }
 }

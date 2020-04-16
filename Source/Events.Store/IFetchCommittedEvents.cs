@@ -19,6 +19,6 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="aggregateRoot">The <see cref="ArtifactId"/> identifying the Aggregate Root.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="CommittedAggregateEvents"/> containing all <see cref="CommittedAggregateEvent"/>s applied to the Event Source by the Aggregate root, in the order of which they appear in the Event Log.</returns>
-        Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken = default);
+        Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken);
     }
 }

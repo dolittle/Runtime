@@ -27,12 +27,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public bool CanFetchFromStream(StreamId stream) => WellKnownStreams.Contains(stream);
 
         /// <inheritdoc/>
-        public abstract Task<StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
+        public abstract Task<StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
-        public abstract Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
+        public abstract Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
-        public abstract Task<StreamPosition> FindNext(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default);
+        public abstract Task<StreamPosition> FindNext(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken);
     }
 }

@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         }
 
         /// <inheritdoc/>
-        public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken = default)
+        public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken)
         {
             ThrowIfNoEventsToCommit(events);
             try
@@ -88,7 +88,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         }
 
         /// <inheritdoc/>
-        public async Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken = default)
+        public async Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken)
         {
             ThrowIfNoEventsToCommit(events);
             try
@@ -142,7 +142,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         }
 
         /// <inheritdoc/>
-        public async Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken = default)
+        public async Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken)
         {
             try
             {

@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="events">The <see cref="UncommittedEvents"/> to be committed.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns><see cref="CommittedEvents"/> corresponding to the <see cref="UncommittedEvents"/> supplied.</returns>
-        Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken = default);
+        Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken);
 
         /// <summary>
         /// Commits an <see cref="UncommittedAggregateEvents"/> to the Event Store, returning a corresponding <see cref="CommittedAggregateEvents"/>.
@@ -26,6 +26,6 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="events">The <see cref="UncommittedAggregateEvents"/> to be committed.</param>
         /// <returns><see cref="CommittedAggregateEvents"/> corresponding to the <see cref="UncommittedAggregateEvents"/> supplied.</returns>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken = default);
+        Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken);
     }
 }

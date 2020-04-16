@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Dolittle.Execution.ExecutionContext executionContext,
             Cause cause,
             UncommittedEvent @event,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Commits a single <see cref="UncommittedEvent"/> applied to an event source by an aggregate root to the event log.
@@ -58,6 +58,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Dolittle.Execution.ExecutionContext executionContext,
             Cause cause,
             UncommittedEvent @event,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken);
     }
 }

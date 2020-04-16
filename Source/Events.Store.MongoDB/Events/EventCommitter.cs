@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Dolittle.Execution.ExecutionContext executionContext,
             Cause cause,
             UncommittedEvent @event,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             var correlation = executionContext.CorrelationId;
             var microservice = executionContext.Microservice;
@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Execution.ExecutionContext executionContext,
             Cause cause,
             UncommittedEvent @event,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             var correlation = executionContext.CorrelationId;
             var microservice = executionContext.Microservice;
@@ -131,7 +131,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Microservice microservice,
             TenantId tenant,
             Cause cause,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             try
             {

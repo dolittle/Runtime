@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="reason">The reason it failed.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The new <see cref="StreamProcessorState" />.</returns>
-        Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, PartitionId partition, StreamPosition position, ProcessorFailureType failureType, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default);
+        Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, PartitionId partition, StreamPosition position, ProcessorFailureType failureType, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken);
 
         /// <summary>
         /// Catchup all failing partitions for a <see cref="StreamProcessor" />.
@@ -34,6 +34,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorState">The current <see cref="StreamProcessorState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The new <see cref="StreamProcessorState" />.</returns>
-        Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken = default);
+        Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken);
     }
 }
