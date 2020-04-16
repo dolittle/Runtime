@@ -31,11 +31,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _events.DequeueAsync(cancellationToken);
 
         /// <inheritdoc/>
-        public Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scopeId, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default) =>
+        public Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scopeId, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken) =>
             throw new CannotFetchRangeOfEventsFromEventHorizon();
 
         /// <inheritdoc/>
-        public Task<StreamPosition> FindNext(ScopeId scopeId, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default) =>
+        public Task<StreamPosition> FindNext(ScopeId scopeId, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken) =>
             Task.FromResult<StreamPosition>(uint.MaxValue);
     }
 }

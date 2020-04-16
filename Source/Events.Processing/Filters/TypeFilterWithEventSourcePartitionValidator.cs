@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken = default) =>
+        public Task<FilterValidationResult> Validate(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken) =>
             ValidateBasedOffReFilteredStream(filter, cancellationToken);
 
         async Task<FilterValidationResult> ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)

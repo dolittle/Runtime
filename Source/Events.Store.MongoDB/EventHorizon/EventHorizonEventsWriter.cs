@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken = default)
+        public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken)
         {
             await EventsToStreamsWriter.Write(
                 _connection,

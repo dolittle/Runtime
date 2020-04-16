@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             ArtifactId aggregateRoot,
             AggregateRootVersion expectedVersion,
             AggregateRootVersion nextVersion,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             ThrowIfNextVersionIsNotGreaterThanExpectedVersion(expectedVersion, nextVersion);
 
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
                 & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
@@ -86,7 +86,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             ArtifactId aggregateRoot,
             AggregateRootVersion expectedVersion,
             AggregateRootVersion nextVersion,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             try
             {
@@ -145,7 +145,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             ArtifactId aggregateRoot,
             AggregateRootVersion expectedVersion,
             AggregateRootVersion nextVersion,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             var aggregateRootFilter =
                 _filter.Eq(_ => _.EventSource, eventSource.Value)

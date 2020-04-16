@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             ArtifactId aggregateRoot,
             AggregateRootVersion expectedVersion,
             AggregateRootVersion nextVersion,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Fetches the current version of the aggregate root instance in the event store.
@@ -43,6 +43,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             IClientSessionHandle transaction,
             EventSourceId eventSource,
             ArtifactId aggregateRoot,
-            CancellationToken cancellationToken = default);
+            CancellationToken cancellationToken);
     }
 }

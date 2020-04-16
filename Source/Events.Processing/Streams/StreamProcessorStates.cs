@@ -37,14 +37,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public IFailingPartitions FailingPartitions { get; }
 
         /// <inheritdoc/>.
-        public Task<StreamProcessorState> GetStoredStateFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public Task<StreamProcessorState> GetStoredStateFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
         {
             _logger.Debug($"Getting stored stream processor state for Stream Processor '{streamProcessorId}'");
             return _streamProcessorStates.GetOrAddNew(streamProcessorId, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public async Task<StreamProcessorState> ProcessEventAndChangeStateFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamEvent streamEvent, StreamProcessorState currentState, CancellationToken cancellationToken = default)
+        public async Task<StreamProcessorState> ProcessEventAndChangeStateFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamEvent streamEvent, StreamProcessorState currentState, CancellationToken cancellationToken)
         {
             if (currentState.FailingPartitions.Keys.Contains(streamEvent.Partition))
             {

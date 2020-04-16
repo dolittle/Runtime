@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken = default)
+        public override async Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             var committedEventWithPartition = await EventsFromStreamsFetcher.Fetch(
@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
         {
             EventsFromStreamsFetcher.ThrowIfIllegalRange(range);
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
@@ -62,7 +62,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<StreamPosition> FindNext(ScopeId scope, StreamId stream, PartitionId partition, StreamPosition fromPosition, CancellationToken cancellationToken = default)
+        public override async Task<StreamPosition> FindNext(ScopeId scope, StreamId stream, PartitionId partition, StreamPosition fromPosition, CancellationToken cancellationToken)
         {
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             if (partition != PartitionId.NotSet) return ulong.MaxValue;

@@ -139,10 +139,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         async Task<AsyncServerStreamingCall<grpc.SubscriptionStreamMessage>> Subscribe(Subscription subscription, MicroserviceAddress microserviceAddress)
         {
             _logger.Debug($"Tenant '{subscription.ConsumerTenant}' is subscribing to events from tenant '{subscription.ProducerTenant}' in microservice '{subscription.ProducerMicroservice}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
-            var currentStreamProcessorState = await _streamProcessorStates.GetOrAddNew(new StreamProcessorId(
-                                                                                        subscription.Scope,
-                                                                                        subscription.ProducerTenant.Value,
-                                                                                        subscription.ProducerMicroservice.Value)).ConfigureAwait(false);
+            var currentStreamProcessorState = await _streamProcessorStates.GetOrAddNew(
+                new StreamProcessorId(subscription.Scope, subscription.ProducerTenant.Value, subscription.ProducerMicroservice.Value),
+                _token).ConfigureAwait(false);
             var publicEventsPosition = currentStreamProcessorState.Position;
             return _clientManager
                 .Get<grpc.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)

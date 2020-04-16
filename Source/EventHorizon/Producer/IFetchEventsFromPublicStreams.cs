@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamEvent" />.</returns>
-        Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken = default);
+        Task<StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken);
 
         /// <summary>
         /// Fetch a range of events from a position to another in a stream.
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IEnumerable{T}" /> of <see cref="StreamEvent" />.</returns>
-        Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken = default);
+        Task<IEnumerable<StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken);
 
         /// <summary>
         /// Finds the <see cref="StreamPosition" /> of the next event to process in a <see cref="StreamId" /> for a <see cref="PartitionId" />.
@@ -39,6 +39,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="fromPosition">The <see cref="StreamPosition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamPosition" />of the next event to process.</returns>
-        Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken = default);
+        Task<StreamPosition> FindNext(StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken);
     }
 }

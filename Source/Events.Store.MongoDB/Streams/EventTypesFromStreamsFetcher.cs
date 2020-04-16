@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
         {
             ThrowIfIllegalRange(range);
             if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
@@ -104,7 +104,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
         {
             ThrowIfIllegalRange(range);
             if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRangeAndPartition(scope, stream, partition, range, cancellationToken).ConfigureAwait(false);

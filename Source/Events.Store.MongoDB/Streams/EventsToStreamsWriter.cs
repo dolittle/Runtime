@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             ScopeId scope,
             StreamId streamId,
             ArtifactId eventType,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
             where TEvent : class
         {
             StreamPosition streamPosition = null;
@@ -118,7 +118,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken = default)
+        public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken)
         {
             ThrowIfWritingToAllStream(stream);
             await Write(

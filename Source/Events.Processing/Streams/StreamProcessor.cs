@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             IStreamProcessors streamProcessors,
             ILogger logger,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken)
         {
             _processor = processor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
