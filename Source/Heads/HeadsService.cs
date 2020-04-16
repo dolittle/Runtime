@@ -74,7 +74,6 @@ namespace Dolittle.Runtime.Heads
                 };
                 timer.Elapsed += (s, e) => responseStream.WriteAsync(new Empty());
 
-                context.CancellationToken.ThrowIfCancellationRequested();
                 context.CancellationToken.WaitHandle.WaitOne();
             }
             finally

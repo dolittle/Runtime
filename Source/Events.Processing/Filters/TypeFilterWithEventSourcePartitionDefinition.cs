@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// <summary>
     /// Represents the definition for <see cref="TypeFilterWithEventSourcePartition"/>.
     /// </summary>
-    public class TypeFilterWithEventSourcePartitionDefinition : IFilterDefinition
+    public class TypeFilterWithEventSourcePartitionDefinition : IPersistableFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionDefinition"/> class.
@@ -43,8 +43,5 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>.
         public StreamId TargetStream { get; }
-
-        /// <inheritdoc/>
-        public bool IsPersistable => true;
     }
 }

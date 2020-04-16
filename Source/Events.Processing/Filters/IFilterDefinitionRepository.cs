@@ -14,10 +14,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Persists a <see cref="IFilterDefinition" />.
         /// </summary>
-        /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
+        /// <param name="filterDefinition">The <see cref="IPersistableFilterDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The asynchronous operating of adding a persisted filter.</returns>
-        Task PersistFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken);
+        Task PersistFilter(IPersistableFilterDefinition filterDefinition, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the persisted <see cref="IFilterDefinition" />.
@@ -25,6 +25,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The persisted filter definition or the given <see cref="IFilterDefinition" /> if it is not persistable or if it has not been persisted yet.</returns>
-        Task<IFilterDefinition> GetPersistedFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken);
+        Task<IFilterDefinition> GetPersistedFilter(IPersistableFilterDefinition filterDefinition, CancellationToken cancellationToken);
     }
 }

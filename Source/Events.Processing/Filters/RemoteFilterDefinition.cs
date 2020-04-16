@@ -26,8 +26,5 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public StreamId TargetStream { get; }
-
-        /// <inheritdoc/>
-        public bool IsPersistable => false;
     }
 }
