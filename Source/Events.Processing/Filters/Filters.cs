@@ -47,8 +47,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            var sourceStream = filterProcessor.Definition.SourceStream;
-            var filterRegistrationResult = _streamProcessors.Register(filterProcessor, _eventsFromStreamsFetcher, sourceStream, cancellationToken);
+            var filterRegistrationResult = _streamProcessors.Register(filterProcessor, _eventsFromStreamsFetcher, filterProcessor.Definition.SourceStream, cancellationToken);
             var filterValidationResult = await _filterValidators.Validate(filterProcessor, cancellationToken).ConfigureAwait(false);
             var failureReason = FailedFilterRegistrationReason.FromRegistrationResults(filterRegistrationResult, filterValidationResult);
 

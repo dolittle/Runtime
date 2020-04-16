@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         readonly IExecutionContextManager _executionContextManager;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly FactoryFor<IFilterDefinitionRepository> _getFilterDefinitions;
-        readonly FactoryFor<IWriteEventsToStreams> _eventsToStreamsWriterFactory;
+        readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly ILogger _logger;
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitionRepository" />.</param>
-        /// <param name="eventsToStreamsWriterFactory">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
+        /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FiltersService(
             ITenants tenants,
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IExecutionContextManager executionContextManager,
             IReverseCallDispatchers reverseCallDispatchers,
             FactoryFor<IFilterDefinitionRepository> getFilterDefinitions,
-            FactoryFor<IWriteEventsToStreams> eventsToStreamsWriterFactory,
+            FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
             ILogger<FiltersService> logger)
         {
             _tenants = tenants;
@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _executionContextManager = executionContextManager;
             _reverseCallDispatchers = reverseCallDispatchers;
             _getFilterDefinitions = getFilterDefinitions;
-            _eventsToStreamsWriterFactory = eventsToStreamsWriterFactory;
+            _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _logger = logger;
         }
 
@@ -82,15 +82,16 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 return;
             }
 
-            new FilterProcessor()
-
             var dispatcher = _reverseCallDispatchers.GetDispatcherFor(runtimeStream, clientStream, context, _ => _.CallNumber, _ => _.CallNumber);
 
             var scope = registration.Scope.To<ScopeId>();
             var streamId = StreamId.AllStreamId;
 
             var registrationResults = await RegisterStreamProcessorsForAllTenants(
-                new RemoteFilterDefinition(streamId, registration.Filter.To<StreamId>()),
+                scope,
+                StreamId.AllStreamId,
+                filterId,
+                dispatcher,
                 context.CancellationToken).ConfigureAwait(false);
             try
             {
@@ -138,15 +139,25 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         async Task<IEnumerable<(TenantId, FilterRegistrationResult<RemoteFilterDefinition>)>> RegisterStreamProcessorsForAllTenants(
-            RemoteFilterDefinition filterDefinition,
+            ScopeId scope,
+            StreamId sourceStream,
+            StreamId targetStream,
+            IReverseCallDispatcher<FiltersClientToRuntimeStreamMessage, FilterRuntimeToClientStreamMessage> dispatcher,
             CancellationToken cancellationToken)
         {
             var registrationResults = new List<(TenantId, FilterRegistrationResult<RemoteFilterDefinition>)>();
             foreach (var tenant in _tenants.All)
             {
                 _executionContextManager.CurrentFor(tenant);
+                var filterProcessor = new FilterProcessor(
+                    scope,
+                    new RemoteFilterDefinition(sourceStream, targetStream),
+                    dispatcher,
+                    _getEventsToStreamsWriter(),
+                    _executionContextManager,
+                    _logger);
                 var filters = _getFilters();
-                var registrationResult = await filters.Register(filterDefinition, cancellationToken).ConfigureAwait(false);
+                var registrationResult = await filters.Register(filterProcessor, cancellationToken).ConfigureAwait(false);
                 registrationResults.Add((tenant, registrationResult));
             }
 
