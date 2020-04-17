@@ -32,6 +32,6 @@ namespace Dolittle.Runtime.Events.Streams
         public ulong Length { get; }
 
         /// <inheritdoc/>
-        public override string ToString() => $"({From}, {Length})";
+        public override string ToString() => $"({From}, {From + Length})";
     }
 }

@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 : await _eventsFromStreams.FetchRange(
                     filter.Scope,
                     filter.Definition.SourceStream,
-                    new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition - StreamPosition.Start),
+                    new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition),
                     cancellationToken)
                     .ConfigureAwait(false);
             var artifactsFromSourceStream = new List<Artifact>();
