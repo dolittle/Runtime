@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task<TypeFilterWithEventSourcePartitionDefinition> GetPersistedFilter(TypeFilterWithEventSourcePartitionDefinition filterDefinition, CancellationToken cancellationToken = default)
+        public async Task<TypeFilterWithEventSourcePartitionDefinition> GetPersistedFilter(TypeFilterWithEventSourcePartitionDefinition filterDefinition, CancellationToken cancellationToken)
         {
             try
             {
@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task PersistFilter(TypeFilterWithEventSourcePartitionDefinition filterDefinition, CancellationToken cancellationToken = default)
+        public async Task PersistFilter(TypeFilterWithEventSourcePartitionDefinition filterDefinition, CancellationToken cancellationToken)
         {
             try
             {
@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task RemovePersistedFilter(StreamId targetStream, CancellationToken cancellationToken = default)
+        public async Task RemovePersistedFilter(StreamId targetStream, CancellationToken cancellationToken)
         {
             try
             {

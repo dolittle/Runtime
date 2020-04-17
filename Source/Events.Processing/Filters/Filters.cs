@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
                 await RegisterForAllTenants(scope, sourceStream, targetStream, createFilter, cancellationToken).ConfigureAwait(false);
 
-                await dispatcher.WaitTillDisconnected().ConfigureAwait(false);
+                await dispatcher.HandleCalls().ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -113,7 +113,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _executionContextManager.CurrentFor(tenant);
                     var filter = createFilter();
                     await _filterRegistryFactory().Register(filter, cancellationToken).ConfigureAwait(false);
-                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStream);
+                    _streamProcessorsFactory().Register(filter, _eventsFromStreamsFetcherFactory(), sourceStream, cancellationToken);
                 }
                 catch (IllegalFilterTransformation ex)
                 {

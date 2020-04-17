@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken = default)
+        public async Task Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken)
         {
             var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken).ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;

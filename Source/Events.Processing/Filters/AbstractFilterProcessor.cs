@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken);
 
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken = default)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId}'");
             var result = await Filter(@event, partitionId, Identifier, retryProcessingState, cancellationToken).ConfigureAwait(false);

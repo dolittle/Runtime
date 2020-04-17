@@ -35,11 +35,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken = default) =>
+        public override Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken) =>
             FetchTypesInRangeAndPartition(scope, stream, PartitionId.NotSet, range, cancellationToken);
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
         {
             EventTypesFromStreamsFetcher.ThrowIfIllegalRange(range);
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);

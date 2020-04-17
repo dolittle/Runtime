@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Server
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder
-                        .UseUrls("http://0.0.0.0:81")
+                        .UseUrls("http://0.0.0.0:8001")
                         .UseEnvironment("Development")
                         .UseStartup<Startup>();
                 });

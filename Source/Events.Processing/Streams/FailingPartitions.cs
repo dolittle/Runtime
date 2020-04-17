@@ -40,16 +40,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, PartitionId partition, StreamPosition position, ProcessorFailureType failureType, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default)
+        public Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, PartitionId partition, StreamPosition position, ProcessorFailureType failureType, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken)
         {
             _logger.Debug($"Adding failing partition '{partition}' with retry time '{retryTime}' to stream processor '{streamProcessorId}' because of: {reason}");
             return _streamProcessorStates.AddFailingPartition(streamProcessorId, partition, position, failureType, retryTime, reason, cancellationToken);
         }
 
         /// <inheritdoc/>
-        public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken = default)
+        public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken)
         {
-            if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = await _streamProcessorStates.GetOrAddNew(streamProcessorId).ConfigureAwait(false);
+            if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = await _streamProcessorStates.GetOrAddNew(streamProcessorId, cancellationToken).ConfigureAwait(false);
             var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
             foreach (var kvp in failingPartitionsList)
             {
