@@ -14,11 +14,11 @@ namespace Dolittle.Runtime.Events.Streams
         /// Initializes a new instance of the <see cref="StreamPositionRange"/> class.
         /// </summary>
         /// <param name="from">The from <see cref="StreamPosition" />.</param>
-        /// <param name="to">The to <see cref="StreamPosition" />.</param>
-        public StreamPositionRange(StreamPosition from, StreamPosition to)
+        /// <param name="length">Wanted length of the range moving forward.</param>
+        public StreamPositionRange(StreamPosition from, ulong length)
         {
             From = from;
-            To = to;
+            Length = length;
         }
 
         /// <summary>
@@ -27,11 +27,11 @@ namespace Dolittle.Runtime.Events.Streams
         public StreamPosition From { get; }
 
         /// <summary>
-        /// Gets the, inclusive, end of the range.
+        /// Gets the length of the wanted range.
         /// </summary>
-        public StreamPosition To { get; }
+        public ulong Length { get; }
 
         /// <inheritdoc/>
-        public override string ToString() => $"({From}, {To})";
+        public override string ToString() => $"({From}, {From + Length})";
     }
 }

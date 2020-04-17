@@ -42,10 +42,25 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public async Task Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken)
         {
-            var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken).ConfigureAwait(false);
+            var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(
+                new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
+                cancellationToken)
+                .ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;
-            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchTypesInRange(filter.Scope, filter.Definition.TargetStream, new StreamPositionRange(StreamPosition.Start, uint.MaxValue), cancellationToken).ConfigureAwait(false);
-            var sourceStreamEvents = lastUnProcessedEventPosition == 0 ? Enumerable.Empty<StreamEvent>() : await _eventsFromStreams.FetchRange(filter.Scope, filter.Definition.SourceStream, new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition - 1), cancellationToken).ConfigureAwait(false);
+            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchTypesInRange(
+                filter.Scope,
+                filter.Definition.TargetStream,
+                new StreamPositionRange(StreamPosition.Start, uint.MaxValue),
+                cancellationToken)
+                .ConfigureAwait(false);
+            var sourceStreamEvents = lastUnProcessedEventPosition == 0
+                ? Enumerable.Empty<StreamEvent>()
+                : await _eventsFromStreams.FetchRange(
+                    filter.Scope,
+                    filter.Definition.SourceStream,
+                    new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition),
+                    cancellationToken)
+                    .ConfigureAwait(false);
             var artifactsFromSourceStream = new List<Artifact>();
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {

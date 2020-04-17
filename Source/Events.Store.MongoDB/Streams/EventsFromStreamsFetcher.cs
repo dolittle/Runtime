@@ -97,14 +97,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var maxNumEvents = range.To.Value - range.From.Value + 1U;
+                var maxNumEvents = range.Length;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
                 var events = await stream.Find(
-                    filter.Gte(sequenceNumberExpression, range.From.Value) & filter.Lte(sequenceNumberExpression, range.To.Value))
+                        filter.Gte(sequenceNumberExpression, range.From.Value)
+                            & filter.Lte(sequenceNumberExpression, range.From.Value + range.Length))
                     .Limit(limit)
                     .Project(projection)
-                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
                 return events.ToArray();
             }
             catch (MongoWaitQueueFullException ex)
@@ -147,15 +149,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
         }
 
-        /// <summary>
-        /// Throws exception if the <see cref="StreamPositionRange" /> is illegal.
-        /// </summary>
-        /// <param name="range">The <see cref="StreamPositionRange" />.</param>
-        public static void ThrowIfIllegalRange(StreamPositionRange range)
-        {
-            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
-        }
-
         /// <inheritdoc/>
         public async Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
@@ -175,7 +168,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <inheritdoc/>
         public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
         {
-            ThrowIfIllegalRange(range);
             if (TryGetFetcher(stream, out var fetcher)) return await fetcher.FetchRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
             var streamEvents = await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false);
             return await FetchRange(
