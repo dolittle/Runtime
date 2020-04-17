@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Represents a unique identifier for a partition.

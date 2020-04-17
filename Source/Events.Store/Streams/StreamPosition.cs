@@ -3,7 +3,7 @@
 
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// An unsigned long used to identify the position of a stream.

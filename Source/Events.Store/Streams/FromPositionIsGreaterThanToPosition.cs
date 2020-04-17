@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Exception that gets thrown when the from <see cref="StreamPosition" /> is greater than the to <see cref="StreamPosition" /> in a <see cref="StreamPositionRange" />.
