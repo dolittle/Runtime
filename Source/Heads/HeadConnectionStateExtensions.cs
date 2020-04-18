@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Heads
             var headIdEntry = serverCallContext.RequestHeaders.SingleOrDefault(_ => _.Key.Equals($"headid{Metadata.BinaryHeaderSuffix}", StringComparison.InvariantCultureIgnoreCase));
             if (headIdEntry != null)
             {
-                var headId = (HeadId)Guid.Parse(headIdEntry.Value);
+                var headId = Guid.Parse(headIdEntry.Value);
                 var head = ConnectedHeads.GetById(headId);
                 if (head != null)
                 {
