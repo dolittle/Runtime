@@ -31,7 +31,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     Position = state.Position,
                     RetryTime = state.RetryTime,
                     Reason = state.Reason,
-                    FailureType = state.FailureType,
                     ProcessingAttempts = state.ProcessingAttempts
                 };
 

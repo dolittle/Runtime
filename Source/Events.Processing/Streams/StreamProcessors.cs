@@ -8,7 +8,6 @@ using System.Threading;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -53,6 +52,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             CancellationToken cancellationToken)
         {
             var tenant = _executionContextManager.Current.Tenant;
+            var streamProcessorId = new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, sourceStreamId);
+
+            if (_streamProcessors.ContainsKey(streamProcessorId))
+            {
+                return new StreamProcessorRegistrationResult(false, _streamProcessors[streamProcessorId]);
+            }
+#pragma warning disable CA2000
             var streamProcessor = new StreamProcessor(
                 tenant,
                 sourceStreamId,
@@ -65,24 +71,21 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 this,
                 _logger,
                 cancellationToken);
-
-            if (_streamProcessors.TryAdd(streamProcessor.Identifier, streamProcessor))
+            if (_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
-                streamProcessor.Start();
-                _logger.Debug($"Started Stream Processor with key '{new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, sourceStreamId)}' for tenant '{tenant}'");
                 return new StreamProcessorRegistrationResult(true, streamProcessor);
             }
 
-            return new StreamProcessorRegistrationResult(false, _streamProcessors[streamProcessor.Identifier]);
+            return new StreamProcessorRegistrationResult(false, _streamProcessors[streamProcessorId]);
         }
 
         /// <inheritdoc/>
-        public void Unregister(ScopeId scopeId, EventProcessorId eventProcessorId, StreamId sourceStreamId)
+        public void Unregister(StreamProcessorId streamProcessorId)
         {
-            var identifier = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamId);
-            if (_streamProcessors.TryRemove(identifier, out var _))
+            if (_streamProcessors.TryRemove(streamProcessorId, out var streamProcessor))
             {
-                _logger.Debug($"Stopping Stream Processor with key '{identifier}'");
+                _logger.Debug($"Disposing Stream Processor with key '{streamProcessorId}'");
+                streamProcessor.Dispose();
             }
         }
     }

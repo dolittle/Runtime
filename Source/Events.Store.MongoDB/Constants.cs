@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <summary>
         /// The collection name where type partition filters are stored.
         /// </summary>
-        public const string TypePartitionFilterDefinitionCollection = "type-partition-filters";
+        public const string FilterDefinitionCollection = "filters";
 
         /// <summary>
         /// Gets the collection name where events in the event log are stored.

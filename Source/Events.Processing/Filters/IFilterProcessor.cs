@@ -1,13 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
-using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
-using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -23,16 +19,24 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         TDefinition Definition { get; }
 
-        #nullable enable
         /// <summary>
         /// Filters the event.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
-        /// <param name="retryProcessingState"><see cref="grpc.RetryProcessingState" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation of filtering an event.</returns>
-        Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, grpc.RetryProcessingState? retryProcessingState, CancellationToken cancellationToken);
+        Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
+
+        /// <summary>
+        /// Filters the event.
+        /// </summary>
+        /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="partitionId">The <see cref="PartitionId" />.</param>
+        /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
+        /// <param name="failureReason">The reason the processor was failing.</param>
+        /// <param name="retryCount">The retry count.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation of filtering an event.</returns>
+        Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount);
     }
 }

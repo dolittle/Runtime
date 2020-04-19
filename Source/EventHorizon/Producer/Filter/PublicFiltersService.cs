@@ -54,8 +54,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
 
         /// <inheritdoc/>
         public override Task Connect(
-            IAsyncStreamReader<PublicFilterClientToRuntimeResponse> runtimeStream,
-            IServerStreamWriter<PublicFilterRuntimeToClientRequest> clientStream,
+            IAsyncStreamReader<PublicFiltersClientToRuntimeStreamMessage> runtimeStream,
+            IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream,
             ServerCallContext context)
         {
             var filterArguments = context.GetArgumentsMessage<FilterArguments>();

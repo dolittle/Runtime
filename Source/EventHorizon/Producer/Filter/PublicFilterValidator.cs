@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
         }
 
         /// <inheritdoc/>
-        public Task Validate(IFilterProcessor<PublicFilterDefinition> filter, CancellationToken cancellationToken) =>
-            Task.CompletedTask;
+        public Task<FilterValidationResult> Validate(IFilterProcessor<PublicFilterDefinition> filter, CancellationToken cancellationToken) =>
+            Task.FromResult(new FilterValidationResult());
     }
 }

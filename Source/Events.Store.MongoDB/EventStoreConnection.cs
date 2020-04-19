@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             EventLog = connection.Database.GetCollection<Event>(Constants.EventLogCollection);
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
             StreamProcessorStates = connection.Database.GetCollection<StreamProcessorState>(Constants.StreamProcessorStateCollection);
-            TypePartitionFilterDefinitions = connection.Database.GetCollection<TypePartitionFilterDefinition>(Constants.TypePartitionFilterDefinitionCollection);
+            FilterDefinitions = connection.Database.GetCollection<FilterDefinition>(Constants.FilterDefinitionCollection);
 
             CreateCollectionsAndIndexes();
         }
@@ -64,9 +64,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public IMongoCollection<StreamProcessorState> StreamProcessorStates { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{TDocument}" /> for <see cref="TypePartitionFilterDefinition" />.
+        /// Gets the <see cref="IMongoCollection{TDocument}" /> for <see cref="FilterDefinition" />.
         /// </summary>
-        public IMongoCollection<TypePartitionFilterDefinition> TypePartitionFilterDefinitions { get; }
+        public IMongoCollection<FilterDefinition> FilterDefinitions { get; }
 
         /// <summary>
         /// Gets the correct <see cref="IMongoCollection{TDocument}" /> for <see cref="Events.StreamEvent" />.
@@ -178,9 +178,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         void CreateCollectionsAndIndexesForTypePartitionFilterDefinitions()
         {
-            TypePartitionFilterDefinitions.Indexes.CreateOne(new CreateIndexModel<TypePartitionFilterDefinition>(
-                Builders<TypePartitionFilterDefinition>.IndexKeys
-                    .Ascending(_ => _.TargetStream)));
+            FilterDefinitions.Indexes.CreateOne(new CreateIndexModel<FilterDefinition>(
+                Builders<FilterDefinition>.IndexKeys
+                    .Ascending(_ => _.FilterId)));
         }
 
         async Task CreateCollectionsAndIndexesForStreamEventsAsync(IMongoCollection<Events.StreamEvent> stream, CancellationToken cancellationToken)
