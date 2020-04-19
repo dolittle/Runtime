@@ -6,13 +6,13 @@ extern alias contracts;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Google.Protobuf.WellKnownTypes;
-using grpcArtifacts = contracts::Dolittle.Runtime.Artifacts;
-using grpcEvents = contracts::Dolittle.Runtime.Events;
+using grpcArtifacts = contracts::Dolittle.Artifacts.Contracts;
+using grpcEvents = contracts::Dolittle.Runtime.Events.Contracts;
 
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Extensions for working with conversions between <see cref="CommittedAggregateEvent"/> and <see cref="grpcEvents.CommittedAggregateEvent"/>.
+    /// Extensions for working with conversions between <see cref="CommittedAggregateEvent"/> and <see cref="grpcEvents.CommittedAggregateEvents.Types.CommittedAggregateEvent"/>.
     /// </summary>
     public static class CommittedAggregateEventExtensions
     {
@@ -20,29 +20,21 @@ namespace Dolittle.Runtime.Events.Store
         /// Convert to a protobuf message representation of <see cref="CommittedAggregateEvent"/>.
         /// </summary>
         /// <param name="event"><see cref="CommittedAggregateEvent"/> to convert from.</param>
-        /// <returns>Converted <see cref="grpcEvents.CommittedAggregateEvent"/>.</returns>
-        public static grpcEvents.CommittedAggregateEvent ToProtobuf(this CommittedAggregateEvent @event)
+        /// <returns>Converted <see cref="grpcEvents.CommittedAggregateEvents.Types.CommittedAggregateEvent"/>.</returns>
+        public static grpcEvents.CommittedAggregateEvents.Types.CommittedAggregateEvent ToProtobuf(this CommittedAggregateEvent @event)
         {
-            return new grpcEvents.CommittedAggregateEvent
+            return new grpcEvents.CommittedAggregateEvents.Types.CommittedAggregateEvent
             {
                 EventLogSequenceNumber = @event.EventLogSequenceNumber,
                 Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-                AggregateRootVersion = @event.AggregateRootVersion,
-                Correlation = @event.CorrelationId.ToProtobuf(),
-
-                Microservice = @event.Microservice.ToProtobuf(),
-                Tenant = @event.Tenant.ToProtobuf(),
-                Cause = new grpcEvents.Cause
-                {
-                    Type = (grpcEvents.Cause.Types.CauseType)@event.Cause.Type,
-                    SequenceNumber = @event.Cause.Position
-                },
+                ExecutionContext = @event.ExecutionContext.ToProtobuf(),
                 Type = new grpcArtifacts.Artifact
                 {
                     Id = @event.Type.Id.ToProtobuf(),
                     Generation = @event.Type.Generation
                 },
-                Content = @event.Content
+                Content = @event.Content,
+                Public = @event.Public
             };
         }
     }

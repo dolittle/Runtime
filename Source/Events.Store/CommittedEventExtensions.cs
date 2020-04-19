@@ -3,15 +3,12 @@
 
 extern alias contracts;
 
-using Dolittle.Applications;
 using Dolittle.Artifacts;
-using Dolittle.Execution;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Tenancy;
 using Google.Protobuf.WellKnownTypes;
-using grpcArtifacts = contracts::Dolittle.Runtime.Artifacts;
-using grpcEvents = contracts::Dolittle.Runtime.Events;
+using grpcArtifacts = contracts::Dolittle.Artifacts.Contracts;
+using grpcEvents = contracts::Dolittle.Runtime.Events.Contracts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -31,22 +28,15 @@ namespace Dolittle.Runtime.Events.Store
             {
                 EventLogSequenceNumber = @event.EventLogSequenceNumber,
                 Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-                EventSource = @event.EventSource.ToProtobuf(),
-                Correlation = @event.CorrelationId.ToProtobuf(),
-
-                Microservice = @event.Microservice.ToProtobuf(),
-                Tenant = @event.Tenant.ToProtobuf(),
-                Cause = new grpcEvents.Cause
-                {
-                    Type = (grpcEvents.Cause.Types.CauseType)@event.Cause.Type,
-                    SequenceNumber = @event.Cause.Position
-                },
+                EventSourceId = @event.EventSource.ToProtobuf(),
+                ExecutionContext = @event.ExecutionContext.ToProtobuf(),
                 Type = new grpcArtifacts.Artifact
                 {
                     Id = @event.Type.Id.ToProtobuf(),
                     Generation = @event.Type.Generation
                 },
-                Content = @event.Content
+                Content = @event.Content,
+                Public = @event.Public
             };
         }
 
@@ -60,11 +50,8 @@ namespace Dolittle.Runtime.Events.Store
             return new CommittedEvent(
                 @event.EventLogSequenceNumber,
                 @event.Occurred.ToDateTimeOffset(),
-                @event.EventSource.To<EventSourceId>(),
-                @event.Correlation.To<CorrelationId>(),
-                @event.Microservice.To<Microservice>(),
-                @event.Tenant.To<TenantId>(),
-                new Cause((CauseType)@event.Cause.Type, @event.Cause.SequenceNumber),
+                @event.EventSourceId.To<EventSourceId>(),
+                @event.ExecutionContext.ToExecutionContext(),
                 new Artifact(@event.Type.Id.To<ArtifactId>(), @event.Type.Generation),
                 @event.Public,
                 @event.Content);

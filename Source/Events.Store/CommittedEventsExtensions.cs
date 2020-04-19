@@ -5,7 +5,7 @@ extern alias contracts;
 
 using System.Collections.Generic;
 using System.Linq;
-using grpc = contracts::Dolittle.Runtime.Events;
+using grpc = contracts::Dolittle.Runtime.Events.Contracts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -15,22 +15,11 @@ namespace Dolittle.Runtime.Events.Store
     public static class CommittedEventsExtensions
     {
         /// <summary>
-        /// Converts the list of <see cref="CommittedEvent" /> to a list of <see cref="grpc.CommittedEvent" />s.
+        /// Converts the <see cref="CommittedEvents" /> to <see cref="IEnumerable{T}" /> of <see cref="grpc.CommittedEvent" />.
         /// </summary>
         /// <param name="committedEvents">The committed events.</param>
-        /// <returns>The converted list of <see cref="grpc.CommittedEvent" />.</returns>
-        public static IEnumerable<grpc.CommittedEvent> ToProtobuf(this IEnumerable<CommittedEvent> committedEvents) => committedEvents.Select(_ => _.ToProtobuf());
-
-        /// <summary>
-        /// Converts the <see cref="CommittedEvents" /> to <see cref="grpc.CommittedEvents" />s.
-        /// </summary>
-        /// <param name="committedEvents">The committed events.</param>
-        /// <returns>The converted <see cref="grpc.CommittedEvents" />.</returns>
-        public static grpc.CommittedEvents ToProtobuf(this CommittedEvents committedEvents)
-        {
-            var protobuf = new grpc.CommittedEvents();
-            protobuf.Events.AddRange(committedEvents.AsEnumerable().ToProtobuf());
-            return protobuf;
-        }
+        /// <returns>The converted <see cref="IEnumerable{T}" /> of <see cref="grpc.CommittedEvent" />.</returns>
+        public static IEnumerable<grpc.CommittedEvent> ToProtobuf(this CommittedEvents committedEvents) =>
+            committedEvents.AsEnumerable().Select(_ => _.ToProtobuf());
     }
 }
