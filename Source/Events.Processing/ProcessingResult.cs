@@ -3,7 +3,7 @@
 
 extern alias contracts;
 
-using contracts::Dolittle.Runtime.Events.Processing;
+using contracts::Dolittle.Runtime.Events.Processing.Contracts;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -32,10 +32,10 @@ namespace Dolittle.Runtime.Events.Processing
         public ProcessorFailure? Failure { get; }
 
         /// <summary>
-        /// Implicitly converts the <see cref="EventHandlerClientToRuntimeResponse" /> to <see cref="ProcessingResult" />.
+        /// Implicitly converts the <see cref="EventHandlerResponse" /> to <see cref="ProcessingResult" />.
         /// </summary>
-        /// <param name="response">The <see cref="EventHandlerClientToRuntimeResponse" />.</param>
-        public static implicit operator ProcessingResult(EventHandlerClientToRuntimeResponse response) =>
-            new ProcessingResult(response.Failed);
+        /// <param name="response">The <see cref="EventHandlerResponse" />.</param>
+        public static implicit operator ProcessingResult(EventHandlerResponse response) =>
+            new ProcessingResult(response.Failure);
     }
 }
