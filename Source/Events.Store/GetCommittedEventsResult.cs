@@ -4,25 +4,25 @@
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represents the result of committing events.
+    /// Represents the result of getting committied events.
     /// </summary>
     /// <typeparam name="TEvents">Type of the committed events sequence.</typeparam>
-    public class CommitEventsResult<TEvents>
+    public class GetCommittedEventsResult<TEvents>
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommitEventsResult{TEvents}"/> class.
+        /// Initializes a new instance of the <see cref="GetCommittedEventsResult{TEvents}"/> class.
         /// </summary>
         /// <param name="events">The committed events.</param>
-        public CommitEventsResult(TEvents events)
+        public GetCommittedEventsResult(TEvents events)
         {
             Events = events;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="CommitEventsResult{TEvents}"/> class.
+        /// Initializes a new instance of the <see cref="GetCommittedEventsResult{TEvents}"/> class.
         /// </summary>
         /// <param name="failure">The <see cref="EventStoreFailure" />.</param>
-        public CommitEventsResult(EventStoreFailure failure)
+        public GetCommittedEventsResult(EventStoreFailure failure)
         {
             Failure = failure;
         }
