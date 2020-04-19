@@ -7,7 +7,7 @@ using Dolittle.Concepts;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represents the unique identifier of an event store failure.
+    /// Represents the unique identifier of an event store failure type.
     /// </summary>
     public class EventStoreFailureId : ConceptAs<Guid>
     {

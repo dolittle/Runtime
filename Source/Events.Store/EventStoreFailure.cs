@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Protobuf;
+
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
@@ -17,5 +19,11 @@ namespace Dolittle.Runtime.Events.Store
         /// Gets the <see cref="EventStoreFailureReason" />.
         /// </summary>
         public EventStoreFailureReason Reason { get; }
+
+        /// <summary>
+        /// Returns the <see cref="Failure" /> representation.
+        /// </summary>
+        /// <returns>The <see cref="Failure" /> representation.</returns>
+        public Failure AsFailure() => new Failure(Id.Value, Reason.Value);
     }
 }
