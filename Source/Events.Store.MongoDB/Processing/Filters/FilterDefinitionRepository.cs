@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task<IFilterDefinition> GetPersistedFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken)
+        public async Task<IFilterDefinition> GetPersistedFilter(IPersistableFilterDefinition filterDefinition, CancellationToken cancellationToken)
         {
             try
             {
@@ -47,11 +47,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task PersistFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken)
+        public async Task PersistFilter(IPersistableFilterDefinition filterDefinition, CancellationToken cancellationToken)
         {
             try
             {
-                if (!filterDefinition.IsPersistable) return;
                 var document = filterDefinition switch
                     {
                         TypeFilterWithEventSourcePartitionDefinition definition => definition.ToStoreRepresentation(),

@@ -52,15 +52,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>
             new Event(
                 sequenceNumber,
-                new Events.ExecutionContext(
-                    @event.CorrelationId,
-                    @event.Microservice,
-                    @event.Tenant),
+                @event.ExecutionContext.ToStoreRepresentation(),
                 new EventMetadata(
                     @event.Occurred,
                     @event.EventSource,
-                    @event.Cause.Type,
-                    @event.Cause.Position,
                     @event.Type.Id,
                     @event.Type.Generation,
                     @event.Public),

@@ -10,6 +10,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
