@@ -3,9 +3,8 @@
 
 using System;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Exception that gets thrown when a the <see cref="IWriteEventsToStreams" /> tries to write an event twice to a stream.

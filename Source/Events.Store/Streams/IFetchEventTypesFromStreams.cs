@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Defines a system that can fetch <see cref="ArtifactId">event types</see> from <see cref="StreamId">streams</see>.

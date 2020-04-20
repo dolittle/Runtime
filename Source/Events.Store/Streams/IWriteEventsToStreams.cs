@@ -3,9 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Defines a system that can write an event to a stream in the event store.

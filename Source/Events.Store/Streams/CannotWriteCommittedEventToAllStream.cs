@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Exception that gets thrown when <see cref="IWriteEventsToStreams" /> is attempting to write a committed event to the all stream.

@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterRegistry.when_removing_if_persisted

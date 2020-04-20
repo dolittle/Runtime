@@ -3,7 +3,7 @@
 
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Represents the reason for why a <see cref="StreamPositionRange" /> is invalid.

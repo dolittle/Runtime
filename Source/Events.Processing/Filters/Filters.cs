@@ -10,7 +10,7 @@ using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Google.Protobuf;
