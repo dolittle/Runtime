@@ -7,7 +7,7 @@ using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Filters;
 
-namespace Dolittle.Runtime.EventHorizon.Producer.Filter
+namespace Dolittle.Runtime.Events.Processing.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanValidateFilterFor{T}" /> that can validate a <see cref="PublicFilterDefinition" />.

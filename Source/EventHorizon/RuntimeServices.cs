@@ -1,13 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Collections.Generic;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Services;
 using Dolittle.Services;
-using grpc = contracts::Dolittle.Runtime.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -35,7 +32,7 @@ namespace Dolittle.Runtime.EventHorizon
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_subscriptions, grpc.Subscriptions.BindService(_subscriptions), grpc.Subscriptions.Descriptor)
+                new Service(_subscriptions, Contracts.Subscriptions.BindService(_subscriptions), Contracts.Subscriptions.Descriptor)
             };
     }
 }

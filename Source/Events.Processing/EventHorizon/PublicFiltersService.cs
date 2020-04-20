@@ -1,23 +1,19 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Services;
 using Grpc.Core;
-using static contracts::Dolittle.Runtime.Events.Processing.PublicFilters;
+using static Dolittle.Runtime.Events.Processing.Contracts.PublicFilters;
 
-namespace Dolittle.Runtime.EventHorizon.Producer.Filter
+namespace Dolittle.Runtime.Events.Processing.EventHorizon
 {
     /// <summary>
     /// Represents the implementation of <see creF="PublicFiltersBase"/>.
@@ -34,7 +30,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
         /// Initializes a new instance of the <see cref="PublicFiltersService"/> class.
         /// </summary>
         /// <param name="filters">The <see cref="IFilters" />.</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="ExecutionContext"/>.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
@@ -54,7 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
 
         /// <inheritdoc/>
         public override Task Connect(
-            IAsyncStreamReader<PublicFiltersClientToRuntimeStreamMessage> runtimeStream,
+            IAsyncStreamReader<Contracts.PublicFiltersClientToRuntimeStreamMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream,
             ServerCallContext context)
         {

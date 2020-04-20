@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.EventHorizon.Producer.Filter
+namespace Dolittle.Runtime.Events.Processing.EventHorizon
 {
     /// <summary>
     /// Defines a system that can write events to public event streams.

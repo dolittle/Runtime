@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.EventHorizon.Producer.Filter
+namespace Dolittle.Runtime.Events.Processing.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFilterDefinition" /> for a public filter.

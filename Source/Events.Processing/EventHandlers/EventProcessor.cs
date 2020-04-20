@@ -1,12 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing.Contracts;
-using contracts::Dolittle.Services.Contracts;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
@@ -21,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
-        readonly IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage> _dispatcher;
+        readonly IReverseCallDispatcher<Contracts.EventHandlersClientToRuntimeMessage, Contracts.EventHandlerRuntimeToClientMessage> _dispatcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
         readonly string _logMessagePrefix;
@@ -37,7 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public EventProcessor(
             ScopeId scope,
             EventProcessorId id,
-            IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage> dispatcher,
+            IReverseCallDispatcher<Contracts.EventHandlersClientToRuntimeMessage, Contracts.EventHandlerRuntimeToClientMessage> dispatcher,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
@@ -60,7 +56,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 
-            var request = new HandleEventRequest
+            var request = new Contracts.HandleEventRequest
                 {
                     Event = @event.ToProtobuf(),
                     PartitionId = partitionId.ToProtobuf()
@@ -72,22 +68,22 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}' again for the {retryCount}. time because: {failureReason}");
-            var request = new HandleEventRequest
+            var request = new Contracts.HandleEventRequest
                 {
                     Event = @event.ToProtobuf(),
                     PartitionId = partitionId.ToProtobuf(),
-                    RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+                    RetryProcessingState = new Contracts.RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
                 };
             return Process(request, cancellationToken);
         }
 
 #pragma warning disable CA1801
-        async Task<IProcessingResult> Process(HandleEventRequest request, CancellationToken cancellationToken)
+        async Task<IProcessingResult> Process(Contracts.HandleEventRequest request, CancellationToken cancellationToken)
         {
-            request.CallContext = new ReverseCallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() };
-            var response = await _dispatcher.Call(new EventHandlerRuntimeToClientMessage { HandleRequest = request }).ConfigureAwait(false);
+            request.CallContext = new Dolittle.Services.Contracts.ReverseCallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() };
+            var response = await _dispatcher.Call(new Contracts.EventHandlerRuntimeToClientMessage { HandleRequest = request }).ConfigureAwait(false);
 
-            if (response.MessageCase == EventHandlersClientToRuntimeMessage.MessageOneofCase.HandleResult)
+            if (response.MessageCase == Contracts.EventHandlersClientToRuntimeMessage.MessageOneofCase.HandleResult)
             {
                 return response.HandleResult switch
                     {

@@ -1,13 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Artifacts;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
@@ -21,7 +18,7 @@ using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Dolittle.Tenancy;
 using Grpc.Core;
-using static contracts::Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
+using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
@@ -64,8 +61,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
         /// <inheritdoc/>
         public override async Task Connect(
-            IAsyncStreamReader<EventHandlersClientToRuntimeMessage> runtimeStream,
-            IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
+            IAsyncStreamReader<Contracts.EventHandlersClientToRuntimeMessage> runtimeStream,
+            IServerStreamWriter<Contracts.EventHandlerRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
             var hasRegistrationRequest = await HandleRegistrationRequest(runtimeStream, clientStream, context.CancellationToken).ConfigureAwait(false);
@@ -106,7 +103,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
         async Task<bool> HandleRegistrationResults(
             IEnumerable<(TenantId, EventHandlerRegistrationResult)> registrationResults,
-            IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
+            IServerStreamWriter<Contracts.EventHandlerRuntimeToClientMessage> clientStream,
             CancellationToken cancellationToken)
         {
             var failedRegistrationReasons = registrationResults
@@ -151,8 +148,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         }
 
         (IEventProcessor, TypeFilterWithEventSourcePartitionDefinition) CreateEventProcessorAndFilterDefinition(
-            EventHandlersRegistrationRequest registration,
-            IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage> dispatcher)
+            Contracts.EventHandlersRegistrationRequest registration,
+            IReverseCallDispatcher<Contracts.EventHandlersClientToRuntimeMessage, Contracts.EventHandlerRuntimeToClientMessage> dispatcher)
         {
             var sourceStream = StreamId.AllStreamId;
             var eventHandlerId = registration.EventHandlerId.To<EventProcessorId>();
@@ -167,8 +164,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         }
 
         async Task<bool> HandleRegistrationRequest(
-            IAsyncStreamReader<EventHandlersClientToRuntimeMessage> runtimeStream,
-            IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
+            IAsyncStreamReader<Contracts.EventHandlersClientToRuntimeMessage> runtimeStream,
+            IServerStreamWriter<Contracts.EventHandlerRuntimeToClientMessage> clientStream,
             CancellationToken cancellationToken)
         {
             if (!await runtimeStream.MoveNext(cancellationToken).ConfigureAwait(false))
@@ -179,21 +176,21 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 return false;
             }
 
-            if (runtimeStream.Current.MessageCase != EventHandlersClientToRuntimeMessage.MessageOneofCase.RegistrationRequest)
+            if (runtimeStream.Current.MessageCase != Contracts.EventHandlersClientToRuntimeMessage.MessageOneofCase.RegistrationRequest)
             {
                 const string message = "EventHandlers connection requested but first message in request stream was not an event handler registration request message";
                 _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(EventHandlersFailures.NoEventHandlerRegistrationReceived, $"The first message in the event handler connection needs to be {typeof(EventHandlersRegistrationRequest).FullName}")).ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(EventHandlersFailures.NoEventHandlerRegistrationReceived, $"The first message in the event handler connection needs to be {typeof(Contracts.EventHandlersRegistrationRequest)}")).ConfigureAwait(false);
                 return false;
             }
 
             return true;
         }
 
-        Task WriteFailedRegistrationResponse(IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream, Failure failure) =>
-            clientStream.WriteAsync(new EventHandlerRuntimeToClientMessage { RegistrationResponse = new EventHandlerRegistrationResponse { Failure = failure } });
+        Task WriteFailedRegistrationResponse(IServerStreamWriter<Contracts.EventHandlerRuntimeToClientMessage> clientStream, Failure failure) =>
+            clientStream.WriteAsync(new Contracts.EventHandlerRuntimeToClientMessage { RegistrationResponse = new Contracts.EventHandlerRegistrationResponse { Failure = failure } });
 
-        Task WriteSuccessfulRegistrationResponse(IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream) =>
-            clientStream.WriteAsync(new EventHandlerRuntimeToClientMessage { RegistrationResponse = new EventHandlerRegistrationResponse() });
+        Task WriteSuccessfulRegistrationResponse(IServerStreamWriter<Contracts.EventHandlerRuntimeToClientMessage> clientStream) =>
+            clientStream.WriteAsync(new Contracts.EventHandlerRuntimeToClientMessage { RegistrationResponse = new Contracts.EventHandlerRegistrationResponse() });
     }
 }

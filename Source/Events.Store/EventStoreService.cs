@@ -1,8 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -12,8 +10,7 @@ using Dolittle.DependencyInversion;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Grpc.Core;
-using static contracts::Dolittle.Runtime.Events.Contracts.EventStore;
-using grpc = contracts::Dolittle.Runtime.Events.Contracts;
+using static Dolittle.Runtime.Events.Contracts.EventStore;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -39,9 +36,9 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <inheritdoc/>
-        public override async Task<grpc.CommitEventsResponse> Commit(grpc.CommitEventsRequest request, ServerCallContext context)
+        public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
         {
-            var response = new grpc.CommitEventsResponse();
+            var response = new Contracts.CommitEventsResponse();
             try
             {
                 _logger.Debug("{eventsCount} Events received for committing", request.Events.Count);
@@ -70,9 +67,9 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <inheritdoc/>
-        public override async Task<grpc.CommitAggregateEventsResponse> CommitForAggregate(grpc.CommitAggregateEventsRequest request, ServerCallContext context)
+        public override async Task<Contracts.CommitAggregateEventsResponse> CommitForAggregate(Contracts.CommitAggregateEventsRequest request, ServerCallContext context)
         {
-            var response = new grpc.CommitAggregateEventsResponse();
+            var response = new Contracts.CommitAggregateEventsResponse();
             try
             {
                 _logger.Debug("{eventsCount} Aggregate Events received for committing", request.Events.Events.Count);
@@ -108,13 +105,13 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <inheritdoc/>
-        public override async Task<grpc.FetchForAggregateResponse> FetchForAggregate(grpc.FetchForAggregateRequest request, ServerCallContext context)
+        public override async Task<Contracts.FetchForAggregateResponse> FetchForAggregate(Contracts.FetchForAggregateRequest request, ServerCallContext context)
         {
             _logger.Debug("Fetch for Aggregate");
             var aggregate = request.Aggregate.AggregateRootId.To<ArtifactId>();
             var eventSource = request.Aggregate.EventSourceId.To<EventSourceId>();
 
-            var response = new grpc.FetchForAggregateResponse();
+            var response = new Contracts.FetchForAggregateResponse();
             try
             {
                 var committedEventsResult = await _eventStoreFactory().FetchForAggregate(eventSource, aggregate, context.CancellationToken).ConfigureAwait(false);

@@ -1,14 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 using Dolittle.Services;
-using grpc = contracts::Dolittle.Runtime.Events.Processing;
 
-namespace Dolittle.Runtime.EventHorizon.Producer.Filter
+namespace Dolittle.Runtime.Events.Processing.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
@@ -34,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer.Filter
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_publicFilters, grpc.PublicFilters.BindService(_publicFilters), grpc.PublicFilters.Descriptor)
+                new Service(_publicFilters, Contracts.PublicFilters.BindService(_publicFilters), Contracts.PublicFilters.Descriptor)
             };
     }
 }
