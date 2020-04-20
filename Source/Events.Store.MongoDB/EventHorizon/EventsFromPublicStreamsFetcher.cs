@@ -54,7 +54,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// <inheritdoc/>
         public async Task<IEnumerable<Runtime.Events.Store.Streams.StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken)
         {
-            EventsFromStreamsFetcher.ThrowIfIllegalRange(range);
             return await EventsFromStreamsFetcher.FetchRange(
                 await _connection.GetPublicStreamCollection(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,
