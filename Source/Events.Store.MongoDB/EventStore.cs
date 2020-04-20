@@ -186,11 +186,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             }
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-        }
-
         void ThrowIfNoEventsToCommit(UncommittedEvents events)
         {
             if (!events.HasEvents) throw new NoEventsToCommit();
