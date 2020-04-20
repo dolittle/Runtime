@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Contracts.Processing;
+using contracts::Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
@@ -62,25 +62,25 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public override async Task Connect(
-            IAsyncStreamReader<FiltersClientToRuntimeStreamMessage> runtimeStream,
-            IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream,
+            IAsyncStreamReader<FiltersClientToRuntimeMessage> runtimeStream,
+            IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
             var hasRegistrationRequest = await HandleRegistrationRequest(runtimeStream, clientStream, context.CancellationToken).ConfigureAwait(false);
             if (!hasRegistrationRequest) return;
 
             var registration = runtimeStream.Current.RegistrationRequest;
-            var filterId = registration.Filter.To<StreamId>();
+            var filterId = registration.FilterId.To<StreamId>();
             if (filterId.IsNonWriteable)
             {
                 _logger.Warning("Received filter registration request with Filter Id: '{filterId}' which is an invalid stream id", filterId);
-                await WriteFailedRegistrationResponse(clientStream, $"Received event handler registration request with Filter Id: '{filterId}' which is an invalid stream id").ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Received event handler registration request with Filter Id: '{filterId}' which is an invalid stream id")).ConfigureAwait(false);
                 return;
             }
 
-            var dispatcher = _reverseCallDispatchers.GetDispatcherFor(runtimeStream, clientStream, context, _ => _.CallNumber, _ => _.CallNumber);
+            var dispatcher = _reverseCallDispatchers.GetDispatcherFor(runtimeStream, clientStream, context, _ => _.FilterResult.CallContext, _ => _.FilterRequest.CallContext);
 
-            var scope = registration.Scope.To<ScopeId>();
+            var scope = registration.ScopeId.To<ScopeId>();
             var streamId = StreamId.AllStreamId;
 
             var registrationResults = await RegisterStreamProcessorsForAllTenants(
@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
                 await WriteSuccessfulRegistrationResponse(clientStream).ConfigureAwait(false);
 
-                await dispatcher.HandleCalls().ConfigureAwait(false);
+                await dispatcher.WaitTillCompleted().ConfigureAwait(false);
             }
             finally
             {
@@ -108,7 +108,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         async Task<bool> HandleRegistrationResults(
             IEnumerable<(TenantId, FilterRegistrationResult<RemoteFilterDefinition>)> registrationResults,
-            IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream)
+            IServerStreamWriter<FilterRuntimeToClientMessage> clientStream)
         {
             var failedRegistrationReasons = registrationResults
                                                 .Where(tenantAndResult => tenantAndResult.Item2.Succeeded)
@@ -118,7 +118,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 var failureMessage = $"Failed to register event handler:\n\t";
                 failureMessage += string.Join("\n\t", failedRegistrationReasons);
                 _logger.Warning(failureMessage);
-                await WriteFailedRegistrationResponse(clientStream, failureMessage).ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.FailedToRegisterFilter, failureMessage)).ConfigureAwait(false);
                 return false;
             }
 
@@ -134,7 +134,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             ScopeId scope,
             StreamId sourceStream,
             StreamId targetStream,
-            IReverseCallDispatcher<FiltersClientToRuntimeStreamMessage, FilterRuntimeToClientStreamMessage> dispatcher,
+            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage> dispatcher,
             CancellationToken cancellationToken)
         {
             var registrationResults = new List<(TenantId, FilterRegistrationResult<RemoteFilterDefinition>)>();
@@ -157,39 +157,33 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         async Task<bool> HandleRegistrationRequest(
-            IAsyncStreamReader<FiltersClientToRuntimeStreamMessage> runtimeStream,
-            IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream,
+            IAsyncStreamReader<FiltersClientToRuntimeMessage> runtimeStream,
+            IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             CancellationToken cancellationToken)
         {
             if (!await runtimeStream.MoveNext(cancellationToken).ConfigureAwait(false))
             {
                 const string message = "Filters connection requested but client-to-runtime stream did not contain any messages";
                 _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, message).ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.NoFilterRegistrationReceived, message)).ConfigureAwait(false);
                 return false;
             }
 
-            if (runtimeStream.Current.MessageCase != FiltersClientToRuntimeStreamMessage.MessageOneofCase.RegistrationRequest)
+            if (runtimeStream.Current.MessageCase != FiltersClientToRuntimeMessage.MessageOneofCase.RegistrationRequest)
             {
                 const string message = "Filters connection requested but first message in request stream was not an event handler registration request message";
                 _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, $"The first message in the event handler connection needs to be {typeof(FiltersRegistrationRequest).FullName}").ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.NoFilterRegistrationReceived, $"The first message in the event handler connection needs to be {typeof(FiltersRegistrationRequest)}")).ConfigureAwait(false);
                 return false;
             }
 
             return true;
         }
 
-        Task WriteFailedRegistrationResponse(IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream, string reason) =>
-            clientStream.WriteAsync(new FilterRuntimeToClientStreamMessage
-                {
-                    RegistrationResponse = new FilterRegistrationResponse
-                    {
-                        Failure = new Failure { Reason = reason }
-                    }
-                });
+        Task WriteFailedRegistrationResponse(IServerStreamWriter<FilterRuntimeToClientMessage> clientStream, Failure failure) =>
+            clientStream.WriteAsync(new FilterRuntimeToClientMessage { RegistrationResponse = new FilterRegistrationResponse { Failure = failure } });
 
-        Task WriteSuccessfulRegistrationResponse(IServerStreamWriter<FilterRuntimeToClientStreamMessage> clientStream) =>
-            clientStream.WriteAsync(new FilterRuntimeToClientStreamMessage { RegistrationResponse = new FilterRegistrationResponse() });
+        Task WriteSuccessfulRegistrationResponse(IServerStreamWriter<FilterRuntimeToClientMessage> clientStream) =>
+            clientStream.WriteAsync(new FilterRuntimeToClientMessage { RegistrationResponse = new FilterRegistrationResponse() });
     }
 }

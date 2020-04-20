@@ -75,7 +75,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             if (registration.EventHandlerId.To<StreamId>().IsNonWriteable)
             {
                 _logger.Warning("Received event handler registration request with Event Handler Id: '{eventHandlerId}' which is an invalid stream id", registration.EventHandlerId.ToGuid());
-                await WriteFailedRegistrationResponse(clientStream, EventHandlersFailureId.CannotRegisterEventHandlerOnNonWriteableStream, $"Received event handler registration request with Event Handler Id: '{registration.EventHandlerId.ToGuid()}' which is an invalid stream id").ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(
+                    clientStream,
+                    new Failure(
+                        EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
+                        $"Received event handler registration request with Event Handler Id: '{registration.EventHandlerId.ToGuid()}' which is an invalid stream id")).ConfigureAwait(false);
                 return;
             }
 
@@ -113,7 +117,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 var failureMessage = $"Failed to register event handler:\n\t";
                 failureMessage += string.Join("\n\t", failedRegistrationReasons);
                 _logger.Warning(failureMessage);
-                await WriteFailedRegistrationResponse(clientStream, EventHandlersFailureId.FailedToRegisterEventHandler, failureMessage).ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(EventHandlersFailures.FailedToRegisterEventHandler, failureMessage)).ConfigureAwait(false);
                 return false;
             }
 
@@ -171,7 +175,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             {
                 const string message = "EventHandlers connection requested but client-to-runtime stream did not contain any messages";
                 _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, EventHandlersFailureId.NoEventHandlerRegistration, message).ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(EventHandlersFailures.NoEventHandlerRegistrationReceived, message)).ConfigureAwait(false);
                 return false;
             }
 
@@ -179,21 +183,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             {
                 const string message = "EventHandlers connection requested but first message in request stream was not an event handler registration request message";
                 _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, EventHandlersFailureId.NoEventHandlerRegistration, $"The first message in the event handler connection needs to be {typeof(EventHandlersRegistrationRequest).FullName}").ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(EventHandlersFailures.NoEventHandlerRegistrationReceived, $"The first message in the event handler connection needs to be {typeof(EventHandlersRegistrationRequest).FullName}")).ConfigureAwait(false);
                 return false;
             }
 
             return true;
         }
 
-        Task WriteFailedRegistrationResponse(IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream, EventHandlersFailureId failureId, string reason) =>
-            clientStream.WriteAsync(new EventHandlerRuntimeToClientMessage
-                {
-                    RegistrationResponse = new EventHandlerRegistrationResponse
-                        {
-                            Failure = new Failure(failureId, reason).ToProtobuf()
-                        }
-                });
+        Task WriteFailedRegistrationResponse(IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream, Failure failure) =>
+            clientStream.WriteAsync(new EventHandlerRuntimeToClientMessage { RegistrationResponse = new EventHandlerRegistrationResponse { Failure = failure } });
 
         Task WriteSuccessfulRegistrationResponse(IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream) =>
             clientStream.WriteAsync(new EventHandlerRuntimeToClientMessage { RegistrationResponse = new EventHandlerRegistrationResponse() });
