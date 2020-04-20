@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Security;
 using Dolittle.Tenancy;
 using Machine.Specifications;

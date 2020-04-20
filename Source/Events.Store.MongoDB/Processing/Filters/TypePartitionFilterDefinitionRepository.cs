@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Filters;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters

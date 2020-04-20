@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
@@ -74,8 +74,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="event">The <see cref="Event" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <returns>The converted <see cref="StreamEvent" />.</returns>
-        public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this MongoDB.Events.StreamEvent @event, StreamId stream) =>
-            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition);
+        public static Runtime.Events.Store.Streams.StreamEvent ToRuntimeStreamEvent(this MongoDB.Events.StreamEvent @event, StreamId stream) =>
+            new Runtime.Events.Store.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition);
 
         /// <summary>
         /// Converts a <see cref="CommittedEvent" /> to <see cref="Event" />.

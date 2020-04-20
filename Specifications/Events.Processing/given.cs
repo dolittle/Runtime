@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Collections;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Moq;
 
 namespace Dolittle.Runtime.Events.Processing

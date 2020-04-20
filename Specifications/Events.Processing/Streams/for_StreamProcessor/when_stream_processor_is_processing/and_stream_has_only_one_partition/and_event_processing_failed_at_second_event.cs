@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_stream_processor_is_processing.and_stream_has_only_one_partition

@@ -8,7 +8,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Streams.StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
+        public async Task<Runtime.Events.Store.Streams.StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             var committedEventWithPartition = await EventsFromStreamsFetcher.Fetch(
                 await _connection.GetPublicStreamCollection(streamId, cancellationToken).ConfigureAwait(false),
@@ -48,11 +48,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken) =>
+        public Task<Runtime.Events.Store.Streams.StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken) =>
             Fetch(streamId, streamPosition, cancellationToken);
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Runtime.Events.Store.Streams.StreamEvent>> FetchRange(StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken)
         {
             EventsFromStreamsFetcher.ThrowIfIllegalRange(range);
             return await EventsFromStreamsFetcher.FetchRange(
@@ -65,7 +65,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken) =>
+        public Task<IEnumerable<Runtime.Events.Store.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken) =>
             FetchRange(streamId, range, cancellationToken);
 
         /// <inheritdoc/>
