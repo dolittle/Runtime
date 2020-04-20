@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Security;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
@@ -13,19 +13,25 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
         static StreamId stream;
         static PartitionId partition;
         static StreamEvent stream_event;
+        static Execution.ExecutionContext execution_context;
 
         Establish context = () =>
         {
             stream = Guid.NewGuid();
             partition = Guid.NewGuid();
+            execution_context = new Dolittle.Execution.ExecutionContext(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Dolittle.Versioning.Version.NotSet,
+                Dolittle.Execution.Environment.Development,
+                Guid.NewGuid(),
+                CultureInfo.InvariantCulture
+            );
             committed_event = new CommittedEvent(
                 0,
                 DateTimeOffset.Now,
                 Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                new Cause(CauseType.Command, 0),
+                execution_context,
                 new Artifacts.Artifact(Guid.NewGuid(), 0),
                 false,
                 "content");

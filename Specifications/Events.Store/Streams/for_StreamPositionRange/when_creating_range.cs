@@ -3,23 +3,23 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Streams.for_StreamPositionRange
+namespace Dolittle.Runtime.Events.Store.Streams.for_StreamPositionRange
 {
     public class when_creating_range
     {
         static StreamPosition from;
-        static StreamPosition to;
+        static uint range_length;
         static StreamPositionRange range;
 
         Establish context = () =>
         {
             from = 0;
-            to = 1;
+            range_length = 1;
         };
 
-        Because of = () => range = new StreamPositionRange(from, to);
+        Because of = () => range = new StreamPositionRange(from, range_length);
 
         It should_have_the_correct_from_position = () => range.From.ShouldEqual(from);
-        It should_have_the_correct_to_position = () => range.To.ShouldEqual(to);
+        It should_have_the_correct_length = () => range.Length.ShouldEqual(from.Length);
     }
 }
