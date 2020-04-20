@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public class EventCommitter : IEventCommitter
     {
-        readonly IMongoCollection<Event> _allStream;
+        readonly IMongoCollection<MongoDB.Events.Event> _allStream;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventCommitter"/> class.

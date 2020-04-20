@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
@@ -18,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// </summary>
     public class EventTypesFromEventLogFetcher : AbstractEventTypesFromWellKnownStreamsFetcher
     {
-        readonly FilterDefinitionBuilder<Event> _eventLogFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventLogFilter = Builders<MongoDB.Events.Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -48,7 +47,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 _eventLogFilter,
                 _eventLogFilter.Empty,
                 _ => _.EventLogSequenceNumber,
-                Builders<Event>.Projection.Expression(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)),
+                Builders<MongoDB.Events.Event>.Projection.Expression(_ => new Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)),
                 range,
                 cancellationToken).ConfigureAwait(false);
         }
