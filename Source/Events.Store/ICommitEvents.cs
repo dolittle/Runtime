@@ -16,8 +16,8 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="events">The <see cref="UncommittedEvents"/> to be committed.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="GetCommittedEventsResult{TEvents}" /> with the <see cref="CommittedEvents"/> corresponding to the <see cref="UncommittedEvents"/> supplied.</returns>
-        Task<GetCommittedEventsResult<CommittedEvents>> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="CommittedEvents"/> corresponding to the <see cref="UncommittedEvents"/> supplied.</returns>
+        Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken);
 
         /// <summary>
         /// Commits an <see cref="UncommittedAggregateEvents"/> to the Event Store, returning a corresponding <see cref="CommittedAggregateEvents"/>.
@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="events">The <see cref="UncommittedAggregateEvents"/> to be committed.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="GetCommittedEventsResult{TEvents}" /> with the <see cref="CommittedAggregateEvents"/> corresponding to the <see cref="UncommittedAggregateEvents"/> supplied.</returns>
-        Task<GetCommittedEventsResult<CommittedAggregateEvents>> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="CommittedAggregateEvents"/> corresponding to the <see cref="UncommittedAggregateEvents"/> supplied.</returns>
+        Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken);
     }
 }

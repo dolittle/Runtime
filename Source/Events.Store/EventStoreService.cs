@@ -44,23 +44,14 @@ namespace Dolittle.Runtime.Events.Store
                 _logger.Debug("{eventsCount} Events received for committing", request.Events.Count);
                 var events = request.Events.Select(_ => new UncommittedEvent(new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
                 var uncommittedEvents = new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
-                var committedEventsResult = await _eventStoreFactory().CommitEvents(uncommittedEvents, context.CancellationToken).ConfigureAwait(false);
-
-                if (committedEventsResult.Success)
-                {
-                    _logger.Debug("Events were successfully committed");
-                    response.Events.AddRange(committedEventsResult.Events.ToProtobuf());
-                }
-                else
-                {
-                    _logger.Debug("Events were unsuccessfully committed");
-                    response.Failure = committedEventsResult.Failure.AsFailure().ToProtobuf();
-                }
+                var committedEvents = await _eventStoreFactory().CommitEvents(uncommittedEvents, context.CancellationToken).ConfigureAwait(false);
+                _logger.Debug("Events were successfully committed");
+                response.Events.AddRange(committedEvents.ToProtobuf());
             }
             catch (Exception ex)
             {
                 _logger.Warning(ex, "Error committing events");
-                response.Failure = new Failure(FailureId.Other, $"Error message: {ex.Message}\nStack Trace: {ex.StackTrace}").ToProtobuf();
+                response.Failure = GetFailureFromException(ex);
             }
 
             return response;
@@ -83,22 +74,13 @@ namespace Dolittle.Runtime.Events.Store
                     request.Events.ExpectedAggregateRootVersion,
                     new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
                 var committedEventsResult = await _eventStoreFactory().CommitAggregateEvents(uncommittedAggregateEvents, context.CancellationToken).ConfigureAwait(false);
-
-                if (committedEventsResult.Success)
-                {
-                    _logger.Debug("Aggregate Events were successfully committed");
-                    response.Events = committedEventsResult.Events.ToProtobuf();
-                }
-                else
-                {
-                    _logger.Debug("Aggregate Events were unsuccessfully committed");
-                    response.Failure = committedEventsResult.Failure.AsFailure().ToProtobuf();
-                }
+                _logger.Debug("Aggregate Events were successfully committed");
+                response.Events = committedEventsResult.ToProtobuf();
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "Error committing events");
-                response.Failure = new Failure(FailureId.Other, $"Error message: {ex.Message}\nStack Trace: {ex.StackTrace}").ToProtobuf();
+                _logger.Warning(ex, "Error committing aggregate events");
+                response.Failure = GetFailureFromException(ex);
             }
 
             return response;
@@ -115,25 +97,32 @@ namespace Dolittle.Runtime.Events.Store
             try
             {
                 var committedEventsResult = await _eventStoreFactory().FetchForAggregate(eventSource, aggregate, context.CancellationToken).ConfigureAwait(false);
-
-                if (committedEventsResult.Success)
-                {
-                    _logger.Debug("Successfully fetched events for aggregate");
-                    response.Events = committedEventsResult.Events.ToProtobuf();
-                }
-                else
-                {
-                    _logger.Debug("Unsuccessfully fetched events for aggregate");
-                    response.Failure = committedEventsResult.Failure.AsFailure().ToProtobuf();
-                }
+                _logger.Debug("Successfully fetched events for aggregate");
+                response.Events = committedEventsResult.ToProtobuf();
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "Error committing events");
-                response.Failure = new Failure(FailureId.Other, $"Error message: {ex.Message}\nStack Trace: {ex.StackTrace}").ToProtobuf();
+                _logger.Warning(ex, "Error fetching events from aggregate");
+                response.Failure = GetFailureFromException(ex);
             }
 
             return response;
         }
+
+        Failure GetFailureFromException(Exception ex) =>
+            ex switch
+                {
+                    EventStoreUnavailable e => new Failure(EventStoreFailures.EventStoreUnavailable, e.Message),
+                    EventWasAppliedByOtherAggregateRoot e => new Failure(EventStoreFailures.EventAppliedByOtherAggregateRoot, e.Message),
+                    EventWasAppliedToOtherEventSource e => new Failure(EventStoreFailures.EventAppliedToOtherEventSource, e.Message),
+                    EventStorePersistenceError e => new Failure(EventStoreFailures.EventStorePersistanceError, e.Message),
+                    EventStoreConsistencyError e => new Failure(EventStoreFailures.EventStoreConsistencyError, e.Message),
+                    EventLogSequenceIsOutOfOrder e => new Failure(EventStoreFailures.EventLogSequenceIsOutOfOrder, e.Message),
+                    EventCanNotBeNull e => new Failure(EventStoreFailures.EventCannotBeNull, e.Message),
+                    AggregateRootVersionIsOutOfOrder e => new Failure(EventStoreFailures.AggregateRootVersionOutOfOrder, e.Message),
+                    AggregateRootConcurrencyConflict e => new Failure(EventStoreFailures.AggregateRootConcurrencyConflict, e.Message),
+                    NoEventsToCommit e => new Failure(EventStoreFailures.NoEventsToCommit, e.Message),
+                    _ => new Failure(FailureId.Other, $"Error message: {ex.Message}\nStack Trace: {ex.StackTrace}")
+                };
     }
 }
