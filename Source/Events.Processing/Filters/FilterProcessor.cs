@@ -4,7 +4,8 @@
 extern alias contracts;
 
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing;
+using contracts::Dolittle.Runtime.Events.Processing.Contracts;
+using contracts::Dolittle.Services.Contracts;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
@@ -19,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// </summary>
     public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
     {
-        readonly IReverseCallDispatcher<FiltersClientToRuntimeStreamMessage, FilterRuntimeToClientStreamMessage> _dispatcher;
+        readonly IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage> _dispatcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
@@ -35,7 +36,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FilterProcessor(
             ScopeId scope,
             RemoteFilterDefinition definition,
-            IReverseCallDispatcher<FiltersClientToRuntimeStreamMessage, FilterRuntimeToClientStreamMessage> dispatcher,
+            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
             IExecutionContextManager executionContextManager,
             ILogger logger)
@@ -54,7 +55,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),
-                    Partition = partitionId.ToProtobuf(),
+                    PartitionId = partitionId.ToProtobuf(),
                 };
 
             return Filter(request);
@@ -68,7 +69,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),
-                    Partition = partitionId.ToProtobuf(),
+                    PartitionId = partitionId.ToProtobuf(),
                     RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
                 };
 
@@ -77,29 +78,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         async Task<IFilterResult> Filter(FilterEventRequest request)
         {
-            IFilterResult result = null;
-            await _dispatcher.Call(
-                new FilterRuntimeToClientStreamMessage
-                {
-                    FilterRequest = request,
-                    ExecutionContext = _executionContextManager.Current.ToByteString()
-                },
-                response =>
-                {
-                    if (response.MessageCase != FiltersClientToRuntimeStreamMessage.MessageOneofCase.FilterResult)
+            request.CallContext = new ReverseCallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() };
+            var response = await _dispatcher.Call(new FilterRuntimeToClientMessage { FilterRequest = request }).ConfigureAwait(false);
+            if (response.MessageCase == FiltersClientToRuntimeMessage.MessageOneofCase.FilterResult)
+            {
+                return response.FilterResult switch
                     {
-                        result = response.FilterResult switch
-                            {
-                                { Failed: null } => new SuccessfulFiltering(response.FilterResult.Success.IsIncluded, response.FilterResult.Success.Partition.To<PartitionId>()),
-                                _ => new FailedFiltering(response.FilterResult.Failed.Reason, response.FilterResult.Failed.Retry, response.FilterResult.Failed.RetryTimeout.ToTimeSpan())
-                            };
-                    }
-                    else
-                    {
-                        result = new FailedFiltering("The response from the processing was of an unexpected response type.");
-                    }
-                }).ConfigureAwait(false);
-            return result!;
+                        { Failure: null } => new SuccessfulFiltering(response.FilterResult.IsIncluded, response.FilterResult.PartitionId.To<PartitionId>()),
+                        _ => new FailedFiltering(response.FilterResult.Failure.Reason, response.FilterResult.Failure.Retry, response.FilterResult.Failure.RetryTimeout.ToTimeSpan())
+                    };
+            }
+
+            return new FailedFiltering("The response from the processing was of an unexpected response type.");
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing;
+using contracts::Dolittle.Runtime.Events.Contracts.Processing;
 using Dolittle.Collections;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
@@ -19,7 +19,7 @@ using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Dolittle.Tenancy;
 using Grpc.Core;
-using static contracts::Dolittle.Runtime.Events.Processing.Filters;
+using static contracts::Dolittle.Runtime.Events.Processing.Contracts.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {

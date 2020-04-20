@@ -5,14 +5,14 @@ extern alias contracts;
 
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing;
+using contracts::Dolittle.Runtime.Events.Processing.Contracts;
+using contracts::Dolittle.Services.Contracts;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Streams;
 using Dolittle.Services;
-using Google.Protobuf;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
-        readonly IReverseCallDispatcher<EventHandlersClientToRuntimeStreamMessage, EventHandlerRuntimeToClientStreamMessage> _dispatcher;
+        readonly IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage> _dispatcher;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
         readonly string _logMessagePrefix;
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public EventProcessor(
             ScopeId scope,
             EventProcessorId id,
-            IReverseCallDispatcher<EventHandlersClientToRuntimeStreamMessage, EventHandlerRuntimeToClientStreamMessage> dispatcher,
+            IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage> dispatcher,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             var request = new HandleEventRequest
                 {
                     Event = @event.ToProtobuf(),
-                    Partition = partitionId.ToProtobuf()
+                    PartitionId = partitionId.ToProtobuf()
                 };
             return Process(request, cancellationToken);
         }
@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             var request = new HandleEventRequest
                 {
                     Event = @event.ToProtobuf(),
-                    Partition = partitionId.ToProtobuf(),
+                    PartitionId = partitionId.ToProtobuf(),
                     RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
                 };
             return Process(request, cancellationToken);
@@ -84,25 +84,19 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 #pragma warning disable CA1801
         async Task<IProcessingResult> Process(HandleEventRequest request, CancellationToken cancellationToken)
         {
-            IProcessingResult result = null;
-            await _dispatcher.Call(
-                new EventHandlerRuntimeToClientStreamMessage { HandleRequest = request, ExecutionContext = _executionContextManager.Current.ToByteString() },
-                response =>
-                {
-                    if (response.MessageCase != EventHandlersClientToRuntimeStreamMessage.MessageOneofCase.HandleResult)
+            request.CallContext = new ReverseCallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() };
+            var response = await _dispatcher.Call(new EventHandlerRuntimeToClientMessage { HandleRequest = request }).ConfigureAwait(false);
+
+            if (response.MessageCase == EventHandlersClientToRuntimeMessage.MessageOneofCase.HandleResult)
+            {
+                return response.HandleResult switch
                     {
-                        result = response.HandleResult switch
-                            {
-                                { Failed: null } => new SuccessfulProcessing(),
-                                _ => new FailedProcessing(response.HandleResult.Failed.Reason, response.HandleResult.Failed.Retry, response.HandleResult.Failed.RetryTimeout.ToTimeSpan())
-                            };
-                    }
-                    else
-                    {
-                        result = new FailedProcessing("The response from the processing was of an unexpected response type.");
-                    }
-                }).ConfigureAwait(false);
-            return result!;
+                        { Failure: null } => new SuccessfulProcessing(),
+                        _ => new FailedProcessing(response.HandleResult.Failure.Reason, response.HandleResult.Failure.Retry, response.HandleResult.Failure.RetryTimeout.ToTimeSpan())
+                    };
+            }
+
+            return new FailedProcessing("The response from the processing was of an unexpected response type.");
         }
 #pragma warning restore CA1801
     }
