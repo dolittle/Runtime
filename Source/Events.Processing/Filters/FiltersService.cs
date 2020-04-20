@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             if (filterId.IsNonWriteable)
             {
                 _logger.Warning("Received filter registration request with Filter Id: '{filterId}' which is an invalid stream id", filterId);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Received event handler registration request with Filter Id: '{filterId}' which is an invalid stream id")).ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Received filter registration request with Filter Id: '{filterId}' which is an invalid stream id")).ConfigureAwait(false);
                 return;
             }
 
@@ -112,7 +112,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                                                 .Select(tenantAndResult => $"For tenant '{tenantAndResult.Item1}':\n\t{string.Join("\n\t", tenantAndResult.Item2.FailureReason.Value.Split("\n"))}");
             if (failedRegistrationReasons.Any())
             {
-                var failureMessage = $"Failed to register event handler:\n\t";
+                var failureMessage = $"Failed to register filter:\n\t";
                 failureMessage += string.Join("\n\t", failedRegistrationReasons);
                 _logger.Warning(failureMessage);
                 await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.FailedToRegisterFilter, failureMessage)).ConfigureAwait(false);
@@ -168,9 +168,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             if (runtimeStream.Current.MessageCase != Contracts.FiltersClientToRuntimeMessage.MessageOneofCase.RegistrationRequest)
             {
-                const string message = "Filters connection requested but first message in request stream was not an event handler registration request message";
+                const string message = "Filters connection requested but first message in request stream was not a filter registration request message";
                 _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.NoFilterRegistrationReceived, $"The first message in the event handler connection needs to be {typeof(Contracts.FiltersRegistrationRequest)}")).ConfigureAwait(false);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.NoFilterRegistrationReceived, $"The first message in the filter connection needs to be {typeof(Contracts.FiltersRegistrationRequest)}")).ConfigureAwait(false);
                 return false;
             }
 

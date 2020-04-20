@@ -69,8 +69,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
             var filterId = registration.FilterId.To<StreamId>();
             if (filterId.IsNonWriteable)
             {
-                _logger.Warning("Received filter registration request with Filter Id: '{filterId}' which is an invalid stream id", filterId);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Received event handler registration request with Filter Id: '{filterId}' which is an invalid stream id")).ConfigureAwait(false);
+                _logger.Warning("Received public filter registration request with Filter Id: '{filterId}' which is an invalid stream id", filterId);
+                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Received public filter registration request with Filter Id: '{filterId}' which is an invalid stream id")).ConfigureAwait(false);
                 return;
             }
 
