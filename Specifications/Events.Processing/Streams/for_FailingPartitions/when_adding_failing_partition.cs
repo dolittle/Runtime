@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions

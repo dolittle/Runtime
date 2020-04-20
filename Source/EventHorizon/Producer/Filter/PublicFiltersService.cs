@@ -12,7 +12,7 @@ using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Services;
 using Grpc.Core;
 using static contracts::Dolittle.Runtime.Events.Processing.PublicFilters;

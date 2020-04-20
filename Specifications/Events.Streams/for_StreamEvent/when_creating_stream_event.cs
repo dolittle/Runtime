@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Streams.for_StreamEvent
+namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
 {
     public class when_creating_stream_event
     {
