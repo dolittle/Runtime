@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
-using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="AbstractFilterProcessor{TDefinition}" /> for processing events through a public events filter.
@@ -27,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHorizon
         /// <param name="definition">The <see cref="RemoteFilterDefinition"/>.</param>
         /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TResponse, TRequest}"/>.</param>
         /// <param name="eventsToPublicStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public PublicFilterProcessor(
             PublicFilterDefinition definition,

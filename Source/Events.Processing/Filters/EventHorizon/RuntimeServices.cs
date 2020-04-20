@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Events.Processing.EventHorizon
+namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
