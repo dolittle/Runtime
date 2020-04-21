@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 cancellationToken)
                 .ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;
-            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchTypesInRange(
+            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchInRange(
                 filter.Scope,
                 filter.Definition.TargetStream,
                 new StreamPositionRange(StreamPosition.Start, uint.MaxValue),

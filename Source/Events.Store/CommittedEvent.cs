@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store
     /// <summary>
     /// Represent an Event that is committed to the Event Store.
     /// </summary>
-    public class CommittedEvent
+    public class CommittedEvent : Event
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedEvent"/> class.
@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.Events.Store
             Artifact type,
             bool isPublic,
             string content)
+            : base(eventSource, type, isPublic, content)
         {
             EventLogSequenceNumber = eventLogSequenceNumber;
             Occurred = occurred;
@@ -39,11 +40,6 @@ namespace Dolittle.Runtime.Events.Store
             Public = isPublic;
             Content = content;
         }
-
-        /// <summary>
-        /// Gets the <see cref="EventSource" />. that the Event was applied to.
-        /// </summary>
-        public EventSourceId EventSource { get; }
 
         /// <summary>
         /// Gets the sequence number of the Event Log the Event was committed to.

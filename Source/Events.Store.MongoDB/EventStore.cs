@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     /// </summary>
     public class EventStore : IEventStore
     {
-        readonly FilterDefinitionBuilder<Event> _eventFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
         readonly IExecutionContextManager _executionContextManager;
         readonly EventStoreConnection _connection;
         readonly IEventCommitter _eventCommitter;
@@ -161,7 +161,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
                             var events = await _connection.EventLog
                                 .Find(transaction, filter)
-                                .Sort(Builders<Event>.Sort.Ascending(_ => _.Aggregate.Version))
+                                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
                                 .Project(_ => _.ToCommittedAggregateEvent())
                                 .ToListAsync(cancel).ConfigureAwait(false);
 

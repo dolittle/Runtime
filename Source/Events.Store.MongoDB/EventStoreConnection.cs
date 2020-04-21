@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
-using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -35,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
             MongoClient = connection.MongoClient;
 
-            EventLog = connection.Database.GetCollection<Event>(Constants.EventLogCollection);
+            EventLog = connection.Database.GetCollection<MongoDB.Events.Event>(Constants.EventLogCollection);
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
             StreamProcessorStates = connection.Database.GetCollection<StreamProcessorState>(Constants.StreamProcessorStateCollection);
             FilterDefinitions = connection.Database.GetCollection<FilterDefinition>(Constants.FilterDefinitionCollection);
@@ -51,7 +50,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <summary>
         /// Gets the <see cref="IMongoCollection{Event}"/> where Events in the event log are stored.
         /// </summary>
-        public IMongoCollection<Event> EventLog { get; }
+        public IMongoCollection<MongoDB.Events.Event> EventLog { get; }
 
         /// <summary>
         /// Gets the <see cref="IMongoCollection{AggregateRoot}"/> where Aggregate Roots are stored.
@@ -111,7 +110,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The collection.</returns>
-        public Task<IMongoCollection<Event>> GetEventLogCollection(ScopeId scope, CancellationToken cancellationToken) =>
+        public Task<IMongoCollection<MongoDB.Events.Event>> GetEventLogCollection(ScopeId scope, CancellationToken cancellationToken) =>
             scope == ScopeId.Default ? Task.FromResult(EventLog) : GetScopedEventLog(scope, cancellationToken);
 
         /// <summary>
@@ -120,9 +119,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
-        public async Task<IMongoCollection<Event>> GetScopedEventLog(ScopeId scope, CancellationToken cancellationToken)
+        public async Task<IMongoCollection<MongoDB.Events.Event>> GetScopedEventLog(ScopeId scope, CancellationToken cancellationToken)
         {
-            var collection = _connection.Database.GetCollection<Event>(Constants.CollectionNameForScopedEventLog(scope));
+            var collection = _connection.Database.GetCollection<MongoDB.Events.Event>(Constants.CollectionNameForScopedEventLog(scope));
             await CreateCollectionsAndIndexesForEventLogAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
@@ -150,12 +149,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         void CreateCollectionsAndIndexesForEventLog()
         {
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
+            EventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
+                Builders<MongoDB.Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)));
 
-            EventLog.Indexes.CreateOne(new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
+            EventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
+                Builders<MongoDB.Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)
                     .Ascending(_ => _.Aggregate.TypeId)));
         }
@@ -212,17 +211,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        async Task CreateCollectionsAndIndexesForEventLogAsync(IMongoCollection<Event> stream, CancellationToken cancellationToken)
+        async Task CreateCollectionsAndIndexesForEventLogAsync(IMongoCollection<MongoDB.Events.Event> stream, CancellationToken cancellationToken)
         {
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
+                new CreateIndexModel<MongoDB.Events.Event>(
+                Builders<MongoDB.Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<Event>(
-                Builders<Event>.IndexKeys
+                new CreateIndexModel<MongoDB.Events.Event>(
+                Builders<MongoDB.Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)
                     .Ascending(_ => _.Aggregate.TypeId)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
