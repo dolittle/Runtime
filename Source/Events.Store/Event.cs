@@ -6,7 +6,7 @@ using Dolittle.Artifacts;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Abstract type for Committed/UncommittedEvent.
+    /// Represents the basis for an event.
     /// </summary>
     public abstract class Event
     {
