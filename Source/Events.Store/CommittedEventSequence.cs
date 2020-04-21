@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Sequence of committed events.
+    /// Represents the basis for a sequence of committed <see cref="Event" >events</see>.
     /// </summary>
     /// <typeparam name="TEvent">CommittedEvent.</typeparam>
     public abstract class CommittedEventSequence<TEvent> : EventSequence<TEvent>
