@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="eventLogSequenceNumber">The sequence number of the Event Log the Event was committed to.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
-        /// <param name="eventSource">The <see cref="EventSource" />.</param>
+        /// <param name="eventSource">The <see cref="EventSourceId" />.</param>
         /// <param name="executionContext">The current <see cref="ExecutionContext" /> when this event was committed.</param>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
         /// <param name="isPublic">Whether this Event is public.</param>
@@ -34,11 +34,7 @@ namespace Dolittle.Runtime.Events.Store
         {
             EventLogSequenceNumber = eventLogSequenceNumber;
             Occurred = occurred;
-            EventSource = eventSource;
             ExecutionContext = executionContext;
-            Type = type;
-            Public = isPublic;
-            Content = content;
         }
 
         /// <summary>
@@ -55,20 +51,5 @@ namespace Dolittle.Runtime.Events.Store
         /// Gets the <see cref="ExecutionContext" /> that committed this event.
         /// </summary>
         public ExecutionContext ExecutionContext { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Artifact"/> representing the type of the Event.
-        /// </summary>
-        public Artifact Type { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the Event is public.
-        /// </summary>
-        public bool Public { get; }
-
-        /// <summary>
-        /// Gets the content of the Event represented as a JSON-encoded <see cref="string"/>.
-        /// </summary>
-        public string Content { get; }
     }
 }

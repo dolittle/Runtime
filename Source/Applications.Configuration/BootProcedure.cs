@@ -6,7 +6,7 @@ using Dolittle.Booting;
 using Dolittle.Execution;
 using Dolittle.ResourceTypes.Configuration;
 
-namespace Dolittle.Applications.Configuration
+namespace Dolittle.ApplicationModel.Configuration
 {
     /// <summary>
     /// Performs the boot procedures for the application configuration.

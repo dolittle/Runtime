@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Applications" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.ApplicationModel" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />

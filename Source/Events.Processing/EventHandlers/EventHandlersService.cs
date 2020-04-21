@@ -66,7 +66,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetDispatcherFor<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>(
+            var dispatcher = _reverseCallDispatchers.GetFor<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>(
                 runtimeStream,
                 clientStream,
                 context,

@@ -4,8 +4,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Applications;
-using Dolittle.Applications.Configuration;
+using Dolittle.ApplicationModel;
+using Dolittle.ApplicationModel.Configuration;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;

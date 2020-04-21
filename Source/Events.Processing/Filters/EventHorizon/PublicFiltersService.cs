@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetDispatcherFor<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
+            var dispatcher = _reverseCallDispatchers.GetFor<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,
