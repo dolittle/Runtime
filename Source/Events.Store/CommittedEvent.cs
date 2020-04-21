@@ -12,14 +12,14 @@ namespace Dolittle.Runtime.Events.Store
     /// <summary>
     /// Represent an Event that is committed to the Event Store.
     /// </summary>
-    public class CommittedEvent
+    public class CommittedEvent : Event
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CommittedEvent"/> class.
         /// </summary>
         /// <param name="eventLogSequenceNumber">The sequence number of the Event Log the Event was committed to.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset" /> when the Event was committed to the Event Store.</param>
-        /// <param name="eventSource">The <see cref="EventSource" />.</param>
+        /// <param name="eventSource">The <see cref="EventSourceId" />.</param>
         /// <param name="correlationId">The <see cref="CorrelationId" /> to relate this event to other artifacts and actions within the system.</param>
         /// <param name="microservice">The <see cref="Microservice"/> within which the Event occurred.</param>
         /// <param name="tenant">The <see cref="TenantId"/> within which the Event occurred.</param>
@@ -38,23 +38,15 @@ namespace Dolittle.Runtime.Events.Store
             Artifact type,
             bool isPublic,
             string content)
+            : base(eventSource, type, isPublic, content)
         {
             EventLogSequenceNumber = eventLogSequenceNumber;
             Occurred = occurred;
-            EventSource = eventSource;
             CorrelationId = correlationId;
             Microservice = microservice;
             Tenant = tenant;
             Cause = cause;
-            Type = type;
-            Public = isPublic;
-            Content = content;
         }
-
-        /// <summary>
-        /// Gets the <see cref="EventSource" />. that the Event was applied to.
-        /// </summary>
-        public EventSourceId EventSource { get; }
 
         /// <summary>
         /// Gets the sequence number of the Event Log the Event was committed to.
@@ -85,20 +77,5 @@ namespace Dolittle.Runtime.Events.Store
         /// Gets the link to the cause of the Event.
         /// </summary>
         public Cause Cause { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Artifact"/> representing the type of the Event.
-        /// </summary>
-        public Artifact Type { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the Event is public.
-        /// </summary>
-        public bool Public { get; }
-
-        /// <summary>
-        /// Gets the content of the Event represented as a JSON-encoded <see cref="string"/>.
-        /// </summary>
-        public string Content { get; }
     }
 }

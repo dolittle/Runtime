@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// </summary>
     public class EventFromEventLogFetcher : AbstractEventsFromWellKnownStreamsFetcher
     {
-        readonly FilterDefinitionBuilder<Event> _eventLogFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventLogFilter = Builders<MongoDB.Events.Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 await _connection.GetEventLogCollection(scope, cancellationToken).ConfigureAwait(false),
                 _eventLogFilter,
                 _ => _.EventLogSequenceNumber,
-                Builders<Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
+                Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
                 streamPosition,
                 cancellationToken).ConfigureAwait(false);
             if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(scope, StreamId.AllStreamId, streamPosition);
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 await _connection.GetEventLogCollection(scope, cancellationToken).ConfigureAwait(false),
                 _eventLogFilter,
                 _ => _.EventLogSequenceNumber,
-                Builders<Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
+                Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
                 range,
                 cancellationToken).ConfigureAwait(false);
         }
