@@ -8,7 +8,7 @@ using Dolittle.Collections;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Sequence of events.
+    /// Represents the basis for a sequence of <see cref="Event" >events</see>.
     /// </summary>
     /// <typeparam name="TEvent">IReadOnlyList of CommittedEvent or UncommittedEvent.</typeparam>
     public abstract class EventSequence<TEvent> : IReadOnlyList<TEvent>
