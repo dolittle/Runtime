@@ -106,7 +106,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 context.CancellationToken).ConfigureAwait(false);
             try
             {
-                if (TryStartStreamProcessors(registrationResults, out var failure))
+                if (!TryStartStreamProcessors(registrationResults, out var failure))
                 {
                     _logger.Warning(failure.Reason);
                     await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);

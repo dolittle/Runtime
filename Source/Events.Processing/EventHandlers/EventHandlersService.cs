@@ -110,7 +110,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             var registrationResults = await RegisterStreamProcessorsForAllTenants(eventProcessor, filterDefinition, context.CancellationToken).ConfigureAwait(false);
             try
             {
-                if (TryStartStreamProcessors(registrationResults, out var failure))
+                if (!TryStartStreamProcessors(registrationResults, out var failure))
                 {
                     _logger.Warning(failure.Reason);
                     await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
