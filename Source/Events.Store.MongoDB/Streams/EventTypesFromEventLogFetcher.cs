@@ -34,15 +34,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken) =>
-            FetchTypesInRangeAndPartition(scope, stream, PartitionId.NotSet, range, cancellationToken);
+        public override Task<IEnumerable<Artifact>> FetchInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken) =>
+            FetchInRangeAndPartition(scope, stream, PartitionId.NotSet, range, cancellationToken);
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
+        public override async Task<IEnumerable<Artifact>> FetchInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
         {
             if (!CanFetchFromStream(stream)) throw new EventTypesFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             if (partition != PartitionId.NotSet) return Enumerable.Empty<Artifact>();
-            return await EventTypesFromStreamsFetcher.FetchTypesInRange(
+            return await EventTypesFromStreamsFetcher.FetchInRange(
                 await _connection.GetEventLogCollection(scope, cancellationToken).ConfigureAwait(false),
                 _eventLogFilter,
                 _eventLogFilter.Empty,
