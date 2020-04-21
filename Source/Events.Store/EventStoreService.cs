@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
 using Dolittle.DependencyInversion;
+using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Grpc.Core;
@@ -20,24 +21,29 @@ namespace Dolittle.Runtime.Events.Store
     public class EventStoreService : EventStoreBase
     {
         readonly FactoryFor<IEventStore> _eventStoreFactory;
+        readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventStoreService"/> class.
         /// </summary>
         /// <param name="eventStoreFactory"><see cref="IEventStore"/>.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public EventStoreService(
             FactoryFor<IEventStore> eventStoreFactory,
+            IExecutionContextManager executionContextManager,
             ILogger<EventStoreService> logger)
         {
             _eventStoreFactory = eventStoreFactory;
+            _executionContextManager = executionContextManager;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
         {
+            _executionContextManager.CurrentFor(request.CallContext.ExecutionContext);
             var response = new Contracts.CommitEventsResponse();
             try
             {
@@ -60,6 +66,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <inheritdoc/>
         public override async Task<Contracts.CommitAggregateEventsResponse> CommitForAggregate(Contracts.CommitAggregateEventsRequest request, ServerCallContext context)
         {
+            _executionContextManager.CurrentFor(request.CallContext.ExecutionContext);
             var response = new Contracts.CommitAggregateEventsResponse();
             try
             {
@@ -90,6 +97,7 @@ namespace Dolittle.Runtime.Events.Store
         public override async Task<Contracts.FetchForAggregateResponse> FetchForAggregate(Contracts.FetchForAggregateRequest request, ServerCallContext context)
         {
             _logger.Debug("Fetch for Aggregate");
+            _executionContextManager.CurrentFor(request.CallContext.ExecutionContext);
             var aggregate = request.Aggregate.AggregateRootId.To<ArtifactId>();
             var eventSource = request.Aggregate.EventSourceId.To<EventSourceId>();
 
