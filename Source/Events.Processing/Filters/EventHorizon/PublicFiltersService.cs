@@ -10,6 +10,7 @@ using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
@@ -58,23 +59,41 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
 
         /// <inheritdoc/>
         public override async Task Connect(
-            IAsyncStreamReader<Contracts.PublicFiltersClientToRuntimeMessage> runtimeStream,
-            IServerStreamWriter<Contracts.FilterRuntimeToClientMessage> clientStream,
+            IAsyncStreamReader<PublicFiltersClientToRuntimeMessage> runtimeStream,
+            IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var hasRegistrationRequest = await HandleRegistrationRequest(runtimeStream, clientStream, context.CancellationToken).ConfigureAwait(false);
-            if (!hasRegistrationRequest) return;
+            var dispatcher = _reverseCallDispatchers.GetDispatcherFor<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
+                runtimeStream,
+                clientStream,
+                context,
+                _ => _.RegistrationRequest,
+                (serverMessage, registrationResponse) => serverMessage.RegistrationResponse = registrationResponse,
+                (serverMessage, request) => serverMessage.FilterRequest = request,
+                _ => _.FilterResult,
+                _ => _.CallContext,
+                (request, context) => request.CallContext = context,
+                _ => _.CallContext);
 
-            var registration = runtimeStream.Current.RegistrationRequest;
-            var filterId = registration.FilterId.To<StreamId>();
-            if (filterId.IsNonWriteable)
+            if (!await dispatcher.ReceiveArguments(context.CancellationToken).ConfigureAwait(false))
             {
-                _logger.Warning("Received public filter registration request with Filter Id: '{filterId}' which is an invalid stream id", filterId);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Received public filter registration request with Filter Id: '{filterId}' which is an invalid stream id")).ConfigureAwait(false);
+                const string message = "Public Filters connection arguments were not received";
+                _logger.Warning(message);
+                var failure = new Failure(FiltersFailures.NoFilterRegistrationReceived, message);
+                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
                 return;
             }
 
-            var dispatcher = _reverseCallDispatchers.GetDispatcherFor(runtimeStream, clientStream, context, _ => _.FilterResult.CallContext, _ => _.FilterRequest.CallContext);
+            var arguments = dispatcher.Arguments;
+            var filterId = arguments.FilterId.To<StreamId>();
+            if (filterId.IsNonWriteable)
+            {
+                _logger.Warning("Received public filter registration request with Filter Id: '{filterId}' which is an invalid stream id", filterId);
+                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Received public filter registration request with Filter Id: '{filterId}' which is an invalid stream id");
+                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
+                return;
+            }
+
             var streamId = StreamId.AllStreamId;
 
             var registrationResults = await RegisterStreamProcessorsForAllTenants(
@@ -84,12 +103,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
                 context.CancellationToken).ConfigureAwait(false);
             try
             {
-                var allRegistrationsSucceeded = await HandleRegistrationResults(registrationResults, clientStream).ConfigureAwait(false);
-                if (!allRegistrationsSucceeded) return;
+                if (!TryStartStreamProcessors(registrationResults, out var failure))
+                {
+                    _logger.Warning(failure.Reason);
+                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
+                    return;
+                }
 
-                await WriteSuccessfulRegistrationResponse(clientStream).ConfigureAwait(false);
-
-                await dispatcher.WaitTillCompleted().ConfigureAwait(false);
+                await dispatcher.Accept(new FilterRegistrationResponse(), context.CancellationToken).ConfigureAwait(false);
             }
             finally
             {
@@ -99,19 +120,17 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
             }
         }
 
-        async Task<bool> HandleRegistrationResults(
-            IEnumerable<(TenantId, FilterRegistrationResult<PublicFilterDefinition>)> registrationResults,
-            IServerStreamWriter<Contracts.FilterRuntimeToClientMessage> clientStream)
+        bool TryStartStreamProcessors(IEnumerable<(TenantId, FilterRegistrationResult<PublicFilterDefinition>)> registrationResults, out Failure failure)
         {
+            failure = null;
             var failedRegistrationReasons = registrationResults
-                                                .Where(tenantAndResult => tenantAndResult.Item2.Succeeded)
+                                                .Where(tenantAndResult => !tenantAndResult.Item2.Succeeded)
                                                 .Select(tenantAndResult => $"For tenant '{tenantAndResult.Item1}':\n\t{string.Join("\n\t", tenantAndResult.Item2.FailureReason.Value.Split("\n"))}");
             if (failedRegistrationReasons.Any())
             {
                 var failureMessage = $"Failed to register public filter:\n\t";
                 failureMessage += string.Join("\n\t", failedRegistrationReasons);
-                _logger.Warning(failureMessage);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.FailedToRegisterFilter, failureMessage)).ConfigureAwait(false);
+                failure = new Failure(FiltersFailures.FailedToRegisterFilter, failureMessage);
                 return false;
             }
 
@@ -126,7 +145,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         async Task<IEnumerable<(TenantId, FilterRegistrationResult<PublicFilterDefinition>)>> RegisterStreamProcessorsForAllTenants(
             StreamId sourceStream,
             StreamId targetStream,
-            IReverseCallDispatcher<Contracts.PublicFiltersClientToRuntimeMessage, Contracts.FilterRuntimeToClientMessage> dispatcher,
+            IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
             CancellationToken cancellationToken)
         {
             var registrationResults = new List<(TenantId, FilterRegistrationResult<PublicFilterDefinition>)>();
@@ -137,7 +156,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
                     new PublicFilterDefinition(sourceStream, targetStream),
                     dispatcher,
                     _getEventsToPublicStreamsWriter(),
-                    _executionContextManager,
                     _logger);
                 var filters = _getFilters();
                 var registrationResult = await filters.Register(filterProcessor, cancellationToken).ConfigureAwait(false);
@@ -147,34 +165,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
             return registrationResults.AsEnumerable();
         }
 
-        async Task<bool> HandleRegistrationRequest(
-            IAsyncStreamReader<Contracts.PublicFiltersClientToRuntimeMessage> runtimeStream,
-            IServerStreamWriter<Contracts.FilterRuntimeToClientMessage> clientStream,
-            CancellationToken cancellationToken)
-        {
-            if (!await runtimeStream.MoveNext(cancellationToken).ConfigureAwait(false))
-            {
-                const string message = "PublicFilters connection requested but client-to-runtime stream did not contain any messages";
-                _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.NoFilterRegistrationReceived, message)).ConfigureAwait(false);
-                return false;
-            }
-
-            if (runtimeStream.Current.MessageCase != Contracts.PublicFiltersClientToRuntimeMessage.MessageOneofCase.RegistrationRequest)
-            {
-                const string message = "PublicFilters connection requested but first message in request stream was not an public filter registration request message";
-                _logger.Warning(message);
-                await WriteFailedRegistrationResponse(clientStream, new Failure(FiltersFailures.NoFilterRegistrationReceived, $"The first message in the public filter connection needs to be {typeof(Contracts.FiltersRegistrationRequest)}")).ConfigureAwait(false);
-                return false;
-            }
-
-            return true;
-        }
-
-        Task WriteFailedRegistrationResponse(IServerStreamWriter<Contracts.FilterRuntimeToClientMessage> clientStream, Failure failure) =>
-            clientStream.WriteAsync(new Contracts.FilterRuntimeToClientMessage { RegistrationResponse = new Contracts.FilterRegistrationResponse { Failure = failure } });
-
-        Task WriteSuccessfulRegistrationResponse(IServerStreamWriter<Contracts.FilterRuntimeToClientMessage> clientStream) =>
-            clientStream.WriteAsync(new Contracts.FilterRuntimeToClientMessage { RegistrationResponse = new Contracts.FilterRegistrationResponse() });
+        Task WriteFailedRegistrationResponse(
+            IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+            Failure failure,
+            CancellationToken cancellationToken) => dispatcher.Reject(new FilterRegistrationResponse { Failure = failure }, cancellationToken);
     }
 }

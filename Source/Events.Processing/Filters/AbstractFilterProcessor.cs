@@ -51,16 +51,16 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public EventProcessorId Identifier => Definition.TargetStream.Value;
 
         /// <inheritdoc/>
-        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId);
+        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
-        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount);
+        public abstract Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken);
 
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId}'");
-            var result = await Filter(@event, partitionId, Identifier).ConfigureAwait(false);
+            var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
 
             await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
 
@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId} again for the {retryCount}. time because: {failureReason}'");
-            var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount).ConfigureAwait(false);
+            var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount, cancellationToken).ConfigureAwait(false);
 
             await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
 
