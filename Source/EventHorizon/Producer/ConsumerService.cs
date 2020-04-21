@@ -79,6 +79,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <inheritdoc/>
         public override async Task Subscribe(Contracts.ConsumerSubscription subscription, IServerStreamWriter<Contracts.SubscriptionMessage> responseStream, ServerCallContext context)
         {
+            _executionContextManager.CurrentFor(subscription.CallContext.ExecutionContext);
             var consumerMicroservice = _executionContextManager.Current.Microservice;
             var consumerTenant = _executionContextManager.Current.Tenant;
             var producerTenant = subscription.TenantId.To<TenantId>();

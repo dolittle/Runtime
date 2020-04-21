@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.ApplicationModel;
+using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
@@ -32,6 +33,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
+        readonly IExecutionContextManager _executionContextManager;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly CancellationToken _token;
         readonly ILogger _logger;
@@ -47,6 +49,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
             IClientManager clientManager,
@@ -56,6 +59,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IStreamProcessorStateRepository streamProcessorStates,
             IWriteEventHorizonEvents eventHorizonEventsWriter,
             IAsyncPolicyFor<ConsumerClient> policy,
+            IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _clientManager = clientManager;
@@ -65,6 +69,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _streamProcessorStates = streamProcessorStates;
             _eventHorizonEventsWriter = eventHorizonEventsWriter;
             _policy = policy;
+            _executionContextManager = executionContextManager;
             _logger = logger;
             _cancellationTokenSource = new CancellationTokenSource();
             _token = _cancellationTokenSource.Token;
@@ -149,7 +154,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         TenantId = subscription.ProducerTenant.ToProtobuf(),
                         LastReceived = (int)publicEventsPosition.Value - 1,
                         StreamId = subscription.Stream.ToProtobuf(),
-                        PartitionId = subscription.Partition.ToProtobuf()
+                        PartitionId = subscription.Partition.ToProtobuf(),
+                        CallContext = new Dolittle.Services.Contracts.CallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() }
                     }, cancellationToken: _token);
         }
 

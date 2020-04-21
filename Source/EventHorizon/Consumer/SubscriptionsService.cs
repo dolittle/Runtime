@@ -50,6 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public override async Task<Contracts.SubscriptionResponse> Subscribe(Contracts.Subscription subscriptionRequest, ServerCallContext context)
         {
+            _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
             var consumerTenant = _executionContextManager.Current.Tenant;
             var subscription = new Subscription(
                 consumerTenant,
