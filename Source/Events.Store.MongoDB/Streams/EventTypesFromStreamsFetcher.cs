@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="range">The from <see cref="StreamPosition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The position of the next event.</returns>
-        public static async Task<IEnumerable<Artifact>> FetchTypesInRange<TEvent>(
+        public static async Task<IEnumerable<Artifact>> FetchInRange<TEvent>(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             FilterDefinition<TEvent> eventsInPartitionFilter,
@@ -62,7 +62,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             CancellationToken cancellationToken)
             where TEvent : class
         {
-             try
+            try
             {
                 var maxNumEvents = range.Length;
                 int? limit = (int)maxNumEvents;
@@ -81,10 +81,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Artifact>> FetchInRange(
+            ScopeId scope,
+            StreamId stream,
+            StreamPositionRange range,
+            CancellationToken cancellationToken)
         {
-            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
-            return await FetchTypesInRange(
+            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchInRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
+            return await FetchInRange(
                 await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamEventFilter,
                 _streamEventFilter.Empty,
@@ -95,10 +99,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Artifact>> FetchInRangeAndPartition(
+            ScopeId scope,
+            StreamId stream,
+            PartitionId partition,
+            StreamPositionRange range,
+            CancellationToken cancellationToken)
         {
-            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRangeAndPartition(scope, stream, partition, range, cancellationToken).ConfigureAwait(false);
-            return await FetchTypesInRange(
+            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchInRangeAndPartition(scope, stream, partition, range, cancellationToken).ConfigureAwait(false);
+            return await FetchInRange(
                 await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamEventFilter,
                 _streamEventFilter.Eq(_ => _.Partition, partition.Value),

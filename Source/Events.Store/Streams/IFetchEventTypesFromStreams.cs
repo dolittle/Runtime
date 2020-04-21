@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IEnumerable{Artifact}" /> event types.</returns>
-        Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken);
+        Task<IEnumerable<Artifact>> FetchInRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken);
 
         /// <summary>
         /// Fetch the unique <see cref="Artifact">event types</see> in a an inclusive range in a <see cref="StreamId" /> and <see cref="PartitionId" />.
@@ -32,6 +32,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IEnumerable{Artifact}" /> event types.</returns>
-        Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken);
+        Task<IEnumerable<Artifact>> FetchInRangeAndPartition(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken);
     }
 }
