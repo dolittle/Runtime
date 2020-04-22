@@ -31,10 +31,10 @@ namespace Dolittle.Runtime.Events.Processing
             return Task.FromResult(state);
         }
 
-        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public Task<StreamProcessorState> SetNextEventToProcessPosition(StreamProcessorId streamProcessorId, StreamPosition position, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
-            newState.Position = newState.Position.Increment();
+            newState.Position = position;
             states[streamProcessorId] = newState;
 
             return Task.FromResult(newState);
