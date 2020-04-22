@@ -59,5 +59,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <returns>The scoped stream collection name.</returns>
         public static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-stream-{scope}-{stream}";
+
+        /// <summary>
+        /// Gtes the collection name for scoped StreamProcessorStates.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <returns>The scoped StreamProcessorStates collection name.</returns>
+        public static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{StreamProcessorStateCollection}-{scope}";
     }
 }
