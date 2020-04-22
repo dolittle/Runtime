@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Security;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
@@ -11,6 +10,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
     {
         static CommittedEvent committed_event;
         static StreamId stream;
+        static StreamPosition stream_position;
         static PartitionId partition;
         static StreamEvent stream_event;
         static Execution.ExecutionContext execution_context;
@@ -18,15 +18,9 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
         Establish context = () =>
         {
             stream = Guid.NewGuid();
+            stream_position = 0;
             partition = Guid.NewGuid();
-            execution_context = new Dolittle.Execution.ExecutionContext(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Dolittle.Versioning.Version.NotSet,
-                Dolittle.Execution.Environment.Development,
-                Guid.NewGuid(),
-                CultureInfo.InvariantCulture
-            );
+            execution_context = execution_contexts.create();
             committed_event = new CommittedEvent(
                 0,
                 DateTimeOffset.Now,
@@ -37,9 +31,10 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
                 "content");
         };
 
-        Because of = () => stream_event = new StreamEvent(committed_event, stream, partition);
+        Because of = () => stream_event = new StreamEvent(committed_event, stream_position, stream, partition);
 
         It should_have_the_correct_stream_id = () => stream_event.Stream.ShouldEqual(stream);
+        It should_have_the_correct_stream_position = () => stream_event.Position.ShouldEqual(stream_position);
         It should_have_the_correct_partition = () => stream_event.Partition.ShouldEqual(partition);
         It should_have_the_correct_committed_event = () => stream_event.Event.ShouldEqual(committed_event);
     }

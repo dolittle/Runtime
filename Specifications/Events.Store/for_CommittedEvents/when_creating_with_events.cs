@@ -9,10 +9,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents
     {
         static CommittedEvents events;
 
-        Because of = () =>
-        {
-            events = new CommittedEvents(new[] { event_one, event_two, event_three });
-        };
+        Because of = () => events = new CommittedEvents(new[] { event_one, event_two, event_three });
 
         It should_not_be_empty = () => events.ShouldNotBeEmpty();
         It should_have_events = () => events.HasEvents.ShouldBeTrue();

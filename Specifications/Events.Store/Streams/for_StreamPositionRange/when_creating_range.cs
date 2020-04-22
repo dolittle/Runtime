@@ -20,6 +20,6 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamPositionRange
         Because of = () => range = new StreamPositionRange(from, range_length);
 
         It should_have_the_correct_from_position = () => range.From.ShouldEqual(from);
-        It should_have_the_correct_length = () => range.Length.ShouldEqual(from.Length);
+        It should_have_the_correct_length = () => range.Length.ShouldEqual(range.Length);
     }
 }
