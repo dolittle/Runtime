@@ -187,7 +187,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     try
                     {
                         await ReadEventsFromEventHorizon(subscription, responseStream).ConfigureAwait(false);
-                        throw new Todo();
+                        throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                     }
                     catch (Exception)
                     {
@@ -197,9 +197,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                             {
                                 var call = await Subscribe(subscription, microserviceAddress).ConfigureAwait(false);
                                 var response = await HandleSubscriptionResponse(call.ResponseStream, subscription).ConfigureAwait(false);
-                                if (!response.Success) throw new Todo();
+                                if (!response.Success) throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                                 await ReadEventsFromEventHorizon(subscription, call.ResponseStream).ConfigureAwait(false);
-                                throw new Todo();
+                                throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                             }, _token).ConfigureAwait(false);
                     }
                 });
