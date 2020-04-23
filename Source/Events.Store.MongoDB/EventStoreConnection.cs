@@ -118,8 +118,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 : GetScopedStreamProcessorStateCollection(scope, cancellationToken);
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{StreamProcessorState}" /> that represents a collection of the events
-        /// received from a microservices <see cref="StreamProcessorState" />.
+        /// Gets the scoped <see cref="IMongoCollection{T}" /> of <see cref="StreamProcessorState" />.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
