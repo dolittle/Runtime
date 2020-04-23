@@ -33,13 +33,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> GetOrAddNew(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> GetOrAddNew(
+            Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId,
+            CancellationToken cancellationToken)
         {
             try
             {
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(
+                        streamProcessorId.ScopeId,
+                        streamProcessorId.EventProcessorId,
+                        streamProcessorId.SourceStreamId)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default)
@@ -87,7 +92,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
@@ -124,7 +129,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
@@ -154,7 +159,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
@@ -185,7 +190,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
