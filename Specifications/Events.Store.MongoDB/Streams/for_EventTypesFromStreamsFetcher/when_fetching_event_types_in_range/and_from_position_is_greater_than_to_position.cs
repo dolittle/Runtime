@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
 
         Establish context = () => stream = Guid.NewGuid();
 
-        Because of = () => exception = Catch.Exception(() => event_types_from_streams.FetchTypesInRange(stream, new StreamPositionRange(1U, 0U)).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => event_types_from_streams.FetchInRange(Moq.It.IsAny<ScopeId>(), stream, new StreamPositionRange(1U, 0U)).GetAwaiter().GetResult());
 
         It should_throw_exception = () => exception.ShouldNotBeNull();
         It should_fail_because_from_position_is_greater_than_to = () => exception.ShouldBeOfExactType<FromPositionIsGreaterThanToPosition>();

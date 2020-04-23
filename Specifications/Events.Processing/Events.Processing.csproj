@@ -7,7 +7,7 @@
   <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Events.Processing\Events.Processing.csproj" />
+    <ProjectReference Include="../../Source/Events.Processing/Events.Processing.csproj" />
   </ItemGroup>
   
 </Project>

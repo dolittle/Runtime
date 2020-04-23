@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
             events.InsertOne(committed_event.ToStoreStreamEvent(0, partition));
         };
 
-        Because of = () => result = event_types_from_streams.FetchTypesInRange(stream, new StreamPositionRange(0U, 1U)).GetAwaiter().GetResult();
+        Because of = () => result = event_types_from_streams.FetchInRange(Moq.It.IsAny<ScopeId>(), stream, new StreamPositionRange(0U, 1U)).GetAwaiter().GetResult();
 
         It should_not_be_empty_list = () => result.ShouldNotBeEmpty();
         It should_get_one_event_type = () => result.Count().ShouldEqual(1);

@@ -29,13 +29,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions.when_
                 Processing.committed_events.single(),
                 Processing.committed_events.single()
             });
-            stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
+            stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
             event_processor = new Mock<IEventProcessor>();
             stream_processor_state = new StreamProcessorState(initial_stream_processor_position, new Dictionary<PartitionId, FailingPartitionState>());
 
             events_fetcher
-                .Setup(_ => _.Fetch(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns<StreamId, StreamPosition, CancellationToken>((id, pos, _) => Task.FromResult(new StreamEvent(committed_events[(int)pos.Value], Guid.NewGuid(), Guid.NewGuid())));
+                .Setup(_ => _.Fetch(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
+                .Returns<ScopeId, StreamId, StreamPosition, CancellationToken>((scope, id, pos, _) => Task.FromResult(new StreamEvent(committed_events[(int)pos.Value], pos, Guid.NewGuid(), Guid.NewGuid())));
             stream_processor_state_repository
                 .Setup(_ => _.GetOrAddNew(Moq.It.IsAny<StreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(stream_processor_state));

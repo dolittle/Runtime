@@ -13,8 +13,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static FilterDefinitionBuilder<StreamEvent> stream_event_filter => Builders<StreamEvent>.Filter;
 
-        public static FilterDefinitionBuilder<PublicEvent> public_event_filter => Builders<PublicEvent>.Filter;
-
         public static FilterDefinitionBuilder<AggregateRoot> an_aggregate_filter => Builders<AggregateRoot>.Filter;
     }
 }

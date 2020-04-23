@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -27,13 +28,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions.when_
             {
                 Position = initial_failing_partition_position,
                 Reason = initial_failing_partition_reason,
-                RetryTime = initial_failing_partition_retry_time
+                RetryTime = initial_failing_partition_retry_time,
+                ProcessingAttempts = 1
             };
             stream_processor_state.FailingPartitions.Add(failing_partition_id, failing_partition_state);
 
             events_fetcher
-                .Setup(_ => _.FindNext(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns<StreamId, PartitionId, StreamPosition, CancellationToken>((stream, partition, position, _) =>
+                .Setup(_ => _.FindNext(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
+                .Returns<ScopeId, StreamId, PartitionId, StreamPosition, CancellationToken>((scope, stream, partition, position, _) =>
                 {
                     if (position.Value >= initial_stream_processor_position) return Task.FromResult(new StreamPosition(uint.MaxValue));
                     return Task.FromResult(position);

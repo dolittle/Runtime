@@ -22,6 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
             artifact = given.artifacts.single();
             partition = Guid.NewGuid();
             filter = new TypeFilterWithEventSourcePartition(
+                scope,
                 new TypeFilterWithEventSourcePartitionDefinition(Guid.NewGuid(), Guid.NewGuid(), new ArtifactId[] { artifact.Id }.AsEnumerable(), true),
                 writer.Object,
                 Moq.Mock.Of<ILogger>());

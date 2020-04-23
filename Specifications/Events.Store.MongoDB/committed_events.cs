@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                new Cause(CauseType.Command, 0),
                 new Artifact(Guid.NewGuid(), 1),
                 false,
                 events.some_event_content);

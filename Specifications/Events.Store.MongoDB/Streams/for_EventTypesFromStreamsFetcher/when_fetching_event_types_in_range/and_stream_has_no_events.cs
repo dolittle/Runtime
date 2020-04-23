@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
 
         Establish context = () => stream = Guid.NewGuid();
 
-        Because of = () => result = event_types_from_streams.FetchTypesInRange(stream, new StreamPositionRange(0U, 0U)).GetAwaiter().GetResult();
+        Because of = () => result = event_types_from_streams.FetchInRange(Moq.It.IsAny<ScopeId>(), stream, new StreamPositionRange(0U, 0U)).GetAwaiter().GetResult();
 
         It should_return_empty_list = () => result.ShouldBeEmpty();
     }

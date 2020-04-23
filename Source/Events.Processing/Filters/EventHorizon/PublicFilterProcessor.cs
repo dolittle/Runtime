@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
             if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.NotSet));
             var request = new FilterEventRequest
                 {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() }
                 };
 
             return Filter(request, cancellationToken);
