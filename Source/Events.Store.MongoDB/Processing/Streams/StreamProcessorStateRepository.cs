@@ -39,8 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         {
             try
             {
-                var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken)
-                    .ConfigureAwait(false);
+                var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(
                         streamProcessorId.ScopeId,
