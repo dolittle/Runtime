@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Logging;
 using Machine.Specifications;
 
@@ -24,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.for_EventStore.when_committing_e
                 Moq.Mock.Of<ILogger>());
         };
 
-        Because of = () => exception = Catch.Exception(() => event_store.CommitEvents(uncommitted_events).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => event_store.CommitEvents(uncommitted_events, CancellationToken.None).GetAwaiter().GetResult());
 
         It should_throw_an_exception = () => exception.ShouldNotBeNull();
         It should_fail_because_there_are_no_events_to_commit = () => exception.ShouldBeOfExactType<NoEventsToCommit>();

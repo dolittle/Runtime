@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -11,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventFromEventLogFet
     {
         static Exception exception;
 
-        Because of = () => exception = Catch.Exception(() => fetcher.Fetch(StreamId.New(), 0).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => fetcher.Fetch(ScopeId.Default, StreamId.New(), 0, CancellationToken.None).GetAwaiter().GetResult());
 
         It should_fail_because_it_cannot_fetch_events_from_the_stream = () => exception.ShouldBeOfExactType<EventsFromWellKnownStreamsFetcherCannotFetchFromStream>();
     }
