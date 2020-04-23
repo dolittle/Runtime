@@ -10,8 +10,4 @@
     <ProjectReference Include="..\..\Source\EventHorizon\EventHorizon.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-  </ItemGroup>
-
 </Project>

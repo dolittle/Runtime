@@ -10,14 +10,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_EventHorizonEventProcessor.
 {
     public class an_event : given.all_dependencies
     {
-        static EventHorizonEventProcessor processor;
+        static EventProcessor processor;
         static IProcessingResult result;
 
-        Establish context = () => processor = new EventHorizonEventProcessor(event_horizon, event_horizon_events_writer.Object, Moq.Mock.Of<ILogger>());
+        Establish context = () => processor = new EventProcessor(subscription, event_horizon_events_writer.Object, Moq.Mock.Of<ILogger>());
 
         Because of = () => result = processor.Process(@event, partition, default).GetAwaiter().GetResult();
 
-        It should_write_event = () => event_horizon_events_writer.Verify(_ => _.Write(@event, event_horizon, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+        It should_write_event = () => event_horizon_events_writer.Verify(_ => _.Write(@event, subscription.Scope, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
         It should_return_succeeded_processing_result = () => result.Succeeded.ShouldBeTrue();
     }
 }
