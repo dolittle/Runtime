@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
     /// <summary>
     /// Represents a <see cref="IFilterDefinition" /> for a remote filter.
     /// </summary>
-    public class RemoteFilterDefinition : IPersistableFilterDefinition
+    public class RemoteFilterDefinition : IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteFilterDefinition"/> class.

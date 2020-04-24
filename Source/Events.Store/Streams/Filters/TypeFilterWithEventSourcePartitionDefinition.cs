@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
     /// <summary>
     /// Represents the <see cref="IFilterDefinition" /> for type filter with event source partition.
     /// </summary>
-    public class TypeFilterWithEventSourcePartitionDefinition : IPersistableFilterDefinition
+    public class TypeFilterWithEventSourcePartitionDefinition : IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionDefinition"/> class.
