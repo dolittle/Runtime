@@ -10,14 +10,14 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
 {
     /// <summary>
     /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
     /// </summary>
     public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
     {
-        readonly IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
+        readonly IReverseCallDispatcher<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FilterProcessor(
             ScopeId scope,
             RemoteFilterDefinition definition,
-            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+            IReverseCallDispatcher<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
             : base(scope, definition, eventsToStreamsWriter, logger)
@@ -47,7 +47,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var request = new FilterEventRequest
                 {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() }
+                    Event = @event.ToProtobuf(),
+                    ScopeId = Scope.ToProtobuf()
                 };
 
             return Filter(request, cancellationToken);
@@ -60,7 +61,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var request = new FilterEventRequest
                 {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                    Event = @event.ToProtobuf(),
+                    ScopeId = Scope.ToProtobuf(),
                     RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
                 };
 

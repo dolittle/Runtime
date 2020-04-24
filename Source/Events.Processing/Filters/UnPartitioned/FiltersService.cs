@@ -17,14 +17,14 @@ using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Dolittle.Tenancy;
 using Grpc.Core;
-using static Dolittle.Runtime.Events.Processing.Contracts.Filters;
+using static Dolittle.Runtime.Events.Processing.Contracts.UnPartitionedFilters;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
 {
     /// <summary>
     /// Represents the implementation of <see creF="FiltersBase"/>.
     /// </summary>
-    public class FiltersService : FiltersBase
+    public class FiltersService : UnPartitionedFiltersBase
     {
         readonly ITenants _tenants;
         readonly FactoryFor<IFilters> _getFilters;
@@ -60,11 +60,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public override async Task Connect(
-            IAsyncStreamReader<FiltersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<UnPartitionedFiltersClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
+            var dispatcher = _reverseCallDispatchers.GetFor<UnPartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, UnPartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, UnPartitionedFilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,
@@ -149,7 +149,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             ScopeId scope,
             StreamId sourceStream,
             StreamId targetStream,
-            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+            IReverseCallDispatcher<UnPartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, UnPartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, UnPartitionedFilterResponse> dispatcher,
             CancellationToken cancellationToken)
         {
             var registrationResults = new List<(TenantId, FilterRegistrationResult<RemoteFilterDefinition>)>();
@@ -171,7 +171,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         Task WriteFailedRegistrationResponse(
-            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+            IReverseCallDispatcher<UnPartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, UnPartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, UnPartitionedFilterResponse> dispatcher,
             Failure failure,
             CancellationToken cancellationToken) => dispatcher.Reject(new FilterRegistrationResponse { Failure = failure }, cancellationToken);
     }

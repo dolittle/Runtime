@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_filtersService, Contracts.Filters.BindService(_filtersService), Contracts.Filters.Descriptor)
+                new Service(_filtersService, Contracts.PartitionedFilters.BindService(_filtersService), Contracts.PartitionedFilters.Descriptor)
             };
     }
 }
