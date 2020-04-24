@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 using Machine.Specifications;
 using Moq;

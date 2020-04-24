@@ -7,7 +7,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
     /// </summary>
     public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     {
-        readonly FilterDefinitionBuilder<Event> _eventFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -49,8 +49,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 cancellationToken).ConfigureAwait(false);
         }
 
-        Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>
-            new Event(
+        MongoDB.Events.Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>
+            new MongoDB.Events.Event(
                 sequenceNumber,
                 new Events.ExecutionContext(
                     @event.CorrelationId,

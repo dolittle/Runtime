@@ -12,7 +12,7 @@ using Dolittle.Protobuf;
 using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
 using Grpc.Core;

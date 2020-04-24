@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Store
             var response = new EventCommitResponse { Reason = string.Empty };
             try
             {
-                var events = request.Events.Select(_ => new UncommittedEvent(new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
+                var events = request.Events.Select(_ => new UncommittedEvent(Guid.NewGuid(), new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
                 var uncommittedEvents = new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
                 var committedEvents = await _eventStoreFactory().CommitEvents(uncommittedEvents, context.CancellationToken).ConfigureAwait(false);
                 response.Success = true;
@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.Events.Store
             var response = new grpc.AggregateEventCommitResponse { Reason = string.Empty };
             try
             {
-                var events = request.Events.Select(_ => new UncommittedEvent(new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
+                var events = request.Events.Select(_ => new UncommittedEvent(Guid.NewGuid(), new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
                 var eventSourceId = request.EventSource.To<EventSourceId>();
                 var aggregateRoot = new Artifact(request.AggregateRoot.To<ArtifactId>(), ArtifactGeneration.First);
 

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Exception that gets thrown when a filter is filtering to a non-writeable <see cref="StreamId">stream</see>.

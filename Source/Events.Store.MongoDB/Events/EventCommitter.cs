@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Applications;
 using Dolittle.Artifacts;
 using Dolittle.Execution;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public class EventCommitter : IEventCommitter
     {
-        readonly IMongoCollection<Event> _allStream;
+        readonly IMongoCollection<MongoDB.Events.Event> _allStream;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventCommitter"/> class.
