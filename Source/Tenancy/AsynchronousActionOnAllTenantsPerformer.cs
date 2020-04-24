@@ -31,10 +31,18 @@ namespace Dolittle.Runtime.Tenancy
         /// <inheritdoc/>
         public async Task Perform(Func<TenantId, Task> action)
         {
-            foreach (var tenant in _tenants.All.ToArray())
+            var originalExecutionContext = _executionContextManager.Current;
+            try
             {
-                _executionContextManager.CurrentFor(tenant);
-                await action(tenant).ConfigureAwait(false);
+                foreach (var tenant in _tenants.All.ToArray())
+                {
+                    _executionContextManager.CurrentFor(tenant);
+                    await action(tenant).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                _executionContextManager.CurrentFor(originalExecutionContext);
             }
         }
 

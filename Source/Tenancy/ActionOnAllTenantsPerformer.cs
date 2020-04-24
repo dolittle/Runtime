@@ -30,10 +30,18 @@ namespace Dolittle.Runtime.Tenancy
         /// <inheritdoc/>
         public void Perform(Action<TenantId> action)
         {
-            foreach (var tenant in _tenants.All.ToArray())
+            var originalExecutionContext = _executionContextManager.Current;
+            try
             {
-                _executionContextManager.CurrentFor(tenant);
-                action(tenant);
+                foreach (var tenant in _tenants.All.ToArray())
+                {
+                    _executionContextManager.CurrentFor(tenant);
+                    action(tenant);
+                }
+            }
+            finally
+            {
+                _executionContextManager.CurrentFor(originalExecutionContext);
             }
         }
     }
