@@ -36,5 +36,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public PartitionId Partition => PartitionId.NotSet;
+
+        /// <inheritdoc/>
+        public bool IsPartitioned { get; }
     }
 }
