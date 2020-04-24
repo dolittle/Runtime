@@ -128,7 +128,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             CancellationToken cancellationToken)
         {
             var collection = _connection.Database.GetCollection<StreamProcessorState>(Constants.CollectionNameForScopedStreamProcessorStates(scope));
-            await CreateCollectionsAndIndexesForStreamProcessorStatesAsync(collection, cancellationToken).ConfigureAwait(false);
+            await CreateIndexesForStreamProcessorStatesAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
@@ -169,13 +169,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         void CreateCollectionsAndIndexes()
         {
-            CreateCollectionsAndIndexesForEventLog();
-            CreateCollectionsAndIndexesForAggregates();
-            CreateCollectionsAndIndexesForStreamProcessorStates();
-            CreateCollectionsAndIndexesForTypePartitionFilterDefinitions();
+            CreateIndexesForEventLog();
+            CreateIndexesForAggregates();
+            CreateIndexesForStreamProcessorStates();
+            CreateIndexesForTypePartitionFilterDefinitions();
         }
 
-        void CreateCollectionsAndIndexesForEventLog()
+        void CreateIndexesForEventLog()
         {
             EventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
                 Builders<MongoDB.Events.Event>.IndexKeys
@@ -187,7 +187,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                     .Ascending(_ => _.Aggregate.TypeId)));
         }
 
-        void CreateCollectionsAndIndexesForAggregates()
+        void CreateIndexesForAggregates()
         {
             Aggregates.Indexes.CreateOne(new CreateIndexModel<AggregateRoot>(
                 Builders<AggregateRoot>.IndexKeys
@@ -196,15 +196,20 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 new CreateIndexOptions { Unique = true }));
         }
 
-        void CreateCollectionsAndIndexesForStreamProcessorStates()
+        /// <summary>
+        /// Creates the compound index for <see cref="StreamProcessorState"/>.
+        /// </summary>
+        void CreateIndexesForStreamProcessorStates()
         {
             StreamProcessorStates.Indexes.CreateOne(
                 new CreateIndexModel<StreamProcessorState>(
                 Builders<StreamProcessorState>.IndexKeys
-                    .Ascending(_ => _.Id)));
+                    .Ascending(_ => _.ScopeId)
+                    .Ascending(_ => _.EventProcessorId)
+                    .Ascending(_ => _.SourceStreamId)));
         }
 
-        void CreateCollectionsAndIndexesForTypePartitionFilterDefinitions()
+        void CreateIndexesForTypePartitionFilterDefinitions()
         {
             TypePartitionFilterDefinitions.Indexes.CreateOne(new CreateIndexModel<TypePartitionFilterDefinition>(
                 Builders<TypePartitionFilterDefinition>.IndexKeys
@@ -240,14 +245,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        async Task CreateCollectionsAndIndexesForStreamProcessorStatesAsync(
+        /// <summary>
+        /// Creates the compound index for <see cref="StreamProcessorState"/>.
+        /// </summary>
+        /// <param name="streamProcessorState">Collection of <see cref="StreamProcessorState"/> to add indexes to.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+        /// <returns>Task.</returns>
+        async Task CreateIndexesForStreamProcessorStatesAsync(
             IMongoCollection<StreamProcessorState> streamProcessorState,
             CancellationToken cancellationToken)
         {
             await streamProcessorState.Indexes.CreateOneAsync(
                 new CreateIndexModel<StreamProcessorState>(
                     Builders<StreamProcessorState>.IndexKeys
-                        .Ascending(_ => _.Id)),
+                        .Ascending(_ => _.ScopeId)
+                        .Ascending(_ => _.EventProcessorId)
+                        .Ascending(_ => _.SourceStreamId),
+                    new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
