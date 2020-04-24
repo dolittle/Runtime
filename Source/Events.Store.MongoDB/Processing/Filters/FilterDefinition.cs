@@ -19,10 +19,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         /// </summary>
         /// <param name="filterId">The filter id.</param>
         /// <param name="sourceStream">The source stream.</param>
-        public FilterDefinition(Guid filterId, Guid sourceStream)
+        /// <param name="partitioned">Whether the filter is partitioned or not.</param>
+        public FilterDefinition(Guid filterId, Guid sourceStream, bool partitioned)
         {
             FilterId = filterId;
             SourceStream = sourceStream;
+            Partitioned = partitioned;
         }
 
         /// <summary>
@@ -37,9 +39,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         public Guid SourceStream { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether the filter is partitioned or not.
+        /// </summary>
+        public bool Partitioned { get; set; }
+
+        /// <summary>
         /// Converts the stored filter into the runtime <see cref="IFilterDefinition" /> that it represents.
         /// </summary>
         /// <returns>The runtime <see cref="IFilterDefinition" />.</returns>
-        public virtual IFilterDefinition AsRuntimeRepresentation() => new RemoteFilterDefinition(SourceStream, FilterId);
+        public virtual IFilterDefinition AsRuntimeRepresentation() => new RemoteFilterDefinition(SourceStream, FilterId, Partitioned);
     }
 }

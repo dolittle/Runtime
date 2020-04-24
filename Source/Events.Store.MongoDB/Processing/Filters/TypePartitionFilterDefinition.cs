@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         /// <param name="types">The event artifact types.</param>
         /// <param name="partitioned">Whether it is partitioned or not.</param>
         public TypePartitionFilterDefinition(Guid filterId, Guid sourceStream, IEnumerable<Guid> types, bool partitioned)
-            : base(filterId, sourceStream)
+            : base(filterId, sourceStream, partitioned)
         {
             Types = types;
             Partitioned = partitioned;
@@ -32,11 +32,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         /// Gets or sets the <see cref="ArtifactId"> types</see> that this definition filters on.
         /// </summary>
         public IEnumerable<Guid> Types { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this type filter is partitioned.
-        /// </summary>
-        public bool Partitioned { get; set; }
 
         /// <inheritdoc/>
         public override IFilterDefinition AsRuntimeRepresentation() =>
