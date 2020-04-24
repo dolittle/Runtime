@@ -27,8 +27,7 @@ namespace Dolittle.Runtime.Tenancy
         /// <inheritdoc/>
         public async Task Perform(Func<TenantId, Task> action)
         {
-            var tenants = _tenants.All.ToArray();
-            foreach (var tenant in tenants)
+            foreach (var tenant in _tenants.All.ToArray())
             {
                 await action(tenant).ConfigureAwait(false);
             }
