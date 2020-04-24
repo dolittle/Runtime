@@ -158,7 +158,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
                 _executionContextManager.CurrentFor(tenant);
                 var filterProcessor = new FilterProcessor(
                     scope,
-                    new RemoteFilterDefinition(sourceStream, targetStream),
+                    new RemoteFilterDefinition(sourceStream, targetStream, false),
                     dispatcher,
                     _getEventsToStreamsWriter(),
                     _logger);

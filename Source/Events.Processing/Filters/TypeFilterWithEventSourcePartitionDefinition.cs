@@ -33,9 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         public IEnumerable<ArtifactId> Types { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether or not the filter is partitioned by <see cref="EventSourceId"/>.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Partitioned { get; }
 
         /// <inheritdoc/>.
