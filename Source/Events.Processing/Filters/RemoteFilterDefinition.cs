@@ -8,19 +8,17 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// <summary>
     /// Represents a <see cref="IFilterDefinition" /> for a remote filter.
     /// </summary>
-    public class RemoteFilterDefinition : IPersistableFilterDefinition
+    public class RemoteFilterDefinition : IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="RemoteFilterDefinition"/> class.
         /// </summary>
         /// <param name="sourceStream">The source <see cref="StreamId" />.</param>
         /// <param name="targetStream">The target <see cref="StreamId" />.</param>
-        /// <param name="partitioned">Whether the filter is partitioned or not.</param>
-        public RemoteFilterDefinition(StreamId sourceStream, StreamId targetStream, bool partitioned)
+        public RemoteFilterDefinition(StreamId sourceStream, StreamId targetStream)
         {
             SourceStream = sourceStream;
             TargetStream = targetStream;
-            Partitioned = partitioned;
         }
 
         /// <inheritdoc/>
@@ -28,8 +26,5 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public StreamId TargetStream { get; }
-
-        /// <inheritdoc/>
-        public bool Partitioned { get; }
     }
 }

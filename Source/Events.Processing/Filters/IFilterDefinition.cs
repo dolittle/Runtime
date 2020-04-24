@@ -19,10 +19,5 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Gets the <see cref="StreamId" /> that the filter filters to.
         /// </summary>
         StreamId TargetStream { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the filter is partitioned or not.
-        /// </summary>
-        bool Partitioned { get; }
     }
 }

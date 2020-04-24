@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
 
             filter_processor = new Mock<AbstractFilterProcessor<IFilterDefinition>>(
                 scope_id,
-                new RemoteFilterDefinition(stream_id.Value, event_processor_id.Value, true),
+                new RemoteFilterDefinition(stream_id.Value, event_processor_id.Value),
                 events_to_streams_writer.Object,
                 Mock.Of<ILogger>());
         };

@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
                 var document = filterDefinition switch
                     {
                         TypeFilterWithEventSourcePartitionDefinition definition => definition.ToStoreRepresentation(),
-                        _ => new FilterDefinition(filterDefinition.TargetStream, filterDefinition.SourceStream, filterDefinition.Partitioned)
+                        _ => new FilterDefinition(filterDefinition.TargetStream, filterDefinition.SourceStream)
                     };
 
                 await _connection.FilterDefinitions

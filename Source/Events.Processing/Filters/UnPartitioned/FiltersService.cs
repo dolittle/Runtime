@@ -31,7 +31,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
         readonly IExecutionContextManager _executionContextManager;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
-        readonly FactoryFor<IFilterDefinitionRepository> _getFilterDefinitions;
         readonly ILogger _logger;
 
         /// <summary>
@@ -42,7 +41,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
-        /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitionRepository" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FiltersService(
             ITenants tenants,
@@ -50,7 +48,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
             IExecutionContextManager executionContextManager,
             IReverseCallDispatchers reverseCallDispatchers,
             FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
-            FactoryFor<IFilterDefinitionRepository> getFilterDefinitions,
             ILogger<FiltersService> logger)
         {
             _tenants = tenants;
@@ -58,7 +55,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
             _executionContextManager = executionContextManager;
             _reverseCallDispatchers = reverseCallDispatchers;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
-            _getFilterDefinitions = getFilterDefinitions;
             _logger = logger;
         }
 
@@ -117,7 +113,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
                     return;
                 }
 
-                await PersistFilters(registrationResults.Select(_ => (_.Item1, _.Item2.FilterProcessor.Definition as IPersistableFilterDefinition)), context.CancellationToken).ConfigureAwait(false);
                 await dispatcher.Accept(new FilterRegistrationResponse(), context.CancellationToken).ConfigureAwait(false);
             }
             finally
@@ -150,16 +145,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
             return true;
         }
 
-        async Task PersistFilters(IEnumerable<(TenantId, IPersistableFilterDefinition filter)> tenantsAndFilters, CancellationToken cancellationToken)
-        {
-            foreach ((var tenant, var filter) in tenantsAndFilters)
-            {
-                _executionContextManager.CurrentFor(tenant);
-                var filterDefinitions = _getFilterDefinitions();
-                await filterDefinitions.PersistFilter(filter, cancellationToken).ConfigureAwait(false);
-            }
-        }
-
         async Task<IEnumerable<(TenantId, FilterRegistrationResult<RemoteFilterDefinition>)>> RegisterStreamProcessorsForAllTenants(
             ScopeId scope,
             StreamId sourceStream,
@@ -173,7 +158,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
                 _executionContextManager.CurrentFor(tenant);
                 var filterProcessor = new FilterProcessor(
                     scope,
-                    new RemoteFilterDefinition(sourceStream, targetStream, false),
+                    new RemoteFilterDefinition(sourceStream, targetStream),
                     dispatcher,
                     _getEventsToStreamsWriter(),
                     _logger);

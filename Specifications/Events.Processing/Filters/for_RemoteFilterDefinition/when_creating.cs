@@ -11,20 +11,17 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterDefinition
     {
         static StreamId source_stream;
         static StreamId target_stream;
-        static bool partitioned;
         static RemoteFilterDefinition definition;
 
         Establish context = () =>
         {
             source_stream = Guid.NewGuid();
             target_stream = Guid.NewGuid();
-            partitioned = true;
         };
 
-        Because of = () => definition = new RemoteFilterDefinition(source_stream, target_stream, partitioned);
+        Because of = () => definition = new RemoteFilterDefinition(source_stream, target_stream);
 
         It should_have_the_correct_source_stream = () => definition.SourceStream.ShouldEqual(source_stream);
         It should_have_the_correct_target_stream = () => definition.TargetStream.ShouldEqual(target_stream);
-        It should_have_the_correct_partitioned_value = () => definition.Partitioned.ShouldEqual(partitioned);
     }
 }
