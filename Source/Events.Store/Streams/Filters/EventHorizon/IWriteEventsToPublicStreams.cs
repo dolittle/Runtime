@@ -3,10 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
+namespace Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon
 {
     /// <summary>
     /// Defines a system that can write events to public event streams.

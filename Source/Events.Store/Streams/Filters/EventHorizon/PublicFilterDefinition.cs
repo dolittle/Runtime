@@ -1,26 +1,22 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Store.Streams;
-
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon
 {
     /// <summary>
-    /// Represents a <see cref="IFilterDefinition" /> for a remote filter.
+    /// Represents an implementation of <see cref="IFilterDefinition" /> for a public filter.
     /// </summary>
-    public class RemoteFilterDefinition : IPersistableFilterDefinition
+    public class PublicFilterDefinition : IFilterDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RemoteFilterDefinition"/> class.
+        /// Initializes a new instance of the <see cref="PublicFilterDefinition"/> class.
         /// </summary>
         /// <param name="sourceStream">The source <see cref="StreamId" />.</param>
         /// <param name="targetStream">The target <see cref="StreamId" />.</param>
-        /// <param name="partitioned">Whether the filter is partitioned or not.</param>
-        public RemoteFilterDefinition(StreamId sourceStream, StreamId targetStream, bool partitioned)
+        public PublicFilterDefinition(StreamId sourceStream, StreamId targetStream)
         {
             SourceStream = sourceStream;
             TargetStream = targetStream;
-            Partitioned = partitioned;
         }
 
         /// <inheritdoc/>
@@ -30,6 +26,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public StreamId TargetStream { get; }
 
         /// <inheritdoc/>
-        public bool Partitioned { get; }
+        public bool Partitioned => true;
     }
 }

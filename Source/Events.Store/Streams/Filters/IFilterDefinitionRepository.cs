@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {
     /// <summary>
     /// Defines a repository for <see cref="IFilterDefinition" >filter definitions</see>.
