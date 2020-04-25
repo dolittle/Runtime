@@ -12,17 +12,17 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an abstract implementation of <see cref="IEventProcessorsRegistration" />.
     /// </summary>
-    public abstract class AbstractEventProcessorRegistration : IEventProcessorsRegistration
+    public abstract class AbstractEventProcessorsRegistration : IEventProcessorsRegistration
     {
         readonly IRegisterStreamProcessorForAllTenants _streamProcessorForAllTenants;
         bool _registering;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AbstractEventProcessorRegistration"/> class.
+        /// Initializes a new instance of the <see cref="AbstractEventProcessorsRegistration"/> class.
         /// </summary>
         /// <param name="streamProcessorForAllTenants">The <see cref="IRegisterStreamProcessorForAllTenants" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        protected AbstractEventProcessorRegistration(
+        protected AbstractEventProcessorsRegistration(
             IRegisterStreamProcessorForAllTenants streamProcessorForAllTenants,
             CancellationToken cancellationToken)
         {
