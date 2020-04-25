@@ -11,18 +11,32 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessorRegistrationResult"/> class.
         /// </summary>
-        /// <param name="newStreamProcessorWasRegistered">Whether a new <see cref="StreamProcessor" /> was registered.</param>
         /// <param name="streamProcessor">The <see cref="StreamProcessor" />.</param>
-        public StreamProcessorRegistrationResult(bool newStreamProcessorWasRegistered, StreamProcessor streamProcessor)
+        public StreamProcessorRegistrationResult(StreamProcessor streamProcessor)
         {
-            NewStreamProcessorWasRegistered = newStreamProcessorWasRegistered;
+            Succeeded = true;
             StreamProcessor = streamProcessor;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamProcessorRegistrationResult"/> class.
+        /// </summary>
+        /// <param name="failureReason">The <see cref="StreamProcessorRegistrationFailureReason" />.</param>
+        public StreamProcessorRegistrationResult(StreamProcessorRegistrationFailureReason failureReason)
+        {
+            Succeeded = false;
+            FailureReason = failureReason;
         }
 
         /// <summary>
         /// Gets a value indicating whether a new <see cref="StreamProcessor" /> was registered.
         /// </summary>
-        public bool NewStreamProcessorWasRegistered { get; }
+        public bool Succeeded { get; }
+
+        /// <summary>
+        /// Gets the <see cref="StreamProcessorRegistrationFailureReason" />.
+        /// </summary>
+        public StreamProcessorRegistrationFailureReason FailureReason { get; }
 
         /// <summary>
         /// Gets the registered stream processor.

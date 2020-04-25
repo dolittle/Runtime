@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamProcessorRegistrationResult"/>.</returns>
-        StreamProcessorRegistrationResult Register(IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, StreamId sourceStreamId, CancellationToken cancellationToken);
+        Task<StreamProcessorRegistrationResult> Register(IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, StreamId sourceStreamId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Unregister a <see cref="StreamProcessor"/> from the in memory map.
