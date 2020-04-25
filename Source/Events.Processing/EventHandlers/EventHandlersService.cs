@@ -15,6 +15,7 @@ using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Dolittle.Tenancy;
@@ -151,7 +152,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             return true;
         }
 
-        async Task PersistFilters(IEnumerable<(TenantId, IPersistableFilterDefinition filter)> tenantsAndFilters, CancellationToken cancellationToken)
+        async Task PersistFilters(IEnumerable<(TenantId, IFilterDefinition filter)> tenantsAndFilters, CancellationToken cancellationToken)
         {
             foreach ((var tenant, var filter) in tenantsAndFilters)
             {

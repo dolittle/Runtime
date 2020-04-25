@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {

@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
