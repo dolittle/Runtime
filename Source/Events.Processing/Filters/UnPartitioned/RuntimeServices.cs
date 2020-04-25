@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
+namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.UnPartitioned
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_filtersService, Contracts.UnPartitionedFilters.BindService(_filtersService), Contracts.UnPartitionedFilters.Descriptor)
+                new Service(_filtersService, Contracts.UnpartitionedFilters.BindService(_filtersService), Contracts.UnpartitionedFilters.Descriptor)
             };
     }
 }
