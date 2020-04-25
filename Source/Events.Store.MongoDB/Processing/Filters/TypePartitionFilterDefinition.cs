@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Processing.Filters;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
 {

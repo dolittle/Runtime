@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing.Filters;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task<IFilterDefinition> GetPersistedFilter(IPersistableFilterDefinition filterDefinition, CancellationToken cancellationToken)
+        public async Task<IFilterDefinition> GetPersistedFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken)
         {
             try
             {
@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task PersistFilter(IPersistableFilterDefinition filterDefinition, CancellationToken cancellationToken)
+        public async Task PersistFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken)
         {
             try
             {
