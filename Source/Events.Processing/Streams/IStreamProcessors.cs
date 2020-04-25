@@ -1,9 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -14,20 +12,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     public interface IStreamProcessors
     {
         /// <summary>
-        /// Gets all registered stream processors.
-        /// </summary>
-        /// <returns>The<see cref="IEnumerable{StreamProcessor}" >stream processors</see>.</returns>
-        IEnumerable<StreamProcessor> Processors { get; }
-
-        /// <summary>
         /// Registers a <see cref="StreamProcessor" />.
         /// </summary>
+        /// <param name="streamDefinition">The <see cref="StreamDefinition" /> of the stream the <see cref="StreamProcessor" /> will be registered on.</param>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
-        /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamProcessorRegistration"/>.</returns>
-        Task<StreamProcessorRegistration> Register(IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, StreamId sourceStreamId, CancellationToken cancellationToken);
+        StreamProcessorRegistration Register(StreamDefinition streamDefinition, IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, CancellationToken cancellationToken);
 
         /// <summary>
         /// Unregister a <see cref="StreamProcessor"/> from the in memory map.
