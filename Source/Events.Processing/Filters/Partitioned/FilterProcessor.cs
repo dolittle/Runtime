@@ -8,6 +8,7 @@ using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
