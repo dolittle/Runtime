@@ -13,17 +13,11 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessorsRegistration" /> that manages the registration of an Event Processor.
     /// </summary>
-    public class EventProcessorRegistration : IEventProcessorsRegistration
+    public class EventProcessorRegistration : AbstractEventProcessorRegistration
     {
         readonly StreamId _sourceStreamId;
         readonly IEventProcessor _eventProcessor;
-        readonly IRegisterStreamProcessorForAllTenants _streamProcessorForAllTenants;
         readonly FactoryFor<IStreamDefinitions> _getStreamDefinitions;
-        readonly StreamProcessorRegistrations _streamProcessorRegistrations;
-        readonly CancellationToken _cancellationToken;
-
-        bool _registering;
-        bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventProcessorRegistration"/> class.
@@ -39,49 +33,22 @@ namespace Dolittle.Runtime.Events.Processing
             IRegisterStreamProcessorForAllTenants streamProcessorForAllTenants,
             FactoryFor<IStreamDefinitions> getStreamDefinitions,
             CancellationToken cancellationToken)
+                : base(streamProcessorForAllTenants, cancellationToken)
         {
             _sourceStreamId = sourceStreamId;
             _eventProcessor = eventProcessor;
-            _streamProcessorForAllTenants = streamProcessorForAllTenants;
             _getStreamDefinitions = getStreamDefinitions;
-            _streamProcessorRegistrations = new StreamProcessorRegistrations();
-            _cancellationToken = cancellationToken;
         }
 
         /// <inheritdoc/>
-        public bool Completed { get; private set; }
-
-        /// <inheritdoc/>
-        public bool Succeeded { get; private set; }
-
-        /// <inheritdoc/>
-        public Task Complete()
+        protected override async Task<EventProcessorsRegistrationResult> PerformRegistration()
         {
-            if (Completed) return Task.CompletedTask;
-            Completed = true;
-            return Task.CompletedTask;
-        }
-
-        /// <inheritdoc/>
-        public Task Fail()
-        {
-            if (Completed) throw new CannotFailCompletedEventProcessorsRegistration();
-            Succeeded = false;
-            return Complete();
-        }
-
-        /// <inheritdoc/>
-        public async Task<EventProcessorsRegistrationResult> Register()
-        {
-            if (_registering) throw new EventProcessorsRegistrationCanOnlyRegisterOnce();
-            if (Completed) throw new CannotRegisterOnCompletedEventProcessorsRegistration();
-            _registering = true;
             try
             {
                 StreamId targetStream = _eventProcessor.Identifier.Value;
 
-                await _streamProcessorForAllTenants.Register(_eventProcessor, () => _getStreamDefinitions().GetFor(_eventProcessor.Scope, _sourceStreamId, _cancellationToken),  _streamProcessorRegistrations, _cancellationToken).ConfigureAwait(false);
-                if (_streamProcessorRegistrations.HasFailures())
+                var failed = await RegisterStreamProcessor(_eventProcessor, () => _getStreamDefinitions().GetFor(_eventProcessor.Scope, _sourceStreamId, CancellationToken)).ConfigureAwait(false);
+                if (failed)
                 {
                     Succeeded = false;
                     return new EventProcessorsRegistrationResult($"Failed registering Event Processor: '{_eventProcessor.Identifier}' on Stream: '{_sourceStreamId}");
@@ -97,26 +64,6 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Dispose the object.
-        /// </summary>
-        /// <param name="disposing">Whether to dispose managed resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!Completed) Complete().GetAwaiter().GetResult();
-            if (_disposed) return;
-            if (disposing)
-            {
-                _streamProcessorRegistrations.Dispose();
-            }
-
-            _disposed = true;
-        }
+        protected override Task OnCompleted() => Task.CompletedTask;
     }
 }
