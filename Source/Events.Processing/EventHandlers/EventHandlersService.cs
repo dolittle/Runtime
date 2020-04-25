@@ -114,7 +114,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 return;
             }
 
-            var eventProcessor = new EventProcessor(scopeId, eventHandlerId, dispatcher, _logger);
             var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(sourceStream, targetStream, types, partitioned);
             using var eventHandlerRegistration = new EventHandlerRegistration(
                 scopeId,
@@ -136,10 +135,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 var registrationResult = await eventHandlerRegistration.Register().ConfigureAwait(false);
                 if (!registrationResult.Succeeded)
                 {
-                    _logger.Warning("Failed during registration of Event Handler: '{eventHandlerId}' which is an invalid stream id", eventHandlerId);
+                    _logger.Warning("Failed during registration of Event Handler: '{eventHandlerId}'. {reason}", eventHandlerId, registrationResult.FailureReason);
                     var failure = new Failure(
-                        EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
-                        $"Received event handler registration request with Event Handler Id: '{eventHandlerId}' which is an invalid stream id");
+                        EventHandlersFailures.FailedToRegisterEventHandler,
+                        $"Failed during registration of Event Handler: '{eventHandlerId}'. {registrationResult.FailureReason}");
 
                     await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
                 }
