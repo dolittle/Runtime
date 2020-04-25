@@ -34,6 +34,9 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
         /// <inheritdoc/>
         public bool Partitioned { get; }
 
+        /// <inheritdoc/>
+        public bool Public => false;
+
         /// <inheritdoc/>.
         public StreamId SourceStream { get; }
 

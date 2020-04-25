@@ -22,5 +22,10 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
         /// Gets a value indicating whether the filter is partitioned or not.
         /// </summary>
         bool Partitioned { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the filter defines a public stream definition.
+        /// </summary>
+        bool Public { get; }
     }
 }

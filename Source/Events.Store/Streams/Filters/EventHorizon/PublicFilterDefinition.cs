@@ -27,5 +27,8 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon
 
         /// <inheritdoc/>
         public bool Partitioned => true;
+
+        /// <inheritdoc/>
+        public bool Public => true;
     }
 }

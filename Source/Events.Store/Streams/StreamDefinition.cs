@@ -14,17 +14,15 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// Initializes a new instance of the <see cref="StreamDefinition"/> class.
         /// </summary>
         /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
-        /// <param name="isPublic">Whether the stream is public or not.</param>
-        public StreamDefinition(IFilterDefinition filterDefinition, bool isPublic)
+        public StreamDefinition(IFilterDefinition filterDefinition)
         {
             FilterDefinition = filterDefinition;
-            Public = isPublic;
         }
 
         /// <summary>
         /// Gets the <see cref="StreamDefinition" /> which represents the definition of the Event Log.
         /// </summary>
-        public static StreamDefinition EventLog => new StreamDefinition(new RemoteFilterDefinition(StreamId.AllStreamId, StreamId.AllStreamId, false), false);
+        public static StreamDefinition EventLog => new StreamDefinition(new RemoteFilterDefinition(StreamId.AllStreamId, StreamId.AllStreamId, false));
 
         /// <summary>
         /// Gets the <see cref="IFilterDefinition" /> that defines this stream.
@@ -34,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <summary>
         /// Gets a value indicating whether this is a public stream.
         /// </summary>
-        public bool Public { get; }
+        public bool Public => FilterDefinition.Public;
 
         /// <summary>
         /// Gets the <see cref="StreamId" />.
