@@ -18,6 +18,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         bool _started;
 
         /// <summary>
+        /// Gets a value indicating whether any of the <see cref="StreamProcessorRegistration" />s failed.
+        /// </summary>
+        /// <returns>A value indicating whether any of the <see cref="StreamProcessorRegistration" />s failed.</returns>
+        public bool HasFailures => _registrations.Any(_ => !_.Succeeded);
+
+        /// <summary>
         /// Add a <see cref="StreamProcessorRegistration" />.
         /// </summary>
         /// <param name="streamProcessorRegistration">The <see cref="StreamProcessorRegistration" />.</param>
@@ -37,12 +43,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
             return true;
         }
-
-        /// <summary>
-        /// Whether any of the <see cref="StreamProcessorRegistration" />s failed.
-        /// </summary>
-        /// <returns>A value indicating whether any of the <see cref="StreamProcessorRegistration" />s failed.</returns>
-        public bool HasFailures() => _registrations.Any(_ => !_.Succeeded);
 
         /// <summary>
         /// Disposes the object.
