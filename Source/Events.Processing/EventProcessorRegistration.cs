@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessorsRegistration" /> that manages the registration of an Event Processor.
     /// </summary>
-    public class EventProcessorRegistration : AbstractEventProcessorRegistration
+    public class EventProcessorRegistration : AbstractEventProcessorsRegistration
     {
         readonly StreamId _sourceStreamId;
         readonly IEventProcessor _eventProcessor;
@@ -54,6 +54,7 @@ namespace Dolittle.Runtime.Events.Processing
                     return new EventProcessorsRegistrationResult($"Failed registering Event Processor: '{_eventProcessor.Identifier}' on Stream: '{_sourceStreamId}");
                 }
 
+                Succeeded = true;
                 return new EventProcessorsRegistrationResult();
             }
             catch (Exception ex)
