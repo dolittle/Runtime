@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// <summary>
     /// Represents registrations of <see cref="StreamProcessor" /> as an unit in a transaction.
     /// </summary>
-    public class StreamProcessorRegistrations : IDisposable
+    public class StreamProcessorRegistrations : List<StreamProcessorRegistration>, IDisposable
     {
         readonly IList<StreamProcessorRegistration> _registrations;
         bool _disposed;
@@ -22,12 +22,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// </summary>
         /// <returns>A value indicating whether any of the <see cref="StreamProcessorRegistration" />s failed.</returns>
         public bool HasFailures => _registrations.Any(_ => !_.Succeeded);
-
-        /// <summary>
-        /// Add a <see cref="StreamProcessorRegistration" />.
-        /// </summary>
-        /// <param name="streamProcessorRegistration">The <see cref="StreamProcessorRegistration" />.</param>
-        public void Add(StreamProcessorRegistration streamProcessorRegistration) => _registrations.Add(streamProcessorRegistration);
 
         /// <summary>
         /// Try to <see cref="StreamProcessor.Start" /> all <see cref="StreamProcessor" />s.
