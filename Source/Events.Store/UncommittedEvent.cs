@@ -8,34 +8,18 @@ namespace Dolittle.Runtime.Events.Store
     /// <summary>
     /// Represent an Event that has not been committed to the Event Store.
     /// </summary>
-    public class UncommittedEvent
+    public class UncommittedEvent : Event
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UncommittedEvent"/> class.
         /// </summary>
+        /// <param name="eventSourceId">The Events EventSourceId.</param>
         /// <param name="type">The <see cref="Artifact"/> representing the type of the Event.</param>
         /// <param name="isPublic">Whether the Event is public.</param>
         /// <param name="content">The content of the Event represented as a JSON-encoded <see cref="string"/>.</param>
-        public UncommittedEvent(Artifact type, bool isPublic, string content)
+        public UncommittedEvent(EventSourceId eventSourceId, Artifact type, bool isPublic, string content)
+            : base(eventSourceId, type, isPublic, content)
         {
-            Type = type;
-            Public = isPublic;
-            Content = content;
         }
-
-        /// <summary>
-        /// Gets the <see cref="Artifact"/> representing the type of the Event.
-        /// </summary>
-        public Artifact Type { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the Event is public.
-        /// </summary>
-        public bool Public { get; }
-
-        /// <summary>
-        /// Gets the content of the Event represented as a JSON-encoded <see cref="string"/>.
-        /// </summary>
-        public string Content { get; }
     }
 }

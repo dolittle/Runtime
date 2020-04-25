@@ -9,7 +9,7 @@ using Dolittle.Artifacts;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -40,14 +40,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken)
+        public async Task<FilterValidationResult> Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken)
         {
             var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(
                 new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
                 cancellationToken)
                 .ConfigureAwait(false);
             var lastUnProcessedEventPosition = streamProcessorState.Position;
-            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchTypesInRange(
+            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchInRange(
                 filter.Scope,
                 filter.Definition.TargetStream,
                 new StreamPositionRange(StreamPosition.Start, uint.MaxValue),
@@ -64,11 +64,16 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var artifactsFromSourceStream = new List<Artifact>();
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {
-                var processingResult = await filter.Filter(@event, PartitionId.NotSet, filter.Identifier, null, cancellationToken).ConfigureAwait(false);
+                var processingResult = await filter.Filter(@event, PartitionId.NotSet, filter.Identifier, cancellationToken).ConfigureAwait(false);
                 if (processingResult.IsIncluded) artifactsFromSourceStream.Add(@event.Type);
             }
 
-            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream)) throw new IllegalFilterTransformation(filter.Scope, filter.Definition.TargetStream, filter.Definition.SourceStream);
+            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream))
+            {
+                return new FilterValidationResult($"The new stream generated from the filter does not match the old stream.");
+            }
+
+            return new FilterValidationResult();
         }
 
         bool ArtifactListsAreTheSame(IEnumerable<Artifact> oldList, IEnumerable<Artifact> newList) =>

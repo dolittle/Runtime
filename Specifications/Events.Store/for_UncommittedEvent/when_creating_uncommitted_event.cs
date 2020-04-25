@@ -9,6 +9,7 @@ namespace Dolittle.Runtime.Events.Store.for_UncommittedEvent
 {
     public class when_creating_uncommitted_event
     {
+        static EventSourceId event_source_id;
         static ArtifactId artifact_id;
         static ArtifactGeneration artifact_generation;
         static bool is_public;
@@ -17,13 +18,14 @@ namespace Dolittle.Runtime.Events.Store.for_UncommittedEvent
 
         Establish context = () =>
         {
+            event_source_id = Guid.NewGuid();
             artifact_id = Guid.NewGuid();
             artifact_generation = 0;
             is_public = false;
             content = "content";
         };
 
-        Because of = () => uncommitted_event = new UncommittedEvent(new Artifact(artifact_id, artifact_generation), is_public, content);
+        Because of = () => uncommitted_event = new UncommittedEvent(event_source_id, new Artifact(artifact_id, artifact_generation), is_public, content);
 
         It should_have_the_correct_artifact_id = () => uncommitted_event.Type.Id.ShouldEqual(artifact_id);
         It should_have_the_correct_artifact_generation = () => uncommitted_event.Type.Generation.ShouldEqual(artifact_generation);

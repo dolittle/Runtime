@@ -4,14 +4,14 @@
 using System.Collections.Generic;
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents the definition for <see cref="TypeFilterWithEventSourcePartition"/>.
     /// </summary>
-    public class TypeFilterWithEventSourcePartitionDefinition : IFilterDefinition
+    public class TypeFilterWithEventSourcePartitionDefinition : IPersistableFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionDefinition"/> class.

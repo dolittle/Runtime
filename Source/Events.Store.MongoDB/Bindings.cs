@@ -4,14 +4,14 @@
 using Dolittle.DependencyInversion;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.EventHorizon.Producer;
-using Dolittle.Runtime.EventHorizon.Producer.Filter;
 using Dolittle.Runtime.Events.Processing.Filters;
+using Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public void Provide(IBindingProviderBuilder builder)
         {
             builder.Bind<IStreamProcessorStateRepository>().To<StreamProcessorStateRepository>();
-            builder.Bind<IFilterDefinitionRepositoryFor<TypeFilterWithEventSourcePartitionDefinition>>().To<TypePartitionFilterDefinitionRepository>();
+            builder.Bind<IFilterDefinitionRepository>().To<FilterDefinitionRepository>();
             builder.Bind<IFetchEventsFromStreams>().To<EventsFromStreamsFetcher>();
             builder.Bind<IWriteEventsToStreams>().To<EventsToStreamsWriter>();
             builder.Bind<IFetchEventTypesFromStreams>().To<EventTypesFromStreamsFetcher>();

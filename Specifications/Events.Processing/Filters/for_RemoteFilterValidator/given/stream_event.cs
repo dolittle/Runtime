@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.given
 {
@@ -15,13 +15,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.g
                     0,
                     DateTimeOffset.Now,
                     Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    new Cause(CauseType.Command, 0),
+                    execution_contexts.create(),
                     artifacts.single(),
                     false,
                     ""),
+                StreamPosition.Start,
                 Guid.NewGuid(),
                 Guid.NewGuid());
     }

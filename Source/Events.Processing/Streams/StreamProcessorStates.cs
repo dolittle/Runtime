@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -53,16 +53,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
             _logger.Debug($"Processing event '{streamEvent.Event.Type.Id}' in partition '{streamEvent.Partition}' at position '{streamEvent.Position}' for Stream Processor '{streamProcessorId}'");
 
-            var processingResult = await eventProcessor.Process(streamEvent.Event, streamEvent.Partition, null, cancellationToken).ConfigureAwait(false);
+            var processingResult = await eventProcessor.Process(streamEvent.Event, streamEvent.Partition, cancellationToken).ConfigureAwait(false);
             if (processingResult.Retry)
             {
                 await FailingPartitions.AddFailingPartitionFor(
                     streamProcessorId,
                     streamEvent.Partition,
                     streamEvent.Position,
-                    processingResult.Failure.Type,
-                    DateTimeOffset.UtcNow.Add(processingResult.Failure.RetryTimeout),
-                    processingResult.Failure.Reason,
+                    DateTimeOffset.UtcNow.Add(processingResult.RetryTimeout),
+                    processingResult.FailureReason,
                     cancellationToken).ConfigureAwait(false);
             }
             else if (!processingResult.Succeeded)
@@ -71,9 +70,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     streamProcessorId,
                     streamEvent.Partition,
                     streamEvent.Position,
-                    processingResult.Failure.Type,
                     DateTimeOffset.MaxValue,
-                    processingResult.Failure.Reason,
+                    processingResult.FailureReason,
                     cancellationToken).ConfigureAwait(false);
             }
 

@@ -2,8 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.for_StreamProcessorStateRepository.when_adding_failing_partition
@@ -26,11 +27,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.for_StreamPro
             initial_state = Runtime.Events.Processing.Streams.StreamProcessorState.New;
             failing_partition_position = 0U;
             failing_partition_retry_time = DateTimeOffset.UtcNow;
-            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
-            repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
+            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+            repository.GetOrAddNew(stream_processor_id, CancellationToken.None).GetAwaiter().GetResult();
         };
 
-        Because of = () => result = repository.AddFailingPartition(stream_processor_id, partition, failing_partition_position, failing_partition_retry_time, reason).GetAwaiter().GetResult();
+        Because of = () => result = repository.AddFailingPartition(stream_processor_id, partition, failing_partition_position, failing_partition_retry_time, reason, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_have_the_same_position = () => result.Position.ShouldEqual(initial_state.Position);
         It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);

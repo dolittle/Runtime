@@ -23,9 +23,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents.giv
 
         Establish context = () =>
         {
-            event_one = new UncommittedEvent(event_a_artifact, is_public, "one");
-            event_two = new UncommittedEvent(event_a_artifact, is_public, "two");
-            event_three = new UncommittedEvent(event_b_artifact, is_public, "three");
+            event_one = new UncommittedEvent(event_source_id, event_a_artifact, is_public, "one");
+            event_two = new UncommittedEvent(event_source_id, event_a_artifact, is_public, "two");
+            event_three = new UncommittedEvent(event_source_id, event_b_artifact, is_public, "three");
         };
     }
 }

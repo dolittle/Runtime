@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
@@ -20,8 +20,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new EventMetadata(
                 committedEvent.Occurred,
                 committedEvent.EventSource,
-                committedEvent.Cause.Type,
-                committedEvent.Cause.Position,
                 committedEvent.Type.Id,
                 committedEvent.Type.Generation,
                 committedEvent.Public);
@@ -38,10 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
-                @event.ExecutionContext.Correlation,
-                @event.ExecutionContext.Microservice,
-                @event.ExecutionContext.Tenant,
-                new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
+                @event.ExecutionContext.ToExecutionContext(),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
                 @event.Content.ToString());
@@ -58,20 +53,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                       @event.EventLogSequenceNumber,
                       @event.Metadata.Occurred,
                       @event.Metadata.EventSource,
-                      @event.ExecutionContext.Correlation,
-                      @event.ExecutionContext.Microservice,
-                      @event.ExecutionContext.Tenant,
-                      new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
+                      @event.ExecutionContext.ToExecutionContext(),
                       new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                       @event.Metadata.Public,
                       @event.Content.ToString());
 
         /// <summary>
-        /// Converts a <see cref="Event" /> to a <see cref="Runtime.Events.Streams.StreamEvent" />.
+        /// Converts a <see cref="Event" /> to a <see cref="Runtime.Events.Store.Streams.StreamEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
-        /// <returns>The converted <see cref="Runtime.Events.Streams.StreamEvent" />.</returns>
-        public static Runtime.Events.Streams.StreamEvent ToRuntimeStreamEvent(this Event @event) =>
-            new Runtime.Events.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.AllStreamId, PartitionId.NotSet);
+        /// <returns>The converted <see cref="Runtime.Events.Store.Streams.StreamEvent" />.</returns>
+        public static Runtime.Events.Store.Streams.StreamEvent ToRuntimeStreamEvent(this Event @event) =>
+            new Runtime.Events.Store.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.AllStreamId, PartitionId.NotSet);
     }
 }

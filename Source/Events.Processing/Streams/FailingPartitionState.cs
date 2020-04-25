@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Concepts;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -26,11 +26,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Gets or sets the reason for failure.
         /// </summary>
         public string Reason { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="ProcessorFailureType" />.
-        /// </summary>
-        public ProcessorFailureType FailureType { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times that the event at position has been attempted processed.

@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions.when_catching_up.and_there_are_multiple_failing_partitions
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions.when_
             stream_processor_state.FailingPartitions[second_failing_partition_id] = second_failing_partition_state;
         };
 
-        Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, event_processor.Object, stream_processor_state).GetAwaiter().GetResult();
+        Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, event_processor.Object, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
         It should_have_two_failing_partitions = () => result.FailingPartitions.Count.ShouldEqual(2);

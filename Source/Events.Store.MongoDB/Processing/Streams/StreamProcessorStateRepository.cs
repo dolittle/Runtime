@@ -5,9 +5,8 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
@@ -33,13 +32,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> GetOrAddNew(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+        public async Task<Runtime.Events.Processing.Streams.StreamProcessorState> GetOrAddNew(
+            Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId,
+            CancellationToken cancellationToken)
         {
             try
             {
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(
+                        streamProcessorId.ScopeId,
+                        streamProcessorId.EventProcessorId,
+                        streamProcessorId.SourceStreamId)))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default)
@@ -87,7 +91,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
@@ -116,7 +120,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId,
             PartitionId partitionId,
             StreamPosition position,
-            ProcessorFailureType failureType,
             DateTimeOffset retryTime,
             string reason,
             CancellationToken cancellationToken)
@@ -124,7 +127,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
@@ -132,7 +135,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 if (state == default) throw new StreamProcessorNotFound(streamProcessorId);
 
                 if (state.FailingPartitions.ContainsKey(partitionId.Value.ToString())) throw new FailingPartitionAlreadyExists(streamProcessorId, partitionId);
-                state.FailingPartitions.Add(partitionId.Value.ToString(), new FailingPartitionState(position, retryTime, reason, failureType, 1));
+                state.FailingPartitions.Add(partitionId.Value.ToString(), new FailingPartitionState(position, retryTime, reason, 1));
                 var replaceResult = await states.ReplaceOneAsync(
                     _streamProcessorFilter.Eq(_ => _.Id, id),
                     state,
@@ -154,7 +157,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
@@ -185,7 +188,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             try
             {
                 var id = new StreamProcessorId(streamProcessorId.ScopeId, streamProcessorId.EventProcessorId, streamProcessorId.SourceStreamId);
-                var states = _connection.StreamProcessorStates;
+                var states = await _connection.GetStreamProcessorStateCollection(id.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.Id, id))
                     .FirstOrDefaultAsync(cancellationToken)
@@ -198,7 +201,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                                                                                 failingPartitionState.Position,
                                                                                 failingPartitionState.RetryTime,
                                                                                 failingPartitionState.Reason,
-                                                                                failingPartitionState.FailureType,
                                                                                 failingPartitionState.ProcessingAttempts);
 
                 var replaceResult = await states.ReplaceOneAsync(

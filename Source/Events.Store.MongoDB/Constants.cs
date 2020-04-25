@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <summary>
         /// The collection name where type partition filters are stored.
         /// </summary>
-        public const string TypePartitionFilterDefinitionCollection = "type-partition-filters";
+        public const string FilterDefinitionCollection = "filters";
 
         /// <summary>
         /// Gets the collection name where events in the event log are stored.
@@ -59,5 +59,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <returns>The scoped stream collection name.</returns>
         public static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-stream-{scope}-{stream}";
+
+        /// <summary>
+        /// Gtes the collection name for scoped StreamProcessorStates.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <returns>The scoped StreamProcessorStates collection name.</returns>
+        public static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{StreamProcessorStateCollection}-{scope}";
     }
 }

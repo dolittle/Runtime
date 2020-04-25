@@ -11,6 +11,6 @@
 
   <ItemGroup>
     <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
   </ItemGroup>
 </Project>
