@@ -13,7 +13,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// </summary>
     public class StreamProcessorRegistrations : List<StreamProcessorRegistration>, IDisposable
     {
-        readonly IList<StreamProcessorRegistration> _registrations;
         bool _disposed;
         bool _started;
 
@@ -21,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Gets a value indicating whether any of the <see cref="StreamProcessorRegistration" />s failed.
         /// </summary>
         /// <returns>A value indicating whether any of the <see cref="StreamProcessorRegistration" />s failed.</returns>
-        public bool HasFailures => _registrations.Any(_ => !_.Succeeded);
+        public bool HasFailures => this.Any(_ => !_.Succeeded);
 
         /// <summary>
         /// Try to <see cref="StreamProcessor.Start" /> all <see cref="StreamProcessor" />s.
@@ -31,8 +30,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             if (_started || _disposed) return false;
             _started = true;
-            var succeededRegistrations = _registrations.Where(_ => _.Succeeded);
-            if (succeededRegistrations.Count() != _registrations.Count) return false;
+            var succeededRegistrations = this.Where(_ => _.Succeeded);
+            if (succeededRegistrations.Count() != Count) return false;
             succeededRegistrations.Select(_ => _.StreamProcessor).ForEach(_ => _.Start());
 
             return true;
@@ -53,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
             if (disposing)
             {
-                _registrations.ForEach(_ => _.Dispose());
+                ForEach(_ => _.Dispose());
             }
 
             _disposed = true;

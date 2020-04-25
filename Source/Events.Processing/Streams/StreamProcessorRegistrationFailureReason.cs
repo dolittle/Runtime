@@ -4,7 +4,7 @@
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents the reason for why <see cref="IStreamProcessors.Register(IEventProcessor, Store.Streams.IFetchEventsFromStreams, Store.Streams.StreamId, System.Threading.CancellationToken)" /> failed.
+    /// Represents the reason for why <see cref="IEventProcessorsRegistration.Register()" /> failed.
     /// </summary>
     public class StreamProcessorRegistrationFailureReason : Concepts.ConceptAs<string>
     {
