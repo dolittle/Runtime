@@ -43,11 +43,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<StreamProcessorRegistration>> Register(IEventProcessor eventProcessor, StreamId sourceStream, CancellationToken cancellationToken)
+        public async Task<IEnumerable<StreamProcessorRegistration>> Register(IEventProcessor eventProcessor, Task<StreamDefinition> streamDefinitionGetter, CancellationToken cancellationToken)
         {
-            _logger.Trace("Registering Stream Processor for Event Processor: {eventProcessor} on Stream: '{sourceStream}' for all Tenants", eventProcessor.Identifier, sourceStream);
+            _logger.Trace("Registering Stream Processor for Event Processor: {eventProcessor} for all Tenants", eventProcessor.Identifier);
             var registrationResults = new List<StreamProcessorRegistration>();
-            await _onAllTenants.PerformAsync(async _ => registrationResults.Add(await _getStreamProcessors().Register(eventProcessor, _getEventsFromStreamsFetcher(), sourceStream, cancellationToken).ConfigureAwait(false))).ConfigureAwait(false);
+            await _onAllTenants.PerformAsync(async _ =>
+                {
+                    var streamDefinition = await streamDefinitionGetter.ConfigureAwait(false);
+                    var registrationResult = _getStreamProcessors().Register(streamDefinition, eventProcessor, _getEventsFromStreamsFetcher(), cancellationToken);
+                    registrationResults.Add(registrationResult);
+                }).ConfigureAwait(false);
             return registrationResults;
         }
     }

@@ -17,9 +17,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Register a <see cref="StreamProcessor" /> with the given <see cref="IEventProcessor" /> on the given source <see cref="StreamId" />.
         /// </summary>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
-        /// <param name="sourceStream">The source <see cref="StreamId" />.</param>
+        /// <param name="streamDefinitionGetter">A <see cref="Task" /> that, when resolved, returns the <see cref="StreamDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns a list of <see cref="StreamProcessorRegistration" />.</returns>
-        Task<IEnumerable<StreamProcessorRegistration>> Register(IEventProcessor eventProcessor, StreamId sourceStream, CancellationToken cancellationToken);
+        Task<IEnumerable<StreamProcessorRegistration>> Register(IEventProcessor eventProcessor, Task<StreamDefinition> streamDefinitionGetter, CancellationToken cancellationToken);
     }
 }
