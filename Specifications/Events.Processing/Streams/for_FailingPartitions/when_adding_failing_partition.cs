@@ -18,14 +18,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions
 
         Establish context = () =>
         {
-            stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
+            stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
             partition = Guid.NewGuid();
             stream_position = 0;
             retry_time = DateTimeOffset.Now;
             reason = "";
         };
 
-        Because of = () => failing_partitions.AddFailingPartitionFor(stream_processor_id, partition, stream_position, retry_time, reason);
+        Because of = () => failing_partitions.AddFailingPartitionFor(stream_processor_id, partition, stream_position, retry_time, reason, CancellationToken.None);
 
         It should_add_the_failing_partition_state = () => stream_processor_state_repository.Verify(_ => _.AddFailingPartition(stream_processor_id, partition, stream_position, retry_time, reason, Moq.It.IsAny<CancellationToken>()));
     }

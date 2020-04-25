@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -11,8 +12,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventFromEventLogFet
     {
         static StreamPosition result;
 
-        Because of = () => result = fetcher.FindNext(StreamId.AllStreamId, Guid.NewGuid(), 0).GetAwaiter().GetResult();
+        Because of = () => result = fetcher.FindNext(ScopeId.Default, StreamId.AllStreamId, Guid.NewGuid(), 0, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_return_the_max_value = () => result.Value.ShouldEqual(uint.MaxValue);
+        It should_return_the_max_value = () => result.Value.ShouldEqual(ulong.MaxValue);
     }
 }

@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Processing;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -19,14 +18,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="position">The position.</param>
         /// <param name="retryTime">The retry time.</param>
         /// <param name="reason">The reason for failure.</param>
-        /// <param name="failureType">The <see cref="ProcessorFailureType" />.</param>
         /// <param name="processingAttempts">The number of times the event at position has been processed.</param>
-        public FailingPartitionState(ulong position, DateTimeOffset retryTime, string reason, ProcessorFailureType failureType, uint processingAttempts)
+        public FailingPartitionState(ulong position, DateTimeOffset retryTime, string reason, uint processingAttempts)
         {
             Position = position;
             RetryTime = retryTime;
             Reason = reason;
-            FailureType = failureType;
             ProcessingAttempts = processingAttempts;
         }
 
@@ -46,12 +43,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// Gets or sets the reason for failure.
         /// </summary>
         public string Reason { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="ProcessorFailureType" />.
-        /// </summary>
-        [BsonRepresentation(BsonType.String)]
-        public ProcessorFailureType FailureType { get; set; }
 
         /// <summary>
         /// Gets or sets the number of times that the event at position has been attempted processed.

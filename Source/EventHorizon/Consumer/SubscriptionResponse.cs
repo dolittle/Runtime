@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Protobuf;
+
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
@@ -16,8 +18,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionResponse"/> class.
         /// </summary>
-        /// <param name="failureReason">The reason for why the subscription failed.</param>
-        protected SubscriptionResponse(string failureReason) => FailureReason = failureReason;
+        /// <param name="failure">The <see cref="Failure"/>.</param>
+        protected SubscriptionResponse(Failure failure) => Failure = failure;
 
         /// <summary>
         /// Gets a value indicating whether the subscription is fine.
@@ -27,6 +29,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Gets the reason for why the subscription failed.
         /// </summary>
-        public string FailureReason { get; }
+        public Failure Failure { get; }
     }
 }

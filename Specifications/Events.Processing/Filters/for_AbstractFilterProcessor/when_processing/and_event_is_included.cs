@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
@@ -13,17 +14,23 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
 {
     public class and_event_is_included : given.all_dependencies
     {
-        static IFilterResult result;
+        static IProcessingResult result;
+        static PartitionId partition;
 
-        Establish context = () => filter_processor.Setup(_ => _.Filter(
-            Moq.It.IsAny<CommittedEvent>(),
-            Moq.It.IsAny<PartitionId>(),
-            Moq.It.IsAny<EventProcessorId>(),
-            Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<IFilterResult>(new SucceededFilteringResult(true, PartitionId.NotSet)));
+        Establish context = () =>
+        {
+            partition = Guid.NewGuid();
+            filter_processor
+                .Setup(_ => _.Filter(
+                    Moq.It.IsAny<CommittedEvent>(),
+                    Moq.It.IsAny<PartitionId>(),
+                    Moq.It.IsAny<EventProcessorId>(),
+                    Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult<IFilterResult>(new SuccessfulFiltering(true, partition)));
+        };
 
-        Because of = () => result = filter_processor.Object.Process(committed_event, PartitionId.NotSet).Result as IFilterResult;
-
-        It should_write_it_to_target_stream = () => events_to_streams_writer.Verify(_ => _.Write(committed_event, event_processor_id.Value, Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()), Times.Once);
+        Because of = () => result = filter_processor.Object.Process(committed_event, partition, CancellationToken.None).GetAwaiter().GetResult();
+        It should_write_it_to_target_stream = () => events_to_streams_writer.Verify(_ => _.Write(committed_event, scope_id, filter_processor.Object.Definition.TargetStream, partition, Moq.It.IsAny<CancellationToken>()), Times.Once);
+        It should_returned_successful_processing_result = () => result.Succeeded.ShouldBeTrue();
     }
 }

@@ -4,11 +4,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Applications;
 using Dolittle.Artifacts;
-using Dolittle.Execution;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -36,7 +33,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             EventLogSequenceNumber sequenceNumber,
             DateTimeOffset occurred,
             Dolittle.Execution.ExecutionContext executionContext,
-            Cause cause,
             UncommittedEvent @event,
             CancellationToken cancellationToken)
         {
@@ -52,20 +48,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 eventSource,
                 @event,
                 new AggregateMetadata(),
-                correlation,
-                microservice,
-                tenant,
-                cause,
+                executionContext,
                 cancellationToken).ConfigureAwait(false);
 
             return new CommittedEvent(
                 sequenceNumber,
                 occurred,
                 eventSource,
-                correlation,
-                microservice,
-                tenant,
-                cause,
+                executionContext,
                 @event.Type,
                 @event.Public,
                 @event.Content);
@@ -80,13 +70,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             DateTimeOffset occurred,
             EventSourceId eventSource,
             Execution.ExecutionContext executionContext,
-            Cause cause,
             UncommittedEvent @event,
             CancellationToken cancellationToken)
         {
-            var correlation = executionContext.CorrelationId;
-            var microservice = executionContext.Microservice;
-            var tenant = executionContext.Tenant;
             await InsertEvent(
                 transaction,
                 version,
@@ -100,10 +86,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     TypeGeneration = aggregateRoot.Generation,
                     Version = aggregateRootVersion
                 },
-                correlation,
-                microservice,
-                tenant,
-                cause,
+                executionContext,
                 cancellationToken).ConfigureAwait(false);
             return new CommittedAggregateEvent(
                 aggregateRoot,
@@ -111,10 +94,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 version,
                 occurred,
                 eventSource,
-                correlation,
-                microservice,
-                tenant,
-                cause,
+                executionContext,
                 @event.Type,
                 @event.Public,
                 @event.Content);
@@ -127,10 +107,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             EventSourceId eventSource,
             UncommittedEvent @event,
             AggregateMetadata aggregate,
-            CorrelationId correlation,
-            Microservice microservice,
-            TenantId tenant,
-            Cause cause,
+            Execution.ExecutionContext executionContext,
             CancellationToken cancellationToken)
         {
             try
@@ -139,15 +116,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     transaction,
                     new Event(
                         version,
-                        new ExecutionContext(
-                            correlation,
-                            microservice,
-                            tenant),
+                        executionContext.ToStoreRepresentation(),
                         new EventMetadata(
                             occurred,
                             eventSource,
-                            cause.Type,
-                            cause.Position,
                             @event.Type.Id,
                             @event.Type.Generation,
                             @event.Public),

@@ -4,7 +4,7 @@
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 
-namespace Dolittle.Applications.Configuration
+namespace Dolittle.ApplicationModel.Configuration
 {
     /// <summary>
     /// Binds up the bindings related to the running application. The<see cref="Application"/>, the <see cref="Microservice"/> and the <see cref="Environment"/>.

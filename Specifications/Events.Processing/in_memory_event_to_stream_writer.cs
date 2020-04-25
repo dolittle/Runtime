@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing
     {
         readonly IDictionary<StreamId, IDictionary<PartitionId, IList<CommittedEvent>>> streams = new Dictionary<StreamId, IDictionary<PartitionId, IList<CommittedEvent>>>();
 
-        public Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
+        public Task Write(CommittedEvent @event, ScopeId scopeId, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken = default)
         {
             if (streams.ContainsKey(streamId))
             {

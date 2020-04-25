@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
@@ -11,11 +12,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         Events.StreamEvent _instance;
 
-        public stream_event_builder(uint stream_position) =>
-            _instance = new Events.StreamEvent(stream_position, metadata.random_stream_event_metadata, metadata.aggregate_metadata_from_non_aggregate_event, events.some_event_content_bson_document);
+        public stream_event_builder(uint stream_position, Guid partition) =>
+            _instance = new Events.StreamEvent(stream_position, partition, execution_contexts.create_store(), metadata.random_stream_event_metadata, metadata.aggregate_metadata_from_non_aggregate_event, events.some_event_content_bson_document);
 
-        public stream_event_builder(uint stream_position, uint aggregate_version) =>
-            _instance = new Events.StreamEvent(stream_position, metadata.random_stream_event_metadata, metadata.random_aggregate_metadata_from_aggregate_event_with_version(aggregate_version), events.some_event_content_bson_document);
+        public stream_event_builder(uint stream_position, Guid partition, uint aggregate_version) =>
+            _instance = new Events.StreamEvent(stream_position, partition, execution_contexts.create_store(), metadata.random_stream_event_metadata, metadata.random_aggregate_metadata_from_aggregate_event_with_version(aggregate_version), events.some_event_content_bson_document);
 
         public Events.StreamEvent build() => _instance;
 
@@ -41,7 +42,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public stream_event_builder with_partition(PartitionId partition)
         {
-            _instance.Metadata.Partition = partition;
+            _instance.Partition = partition;
             return this;
         }
 

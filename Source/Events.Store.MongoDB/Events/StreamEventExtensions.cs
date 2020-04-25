@@ -22,8 +22,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.EventLogSequenceNumber,
                 committedEvent.Occurred,
                 committedEvent.EventSource,
-                committedEvent.Cause.Type,
-                committedEvent.Cause.Position,
                 committedEvent.Type.Id,
                 committedEvent.Type.Generation,
                 committedEvent.Public);
@@ -33,37 +31,31 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
         /// <returns>The converted <see cref="CommittedAggregateEvent" />.</returns>
-        public static CommittedAggregateEvent ToCommittedAggregateEvent(this MongoDB.Events.StreamEvent @event) =>
+        public static CommittedAggregateEvent ToCommittedAggregateEvent(this StreamEvent @event) =>
             new CommittedAggregateEvent(
                 new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
                 @event.Aggregate.Version,
                 @event.Metadata.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
-                @event.ExecutionContext.Correlation,
-                @event.ExecutionContext.Microservice,
-                @event.ExecutionContext.Tenant,
-                new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
+                @event.ExecutionContext.ToExecutionContext(),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
                 @event.Content.ToString());
 
         /// <summary>
-        /// Converts a <see cref="MongoDB.Events.StreamEvent" /> to <see cref="CommittedEvent" />.
+        /// Converts a <see cref="StreamEvent" /> to <see cref="CommittedEvent" />.
         /// </summary>
-        /// <param name="event">The <see cref="MongoDB.Events.StreamEvent" />.</param>
+        /// <param name="event">The <see cref="StreamEvent" />.</param>
         /// <returns>The converted <see cref="CommittedEvent" />.</returns>
-        public static CommittedEvent ToCommittedEvent(this MongoDB.Events.StreamEvent @event) =>
+        public static CommittedEvent ToCommittedEvent(this StreamEvent @event) =>
             @event.Aggregate.WasAppliedByAggregate ?
                 @event.ToCommittedAggregateEvent()
                 : new CommittedEvent(
                     @event.Metadata.EventLogSequenceNumber,
                     @event.Metadata.Occurred,
                     @event.Metadata.EventSource,
-                    @event.ExecutionContext.Correlation,
-                    @event.ExecutionContext.Microservice,
-                    @event.ExecutionContext.Tenant,
-                    new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
+                    @event.ExecutionContext.ToExecutionContext(),
                     new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                     @event.Metadata.Public,
                     @event.Content.ToString());
@@ -88,10 +80,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new MongoDB.Events.StreamEvent(
                 streamPosition,
                 partition,
-                new ExecutionContext(
-                    committedEvent.CorrelationId,
-                    committedEvent.Microservice,
-                    committedEvent.Tenant),
+                committedEvent.ExecutionContext.ToStoreRepresentation(),
                 committedEvent.GetStreamEventMetadata(),
                 committedEvent.GetAggregateMetadata(),
                 BsonDocument.Parse(committedEvent.Content));

@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Threading;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -20,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         IEnumerable<StreamProcessor> Processors { get; }
 
         /// <summary>
-        /// Registers and starts a <see cref="StreamProcessor" />.
+        /// Registers a <see cref="StreamProcessor" />.
         /// </summary>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
@@ -30,11 +29,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         StreamProcessorRegistrationResult Register(IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, StreamId sourceStreamId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Unregister a <see cref="IEventProcessor"/> from stream processing.
+        /// Unregister a <see cref="StreamProcessor"/> from the in memory map.
         /// </summary>
-        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-        /// <param name="eventProcessorId">The <see cref="EventProcessorId" /> of the event processor.</param>
-        /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
-        void Unregister(ScopeId scopeId, EventProcessorId eventProcessorId, StreamId sourceStreamId);
+        /// <remarks>Does not actually stop the stream processor. They are only stopped through the <see cref="CancellationToken" /> they are given.</remarks>
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
+        void Unregister(StreamProcessorId streamProcessorId);
     }
 }

@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
@@ -14,14 +16,18 @@ namespace Dolittle.Runtime.Events.Processing
         bool Succeeded { get; }
 
         /// <summary>
+        /// Gets the reason for why processing failed.
+        /// </summary>
+        string FailureReason { get; }
+
+        /// <summary>
         /// Gets a value indicating whether to retry processing.
         /// </summary>
         bool Retry { get; }
 
-        #nullable enable
         /// <summary>
-        /// Gets the nullable <see cref="ProcessorFailure" />.
+        /// Gets the retry timeout <see cref="TimeSpan" />.
         /// </summary>
-        ProcessorFailure? Failure { get; }
+        TimeSpan RetryTimeout { get; }
     }
 }

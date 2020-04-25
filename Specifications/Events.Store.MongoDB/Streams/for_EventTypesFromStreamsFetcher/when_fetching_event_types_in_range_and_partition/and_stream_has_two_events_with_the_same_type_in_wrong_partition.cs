@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -24,12 +25,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
             event_type = new Artifact(Guid.NewGuid(), 0);
             first_committed_event = committed_events.a_committed_event_with_type(0, event_type);
             second_committed_event = committed_events.a_committed_event_with_type(1, event_type);
-            var events = an_event_store_connection.GetStreamCollectionAsync(stream).GetAwaiter().GetResult();
+            var events = an_event_store_connection.GetStreamCollection(stream, CancellationToken.None).GetAwaiter().GetResult();
             events.InsertOne(first_committed_event.ToStoreStreamEvent(0, Guid.NewGuid()));
             events.InsertOne(second_committed_event.ToStoreStreamEvent(1, Guid.NewGuid()));
         };
 
-        Because of = () => result = event_types_from_streams.FetchTypesInRangeAndPartition(stream, Guid.NewGuid(), new StreamPositionRange(0U, 1U)).GetAwaiter().GetResult();
+        Because of = () => result = event_types_from_streams.FetchInRangeAndPartition(ScopeId.Default, stream, Guid.NewGuid(), new StreamPositionRange(0U, 2U), CancellationToken.None).GetAwaiter().GetResult();
 
         It should_return_empty_list = () => result.ShouldBeEmpty();
     }

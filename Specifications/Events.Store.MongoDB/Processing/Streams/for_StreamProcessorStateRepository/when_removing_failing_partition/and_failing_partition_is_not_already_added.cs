@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Logging;
 using Machine.Specifications;
 
@@ -16,11 +17,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.for_StreamPro
         Establish context = () =>
         {
             repository = new StreamProcessorStateRepository(an_event_store_connection, Moq.Mock.Of<ILogger>());
-            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
-            repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
+            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+            repository.GetOrAddNew(stream_processor_id, CancellationToken.None).GetAwaiter().GetResult();
         };
 
-        Because of = () => exception = Catch.Exception(() => repository.RemoveFailingPartition(stream_processor_id, Guid.NewGuid()).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => repository.RemoveFailingPartition(stream_processor_id, Guid.NewGuid(), CancellationToken.None).GetAwaiter().GetResult());
 
         It should_throw_an_exception = () => exception.ShouldNotBeNull();
         It should_fail_because_failing_partition_does_not_exist = () => exception.ShouldBeOfExactType<Runtime.Events.Processing.Streams.FailingPartitionDoesNotExist>();

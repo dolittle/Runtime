@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Globalization;
 using Dolittle.Execution;
-using Dolittle.Security;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoots.given
@@ -19,15 +17,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoots.gi
         Establish context = () =>
         {
             an_event_store_connection = new an_event_store_connection(new a_mongo_db_connection());
-            execution_context = new ExecutionContext(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "dev",
-                Guid.NewGuid(),
-                Claims.Empty,
-                CultureInfo.InvariantCulture);
-            uncommitted_event = new UncommittedEvent(new Artifacts.Artifact(Guid.NewGuid(), 0), is_public, events.some_event_content);
+            execution_context = execution_contexts.create();
+            uncommitted_event = new UncommittedEvent(Guid.NewGuid(), new Artifacts.Artifact(Guid.NewGuid(), 0), is_public, events.some_event_content);
         };
 
         Cleanup cleanup = () => an_event_store_connection.Dispose();

@@ -16,10 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static StreamEventMetadata random_stream_event_metadata => new stream_event_metadata_builder().build();
 
-        public static public_event_metadata_builder new_public_event_metadata => new public_event_metadata_builder();
-
-        public static PublicEventMetadata random_public_event_metadata => new public_event_metadata_builder().build();
-
         public static AggregateMetadata random_aggregate_metadata_from_aggregate_event_with_version(uint version) =>
             new AggregateMetadata(
                 true,

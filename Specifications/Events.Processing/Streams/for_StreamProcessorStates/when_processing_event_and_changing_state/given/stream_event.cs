@@ -15,13 +15,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorStates.w
                     0,
                     DateTimeOffset.Now,
                     Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    Guid.NewGuid(),
-                    new Cause(CauseType.Command, 0),
+                    execution_contexts.create(),
                     new Artifacts.Artifact(Guid.NewGuid(), 1),
                     false,
                     ""),
+                StreamPosition.Start,
                 Guid.NewGuid(),
                 partition);
     }

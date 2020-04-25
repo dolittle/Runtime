@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 {
     public static class ShouldExtensions
     {
-        public static CommittedEvent ShouldBeStoredWithCorrectStoreRepresentation(this CommittedEvent committedEvent, Event storedEvent, StreamPosition streamPosition, PartitionId partition)
+        public static CommittedEvent ShouldBeStoredWithCorrectStoreRepresentation(this CommittedEvent committedEvent, MongoDB.Events.Event storedEvent, StreamPosition streamPosition, PartitionId partition)
         {
             Ensure.IsNotNull(nameof(committedEvent), committedEvent);
             Ensure.IsNotNull(nameof(storedEvent), storedEvent);
@@ -19,13 +19,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.EventLogSequenceNumber.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogSequenceNumber);
             storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
 
-            storedEvent.Metadata.CausePosition.ShouldEqual(committedEventStoreRepresentation.Metadata.CausePosition);
-            storedEvent.Metadata.CauseType.ShouldEqual(committedEventStoreRepresentation.Metadata.CauseType);
-            storedEvent.Metadata.Correlation.ShouldEqual(committedEventStoreRepresentation.Metadata.Correlation);
+            storedEvent.ExecutionContext.Correlation.ShouldEqual(committedEventStoreRepresentation.ExecutionContext.Correlation);
             storedEvent.Metadata.EventSource.ShouldEqual(committedEventStoreRepresentation.Metadata.EventSource);
-            storedEvent.Metadata.Microservice.ShouldEqual(committedEventStoreRepresentation.Metadata.Microservice);
+            storedEvent.ExecutionContext.Microservice.ShouldEqual(committedEventStoreRepresentation.ExecutionContext.Microservice);
             storedEvent.Metadata.Occurred.ShouldEqual(committedEventStoreRepresentation.Metadata.Occurred);
-            storedEvent.Metadata.Tenant.ShouldEqual(committedEventStoreRepresentation.Metadata.Tenant);
+            storedEvent.ExecutionContext.Tenant.ShouldEqual(committedEventStoreRepresentation.ExecutionContext.Tenant);
             storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeGeneration);
             storedEvent.Metadata.TypeId.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeId);
 
@@ -46,15 +44,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogSequenceNumber);
             storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
             storedEvent.StreamPosition.ShouldEqual(committedEventStoreRepresentation.StreamPosition);
-            storedEvent.Metadata.Partition.ShouldEqual(committedEventStoreRepresentation.Metadata.Partition);
+            storedEvent.Partition.ShouldEqual(committedEventStoreRepresentation.Partition);
 
-            storedEvent.Metadata.CausePosition.ShouldEqual(committedEventStoreRepresentation.Metadata.CausePosition);
-            storedEvent.Metadata.CauseType.ShouldEqual(committedEventStoreRepresentation.Metadata.CauseType);
-            storedEvent.Metadata.Correlation.ShouldEqual(committedEventStoreRepresentation.Metadata.Correlation);
+            storedEvent.ExecutionContext.Correlation.ShouldEqual(committedEventStoreRepresentation.ExecutionContext.Correlation);
             storedEvent.Metadata.EventSource.ShouldEqual(committedEventStoreRepresentation.Metadata.EventSource);
-            storedEvent.Metadata.Microservice.ShouldEqual(committedEventStoreRepresentation.Metadata.Microservice);
+            storedEvent.ExecutionContext.Microservice.ShouldEqual(committedEventStoreRepresentation.ExecutionContext.Microservice);
             storedEvent.Metadata.Occurred.ShouldEqual(committedEventStoreRepresentation.Metadata.Occurred);
-            storedEvent.Metadata.Tenant.ShouldEqual(committedEventStoreRepresentation.Metadata.Tenant);
+            storedEvent.ExecutionContext.Tenant.ShouldEqual(committedEventStoreRepresentation.ExecutionContext.Tenant);
             storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeGeneration);
             storedEvent.Metadata.TypeId.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeId);
 
@@ -66,42 +62,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             return committedEvent;
         }
 
-        public static CommittedEvent ShouldBeStoredWithCorrectStoreRepresentation(this CommittedEvent committedEvent, PublicEvent storedEvent, StreamPosition streamPosition)
-        {
-            Ensure.IsNotNull(nameof(committedEvent), committedEvent);
-            Ensure.IsNotNull(nameof(storedEvent), storedEvent);
-            var committedEventStoreRepresentation = committedEvent.ToStoreStreamEvent(streamPosition, PartitionId.NotSet);
-
-            storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEventStoreRepresentation.Metadata.EventLogSequenceNumber);
-            storedEvent.Content.ShouldEqual(committedEventStoreRepresentation.Content);
-            storedEvent.StreamPosition.ShouldEqual(committedEventStoreRepresentation.StreamPosition);
-
-            storedEvent.Metadata.CausePosition.ShouldEqual(committedEventStoreRepresentation.Metadata.CausePosition);
-            storedEvent.Metadata.CauseType.ShouldEqual(committedEventStoreRepresentation.Metadata.CauseType);
-            storedEvent.Metadata.Correlation.ShouldEqual(committedEventStoreRepresentation.Metadata.Correlation);
-            storedEvent.Metadata.EventSource.ShouldEqual(committedEventStoreRepresentation.Metadata.EventSource);
-            storedEvent.Metadata.Microservice.ShouldEqual(committedEventStoreRepresentation.Metadata.Microservice);
-            storedEvent.Metadata.Occurred.ShouldEqual(committedEventStoreRepresentation.Metadata.Occurred);
-            storedEvent.Metadata.Tenant.ShouldEqual(committedEventStoreRepresentation.Metadata.Tenant);
-            storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeGeneration);
-            storedEvent.Metadata.TypeId.ShouldEqual(committedEventStoreRepresentation.Metadata.TypeId);
-
-            return committedEvent;
-        }
-
         public static CommittedEvent ShouldBeTheSameAs(this CommittedEvent committedEvent, CommittedEvent otherEvent)
         {
             Ensure.IsNotNull(nameof(committedEvent), committedEvent);
             Ensure.IsNotNull(nameof(otherEvent), otherEvent);
 
-            otherEvent.Cause.ShouldEqual(committedEvent.Cause);
             otherEvent.Content.ShouldEqual(committedEvent.Content);
-            otherEvent.CorrelationId.ShouldEqual(committedEvent.CorrelationId);
+            otherEvent.ExecutionContext.CorrelationId.ShouldEqual(committedEvent.ExecutionContext.CorrelationId);
             otherEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber);
             otherEvent.EventSource.ShouldEqual(committedEvent.EventSource);
-            otherEvent.Microservice.ShouldEqual(committedEvent.Microservice);
+            otherEvent.ExecutionContext.Microservice.ShouldEqual(committedEvent.ExecutionContext.Microservice);
             otherEvent.Occurred.ShouldEqual(committedEvent.Occurred);
-            otherEvent.Tenant.ShouldEqual(committedEvent.Tenant);
+            otherEvent.ExecutionContext.Tenant.ShouldEqual(committedEvent.ExecutionContext.Tenant);
             otherEvent.Type.ShouldEqual(committedEvent.Type);
 
             return committedEvent;

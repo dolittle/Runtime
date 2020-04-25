@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoots.when_fetching_version
@@ -23,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoots.wh
         Because of = () =>
         {
             using var session = an_event_store_connection.MongoClient.StartSession();
-            result = aggregate_roots.FetchVersionFor(session, event_source_id, aggregate_root).GetAwaiter().GetResult();
+            result = aggregate_roots.FetchVersionFor(session, event_source_id, aggregate_root, CancellationToken.None).GetAwaiter().GetResult();
         };
 
         It should_return_the_initial_aggregate_root_version = () => result.ShouldEqual(AggregateRootVersion.Initial);
