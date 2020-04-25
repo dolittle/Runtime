@@ -63,8 +63,5 @@ namespace Dolittle.Runtime.Events.Processing
                 return new EventProcessorsRegistrationResult($"Failed registering Event Processor: '{_eventProcessor.Identifier}' on Stream: '{_sourceStreamId}. {ex.Message}'");
             }
         }
-
-        /// <inheritdoc/>
-        protected override Task OnCompleted() => Task.CompletedTask;
     }
 }

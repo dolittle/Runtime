@@ -53,11 +53,12 @@ namespace Dolittle.Runtime.Events.Processing
         protected StreamProcessorRegistrations StreamProcessorRegistrations { get; }
 
         /// <inheritdoc/>
-        public Task Complete()
+        public async Task Complete()
         {
             ThrowIfCompleted();
             Completed = true;
-            return OnCompleted();
+            await OnCompleted().ConfigureAwait(false);
+            if (Succeeded) StreamProcessorRegistrations.TryStart();
         }
 
         /// <inheritdoc/>
@@ -94,7 +95,7 @@ namespace Dolittle.Runtime.Events.Processing
         /// The action that is should be performed only once when the registration is completed.
         /// </summary>
         /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
-        protected abstract Task OnCompleted();
+        protected virtual Task OnCompleted() => Task.CompletedTask;
 
         /// <summary>
         /// Register stream processor for all Tenants.

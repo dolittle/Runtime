@@ -4,7 +4,7 @@
 namespace Dolittle.Runtime.Events.Processing
 {
     /// <summary>
-    /// Represents the result of registering Event Processors.
+    /// Represents the result of <see cref="IEventProcessorsRegistration.Register()" />.
     /// </summary>
     public class EventProcessorsRegistrationResult
     {

@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Processing.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
 {
@@ -28,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing
         Task<EventProcessorsRegistrationResult> Register();
 
         /// <summary>
-        /// Complete the registration.
+        /// Starts the registered <see cref="StreamProcessor" />s and completes the registration.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task Complete();
