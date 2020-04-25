@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
@@ -51,8 +52,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        protected override Task OnCompleted() =>
-            _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(_filterProcessor.Scope, new StreamDefinition(_filterProcessor.Definition), CancellationToken.None));
+        protected override Task OnCompleted()
+        {
+            if (Succeeded)
+            {
+                return _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(_filterProcessor.Scope, new StreamDefinition(_filterProcessor.Definition), CancellationToken.None));
+            }
+
+            return Task.CompletedTask;
+        }
 
         /// <inheritdoc/>
         protected override async Task<EventProcessorsRegistrationResult> PerformRegistration()
@@ -61,11 +69,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (_filterProcessor.Scope == ScopeId.Default && _filterProcessor.Definition.TargetStream == StreamId.AllStreamId) throw new FilterCannotWriteToEventLog();
                 var validationResults = await ValidateFilter().ConfigureAwait(false);
-                var filterValidationResult = await _filterValidators.Validate(_filterProcessor, CancellationToken).ConfigureAwait(false);
-                if (!filterValidationResult.Succeeded)
+                if (validationResults.Any(_ => !_.Succeeded))
                 {
                     Succeeded = false;
-                    return new EventProcessorsRegistrationResult($"Failed to register Filter: '{_filterProcessor.Identifier}' on Stream: {_filterProcessor.Definition.SourceStream}. {filterValidationResult.FailureReason}");
+                    var failedValidation = validationResults.First(_ => !_.Succeeded);
+                    return new EventProcessorsRegistrationResult($"Failed to register Filter: '{_filterProcessor.Identifier}' on Stream: {_filterProcessor.Definition.SourceStream}. {failedValidation.FailureReason}");
                 }
 
                 var failed = await RegisterStreamProcessor(
@@ -75,7 +83,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (failed)
                 {
                     Succeeded = false;
-                    return new EventProcessorsRegistrationResult($"Failed registering Filter: '{_filterProcessor.Identifier}' on Stream: '{_filterProcessor.Definition.SourceStream}");
+                    var failedRegistration = StreamProcessorRegistrations.First(_ => !_.Succeeded);
+                    return new EventProcessorsRegistrationResult($"Failed registering Filter: '{_filterProcessor.Identifier}' on Stream: '{_filterProcessor.Definition.SourceStream}. {failedRegistration.FailureReason}");
                 }
 
                 Succeeded = true;
