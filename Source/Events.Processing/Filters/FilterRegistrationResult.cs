@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -15,12 +16,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterRegistrationResult{T}"/> class.
         /// </summary>
-        /// <param name="filterStreamProcessor">The <see cref="StreamProcessor" /> for the filter.</param>
         /// <param name="filterProcessor">The <see cref="IFilterProcessor{T}" />.</param>
-        public FilterRegistrationResult(StreamProcessor filterStreamProcessor, IFilterProcessor<TFilterDefinition> filterProcessor)
+        public FilterRegistrationResult(IFilterProcessor<TFilterDefinition> filterProcessor)
         {
             Succeeded = true;
-            FilterStreamProcessor = filterStreamProcessor;
             FilterProcessor = filterProcessor;
         }
 
@@ -38,11 +37,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Gets a value indicating whether the registration of the <see cref="StreamProcessor">stream processors</see> for the event handler succeeded.
         /// </summary>
         public bool Succeeded { get; }
-
-        /// <summary>
-        /// Gets the filter <see cref="StreamProcessor" />.
-        /// </summary>
-        public StreamProcessor FilterStreamProcessor { get; }
 
         /// <summary>
         /// Gets the <see cref="IFilterProcessor{T}" /> for TFilterDefinition.

@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             FilterValidationResult filterValidationResult)
         {
             var value = string.Empty;
-            value += filterProcessorRegistrationResult.NewStreamProcessorWasRegistered ?
+            value += filterProcessorRegistrationResult.Failed ?
                 string.Empty
                 : $"{(string.IsNullOrEmpty(value) ? string.Empty : "\n")}Stream Processor for filter with Stream Processor Id: '{filterProcessorRegistrationResult.StreamProcessor.Identifier}' has already been registered";
 

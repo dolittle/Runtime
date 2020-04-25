@@ -31,10 +31,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             FilterValidationResult filterValidationResult)
         {
             var value = string.Empty;
-            value += eventProcessorRegistrationResult.NewStreamProcessorWasRegistered ?
+            value += eventProcessorRegistrationResult.Failed ?
                 string.Empty
                 : $"{(string.IsNullOrEmpty(value) ? string.Empty : "\n")}Stream Processor for event processor with Stream Processor Id: '{eventProcessorRegistrationResult.StreamProcessor.Identifier}' has already been registered";
-            value += filterProcessorRegistrationResult.NewStreamProcessorWasRegistered ?
+            value += filterProcessorRegistrationResult.Failed ?
                 string.Empty
                 : $"{(string.IsNullOrEmpty(value) ? string.Empty : "\n")}Stream Processor for filter with Stream Processor Id: '{filterProcessorRegistrationResult.StreamProcessor.Identifier}' has already been registered";
 

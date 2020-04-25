@@ -3,6 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -16,10 +18,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <typeparam name="TFilterDefinition">The <see cref="IFilterDefinition" /> type.</typeparam>
         /// <param name="filterProcessor">The <see cref="IFilterProcessor{TDefinition}" />.</param>
+        /// <param name="streamProcessorRegistrations">The <see cref="StreamProcessorRegistrations" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A task.</returns>
         Task<FilterRegistrationResult<TFilterDefinition>> Register<TFilterDefinition>(
             IFilterProcessor<TFilterDefinition> filterProcessor,
+            StreamProcessorRegistrations streamProcessorRegistrations,
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition;
     }

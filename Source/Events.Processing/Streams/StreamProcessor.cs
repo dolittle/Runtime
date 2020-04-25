@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly CancellationToken _cancellationToken;
         readonly IStreamProcessorStates _streamProcessorStates;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
-        readonly IStreamProcessors _streamProcessors;
+        readonly Action _unregister;
         readonly string _logMessagePrefix;
         readonly CancellationTokenRegistration _cancellationTokenRegistration;
         Task _task;
@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
-        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
+        /// <param name="unregister">The <see cref="Action" /> that unregisters the <see cref="StreamProcessor" /> from <see cref="IStreamProcessors" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public StreamProcessor(
@@ -44,17 +44,17 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IEventProcessor processor,
             IStreamProcessorStates streamProcessorStates,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
-            IStreamProcessors streamProcessors,
+            Action unregister,
             ILogger logger,
             CancellationToken cancellationToken)
         {
             _processor = processor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;
-            _streamProcessors = streamProcessors;
+            _unregister = unregister;
             _logger = logger;
             _cancellationToken = cancellationToken;
-            _cancellationTokenRegistration = _cancellationToken.Register(() => _streamProcessors.Unregister(Identifier));
+            _cancellationTokenRegistration = _cancellationToken.Register(() => _unregister());
             Identifier = new StreamProcessorId(_processor.Scope, _processor.Identifier, sourceStreamId);
             CurrentState = StreamProcessorState.New;
             _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' in scope {Identifier.ScopeId} with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
