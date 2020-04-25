@@ -3,6 +3,7 @@
 
 using Dolittle.DependencyInversion;
 using Dolittle.Logging;
+using Dolittle.Types;
 using Machine.Specifications;
 using Moq;
 
@@ -10,13 +11,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given
 {
     public class all_dependencies
     {
+        protected static Mock<ITypeFinder> type_finder;
         protected static Mock<IContainer> container;
         protected static FilterValidators filter_validators;
 
         Establish context = () =>
         {
+            type_finder = new Mock<ITypeFinder>();
             container = new Mock<IContainer>();
-            filter_validators = new FilterValidators(container.Object, Mock.Of<ILogger>());
+            filter_validators = new FilterValidators(type_finder.Object, container.Object, Mock.Of<ILogger>());
         };
     }
 }

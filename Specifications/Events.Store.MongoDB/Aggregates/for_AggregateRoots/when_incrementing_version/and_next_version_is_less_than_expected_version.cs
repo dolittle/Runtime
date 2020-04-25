@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoots.when_incrementing_version
@@ -15,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoots.wh
         Because of = () =>
         {
             using var session = an_event_store_connection.MongoClient.StartSession();
-            exception = Catch.Exception(() => aggregate_roots.IncrementVersionFor(session, Guid.NewGuid(), Guid.NewGuid(), 1, 0).GetAwaiter().GetResult());
+            exception = Catch.Exception(() => aggregate_roots.IncrementVersionFor(session, Guid.NewGuid(), Guid.NewGuid(), 1, 0, CancellationToken.None).GetAwaiter().GetResult());
         };
 
         It should_throw_an_exception = () => exception.ShouldNotBeNull();

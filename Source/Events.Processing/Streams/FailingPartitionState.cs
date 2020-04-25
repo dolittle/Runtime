@@ -28,11 +28,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public string Reason { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="ProcessorFailureType" />.
-        /// </summary>
-        public ProcessorFailureType FailureType { get; set; }
-
-        /// <summary>
         /// Gets or sets the number of times that the event at position has been attempted processed.
         /// </summary>
         public uint ProcessingAttempts { get; set; }

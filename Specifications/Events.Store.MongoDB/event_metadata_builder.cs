@@ -15,11 +15,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 DateTimeOffset.UtcNow,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                CauseType.Command,
-                0,
-                Guid.NewGuid(),
                 0,
                 false);
 

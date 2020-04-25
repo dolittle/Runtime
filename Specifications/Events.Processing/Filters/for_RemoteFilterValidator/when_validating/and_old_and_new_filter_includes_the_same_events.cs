@@ -12,31 +12,28 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.when_validating
 {
+    [Ignore("Not implemented")]
     public class and_old_and_new_filter_includes_the_same_events : given.all_dependencies
     {
         static StreamEvent @event;
-        static Exception exception;
+        static FilterValidationResult result;
 
         Establish context = () =>
         {
             @event = given.stream_event.single();
-            streams_metadata
-                .Setup(_ => _.GetLastProcessedEventLogSequenceNumber(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<EventLogSequenceNumber>(1));
-
             event_types_fetcher
-                .Setup(_ => _.FetchTypesInRange(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPositionRange>(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.FetchInRange(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPositionRange>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new Artifact[] { @event.Event.Type }.AsEnumerable()));
             events_fetcher
-                .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPositionRange>(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.FetchRange(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPositionRange>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new StreamEvent[] { @event }.AsEnumerable()));
             filter_processor
                 .Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<EventProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<IFilterResult>(new SucceededFilteringResult(true, PartitionId.NotSet)));
+                .Returns(Task.FromResult<IFilterResult>(new SuccessfulFiltering(true, Guid.NewGuid())));
         };
 
-        Because of = () => exception = Catch.Exception(() => validator.Validate(filter_processor.Object).GetAwaiter().GetResult());
+        Because of = () => result = validator.Validate(filter_processor.Object, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_not_fail_validation = () => exception.ShouldBeNull();
+        It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
     }
 }

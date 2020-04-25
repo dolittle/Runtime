@@ -16,12 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 DateTimeOffset.UtcNow,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                CauseType.Command,
-                0,
-                Guid.NewGuid(),
                 0,
                 false);
 
@@ -30,12 +24,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public stream_event_metadata_builder with_event_log_sequence_number(uint event_log_sequence_number)
         {
             _instance.EventLogSequenceNumber = event_log_sequence_number;
-            return this;
-        }
-
-        public stream_event_metadata_builder with_partition(Guid partition)
-        {
-            _instance.Partition = partition;
             return this;
         }
 

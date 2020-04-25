@@ -18,13 +18,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="eventLogSequenceNumber">The event log sequence number.</param>
         /// <param name="occurred">The date time offset of when the event occurred.</param>
         /// <param name="eventSource">The event source that applied the event.</param>
-        /// <param name="causeType">The type of the cause.</param>
-        /// <param name="causePosition">The position of the cause.</param>
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
         /// <param name="isPublic">Whether the Event is public.</param>
-        public StreamEventMetadata(ulong eventLogSequenceNumber, DateTimeOffset occurred, Guid eventSource, CauseType causeType, ulong causePosition, Guid typeId, int typeGeneration, bool isPublic)
-            : base(occurred, eventSource, causeType, causePosition, typeId, typeGeneration, isPublic)
+        public StreamEventMetadata(ulong eventLogSequenceNumber, DateTimeOffset occurred, Guid eventSource, Guid typeId, uint typeGeneration, bool isPublic)
+            : base(occurred, eventSource, typeId, typeGeneration, isPublic)
         {
             EventLogSequenceNumber = eventLogSequenceNumber;
         }

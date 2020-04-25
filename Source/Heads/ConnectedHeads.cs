@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
+using Dolittle.Services;
 
 namespace Dolittle.Runtime.Heads
 {

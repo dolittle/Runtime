@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
 {
     public class all_dependencies
     {
+        protected static ScopeId scope_id;
         protected static EventProcessorId event_processor_id;
         protected static StreamId stream_id;
         protected static Mock<IWriteEventsToStreams> events_to_streams_writer;
@@ -27,6 +28,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
             events_to_streams_writer = new Mock<IWriteEventsToStreams>();
 
             filter_processor = new Mock<AbstractFilterProcessor<IFilterDefinition>>(
+                scope_id,
                 new RemoteFilterDefinition(stream_id.Value, event_processor_id.Value),
                 events_to_streams_writer.Object,
                 Mock.Of<ILogger>());

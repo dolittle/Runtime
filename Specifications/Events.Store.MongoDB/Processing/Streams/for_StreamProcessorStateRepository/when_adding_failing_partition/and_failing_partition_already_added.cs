@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
@@ -19,12 +20,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.for_StreamPro
         {
             repository = new StreamProcessorStateRepository(an_event_store_connection, Moq.Mock.Of<ILogger>());
             partition = Guid.NewGuid();
-            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
-            repository.GetOrAddNew(stream_processor_id).GetAwaiter().GetResult();
-            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "").GetAwaiter().GetResult();
+            stream_processor_id = new Runtime.Events.Processing.Streams.StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+            repository.GetOrAddNew(stream_processor_id, CancellationToken.None).GetAwaiter().GetResult();
+            repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "", CancellationToken.None).GetAwaiter().GetResult();
         };
 
-        Because of = () => exception = Catch.Exception(() => repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "").GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => repository.AddFailingPartition(stream_processor_id, partition, 0U, DateTimeOffset.UtcNow, "", CancellationToken.None).GetAwaiter().GetResult());
 
         It should_throw_an_exception = () => exception.ShouldNotBeNull();
         It should_fail_because_failing_partition_has_already_been_added = () => exception.ShouldBeOfExactType<Runtime.Events.Processing.Streams.FailingPartitionAlreadyExists>();

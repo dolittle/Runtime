@@ -1,13 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -38,28 +35,21 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger = logger;
         }
 
-        #nullable enable
         /// <inheritdoc/>
-        public override async Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, RetryProcessingState? retryProcessing, CancellationToken cancellationToken)
+        public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            try
+            var included = Definition.Types.Contains(@event.Type.Id);
+            var outPartitionId = PartitionId.NotSet;
+            if (Definition.Partitioned)
             {
-                var included = Definition.Types.Contains(@event.Type.Id);
-                var outPartitionId = PartitionId.NotSet;
-                if (Definition.Partitioned)
-                {
-                    outPartitionId = @event.EventSource.Value;
-                }
+                outPartitionId = @event.EventSource.Value;
+            }
 
-                var filterResult = new FilteringResult(included, outPartitionId);
-                return await Task.FromResult(filterResult).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                return await Task.FromResult(
-                    new FilteringResult(
-                        new ProcessorFailure(ProcessorFailureType.Persistent, $"Failure Message: {ex.Message}\nStack Trace: {ex.StackTrace}"))).ConfigureAwait(false);
-            }
+            return Task.FromResult<IFilterResult>(new SuccessfulFiltering(included, outPartitionId));
         }
+
+        /// <inheritdoc/>
+        public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken) =>
+            Filter(@event, partitionId, eventProcessorId, cancellationToken);
     }
 }

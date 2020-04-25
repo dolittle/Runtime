@@ -70,7 +70,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 eventLogSequenceNumber,
                                 DateTimeOffset.UtcNow,
                                 _executionContextManager.Current,
-                                new Cause(CauseType.Unknown, 0),
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
@@ -115,7 +114,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 DateTimeOffset.UtcNow,
                                 events.EventSource,
                                 _executionContextManager.Current,
-                                new Cause(CauseType.Unknown, 0),
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
@@ -186,11 +184,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
         }
 
         void ThrowIfNoEventsToCommit(UncommittedEvents events)

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Applications.Configuration
+namespace Dolittle.ApplicationModel.Configuration
 {
     /// <summary>
     /// Exception that gets thrown when there is no configuration for the bounded context.

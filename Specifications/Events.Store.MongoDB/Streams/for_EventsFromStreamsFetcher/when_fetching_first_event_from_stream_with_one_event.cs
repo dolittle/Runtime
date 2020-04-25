@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 
 using Dolittle.Runtime.Events.Store.Streams;
@@ -15,23 +16,22 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventsFromStreamsFet
         static StreamId stream;
         static PartitionId partition;
         static Events.StreamEvent stored_event;
-        static Runtime.Events.Streams.StreamEvent result;
+        static Runtime.Events.Store.Streams.StreamEvent result;
 
         Establish context = () =>
         {
             stream = Guid.NewGuid();
             partition = Guid.NewGuid();
-            stored_event = events.new_stream_event_not_from_aggregate(0)
+            stored_event = events.new_stream_event_not_from_aggregate(0, partition)
                 .with_event_log_sequence_number(0)
-                .with_partition(partition).build();
+                .build();
 
-            an_event_store_connection.GetStreamCollectionAsync(stream).GetAwaiter().GetResult().InsertOne(stored_event);
+            an_event_store_connection.GetStreamCollection(stream, CancellationToken.None).GetAwaiter().GetResult().InsertOne(stored_event);
         };
 
-        Because of = () => result = events_from_streams_fetcher.Fetch(stream, 0U).GetAwaiter().GetResult();
+        Because of = () => result = events_from_streams_fetcher.Fetch(ScopeId.Default, stream, 0U, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_not_use_events_from_event_log_fetcher = () => events_from_event_log_fetcher.Verify(_ => _.Fetch(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<System.Threading.CancellationToken>()), Moq.Times.Never);
-        It should_not_use_public_events_fetcher = () => public_events_fetcher.Verify(_ => _.Fetch(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<System.Threading.CancellationToken>()), Moq.Times.Never);
+        It should_not_use_events_from_event_log_fetcher = () => events_from_event_log_fetcher.Verify(_ => _.Fetch(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
         It should_fetch_an_event = () => result.ShouldNotBeNull();
         It should_fetch_event_with_the_correct_partition_id = () => result.Partition.ShouldEqual(partition);
         It should_fetch_event_with_the_stream_id = () => result.Stream.ShouldEqual(stream);

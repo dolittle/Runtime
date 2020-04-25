@@ -50,13 +50,6 @@ namespace Dolittle.Runtime.Server
             app.UseGrpcWeb();
             app.UseCors();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapGrpcService<Tenancy.Management.TenantsService>().EnableGrpcWeb().RequireCors("AllowAll");
-                endpoints.MapGrpcService<Heads.Management.HeadsService>().EnableGrpcWeb().RequireCors("AllowAll");
-                endpoints.MapGrpcService<Logging.Management.LogService>().EnableGrpcWeb().RequireCors("AllowAll");
-            });
-
             app.RunAsSinglePageApplication();
         }
     }

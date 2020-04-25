@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Dolittle.Configuration;
 using Dolittle.ResourceTypes;
 
-namespace Dolittle.Applications.Configuration
+namespace Dolittle.ApplicationModel.Configuration
 {
     /// <summary>
     /// Represents the definition of a <see cref="Microservice"/> for configuration.

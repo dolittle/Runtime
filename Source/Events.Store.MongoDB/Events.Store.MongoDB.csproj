@@ -10,7 +10,7 @@
         <PackageReference Include="MongoDB.Driver" Version="2.10.1"/>
         <PackageReference Include="Dolittle.ResourceTypes" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
     </ItemGroup>
 
     <ItemGroup>

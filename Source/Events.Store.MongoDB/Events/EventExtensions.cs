@@ -20,8 +20,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new EventMetadata(
                 committedEvent.Occurred,
                 committedEvent.EventSource,
-                committedEvent.Cause.Type,
-                committedEvent.Cause.Position,
                 committedEvent.Type.Id,
                 committedEvent.Type.Generation,
                 committedEvent.Public);
@@ -38,10 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
-                @event.ExecutionContext.Correlation,
-                @event.ExecutionContext.Microservice,
-                @event.ExecutionContext.Tenant,
-                new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
+                @event.ExecutionContext.ToExecutionContext(),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
                 @event.Content.ToString());
@@ -58,10 +53,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                       @event.EventLogSequenceNumber,
                       @event.Metadata.Occurred,
                       @event.Metadata.EventSource,
-                      @event.ExecutionContext.Correlation,
-                      @event.ExecutionContext.Microservice,
-                      @event.ExecutionContext.Tenant,
-                      new Cause(@event.Metadata.CauseType, @event.Metadata.CausePosition),
+                      @event.ExecutionContext.ToExecutionContext(),
                       new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                       @event.Metadata.Public,
                       @event.Content.ToString());

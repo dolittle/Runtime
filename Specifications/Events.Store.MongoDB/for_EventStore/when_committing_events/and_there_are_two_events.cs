@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Threading;
 using Dolittle.Logging;
 using Machine.Specifications;
 
@@ -23,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.for_EventStore.when_committing_e
                 Moq.Mock.Of<ILogger>());
         };
 
-        Because of = () => result = event_store.CommitEvents(uncommitted_events).GetAwaiter().GetResult();
+        Because of = () => result = event_store.CommitEvents(uncommitted_events, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_return_two_committed_events = () => result.Count.ShouldEqual(2);
     }

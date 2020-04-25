@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorStates.w
     {
         static StreamProcessorId stream_processor_id;
 
-        Establish context = () => stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
+        Establish context = () => stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
 
         Because of = () => stream_processor_states.GetStoredStateFor(stream_processor_id, default).GetAwaiter().GetResult();
 

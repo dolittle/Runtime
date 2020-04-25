@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorStates.w
         Establish context = () =>
         {
             partition = Guid.NewGuid();
-            stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid());
+            stream_processor_id = new StreamProcessorId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
         };
 
         Because of = () => stream_processor_states.ProcessEventAndChangeStateFor(
@@ -27,8 +27,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorStates.w
             new StreamProcessorState(0, new Dictionary<PartitionId, FailingPartitionState>
             {
                 { partition, new FailingPartitionState() }
-            })).GetAwaiter().GetResult();
+            }),
+            CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_increment_stream_processor_position = () => stream_processor_state_repository.Verify(_ => _.IncrementPosition(stream_processor_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+        It should_set_next_eent_to_process_position_to_one = () => stream_processor_state_repository.Verify(_ => _.SetNextEventToProcessPosition(stream_processor_id, 1, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     }
 }

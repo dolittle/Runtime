@@ -31,10 +31,10 @@ namespace Dolittle.Runtime.Events.Processing
             return Task.FromResult(state);
         }
 
-        public Task<StreamProcessorState> IncrementPosition(StreamProcessorId streamProcessorId, CancellationToken cancellationToken = default)
+        public Task<StreamProcessorState> SetNextEventToProcessPosition(StreamProcessorId streamProcessorId, StreamPosition position, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
-            newState.Position = newState.Position.Increment();
+            newState.Position = position;
             states[streamProcessorId] = newState;
 
             return Task.FromResult(newState);
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Processing
         public Task<StreamProcessorState> AddFailingPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition position, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken = default)
         {
             var newState = states[streamProcessorId];
-            newState.FailingPartitions.Add(partitionId, new FailingPartitionState { Position = position, RetryTime = retryTime, Reason = reason });
+            newState.FailingPartitions.Add(partitionId, new FailingPartitionState { Position = position, RetryTime = retryTime, Reason = reason, ProcessingAttempts = 1 });
             states[streamProcessorId] = newState;
             return Task.FromResult(newState);
         }

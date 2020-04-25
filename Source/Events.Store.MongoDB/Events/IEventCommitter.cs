@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="sequenceNumber">The expected next <see cref="EventLogSequenceNumber"/> of the event log.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset"/> when the event occurred.</param>
         /// <param name="executionContext">The <see cref="Dolittle.Execution.ExecutionContext" />.</param>
-        /// <param name="cause">The <see cref="Cause" />.</param>
         /// <param name="event">The <see cref="UncommittedEvent"/> to commit.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="CommittedEvent" />.</returns>
@@ -30,7 +29,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             EventLogSequenceNumber sequenceNumber,
             DateTimeOffset occurred,
             Dolittle.Execution.ExecutionContext executionContext,
-            Cause cause,
             UncommittedEvent @event,
             CancellationToken cancellationToken);
 
@@ -44,7 +42,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="occurred">The <see cref="DateTimeOffset"/> when the event occurred.</param>
         /// <param name="eventSource">The <see cref="EventSourceId"/> the event was applied to.</param>
         /// <param name="executionContext">The <see cref="Dolittle.Execution.ExecutionContext" />.</param>
-        /// <param name="cause">The <see cref="Cause" />.</param>
         /// <param name="event">The <see cref="UncommittedEvent"/> to commit.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="CommittedAggregateEvent" />.</returns>
@@ -56,7 +53,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             DateTimeOffset occurred,
             EventSourceId eventSource,
             Dolittle.Execution.ExecutionContext executionContext,
-            Cause cause,
             UncommittedEvent @event,
             CancellationToken cancellationToken);
     }

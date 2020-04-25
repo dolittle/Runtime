@@ -1,18 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Threading;
 using System.Threading.Tasks;
-using contracts::Dolittle.Runtime.Events.Processing;
-using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Services;
-using Google.Protobuf;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
@@ -21,8 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
-        readonly IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> _dispatcher;
-        readonly IExecutionContextManager _executionContextManager;
+        readonly IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse> _dispatcher;
         readonly ILogger _logger;
         readonly string _logMessagePrefix;
 
@@ -31,20 +26,17 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="id">The <see cref="EventProcessorId" />.</param>
-        /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TRequest, TResponse}"/> dispatcher.</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
+        /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> dispatcher.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
             ScopeId scope,
             EventProcessorId id,
-            IReverseCallDispatcher<EventHandlerClientToRuntimeResponse, EventHandlerRuntimeToClientRequest> dispatcher,
-            IExecutionContextManager executionContextManager,
+            IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse> dispatcher,
             ILogger logger)
         {
             Scope = scope;
             Identifier = id;
             _dispatcher = dispatcher;
-            _executionContextManager = executionContextManager;
             _logger = logger;
             _logMessagePrefix = $"Event Processor '{Identifier}'";
         }
@@ -55,23 +47,39 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc />
         public EventProcessorId Identifier { get; }
 
-        #nullable enable
         /// <inheritdoc />
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, RetryProcessingState? retryProcessingState, CancellationToken cancellationToken)
+        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
             _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
 
-            var request = new EventHandlerRuntimeToClientRequest
+            var request = new HandleEventRequest
                 {
-                    Event = @event.ToProtobuf(),
-                    Partition = partitionId.ToProtobuf(),
-                    ExecutionContext = _executionContextManager.Current.ToByteString(),
-                    RetryProcessingState = retryProcessingState
+                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
                 };
+            return Process(request, cancellationToken);
+        }
 
-            ProcessingResult? result = null;
-            await _dispatcher.Call(request, response => result = response).ConfigureAwait(false);
-            return result!;
+        /// <inheritdoc/>
+        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+        {
+            _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}' again for the {retryCount}. time because: {failureReason}");
+            var request = new HandleEventRequest
+                {
+                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                    RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+                };
+            return Process(request, cancellationToken);
+        }
+
+        async Task<IProcessingResult> Process(HandleEventRequest request, CancellationToken cancellationToken)
+        {
+            var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
+
+            return response switch
+                {
+                    { Failure: null } => new SuccessfulProcessing(),
+                    _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
+                };
         }
     }
 }
