@@ -16,8 +16,9 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns a value indicating whether there is a <see cref="StreamDefinition" /> persisted.</returns>
-        Task<bool> HasFor(ScopeId scope, StreamId stream);
+        Task<bool> HasFor(ScopeId scope, StreamId stream, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the persisted <see cref="StreamDefinition" />.
@@ -31,8 +32,10 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <summary>
         /// Persists a <see cref="StreamDefinition" />.
         /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="streamDefinition">The <see cref="StreamDefinition" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-        Task Persist(StreamDefinition streamDefinition);
+        Task Persist(ScopeId scope, StreamDefinition streamDefinition, CancellationToken cancellationToken);
     }
 }
