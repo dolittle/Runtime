@@ -22,31 +22,39 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     public class FilterRegistration<TFilterDefinition> : AbstractEventProcessorsRegistration
         where TFilterDefinition : IFilterDefinition
     {
+        readonly ScopeId _scopeId;
+        readonly TFilterDefinition _filterDefinition;
         readonly IPerformActionOnAllTenants _onAllTenants;
-        readonly IFilterProcessor<TFilterDefinition> _filterProcessor;
+        readonly Func<Task<IFilterProcessor<TFilterDefinition>>> _createFilterProcessor;
         readonly IFilterValidators _filterValidators;
         readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitionRepository;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterRegistration{T}"/> class.
         /// </summary>
+        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
+        /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
+        /// <param name="createFilterProcessor">A <see cref="Func{TResult}" /> that returns a <see cref="Task" /> that, when resolved, returns the <see cref="IFilterProcessor{TDefinition}" />.</param>
         /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-        /// <param name="filterProcessor">The <see cref="IFilterProcessor{TDefinition}" />.</param>
         /// <param name="streamProcessorForAllTenants">The <see cref="IRegisterStreamProcessorForAllTenants" />.</param>
         /// <param name="filterValidators">The <see cref="IFilterValidators" />.</param>
         /// <param name="getStreamDefinitionRepository">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitionRepository" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public FilterRegistration(
+            ScopeId scopeId,
+            TFilterDefinition filterDefinition,
+            Func<Task<IFilterProcessor<TFilterDefinition>>> createFilterProcessor,
             IPerformActionOnAllTenants onAllTenants,
-            IFilterProcessor<TFilterDefinition> filterProcessor,
             IRegisterStreamProcessorForAllTenants streamProcessorForAllTenants,
             IFilterValidators filterValidators,
             FactoryFor<IStreamDefinitionRepository> getStreamDefinitionRepository,
             CancellationToken cancellationToken)
             : base(streamProcessorForAllTenants, cancellationToken)
         {
+            _scopeId = scopeId;
+            _filterDefinition = filterDefinition;
             _onAllTenants = onAllTenants;
-            _filterProcessor = filterProcessor;
+            _createFilterProcessor = createFilterProcessor;
             _filterValidators = filterValidators;
             _getStreamDefinitionRepository = getStreamDefinitionRepository;
         }
@@ -56,7 +64,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             if (Succeeded)
             {
-                return _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(_filterProcessor.Scope, new StreamDefinition(_filterProcessor.Definition), CancellationToken.None));
+                return _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(_scopeId, new StreamDefinition(_filterDefinition), CancellationToken.None));
             }
 
             return Task.CompletedTask;
@@ -67,24 +75,24 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             try
             {
-                if (_filterProcessor.Scope == ScopeId.Default && _filterProcessor.Definition.TargetStream == StreamId.AllStreamId) throw new FilterCannotWriteToEventLog();
+                if (_scopeId == ScopeId.Default && _filterDefinition.TargetStream == StreamId.AllStreamId) throw new FilterCannotWriteToEventLog();
                 var validationResults = await ValidateFilter().ConfigureAwait(false);
                 if (validationResults.Any(_ => !_.Succeeded))
                 {
                     Succeeded = false;
                     var failedValidation = validationResults.First(_ => !_.Succeeded);
-                    return new EventProcessorsRegistrationResult($"Failed to register Filter: '{_filterProcessor.Identifier}' on Stream: {_filterProcessor.Definition.SourceStream}. {failedValidation.FailureReason}");
+                    return new EventProcessorsRegistrationResult($"Failed to register Filter: '{_filterDefinition.TargetStream}'. {failedValidation.FailureReason}");
                 }
 
                 var failed = await RegisterStreamProcessor(
-                    _filterProcessor,
-                    () => _getStreamDefinitionRepository().GetFor(_filterProcessor.Scope, _filterProcessor.Definition.SourceStream, CancellationToken)).ConfigureAwait(false);
+                    _createFilterProcessor,
+                    () => _getStreamDefinitionRepository().GetFor(_scopeId, _filterDefinition.SourceStream, CancellationToken.None)).ConfigureAwait(false);
 
                 if (failed)
                 {
                     Succeeded = false;
                     var failedRegistration = StreamProcessorRegistrations.First(_ => !_.Succeeded);
-                    return new EventProcessorsRegistrationResult($"Failed registering Filter: '{_filterProcessor.Identifier}' on Stream: '{_filterProcessor.Definition.SourceStream}. {failedRegistration.FailureReason}");
+                    return new EventProcessorsRegistrationResult($"Failed registering Filter: '{_filterDefinition.TargetStream}'. {failedRegistration.FailureReason}");
                 }
 
                 Succeeded = true;
@@ -93,7 +101,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             catch (Exception ex)
             {
                 Succeeded = false;
-                return new EventProcessorsRegistrationResult($"Failed to register Filter: '{_filterProcessor.Identifier}' on Stream: {_filterProcessor.Definition.SourceStream}. {ex.Message}");
+                return new EventProcessorsRegistrationResult($"Failed to register Filter: '{_filterDefinition.TargetStream}'. {ex.Message}");
             }
         }
 
@@ -103,7 +111,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             await _onAllTenants.PerformAsync(
                 async (_) =>
                 {
-                    var result = await _filterValidators.Validate(_filterProcessor, CancellationToken.None).ConfigureAwait(false);
+                    var eventProcessor = await _createFilterProcessor().ConfigureAwait(false);
+                    var result = await _filterValidators.Validate(eventProcessor, CancellationToken.None).ConfigureAwait(false);
                     validationResults.Add(result);
                 }).ConfigureAwait(false);
             return validationResults;

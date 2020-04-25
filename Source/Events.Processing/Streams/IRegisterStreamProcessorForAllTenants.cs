@@ -16,11 +16,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Register a <see cref="StreamProcessor" /> with the given <see cref="IEventProcessor" /> on the given source <see cref="StreamId" />.
         /// </summary>
-        /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
+        /// <param name="createEventProcessor">A <see cref="Func{TResult}" /> that returns a <see cref="Task" /> that, when resolved, returns the <see cref="IEventProcessor" />.</param>
         /// <param name="getStreamDefinition">A <see cref="Func{TResult}" /> that returns a <see cref="Task" /> that, when resolved, returns the <see cref="StreamDefinition" />.</param>
         /// <param name="streamProcessorRegistrations">The <see cref="StreamProcessorRegistrations" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <typeparam name="TEventProcessor">The <see cref="IEventProcessor" /> type.</typeparam>
         /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-        Task Register(IEventProcessor eventProcessor, Func<Task<StreamDefinition>> getStreamDefinition, StreamProcessorRegistrations streamProcessorRegistrations, CancellationToken cancellationToken);
+        Task Register<TEventProcessor>(Func<Task<TEventProcessor>> createEventProcessor, Func<Task<StreamDefinition>> getStreamDefinition, StreamProcessorRegistrations streamProcessorRegistrations, CancellationToken cancellationToken)
+            where TEventProcessor : IEventProcessor;
     }
 }

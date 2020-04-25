@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
@@ -15,28 +16,36 @@ namespace Dolittle.Runtime.Events.Processing
     /// </summary>
     public class EventProcessorRegistration : AbstractEventProcessorsRegistration
     {
+        readonly ScopeId _scopeId;
+        readonly EventProcessorId _eventProcessorId;
         readonly StreamId _sourceStreamId;
-        readonly IEventProcessor _eventProcessor;
+        readonly Func<Task<IEventProcessor>> _createEventProcessor;
         readonly FactoryFor<IStreamDefinitions> _getStreamDefinitions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventProcessorRegistration"/> class.
         /// </summary>
+        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
+        /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <param name="sourceStreamId">The source <see cref="StreamId" />.</param>
-        /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
+        /// <param name="createEventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="streamProcessorForAllTenants">The <see cref="IRegisterStreamProcessorForAllTenants" />.</param>
         /// <param name="getStreamDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitions" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public EventProcessorRegistration(
+            ScopeId scopeId,
+            EventProcessorId eventProcessorId,
             StreamId sourceStreamId,
-            IEventProcessor eventProcessor,
+            Func<Task<IEventProcessor>> createEventProcessor,
             IRegisterStreamProcessorForAllTenants streamProcessorForAllTenants,
             FactoryFor<IStreamDefinitions> getStreamDefinitions,
             CancellationToken cancellationToken)
                 : base(streamProcessorForAllTenants, cancellationToken)
         {
+            _scopeId = scopeId;
+            _eventProcessorId = eventProcessorId;
             _sourceStreamId = sourceStreamId;
-            _eventProcessor = eventProcessor;
+            _createEventProcessor = createEventProcessor;
             _getStreamDefinitions = getStreamDefinitions;
         }
 
@@ -45,13 +54,11 @@ namespace Dolittle.Runtime.Events.Processing
         {
             try
             {
-                StreamId targetStream = _eventProcessor.Identifier.Value;
-
-                var failed = await RegisterStreamProcessor(_eventProcessor, () => _getStreamDefinitions().GetFor(_eventProcessor.Scope, _sourceStreamId, CancellationToken)).ConfigureAwait(false);
+                var failed = await RegisterStreamProcessor(_createEventProcessor, () => _getStreamDefinitions().GetFor(_scopeId, _sourceStreamId, CancellationToken.None)).ConfigureAwait(false);
                 if (failed)
                 {
                     Succeeded = false;
-                    return new EventProcessorsRegistrationResult($"Failed registering Event Processor: '{_eventProcessor.Identifier}' on Stream: '{_sourceStreamId}");
+                    return new EventProcessorsRegistrationResult($"Failed registering Event Processor: '{_eventProcessorId}''");
                 }
 
                 Succeeded = true;
@@ -60,7 +67,7 @@ namespace Dolittle.Runtime.Events.Processing
             catch (Exception ex)
             {
                 Succeeded = false;
-                return new EventProcessorsRegistrationResult($"Failed registering Event Processor: '{_eventProcessor.Identifier}' on Stream: '{_sourceStreamId}. {ex.Message}'");
+                return new EventProcessorsRegistrationResult($"Failed registering Event Processor: '{_eventProcessorId}'. {ex.Message}'");
             }
         }
     }

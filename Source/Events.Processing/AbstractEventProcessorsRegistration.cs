@@ -100,12 +100,14 @@ namespace Dolittle.Runtime.Events.Processing
         /// <summary>
         /// Register stream processor for all Tenants.
         /// </summary>
-        /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
+        /// <param name="createEventProcessor">A <see cref="Func{TResult}" /> that returns a <see cref="Task" /> that, when resolved, returns the <see cref="IEventProcessor" />.</param>
         /// <param name="getStreamDefinition">A <see cref="Func{TResult}" /> that returns a <see cref="Task" /> that, when resolved, returns the <see cref="StreamDefinition" />. </param>
+        /// <typeparam name="TEventProcessor">The <see cref="IEventProcessor" /> type.</typeparam>
         /// <returns>A <see cref="Task" /> that, when resolved, returns whether there are any failing <see cref="StreamProcessorRegistration" /> in <see cref="StreamProcessorRegistrations" />.</returns>
-        protected async Task<bool> RegisterStreamProcessor(IEventProcessor eventProcessor, Func<Task<StreamDefinition>> getStreamDefinition)
+        protected async Task<bool> RegisterStreamProcessor<TEventProcessor>(Func<Task<TEventProcessor>> createEventProcessor, Func<Task<StreamDefinition>> getStreamDefinition)
+            where TEventProcessor : IEventProcessor
         {
-            await _streamProcessorForAllTenants.Register(eventProcessor, getStreamDefinition, StreamProcessorRegistrations, CancellationToken).ConfigureAwait(false);
+            await _streamProcessorForAllTenants.Register(createEventProcessor, getStreamDefinition, StreamProcessorRegistrations, CancellationToken).ConfigureAwait(false);
             return StreamProcessorRegistrations.HasFailures;
         }
 
