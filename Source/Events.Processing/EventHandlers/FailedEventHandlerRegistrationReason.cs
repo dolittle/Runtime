@@ -19,15 +19,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public bool IsSet => !string.IsNullOrEmpty(Value);
 
         /// <summary>
-        /// Creates a <see cref="FailedEventHandlerRegistrationReason" /> from <see cref="StreamProcessorRegistrationResult" /> and <see cref="FilterValidationResult" />.
+        /// Creates a <see cref="FailedEventHandlerRegistrationReason" /> from <see cref="StreamProcessorRegistration" /> and <see cref="FilterValidationResult" />.
         /// </summary>
-        /// <param name="eventProcessorRegistrationResult">The <see cref="StreamProcessorRegistrationResult" /> for the event processor <see cref="StreamProcessor" />.</param>
-        /// <param name="filterProcessorRegistrationResult">The <see cref="StreamProcessorRegistrationResult" /> for the filter <see cref="StreamProcessor" />.</param>
+        /// <param name="eventProcessorRegistrationResult">The <see cref="StreamProcessorRegistration" /> for the event processor <see cref="StreamProcessor" />.</param>
+        /// <param name="filterProcessorRegistrationResult">The <see cref="StreamProcessorRegistration" /> for the filter <see cref="StreamProcessor" />.</param>
         /// <param name="filterValidationResult">The <see cref="FilterValidationResult" />.</param>
         /// <returns>The <see cref="FailedEventHandlerRegistrationReason" />.</returns>
         public static FailedEventHandlerRegistrationReason FromRegistrationResults(
-            StreamProcessorRegistrationResult eventProcessorRegistrationResult,
-            StreamProcessorRegistrationResult filterProcessorRegistrationResult,
+            StreamProcessorRegistration eventProcessorRegistrationResult,
+            StreamProcessorRegistration filterProcessorRegistrationResult,
             FilterValidationResult filterValidationResult)
         {
             var value = string.Empty;

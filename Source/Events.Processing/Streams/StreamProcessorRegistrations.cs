@@ -5,34 +5,44 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Collections;
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents the lifecycle of stream processors.
+    /// Represents registrations of <see cref="StreamProcessor" /> as an unit in a transaction.
     /// </summary>
     public class StreamProcessorRegistrations : IDisposable
     {
-        readonly IList<(TenantId, StreamProcessorRegistrationResult)> _registrationResults;
-
+        readonly IList<StreamProcessorRegistration> _registrations;
         bool _disposed;
+        bool _started;
 
         /// <summary>
-        /// Add a <see cref="StreamProcessorRegistrationResult" />.
+        /// Add a <see cref="StreamProcessorRegistration" />.
         /// </summary>
-        /// <param name="tenant">The <see cref="TenantId" />.</param>
-        /// <param name="streamProcessorRegistrationResult">The <see cref="StreamProcessorRegistrationResult" />.</param>
-        public void Add(TenantId tenant, StreamProcessorRegistrationResult streamProcessorRegistrationResult)
+        /// <param name="streamProcessorRegistration">The <see cref="StreamProcessorRegistration" />.</param>
+        public void Add(StreamProcessorRegistration streamProcessorRegistration) => _registrations.Add(streamProcessorRegistration);
+
+        /// <summary>
+        /// Try to <see cref="StreamProcessor.Start" /> all <see cref="StreamProcessor" />s.
+        /// </summary>
+        /// <returns>A value indicating whether all registered <see cref="StreamProcessor" />s could be started.</returns>
+        public bool TryStart()
         {
-            _registrationResults.Add((tenant, streamProcessorRegistrationResult));
+            if (_started || _disposed) return false;
+            _started = true;
+            var succeededRegistrations = _registrations.Where(_ => _.Succeeded);
+            if (succeededRegistrations.Count() != _registrations.Count) return false;
+            succeededRegistrations.Select(_ => _.StreamProcessor).ForEach(_ => _.Start());
+
+            return true;
         }
 
         /// <summary>
-        /// Whether any of the <see cref="StreamProcessorRegistrationResult" />s failed.
+        /// Whether any of the <see cref="StreamProcessorRegistration" />s failed.
         /// </summary>
-        /// <returns>A value indicating whether any of the <see cref="StreamProcessorRegistrationResult" />s failed.</returns>
-        public bool HasFailures() => _registrationResults.Any(_ => !_.Item2.Succeeded);
+        /// <returns>A value indicating whether any of the <see cref="StreamProcessorRegistration" />s failed.</returns>
+        public bool HasFailures() => _registrations.Any(_ => !_.Succeeded);
 
         /// <summary>
         /// Disposes the object.
@@ -49,10 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
             if (disposing)
             {
-                _registrationResults
-                    .Select(_ => _.Item2)
-                    .Where(_ => _.Succeeded)
-                    .ForEach(_ => _.StreamProcessor.Dispose());
+                _registrations.ForEach(_ => _.Dispose());
             }
 
             _disposed = true;

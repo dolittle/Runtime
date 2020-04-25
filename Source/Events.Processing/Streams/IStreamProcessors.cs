@@ -26,8 +26,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="StreamProcessorRegistrationResult"/>.</returns>
-        Task<StreamProcessorRegistrationResult> Register(IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, StreamId sourceStreamId, CancellationToken cancellationToken);
+        /// <returns>The <see cref="StreamProcessorRegistration"/>.</returns>
+        Task<StreamProcessorRegistration> Register(IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, StreamId sourceStreamId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Unregister a <see cref="StreamProcessor"/> from the in memory map.
