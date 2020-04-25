@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilterDefinition
