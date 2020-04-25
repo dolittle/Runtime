@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 }
 
                 _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", tenant);
-                return new SuccessfulStreamProcessorRegistration(streamProcessor, tenant, cancellationToken.Register(() => Unregister(streamProcessorId)));
+                return new SuccessfulStreamProcessorRegistration(streamProcessor, tenant, () => Unregister(streamProcessorId));
             }
             catch (Exception ex)
             {
