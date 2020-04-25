@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
@@ -43,17 +42,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<StreamProcessorRegistration>> Register(IEventProcessor eventProcessor, Task<StreamDefinition> streamDefinitionGetter, CancellationToken cancellationToken)
+        public Task Register(IEventProcessor eventProcessor, Task<StreamDefinition> streamDefinitionGetter, StreamProcessorRegistrations streamProcessorRegistrations, CancellationToken cancellationToken)
         {
             _logger.Trace("Registering Stream Processor for Event Processor: {eventProcessor} for all Tenants", eventProcessor.Identifier);
-            var registrationResults = new List<StreamProcessorRegistration>();
-            await _onAllTenants.PerformAsync(async _ =>
+            return _onAllTenants.PerformAsync(async _ =>
                 {
                     var streamDefinition = await streamDefinitionGetter.ConfigureAwait(false);
                     var registrationResult = _getStreamProcessors().Register(streamDefinition, eventProcessor, _getEventsFromStreamsFetcher(), cancellationToken);
-                    registrationResults.Add(registrationResult);
-                }).ConfigureAwait(false);
-            return registrationResults;
+                    streamProcessorRegistrations.Add(registrationResult);
+                });
         }
     }
 }
