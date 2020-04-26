@@ -11,8 +11,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     public interface IStreamProcessorState
     {
         /// <summary>
-        /// Gets or sets the <see cref="StreamPosition" />.
+        /// Gets the <see cref="StreamPosition" />.
         /// </summary>
-        StreamPosition Position { get; set; }
+        StreamPosition Position { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether this <see cref="StreamProcessor" /> is partitioned or not.
+        /// </summary>
+        bool Partitioned { get; }
     }
 }
