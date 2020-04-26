@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly ISubscriptions _subscriptions;
         readonly MicroservicesConfiguration _microservicesConfiguration;
         readonly IStreamProcessors _streamProcessors;
-        readonly IStreamProcessorStateRepository _streamProcessorStates;
+        readonly IStreamProcessorStates _streamProcessorStates;
         readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
         readonly IExecutionContextManager _executionContextManager;
@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="subscriptions">The <see cref="ISubscriptions" />.</param>
         /// <param name="microservicesConfiguration">The <see cref="MicroservicesConfiguration" />.</param>
         /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             ISubscriptions subscriptions,
             MicroservicesConfiguration microservicesConfiguration,
             IStreamProcessors streamProcessors,
-            IStreamProcessorStateRepository streamProcessorStates,
+            IStreamProcessorStates streamProcessorStates,
             IWriteEventHorizonEvents eventHorizonEventsWriter,
             IAsyncPolicyFor<ConsumerClient> policy,
             IExecutionContextManager executionContextManager,
@@ -143,10 +143,16 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         async Task<AsyncServerStreamingCall<Contracts.SubscriptionMessage>> Subscribe(Subscription subscription, MicroserviceAddress microserviceAddress)
         {
             _logger.Debug($"Tenant '{subscription.ConsumerTenant}' is subscribing to events from tenant '{subscription.ProducerTenant}' in microservice '{subscription.ProducerMicroservice}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
-            var currentStreamProcessorState = await _streamProcessorStates.GetOrAddNew(
-                new StreamProcessorId(subscription.Scope, subscription.ProducerTenant.Value, subscription.ProducerMicroservice.Value),
-                _token).ConfigureAwait(false);
-            var publicEventsPosition = currentStreamProcessorState.Position;
+
+            var streamProcessorId = new StreamProcessorId(subscription.Scope, subscription.ProducerTenant.Value, subscription.ProducerMicroservice.Value);
+            var hasStreamProcessorState = await _streamProcessorStates.HasFor(streamProcessorId, CancellationToken.None).ConfigureAwait(false);
+            StreamPosition publicEventsPosition = 0;
+            if (hasStreamProcessorState)
+            {
+                var streamProcessorState = await _streamProcessorStates.GetFor(streamProcessorId, CancellationToken.None).ConfigureAwait(false);
+                publicEventsPosition = streamProcessorState.Position;
+            }
+
             return _clientManager
                 .Get<Contracts.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
                 .Subscribe(
