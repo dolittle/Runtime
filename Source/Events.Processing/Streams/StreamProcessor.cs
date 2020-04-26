@@ -148,6 +148,39 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return await HandleProcessingResult(processingResult, @event).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Process the <see cref="StreamEvent" /> and get the new <see cref="CurrentState" />.
+        /// </summary>
+        /// <param name="event">The <see cref="StreamEvent" />.</param>
+        /// <param name="failureReason">The reason for why processing failed the last time.</param>
+        /// <param name="processingAttempts">The number of times that this event has been processed before.</param>
+        /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="CurrentState" />.</returns>
+        protected async Task<IStreamProcessorState> RetryProcessingEvent(StreamEvent @event, string failureReason, uint processingAttempts)
+        {
+            var processingResult = await Processor.Process(@event.Event, @event.Partition, failureReason, processingAttempts - 1, CancellationToken).ConfigureAwait(false);
+            return await HandleProcessingResult(processingResult, @event).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Handle the <see cref="IProcessingResult" /> from the procssing of a <see cref="StreamEvent" />..
+        /// </summary>
+        /// <param name="processingResult">The <see cref="IProcessingResult" />.</param>
+        /// <param name="processedEvent">The processed <see cref="StreamEvent" />.</param>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="CurrentState" />.</returns>
+        protected Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent)
+        {
+            if (processingResult.Retry)
+            {
+                return OnRetryProcessing(processingResult as FailedProcessing, processedEvent);
+            }
+            else if (!processingResult.Succeeded)
+            {
+                return OnFailedProcessing(processingResult as FailedProcessing, processedEvent);
+            }
+
+            return OnSuccessfulProcessing(processingResult as SuccessfulProcessing, processedEvent);
+        }
+
         Task BeginProcessing()
         {
             return _task ?? Task.Run(
@@ -188,20 +221,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                     }
                 });
-        }
-
-        Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent)
-        {
-            if (processingResult.Retry)
-            {
-                return OnRetryProcessing(processingResult as FailedProcessing, processedEvent);
-            }
-            else if (!processingResult.Succeeded)
-            {
-                return OnFailedProcessing(processingResult as FailedProcessing, processedEvent);
-            }
-
-            return OnSuccessfulProcessing(processingResult as SuccessfulProcessing, processedEvent);
         }
     }
 }
