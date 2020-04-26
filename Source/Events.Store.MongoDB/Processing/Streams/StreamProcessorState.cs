@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public IDictionary<string, FailingPartitionState> FailingPartitions { get; set; }
 
         /// <summary>
-        /// Creates a new, initial, <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" /> from a <see cref="Runtime.Events.Processing.EventProcessorId" />.
+        /// Creates a new, initial, <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" /> from a <see cref="Runtime.Events.Processing.EventProcessorId" />.
         /// </summary>
         /// <param name="id">The <see cref="StreamProcessorId" />.</param>
         /// <returns>The new initial <see cref="StreamProcessorState" />.</returns>

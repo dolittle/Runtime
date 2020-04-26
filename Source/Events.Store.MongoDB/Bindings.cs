@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <inheritdoc/>
         public void Provide(IBindingProviderBuilder builder)
         {
-            builder.Bind<IStreamProcessorStateRepository>().To<StreamProcessorStateRepository>();
+            builder.Bind<IStreamProcessorStates>().To<StreamProcessorStates>();
             builder.Bind<IFilterDefinitionRepository>().To<FilterDefinitionRepository>();
             builder.Bind<IFetchEventsFromStreams>().To<EventsFromStreamsFetcher>();
             builder.Bind<IWriteEventsToStreams>().To<EventsToStreamsWriter>();
