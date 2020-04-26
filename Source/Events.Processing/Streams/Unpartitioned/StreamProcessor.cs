@@ -88,7 +88,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Unpartitioned
         /// <inheritdoc/>
         protected override async Task<IStreamProcessorState> OnSuccessfulProcessing(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent)
         {
-            var newState = new StreamProcessorState(processedEvent.Position.Increment());
+            var newState = new StreamProcessorState(processedEvent.Position + 1);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken).ConfigureAwait(false);
             return newState;
         }
