@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly IFetchEventsFromStreams _eventsFromStreams;
         readonly IFetchEventTypesFromStreams _eventTypesFromStreams;
-        readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
+        readonly IStreamProcessorStates _streamProcessorStateRepository;
         readonly ILogger _logger;
 
         /// <summary>
@@ -30,20 +30,24 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="eventsFromStreams">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="eventTypesFromStreams">The <see cref="IFetchEventTypesFromStreams" />.</param>
-        /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public RemoteFilterValidator(IFetchEventsFromStreams eventsFromStreams, IFetchEventTypesFromStreams eventTypesFromStreams, IStreamProcessorStateRepository streamProcessorStateRepository, ILogger logger)
+        public RemoteFilterValidator(
+            IFetchEventsFromStreams eventsFromStreams,
+            IFetchEventTypesFromStreams eventTypesFromStreams,
+            IStreamProcessorStates streamProcessorStates,
+            ILogger logger)
         {
             _eventsFromStreams = eventsFromStreams;
             _eventTypesFromStreams = eventTypesFromStreams;
-            _streamProcessorStateRepository = streamProcessorStateRepository;
+            _streamProcessorStateRepository = streamProcessorStates;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public async Task<FilterValidationResult> Validate(IFilterProcessor<RemoteFilterDefinition> filter, CancellationToken cancellationToken)
         {
-            var streamProcessorState = await _streamProcessorStateRepository.GetOrAddNew(
+            var streamProcessorState = await _streamProcessorStateRepository.GetFor(
                 new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
                 cancellationToken)
                 .ConfigureAwait(false);

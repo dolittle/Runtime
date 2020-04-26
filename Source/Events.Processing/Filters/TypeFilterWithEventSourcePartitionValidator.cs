@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly IFetchEventsFromStreams _eventsFromStreams;
         readonly IFetchEventTypesFromStreams _eventTypesFromStreams;
-        readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
+        readonly IStreamProcessorStates _streamProcessorStates;
         readonly ILogger _logger;
 
         /// <summary>
@@ -30,17 +30,17 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="eventsFromStreams">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="eventTypesFromStreams">The <see cref="IFetchEventTypesFromStreams" />.</param>
-        /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public TypeFilterWithEventSourcePartitionValidator(
             IFetchEventsFromStreams eventsFromStreams,
             IFetchEventTypesFromStreams eventTypesFromStreams,
-            IStreamProcessorStateRepository streamProcessorStateRepository,
+            IStreamProcessorStates streamProcessorStateRepository,
             ILogger logger)
         {
             _eventsFromStreams = eventsFromStreams;
             _eventTypesFromStreams = eventTypesFromStreams;
-            _streamProcessorStateRepository = streamProcessorStateRepository;
+            _streamProcessorStates = streamProcessorStateRepository;
             _logger = logger;
         }
 
@@ -50,8 +50,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         async Task<FilterValidationResult> ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
-            var streamProcessorState = await _streamProcessorStateRepository
-                .GetOrAddNew(
+            var streamProcessorState = await _streamProcessorStates
+                .GetFor(
                     new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
                     cancellationToken)
                 .ConfigureAwait(false);

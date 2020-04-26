@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 {
                     var streamDefinition = await getStreamDefinition().ConfigureAwait(false);
                     var eventProcessor = await createEventProcessor().ConfigureAwait(false);
-                    var registrationResult = _getStreamProcessors().Register(streamDefinition, eventProcessor, _getEventsFromStreamsFetcher(), cancellationToken);
+                    var registrationResult = await _getStreamProcessors().Register(streamDefinition, eventProcessor, _getEventsFromStreamsFetcher(), cancellationToken).ConfigureAwait(false);
                     streamProcessorRegistrations.Add(registrationResult);
                 });
         }
