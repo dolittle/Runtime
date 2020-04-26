@@ -77,8 +77,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         {
             var newState = await _failingPartitions.AddFailingPartitionFor(
                 Identifier,
-                processedEvent.Partition,
+                CurrentState as StreamProcessorState,
                 processedEvent.Position,
+                processedEvent.Partition,
                 DateTimeOffset.MaxValue,
                 failedProcessing.FailureReason,
                 CancellationToken.None).ConfigureAwait(false);
@@ -90,8 +91,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         {
             var newState = await _failingPartitions.AddFailingPartitionFor(
                 Identifier,
-                processedEvent.Partition,
+                CurrentState as StreamProcessorState,
                 processedEvent.Position,
+                processedEvent.Partition,
                 DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
                 failedProcessing.FailureReason,
                 CancellationToken.None).ConfigureAwait(false);
