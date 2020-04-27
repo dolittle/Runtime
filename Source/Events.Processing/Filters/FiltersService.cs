@@ -90,14 +90,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 (request, context) => request.CallContext = context,
                 _ => _.CallContext);
 
-            if (!await dispatcher.ReceiveArguments(context.CancellationToken).ConfigureAwait(false))
-            {
-                const string message = "Filters connection arguments were not received";
-                _logger.Warning(message);
-                var failure = new Failure(FiltersFailures.NoFilterRegistrationReceived, message);
-                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                return;
-            }
+            if (await TryRejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
@@ -105,16 +98,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = arguments.ScopeId.To<ScopeId>();
             var sourceStreamId = StreamId.AllStreamId;
-            if (filterId.IsNonWriteable)
-            {
-                _logger.Warning("Cannot register Filter Id: '{filterId}' because it is an invalid stream id", filterId);
-                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Cannot register Filter Id: '{filterId}' because it is an invalid stream id");
-                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                return;
-            }
+            if (await TryRejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
 
             var filterDefinition = new RemoteFilterDefinition(sourceStreamId, filterId, partitioned: false);
-            using var filterRegistration = new FilterRegistration<RemoteFilterDefinition>(
+            using var filterRegistration = CreateFilterRegistration(
                 scopeId,
                 filterDefinition,
                 () => Task.FromResult<IFilterProcessor<RemoteFilterDefinition>>(new FilterProcessor(
@@ -123,42 +110,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                                         dispatcher,
                                         _getEventsToStreamsWriter(),
                                         _logger)),
-                _onAllTenants,
-                _streamProcessorForAllTenants,
-                _filterValidators,
-                _getStreamDefinitionRepository,
                 context.CancellationToken);
-            try
-            {
-                var registrationResult = await filterRegistration.Register().ConfigureAwait(false);
-                if (!registrationResult.Succeeded)
-                {
-                    _logger.Warning("Failed during registration of Filter: '{filterId}'. {reason}", filterId, registrationResult.FailureReason);
-                    var failure = new Failure(
-                        FiltersFailures.FailedToRegisterFilter,
-                        $"Failed during registration of Filter: '{filterId}'. {registrationResult.FailureReason}");
-
-                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    await filterRegistration.Complete().ConfigureAwait(false);
-                    await dispatcher.Accept(new FilterRegistrationResponse(), context.CancellationToken).ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                if (!context.CancellationToken.IsCancellationRequested)
-                {
-                    _logger.Debug(ex, "Filter: '{filterId}' failed", filterId);
-                }
-
-                if (!filterRegistration.Completed) await filterRegistration.Fail().ConfigureAwait(false);
-            }
-            finally
-            {
-                _logger.Debug("Filter: '{filterId}' stopped", filterId);
-            }
+            await RegisterFilter(dispatcher, filterId, filterRegistration, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -179,14 +132,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 (request, context) => request.CallContext = context,
                 _ => _.CallContext);
 
-            if (!await dispatcher.ReceiveArguments(context.CancellationToken).ConfigureAwait(false))
-            {
-                const string message = "Partitioned Filters connection arguments were not received";
-                _logger.Warning(message);
-                var failure = new Failure(FiltersFailures.NoFilterRegistrationReceived, message);
-                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                return;
-            }
+            if (await TryRejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
@@ -194,16 +140,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = arguments.ScopeId.To<ScopeId>();
             var sourceStreamId = StreamId.AllStreamId;
-            if (filterId.IsNonWriteable)
-            {
-                _logger.Warning("Cannot register Partitioned Filter: '{filterId}' because it is an invalid stream id", filterId);
-                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Cannot register Partitioned Filter: '{filterId}' because it is an invalid stream id");
-                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                return;
-            }
+            if (await TryRejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
 
             var filterDefinition = new RemoteFilterDefinition(sourceStreamId, filterId, partitioned: true);
-            using var filterRegistration = new FilterRegistration<RemoteFilterDefinition>(
+            using var filterRegistration = CreateFilterRegistration(
                 scopeId,
                 filterDefinition,
                 () => Task.FromResult<IFilterProcessor<RemoteFilterDefinition>>(new Partitioned.FilterProcessor(
@@ -212,42 +152,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                                         dispatcher,
                                         _getEventsToStreamsWriter(),
                                         _logger)),
-                _onAllTenants,
-                _streamProcessorForAllTenants,
-                _filterValidators,
-                _getStreamDefinitionRepository,
                 context.CancellationToken);
-            try
-            {
-                var registrationResult = await filterRegistration.Register().ConfigureAwait(false);
-                if (!registrationResult.Succeeded)
-                {
-                    _logger.Warning("Failed during registration of Partitioned Filter: '{filterId}'. {reason}", filterId, registrationResult.FailureReason);
-                    var failure = new Failure(
-                        FiltersFailures.FailedToRegisterFilter,
-                        $"Failed during registration of Partitioned Filter: '{filterId}'. {registrationResult.FailureReason}");
-
-                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    await filterRegistration.Complete().ConfigureAwait(false);
-                    await dispatcher.Accept(new FilterRegistrationResponse(), context.CancellationToken).ConfigureAwait(false);
-                }
-            }
-            catch (Exception ex)
-            {
-                if (!context.CancellationToken.IsCancellationRequested)
-                {
-                    _logger.Debug(ex, "Partitioned Filter: '{filterId}' failed", filterId);
-                }
-
-                if (!filterRegistration.Completed) await filterRegistration.Fail().ConfigureAwait(false);
-            }
-            finally
-            {
-                _logger.Debug("Partitioned Filter: '{filterId}' stopped", filterId);
-            }
+            await RegisterFilter(dispatcher, filterId, filterRegistration, context.CancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -268,14 +174,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 (request, context) => request.CallContext = context,
                 _ => _.CallContext);
 
-            if (!await dispatcher.ReceiveArguments(context.CancellationToken).ConfigureAwait(false))
-            {
-                const string message = "Public Filters connection arguments were not received";
-                _logger.Warning(message);
-                var failure = new Failure(FiltersFailures.NoFilterRegistrationReceived, message);
-                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                return;
-            }
+            if (await TryRejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
@@ -283,16 +182,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = ScopeId.Default;
             var sourceStreamId = StreamId.AllStreamId;
-            if (filterId.IsNonWriteable)
-            {
-                _logger.Warning("Cannot register Public Filter: '{filterId}' because it is an invalid stream id", filterId);
-                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Cannot register Public Filter: '{filterId}' because it is an invalid stream id");
-                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                return;
-            }
+
+            if (await TryRejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
 
             var filterDefinition = new PublicFilterDefinition(sourceStreamId, filterId);
-            using var filterRegistration = new FilterRegistration<PublicFilterDefinition>(
+            using var filterRegistration = CreateFilterRegistration(
                 scopeId,
                 filterDefinition,
                 () => Task.FromResult<IFilterProcessor<PublicFilterDefinition>>(new PublicFilterProcessor(
@@ -300,43 +194,106 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                                         dispatcher,
                                         _getEventsToPublicStreamsWriter(),
                                         _logger)),
-                _onAllTenants,
-                _streamProcessorForAllTenants,
-                _filterValidators,
-                _getStreamDefinitionRepository,
                 context.CancellationToken);
+            await RegisterFilter(dispatcher, filterId, filterRegistration, context.CancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<bool> TryRejectIfNotReceivedArguments<TClientMessage, TConnectRequest, TResponse>(
+            IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+            CancellationToken cancellationToken)
+            where TClientMessage : IMessage, new()
+            where TConnectRequest : class
+            where TResponse : class
+        {
+            if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
+            {
+                const string message = "Connection arguments were not received";
+                _logger.Warning(message);
+                var failure = new Failure(FiltersFailures.NoFilterRegistrationReceived, message);
+                await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
+                return false;
+            }
+
+            return true;
+        }
+
+        async Task<bool> TryRejectIfInvalidFilterId<TClientMessage, TConnectRequest, TResponse>(
+            IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+            StreamId filterId,
+            CancellationToken cancellationToken)
+            where TClientMessage : IMessage, new()
+            where TConnectRequest : class
+            where TResponse : class
+        {
+            if (filterId.IsNonWriteable)
+            {
+                _logger.Warning("Filter Id: '{filterId}' invalid Stream Id", filterId);
+                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId}' invalid Stream Id");
+                await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
+                return false;
+            }
+
+            return true;
+        }
+
+        async Task RegisterFilter<TFilterDefinition, TClientMessage, TConnectRequest, TResponse>(
+            IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+            StreamId filterId,
+            FilterRegistration<TFilterDefinition> filterRegistration,
+            CancellationToken cancellationToken)
+            where TFilterDefinition : IFilterDefinition
+            where TClientMessage : IMessage, new()
+            where TConnectRequest : class
+            where TResponse : class
+        {
             try
             {
                 var registrationResult = await filterRegistration.Register().ConfigureAwait(false);
                 if (!registrationResult.Succeeded)
                 {
-                    _logger.Warning("Failed during registration of Public Filter: '{filterId}'. {reason}", filterId, registrationResult.FailureReason);
+                    _logger.Warning("Failed during registration of Filter: '{filterId}'. {reason}", filterId, registrationResult.FailureReason);
                     var failure = new Failure(
                         FiltersFailures.FailedToRegisterFilter,
-                        $"Failed during registration of Public Filter: '{filterId}'. {registrationResult.FailureReason}");
+                        $"Failed during registration of Filter: '{filterId}'. {registrationResult.FailureReason}");
 
-                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
+                    await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
                     await filterRegistration.Complete().ConfigureAwait(false);
-                    await dispatcher.Accept(new FilterRegistrationResponse(), context.CancellationToken).ConfigureAwait(false);
+                    await dispatcher.Accept(new FilterRegistrationResponse(), cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (Exception ex)
             {
-                if (!context.CancellationToken.IsCancellationRequested)
+                if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Debug(ex, "Public Filter: '{filterId}' failed", filterId);
+                    _logger.Debug(ex, "Filter: '{filterId}' failed", filterId);
                 }
 
                 if (!filterRegistration.Completed) await filterRegistration.Fail().ConfigureAwait(false);
             }
             finally
             {
-                _logger.Debug("Public Filter: '{filterId}' stopped", filterId);
+                _logger.Debug("Filter: '{filterId}' stopped", filterId);
             }
         }
+
+        FilterRegistration<TFilterDefinition> CreateFilterRegistration<TFilterDefinition>(
+            ScopeId scopeId,
+            TFilterDefinition filterDefinition,
+            Func<Task<IFilterProcessor<TFilterDefinition>>> getFilterProcessor,
+            CancellationToken cancellationToken)
+            where TFilterDefinition : IFilterDefinition =>
+                new FilterRegistration<TFilterDefinition>(
+                    scopeId,
+                    filterDefinition,
+                    getFilterProcessor,
+                    _onAllTenants,
+                    _streamProcessorForAllTenants,
+                    _filterValidators,
+                    _getStreamDefinitionRepository,
+                    cancellationToken);
 
         Task WriteFailedRegistrationResponse<TClientMessage, TConnectRequest, TResponse>(
             IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
