@@ -30,8 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             if (_started || _disposed) return false;
             _started = true;
-            var succeededRegistrations = this.Where(_ => _.Succeeded);
-            if (succeededRegistrations.Count() != Count) return false;
+            if (HasFailures) return false;
             succeededRegistrations.Select(_ => _.StreamProcessor).ForEach(_ => _.Start());
 
             return true;
