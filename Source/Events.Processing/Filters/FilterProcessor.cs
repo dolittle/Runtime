@@ -10,14 +10,14 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned
+namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
     /// </summary>
     public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
     {
-        readonly IReverseCallDispatcher<UnpartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, UnpartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, UnpartitionedFilterResponse> _dispatcher;
+        readonly IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned
         public FilterProcessor(
             ScopeId scope,
             RemoteFilterDefinition definition,
-            IReverseCallDispatcher<UnpartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, UnpartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, UnpartitionedFilterResponse> dispatcher,
+            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
             : base(scope, definition, eventsToStreamsWriter, logger)
