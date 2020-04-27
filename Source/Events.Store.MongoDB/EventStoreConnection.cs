@@ -206,10 +206,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         {
             StreamProcessorStates.Indexes.CreateOne(
                 new CreateIndexModel<StreamProcessorState>(
-                Builders<StreamProcessorState>.IndexKeys
-                    .Ascending(_ => _.ScopeId)
-                    .Ascending(_ => _.EventProcessorId)
-                    .Ascending(_ => _.SourceStreamId)));
+                    Builders<StreamProcessorState>.IndexKeys
+                        .Ascending(_ => _.ScopeId)
+                        .Ascending(_ => _.EventProcessorId)
+                        .Ascending(_ => _.SourceStreamId),
+                    new CreateIndexOptions { Unique = true }));
         }
 
         void CreateCollectionsAndIndexesForTypePartitionFilterDefinitions()
