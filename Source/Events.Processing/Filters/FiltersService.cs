@@ -181,7 +181,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             if (!await dispatcher.ReceiveArguments(context.CancellationToken).ConfigureAwait(false))
             {
-                const string message = "Filters connection arguments were not received";
+                const string message = "Partitioned Filters connection arguments were not received";
                 _logger.Warning(message);
                 var failure = new Failure(FiltersFailures.NoFilterRegistrationReceived, message);
                 await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
@@ -196,8 +196,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var sourceStreamId = StreamId.AllStreamId;
             if (filterId.IsNonWriteable)
             {
-                _logger.Warning("Cannot register Filter: '{filterId}' because it is an invalid stream id", filterId);
-                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Cannot register Filter: '{filterId}' because it is an invalid stream id");
+                _logger.Warning("Cannot register Partitioned Filter: '{filterId}' because it is an invalid stream id", filterId);
+                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Cannot register Partitioned Filter: '{filterId}' because it is an invalid stream id");
                 await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
                 return;
             }
@@ -222,10 +222,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 var registrationResult = await filterRegistration.Register().ConfigureAwait(false);
                 if (!registrationResult.Succeeded)
                 {
-                    _logger.Warning("Failed during registration of Filter: '{filterId}'. {reason}", filterId, registrationResult.FailureReason);
+                    _logger.Warning("Failed during registration of Partitioned Filter: '{filterId}'. {reason}", filterId, registrationResult.FailureReason);
                     var failure = new Failure(
                         FiltersFailures.FailedToRegisterFilter,
-                        $"Failed during registration of Filter: '{filterId}'. {registrationResult.FailureReason}");
+                        $"Failed during registration of Partitioned Filter: '{filterId}'. {registrationResult.FailureReason}");
 
                     await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
                 }
@@ -239,14 +239,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Debug(ex, "Filter: '{filterId}' failed", filterId);
+                    _logger.Debug(ex, "Partitioned Filter: '{filterId}' failed", filterId);
                 }
 
                 if (!filterRegistration.Completed) await filterRegistration.Fail().ConfigureAwait(false);
             }
             finally
             {
-                _logger.Debug("Filter: '{filterId}' stopped", filterId);
+                _logger.Debug("Partitioned Filter: '{filterId}' stopped", filterId);
             }
         }
 
