@@ -19,5 +19,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Gets the <see cref="PartitionId" />.
         /// </summary>
         PartitionId Partition { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the filtered event is partitioned or not.
+        /// </summary>
+        bool IsPartitioned { get; }
     }
 }
