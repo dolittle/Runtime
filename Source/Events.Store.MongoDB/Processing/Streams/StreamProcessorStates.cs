@@ -36,10 +36,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             {
                 var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(
-                        streamProcessorId.ScopeId,
-                        streamProcessorId.EventProcessorId,
-                        streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
+                        & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
+                        & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 return state != default;
@@ -57,10 +56,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             {
                 var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                 var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.Id, new StreamProcessorId(
-                        streamProcessorId.ScopeId,
-                        streamProcessorId.EventProcessorId,
-                        streamProcessorId.SourceStreamId)))
+                    _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
+                        & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
+                        & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
                 if (state == default)
