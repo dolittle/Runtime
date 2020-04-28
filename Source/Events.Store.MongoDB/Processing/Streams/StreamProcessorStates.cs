@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// </summary>
     public class StreamProcessorStates : IStreamProcessorStates
     {
-        readonly FilterDefinitionBuilder<StreamProcessorState> _streamProcessorFilter = Builders<StreamProcessorState>.Filter;
+        readonly FilterDefinitionBuilder<AbstractStreamProcessorState> _streamProcessorFilter = Builders<AbstractStreamProcessorState>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -30,18 +30,25 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<bool> HasFor(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+        public async Task<(bool success, IStreamProcessorState streamProcessor)> TryGetFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
         {
             try
             {
                 var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
-                var state = await states.Find(
+                var persistedState = await states.Find(
                     _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
                         & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
                         & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
-                return state != default;
+                if (persistedState != null)
+                {
+                    return (true, persistedState.ToRuntimeRepresentation());
+                }
+                else
+                {
+                    return (false, null);
+                }
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -50,7 +57,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IStreamProcessorState> GetFor(Runtime.Events.Processing.Streams.StreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+        public async Task Persist(StreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
         {
             try
             {
@@ -61,12 +68,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                         & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
                     .FirstOrDefaultAsync(cancellationToken)
                     .ConfigureAwait(false);
-                if (state == default)
-                {
-                    return null;
-                }
 
-                return state.ToRuntimeRepresentation();
             }
             catch (MongoWaitQueueFullException ex)
             {

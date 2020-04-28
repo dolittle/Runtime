@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// <summary>
     /// Represents an implementation of <see cref="IStreamProcessors" />.
     /// </summary>
-    [SingletonPerTenant]
+    [Singleton]
     public class StreamProcessors : IStreamProcessors
     {
         readonly ConcurrentDictionary<StreamProcessorId, AbstractStreamProcessor> _streamProcessors;

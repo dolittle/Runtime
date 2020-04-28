@@ -14,11 +14,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// <summary>
     /// Represents a system that can process a stream of events.
     /// </summary>
-    public abstract class AbstractStreamProcessor : IDisposable
+    public abstract class AbstractStreamProcessor
     {
         readonly CancellationToken _externalCancellationToken;
         readonly Action _unregister;
-        CancellationTokenSource _internalCancellationTokenSource = new CancellationTokenSource();
         bool _started;
         bool _disposed;
 

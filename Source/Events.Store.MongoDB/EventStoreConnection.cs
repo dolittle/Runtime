@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             EventLog = connection.Database.GetCollection<MongoDB.Events.Event>(Constants.EventLogCollection);
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
 
-            StreamProcessorStates = connection.Database.GetCollection<StreamProcessorState>(Constants.StreamProcessorStateCollection);
+            StreamProcessorStates = connection.Database.GetCollection<AbstractStreamProcessorState>(Constants.StreamProcessorStateCollection);
             FilterDefinitions = connection.Database.GetCollection<FilterDefinition>(Constants.FilterDefinitionCollection);
 
             CreateCollectionsAndIndexes();
@@ -59,9 +59,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public IMongoCollection<AggregateRoot> Aggregates { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{StreamProcessorState}" /> where <see cref="StreamProcessorState" >stream processor states</see> are stored.
+        /// Gets the <see cref="IMongoCollection{StreamProcessorState}" /> where <see cref="AbstractStreamProcessorState" >stream processor states</see> are stored.
         /// </summary>
-        public IMongoCollection<StreamProcessorState> StreamProcessorStates { get; }
+        public IMongoCollection<AbstractStreamProcessorState> StreamProcessorStates { get; }
 
         /// <summary>
         /// Gets the <see cref="IMongoCollection{TDocument}" /> for <see cref="FilterDefinition" />.
@@ -106,12 +106,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         }
 
         /// <summary>
-        /// Gets the correct <see cref="IMongoCollection{TDocument}" /> for <see cref="StreamProcessorState" />.
+        /// Gets the correct <see cref="IMongoCollection{TDocument}" /> for <see cref="AbstractStreamProcessorState" />.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The collection.</returns>
-        public Task<IMongoCollection<StreamProcessorState>> GetStreamProcessorStateCollection(
+        public Task<IMongoCollection<AbstractStreamProcessorState>> GetStreamProcessorStateCollection(
             ScopeId scope,
             CancellationToken cancellationToken) =>
             scope == ScopeId.Default ? Task.FromResult(StreamProcessorStates)
@@ -123,11 +123,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IMongoCollection{StreamProcessorState}" />.</returns>
-        public async Task<IMongoCollection<StreamProcessorState>> GetScopedStreamProcessorStateCollection(
+        public async Task<IMongoCollection<AbstractStreamProcessorState>> GetScopedStreamProcessorStateCollection(
             ScopeId scope,
             CancellationToken cancellationToken)
         {
-            var collection = _connection.Database.GetCollection<StreamProcessorState>(Constants.CollectionNameForScopedStreamProcessorStates(scope));
+            var collection = _connection.Database.GetCollection<AbstractStreamProcessorState>(Constants.CollectionNameForScopedStreamProcessorStates(scope));
             await CreateCollectionsAndIndexesForStreamProcessorStatesAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
@@ -205,8 +205,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         void CreateCollectionsAndIndexesForStreamProcessorStates()
         {
             StreamProcessorStates.Indexes.CreateOne(
-                new CreateIndexModel<StreamProcessorState>(
-                    Builders<StreamProcessorState>.IndexKeys
+                new CreateIndexModel<AbstractStreamProcessorState>(
+                    Builders<AbstractStreamProcessorState>.IndexKeys
                         .Ascending(_ => _.ScopeId)
                         .Ascending(_ => _.EventProcessorId)
                         .Ascending(_ => _.SourceStreamId),
@@ -256,12 +256,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
         /// <returns>Task.</returns>
         async Task CreateCollectionsAndIndexesForStreamProcessorStatesAsync(
-            IMongoCollection<StreamProcessorState> streamProcessorState,
+            IMongoCollection<AbstractStreamProcessorState> streamProcessorState,
             CancellationToken cancellationToken)
         {
             await streamProcessorState.Indexes.CreateOneAsync(
-                new CreateIndexModel<StreamProcessorState>(
-                    Builders<StreamProcessorState>.IndexKeys
+                new CreateIndexModel<AbstractStreamProcessorState>(
+                    Builders<AbstractStreamProcessorState>.IndexKeys
                         .Ascending(_ => _.ScopeId)
                         .Ascending(_ => _.EventProcessorId)
                         .Ascending(_ => _.SourceStreamId),

@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public StreamProcessorState(StreamPosition streamPosition)
         {
             Position = streamPosition;
-            IsFailing = false;
             RetryTime = DateTimeOffset.UtcNow;
             FailureReason = string.Empty;
             ProcessingAttempts = 0;
@@ -35,7 +34,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public StreamProcessorState(StreamPosition streamPosition, string failureReason, DateTimeOffset retryTime, uint processingAttempts)
         {
             Position = streamPosition;
-            IsFailing = true;
             RetryTime = retryTime;
             FailureReason = failureReason;
             ProcessingAttempts = processingAttempts;
@@ -52,11 +50,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         /// <inheritdoc/>
         public StreamPosition Position { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether the <see cref="StreamProcessor" /> is failing.
-        /// </summary>
-        public bool IsFailing { get; }
 
         /// <summary>
         /// Gets or sets the <see cref="DateTimeOffset" /> for when to retry processing.

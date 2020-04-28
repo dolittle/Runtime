@@ -145,11 +145,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger.Debug($"Tenant '{subscription.ConsumerTenant}' is subscribing to events from tenant '{subscription.ProducerTenant}' in microservice '{subscription.ProducerMicroservice}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
 
             var streamProcessorId = new StreamProcessorId(subscription.Scope, subscription.ProducerTenant.Value, subscription.ProducerMicroservice.Value);
-            var hasStreamProcessorState = await _streamProcessorStates.HasFor(streamProcessorId, CancellationToken.None).ConfigureAwait(false);
+            (var hasStreamProcessorState, var streamProcessorState) = await _streamProcessorStates.TryGetFor(streamProcessorId, CancellationToken.None).ConfigureAwait(false);
             StreamPosition publicEventsPosition = 0;
             if (hasStreamProcessorState)
             {
-                var streamProcessorState = await _streamProcessorStates.GetFor(streamProcessorId, CancellationToken.None).ConfigureAwait(false);
                 publicEventsPosition = streamProcessorState.Position;
             }
 
