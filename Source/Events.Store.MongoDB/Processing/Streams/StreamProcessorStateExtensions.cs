@@ -13,14 +13,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     public static class StreamProcessorStateExtensions
     {
         /// <summary>
-        /// Converts <see cref="StreamProcessorId" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.StreamProcessorId" />.
-        /// </summary>
-        /// <param name="id">The <see cref="StreamProcessorId" />.</param>
-        /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.StreamProcessorId" />.</returns>
-        public static Runtime.Events.Processing.Streams.StreamProcessorId ToRuntimeRepresentation(this StreamProcessorId id) =>
-            new Runtime.Events.Processing.Streams.StreamProcessorId(id.ScopeId, id.EventProcessorId, id.SourceStreamId);
-
-        /// <summary>
         /// Converts the <see cref="FailingPartitionState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.FailingPartitionState" />.
         /// </summary>
         /// <param name="state">The <see cref="FailingPartitionState" />.</param>

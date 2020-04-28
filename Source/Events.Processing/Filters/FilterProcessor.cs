@@ -47,7 +47,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var request = new FilterEventRequest
                 {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() }
+                    Event = @event.ToProtobuf(),
+                    ScopeId = Scope.ToProtobuf()
                 };
 
             return Filter(request, cancellationToken);
@@ -60,7 +61,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var request = new FilterEventRequest
                 {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                    Event = @event.ToProtobuf(),
+                    ScopeId = Scope.ToProtobuf(),
                     RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
                 };
 
@@ -72,7 +74,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
             return response switch
                 {
-                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.To<PartitionId>()),
+                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded),
                     _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
                 };
         }

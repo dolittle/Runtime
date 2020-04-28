@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
     public class and_filtered_successfully : given.a_public_event_filter
     {
         static IFilterResult result;
-        static FilterResponse filter_response;
+        static PartitionedFilterResponse filter_response;
         static bool is_included;
         static PartitionId partition_id;
 
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
         {
             is_included = true;
             partition_id = Guid.NewGuid();
-            filter_response = new FilterResponse { IsIncluded = is_included, PartitionId = partition_id.ToProtobuf() };
+            filter_response = new PartitionedFilterResponse { IsIncluded = is_included, PartitionId = partition_id.ToProtobuf() };
             dispatcher.Setup(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(filter_response));
         };
 
