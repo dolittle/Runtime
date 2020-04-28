@@ -4,14 +4,14 @@
 using Dolittle.DependencyInversion;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.EventHorizon.Producer;
-using Dolittle.Runtime.Events.Processing.Filters;
-using Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {

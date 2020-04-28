@@ -3,15 +3,13 @@
 
 using System.Collections.Generic;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {
     /// <summary>
-    /// Represents the definition for <see cref="TypeFilterWithEventSourcePartition"/>.
+    /// Represents the <see cref="IFilterDefinition" /> for type filter with event source partition.
     /// </summary>
-    public class TypeFilterWithEventSourcePartitionDefinition : IPersistableFilterDefinition
+    public class TypeFilterWithEventSourcePartitionDefinition : IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionDefinition"/> class.
@@ -33,10 +31,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         public IEnumerable<ArtifactId> Types { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether or not the filter is partitioned by <see cref="EventSourceId"/>.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Partitioned { get; }
+
+        /// <inheritdoc/>
+        public bool Public => false;
 
         /// <inheritdoc/>.
         public StreamId SourceStream { get; }

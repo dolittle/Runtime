@@ -1,9 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
@@ -40,43 +39,42 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _logger = logger;
         }
 
-        /// <inheritdoc/>
-        public IEnumerable<StreamProcessor> Processors =>
-            _streamProcessors.Select(_ => _.Value);
-
         /// <inheritdoc />
-        public StreamProcessorRegistrationResult Register(
+        public StreamProcessorRegistration Register(
+            StreamDefinition streamDefinition,
             IEventProcessor eventProcessor,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
-            StreamId sourceStreamId,
             CancellationToken cancellationToken)
         {
             var tenant = _executionContextManager.Current.Tenant;
-            var streamProcessorId = new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, sourceStreamId);
-
-            if (_streamProcessors.ContainsKey(streamProcessorId))
+            var streamProcessorId = new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, streamDefinition.StreamId);
+            try
             {
-                return new StreamProcessorRegistrationResult(false, _streamProcessors[streamProcessorId]);
-            }
-#pragma warning disable CA2000
-            var streamProcessor = new StreamProcessor(
-                tenant,
-                sourceStreamId,
-                eventProcessor,
-                new StreamProcessorStates(
-                    new FailingPartitions(_streamProcessorStateRepository, eventsFromStreamsFetcher, _logger),
-                    _streamProcessorStateRepository,
-                    _logger),
-                eventsFromStreamsFetcher,
-                this,
-                _logger,
-                cancellationToken);
-            if (_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
-            {
-                return new StreamProcessorRegistrationResult(true, streamProcessor);
-            }
+                var streamProcessor = new StreamProcessor(
+                    tenant,
+                    streamDefinition.StreamId,
+                    eventProcessor,
+                    new StreamProcessorStates(
+                        new FailingPartitions(_streamProcessorStateRepository, eventsFromStreamsFetcher, _logger),
+                        _streamProcessorStateRepository,
+                        _logger),
+                    eventsFromStreamsFetcher,
+                    _logger,
+                    cancellationToken);
+                if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
+                {
+                    _logger.Warning("Stream Processor with Id: '{streamProcessorId}' for Tenant: '{tenant}' already registered", streamProcessorId, tenant);
+                    return new FailedStreamProcessorRegistration($"Stream Processor with Id: '{streamProcessorId}' already registered", tenant);
+                }
 
-            return new StreamProcessorRegistrationResult(false, _streamProcessors[streamProcessorId]);
+                _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", tenant);
+                return new SuccessfulStreamProcessorRegistration(streamProcessor, tenant, () => Unregister(streamProcessorId));
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Failed to register Stream Processor with Id: '{streamProcessorId}' for Tenant: '{tenant}'", streamProcessorId);
+                return new FailedStreamProcessorRegistration($"Failed to register Stream Processor with Id: '{streamProcessorId}'. {ex.Message}", tenant);
+            }
         }
 
         /// <inheritdoc/>
@@ -84,8 +82,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             if (_streamProcessors.TryRemove(streamProcessorId, out var streamProcessor))
             {
-                _logger.Debug($"Disposing Stream Processor with key '{streamProcessorId}'");
-                streamProcessor.Dispose();
+                _logger.Debug($"Removing and disposing of Stream Processor with Id: '{streamProcessorId}'");
+                streamProcessor.Stop();
             }
         }
     }

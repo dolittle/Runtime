@@ -5,6 +5,7 @@ using System;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 using Moq;
 
@@ -29,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
 
             filter_processor = new Mock<AbstractFilterProcessor<IFilterDefinition>>(
                 scope_id,
-                new RemoteFilterDefinition(stream_id.Value, event_processor_id.Value),
+                new RemoteFilterDefinition(stream_id.Value, event_processor_id.Value, true),
                 events_to_streams_writer.Object,
                 Mock.Of<ILogger>());
         };

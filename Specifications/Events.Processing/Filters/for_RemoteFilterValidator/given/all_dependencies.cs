@@ -5,6 +5,7 @@ using System;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 using Moq;
 
@@ -25,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.g
             source_stream = Guid.NewGuid();
             target_stream = Guid.NewGuid();
             filter_processor = new Mock<IFilterProcessor<RemoteFilterDefinition>>();
-            filter_processor.SetupGet(_ => _.Definition).Returns(new RemoteFilterDefinition(source_stream, target_stream));
+            filter_processor.SetupGet(_ => _.Definition).Returns(new RemoteFilterDefinition(source_stream, target_stream, true));
             stream_processor_states = new Mock<IStreamProcessorStateRepository>();
             events_fetcher = new Mock<IFetchEventsFromStreams>();
             event_types_fetcher = new Mock<IFetchEventTypesFromStreams>();

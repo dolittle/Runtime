@@ -8,6 +8,7 @@ using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
@@ -23,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicFilterProcessor"/> class.
         /// </summary>
-        /// <param name="definition">The <see cref="RemoteFilterDefinition"/>.</param>
+        /// <param name="definition">The <see cref="PublicFilterDefinition"/>.</param>
         /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/>.</param>
         /// <param name="eventsToPublicStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>

@@ -14,18 +14,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// <summary>
     /// Represents a system that processes a stream of events.
     /// </summary>
-    public class StreamProcessor : IDisposable
+    public class StreamProcessor
     {
         readonly IEventProcessor _processor;
-        readonly ILogger _logger;
-        readonly CancellationToken _cancellationToken;
         readonly IStreamProcessorStates _streamProcessorStates;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
-        readonly IStreamProcessors _streamProcessors;
+        readonly ILogger _logger;
+        readonly CancellationToken _cancellationToken;
         readonly string _logMessagePrefix;
-        readonly CancellationTokenRegistration _cancellationTokenRegistration;
         Task _task;
-        bool _disposed;
+        bool _stopped;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
@@ -35,7 +33,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
-        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public StreamProcessor(
@@ -44,17 +41,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IEventProcessor processor,
             IStreamProcessorStates streamProcessorStates,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
-            IStreamProcessors streamProcessors,
             ILogger logger,
             CancellationToken cancellationToken)
         {
             _processor = processor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;
-            _streamProcessors = streamProcessors;
             _logger = logger;
             _cancellationToken = cancellationToken;
-            _cancellationTokenRegistration = _cancellationToken.Register(() => _streamProcessors.Unregister(Identifier));
             Identifier = new StreamProcessorId(_processor.Scope, _processor.Identifier, sourceStreamId);
             CurrentState = StreamProcessorState.New;
             _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' in scope {Identifier.ScopeId} with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
@@ -76,11 +70,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <remarks>This <see cref="StreamProcessorState" /> does not reflect the persisted state until the BeginProcessing.</remarks>
         public StreamProcessorState CurrentState { get; private set; }
 
-        /// <inheritdoc/>
-        public void Dispose()
+        /// <summary>
+        /// Stops the processing of events.
+        /// </summary>
+        public void Stop()
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            _stopped = true;
         }
 
         /// <summary>
@@ -88,16 +83,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// </summary>
         /// <returns>The stream processing task.</returns>
         public Task Start() => _task ?? (_task = BeginProcessing());
-
-        /// <summary>
-        /// Dispose.
-        /// </summary>
-        /// <param name="disposeManagedResources">Whether to dispose managed resources.</param>
-        protected virtual void Dispose(bool disposeManagedResources)
-        {
-            _cancellationTokenRegistration.Dispose();
-            _disposed = true;
-        }
 
         Task BeginProcessing()
         {
@@ -150,6 +135,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, CurrentState.Position, _cancellationToken);
         }
 
-        bool ShouldCancel() => _disposed || _cancellationToken.IsCancellationRequested;
+        bool ShouldCancel() => _stopped || _cancellationToken.IsCancellationRequested;
     }
 }
