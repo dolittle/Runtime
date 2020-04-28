@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents a unique key for a <see cref="StreamProcessor" />.
+    /// Represents a unique key for a <see cref="AbstractStreamProcessor" />.
     /// </summary>
     public class StreamProcessorId : Value<StreamProcessorId>
     {

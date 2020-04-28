@@ -11,7 +11,7 @@ using MongoDB.Bson.Serialization.Options;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the state of an <see cref="StreamProcessor" />.
+    /// Represents the state of an <see cref="AbstractStreamProcessor" />.
     /// </summary>
     public class StreamProcessorState
     {

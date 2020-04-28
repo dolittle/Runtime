@@ -8,25 +8,18 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Defines a hub for <see cref="StreamProcessor" />.
+    /// Defines a hub for <see cref="AbstractStreamProcessor" />.
     /// </summary>
     public interface IStreamProcessors
     {
         /// <summary>
-        /// Registers a <see cref="StreamProcessor" />.
+        /// Registers a <see cref="AbstractStreamProcessor" />.
         /// </summary>
-        /// <param name="streamDefinition">The <see cref="StreamDefinition" /> of the stream the <see cref="StreamProcessor" /> will be registered on.</param>
+        /// <param name="streamDefinition">The <see cref="StreamDefinition" /> of the stream the <see cref="AbstractStreamProcessor" /> will be registered on.</param>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolve, returns the <see cref="StreamProcessorRegistration"/>.</returns>
         Task<StreamProcessorRegistration> Register(StreamDefinition streamDefinition, IEventProcessor eventProcessor, IFetchEventsFromStreams eventsFromStreamsFetcher, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Unregister a <see cref="StreamProcessor"/> from the in memory map.
-        /// </summary>
-        /// <remarks>Does not actually stop the stream processor. They are only stopped through the <see cref="CancellationToken" /> they are given.</remarks>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        void Unregister(StreamProcessorId streamProcessorId);
     }
 }

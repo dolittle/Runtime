@@ -17,18 +17,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     /// </summary>
     public class FailingPartitions : IFailingPartitions
     {
-        readonly IPartitionedStreamProcessorStates _streamProcessorStates;
+        readonly IStreamProcessorStates _streamProcessorStates;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
         /// </summary>
-        /// <param name="streamProcessorStates">The <see cref="IPartitionedStreamProcessorStates" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public FailingPartitions(
-            IPartitionedStreamProcessorStates streamProcessorStates,
+            IStreamProcessorStates streamProcessorStates,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             ILogger<FailingPartitions> logger)
         {
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <inheritdoc/>
         public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken)
         {
-            if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = await _streamProcessorStates.GetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
+            if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = (await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false)).streamProcessorState as StreamProcessorState;
             var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
             foreach (var kvp in failingPartitionsList)
             {

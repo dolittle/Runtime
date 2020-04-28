@@ -12,19 +12,20 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     public interface IStreamProcessorStates
     {
         /// <summary>
-        /// Gets a value indicating whether there is a persisted <see cref="IStreamProcessorState" /> for the given <see cref="StreamProcessorId" />.
-        /// </summary>
-        /// <param name="streamProcessorId">The unique <see cref="StreamProcessorId" /> representing the <see cref="StreamProcessor"/>.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns a value indicating whether there is a persisted <see cref="IStreamProcessorState" />.</returns>
-        Task<bool> HasFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken);
-
-        /// <summary>
         /// Gets the <see cref="IStreamProcessorState" /> for the given <see cref="StreamProcessorId" />.
         /// </summary>
-        /// <param name="streamProcessorId">The unique <see cref="StreamProcessorId" /> representing the <see cref="StreamProcessor"/>.</param>
+        /// <param name="streamProcessorId">The unique <see cref="StreamProcessorId" /> representing the <see cref="AbstractStreamProcessor"/>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The persisted <see cref="IStreamProcessorState" />.</returns>
-        Task<IStreamProcessorState> GetFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the tuple with a <see cref="bool" /> and the persisted <see cref="IStreamProcessorState" /> if exists.</returns>
+        Task<(bool success, IStreamProcessorState streamProcessorState)> TryGetFor(StreamProcessorId streamProcessorId, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Persist the <see cref="IStreamProcessorState" /> for <see cref="StreamProcessorId" />.
+        /// </summary>
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
+        /// <param name="streamProcessorState">The <see cref="IStreamProcessorState" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
+        Task Persist(StreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken);
     }
 }

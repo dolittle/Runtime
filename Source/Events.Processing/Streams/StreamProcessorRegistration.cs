@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// </summary>
         /// <param name="streamProcessor">The <see cref="StreamProcessor" />.</param>
         /// <param name="tenant">The <see cref="TenantId" />.</param>
-        protected StreamProcessorRegistration(StreamProcessor streamProcessor, TenantId tenant)
+        protected StreamProcessorRegistration(AbstractStreamProcessor streamProcessor, TenantId tenant)
         {
             Succeeded = true;
             Tenant = tenant;
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Gets the registered stream processor.
         /// </summary>
-        public StreamProcessor StreamProcessor { get; }
+        public AbstractStreamProcessor StreamProcessor { get; }
 
         /// <summary>
         /// Gets a value indicating whether the object has been disposed.
@@ -74,6 +74,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected virtual void Dispose(bool disposing)
         {
             if (Disposed) return;
+            StreamProcessor?.Dispose();
             Disposed = true;
         }
     }

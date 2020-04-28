@@ -9,12 +9,12 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Defines a system that can register a <see cref="StreamProcessor" /> for all tenants.
+    /// Defines a system that can register a <see cref="AbstractStreamProcessor" /> for all tenants.
     /// </summary>
     public interface IRegisterStreamProcessorForAllTenants
     {
         /// <summary>
-        /// Register a <see cref="StreamProcessor" /> with the given <see cref="IEventProcessor" /> on the given source <see cref="StreamId" />.
+        /// Register a <see cref="AbstractStreamProcessor" /> with the given <see cref="IEventProcessor" /> on the given source <see cref="StreamId" />.
         /// </summary>
         /// <param name="createEventProcessor">A <see cref="Func{TResult}" /> that returns a <see cref="Task" /> that, when resolved, returns the <see cref="IEventProcessor" />.</param>
         /// <param name="getStreamDefinition">A <see cref="Func{TResult}" /> that returns a <see cref="Task" /> that, when resolved, returns the <see cref="StreamDefinition" />.</param>

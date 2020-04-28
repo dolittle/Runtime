@@ -5,7 +5,7 @@ using System;
 using Dolittle.Concepts;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.Unpartitioned
+namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Represents the state of an <see cref="StreamProcessor" />.

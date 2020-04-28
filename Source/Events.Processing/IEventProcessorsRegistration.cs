@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing
         Task<EventProcessorsRegistrationResult> Register();
 
         /// <summary>
-        /// Starts the registered <see cref="StreamProcessor" />s and completes the registration.
+        /// Starts the registered <see cref="AbstractStreamProcessor" />s and completes the registration.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task Complete();

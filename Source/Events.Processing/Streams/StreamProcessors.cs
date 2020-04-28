@@ -9,7 +9,6 @@ using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Streams.Partitioned;
-using Dolittle.Runtime.Events.Processing.Streams.Unpartitioned;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 
@@ -21,9 +20,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     [SingletonPerTenant]
     public class StreamProcessors : IStreamProcessors
     {
-        readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
-        readonly IPartitionedStreamProcessorStates _partitionedStreamProcessorStates;
-        readonly IUnpartitionedStreamProcessorStates _unpartitionedStreamProcessorStates;
+        readonly ConcurrentDictionary<StreamProcessorId, AbstractStreamProcessor> _streamProcessors;
+        readonly IStreamProcessorStates _streamProcessorStates;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILoggerManager _loggerManager;
         readonly ILogger _logger;
@@ -31,21 +29,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
         /// </summary>
-        /// <param name="partitionedStreamProcessorStates">The <see cref="IPartitionedStreamProcessorStates" />.</param>
-        /// <param name="unpartitionedStreamProcessorStates">The <see cref="IUnpartitionedStreamProcessorStates" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public StreamProcessors(
-            IPartitionedStreamProcessorStates partitionedStreamProcessorStates,
-            IUnpartitionedStreamProcessorStates unpartitionedStreamProcessorStates,
+            IStreamProcessorStates streamProcessorStates,
             IExecutionContextManager executionContextManager,
             ILoggerManager loggerManager,
             ILogger<StreamProcessors> logger)
         {
-            _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
-            _partitionedStreamProcessorStates = partitionedStreamProcessorStates;
-            _unpartitionedStreamProcessorStates = unpartitionedStreamProcessorStates;
+            _streamProcessors = new ConcurrentDictionary<StreamProcessorId, AbstractStreamProcessor>();
+            _streamProcessorStates = streamProcessorStates;
             _executionContextManager = executionContextManager;
             _loggerManager = loggerManager;
             _logger = logger;
@@ -76,7 +71,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 }
 
                 _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", tenant);
-                return new SuccessfulStreamProcessorRegistration(streamProcessor, tenant, () => Unregister(streamProcessorId));
+                return new SuccessfulStreamProcessorRegistration(streamProcessor, tenant);
             }
             catch (Exception ex)
             {
@@ -85,17 +80,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
         }
 
-        /// <inheritdoc/>
-        public void Unregister(StreamProcessorId streamProcessorId)
-        {
-            if (_streamProcessors.TryRemove(streamProcessorId, out var streamProcessor))
-            {
-                _logger.Debug($"Removing and disposing of Stream Processor with Id: '{streamProcessorId}'");
-                streamProcessor.Stop();
-            }
-        }
-
-        async Task<StreamProcessor> CreateStreamProcessor(
+        async Task<AbstractStreamProcessor> CreateStreamProcessor(
             StreamProcessorId streamProcessorId,
             StreamDefinition streamDefinition,
             TenantId tenant,
@@ -103,13 +88,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             CancellationToken cancellationToken)
         {
+            void unregister() => _streamProcessors.TryRemove(streamProcessorId, out var _);
             if (streamDefinition.Partitioned)
             {
-                return await CreatePartitionedStreamProcessor(streamProcessorId, streamDefinition.StreamId, tenant, eventProcessor, eventsFromStreamsFetcher, cancellationToken).ConfigureAwait(false);
+                return await CreatePartitionedStreamProcessor(streamProcessorId, streamDefinition.StreamId, tenant, eventProcessor, eventsFromStreamsFetcher, unregister, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                return await CreateUnpartitionedStreamProcessor(streamProcessorId, streamDefinition.StreamId, tenant, eventProcessor, eventsFromStreamsFetcher, cancellationToken).ConfigureAwait(false);
+                return await CreateUnpartitionedStreamProcessor(streamProcessorId, streamDefinition.StreamId, tenant, eventProcessor, eventsFromStreamsFetcher, unregister, cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -119,60 +105,59 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             TenantId tenant,
             IEventProcessor eventProcessor,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
+            Action unregister,
             CancellationToken cancellationToken)
         {
-            var isPersisted = await _partitionedStreamProcessorStates.HasFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
-            Partitioned.StreamProcessorState streamProcessorState;
-            if (isPersisted)
+            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
+            var streamProcessorState = tryGetStreamProcessorState.streamProcessorState;
+            if (!tryGetStreamProcessorState.success)
             {
-                streamProcessorState = await _partitionedStreamProcessorStates.GetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
+                streamProcessorState = StreamProcessorState.New;
+                await _streamProcessorStates.Persist(streamProcessorId, streamProcessorState, cancellationToken).ConfigureAwait(false);
             }
-            else
-            {
-                streamProcessorState = Partitioned.StreamProcessorState.New;
-                await _partitionedStreamProcessorStates.Persist(streamProcessorId, streamProcessorState, cancellationToken).ConfigureAwait(false);
-            }
+
+            if (!streamProcessorState.Partitioned) throw new ExpectedPartitionedStreamProcessorState(streamProcessorId);
 
             return new Partitioned.StreamProcessor(
                 tenant,
                 sourceStreamId,
-                streamProcessorState,
+                streamProcessorState as Partitioned.StreamProcessorState,
                 eventProcessor,
-                _partitionedStreamProcessorStates,
+                _streamProcessorStates,
                 eventsFromStreamsFetcher,
-                new FailingPartitions(_partitionedStreamProcessorStates, eventsFromStreamsFetcher, _loggerManager.CreateLogger<FailingPartitions>()),
+                new FailingPartitions(_streamProcessorStates, eventsFromStreamsFetcher, _loggerManager.CreateLogger<FailingPartitions>()),
+                unregister,
                 _loggerManager.CreateLogger<Partitioned.StreamProcessor>(),
                 cancellationToken);
         }
 
-        async Task<Unpartitioned.StreamProcessor> CreateUnpartitionedStreamProcessor(
+        async Task<StreamProcessor> CreateUnpartitionedStreamProcessor(
             StreamProcessorId streamProcessorId,
             StreamId sourceStreamId,
             TenantId tenant,
             IEventProcessor eventProcessor,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
+            Action unregister,
             CancellationToken cancellationToken)
         {
-            var isPersisted = await _unpartitionedStreamProcessorStates.HasFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
-            Unpartitioned.StreamProcessorState streamProcessorState;
-            if (isPersisted)
+            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
+            var streamProcessorState = tryGetStreamProcessorState.streamProcessorState;
+            if (!tryGetStreamProcessorState.success)
             {
-                streamProcessorState = await _unpartitionedStreamProcessorStates.GetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                streamProcessorState = Unpartitioned.StreamProcessorState.New;
-                await _unpartitionedStreamProcessorStates.Persist(streamProcessorId, streamProcessorState, cancellationToken).ConfigureAwait(false);
+                streamProcessorState = StreamProcessorState.New;
+                await _streamProcessorStates.Persist(streamProcessorId, streamProcessorState, cancellationToken).ConfigureAwait(false);
             }
 
-            return new Unpartitioned.StreamProcessor(
+            if (streamProcessorState.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
+            return new StreamProcessor(
                 tenant,
                 sourceStreamId,
-                streamProcessorState,
+                streamProcessorState as StreamProcessorState,
                 eventProcessor,
-                _unpartitionedStreamProcessorStates,
+                _streamProcessorStates,
                 eventsFromStreamsFetcher,
-                _loggerManager.CreateLogger<Unpartitioned.StreamProcessor>(),
+                unregister,
+                _loggerManager.CreateLogger<StreamProcessor>(),
                 cancellationToken);
         }
     }

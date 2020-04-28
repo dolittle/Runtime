@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Defines the basis for the state of a <see cref="StreamProcessor" />.
+    /// Defines the basis for the state of a <see cref="AbstractStreamProcessor" />.
     /// </summary>
     public interface IStreamProcessorState
     {
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         StreamPosition Position { get; }
 
         /// <summary>
-        /// Gets a value indicating whether this <see cref="StreamProcessor" /> is partitioned or not.
+        /// Gets a value indicating whether this <see cref="AbstractStreamProcessor" /> is partitioned or not.
         /// </summary>
         bool Partitioned { get; }
     }

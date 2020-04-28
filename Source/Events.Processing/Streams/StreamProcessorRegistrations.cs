@@ -9,7 +9,7 @@ using Dolittle.Collections;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents registrations of <see cref="StreamProcessor" /> as an unit in a transaction.
+    /// Represents registrations of <see cref="AbstractStreamProcessor" /> as an unit in a transaction.
     /// </summary>
     public class StreamProcessorRegistrations : List<StreamProcessorRegistration>, IDisposable
     {
@@ -23,9 +23,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public bool HasFailures => this.Any(_ => !_.Succeeded);
 
         /// <summary>
-        /// Try to <see cref="StreamProcessor.Start" /> all <see cref="StreamProcessor" />s.
+        /// Try to <see cref="AbstractStreamProcessor.Start" /> all <see cref="AbstractStreamProcessor" />s.
         /// </summary>
-        /// <returns>A value indicating whether all registered <see cref="StreamProcessor" />s could be started.</returns>
+        /// <returns>A value indicating whether all registered <see cref="AbstractStreamProcessor" />s could be started.</returns>
         public bool TryStart()
         {
             if (_started || _disposed) return false;
