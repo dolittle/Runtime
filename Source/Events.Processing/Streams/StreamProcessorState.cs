@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents the state of an <see cref="StreamProcessor" />.
+    /// Represents the state of an <see cref="ScopedStreamProcessor" />.
     /// </summary>
     public class StreamProcessorState : Value<StreamProcessorState>, IStreamProcessorState
     {
@@ -18,6 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
         public StreamProcessorState(StreamPosition streamPosition)
         {
+            IsFailing = false;
             Position = streamPosition;
             RetryTime = DateTimeOffset.UtcNow;
             FailureReason = string.Empty;
@@ -33,6 +34,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="processingAttempts">The number of times it has processed the Event at <see cref="Position" />.</param>
         public StreamProcessorState(StreamPosition streamPosition, string failureReason, DateTimeOffset retryTime, uint processingAttempts)
         {
+            IsFailing = true;
             Position = streamPosition;
             RetryTime = retryTime;
             FailureReason = failureReason;
@@ -52,18 +54,23 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public StreamPosition Position { get; }
 
         /// <summary>
-        /// Gets or sets the <see cref="DateTimeOffset" /> for when to retry processing.
+        /// Gets a value indicating whether this <see cref="ScopedStreamProcessor" /> is failing.
         /// </summary>
-        public DateTimeOffset RetryTime { get; set; }
+        public bool IsFailing { get; }
 
         /// <summary>
-        /// Gets or sets the reason for failure.
+        /// Gets the <see cref="DateTimeOffset" /> for when to retry processing.
         /// </summary>
-        public string FailureReason { get; set; }
+        public DateTimeOffset RetryTime { get; }
 
         /// <summary>
-        /// Gets or sets the number of times that the event at position has been attempted processed.
+        /// Gets the reason for failure.
         /// </summary>
-        public uint ProcessingAttempts { get; set; }
+        public string FailureReason { get; }
+
+        /// <summary>
+        /// Gets the number of times that the event at position has been attempted processed.
+        /// </summary>
+        public uint ProcessingAttempts { get; }
     }
 }
