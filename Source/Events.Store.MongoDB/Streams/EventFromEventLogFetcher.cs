@@ -43,7 +43,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
                 streamPosition,
                 cancellationToken).ConfigureAwait(false);
-            if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(scope, StreamId.AllStreamId, streamPosition);
+
+            // if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(scope, StreamId.AllStreamId, streamPosition);
             return committedEventWithPartition;
         }
 
