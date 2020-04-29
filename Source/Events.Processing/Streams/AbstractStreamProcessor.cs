@@ -16,15 +16,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// </summary>
     public abstract class AbstractStreamProcessor
     {
-        readonly CancellationToken _externalCancellationToken;
+        readonly TenantId _tenantId;
+        readonly IEventProcessor _processor;
         readonly Action _unregister;
+        readonly string _logMessagePrefix;
+        readonly CancellationToken _cancellationToken;
+        IStreamProcessorState _currentState;
         bool _started;
-        bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractStreamProcessor"/> class.
         /// </summary>
-        /// <param name="tenantId">The <see cref="Dolittle.Tenancy.TenantId"/>.</param>
+        /// <param name="tenantId">The <see cref="TenantId"/>.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="initialState">The initial state of the <see cref="IStreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
@@ -41,14 +44,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             CancellationToken cancellationToken)
         {
             Identifier = new StreamProcessorId(processor.Scope, processor.Identifier, sourceStreamId);
-            CurrentState = initialState;
-            TenantId = tenantId;
-            Processor = processor;
-            DetailedLogMessagePrefix = $"Stream Processor in Scope: {processor.Scope} on Stream: '{sourceStreamId}' with Processor: '{processor.Identifier}' with for Tenant: '{tenantId}'";
             Logger = logger;
 
-            _externalCancellationToken = cancellationToken;
+            _currentState = initialState;
+            _tenantId = tenantId;
+            _processor = processor;
+            _logMessagePrefix = $"Stream Processor in Scope: {processor.Scope} on Stream: '{sourceStreamId}' with Processor: '{processor.Identifier}' with for Tenant: '{tenantId}'";
             _unregister = unregister;
+            _cancellationToken = cancellationToken;
         }
 
         /// <summary>
@@ -57,35 +60,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public StreamProcessorId Identifier { get; }
 
         /// <summary>
-        /// Gets or sets the current <see cref="IStreamProcessorState" />.
-        /// </summary>
-        /// <remarks>This <see cref="IStreamProcessorState" /> does not reflect the persisted state until the BeginProcessing.</remarks>
-        protected IStreamProcessorState CurrentState { get; set; }
-
-        /// <summary>
-        /// Gets the <see cref="Dolittle.Tenancy.TenantId" /> that this <see cref="AbstractStreamProcessor" /> is processing for.
-        /// </summary>
-        protected TenantId TenantId { get; }
-
-        /// <summary>
-        /// Gets the <see cref="IEventProcessor" />.
-        /// </summary>
-        protected IEventProcessor Processor { get; }
-
-        /// <summary>
-        /// Gets the detailed log message prefix.
-        /// </summary>
-        protected string DetailedLogMessagePrefix { get; }
-
-        /// <summary>
         /// Gets the <see cref="ILogger" />.
         /// </summary>
         protected ILogger Logger { get; }
 
         /// <summary>
-        /// Stops the stream processing.
+        /// Gets a value indicating whether the processing should stop.
         /// </summary>
-        public void Stop() => _internalCancellationTokenSource.Cancel();
+        protected bool ShouldStop => _cancellationToken.IsCancellationRequested;
 
         /// <summary>
         /// Starts the stream processing.
@@ -97,42 +79,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _ = BeginProcessing();
         }
 
-        /// <inheritdoc/>
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Disposes the object.
-        /// </summary>
-        /// <param name="disposing">Whether to dispose managed resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposed)
-            {
-                if (disposing)
-                {
-                    if (!_internalCancellationTokenSource.IsCancellationRequested)
-                    {
-                        _internalCancellationTokenSource.Cancel();
-                    }
-
-                    _internalCancellationTokenSource.Dispose();
-                    _internalCancellationTokenSource = null;
-                }
-
-                _disposed = true;
-            }
-        }
-
         /// <summary>
         /// Catchup on failing Events.
         /// </summary>
+        /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="IStreamProcessorState" />.</returns>
-        protected abstract Task<IStreamProcessorState> Catchup(CancellationToken cancellationToken);
+        protected abstract Task<IStreamProcessorState> Catchup(IStreamProcessorState currentState, CancellationToken cancellationToken);
 
         /// <summary>
         /// Fetches the Event that is should be processed next.
@@ -142,53 +95,58 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected abstract Task<StreamEvent> FetchEventToProcess(CancellationToken cancellationToken);
 
         /// <summary>
-        ///  Gets the new <see cref="CurrentState" /> after hanling the event of a <see cref="IProcessingResult" /> that signifies that the processing of the <see cref="StreamEvent" /> succeeded.
+        ///  Gets the new <see cref="_currentState" /> after hanling the event of a <see cref="IProcessingResult" /> that signifies that the processing of the <see cref="StreamEvent" /> succeeded.
         /// </summary>
         /// <param name="successfulProcessing">The <see cref="SuccessfulProcessing" /> <see cref="IProcessingResult" />.</param>
         /// <param name="processedEvent">The <see cref="StreamEvent" /> that was processed.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="CurrentState" />.</returns>
-        protected abstract Task<IStreamProcessorState> OnSuccessfulProcessing(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent);
+        /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="_currentState" />.</returns>
+        protected abstract Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState);
 
         /// <summary>
-        ///  Gets the new <see cref="CurrentState" /> after hanling the event of a <see cref="IProcessingResult" /> that signifies that the <see cref="StreamEvent" /> should be processed again.
+        ///  Gets the new <see cref="_currentState" /> after hanling the event of a <see cref="IProcessingResult" /> that signifies that the <see cref="StreamEvent" /> should be processed again.
         /// </summary>
         /// <param name="failedProcessing">The <see cref="FailedProcessing" /> <see cref="IProcessingResult" />.</param>
         /// <param name="processedEvent">The <see cref="StreamEvent" /> that was processed.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="CurrentState" />.</returns>
-        protected abstract Task<IStreamProcessorState> OnRetryProcessing(FailedProcessing failedProcessing, StreamEvent processedEvent);
+        /// /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="_currentState" />.</returns>
+        protected abstract Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState);
 
         /// <summary>
-        ///  Gets the new <see cref="CurrentState" /> after hanling the event of a <see cref="IProcessingResult" /> that signifies that the <see cref="StreamEvent" /> should not be processed again.
+        ///  Gets the new <see cref="_currentState" /> after hanling the event of a <see cref="IProcessingResult" /> that signifies that the <see cref="StreamEvent" /> should not be processed again.
         /// </summary>
         /// <param name="failedProcessing">The <see cref="FailedProcessing" /> <see cref="IProcessingResult" />.</param>
         /// <param name="processedEvent">The <see cref="StreamEvent" /> that was processed.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="CurrentState" />.</returns>
-        protected abstract Task<IStreamProcessorState> OnFailedProcessing(FailedProcessing failedProcessing, StreamEvent processedEvent);
+        /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="_currentState" />.</returns>
+        protected abstract Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState);
 
         /// <summary>
-        /// Process the <see cref="StreamEvent" /> and get the new <see cref="CurrentState" />.
+        /// Process the <see cref="StreamEvent" /> and get the new <see cref="_currentState" />.
         /// </summary>
         /// <param name="event">The <see cref="StreamEvent" />.</param>
+        /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="CurrentState" />.</returns>
-        protected virtual async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, CancellationToken cancellationToken)
+        /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="_currentState" />.</returns>
+        protected virtual async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, CancellationToken cancellationToken)
         {
-            var processingResult = await Processor.Process(@event.Event, @event.Partition, cancellationToken).ConfigureAwait(false);
-            return await HandleProcessingResult(processingResult, @event).ConfigureAwait(false);
+            var processingResult = await _processor.Process(@event.Event, @event.Partition, cancellationToken).ConfigureAwait(false);
+            return await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Process the <see cref="StreamEvent" /> and get the new <see cref="CurrentState" />.
+        /// Process the <see cref="StreamEvent" /> and get the new <see cref="_currentState" />.
         /// </summary>
         /// <param name="event">The <see cref="StreamEvent" />.</param>
         /// <param name="failureReason">The reason for why processing failed the last time.</param>
         /// <param name="processingAttempts">The number of times that this event has been processed before.</param>
+        /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="CurrentState" />.</returns>
-        protected async Task<IStreamProcessorState> RetryProcessingEvent(StreamEvent @event, string failureReason, uint processingAttempts, CancellationToken cancellationToken)
+        /// <returns>A <see cref="Task"/> that, when returned, returns the new <see cref="_currentState" />.</returns>
+        protected async Task<IStreamProcessorState> RetryProcessingEvent(StreamEvent @event, string failureReason, uint processingAttempts, IStreamProcessorState currentState, CancellationToken cancellationToken)
         {
-            var processingResult = await Processor.Process(@event.Event, @event.Partition, failureReason, processingAttempts - 1, cancellationToken).ConfigureAwait(false);
-            return await HandleProcessingResult(processingResult, @event).ConfigureAwait(false);
+            var processingResult = await _processor.Process(@event.Event, @event.Partition, failureReason, processingAttempts - 1, cancellationToken).ConfigureAwait(false);
+            return await HandleProcessingResult(processingResult, @event, currentState).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -196,36 +154,35 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// </summary>
         /// <param name="processingResult">The <see cref="IProcessingResult" />.</param>
         /// <param name="processedEvent">The processed <see cref="StreamEvent" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="CurrentState" />.</returns>
-        protected Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent)
+        /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="_currentState" />.</returns>
+        protected Task<IStreamProcessorState> HandleProcessingResult(IProcessingResult processingResult, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
             if (processingResult.Retry)
             {
-                return OnRetryProcessing(processingResult as FailedProcessing, processedEvent);
+                return OnRetryProcessingResult(processingResult as FailedProcessing, processedEvent, currentState);
             }
             else if (!processingResult.Succeeded)
             {
-                return OnFailedProcessing(processingResult as FailedProcessing, processedEvent);
+                return OnFailedProcessingResult(processingResult as FailedProcessing, processedEvent, currentState);
             }
 
-            return OnSuccessfulProcessing(processingResult as SuccessfulProcessing, processedEvent);
+            return OnSuccessfulProcessingResult(processingResult as SuccessfulProcessing, processedEvent, currentState);
         }
 
         async Task BeginProcessing()
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_internalCancellationTokenSource.Token, _externalCancellationToken);
-            var token = cts.Token;
             try
             {
                 do
                 {
                     StreamEvent @event = default;
-                    while (@event == default && !token.IsCancellationRequested)
+                    while (@event == default && !ShouldStop)
                     {
                         try
                         {
-                            CurrentState = await Catchup(token).ConfigureAwait(false);
-                            @event = await FetchEventToProcess(cts.Token).ConfigureAwait(false);
+                            _currentState = await Catchup(_currentState, _cancellationToken).ConfigureAwait(false);
+                            @event = await FetchEventToProcess(_cancellationToken).ConfigureAwait(false);
                         }
                         catch (NoEventInStreamAtPosition)
                         {
@@ -237,16 +194,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                     }
 
-                    if (token.IsCancellationRequested) break;
-                    CurrentState = await ProcessEvent(@event, cts.Token).ConfigureAwait(false);
+                    if (ShouldStop) break;
+                    _currentState = await ProcessEvent(@event, _currentState, _cancellationToken).ConfigureAwait(false);
                 }
-                while (!token.IsCancellationRequested);
+                while (!ShouldStop);
             }
             catch (Exception ex)
             {
-                if (!token.IsCancellationRequested)
+                if (!ShouldStop)
                 {
-                    Logger.Warning(ex, "{logPrefix} failed", DetailedLogMessagePrefix);
+                    Logger.Warning(ex, "{logPrefix} failed", _logMessagePrefix);
                 }
             }
             finally
