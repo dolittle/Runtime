@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     public interface IFailingPartitions
     {
         /// <summary>
-        /// Adds a <see cref="FailingPartitionState" /> for a <see cref="StreamProcessor" />.
+        /// Adds a <see cref="FailingPartitionState" /> for a <see cref="ScopedStreamProcessor" />.
         /// </summary>
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
         /// <param name="oldState">The old <see cref="StreamProcessorState" />.</param>
@@ -23,17 +23,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <param name="retryTime">The <see cref="DateTimeOffset" /> it will retry processing again.</param>
         /// <param name="reason">The reason it failed.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The new <see cref="StreamProcessorState" />.</returns>
-        Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, StreamProcessorState oldState, StreamPosition failedPosition, PartitionId partition, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="StreamProcessorState" />.</returns>
+        Task<IStreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, StreamProcessorState oldState, StreamPosition failedPosition, PartitionId partition, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Catchup all failing partitions for a <see cref="StreamProcessor" />.
+        /// Catchup all failing partitions for a <see cref="ScopedStreamProcessor" />.
         /// </summary>
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId"/>.</param>
-        /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="streamProcessorState">The current <see cref="StreamProcessorState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The new <see cref="StreamProcessorState" />.</returns>
-        Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns the new <see cref="StreamProcessorState" />.</returns>
+        Task<IStreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, StreamProcessorState streamProcessorState, CancellationToken cancellationToken);
     }
 }

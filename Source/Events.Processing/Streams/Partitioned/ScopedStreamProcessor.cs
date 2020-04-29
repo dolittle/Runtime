@@ -13,14 +13,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
      /// <summary>
     /// Represents a system that can process a stream of events.
     /// </summary>
-    public class StreamProcessor : AbstractStreamProcessor
+    public class ScopedStreamProcessor : AbstractStreamProcessor
     {
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IStreamProcessorStates _streamProcessorStates;
         readonly IFailingPartitions _failingPartitions;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
+        /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
         /// </summary>
         /// <param name="tenantId">The <see cref="TenantId"/>.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
@@ -29,10 +29,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="failingPartitions">The <see cref="IFailingPartitions" />.</param>
-        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="StreamProcessor" />.</param>
+        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        public StreamProcessor(
+        public ScopedStreamProcessor(
             TenantId tenantId,
             StreamId sourceStreamId,
             StreamProcessorState initialState,
@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             IFailingPartitions failingPartitions,
             Action unregister,
-            ILogger<StreamProcessor> logger,
+            ILogger<ScopedStreamProcessor> logger,
             CancellationToken cancellationToken)
             : base(tenantId, sourceStreamId, initialState, processor, unregister, logger, cancellationToken)
         {
@@ -51,62 +51,54 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         }
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, CancellationToken cancellationToken)
+        protected override async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, CancellationToken cancellationToken)
         {
-            var currentState = CurrentState as StreamProcessorState;
-            if (currentState.FailingPartitions.Keys.Contains(@event.Partition))
+            var streamProcessorState = currentState as StreamProcessorState;
+            if (streamProcessorState.FailingPartitions.Keys.Contains(@event.Partition))
             {
-                var newState = new StreamProcessorState(@event.Position + 1, currentState.FailingPartitions);
+                var newState = new StreamProcessorState(@event.Position + 1, streamProcessorState.FailingPartitions);
                 await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
                 return newState;
             }
 
-            return await base.ProcessEvent(@event, cancellationToken).ConfigureAwait(false);
+            return await base.ProcessEvent(@event, streamProcessorState, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> Catchup(CancellationToken cancellationToken)
-        {
-            var newState = await _failingPartitions.CatchupFor(Identifier, Processor, CurrentState as StreamProcessorState, cancellationToken).ConfigureAwait(false);
-            return newState;
-        }
+        protected override Task<IStreamProcessorState> Catchup(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
+            _failingPartitions.CatchupFor(Identifier, currentState as StreamProcessorState, cancellationToken);
 
         /// <inheritdoc/>
-        protected override Task<StreamEvent> FetchEventToProcess(CancellationToken cancellationToken) => _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, CurrentState.Position, cancellationToken);
+        protected override Task<StreamEvent> FetchEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
+            _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, currentState.Position, cancellationToken);
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> OnFailedProcessing(FailedProcessing failedProcessing, StreamEvent processedEvent)
-        {
-            var newState = await _failingPartitions.AddFailingPartitionFor(
+        protected override Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState) =>
+            _failingPartitions.AddFailingPartitionFor(
                 Identifier,
-                CurrentState as StreamProcessorState,
+                currentState as StreamProcessorState,
                 processedEvent.Position,
                 processedEvent.Partition,
                 DateTimeOffset.MaxValue,
                 failedProcessing.FailureReason,
-                CancellationToken.None).ConfigureAwait(false);
-            return newState;
-        }
+                CancellationToken.None);
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> OnRetryProcessing(FailedProcessing failedProcessing, StreamEvent processedEvent)
-        {
-            var newState = await _failingPartitions.AddFailingPartitionFor(
+        protected override Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState) =>
+            _failingPartitions.AddFailingPartitionFor(
                 Identifier,
-                CurrentState as StreamProcessorState,
+                currentState as StreamProcessorState,
                 processedEvent.Position,
                 processedEvent.Partition,
                 DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
                 failedProcessing.FailureReason,
-                CancellationToken.None).ConfigureAwait(false);
-            return newState;
-        }
+                CancellationToken.None);
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> OnSuccessfulProcessing(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent)
+        protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
-            var currentState = CurrentState as StreamProcessorState;
-            var newState = new StreamProcessorState(processedEvent.Position + 1, currentState.FailingPartitions);
+            var oldState = currentState as StreamProcessorState;
+            var newState = new StreamProcessorState(processedEvent.Position + 1, oldState.FailingPartitions);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }

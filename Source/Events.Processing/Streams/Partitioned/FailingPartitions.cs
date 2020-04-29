@@ -18,6 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     public class FailingPartitions : IFailingPartitions
     {
         readonly IStreamProcessorStates _streamProcessorStates;
+        readonly IEventProcessor _eventProcessor;
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly ILogger _logger;
 
@@ -25,16 +26,19 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
         /// </summary>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
+        /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public FailingPartitions(
             IStreamProcessorStates streamProcessorStates,
+            IEventProcessor eventProcessor,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             ILogger<FailingPartitions> logger)
         {
             _streamProcessorStates = streamProcessorStates;
-            _logger = logger;
+            _eventProcessor = eventProcessor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -51,9 +55,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         }
 
         /// <inheritdoc/>
-        public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, IEventProcessor eventProcessor, StreamProcessorState streamProcessorState, CancellationToken cancellationToken)
+        public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, StreamProcessorState streamProcessorState, CancellationToken cancellationToken)
         {
-            if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = (await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false)).streamProcessorState as StreamProcessorState;
+            if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = (await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false)).Result as StreamProcessorState;
             var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();
             foreach (var kvp in failingPartitionsList)
             {
@@ -67,7 +71,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
                         if (!ShouldRetryProcessing(failingPartitionState)) break;
 
                         var streamEvent = await FetchEventAtPosition(streamProcessorId, nextPosition, cancellationToken).ConfigureAwait(false);
-                        var processingResult = await ProcessEvent(failingPartitionState, eventProcessor, streamEvent.Event, partition, cancellationToken).ConfigureAwait(false);
+                        var processingResult = await RetryProcessingEvent(failingPartitionState, streamEvent.Event, partition, cancellationToken).ConfigureAwait(false);
 
                         if (processingResult.Succeeded)
                         {
@@ -131,10 +135,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             return (newState, newFailingPartitionState);
         }
 
-        Task<IProcessingResult> ProcessEvent(FailingPartitionState failingPartitionState, IEventProcessor eventProcessor, CommittedEvent @event, PartitionId partition, CancellationToken cancellationToken)
-        {
-            return eventProcessor.Process(@event, partition, failingPartitionState.Reason, failingPartitionState.ProcessingAttempts - 1, cancellationToken);
-        }
+        Task<IProcessingResult> RetryProcessingEvent(FailingPartitionState failingPartitionState, CommittedEvent @event, PartitionId partition, CancellationToken cancellationToken) =>
+            _eventProcessor.Process(@event, partition, failingPartitionState.Reason, failingPartitionState.ProcessingAttempts - 1, cancellationToken);
 
         Task PersistNewState(StreamProcessorId streamProcessorId, StreamProcessorState newState) => _streamProcessorStates.Persist(streamProcessorId, newState, CancellationToken.None);
 
