@@ -13,13 +13,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// <summary>
     /// Represents a system that can process a stream of events.
     /// </summary>
-    public class StreamProcessor : AbstractStreamProcessor
+    public class ScopedStreamProcessor : AbstractStreamProcessor
     {
         readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
         readonly IStreamProcessorStates _streamProcessorStates;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
+        /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
         /// </summary>
         /// <param name="tenantId">The <see cref="TenantId"/>.</param>
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
@@ -27,10 +27,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
-        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="StreamProcessor" />.</param>
+        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        public StreamProcessor(
+        public ScopedStreamProcessor(
             TenantId tenantId,
             StreamId sourceStreamId,
             StreamProcessorState initialState,
@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IStreamProcessorStates streamProcessorStates,
             IFetchEventsFromStreams eventsFromStreamsFetcher,
             Action unregister,
-            ILogger<StreamProcessor> logger,
+            ILogger<ScopedStreamProcessor> logger,
             CancellationToken cancellationToken)
             : base(tenantId, sourceStreamId, initialState, processor, unregister, logger, cancellationToken)
         {
@@ -47,48 +47,50 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> Catchup(CancellationToken cancellationToken)
+        protected override async Task<IStreamProcessorState> Catchup(IStreamProcessorState currentState, CancellationToken cancellationToken)
         {
-            var currentState = CurrentState as StreamProcessorState;
-            if (!currentState.IsFailing) return currentState;
+            var streamProcessorState = currentState as StreamProcessorState;
+            if (!streamProcessorState.IsFailing) return streamProcessorState;
             while (true)
             {
-                if (!CanRetryProcessing(currentState.RetryTime))
+                if (!CanRetryProcessing(streamProcessorState.RetryTime))
                 {
                     await Task.Delay(500).ConfigureAwait(false);
-                    CurrentState = (await _streamProcessorStates.TryGetFor(Identifier, cancellationToken).ConfigureAwait(false)).streamProcessorState;
+                    var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(Identifier, cancellationToken).ConfigureAwait(false);
+                    if (tryGetStreamProcessorState.Success) streamProcessorState = tryGetStreamProcessorState.Result as StreamProcessorState;
                 }
                 else
                 {
-                    var @event = await _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, CurrentState.Position, cancellationToken).ConfigureAwait(false);
-                    return await RetryProcessingEvent(@event, currentState.FailureReason, currentState.ProcessingAttempts, cancellationToken).ConfigureAwait(false);
+                    var @event = await _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, streamProcessorState.Position, cancellationToken).ConfigureAwait(false);
+                    return await RetryProcessingEvent(@event, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
 
         /// <inheritdoc/>
-        protected override Task<StreamEvent> FetchEventToProcess(CancellationToken cancellationToken) => _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, CurrentState.Position, cancellationToken);
+        protected override Task<StreamEvent> FetchEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
+            _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, currentState.Position, cancellationToken);
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> OnFailedProcessing(FailedProcessing failedProcessing, StreamEvent processedEvent)
+        protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
-            var oldState = CurrentState as StreamProcessorState;
+            var oldState = currentState as StreamProcessorState;
             var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> OnRetryProcessing(FailedProcessing failedProcessing, StreamEvent processedEvent)
+        protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
-            var oldState = CurrentState as StreamProcessorState;
+            var oldState = currentState as StreamProcessorState;
             var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }
 
         /// <inheritdoc/>
-        protected override async Task<IStreamProcessorState> OnSuccessfulProcessing(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent)
+        protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
             var newState = new StreamProcessorState(processedEvent.Position + 1);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
