@@ -90,9 +90,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Fetches the Event that is should be processed next.
         /// </summary>
+        /// <param name="currentState">The current <see cref="IStreamProcessorState" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="StreamEvent" />.</returns>
-        protected abstract Task<StreamEvent> FetchEventToProcess(CancellationToken cancellationToken);
+        protected abstract Task<StreamEvent> FetchEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken);
 
         /// <summary>
         ///  Gets the new <see cref="_currentState" /> after hanling the event of a <see cref="IProcessingResult" /> that signifies that the processing of the <see cref="StreamEvent" /> succeeded.
@@ -182,7 +183,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         try
                         {
                             _currentState = await Catchup(_currentState, _cancellationToken).ConfigureAwait(false);
-                            @event = await FetchEventToProcess(_cancellationToken).ConfigureAwait(false);
+                            @event = await FetchEventToProcess(_currentState, _cancellationToken).ConfigureAwait(false);
                         }
                         catch (NoEventInStreamAtPosition)
                         {
