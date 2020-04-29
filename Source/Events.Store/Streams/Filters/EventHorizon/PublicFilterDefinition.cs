@@ -1,21 +1,19 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Events.Store.Streams;
-
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon
 {
     /// <summary>
-    /// Represents a <see cref="IFilterDefinition" /> for a remote filter.
+    /// Represents an implementation of <see cref="IFilterDefinition" /> for a public filter.
     /// </summary>
-    public class RemoteFilterDefinition : IFilterDefinition
+    public class PublicFilterDefinition : IFilterDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RemoteFilterDefinition"/> class.
+        /// Initializes a new instance of the <see cref="PublicFilterDefinition"/> class.
         /// </summary>
         /// <param name="sourceStream">The source <see cref="StreamId" />.</param>
         /// <param name="targetStream">The target <see cref="StreamId" />.</param>
-        public RemoteFilterDefinition(StreamId sourceStream, StreamId targetStream)
+        public PublicFilterDefinition(StreamId sourceStream, StreamId targetStream)
         {
             SourceStream = sourceStream;
             TargetStream = targetStream;
@@ -26,5 +24,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public StreamId TargetStream { get; }
+
+        /// <inheritdoc/>
+        public bool Partitioned => true;
+
+        /// <inheritdoc/>
+        public bool Public => true;
     }
 }

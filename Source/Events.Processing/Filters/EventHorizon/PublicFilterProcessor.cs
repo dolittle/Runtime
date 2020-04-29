@@ -8,6 +8,7 @@ using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
@@ -17,19 +18,19 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
     /// </summary>
     public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinition>
     {
-        readonly IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
+        readonly IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicFilterProcessor"/> class.
         /// </summary>
-        /// <param name="definition">The <see cref="RemoteFilterDefinition"/>.</param>
+        /// <param name="definition">The <see cref="PublicFilterDefinition"/>.</param>
         /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/>.</param>
         /// <param name="eventsToPublicStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public PublicFilterProcessor(
             PublicFilterDefinition definition,
-            IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+            IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> dispatcher,
             IWriteEventsToPublicStreams eventsToPublicStreamsWriter,
             ILogger logger)
             : base(ScopeId.Default, definition, eventsToPublicStreamsWriter, logger)
@@ -45,7 +46,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
             if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.NotSet));
             var request = new FilterEventRequest
                 {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() }
+                    Event = @event.ToProtobuf(),
+                    ScopeId = Scope.ToProtobuf()
                 };
 
             return Filter(request, cancellationToken);
@@ -58,7 +60,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
             if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.NotSet));
             var request = new FilterEventRequest
                 {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                    Event = @event.ToProtobuf(),
+                    ScopeId = Scope.ToProtobuf(),
                     RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
                 };
 

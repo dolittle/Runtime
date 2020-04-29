@@ -13,6 +13,7 @@ using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
 using Grpc.Core;
@@ -213,10 +214,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
             using var streamProcessorCancellationSource = new CancellationTokenSource();
             using var cancellationTokenRegistration = _token.Register(() => streamProcessorCancellationSource.Cancel());
-            _streamProcessors.Register(
+            var streamProcessorRegistration = _streamProcessors.Register(
+                new StreamDefinition(new RemoteFilterDefinition(subscription.ProducerMicroservice.Value, subscription.ProducerTenant.Value, partitioned: true)),
                 new EventProcessor(subscription, _eventHorizonEventsWriter, _logger),
                 eventsFetcher,
-                subscription.ProducerMicroservice.Value,
                 streamProcessorCancellationSource.Token);
 
             while (!_token.IsCancellationRequested

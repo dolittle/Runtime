@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {
     /// <summary>
     /// Exception that gets thrown when a filter is targetting the event log stream.

@@ -11,14 +11,14 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
 {
     /// <summary>
     /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
     /// </summary>
     public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
     {
-        readonly IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
+        readonly IReverseCallDispatcher<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FilterProcessor(
             ScopeId scope,
             RemoteFilterDefinition definition,
-            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+            IReverseCallDispatcher<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
             : base(scope, definition, eventsToStreamsWriter, logger)
@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
             return response switch
                 {
-                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded),
+                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.To<PartitionId>()),
                     _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
                 };
         }
