@@ -112,9 +112,19 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     try
                     {
                         var streamPosition = await publicEvents.FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
+                        if (streamPosition == uint.MaxValue)
+                        {
+                            await Task.Delay(1000).ConfigureAwait(false);
+                            continue;
+                        }
 
-                        // if (streamPosition == uint.MaxValue) throw new NoEventInStreamAtPosition(ScopeId.Default, publicStream, publicStreamPosition);
                         var streamEvent = await publicEvents.Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
+                        if (streamEvent == default)
+                        {
+                            await Task.Delay(1000).ConfigureAwait(false);
+                            continue;
+                        }
+
                         var eventHorizonEvent = new Contracts.EventHorizonEvent
                         {
                             Content = streamEvent.Event.Content,
@@ -129,10 +139,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         };
                         await responseStream.WriteAsync(new Contracts.SubscriptionMessage { Event = eventHorizonEvent }).ConfigureAwait(false);
                         publicStreamPosition = streamPosition.Increment();
-                    }
-                    catch (NoEventInStreamAtPosition)
-                    {
-                        await Task.Delay(1000).ConfigureAwait(false);
                     }
                     catch (EventStoreUnavailable)
                     {
