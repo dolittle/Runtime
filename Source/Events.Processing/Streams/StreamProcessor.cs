@@ -103,7 +103,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                                     CurrentState = await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationToken).ConfigureAwait(false);
                                     streamEvent = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
 
-                                    // this could be default then?
                                     if (streamEvent == default) await Task.Delay(250).ConfigureAwait(false);
                                 }
                                 catch (EventStoreUnavailable)
