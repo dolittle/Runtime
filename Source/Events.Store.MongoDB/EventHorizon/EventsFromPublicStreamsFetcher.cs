@@ -36,16 +36,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// <inheritdoc/>
         public async Task<Runtime.Events.Store.Streams.StreamEvent> Fetch(StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
-            var committedEventWithPartition = await EventsFromStreamsFetcher.Fetch(
+            return await EventsFromStreamsFetcher.Fetch(
                 await _connection.GetPublicStreamCollection(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,
                 _ => _.StreamPosition,
                 Builders<Events.StreamEvent>.Projection.Expression(_ => _.ToRuntimeStreamEvent(streamId)),
                 streamPosition,
                 cancellationToken).ConfigureAwait(false);
-
-            // if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(ScopeId.Default, streamId, streamPosition);
-            return committedEventWithPartition;
         }
 
         /// <inheritdoc/>
