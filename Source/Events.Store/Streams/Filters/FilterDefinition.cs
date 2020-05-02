@@ -6,15 +6,15 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
     /// <summary>
     /// Represents a <see cref="IFilterDefinition" /> for a remote filter.
     /// </summary>
-    public class RemoteFilterDefinition : IFilterDefinition
+    public class FilterDefinition : IFilterDefinition
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="RemoteFilterDefinition"/> class.
+        /// Initializes a new instance of the <see cref="FilterDefinition"/> class.
         /// </summary>
         /// <param name="sourceStream">The source <see cref="StreamId" />.</param>
         /// <param name="targetStream">The target <see cref="StreamId" />.</param>
         /// <param name="partitioned">Whether the filter is partitioned or not.</param>
-        public RemoteFilterDefinition(StreamId sourceStream, StreamId targetStream, bool partitioned)
+        public FilterDefinition(StreamId sourceStream, StreamId targetStream, bool partitioned)
         {
             SourceStream = sourceStream;
             TargetStream = targetStream;
