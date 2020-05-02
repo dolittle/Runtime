@@ -154,15 +154,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             if (TryGetFetcher(stream, out var fetcher)) return await fetcher.Fetch(scope, stream, streamPosition, cancellationToken).ConfigureAwait(false);
             var streamEvents = await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false);
-            var committedEventWithPartition = await Fetch(
+            return await Fetch(
                 streamEvents,
                 _streamEventFilter,
                 _ => _.StreamPosition,
                 Builders<Events.StreamEvent>.Projection.Expression(_ => _.ToRuntimeStreamEvent(stream)),
                 streamPosition,
                 cancellationToken).ConfigureAwait(false);
-            if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(scope, stream, streamPosition);
-            return committedEventWithPartition;
         }
 
         /// <inheritdoc/>
