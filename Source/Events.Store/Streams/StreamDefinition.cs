@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// <summary>
     /// Represents the definition of a Stream.
     /// </summary>
-    public class StreamDefinition
+    public class StreamDefinition : IStreamDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamDefinition"/> class.
@@ -19,29 +19,16 @@ namespace Dolittle.Runtime.Events.Store.Streams
             FilterDefinition = filterDefinition;
         }
 
-        /// <summary>
-        /// Gets the <see cref="StreamDefinition" /> which represents the definition of the Event Log.
-        /// </summary>
-        public static StreamDefinition EventLog => new StreamDefinition(new RemoteFilterDefinition(StreamId.AllStreamId, StreamId.AllStreamId, false));
-
-        /// <summary>
-        /// Gets the <see cref="IFilterDefinition" /> that defines this stream.
-        /// </summary>
+        /// <inheritdoc/>
         public IFilterDefinition FilterDefinition { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether this is a public stream.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Public => FilterDefinition.Public;
 
-        /// <summary>
-        /// Gets the <see cref="StreamId" />.
-        /// </summary>
+        /// <inheritdoc/>
         public StreamId StreamId => FilterDefinition.TargetStream;
 
-        /// <summary>
-        /// Gets a value indicating whether the stream is partitioned.
-        /// </summary>
+        /// <inheritdoc/>
         public bool Partitioned => FilterDefinition.Partitioned;
     }
 }

@@ -8,7 +8,7 @@ using Dolittle.Runtime.Async;
 namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
-    /// Defines a repository for <see cref="StreamDefinition" />.
+    /// Defines a repository for <see cref="IStreamDefinition" />.
     /// </summary>
     public interface IStreamDefinitionRepository
     {
@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="Try{TResult}" /> with <see cref="IStreamDefinition" /> result.</returns>
-        Task<Try<StreamDefinition>> TryGetFor(ScopeId scope, StreamId stream, CancellationToken cancellationToken);
+        Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId stream, CancellationToken cancellationToken);
 
         /// <summary>
         /// Persists a <see cref="IStreamDefinition" />.
