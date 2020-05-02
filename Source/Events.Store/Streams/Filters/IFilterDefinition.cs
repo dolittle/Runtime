@@ -9,12 +9,12 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
     public interface IFilterDefinition
     {
         /// <summary>
-        /// Gets the <see cref="StreamId" /> that the filter filters from.
+        /// Gets the <see cref="StreamId" /> to filter from.
         /// </summary>
         StreamId SourceStream { get; }
 
         /// <summary>
-        /// Gets the <see cref="StreamId" /> that the filter filters to.
+        /// Gets the <see cref="StreamId" /> to filter to.
         /// </summary>
         StreamId TargetStream { get; }
 
