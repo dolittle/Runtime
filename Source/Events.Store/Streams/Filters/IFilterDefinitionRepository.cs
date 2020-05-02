@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
 
 namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
         /// </summary>
         /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The asynchronous operating of adding a persisted filter.</returns>
+        /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
         Task PersistFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken);
 
         /// <summary>
@@ -24,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
         /// </summary>
         /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The persisted filter definition or the given <see cref="IFilterDefinition" /> if it is not persistable or if it has not been persisted yet.</returns>
-        Task<IFilterDefinition> GetPersistedFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="Try{TResult}" /> with <see cref="IFilterDefinition" /> result.</returns>
+        Task<Try<IFilterDefinition>> TryGetPersistedFilter(IFilterDefinition filterDefinition, CancellationToken cancellationToken);
     }
 }

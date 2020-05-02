@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
@@ -14,9 +15,9 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <summary>
         /// Gets an instance of <see cref="ICanFetchEventsFromStream" />.
         /// </summary>
-        /// <param name="streamDefinition">The <see cref="StreamDefinition" />.</param>
+        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, whn resolved, the <see cref="ICanFetchEventsFromStream" />.</returns>
-        Task<ICanFetchEventsFromStream> GetFetcherFor(StreamDefinition streamDefinition, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, whn resolved, returns a <see cref="Try{TResult}" /> with <see cref="ICanFetchEventsFromStream" /> result.</returns>
+        Task<Try<ICanFetchEventsFromStream>> TryGetFetcherFor(IStreamDefinition streamDefinition, CancellationToken cancellationToken);
     }
 }
