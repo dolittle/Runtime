@@ -9,17 +9,17 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Defines a hub for <see cref="AbstractStreamProcessor" />.
+    /// Defines a hub for <see cref="AbstractScopedStreamProcessor" />.
     /// </summary>
     public interface IStreamProcessors
     {
         /// <summary>
-        /// Registers a <see cref="AbstractStreamProcessor" />.
+        /// Registers a <see cref="StreamProcessor" />.
         /// </summary>
-        /// <param name="streamDefinition">The <see cref="StreamDefinition" /> of the stream the <see cref="AbstractStreamProcessor" /> will be registered on.</param>
+        /// <param name="streamDefinition">The <see cref="IStreamDefinition" /> of the stream the <see cref="AbstractScopedStreamProcessor" /> is processing.</param>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolve, returns the <see cref="Try{TResult}" /> for <see cref="AbstractStreamProcessor"/>.</returns>
-        Task<Try<AbstractStreamProcessor>> TryRegister(StreamDefinition streamDefinition, IEventProcessor eventProcessor, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolve, returns the <see cref="Try{TResult}" /> for <see cref="StreamProcessor"/>.</returns>
+        Task<Try<StreamProcessor>> TryRegister(IStreamDefinition streamDefinition, IEventProcessor eventProcessor, CancellationToken cancellationToken);
     }
 }
