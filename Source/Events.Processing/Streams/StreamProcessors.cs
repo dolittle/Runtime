@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
-using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Tenancy;
 
@@ -49,11 +47,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc />
-        public async Task<Try<StreamProcessor>> TryRegister(
+        public bool TryRegister(
             IStreamDefinition streamDefinition,
             IEventProcessor eventProcessor,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            out StreamProcessor streamProcessor)
         {
+            streamProcessor = default;
             var streamProcessorId = new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, streamDefinition.StreamId);
             try
             {
@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     return false;
                 }
 
-                var streamProcessor = new StreamProcessor(
+                streamProcessor = new StreamProcessor(
                     streamProcessorId,
                     _onAllTenants,
                     streamDefinition,
@@ -76,15 +76,17 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
                 {
                     _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
+                    streamProcessor = default;
                     return false;
                 }
 
                 _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", streamProcessorId);
-                return streamProcessor;
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.Warning(ex, "Failed to register Stream Processor with Id: '{streamProcessorId}' for Tenant: '{tenant}'", streamProcessorId);
+                streamProcessor = default;
                 return false;
             }
         }
