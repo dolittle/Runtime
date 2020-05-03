@@ -11,12 +11,12 @@ using Dolittle.Tenancy;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents a system that can process a stream of events.
+    /// Represents an implementation of <see cref="AbstractScopedStreamProcessor" /> that processes an unpartitioned stream of events.
     /// </summary>
-    public class ScopedStreamProcessor : AbstractStreamProcessor
+    public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     {
-        readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
-        readonly IStreamProcessorStates _streamProcessorStates;
+        readonly ICanFetchEventsFromStream _eventsFromStreamsFetcher;
+        readonly IStreamProcessorStateRepository _streamProcessorStates;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
@@ -25,9 +25,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
         /// <param name="initialState">The <see cref="StreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
-        /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
-        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public ScopedStreamProcessor(
@@ -35,12 +34,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             StreamId sourceStreamId,
             StreamProcessorState initialState,
             IEventProcessor processor,
-            IStreamProcessorStates streamProcessorStates,
-            IFetchEventsFromStreams eventsFromStreamsFetcher,
-            Action unregister,
+            IStreamProcessorStateRepository streamProcessorStates,
+            ICanFetchEventsFromStream eventsFromStreamsFetcher,
             ILogger<ScopedStreamProcessor> logger,
             CancellationToken cancellationToken)
-            : base(tenantId, sourceStreamId, initialState, processor, unregister, logger, cancellationToken)
+            : base(tenantId, sourceStreamId, initialState, processor, logger, cancellationToken)
         {
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;

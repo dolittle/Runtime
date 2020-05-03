@@ -6,7 +6,7 @@ using System;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Exception that gets thrown when a <see cref="AbstractStreamProcessor.Start()" /> is called more than once.
+    /// Exception that gets thrown when a Stream Processor is started multiple times.
     /// </summary>
     public class StreamProcessorAlreadyProcessingStream : Exception
     {
@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// </summary>
         /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
         public StreamProcessorAlreadyProcessingStream(StreamProcessorId streamProcessorId)
-            : base($"Stream Processor: '{streamProcessorId}' is already processing stream.")
+            : base($"Stream Processor: '{streamProcessorId}' is already processing stream")
         {
         }
     }

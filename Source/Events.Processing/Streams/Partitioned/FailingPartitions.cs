@@ -17,22 +17,22 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     /// </summary>
     public class FailingPartitions : IFailingPartitions
     {
-        readonly IStreamProcessorStates _streamProcessorStates;
+        readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly IEventProcessor _eventProcessor;
-        readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
+        readonly ICanFetchEventsFromStream _eventsFromStreamsFetcher;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
         /// </summary>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
-        /// <param name="eventsFromStreamsFetcher">The <see cref="IFetchEventsFromStreams" />.</param>
+        /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public FailingPartitions(
-            IStreamProcessorStates streamProcessorStates,
+            IStreamProcessorStateRepository streamProcessorStates,
             IEventProcessor eventProcessor,
-            IFetchEventsFromStreams eventsFromStreamsFetcher,
+            ICanFetchEventsFromStream eventsFromStreamsFetcher,
             ILogger<FailingPartitions> logger)
         {
             _streamProcessorStates = streamProcessorStates;
@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         }
 
         /// <inheritdoc/>
-        public async Task<StreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, StreamProcessorState oldState, StreamPosition failedPosition, PartitionId partition, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken)
+        public async Task<IStreamProcessorState> AddFailingPartitionFor(StreamProcessorId streamProcessorId, StreamProcessorState oldState, StreamPosition failedPosition, PartitionId partition, DateTimeOffset retryTime, string reason, CancellationToken cancellationToken)
         {
             var failingPartition = new FailingPartitionState(failedPosition, retryTime, reason, 1);
             var failingPartitions = new Dictionary<PartitionId, FailingPartitionState>(oldState.FailingPartitions)
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         }
 
         /// <inheritdoc/>
-        public async Task<StreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, StreamProcessorState streamProcessorState, CancellationToken cancellationToken)
+        public async Task<IStreamProcessorState> CatchupFor(StreamProcessorId streamProcessorId, StreamProcessorState streamProcessorState, CancellationToken cancellationToken)
         {
             if (streamProcessorState.FailingPartitions.Count > 0) streamProcessorState = (await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false)).Result as StreamProcessorState;
             var failingPartitionsList = streamProcessorState.FailingPartitions.ToList();

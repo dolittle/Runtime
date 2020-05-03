@@ -12,50 +12,44 @@ using Dolittle.Tenancy;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents a system that can process a stream of events.
+    /// Represents the basis of system that can process a stream of events.
     /// </summary>
-    public abstract class AbstractStreamProcessor
+    public abstract class AbstractScopedStreamProcessor
     {
         readonly TenantId _tenantId;
         readonly IEventProcessor _processor;
-        readonly Action _unregister;
         readonly string _logMessagePrefix;
         readonly CancellationToken _cancellationToken;
         IStreamProcessorState _currentState;
         bool _started;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AbstractStreamProcessor"/> class.
+        /// Initializes a new instance of the <see cref="AbstractScopedStreamProcessor"/> class.
         /// </summary>
         /// <param name="tenantId">The <see cref="TenantId"/>.</param>
-        /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
+        /// <param name="sourceStreamId">The source <see cref="StreamId" />.</param>
         /// <param name="initialState">The initial state of the <see cref="IStreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="AbstractStreamProcessor" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        protected AbstractStreamProcessor(
+        protected AbstractScopedStreamProcessor(
             TenantId tenantId,
             StreamId sourceStreamId,
             IStreamProcessorState initialState,
             IEventProcessor processor,
-            Action unregister,
             ILogger logger,
             CancellationToken cancellationToken)
         {
             Identifier = new StreamProcessorId(processor.Scope, processor.Identifier, sourceStreamId);
             Logger = logger;
-
             _currentState = initialState;
             _tenantId = tenantId;
             _processor = processor;
-            _logMessagePrefix = $"Stream Processor in Scope: {processor.Scope} on Stream: '{sourceStreamId}' with Processor: '{processor.Identifier}' with for Tenant: '{tenantId}'";
-            _unregister = unregister;
             _cancellationToken = cancellationToken;
         }
 
         /// <summary>
-        /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="AbstractStreamProcessor"/>.
+        /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="AbstractScopedStreamProcessor"/>.
         /// </summary>
         public StreamProcessorId Identifier { get; }
 
@@ -72,11 +66,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Starts the stream processing.
         /// </summary>
-        public void Start()
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public Task Start()
         {
             if (_started) throw new StreamProcessorAlreadyProcessingStream(Identifier);
             _started = true;
-            _ = BeginProcessing();
+            return BeginProcessing();
         }
 
         /// <summary>
@@ -184,10 +179,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         {
                             _currentState = await Catchup(_currentState, _cancellationToken).ConfigureAwait(false);
                             @event = await FetchEventToProcess(_currentState, _cancellationToken).ConfigureAwait(false);
-                        }
-                        catch (NoEventInStreamAtPosition)
-                        {
-                            await Task.Delay(250).ConfigureAwait(false);
+                            if (@event == default) await Task.Delay(250).ConfigureAwait(false);
                         }
                         catch (EventStoreUnavailable)
                         {
@@ -206,10 +198,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 {
                     Logger.Warning(ex, "{logPrefix} failed", _logMessagePrefix);
                 }
-            }
-            finally
-            {
-                _unregister();
             }
         }
     }
