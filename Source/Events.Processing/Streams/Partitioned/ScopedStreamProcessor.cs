@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     /// </summary>
     public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     {
-        readonly ICanFetchEventsFromStream _eventsFromStreamsFetcher;
+        readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
         readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly IFailingPartitions _failingPartitions;
 
@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             StreamProcessorState initialState,
             IEventProcessor processor,
             IStreamProcessorStateRepository streamProcessorStates,
-            ICanFetchEventsFromStream eventsFromStreamsFetcher,
+            ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             IFailingPartitions failingPartitions,
             ILogger<ScopedStreamProcessor> logger,
             CancellationToken cancellationToken)
@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
 
         /// <inheritdoc/>
         protected override Task<StreamEvent> FetchEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
-            _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, currentState.Position, cancellationToken);
+            _eventsFromStreamsFetcher.Fetch(currentState.Position, cancellationToken);
 
         /// <inheritdoc/>
         protected override Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState) =>

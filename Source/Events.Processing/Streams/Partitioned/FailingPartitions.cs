@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     {
         readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly IEventProcessor _eventProcessor;
-        readonly ICanFetchEventsFromStream _eventsFromStreamsFetcher;
+        readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         public FailingPartitions(
             IStreamProcessorStateRepository streamProcessorStates,
             IEventProcessor eventProcessor,
-            ICanFetchEventsFromStream eventsFromStreamsFetcher,
+            ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             ILogger<FailingPartitions> logger)
         {
             _streamProcessorStates = streamProcessorStates;
@@ -65,28 +65,27 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
                 var failingPartitionState = kvp.Value;
                 if (ShouldRetryProcessing(failingPartitionState))
                 {
-                    var nextPosition = await FindPositionOfNextEventInPartition(streamProcessorId, partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
-                    while (ShouldProcessNextEventInPartition(nextPosition, streamProcessorState.Position))
+                    var streamEvent = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
+                    while (ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position))
                     {
                         if (!ShouldRetryProcessing(failingPartitionState)) break;
 
-                        var streamEvent = await FetchEventAtPosition(streamProcessorId, nextPosition, cancellationToken).ConfigureAwait(false);
                         var processingResult = await RetryProcessingEvent(failingPartitionState, streamEvent.Event, partition, cancellationToken).ConfigureAwait(false);
 
                         if (processingResult.Succeeded)
                         {
-                            (streamProcessorState, failingPartitionState) = await ChangePositionInFailingPartition(streamProcessorId, streamProcessorState, partition, nextPosition + 1).ConfigureAwait(false);
+                            (streamProcessorState, failingPartitionState) = await ChangePositionInFailingPartition(streamProcessorId, streamProcessorState, partition, streamEvent.Position + 1).ConfigureAwait(false);
                         }
                         else if (processingResult.Retry)
                         {
-                            (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(streamProcessorId, streamProcessorState, partition, failingPartitionState.ProcessingAttempts + 1, processingResult.RetryTimeout, processingResult.FailureReason, nextPosition).ConfigureAwait(false);
+                            (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(streamProcessorId, streamProcessorState, partition, failingPartitionState.ProcessingAttempts + 1, processingResult.RetryTimeout, processingResult.FailureReason, streamEvent.Position).ConfigureAwait(false);
                         }
                         else
                         {
-                            (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(streamProcessorId, streamProcessorState, partition, failingPartitionState.ProcessingAttempts + 1, DateTimeOffset.MaxValue, processingResult.FailureReason, nextPosition).ConfigureAwait(false);
+                            (streamProcessorState, failingPartitionState) = await SetFailingPartitionState(streamProcessorId, streamProcessorState, partition, failingPartitionState.ProcessingAttempts + 1, DateTimeOffset.MaxValue, processingResult.FailureReason, streamEvent.Position).ConfigureAwait(false);
                         }
 
-                        nextPosition = await FindPositionOfNextEventInPartition(streamProcessorId, partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
+                        streamEvent = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
                     }
 
                     if (ShouldRetryProcessing(failingPartitionState)) streamProcessorState = await RemoveFailingPartition(streamProcessorId, streamProcessorState, partition).ConfigureAwait(false);
@@ -109,16 +108,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
 
         Task<(StreamProcessorState, FailingPartitionState)> ChangePositionInFailingPartition(StreamProcessorId streamProcessorId, StreamProcessorState oldState, PartitionId partitionId, StreamPosition newPosition) =>
             SetFailingPartitionState(streamProcessorId, oldState, partitionId, 0, DateTimeOffset.MinValue, string.Empty, newPosition);
-
-        Task<StreamEvent> FetchEventAtPosition(StreamProcessorId streamProcessorId, StreamPosition position, CancellationToken cancellationToken)
-        {
-            return _eventsFromStreamsFetcher.Fetch(streamProcessorId.ScopeId, streamProcessorId.SourceStreamId, position, cancellationToken);
-        }
-
-        Task<StreamPosition> FindPositionOfNextEventInPartition(StreamProcessorId streamProcessorId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken)
-        {
-            return _eventsFromStreamsFetcher.FindNext(streamProcessorId.ScopeId, streamProcessorId.SourceStreamId, partitionId, fromPosition, cancellationToken);
-        }
 
         Task<(StreamProcessorState, FailingPartitionState)> SetFailingPartitionState(StreamProcessorId streamProcessorId, StreamProcessorState oldState, PartitionId partitionId, uint processingAttempts, TimeSpan retryTimeout, string reason, StreamPosition position) =>
             SetFailingPartitionState(streamProcessorId, oldState, partitionId, processingAttempts, DateTimeOffset.UtcNow.Add(retryTimeout), reason, position);

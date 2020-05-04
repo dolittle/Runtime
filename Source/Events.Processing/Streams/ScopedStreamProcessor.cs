@@ -59,7 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 }
                 else
                 {
-                    var @event = await _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, streamProcessorState.Position, cancellationToken).ConfigureAwait(false);
+                    var @event = await _eventsFromStreamsFetcher.Fetch(streamProcessorState.Position, cancellationToken).ConfigureAwait(false);
                     return await RetryProcessingEvent(@event, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, cancellationToken).ConfigureAwait(false);
                 }
             }
@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         /// <inheritdoc/>
         protected override Task<StreamEvent> FetchEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
-            _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, currentState.Position, cancellationToken);
+            _eventsFromStreamsFetcher.Fetch(currentState.Position, cancellationToken);
 
         /// <inheritdoc/>
         protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)

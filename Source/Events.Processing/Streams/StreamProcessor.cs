@@ -190,7 +190,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             if (streamDefinition.Partitioned)
             {
-                return await CreatePartitionedScopedStreamProcessor(tenant, streamDefinition.StreamId, eventProcessor, eventsFromStreamsFetcher, streamProcessorStates).ConfigureAwait(false);
+                return await CreatePartitionedScopedStreamProcessor(tenant, streamDefinition.StreamId, eventProcessor, eventsFromStreamsFetcher as ICanFetchEventsFromPartitionedStream, streamProcessorStates).ConfigureAwait(false);
             }
             else
             {
@@ -202,7 +202,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             TenantId tenant,
             StreamId sourceStreamId,
             IEventProcessor eventProcessor,
-            ICanFetchEventsFromStream eventsFromStreamsFetcher,
+            ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             IStreamProcessorStateRepository streamProcessorStates)
         {
             var tryGetStreamProcessorState = await streamProcessorStates.TryGetFor(_identifier, _cancellationToken).ConfigureAwait(false);

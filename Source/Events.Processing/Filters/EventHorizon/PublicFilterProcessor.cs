@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
@@ -43,7 +44,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
             _logger.Debug($"Filter event that occurred @ {@event.Occurred} to public events stream '{Definition.TargetStream}'");
-            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.NotSet));
+            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, Guid.Empty));
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),
@@ -57,7 +58,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
             _logger.Debug($"Filter event that occurred @ {@event.Occurred} to public events stream '{Definition.TargetStream}' again for the {retryCount}. time because: {failureReason}");
-            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.NotSet));
+            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, Guid.Empty));
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),

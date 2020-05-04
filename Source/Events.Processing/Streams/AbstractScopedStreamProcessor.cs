@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     {
         readonly TenantId _tenantId;
         readonly IEventProcessor _processor;
-        readonly string _logMessagePrefix;
         readonly CancellationToken _cancellationToken;
         IStreamProcessorState _currentState;
         bool _started;
@@ -196,7 +195,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 if (!ShouldStop)
                 {
-                    Logger.Warning(ex, "{logPrefix} failed", _logMessagePrefix);
+                    Logger.Warning(ex, "{streamProcessorId} for tenant {tenantId} failed", Identifier, _tenantId);
                 }
             }
         }

@@ -3,9 +3,8 @@
 
 using System;
 using System.Threading;
-using System.Threading.Tasks;
+using Dolittle.Lifecycle;
 using Dolittle.Logging;
-using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -15,6 +14,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessors" />.
     /// </summary>
+    [Singleton]
     public class EventProcessors : IEventProcessors
     {
         readonly IStreamProcessors _streamProcessors;
@@ -32,23 +32,31 @@ namespace Dolittle.Runtime.Events.Processing
         }
 
         /// <inheritdoc/>
-        public bool TryRegisterEventProcessor(ScopeId scopeId, EventProcessorId eventProcessorId, StreamId sourceStreamId, Func<IEventProcessor> getEventProcessor, CancellationToken cancellationToken, out StreamProcessor streamProcessor) =>
-            _streamProcessors.TryRegister(
+        public EventProcessorRegistrationResult Register(ScopeId scopeId, EventProcessorId eventProcessorId, StreamId sourceStreamId, Func<IEventProcessor> getEventProcessor, CancellationToken cancellationToken)
+        {
+            return new EventProcessorRegistrationResult(
+                _streamProcessors.TryRegister(
                 scopeId,
                 eventProcessorId,
                 sourceStreamId,
                 getEventProcessor,
                 cancellationToken,
-                out streamProcessor);
+                out var streamProcessor),
+                streamProcessor);
+        }
 
         /// <inheritdoc/>
-        public bool TryRegisterEventProcessor(ScopeId scopeId, EventProcessorId eventProcessorId, StreamDefinition streamDefinition, Func<IEventProcessor> getEventProcessor, CancellationToken cancellationToken, out StreamProcessor streamProcessor) =>
-            _streamProcessors.TryRegister(
+        public EventProcessorRegistrationResult Register(ScopeId scopeId, EventProcessorId eventProcessorId, StreamDefinition streamDefinition, Func<IEventProcessor> getEventProcessor, CancellationToken cancellationToken)
+        {
+            return new EventProcessorRegistrationResult(
+                _streamProcessors.TryRegister(
                 scopeId,
                 eventProcessorId,
                 streamDefinition,
                 getEventProcessor,
                 cancellationToken,
-                out streamProcessor);
+                out var streamProcessor),
+                streamProcessor);
+        }
     }
 }

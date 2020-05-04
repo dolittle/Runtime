@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
     {
         readonly IEventFetchers _eventFetchers;
-        readonly IFetchEventTypesFromStreams _eventTypesFromStreams;
         readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly ILogger _logger;
 
@@ -29,17 +28,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
         /// </summary>
         /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
-        /// <param name="eventTypesFromStreams">The <see cref="IFetchEventTypesFromStreams" />.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public TypeFilterWithEventSourcePartitionValidator(
             IEventFetchers eventFetchers,
-            IFetchEventTypesFromStreams eventTypesFromStreams,
             IStreamProcessorStateRepository streamProcessorStates,
             ILogger logger)
         {
             _eventFetchers = eventFetchers;
-            _eventTypesFromStreams = eventTypesFromStreams;
             _streamProcessorStates = streamProcessorStates;
             _logger = logger;
         }
@@ -55,6 +51,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             if (persistedDefinition.Partitioned != filter.Definition.Partitioned)
             {
                 return new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persistedDefinition.Partitioned ? "The previous filter is partitioned while the new filter is not" : "The previous filter is not partitioned while the new filter is")}");
+            }
+
+            if (persistedDefinition.Public != filter.Definition.Public)
+            {
+                return new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persistedDefinition.Public ? "The previous filter is public while the new filter is not" : "The previous filter is not public while the new filter is")}");
             }
 
             var tryGetState = await _streamProcessorStates.TryGetFor(
