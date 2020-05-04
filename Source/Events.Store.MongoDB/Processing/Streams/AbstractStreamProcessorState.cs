@@ -9,10 +9,11 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the base state of an <see cref="AbstractStreamProcessor" />.
+    /// Represents the base state of an <see cref="AbstractScopedStreamProcessor" />.
     /// </summary>
     [BsonDiscriminator(RootClass = true, Required = true)]
     [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.StreamProcessorState))]
+    [BsonIgnoreExtraElements]
     public abstract class AbstractStreamProcessorState
     {
         /// <summary>
@@ -31,12 +32,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Position = position;
             Partitioned = partitioned;
         }
-
-        /// <summary>
-        /// Gets or sets the  MongoDB _id. This is used so that the class would have a valid '_id' field in mongo.
-        /// The classes 'true' id is compromised from the combinaton of ScopeId, EventProcessorId and SourceStreamId.
-        /// </summary>
-        public ObjectId Id { get; set; }
 
         /// <summary>
         /// Gets or sets the scope id.
