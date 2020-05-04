@@ -71,8 +71,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
                 return new FilterValidationResult();
             }
 
-            var streamEventsFetcher = await _eventFetchers.GetFetcherFor(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
-            var sourceStreamEventsFetcher = await _eventFetchers.GetFetcherFor(filter.Scope, filter.Definition.SourceStream, cancellationToken).ConfigureAwait(false);
+            var streamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
+            var sourceStreamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, filter.Definition.SourceStream, cancellationToken).ConfigureAwait(false);
             var oldStream = await streamEventsFetcher.FetchRange(
                 new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition),
                 cancellationToken)

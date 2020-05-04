@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// <summary>
     /// Represents an implementation of <see cref="IFetchEventsFromStreams" />.
     /// </summary>
-    public class EventsFromStreamsFetcher : IFetchEventsFromStreams
+    public class EventsFromStreamsFetcher : IFetchEventsFromStreams, ICanFetchRangeOfEventsFromStream
     {
         readonly IEnumerable<ICanFetchEventsFromWellKnownStreams> _wellKnownStreamFetchers;
         readonly FilterDefinitionBuilder<Events.StreamEvent> _streamEventFilter = Builders<Events.StreamEvent>.Filter;

@@ -14,9 +14,9 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IFetchEventsFromPublicStreams" />.
+    /// Represents an implementation of <see cref="ICanFetchEventsFromPublicStreams" />.
     /// </summary>
-    public class EventsFromPublicStreamsFetcher : IFetchEventsFromPublicStreams
+    public class EventsFromPublicStreamsFetcher : ICanFetchEventsFromPublicStreams
     {
         readonly FilterDefinitionBuilder<Events.StreamEvent> _filter = Builders<Events.StreamEvent>.Filter;
         readonly EventStoreConnection _connection;

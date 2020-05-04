@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -28,9 +27,5 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public Task<StreamEvent> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken) =>
             _events.DequeueAsync(cancellationToken);
-
-        /// <inheritdoc/>
-        public Task<IEnumerable<StreamEvent>> FetchRange(StreamPositionRange range, CancellationToken cancellationToken) =>
-            throw new CannotFetchRangeOfEventsFromEventHorizon();
     }
 }

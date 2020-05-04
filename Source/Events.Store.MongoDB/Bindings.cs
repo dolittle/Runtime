@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             builder.Bind<IWriteEventsToStreams>().To<EventsToStreamsWriter>();
             builder.Bind<IFetchEventTypesFromStreams>().To<EventTypesFromStreamsFetcher>();
             builder.Bind<IWriteEventHorizonEvents>().To<EventHorizonEventsWriter>();
-            builder.Bind<IFetchEventsFromPublicStreams>().To<EventsFromPublicStreamsFetcher>();
+            builder.Bind<ICanFetchEventsFromPublicStreams>().To<EventsFromPublicStreamsFetcher>();
             builder.Bind<IWriteEventsToPublicStreams>().To<EventsToPublicStreamsWriter>();
         }
     }
