@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     /// </summary>
     public class EventStore : IEventStore
     {
-        readonly FilterDefinitionBuilder<Event> _eventFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
         readonly IExecutionContextManager _executionContextManager;
         readonly EventStoreConnection _connection;
         readonly IEventCommitter _eventCommitter;
@@ -76,7 +76,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 eventLogSequenceNumber,
                                 DateTimeOffset.UtcNow,
                                 _executionContextManager.Current,
-                                new Cause(CauseType.Unknown, 0),
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
@@ -126,7 +125,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 DateTimeOffset.UtcNow,
                                 events.EventSource,
                                 _executionContextManager.Current,
-                                new Cause(CauseType.Unknown, 0),
                                 @event,
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
@@ -177,7 +175,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
                             var events = await _connection.EventLog
                                 .Find(transaction, filter)
-                                .Sort(Builders<Event>.Sort.Ascending(_ => _.Aggregate.Version))
+                                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
                                 .Project(_ => _.ToCommittedAggregateEvent())
                                 .ToListAsync(cancel).ConfigureAwait(false);
 
@@ -200,11 +198,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
-        }
-
-        /// <inheritdoc/>
-        public void Dispose()
-        {
         }
 
         void ThrowIfNoEventsToCommit(UncommittedEvents events)

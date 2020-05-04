@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Streams;
+using System.Threading;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventsFromStreamsFetcher.when_finding_next_position.in_a_stream
@@ -11,8 +12,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventsFromStreamsFet
     {
         static StreamPosition result;
 
-        Because of = () => result = events_from_streams_fetcher.FindNext(Guid.NewGuid(), Guid.NewGuid(), 0U).GetAwaiter().GetResult();
+        Because of = () => result = events_from_streams_fetcher.FindNext(ScopeId.Default, Guid.NewGuid(), Guid.NewGuid(), 0U, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_return_the_max_value_of_uint = () => result.Value.ShouldEqual(uint.MaxValue);
+        It should_return_the_max_value_of_uint = () => result.Value.ShouldEqual(ulong.MaxValue);
     }
 }

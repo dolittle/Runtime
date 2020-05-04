@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions.when_catching_up.and_there_are_multiple_failing_partitions.that_should_be_retried.and_succeeds_in_processing
@@ -15,18 +15,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_FailingPartitions.when_
 
         Establish context = () =>
             event_processor
-                .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<IProcessingResult>(new SucceededProcessingResult()));
+                .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
 
-        Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, event_processor.Object, stream_processor_state).GetAwaiter().GetResult();
+        Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, event_processor.Object, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
         It should_not_have_any_failing_partitions = () => result.FailingPartitions.ShouldBeEmpty();
-        It should_have_processed_three_events = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(3));
-        It should_have_first_failing_partition_process_two_events = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), first_failing_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
-        It should_have_second_failing_partition_process_one_event = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), second_failing_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(1));
-        It should_have_first_failing_partition_process_first_event_once = () => event_processor.Verify(_ => _.Process(committed_events[0], first_failing_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
-        It should_have_second_failing_partition_process_second_event_once = () => event_processor.Verify(_ => _.Process(committed_events[1], second_failing_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
-        It should_have_first_failing_process_process_third_event_once = () => event_processor.Verify(_ => _.Process(committed_events[2], first_failing_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+        It should_have_processed_three_events = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(3));
+        It should_have_first_failing_partition_process_two_events = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), first_failing_partition_id, Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
+        It should_have_second_failing_partition_process_one_event = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), second_failing_partition_id, Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(1));
+        It should_have_first_failing_partition_process_first_event_once = () => event_processor.Verify(_ => _.Process(committed_events[0], first_failing_partition_id, Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+        It should_have_second_failing_partition_process_second_event_once = () => event_processor.Verify(_ => _.Process(committed_events[1], second_failing_partition_id, Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+        It should_have_first_failing_process_process_third_event_once = () => event_processor.Verify(_ => _.Process(committed_events[2], first_failing_partition_id, Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     }
 }

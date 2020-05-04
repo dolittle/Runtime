@@ -1,22 +1,19 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-extern alias contracts;
-
 using System.Threading.Tasks;
-using Dolittle.Applications;
+using Dolittle.ApplicationModel;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
 using Grpc.Core;
-using static contracts::Dolittle.Runtime.EventHorizon.Subscriptions;
-using grpc = contracts::Dolittle.Runtime.EventHorizon;
+using static Dolittle.Runtime.EventHorizon.Contracts.Subscriptions;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -51,24 +48,25 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public override async Task<grpc.SubscriptionResponse> Subscribe(grpc.Subscription subscriptionRequest, ServerCallContext context)
+        public override async Task<Contracts.SubscriptionResponse> Subscribe(Contracts.Subscription subscriptionRequest, ServerCallContext context)
         {
+            _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
             var consumerTenant = _executionContextManager.Current.Tenant;
             var subscription = new Subscription(
                 consumerTenant,
-                subscriptionRequest.Microservice.To<Microservice>(),
-                subscriptionRequest.Tenant.To<TenantId>(),
-                subscriptionRequest.Scope.To<ScopeId>(),
-                subscriptionRequest.Stream.To<StreamId>(),
-                subscriptionRequest.Partition.To<PartitionId>());
+                subscriptionRequest.MicroserviceId.To<Microservice>(),
+                subscriptionRequest.TenantId.To<TenantId>(),
+                subscriptionRequest.ScopeId.To<ScopeId>(),
+                subscriptionRequest.StreamId.To<StreamId>(),
+                subscriptionRequest.PartitionId.To<PartitionId>());
 
             _logger.Information($"Incomming event horizon subscription request from head to runtime. {subscription}");
             var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscription).ConfigureAwait(false);
 
             return subscriptionResponse switch
                 {
-                    { Success: false } => new grpc.SubscriptionResponse { Failure = new grpc.Failure { Reason = subscriptionResponse.FailureReason } },
-                    _ => new grpc.SubscriptionResponse(),
+                    { Success: false } => new Contracts.SubscriptionResponse { Failure = subscriptionResponse.Failure },
+                    _ => new Contracts.SubscriptionResponse(),
                 };
         }
     }

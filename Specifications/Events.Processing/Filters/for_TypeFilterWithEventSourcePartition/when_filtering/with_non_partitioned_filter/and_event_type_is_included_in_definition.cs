@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.when_filtering.with_non_partitioned_filter
@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
         {
             artifact = given.artifacts.single();
             filter = new TypeFilterWithEventSourcePartition(
+                scope,
                 new TypeFilterWithEventSourcePartitionDefinition(Guid.NewGuid(), Guid.NewGuid(), new ArtifactId[] { artifact.Id }.AsEnumerable(), false),
                 writer.Object,
                 Moq.Mock.Of<ILogger>());

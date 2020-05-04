@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Execution;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 using Moq;
 
@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.given
         Establish context = () =>
         {
             execution_context_manager_mock = new Mock<IExecutionContextManager>();
-            next_event_fetcher_mock = Processing.given.a_next_event_fetcher();
+            next_event_fetcher_mock = new Mock<IFetchEventsFromStreams>();
             stream_processor_state_repository = new in_memory_stream_processor_state_repository();
         };
     }

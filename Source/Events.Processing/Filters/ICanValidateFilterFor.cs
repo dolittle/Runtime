@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -18,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="filter">The <see cref="IFilterProcessor{TDefinition}" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The async operation of validating a filter.</returns>
-        Task Validate(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken);
+        /// <returns><see cref="FilterValidationResult" />.</returns>
+        Task<FilterValidationResult> Validate(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken);
     }
 }

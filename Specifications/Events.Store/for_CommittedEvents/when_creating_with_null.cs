@@ -11,10 +11,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents
         static CommittedEvents events;
         static Exception exception;
 
-        Because of = () => exception = Catch.Exception(() =>
-        {
-            events = new CommittedEvents(new[] { event_one, null, event_three });
-        });
+        Because of = () => exception = Catch.Exception(() => events = new CommittedEvents(new[] { event_one, null, event_three }));
 
         It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
         It should_not_be_created = () => events.ShouldBeNull();

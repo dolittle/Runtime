@@ -8,9 +8,10 @@
 
     <ItemGroup>
         <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts" />
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Services.Clients" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
@@ -18,7 +19,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
-        <ProjectReference Include="..\Events.Streams\Events.Streams.csproj" />
         <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
         <ProjectReference Include="..\Microservices\Microservices.csproj" />
         <ProjectReference Include="..\Services\Services.csproj" />

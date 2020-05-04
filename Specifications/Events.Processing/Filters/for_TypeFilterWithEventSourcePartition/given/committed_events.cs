@@ -16,10 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
                 0,
                 DateTimeOffset.Now,
                 event_source,
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                new Cause(CauseType.Command, 0),
+                execution_contexts.create(),
                 artifact,
                 false,
                 "");

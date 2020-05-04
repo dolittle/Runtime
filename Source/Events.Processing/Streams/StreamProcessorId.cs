@@ -3,7 +3,7 @@
 
 using Dolittle.Concepts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -41,6 +41,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public StreamId SourceStreamId { get; set; }
 
         /// <inheritdoc />
-        public override string ToString() => $"{ScopeId} - {EventProcessorId} - {SourceStreamId}";
+        public override string ToString() => $"Scope: {ScopeId} Event Processor Id: {EventProcessorId} Source Stream: {SourceStreamId}";
     }
 }

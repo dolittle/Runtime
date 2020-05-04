@@ -2,7 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Streams;
+using System.Threading;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventsFromStreamsFetcher
@@ -11,10 +12,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventsFromStreamsFet
     {
         static Exception exception;
 
-        Because of = () => exception = Catch.Exception(() => events_from_streams_fetcher.Fetch(Guid.NewGuid(), 0U).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => events_from_streams_fetcher.Fetch(ScopeId.Default, Guid.NewGuid(), 0U, CancellationToken.None).GetAwaiter().GetResult());
 
-        It should_not_use_events_from_event_log_fetcher = () => events_from_event_log_fetcher.Verify(_ => _.Fetch(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<System.Threading.CancellationToken>()), Moq.Times.Never);
-        It should_not_use_public_events_fetcher = () => public_events_fetcher.Verify(_ => _.Fetch(Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<System.Threading.CancellationToken>()), Moq.Times.Never);
+        It should_not_use_events_from_event_log_fetcher = () => events_from_event_log_fetcher.Verify(_ => _.Fetch(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
         It should_throw_exception = () => exception.ShouldNotBeNull();
         It should_fail_because_stream_has_no_event_at_the_initial_position = () => exception.ShouldBeOfExactType<NoEventInStreamAtPosition>();
     }

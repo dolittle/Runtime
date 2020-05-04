@@ -1,8 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Applications;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.ApplicationModel;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon.Producer

@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Types;
 using MongoDB.Driver;
 
@@ -48,15 +48,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="stream">The <see cref="IMongoCollection{TDocument}" />.</param>
         /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
         /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
-        /// <param name="projection">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="Runtime.Events.Streams.StreamEvent" />.</param>
+        /// <param name="projection">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="Runtime.Events.Store.Streams.StreamEvent" />.</param>
         /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The fetched event or null.</returns>
-        public static async Task<Runtime.Events.Streams.StreamEvent?> Fetch<TEvent>(
+        public static async Task<Runtime.Events.Store.Streams.StreamEvent?> Fetch<TEvent>(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             Expression<Func<TEvent, ulong>> sequenceNumberExpression,
-            ProjectionDefinition<TEvent, Runtime.Events.Streams.StreamEvent> projection,
+            ProjectionDefinition<TEvent, Runtime.Events.Store.Streams.StreamEvent> projection,
             StreamPosition streamPosition,
             CancellationToken cancellationToken)
             where TEvent : class
@@ -82,29 +82,31 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="stream">The <see cref="IMongoCollection{TDocument}" />.</param>
         /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
         /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
-        /// <param name="projection">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="Runtime.Events.Streams.StreamEvent" />.</param>
+        /// <param name="projection">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="Runtime.Events.Store.Streams.StreamEvent" />.</param>
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A list of events.</returns>
-        public static async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange<TEvent>(
+        public static async Task<IEnumerable<Runtime.Events.Store.Streams.StreamEvent>> FetchRange<TEvent>(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             Expression<Func<TEvent, ulong>> sequenceNumberExpression,
-            ProjectionDefinition<TEvent, Runtime.Events.Streams.StreamEvent> projection,
+            ProjectionDefinition<TEvent, Runtime.Events.Store.Streams.StreamEvent> projection,
             StreamPositionRange range,
             CancellationToken cancellationToken)
             where TEvent : class
         {
             try
             {
-                var maxNumEvents = range.To.Value - range.From.Value + 1U;
+                var maxNumEvents = range.Length;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
                 var events = await stream.Find(
-                    filter.Gte(sequenceNumberExpression, range.From.Value) & filter.Lte(sequenceNumberExpression, range.To.Value))
+                        filter.Gte(sequenceNumberExpression, range.From.Value)
+                            & filter.Lte(sequenceNumberExpression, range.From.Value + range.Length))
                     .Limit(limit)
                     .Project(projection)
-                    .ToListAsync(cancellationToken).ConfigureAwait(false);
+                    .ToListAsync(cancellationToken)
+                    .ConfigureAwait(false);
                 return events.ToArray();
             }
             catch (MongoWaitQueueFullException ex)
@@ -147,35 +149,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             }
         }
 
-        /// <summary>
-        /// Throws exception if the <see cref="StreamPositionRange" /> is illegal.
-        /// </summary>
-        /// <param name="range">The <see cref="StreamPositionRange" />.</param>
-        public static void ThrowIfIllegalRange(StreamPositionRange range)
-        {
-            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
-        }
-
         /// <inheritdoc/>
-        public async Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
+        public async Task<Runtime.Events.Store.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             if (TryGetFetcher(stream, out var fetcher)) return await fetcher.Fetch(scope, stream, streamPosition, cancellationToken).ConfigureAwait(false);
             var streamEvents = await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false);
-            var committedEventWithPartition = await Fetch(
+            return await Fetch(
                 streamEvents,
                 _streamEventFilter,
                 _ => _.StreamPosition,
                 Builders<Events.StreamEvent>.Projection.Expression(_ => _.ToRuntimeStreamEvent(stream)),
                 streamPosition,
                 cancellationToken).ConfigureAwait(false);
-            if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(scope, stream, streamPosition);
-            return committedEventWithPartition;
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Runtime.Events.Store.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
         {
-            ThrowIfIllegalRange(range);
             if (TryGetFetcher(stream, out var fetcher)) return await fetcher.FetchRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
             var streamEvents = await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false);
             return await FetchRange(

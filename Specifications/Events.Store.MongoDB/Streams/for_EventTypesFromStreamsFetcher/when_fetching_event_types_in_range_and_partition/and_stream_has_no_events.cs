@@ -3,8 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStreamsFetcher.when_fetching_event_types_in_range_and_partition
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
 
         Establish context = () => stream = Guid.NewGuid();
 
-        Because of = () => result = event_types_from_streams.FetchTypesInRange(stream, new StreamPositionRange(0U, 0U)).GetAwaiter().GetResult();
+        Because of = () => result = event_types_from_streams.FetchInRange(Moq.It.IsAny<ScopeId>(), stream, new StreamPositionRange(0U, 1), CancellationToken.None).GetAwaiter().GetResult();
 
         It should_return_empty_list = () => result.ShouldBeEmpty();
     }

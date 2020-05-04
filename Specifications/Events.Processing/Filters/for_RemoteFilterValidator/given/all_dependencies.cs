@@ -3,7 +3,9 @@
 
 using System;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 using Moq;
 
@@ -16,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.g
         protected static Mock<IFilterProcessor<RemoteFilterDefinition>> filter_processor;
         protected static Mock<IFetchEventsFromStreams> events_fetcher;
         protected static Mock<IFetchEventTypesFromStreams> event_types_fetcher;
-        protected static Mock<IStreamsMetadata> streams_metadata;
+        protected static Mock<IStreamProcessorStateRepository> stream_processor_states;
         protected static RemoteFilterValidator validator;
 
         Establish context = () =>
@@ -24,11 +26,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.g
             source_stream = Guid.NewGuid();
             target_stream = Guid.NewGuid();
             filter_processor = new Mock<IFilterProcessor<RemoteFilterDefinition>>();
-            filter_processor.SetupGet(_ => _.Definition).Returns(new RemoteFilterDefinition(source_stream, target_stream));
+            filter_processor.SetupGet(_ => _.Definition).Returns(new RemoteFilterDefinition(source_stream, target_stream, true));
+            stream_processor_states = new Mock<IStreamProcessorStateRepository>();
             events_fetcher = new Mock<IFetchEventsFromStreams>();
             event_types_fetcher = new Mock<IFetchEventTypesFromStreams>();
-            streams_metadata = new Mock<IStreamsMetadata>();
-            validator = new RemoteFilterValidator(events_fetcher.Object, event_types_fetcher.Object, streams_metadata.Object, Mock.Of<ILogger>());
+            validator = new RemoteFilterValidator(events_fetcher.Object, event_types_fetcher.Object, stream_processor_states.Object, Mock.Of<ILogger>());
         };
     }
 }

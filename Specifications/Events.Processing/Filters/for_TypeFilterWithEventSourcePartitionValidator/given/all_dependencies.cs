@@ -5,7 +5,9 @@ using System;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 using Moq;
 
@@ -18,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
         protected static Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> filter_processor;
         protected static Mock<IFetchEventsFromStreams> events_fetcher;
         protected static Mock<IFetchEventTypesFromStreams> event_types_fetcher;
-        protected static Mock<IStreamsMetadata> streams_metadata;
+        protected static Mock<IStreamProcessorStateRepository> stream_processor_states;
         protected static TypeFilterWithEventSourcePartitionValidator validator;
 
         Establish context = () =>
@@ -27,10 +29,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
             target_stream = Guid.NewGuid();
             filter_processor = new Mock<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>();
             filter_processor.SetupGet(_ => _.Definition).Returns(new TypeFilterWithEventSourcePartitionDefinition(source_stream, target_stream, Enumerable.Empty<ArtifactId>(), false));
+            stream_processor_states = new Mock<IStreamProcessorStateRepository>();
             events_fetcher = new Mock<IFetchEventsFromStreams>();
             event_types_fetcher = new Mock<IFetchEventTypesFromStreams>();
-            streams_metadata = new Mock<IStreamsMetadata>();
-            validator = new TypeFilterWithEventSourcePartitionValidator(Mock.Of<IFilterDefinitionRepositoryFor<TypeFilterWithEventSourcePartitionDefinition>>(), events_fetcher.Object, event_types_fetcher.Object, streams_metadata.Object, Mock.Of<ILogger>());
+            validator = new TypeFilterWithEventSourcePartitionValidator(events_fetcher.Object, event_types_fetcher.Object, stream_processor_states.Object, Mock.Of<ILogger>());
         };
     }
 }

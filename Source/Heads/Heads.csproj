@@ -13,7 +13,7 @@
   <ItemGroup>
     <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)"/>
     <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)"/>
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
     <PackageReference Include="system.reactive" Version="4.3.2" />
   </ItemGroup>
 </Project>

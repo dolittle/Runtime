@@ -4,9 +4,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStreamsFetcher.when_fetching_event_types_in_range_and_partition
@@ -23,11 +24,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.for_EventTypesFromStream
             stream = Guid.NewGuid();
             partition = Guid.NewGuid();
             committed_event = committed_events.a_committed_event(0U);
-            var events = an_event_store_connection.GetStreamCollectionAsync(stream).GetAwaiter().GetResult();
+            var events = an_event_store_connection.GetStreamCollection(stream, CancellationToken.None).GetAwaiter().GetResult();
             events.InsertOne(committed_event.ToStoreStreamEvent(0, partition));
         };
 
-        Because of = () => result = event_types_from_streams.FetchTypesInRangeAndPartition(stream, partition, new StreamPositionRange(0U, 0U)).GetAwaiter().GetResult();
+        Because of = () => result = event_types_from_streams.FetchInRangeAndPartition(ScopeId.Default, stream, partition, new StreamPositionRange(0U, 2U), CancellationToken.None).GetAwaiter().GetResult();
 
         It should_not_be_empty_list = () => result.ShouldNotBeEmpty();
         It should_get_one_event_type = () => result.Count().ShouldEqual(1);

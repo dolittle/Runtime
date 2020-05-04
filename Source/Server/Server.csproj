@@ -23,7 +23,7 @@
         <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Hosting.Microsoft" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Logging.Microsoft" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" Alias="contracts"/>
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)"/>
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.2" />
         <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.2" />
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />

@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// </summary>
     public class EventFromEventLogFetcher : AbstractEventsFromWellKnownStreamsFetcher
     {
-        readonly FilterDefinitionBuilder<Event> _eventLogFilter = Builders<Event>.Filter;
+        readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventLogFilter = Builders<MongoDB.Events.Event>.Filter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -33,30 +33,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<Runtime.Events.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
+        public override async Task<Runtime.Events.Store.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
-            var committedEventWithPartition = await EventsFromStreamsFetcher.Fetch(
+            return await EventsFromStreamsFetcher.Fetch(
                 await _connection.GetEventLogCollection(scope, cancellationToken).ConfigureAwait(false),
                 _eventLogFilter,
                 _ => _.EventLogSequenceNumber,
-                Builders<Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
+                Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
                 streamPosition,
                 cancellationToken).ConfigureAwait(false);
-            if (committedEventWithPartition == default) throw new NoEventInStreamAtPosition(scope, StreamId.AllStreamId, streamPosition);
-            return committedEventWithPartition;
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Runtime.Events.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
+        public override async Task<IEnumerable<Runtime.Events.Store.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
         {
-            EventsFromStreamsFetcher.ThrowIfIllegalRange(range);
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             return await EventsFromStreamsFetcher.FetchRange(
                 await _connection.GetEventLogCollection(scope, cancellationToken).ConfigureAwait(false),
                 _eventLogFilter,
                 _ => _.EventLogSequenceNumber,
-                Builders<Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
+                Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
                 range,
                 cancellationToken).ConfigureAwait(false);
         }

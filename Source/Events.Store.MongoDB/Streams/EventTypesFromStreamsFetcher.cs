@@ -8,7 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Types;
 using MongoDB.Driver;
 
@@ -41,15 +41,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <summary>
-        /// Throws exception if the <see cref="StreamPositionRange" /> is illegal.
-        /// </summary>
-        /// <param name="range">The <see cref="StreamPositionRange" />.</param>
-        public static void ThrowIfIllegalRange(StreamPositionRange range)
-        {
-            if (range.From.Value > range.To.Value) throw new FromPositionIsGreaterThanToPosition(range);
-        }
-
-        /// <summary>
         /// Fetches a list of <see cref="Artifact" /> in a range.
         /// </summary>
         /// <typeparam name="TEvent">The type of the stored event.</typeparam>
@@ -61,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="range">The from <see cref="StreamPosition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The position of the next event.</returns>
-        public static async Task<IEnumerable<Artifact>> FetchTypesInRange<TEvent>(
+        public static async Task<IEnumerable<Artifact>> FetchInRange<TEvent>(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             FilterDefinition<TEvent> eventsInPartitionFilter,
@@ -71,13 +62,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             CancellationToken cancellationToken)
             where TEvent : class
         {
-             try
+            try
             {
-                var maxNumEvents = range.To.Value - range.From.Value + 1U;
+                var maxNumEvents = range.Length;
                 int? limit = (int)maxNumEvents;
                 if (limit < 0) limit = null;
                 return await stream
-                    .Find(eventsInPartitionFilter & filter.Gte(sequenceNumberExpression, range.From.Value) & filter.Lte(sequenceNumberExpression, range.To.Value))
+                    .Find(eventsInPartitionFilter & filter.Gte(sequenceNumberExpression, range.From.Value)
+                        & filter.Lte(sequenceNumberExpression, range.From.Value + range.Length))
                     .Limit(limit)
                     .Project(projection)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
@@ -89,11 +81,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Artifact>> FetchInRange(
+            ScopeId scope,
+            StreamId stream,
+            StreamPositionRange range,
+            CancellationToken cancellationToken)
         {
-            ThrowIfIllegalRange(range);
-            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
-            return await FetchTypesInRange(
+            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchInRange(scope, stream, range, cancellationToken).ConfigureAwait(false);
+            return await FetchInRange(
                 await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamEventFilter,
                 _streamEventFilter.Empty,
@@ -104,11 +99,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchTypesInRangeAndPartition(ScopeId scope, StreamId stream, PartitionId partition, StreamPositionRange range, CancellationToken cancellationToken)
+        public async Task<IEnumerable<Artifact>> FetchInRangeAndPartition(
+            ScopeId scope,
+            StreamId stream,
+            PartitionId partition,
+            StreamPositionRange range,
+            CancellationToken cancellationToken)
         {
-            ThrowIfIllegalRange(range);
-            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchTypesInRangeAndPartition(scope, stream, partition, range, cancellationToken).ConfigureAwait(false);
-            return await FetchTypesInRange(
+            if (TryGetFetcher(stream, out var fetcher)) await fetcher.FetchInRangeAndPartition(scope, stream, partition, range, cancellationToken).ConfigureAwait(false);
+            return await FetchInRange(
                 await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamEventFilter,
                 _streamEventFilter.Eq(_ => _.Partition, partition.Value),
