@@ -47,6 +47,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         /// Converts the stored filter into the runtime <see cref="IFilterDefinition" /> that it represents.
         /// </summary>
         /// <returns>The runtime <see cref="IFilterDefinition" />.</returns>
-        public virtual IFilterDefinition AsRuntimeRepresentation() => new RemoteFilterDefinition(SourceStream, FilterId, Partitioned);
+        public virtual IFilterDefinition AsRuntimeRepresentation() => new FilterDefinition(SourceStream, FilterId, Partitioned);
     }
 }
