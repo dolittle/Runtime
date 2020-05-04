@@ -4,16 +4,15 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IFetchEventsFromStreams" />.
+    /// Represents an implementation of <see cref="ICanFetchEventsFromStream" />.
     /// </summary>
-    public class EventsFromEventHorizonFetcher : IFetchEventsFromStreams
+    public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream
     {
         readonly AsyncProducerConsumerQueue<StreamEvent> _events;
 
@@ -27,15 +26,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public Task<StreamEvent> Fetch(ScopeId scopeId, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken) =>
+        public Task<StreamEvent> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken) =>
             _events.DequeueAsync(cancellationToken);
 
         /// <inheritdoc/>
-        public Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scopeId, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken) =>
+        public Task<IEnumerable<StreamEvent>> FetchRange(StreamPositionRange range, CancellationToken cancellationToken) =>
             throw new CannotFetchRangeOfEventsFromEventHorizon();
-
-        /// <inheritdoc/>
-        public Task<StreamPosition> FindNext(ScopeId scopeId, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken) =>
-            Task.FromResult<StreamPosition>(uint.MaxValue);
     }
 }

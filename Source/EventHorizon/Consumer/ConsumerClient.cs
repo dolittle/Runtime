@@ -13,7 +13,6 @@ using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
 using Grpc.Core;
@@ -30,8 +29,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IClientManager _clientManager;
         readonly ISubscriptions _subscriptions;
         readonly MicroservicesConfiguration _microservicesConfiguration;
-        readonly IStreamProcessors _streamProcessors;
-        readonly IStreamProcessorStates _streamProcessorStates;
+        readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
         readonly IExecutionContextManager _executionContextManager;
@@ -46,8 +44,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="clientManager">The <see cref="IClientManager" />.</param>
         /// <param name="subscriptions">The <see cref="ISubscriptions" />.</param>
         /// <param name="microservicesConfiguration">The <see cref="MicroservicesConfiguration" />.</param>
-        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
@@ -56,8 +53,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IClientManager clientManager,
             ISubscriptions subscriptions,
             MicroservicesConfiguration microservicesConfiguration,
-            IStreamProcessors streamProcessors,
-            IStreamProcessorStates streamProcessorStates,
+            IStreamProcessorStateRepository streamProcessorStates,
             IWriteEventHorizonEvents eventHorizonEventsWriter,
             IAsyncPolicyFor<ConsumerClient> policy,
             IExecutionContextManager executionContextManager,
@@ -66,7 +62,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _clientManager = clientManager;
             _subscriptions = subscriptions;
             _microservicesConfiguration = microservicesConfiguration;
-            _streamProcessors = streamProcessors;
             _streamProcessorStates = streamProcessorStates;
             _eventHorizonEventsWriter = eventHorizonEventsWriter;
             _policy = policy;
@@ -92,19 +87,18 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public async Task<SubscriptionResponse> HandleSubscription(Subscription subscription)
+        public async Task<SubscriptionResponse> HandleSubscription(SubscriptionId subscriptionId)
         {
-            _logger.Trace($"Adding subscription {subscription}");
-            if (!TryAddNewSubscription(subscription))
+            if (!_subscriptions.HasSubscription(subscriptionId))
             {
-                _logger.Trace($"Already subscribed to subscription {subscription}");
+                _logger.Trace($"Already subscribed to subscription {subscriptionId}");
                 return new SuccessfulSubscriptionResponse();
             }
 
             _logger.Trace($"Getting microservice address");
-            if (!TryGetMicroserviceAddress(subscription.ProducerMicroservice, out var microserviceAddress))
+            if (!TryGetMicroserviceAddress(subscriptionId.ProducerMicroserviceId, out var microserviceAddress))
             {
-                var message = $"There is no microservice configuration for the producer microservice '{subscription.ProducerMicroservice}'.";
+                var message = $"There is no microservice configuration for the producer microservice '{subscriptionId.ProducerMicroserviceId}'.";
                 _logger.Warning(message);
                 return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.MissingMicroserviceConfiguration, message));
             }
@@ -112,13 +106,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             return await _policy.Execute(
                 async _ =>
                 {
-                    var call = await Subscribe(subscription, microserviceAddress).ConfigureAwait(false);
+                    var call = await Subscribe(subscriptionId, microserviceAddress).ConfigureAwait(false);
 
                     var response = await HandleSubscriptionResponse(
                         call.ResponseStream,
-                        subscription).ConfigureAwait(false);
+                        subscriptionId).ConfigureAwait(false);
 
-                    if (response.Success) StartProcessingEventHorizon(subscription, microserviceAddress, call.ResponseStream);
+                    if (response.Success) StartProcessingEventHorizon(subscriptionId, microserviceAddress, call.ResponseStream);
                     return response;
                 }, _token).ConfigureAwait(false);
         }
@@ -140,16 +134,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _disposed = true;
         }
 
-        async Task<AsyncServerStreamingCall<Contracts.SubscriptionMessage>> Subscribe(Subscription subscription, MicroserviceAddress microserviceAddress)
+        async Task<AsyncServerStreamingCall<Contracts.SubscriptionMessage>> Subscribe(SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress)
         {
-            _logger.Debug($"Tenant '{subscription.ConsumerTenant}' is subscribing to events from tenant '{subscription.ProducerTenant}' in microservice '{subscription.ProducerMicroservice}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
+            _logger.Debug($"Tenant '{subscriptionId.ConsumerTenantId}' is subscribing to events from tenant '{subscriptionId.ProducerTenantId}' in microservice '{subscriptionId.ProducerMicroserviceId}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
 
-            var streamProcessorId = new StreamProcessorId(subscription.Scope, subscription.ProducerTenant.Value, subscription.ProducerMicroservice.Value);
-            (var hasStreamProcessorState, var streamProcessorState) = await _streamProcessorStates.TryGetFor(streamProcessorId, CancellationToken.None).ConfigureAwait(false);
+            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, CancellationToken.None).ConfigureAwait(false);
             StreamPosition publicEventsPosition = 0;
-            if (hasStreamProcessorState)
+            if (tryGetStreamProcessorState.Success)
             {
-                publicEventsPosition = streamProcessorState.Position;
+                publicEventsPosition = tryGetStreamProcessorState.Result.Position;
             }
 
             return _clientManager
@@ -157,20 +150,20 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 .Subscribe(
                     new Contracts.ConsumerSubscription
                     {
-                        TenantId = subscription.ProducerTenant.ToProtobuf(),
+                        TenantId = subscriptionId.ProducerTenantId.ToProtobuf(),
                         LastReceived = (int)publicEventsPosition.Value - 1,
-                        StreamId = subscription.Stream.ToProtobuf(),
-                        PartitionId = subscription.Partition.ToProtobuf(),
+                        StreamId = subscriptionId.StreamId.ToProtobuf(),
+                        PartitionId = subscriptionId.PartitionId.ToProtobuf(),
                         CallContext = new Dolittle.Services.Contracts.CallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() }
                     }, cancellationToken: _token);
         }
 
-        async Task<SubscriptionResponse> HandleSubscriptionResponse(IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream, Subscription subscription)
+        async Task<SubscriptionResponse> HandleSubscriptionResponse(IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream, SubscriptionId subscriptionId)
         {
             if (!await responseStream.MoveNext(_token).ConfigureAwait(false)
                 || responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.SubscriptionResponse)
             {
-                var message = $"Did not receive subscription response when subscribing with subscription {subscription}";
+                var message = $"Did not receive subscription response when subscribing with subscription {subscriptionId}";
                 _logger.Warning(message);
                 return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.DidNotReceiveSubscriptionResponse, message));
             }
@@ -178,77 +171,79 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var subscriptionResponse = responseStream.Current.SubscriptionResponse;
             if (subscriptionResponse.Failure != null)
             {
-                _logger.Warning($"Failed subscribing with subscription {subscription}. {subscriptionResponse.Failure.Reason}");
+                _logger.Warning($"Failed subscribing with subscription {subscriptionId}. {subscriptionResponse.Failure.Reason}");
                 return new FailedSubscriptionResponse(subscriptionResponse.Failure);
             }
 
-            _logger.Trace($"Subscription response for subscription {subscription} was successful");
+            _logger.Trace($"Subscription response for subscription {subscriptionId} was successful");
             return new SuccessfulSubscriptionResponse();
         }
 
-        void StartProcessingEventHorizon(Subscription subscription, MicroserviceAddress microserviceAddress, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
+        void StartProcessingEventHorizon(SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
         {
             Task.Run(async () =>
                 {
                     try
                     {
-                        await ReadEventsFromEventHorizon(subscription, responseStream).ConfigureAwait(false);
+                        await ReadEventsFromEventHorizon(subscriptionId, responseStream).ConfigureAwait(false);
                         throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                     }
                     catch (Exception)
                     {
-                        _logger.Debug($"Reconnecting to event horizon with subscription {subscription}");
+                        _logger.Debug($"Reconnecting to event horizon with subscription {subscriptionId}");
                         await _policy.Execute(
                             async _ =>
                             {
-                                var call = await Subscribe(subscription, microserviceAddress).ConfigureAwait(false);
-                                var response = await HandleSubscriptionResponse(call.ResponseStream, subscription).ConfigureAwait(false);
+                                var call = await Subscribe(subscriptionId, microserviceAddress).ConfigureAwait(false);
+                                var response = await HandleSubscriptionResponse(call.ResponseStream, subscriptionId).ConfigureAwait(false);
                                 if (!response.Success) throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
-                                await ReadEventsFromEventHorizon(subscription, call.ResponseStream).ConfigureAwait(false);
+                                await ReadEventsFromEventHorizon(subscriptionId, call.ResponseStream).ConfigureAwait(false);
                                 throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                             }, _token).ConfigureAwait(false);
                     }
                 });
         }
 
-        async Task ReadEventsFromEventHorizon(Subscription subscription, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
+        async Task ReadEventsFromEventHorizon(SubscriptionId subscriptionId, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
         {
-            _logger.Information($"Successfully connected event horizon with {subscription}. Waiting for events to process");
+            _logger.Information($"Successfully connected event horizon with {subscriptionId}. Waiting for events to process");
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();
             var eventsFetcher = new EventsFromEventHorizonFetcher(queue);
 
             using var streamProcessorCancellationSource = new CancellationTokenSource();
             using var cancellationTokenRegistration = _token.Register(() => streamProcessorCancellationSource.Cancel());
-            var streamProcessorRegistration = _streamProcessors.Register(
-                new StreamDefinition(new RemoteFilterDefinition(subscription.ProducerMicroservice.Value, subscription.ProducerTenant.Value, partitioned: true)),
-                new EventProcessor(subscription, _eventHorizonEventsWriter, _logger),
+
+            _subscriptions.TrySubscribe(
+                subscriptionId,
+                new EventProcessor(subscriptionId, _eventHorizonEventsWriter, _logger),
                 eventsFetcher,
-                streamProcessorCancellationSource.Token);
+                streamProcessorCancellationSource.Token,
+                out var streamProcessor);
+
+            await streamProcessor.Initialize().ConfigureAwait(false);
+            _ = streamProcessor.Start();
 
             while (!_token.IsCancellationRequested
                 && await responseStream.MoveNext(_token).ConfigureAwait(false))
             {
                 if (responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.Event)
                 {
-                    _logger.Warning("Expected the response to contain an event in subscription {subscription}. Getting next response", subscription);
+                    _logger.Warning("Expected the response to contain an event in subscription {subscription}. Getting next response", subscriptionId);
                     continue;
                 }
 
                 var @event = responseStream.Current.Event;
                 await queue.EnqueueAsync(
                     new StreamEvent(
-                        @event.ToCommittedEvent(subscription.ProducerMicroservice, subscription.ConsumerTenant),
+                        @event.ToCommittedEvent(subscriptionId.ProducerMicroserviceId, subscriptionId.ConsumerTenantId),
                         @event.StreamSequenceNumber,
-                        StreamId.AllStreamId,
-                        PartitionId.NotSet),
+                        StreamId.EventLog,
+                        Guid.Empty),
                     _token).ConfigureAwait(false);
             }
 
             streamProcessorCancellationSource.Cancel();
         }
-
-        bool TryAddNewSubscription(Subscription subscription) =>
-            _subscriptions.AddSubscription(subscription);
 
         bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress) =>
             _microservicesConfiguration.TryGetValue(producerMicroservice, out microserviceAddress);

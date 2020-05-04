@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
-        readonly Subscription _subscription;
+        readonly SubscriptionId _subscriptionId;
         readonly IWriteEventHorizonEvents _receivedEventsWriter;
         readonly ILogger _logger;
 
@@ -26,13 +26,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="receivedEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
-            Subscription subscription,
+            SubscriptionId subscription,
             IWriteEventHorizonEvents receivedEventsWriter,
             ILogger logger)
         {
-            Scope = subscription.Scope;
-            Identifier = subscription.ProducerTenant.Value;
-            _subscription = subscription;
+            Scope = subscription.ScopeId;
+            Identifier = subscription.ProducerTenantId.Value;
+            _subscriptionId = subscription;
             _receivedEventsWriter = receivedEventsWriter;
             _logger = logger;
         }
@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Trace($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_subscription.ProducerMicroservice}' and tenant '{_subscription.ProducerTenant}'");
+            _logger.Trace($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_subscriptionId.ProducerMicroserviceId}' and tenant '{_subscriptionId.ProducerTenantId}'");
 
             await _receivedEventsWriter.Write(@event, Scope, cancellationToken).ConfigureAwait(false);
             return new SuccessfulProcessing();
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Trace($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_subscription.ProducerMicroservice}' and tenant '{_subscription.ProducerTenant}'");
+            _logger.Trace($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_subscriptionId.ProducerMicroserviceId}' and tenant '{_subscriptionId.ProducerTenantId}'");
 
             await _receivedEventsWriter.Write(@event, Scope, cancellationToken).ConfigureAwait(false);
             return new SuccessfulProcessing();

@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
             var consumerTenant = _executionContextManager.Current.Tenant;
-            var subscription = new Subscription(
+            var subscriptionId = new SubscriptionId(
                 consumerTenant,
                 subscriptionRequest.MicroserviceId.To<Microservice>(),
                 subscriptionRequest.TenantId.To<TenantId>(),
@@ -60,8 +60,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 subscriptionRequest.StreamId.To<StreamId>(),
                 subscriptionRequest.PartitionId.To<PartitionId>());
 
-            _logger.Information($"Incomming event horizon subscription request from head to runtime. {subscription}");
-            var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscription).ConfigureAwait(false);
+            _logger.Information($"Incomming event horizon subscription request from head to runtime. {subscriptionId}");
+            var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscriptionId).ConfigureAwait(false);
 
             return subscriptionResponse switch
                 {
