@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Artifacts;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -46,45 +45,72 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public async Task<FilterValidationResult> Validate(FilterDefinition persistedDefinition, IFilterProcessor<FilterDefinition> filter, CancellationToken cancellationToken)
+        public async Task<FilterValidationResult> Validate(IFilterDefinition persistedDefinition, IFilterProcessor<FilterDefinition> filter, CancellationToken cancellationToken)
         {
             if (persistedDefinition == default) return new FilterValidationResult();
+
+            if (persistedDefinition.Partitioned != filter.Definition.Partitioned)
+            {
+                return new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persistedDefinition.Partitioned ? "The previous filter is partitioned while the new filter is not" : "The previous filter is not partitioned while the new filter is")}");
+            }
 
             var tryGetState = await _streamProcessorStateRepository.TryGetFor(
                 new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
                 cancellationToken)
                 .ConfigureAwait(false);
-            if (tryGetState.Success) return new FilterValidationResult();
+            if (!tryGetState.Success)
+            {
+                return new FilterValidationResult();
+            }
+
             var lastUnProcessedEventPosition = tryGetState.Result.Position;
-            var artifactsFromTargetStream = await _eventTypesFromStreams.FetchInRange(
-                filter.Scope,
-                filter.Definition.TargetStream,
-                new StreamPositionRange(StreamPosition.Start, uint.MaxValue),
+            if (lastUnProcessedEventPosition == 0)
+            {
+                return new FilterValidationResult();
+            }
+
+            var streamEventsFetcher = await _eventFetchers.GetFetcherFor(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
+            var sourceStreamEventsFetcher = await _eventFetchers.GetFetcherFor(filter.Scope, filter.Definition.SourceStream, cancellationToken).ConfigureAwait(false);
+            var oldStream = await streamEventsFetcher.FetchRange(
+                new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition),
                 cancellationToken)
                 .ConfigureAwait(false);
-            var eventsFetcher = await _eventFetchers.GetFetcherFor(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
-            var sourceStreamEvents = lastUnProcessedEventPosition == 0
-                ? Enumerable.Empty<StreamEvent>()
-                : await eventsFetcher.FetchRange(
-                    new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition),
+            var lastUnprocessedEventLogEventPosition = oldStream.Last().Event.EventLogSequenceNumber;
+            var sourceStreamEvents = await sourceStreamEventsFetcher.FetchRange(
+                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEventLogEventPosition),
                     cancellationToken)
                     .ConfigureAwait(false);
-            var artifactsFromSourceStream = new List<Artifact>();
+            var newStream = new List<StreamEvent>();
+            var streamPosition = 0;
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {
                 var processingResult = await filter.Filter(@event, Guid.Empty, filter.Identifier, cancellationToken).ConfigureAwait(false);
-                if (processingResult.IsIncluded) artifactsFromSourceStream.Add(@event.Type);
+                if (processingResult.IsIncluded) newStream.Add(new StreamEvent(@event, new StreamPosition((ulong)streamPosition++), filter.Definition.TargetStream, processingResult.Partition));
             }
 
-            if (!ArtifactListsAreTheSame(artifactsFromTargetStream, artifactsFromSourceStream))
+            var oldStreamList = oldStream.ToList();
+            if (newStream.Count != oldStreamList.Count)
             {
-                return new FilterValidationResult($"The new stream generated from the filter does not match the old stream.");
+                return new FilterValidationResult($"The number of events included in the new stream generated from the filter does not match the old stream.");
+            }
+
+            for (var i = 0; i < newStream.Count; i++)
+            {
+                var newEvent = newStream[i];
+                var oldEvent = oldStreamList[i];
+
+                if (newEvent.Event.EventLogSequenceNumber != oldEvent.Event.EventLogSequenceNumber)
+                {
+                    return new FilterValidationResult($"Event in new stream at position {i} is event {newEvent.Event.EventLogSequenceNumber} while the event in the old stream is event {oldEvent.Event.EventLogSequenceNumber}");
+                }
+
+                if (filter.Definition.Partitioned && newEvent.Partition != oldEvent.Partition)
+                {
+                    return new FilterValidationResult($"Event in new stream at position {i} has is in partition {newEvent.Partition} while the event in the old stream is in partition {oldEvent.Partition}");
+                }
             }
 
             return new FilterValidationResult();
         }
-
-        bool ArtifactListsAreTheSame(IEnumerable<Artifact> oldList, IEnumerable<Artifact> newList) =>
-            oldList.LongCount() == newList.LongCount() && oldList.All(newList.Contains);
     }
 }

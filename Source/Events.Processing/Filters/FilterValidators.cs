@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate<TDefinition>(TDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
+        public Task<FilterValidationResult> Validate<TDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
             _logger.Trace($"Finding validator for filter '{filter.Definition.TargetStream}'");
