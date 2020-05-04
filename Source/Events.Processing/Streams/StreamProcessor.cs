@@ -190,17 +190,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             if (streamDefinition.Partitioned)
             {
-                return await CreatePartitionedScopedStreamProcessor(tenant, streamDefinition.StreamId, eventProcessor, eventsFromStreamsFetcher as ICanFetchEventsFromPartitionedStream, streamProcessorStates).ConfigureAwait(false);
+                return await CreatePartitionedScopedStreamProcessor(tenant, eventProcessor, eventsFromStreamsFetcher as ICanFetchEventsFromPartitionedStream, streamProcessorStates).ConfigureAwait(false);
             }
             else
             {
-                return await CreateUnpartitionedScopedStreamProcessor(tenant, streamDefinition.StreamId, eventProcessor, eventsFromStreamsFetcher, streamProcessorStates).ConfigureAwait(false);
+                return await CreateUnpartitionedScopedStreamProcessor(tenant, eventProcessor, eventsFromStreamsFetcher, streamProcessorStates).ConfigureAwait(false);
             }
         }
 
         async Task<Partitioned.ScopedStreamProcessor> CreatePartitionedScopedStreamProcessor(
             TenantId tenant,
-            StreamId sourceStreamId,
             IEventProcessor eventProcessor,
             ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             IStreamProcessorStateRepository streamProcessorStates)
@@ -216,7 +215,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
             return new Partitioned.ScopedStreamProcessor(
                 tenant,
-                sourceStreamId,
+                _identifier,
                 tryGetStreamProcessorState.Result as Partitioned.StreamProcessorState,
                 eventProcessor,
                 streamProcessorStates,
@@ -228,7 +227,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         async Task<ScopedStreamProcessor> CreateUnpartitionedScopedStreamProcessor(
             TenantId tenant,
-            StreamId sourceStreamId,
             IEventProcessor eventProcessor,
             ICanFetchEventsFromStream eventsFromStreamsFetcher,
             IStreamProcessorStateRepository streamProcessorStates)
@@ -243,7 +241,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(_identifier);
             return new ScopedStreamProcessor(
                 tenant,
-                sourceStreamId,
+                _identifier,
                 tryGetStreamProcessorState.Result as StreamProcessorState,
                 eventProcessor,
                 streamProcessorStates,

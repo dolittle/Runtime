@@ -26,20 +26,20 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Initializes a new instance of the <see cref="AbstractScopedStreamProcessor"/> class.
         /// </summary>
         /// <param name="tenantId">The <see cref="TenantId"/>.</param>
-        /// <param name="sourceStreamId">The source <see cref="StreamId" />.</param>
+        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
         /// <param name="initialState">The initial state of the <see cref="IStreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         protected AbstractScopedStreamProcessor(
             TenantId tenantId,
-            StreamId sourceStreamId,
+            IStreamProcessorId streamProcessorId,
             IStreamProcessorState initialState,
             IEventProcessor processor,
             ILogger logger,
             CancellationToken cancellationToken)
         {
-            Identifier = new StreamProcessorId(processor.Scope, processor.Identifier, sourceStreamId);
+            Identifier = streamProcessorId;
             Logger = logger;
             _currentState = initialState;
             _tenantId = tenantId;
@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="AbstractScopedStreamProcessor"/>.
         /// </summary>
-        public StreamProcessorId Identifier { get; }
+        public IStreamProcessorId Identifier { get; }
 
         /// <summary>
         /// Gets the <see cref="ILogger" />.

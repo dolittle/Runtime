@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
         /// </summary>
         /// <param name="tenantId">The <see cref="TenantId"/>.</param>
-        /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
+        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
         /// <param name="initialState">The <see cref="StreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
@@ -31,14 +31,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public ScopedStreamProcessor(
             TenantId tenantId,
-            StreamId sourceStreamId,
+            IStreamProcessorId streamProcessorId,
             StreamProcessorState initialState,
             IEventProcessor processor,
             IStreamProcessorStateRepository streamProcessorStates,
             ICanFetchEventsFromStream eventsFromStreamsFetcher,
             ILogger<ScopedStreamProcessor> logger,
             CancellationToken cancellationToken)
-            : base(tenantId, sourceStreamId, initialState, processor, logger, cancellationToken)
+            : base(tenantId, streamProcessorId, initialState, processor, logger, cancellationToken)
         {
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;
