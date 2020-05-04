@@ -14,9 +14,19 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <summary>
         /// Gets an instance of <see cref="ICanFetchEventsFromStream" />.
         /// </summary>
+        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
         /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventsFromStream" />.</returns>
-        Task<ICanFetchEventsFromStream> GetFetcherFor(IStreamDefinition streamDefinition, CancellationToken cancellationToken);
+        Task<ICanFetchEventsFromStream> GetFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets an instance of <see cref="ICanFetchEventsFromStream" />.
+        /// </summary>
+        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
+        /// <param name="streamId">The <see cref="StreamId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventsFromStream" />.</returns>
+        Task<ICanFetchEventsFromStream> GetFetcherFor(ScopeId scopeId, StreamId streamId, CancellationToken cancellationToken);
     }
 }
