@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -20,61 +21,62 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     [SingletonPerTenant]
     public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
     {
-        readonly IFetchEventsFromStreams _eventsFromStreams;
+        readonly IEventFetchers _eventFetchers;
         readonly IFetchEventTypesFromStreams _eventTypesFromStreams;
-        readonly IStreamProcessorStates _streamProcessorStates;
+        readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
         /// </summary>
-        /// <param name="eventsFromStreams">The <see cref="IFetchEventsFromStreams" />.</param>
+        /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
         /// <param name="eventTypesFromStreams">The <see cref="IFetchEventTypesFromStreams" />.</param>
-        /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStates" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public TypeFilterWithEventSourcePartitionValidator(
-            IFetchEventsFromStreams eventsFromStreams,
+            IEventFetchers eventFetchers,
             IFetchEventTypesFromStreams eventTypesFromStreams,
-            IStreamProcessorStates streamProcessorStateRepository,
+            IStreamProcessorStateRepository streamProcessorStates,
             ILogger logger)
         {
-            _eventsFromStreams = eventsFromStreams;
+            _eventFetchers = eventFetchers;
             _eventTypesFromStreams = eventTypesFromStreams;
-            _streamProcessorStates = streamProcessorStateRepository;
+            _streamProcessorStates = streamProcessorStates;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken) =>
-            ValidateBasedOffReFilteredStream(filter, cancellationToken);
+        public Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken) =>
+            ValidateBasedOffReFilteredStream(persistedDefinition, filter, cancellationToken);
 
-        async Task<FilterValidationResult> ValidateBasedOffReFilteredStream(IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
+        async Task<FilterValidationResult> ValidateBasedOffReFilteredStream(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
-            (var isPersisted, var streamProcessorState) = await _streamProcessorStates
+            if (persistedDefinition == default) return new FilterValidationResult();
+            var tryGetStreamProcessorState = await _streamProcessorStates
                 .TryGetFor(
                     new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
                     cancellationToken)
                 .ConfigureAwait(false);
-            if (!isPersisted) return new FilterValidationResult();
-            var lastUnProcessedEventPosition = streamProcessorState.Position;
+            if (!tryGetStreamProcessorState.Success) return new FilterValidationResult();
+            var lastUnProcessedEventPosition = tryGetStreamProcessorState.Result.Position;
             var artifactsFromTargetStream = await _eventTypesFromStreams.FetchInRange(
                     filter.Scope,
                     filter.Definition.TargetStream,
                     new StreamPositionRange(StreamPosition.Start, uint.MaxValue),
                     cancellationToken)
                 .ConfigureAwait(false);
+            var eventsFetcher = await _eventFetchers.GetFetcherFor(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
             var sourceStreamEvents = lastUnProcessedEventPosition == 0
                 ? Enumerable.Empty<StreamEvent>()
-                : await _eventsFromStreams.FetchRange(
-                    filter.Scope,
-                    filter.Definition.SourceStream,
+                : await eventsFetcher.FetchRange(
                     new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition),
                     cancellationToken)
                     .ConfigureAwait(false);
+
             var artifactsFromSourceStream = new List<Artifact>();
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {
-                var processingResult = await filter.Filter(@event, PartitionId.NotSet, filter.Identifier, cancellationToken).ConfigureAwait(false);
+                var processingResult = await filter.Filter(@event, Guid.Empty, filter.Identifier, cancellationToken).ConfigureAwait(false);
                 if (processingResult.IsIncluded) artifactsFromSourceStream.Add(@event.Type);
             }
 
