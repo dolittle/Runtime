@@ -13,8 +13,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="CannotCreateStreamProcessorOnUndefinedStream"/> class.
         /// </summary>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        public CannotCreateStreamProcessorOnUndefinedStream(StreamProcessorId streamProcessorId)
+        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+        public CannotCreateStreamProcessorOnUndefinedStream(IStreamProcessorId streamProcessorId)
             : base($"Stream Processor: '{streamProcessorId}' cannot be created on undefined Stream")
         {
         }

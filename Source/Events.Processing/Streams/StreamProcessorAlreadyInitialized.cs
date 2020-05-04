@@ -13,8 +13,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessorAlreadyInitialized"/> class.
         /// </summary>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        public StreamProcessorAlreadyInitialized(StreamProcessorId streamProcessorId)
+        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+        public StreamProcessorAlreadyInitialized(IStreamProcessorId streamProcessorId)
             : base($"Stream Processor: '{streamProcessorId}' is already initialized")
         {
         }

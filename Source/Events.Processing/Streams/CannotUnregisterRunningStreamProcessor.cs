@@ -13,8 +13,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="CannotUnregisterRunningStreamProcessor"/> class.
         /// </summary>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        public CannotUnregisterRunningStreamProcessor(StreamProcessorId streamProcessorId)
+        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+        public CannotUnregisterRunningStreamProcessor(IStreamProcessorId streamProcessorId)
             : base($"Stream Processor: '{streamProcessorId}' is running, cannot unregister")
         {
         }

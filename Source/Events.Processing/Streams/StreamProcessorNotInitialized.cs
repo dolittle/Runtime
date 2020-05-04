@@ -13,8 +13,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessorNotInitialized"/> class.
         /// </summary>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        public StreamProcessorNotInitialized(StreamProcessorId streamProcessorId)
+        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+        public StreamProcessorNotInitialized(IStreamProcessorId streamProcessorId)
             : base($"Stream Processor: '{streamProcessorId}' is not initialized")
         {
         }

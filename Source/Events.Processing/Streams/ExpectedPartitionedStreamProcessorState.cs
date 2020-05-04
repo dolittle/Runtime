@@ -13,8 +13,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="ExpectedPartitionedStreamProcessorState"/> class.
         /// </summary>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        public ExpectedPartitionedStreamProcessorState(StreamProcessorId streamProcessorId)
+        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+        public ExpectedPartitionedStreamProcessorState(IStreamProcessorId streamProcessorId)
             : base($"Expected Stream Processor: '{streamProcessorId}' to be a partitioned stream processor")
         {
         }
