@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Options;
@@ -12,7 +11,7 @@ using MongoDB.Bson.Serialization.Options;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
 {
     /// <summary>
-    /// Represents the state of an <see cref="AbstractStreamProcessor" />.
+    /// Represents the state of a <see cref="Runtime.Events.Processing.Streams.Partitioned.ScopedStreamProcessor" />.
     /// </summary>
     public class StreamProcessorState : AbstractStreamProcessorState
     {

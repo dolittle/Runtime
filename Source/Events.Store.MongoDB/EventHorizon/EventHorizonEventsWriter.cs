@@ -7,7 +7,6 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -43,9 +42,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 await _connection.GetScopedEventLog(scope, cancellationToken).ConfigureAwait(false),
                 _eventFilter,
                 streamPosition => CreateEventFromEventHorizonEvent(@event, streamPosition.Value),
-                scope,
-                StreamId.EventLog,
-                @event.Type.Id,
                 cancellationToken).ConfigureAwait(false);
         }
 
