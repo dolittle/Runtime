@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// Represents a fetcher.
     /// </summary>
     /// <typeparam name="TEvent">The type of the stored event.</typeparam>
-    public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsFromPartitionedStream, ICanFetchRangeOfEventsFromStream, ICanFetchEventTypesFromStream
+    public class StreamFetcher<TEvent> : ICanFetchEventsFromStream, ICanFetchEventsFromPartitionedStream, ICanFetchRangeOfEventsFromStream, ICanFetchEventTypesFromStream, ICanFetchEventTypesFromPartitionedStream
         where TEvent : class
     {
         readonly IMongoCollection<TEvent> _stream;
@@ -31,24 +31,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// </summary>
         /// <param name="stream">The <see cref="IMongoCollection{TDocument}" />.</param>
         /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
-        /// <param name="partitionIdExpression">The <see cref="Expression{T}" /> for getting the <see cref="Guid" /> for the Partition Id from the stored event.</param>
         /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
         /// <param name="eventToStreamEvent">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="Store.Streams.StreamEvent" />.</param>
         /// <param name="eventToArtifact">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to <see cref="Artifact" />.</param>
+        /// <param name="partitionIdExpression">The <see cref="Expression{T}" /> for getting the <see cref="Guid" /> for the Partition Id from the stored event.</param>
         public StreamFetcher(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
-            Expression<Func<TEvent, Guid>> partitionIdExpression,
             Expression<Func<TEvent, ulong>> sequenceNumberExpression,
             ProjectionDefinition<TEvent, Store.Streams.StreamEvent> eventToStreamEvent,
-            ProjectionDefinition<TEvent, Artifact> eventToArtifact)
+            ProjectionDefinition<TEvent, Artifact> eventToArtifact,
+            Expression<Func<TEvent, Guid>> partitionIdExpression = default)
         {
             _stream = stream;
             _filter = filter;
-            _partitionIdExpression = partitionIdExpression;
             _sequenceNumberExpression = sequenceNumberExpression;
             _eventToStreamEvent = eventToStreamEvent;
             _eventToArtifact = eventToArtifact;
+            _partitionIdExpression = partitionIdExpression;
         }
 
         /// <inheritdoc/>
