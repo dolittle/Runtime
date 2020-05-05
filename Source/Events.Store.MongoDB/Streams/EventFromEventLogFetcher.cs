@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<Runtime.Events.Store.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
+        public override async Task<Store.Streams.StreamEvent> Fetch(ScopeId scope, StreamId stream, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             return await EventsFromStreamsFetcher.Fetch(
@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public override async Task<IEnumerable<Runtime.Events.Store.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
+        public override async Task<IEnumerable<Store.Streams.StreamEvent>> FetchRange(ScopeId scope, StreamId stream, StreamPositionRange range, CancellationToken cancellationToken)
         {
             if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
             return await EventsFromStreamsFetcher.FetchRange(
@@ -55,20 +55,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 _ => _.EventLogSequenceNumber,
                 Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
                 range,
-                cancellationToken).ConfigureAwait(false);
-        }
-
-        /// <inheritdoc/>
-        public override async Task<StreamPosition> FindNext(ScopeId scope, StreamId stream, PartitionId partition, StreamPosition fromPosition, CancellationToken cancellationToken)
-        {
-            if (!CanFetchFromStream(stream)) throw new EventsFromWellKnownStreamsFetcherCannotFetchFromStream(this, stream);
-            if (partition != PartitionId.NotSet) return ulong.MaxValue;
-            return await EventsFromStreamsFetcher.FindNext(
-                await _connection.GetEventLogCollection(scope, cancellationToken).ConfigureAwait(false),
-                _eventLogFilter,
-                _eventLogFilter.Empty,
-                _ => _.EventLogSequenceNumber,
-                fromPosition,
                 cancellationToken).ConfigureAwait(false);
         }
     }

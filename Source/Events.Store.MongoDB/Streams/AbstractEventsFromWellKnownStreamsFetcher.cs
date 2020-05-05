@@ -5,14 +5,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Artifacts;
+using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
     /// <summary>
-    /// Represents an abstract implementation of <see cref="ICanFetchEventsFromWellKnownStreams" />.
+    /// Represents an abstract implementation of <see cref="ICanFetchFromWellKnownStreams" />.
     /// </summary>
-    public abstract class AbstractEventsFromWellKnownStreamsFetcher : ICanFetchEventsFromWellKnownStreams
+    public abstract class AbstractEventsFromWellKnownStreamsFetcher : ICanFetchFromWellKnownStreams
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractEventsFromWellKnownStreamsFetcher"/> class.
@@ -27,12 +29,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public bool CanFetchFromStream(StreamId stream) => WellKnownStreams.Contains(stream);
 
         /// <inheritdoc/>
-        public abstract Task<StreamEvent> Fetch(ScopeId scope, StreamId streamId, StreamPosition streamPosition, CancellationToken cancellationToken);
+        public abstract Task<StreamEvent> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
-        public abstract Task<IEnumerable<StreamEvent>> FetchRange(ScopeId scope, StreamId streamId, StreamPositionRange range, CancellationToken cancellationToken);
+        public abstract Task<IEnumerable<StreamEvent>> FetchRange(StreamPositionRange range, CancellationToken cancellationToken);
 
         /// <inheritdoc/>
-        public abstract Task<StreamPosition> FindNext(ScopeId scope, StreamId streamId, PartitionId partitionId, StreamPosition fromPosition, CancellationToken cancellationToken);
+        public abstract Task<IEnumerable<Artifact>> FetchInRange(StreamPositionRange range, CancellationToken cancellationToken);
+
+        /// <inheritdoc/>
+        public abstract Task<IEnumerable<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken);
     }
 }

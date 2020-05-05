@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 _eventFilter,
                 streamPosition => CreateEventFromEventHorizonEvent(@event, streamPosition.Value),
                 scope,
-                StreamId.AllStreamId,
+                StreamId.EventLog,
                 @event.Type.Id,
                 cancellationToken).ConfigureAwait(false);
         }

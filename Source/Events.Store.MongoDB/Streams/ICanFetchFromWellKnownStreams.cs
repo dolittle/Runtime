@@ -7,9 +7,9 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
     /// <summary>
-    /// Defines a special interface of <see cref="IFetchEventsFromStreams" /> that can fetch events only from well-known streams.
+    /// Defines a system that can fetch from well-known streams.
     /// </summary>
-    public interface ICanFetchEventsFromWellKnownStreams : IFetchEventsFromStreams, ICanFetchRangeOfEventsFromStream
+    public interface ICanFetchFromWellKnownStreams : ICanFetchEventsFromStream, ICanFetchRangeOfEventsFromStream, ICanFetchEventTypesFromStream
     {
         /// <summary>
         /// Gets the well-known streams it can fetch Events from.

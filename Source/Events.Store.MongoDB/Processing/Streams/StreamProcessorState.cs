@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -13,7 +12,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// <summary>
     /// Represents the state of an <see cref="AbstractStreamProcessor" />.
     /// </summary> 
-    [BsonIgnoreExtraElements]
     public class StreamProcessorState : AbstractStreamProcessorState
     {
         /// <summary>
