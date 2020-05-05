@@ -22,13 +22,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IDictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new Dictionary<TenantId, AbstractScopedStreamProcessor>();
         readonly StreamProcessorId _identifier;
         readonly IPerformActionOnAllTenants _onAllTenants;
-        readonly StreamId _sourceStreamId;
         readonly IStreamDefinition _streamDefinition;
         readonly Func<IEventProcessor> _getEventProcessor;
         readonly Action _unregister;
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
         readonly FactoryFor<IEventFetchers> _getEventFetchers;
-        readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitions;
         readonly ILoggerManager _loggerManager;
         readonly ILogger<StreamProcessor> _logger;
         readonly CancellationToken _cancellationToken;
@@ -46,7 +44,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
         /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
-        /// <param name="getStreamDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitionRepository" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public StreamProcessor(
@@ -57,7 +54,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             Action unregister,
             FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
             FactoryFor<IEventFetchers> getEventFetchers,
-            FactoryFor<IStreamDefinitionRepository> getStreamDefinitions,
             ILoggerManager loggerManager,
             CancellationToken cancellationToken)
         {
@@ -68,45 +64,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _unregister = unregister;
             _getStreamProcessorStates = getStreamProcessorStates;
             _getEventFetchers = getEventFetchers;
-            _getStreamDefinitions = getStreamDefinitions;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<StreamProcessor>();
-            _cancellationToken = cancellationToken;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
-        /// </summary>
-        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-        /// <param name="sourceStreamId">The source <see cref="StreamId" />.</param>
-        /// <param name="getEventProcessor">The <see cref="Func{TResult}" /> that returns an <see cref="IEventProcessor" />.</param>
-        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
-        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
-        /// <param name="getStreamDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitionRepository" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        public StreamProcessor(
-            StreamProcessorId streamProcessorId,
-            IPerformActionOnAllTenants onAllTenants,
-            StreamId sourceStreamId,
-            Func<IEventProcessor> getEventProcessor,
-            Action unregister,
-            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
-            FactoryFor<IEventFetchers> getEventFetchers,
-            FactoryFor<IStreamDefinitionRepository> getStreamDefinitions,
-            ILoggerManager loggerManager,
-            CancellationToken cancellationToken)
-        {
-            _identifier = streamProcessorId;
-            _onAllTenants = onAllTenants;
-            _sourceStreamId = sourceStreamId;
-            _getEventProcessor = getEventProcessor;
-            _unregister = unregister;
-            _getStreamProcessorStates = getStreamProcessorStates;
-            _getEventFetchers = getEventFetchers;
-            _getStreamDefinitions = getStreamDefinitions;
             _loggerManager = loggerManager;
             _logger = loggerManager.CreateLogger<StreamProcessor>();
             _cancellationToken = cancellationToken;
@@ -125,19 +82,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 await _onAllTenants.PerformAsync(async tenant =>
                 {
-                    var streamDefinition = _streamDefinition;
-                    if (streamDefinition == default)
-                    {
-                        var tryGetStreamDefinition = await _getStreamDefinitions().TryGet(_identifier.ScopeId, _sourceStreamId, _cancellationToken).ConfigureAwait(false);
-                        if (!tryGetStreamDefinition.Success) throw new CannotCreateStreamProcessorOnUndefinedStream(_identifier);
-                        streamDefinition = tryGetStreamDefinition.Result;
-                    }
-
                     var scopedStreamProcessor = await CreateScopedStreamProcessor(
                         tenant,
-                        streamDefinition,
                         _getEventProcessor(),
-                        await _getEventFetchers().GetFetcherFor(_identifier.ScopeId, _streamDefinition, _cancellationToken).ConfigureAwait(false),
+                        _getEventFetchers(),
                         _getStreamProcessorStates()).ConfigureAwait(false);
                     _streamProcessors.Add(tenant, scopedStreamProcessor);
                 }).ConfigureAwait(false);
@@ -183,18 +131,19 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         async Task<AbstractScopedStreamProcessor> CreateScopedStreamProcessor(
             TenantId tenant,
-            IStreamDefinition streamDefinition,
             IEventProcessor eventProcessor,
-            ICanFetchEventsFromStream eventsFromStreamsFetcher,
+            IEventFetchers eventFetchers,
             IStreamProcessorStateRepository streamProcessorStates)
         {
-            if (streamDefinition.Partitioned)
+            if (_streamDefinition.Partitioned)
             {
-                return await CreatePartitionedScopedStreamProcessor(tenant, eventProcessor, eventsFromStreamsFetcher as ICanFetchEventsFromPartitionedStream, streamProcessorStates).ConfigureAwait(false);
+                var eventFetcher = await eventFetchers.GetPartitionedFetcherFor(eventProcessor.Scope, _streamDefinition, _cancellationToken).ConfigureAwait(false);
+                return await CreatePartitionedScopedStreamProcessor(tenant, eventProcessor, eventFetcher, streamProcessorStates).ConfigureAwait(false);
             }
             else
             {
-                return await CreateUnpartitionedScopedStreamProcessor(tenant, eventProcessor, eventsFromStreamsFetcher, streamProcessorStates).ConfigureAwait(false);
+                var eventFetcher = await eventFetchers.GetFetcherFor(eventProcessor.Scope, _streamDefinition, _cancellationToken).ConfigureAwait(false);
+                return await CreateUnpartitionedScopedStreamProcessor(tenant, eventProcessor, eventFetcher, streamProcessorStates).ConfigureAwait(false);
             }
         }
 

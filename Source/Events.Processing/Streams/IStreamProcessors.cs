@@ -30,23 +30,5 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             Func<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken,
             out StreamProcessor streamProcessor);
-
-        /// <summary>
-        /// Registers a <see cref="StreamProcessor" />.
-        /// </summary>
-        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-        /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
-        /// <param name="sourceStreamId">The <see cref="StreamId" /> of the stream the <see cref="AbstractScopedStreamProcessor" /> is processing.</param>
-        /// <param name="getEventProcessor">The <see cref="Func{TResult}" /> <see cref="IEventProcessor" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <param name="streamProcessor">The registered <see cref="StreamProcessor" />.</param>
-        /// <returns>A value indicating whether a new <see cref="StreamProcessor" /> was registered.</returns>
-        bool TryRegister(
-            ScopeId scopeId,
-            EventProcessorId eventProcessorId,
-            StreamId sourceStreamId,
-            Func<IEventProcessor> getEventProcessor,
-            CancellationToken cancellationToken,
-            out StreamProcessor streamProcessor);
     }
 }
