@@ -1,13 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Artifacts;
 using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams;
+using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
@@ -16,14 +15,54 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// </summary>
     public class StreamDefinitionRepository : IStreamDefinitionRepository
     {
-        public Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken)
+        readonly EventStoreConnection _connection;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamDefinitionRepository"/> class.
+        /// </summary>
+        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
+        public StreamDefinitionRepository(EventStoreConnection connection)
         {
-            throw new System.NotImplementedException();
+            _connection = connection;
         }
 
-        public Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId stream, CancellationToken cancellationToken)
+        /// <inheritdoc/>
+        public async Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken)
         {
-            throw new System.NotImplementedException();
+            try
+            {
+                var streamDefinitions = await _connection.GetStreamDefinitionsCollection(scope, cancellationToken).ConfigureAwait(false);
+                await streamDefinitions.ReplaceOneAsync(
+                    Builders<StreamDefinition>.Filter.Eq(_ => _.StreamId, streamDefinition.StreamId.Value),
+                    new StreamDefinition(
+                        streamDefinition.StreamId,
+                        streamDefinition.FilterDefinition.ToStoreRepresentation(),
+                        streamDefinition.Partitioned,
+                        streamDefinition.Public),
+                    new ReplaceOptions { IsUpsert = true }).ConfigureAwait(false);
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId stream, CancellationToken cancellationToken)
+        {
+            try
+            {
+                var streamDefinitions = await _connection.GetStreamDefinitionsCollection(scope, cancellationToken).ConfigureAwait(false);
+                var streamDefinition = await streamDefinitions.Find(
+                    Builders<StreamDefinition>.Filter.Eq(_ => _.StreamId, stream.Value))
+                    .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                if (streamDefinition != default) return new Try<IStreamDefinition>(true, streamDefinition.AsRuntimeRepresentation());
+                return new Try<IStreamDefinition>(false, null);
+            }
+            catch (MongoWaitQueueFullException ex)
+            {
+                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
+            }
         }
     }
 }

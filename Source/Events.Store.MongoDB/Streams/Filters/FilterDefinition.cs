@@ -5,14 +5,13 @@ using System;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
 {
     /// <summary>
-    /// Represents a persisted <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
+    /// Represents a persisted <see cref="Store.Streams.Filters.FilterDefinition" />.
     /// </summary>
-    [BsonDiscriminator(RootClass = true, Required = true)]
     [BsonKnownTypes(typeof(TypePartitionFilterDefinition))]
-    public class FilterDefinition
+    public class FilterDefinition : AbstractFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterDefinition"/> class.
@@ -21,22 +20,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         /// <param name="sourceStream">The source stream.</param>
         /// <param name="partitioned">Whether the filter is partitioned or not.</param>
         public FilterDefinition(Guid filterId, Guid sourceStream, bool partitioned)
+            : base(filterId, sourceStream)
         {
             FilterId = filterId;
             SourceStream = sourceStream;
             Partitioned = partitioned;
         }
-
-        /// <summary>
-        /// Gets or sets the filter id.
-        /// </summary>
-        [BsonId]
-        public Guid FilterId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the source stream.
-        /// </summary>
-        public Guid SourceStream { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the filter is partitioned or not.
@@ -47,6 +36,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
         /// Converts the stored filter into the runtime <see cref="IFilterDefinition" /> that it represents.
         /// </summary>
         /// <returns>The runtime <see cref="IFilterDefinition" />.</returns>
-        public virtual IFilterDefinition AsRuntimeRepresentation() => new FilterDefinition(SourceStream, FilterId, Partitioned);
+        public override IFilterDefinition AsRuntimeRepresentation() => new Store.Streams.Filters.FilterDefinition(SourceStream, FilterId, Partitioned);
     }
 }
