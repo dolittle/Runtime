@@ -30,6 +30,14 @@ namespace Dolittle.Runtime.Events.Store.Streams
         Task<ICanFetchEventsFromPartitionedStream> GetPartitionedFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
         /// <summary>
+        /// Gets an instance of <see cref="ICanFetchEventsFromPartitionedStream" />.
+        /// </summary>
+        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventsFromPartitionedStream" />.</returns>
+        Task<ICanFetchEventsFromPartitionedStream> GetPublicEventsFetcherFor(IStreamDefinition streamDefinition, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Gets an instance of <see cref="ICanFetchRangeOfEventsFromStream" />.
         /// </summary>
         /// <param name="scopeId">The <see cref="ScopeId" />.</param>

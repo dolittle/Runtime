@@ -13,6 +13,7 @@ using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
 using Google.Protobuf.WellKnownTypes;
@@ -31,7 +32,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         readonly IExecutionContextManager _executionContextManager;
         readonly EventHorizonConsentsConfiguration _eventHorizonConsents;
         readonly ITenants _tenants;
-        readonly FactoryFor<IPublicEventFetchers> _getPublicEventFetchers;
+        readonly FactoryFor<IEventFetchers> _getEventFetchers;
         readonly ILogger _logger;
 
         bool _disposed;
@@ -43,21 +44,21 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="eventHorizonConsents">The <see cref="EventHorizonConsentsConfiguration" />.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
-        /// <param name="getPublicEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IPublicEventFetchers" />.</param>
+        /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConsumerService(
             BoundedContextConfiguration boundedContextConfiguration,
             IExecutionContextManager executionContextManager,
             EventHorizonConsentsConfiguration eventHorizonConsents,
             ITenants tenants,
-            FactoryFor<IPublicEventFetchers> getPublicEventFetchers,
+            FactoryFor<IEventFetchers> getEventFetchers,
             ILogger<ConsumerService> logger)
         {
             _thisMicroservice = boundedContextConfiguration.BoundedContext;
             _executionContextManager = executionContextManager;
             _eventHorizonConsents = eventHorizonConsents;
             _tenants = tenants;
-            _getPublicEventFetchers = getPublicEventFetchers;
+            _getEventFetchers = getEventFetchers;
             _logger = logger;
         }
 
@@ -105,7 +106,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     _thisMicroservice,
                     producerTenant,
                     _executionContextManager.Current.CorrelationId);
-                var publicEvents = await _getPublicEventFetchers().GetFetcherFor(publicStream, context.CancellationToken).ConfigureAwait(false);
+                var publicEvents = await _getEventFetchers().GetPublicEventsFetcherFor(new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, publicStream)), context.CancellationToken).ConfigureAwait(false);
                 while (!context.CancellationToken.IsCancellationRequested
                     && !_disposed)
                 {
