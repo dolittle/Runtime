@@ -21,13 +21,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
         Task<ICanFetchEventsFromStream> GetFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets an instance of <see cref="ICanFetchEventsFromStream" />.
+        /// Gets an instance of <see cref="ICanFetchEventsFromPartitionedStream" />.
         /// </summary>
         /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-        /// <param name="streamId">The <see cref="StreamId" />.</param>
+        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventsFromStream" />.</returns>
-        Task<ICanFetchEventsFromStream> GetFetcherFor(ScopeId scopeId, StreamId streamId, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventsFromPartitionedStream" />.</returns>
+        Task<ICanFetchEventsFromPartitionedStream> GetPartitionedFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets an instance of <see cref="ICanFetchRangeOfEventsFromStream" />.
@@ -39,15 +39,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
         Task<ICanFetchRangeOfEventsFromStream> GetRangeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets an instance of <see cref="ICanFetchRangeOfEventsFromStream" />.
-        /// </summary>
-        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-        /// <param name="streamId">The <see cref="StreamId" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchRangeOfEventsFromStream" />.</returns>
-        Task<ICanFetchRangeOfEventsFromStream> GetRangeFetcherFor(ScopeId scopeId, StreamId streamId, CancellationToken cancellationToken);
-
-        /// <summary>
         /// Gets an instance of <see cref="ICanFetchEventTypesFromStream" />.
         /// </summary>
         /// <param name="scopeId">The <see cref="ScopeId" />.</param>
@@ -57,12 +48,12 @@ namespace Dolittle.Runtime.Events.Store.Streams
         Task<ICanFetchEventTypesFromStream> GetTypeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets an instance of <see cref="ICanFetchEventTypesFromStream" />.
+        /// Gets an instance of <see cref="ICanFetchEventTypesFromPartitionedStream" />.
         /// </summary>
         /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-        /// <param name="streamId">The <see cref="StreamId" />.</param>
+        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventTypesFromStream" />.</returns>
-        Task<ICanFetchEventTypesFromStream> GetTypeFetcherFor(ScopeId scopeId, StreamId streamId, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, whn resolved, returns the <see cref="ICanFetchEventTypesFromPartitionedStream" />.</returns>
+        Task<ICanFetchEventTypesFromPartitionedStream> GetPartitionedTypeFetcherFor(ScopeId scopeId, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
     }
 }

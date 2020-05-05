@@ -1,12 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Concepts;
+
 namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {
     /// <summary>
     /// Represents a <see cref="IFilterDefinition" /> for a remote filter.
     /// </summary>
-    public class FilterDefinition : IFilterDefinition
+    public class FilterDefinition : Value<FilterDefinition>, IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterDefinition"/> class.

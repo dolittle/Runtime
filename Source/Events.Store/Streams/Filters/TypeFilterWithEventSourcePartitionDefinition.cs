@@ -3,13 +3,14 @@
 
 using System.Collections.Generic;
 using Dolittle.Artifacts;
+using Dolittle.Concepts;
 
 namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {
     /// <summary>
     /// Represents a <see cref="FilterDefinition" /> for type filter with event source partition.
     /// </summary>
-    public class TypeFilterWithEventSourcePartitionDefinition : FilterDefinition
+    public class TypeFilterWithEventSourcePartitionDefinition : Value<TypeFilterWithEventSourcePartitionDefinition>, IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionDefinition"/> class.
@@ -19,14 +20,28 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
         /// <param name="types"><see cref="IEnumerable{T}"/> of <see cref="ArtifactId"/>.</param>
         /// <param name="partitioned">Whether or not to partition by <see cref="EventSourceId"/>.</param>
         public TypeFilterWithEventSourcePartitionDefinition(StreamId sourceStream, StreamId targetStream, IEnumerable<ArtifactId> types, bool partitioned)
-            : base(sourceStream, targetStream, partitioned)
         {
+            SourceStream = sourceStream;
+            TargetStream = targetStream;
             Types = types;
+            Partitioned = partitioned;
         }
 
         /// <summary>
         /// Gets the artifacts included by the filter.
         /// </summary>
         public IEnumerable<ArtifactId> Types { get; }
+
+        /// <inheritdoc/>
+        public StreamId SourceStream { get; }
+
+        /// <inheritdoc/>
+        public StreamId TargetStream { get; }
+
+        /// <inheritdoc/>
+        public bool Partitioned { get; }
+
+        /// <inheritdoc/>
+        public bool Public => false;
     }
 }

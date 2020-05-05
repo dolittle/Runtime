@@ -20,6 +20,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Async\Async.csproj" />
     <ProjectReference Include="..\Services\Services.csproj" />
+    <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
   </ItemGroup>
 
 </Project>

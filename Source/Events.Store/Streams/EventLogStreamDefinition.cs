@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Concepts;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Store.Streams
@@ -8,7 +9,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// <summary>
     /// Represents an implentation of <see cref="IStreamDefinition" /> which represents the definition of the Event Log.
     /// </summary>
-    public class EventLogStreamDefinition : IStreamDefinition
+    public class EventLogStreamDefinition : Value<EventLogStreamDefinition>, IStreamDefinition
     {
         /// <inheritdoc/>
         public StreamId StreamId => StreamId.EventLog;
