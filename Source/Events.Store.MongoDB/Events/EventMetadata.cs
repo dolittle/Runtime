@@ -32,8 +32,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 
         /// <summary>
         /// Gets or sets the <see cref="DateTimeOffset"/> of when the event was committed to the event store.
+        /// BsonType.Document saves a UTC DateTime, ticks and an offset(in minutes) to the document. This way we can
+        /// query for the DateTime from the database and it looks nicer than the string representation.
+        /// https://github.com/mongodb/mongo-csharp-driver/blob/master/src/MongoDB.Bson/Serialization/Serializers/DateTimeOffsetSerializer.cs#L158
         /// </summary>
-        [BsonRepresentation(BsonType.String)]
+        [BsonRepresentation(BsonType.Document)]
         public DateTimeOffset Occurred { get; set; }
 
         /// <summary>
