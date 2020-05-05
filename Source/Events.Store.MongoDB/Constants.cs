@@ -8,6 +8,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     /// <summary>
     /// A collection of configuration constants used for the MongoDB event store implementation.
     /// </summary>
+    /// <remarks>
+    /// Our convention is to always place the scope-id before other id's(when applicable) to make the db
+    /// look nicer when viewed.
+    /// </remarks>
     public static class Constants
     {
         /// <summary>
@@ -50,7 +54,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <returns>The scoped event log stream collection name.</returns>
-        public static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-event-log-{scope}";
+        public static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-event-log";
 
         /// <summary>
         /// Gets the collection name for scoped stream.
@@ -58,13 +62,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <returns>The scoped stream collection name.</returns>
-        public static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-stream-{scope}-{stream}";
+        public static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-{scope}-stream-{stream}";
 
         /// <summary>
         /// Gtes the collection name for scoped StreamProcessorStates.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <returns>The scoped StreamProcessorStates collection name.</returns>
-        public static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{StreamProcessorStateCollection}-{scope}";
+        public static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{scope}-{StreamProcessorStateCollection}";
     }
 }
