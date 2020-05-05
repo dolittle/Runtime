@@ -165,10 +165,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
                     _logger.Warning("Failed to register EventHandler: {eventHandlerId}. Filter validation failed. {reason}", eventHandlerId, firstFailedValidation.FailureReason);
-                    var failure = new Failure(
-                        EventHandlersFailures.FailedToRegisterEventHandler,
-                        $"Failed to register EventHandler: {eventHandlerId}. Filter validation failed. {firstFailedValidation.FailureReason}");
-                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
+                    throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 }
 
                 await _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(scopeId, streamDefinition, context.CancellationToken)).ConfigureAwait(false);

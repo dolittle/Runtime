@@ -280,10 +280,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 {
                     var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
                     _logger.Warning("Failed to register Filter: {filterId}. Filter validation failed. {reason}", filterDefinition.TargetStream, firstFailedValidation.FailureReason);
-                    var failure = new Failure(
-                        FiltersFailures.FailedToRegisterFilter,
-                        $"Failed to register Filter: {filterDefinition.TargetStream}. Filter validation failed. {firstFailedValidation.FailureReason}");
-                    await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
+                    throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 }
 
                 await _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(scopeId, streamDefinition, cancellationToken)).ConfigureAwait(false);
