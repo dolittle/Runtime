@@ -16,7 +16,6 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
-using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Google.Protobuf;
 using Grpc.Core;
@@ -31,12 +30,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly IStreamProcessors _streamProcessors;
         readonly IValidateFilterForAllTenants _filterForAllTenants;
-        readonly IPerformActionOnAllTenants _onAllTenants;
         readonly IExecutionContextManager _executionContextManager;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly FactoryFor<IWriteEventsToPublicStreams> _getEventsToPublicStreamsWriter;
-        readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitionRepository;
+        readonly IStreamDefinitions _streamDefinitions;
         readonly ILoggerManager _loggerManager;
         readonly ILogger _logger;
 
@@ -45,32 +43,29 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
         /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
+        /// <param name="streamDefinitions">The <see cref="IFilterDefinitions" />.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
         /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
-        /// <param name="getStreamDefinitionRepository">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitions" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager"/>.</param>
         public FiltersService(
             IStreamProcessors streamProcessors,
             IValidateFilterForAllTenants filterForAllTenants,
-            IPerformActionOnAllTenants onAllTenants,
             IExecutionContextManager executionContextManager,
             IReverseCallDispatchers reverseCallDispatchers,
+            IStreamDefinitions streamDefinitions,
             FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
             FactoryFor<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
-            FactoryFor<IStreamDefinitionRepository> getStreamDefinitionRepository,
             ILoggerManager loggerManager)
         {
             _streamProcessors = streamProcessors;
             _filterForAllTenants = filterForAllTenants;
-            _onAllTenants = onAllTenants;
             _executionContextManager = executionContextManager;
             _reverseCallDispatchers = reverseCallDispatchers;
+            _streamDefinitions = streamDefinitions;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _getEventsToPublicStreamsWriter = getEventsToPublicStreamsWriter;
-            _getStreamDefinitionRepository = getStreamDefinitionRepository;
             _loggerManager = loggerManager;
             _logger = loggerManager.CreateLogger<FiltersService>();
         }
@@ -283,7 +278,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 }
 
-                await _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(scopeId, streamDefinition, cancellationToken)).ConfigureAwait(false);
+                await _streamDefinitions.Persist(scopeId, streamDefinition, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -16,7 +16,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
@@ -28,11 +27,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventHandlersService : EventHandlersBase
     {
-        readonly IPerformActionOnAllTenants _onAllTenants;
         readonly IValidateFilterForAllTenants _filterForAllTenants;
         readonly IStreamProcessors _streamProcessors;
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
-        readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitionRepository;
+        readonly IStreamDefinitions _streamDefinitions;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILoggerManager _loggerManager;
@@ -41,29 +39,26 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
         /// </summary>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
         /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
         /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> <see cref="IWriteEventsToStreams" />.</param>
-        /// <param name="getStreamDefinitionRepository">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitionRepository" />.</param>
+        /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager"/>.</param>
         public EventHandlersService(
-            IPerformActionOnAllTenants onAllTenants,
             IValidateFilterForAllTenants filterForAllTenants,
             IStreamProcessors streamProcessors,
             FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
-            FactoryFor<IStreamDefinitionRepository> getStreamDefinitionRepository,
+            IStreamDefinitions streamDefinitions,
             IReverseCallDispatchers reverseCallDispatchers,
             IExecutionContextManager executionContextManager,
             ILoggerManager loggerManager)
         {
-            _onAllTenants = onAllTenants;
             _filterForAllTenants = filterForAllTenants;
             _streamProcessors = streamProcessors;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
-            _getStreamDefinitionRepository = getStreamDefinitionRepository;
+            _streamDefinitions = streamDefinitions;
             _reverseCallDispatchers = reverseCallDispatchers;
             _executionContextManager = executionContextManager;
             _loggerManager = loggerManager;
@@ -168,7 +163,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 }
 
-                await _onAllTenants.PerformAsync(_ => _getStreamDefinitionRepository().Persist(scopeId, streamDefinition, context.CancellationToken)).ConfigureAwait(false);
+                await _streamDefinitions.Persist(scopeId, streamDefinition, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
