@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Artifacts;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartitionDefinition.given
+namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_TypeFilterWithEventSourcePartitionDefinition.given
 {
     public static class artifacts
     {

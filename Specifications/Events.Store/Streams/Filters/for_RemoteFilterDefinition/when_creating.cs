@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterDefinition
+namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_FilterDefinition
 {
     public class when_creating
     {

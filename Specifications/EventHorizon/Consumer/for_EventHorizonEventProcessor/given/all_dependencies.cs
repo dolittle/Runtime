@@ -10,14 +10,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_EventHorizonEventProcessor.
 {
     public class all_dependencies
     {
-        protected static Subscription subscription;
+        protected static SubscriptionId subscription_id;
         protected static Moq.Mock<IWriteEventHorizonEvents> event_horizon_events_writer;
         protected static CommittedEvent @event;
         protected static PartitionId partition;
 
         Establish context = () =>
         {
-            subscription = new Subscription(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+            subscription_id = new SubscriptionId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
             partition = Guid.NewGuid();
             event_horizon_events_writer = new Moq.Mock<IWriteEventHorizonEvents>();
             @event = new CommittedEvent(
