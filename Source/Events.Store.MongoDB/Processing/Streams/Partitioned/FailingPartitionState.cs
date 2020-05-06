@@ -19,12 +19,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="retryTime">The retry time.</param>
         /// <param name="reason">The reason for failure.</param>
         /// <param name="processingAttempts">The number of times the event at position has been processed.</param>
-        public FailingPartitionState(ulong position, DateTimeOffset retryTime, string reason, uint processingAttempts)
+        /// <param name="lastFailed">The timestamp of when this partition last failed.</param>
+        public FailingPartitionState(ulong position, DateTimeOffset retryTime, string reason, uint processingAttempts, DateTimeOffset lastFailed)
         {
             Position = position;
             RetryTime = retryTime;
             Reason = reason;
             ProcessingAttempts = processingAttempts;
+            LastFailed = lastFailed;
         }
 
         /// <summary>
@@ -53,5 +55,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// Gets or sets the number of times that the event at position has been attempted processed.
         /// </summary>
         public uint ProcessingAttempts { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp on when the partition failed.
+        /// </summary>
+        [BsonRepresentation(BsonType.Document)]
+        public DateTimeOffset LastFailed { get; set; }
     }
 }
