@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events.Store
         public void IncrementCommittedEvents(CommittedEvent @event)
         {
             CommittedAggregateEvents.WithLabels(
-                @event.Tenant.Value.ToString(),
+                @event.ExecutionContext.Tenant.Value.ToString(),
                 @event.EventSource.Value.ToString(),
                 @event.Type.Id.Value.ToString(),
                 @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.Events.Store
         public void IncrementCommittedAggregateEvents(CommittedAggregateEvent @event)
         {
             CommittedAggregateEvents.WithLabels(
-                @event.Tenant.Value.ToString(),
+                @event.ExecutionContext.Tenant.Value.ToString(),
                 @event.EventSource.Value.ToString(),
                 @event.AggregateRoot.Id.Value.ToString(),
                 @event.Type.Id.Value.ToString(),
