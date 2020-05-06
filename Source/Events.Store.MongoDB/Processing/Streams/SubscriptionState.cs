@@ -3,8 +3,6 @@
 
 using System;
 using Dolittle.ApplicationModel;
-using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -13,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
     /// Represents the state of an <see cref="SubscriptionState" />.
-    /// </summary> 
+    /// </summary>
     public class SubscriptionState : AbstractSubscriptionState
     {
         /// <summary>
