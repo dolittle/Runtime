@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
     /// <summary>
     /// Defines a system that can fetch events from public event streams.
     /// </summary>
-    public interface IFetchEventsFromPublicStreams : IFetchEventsFromStreams
+    public interface IFetchEventsFromPublicStreams : IFetchEventsFromStreams, IFetchRangeOfEventsFromStreams
     {
         /// <summary>
         /// Fetch the event at a given position in a stream.

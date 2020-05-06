@@ -12,7 +12,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
     /// Represents the state of an <see cref="StreamProcessor" />.
+    /// BsonIgnoreExtraElements is used so that we don't deserialize the '_id' from MongoDB as it's not a property in the class.
     /// </summary>
+    [BsonIgnoreExtraElements]
     public class StreamProcessorState
     {
         /// <summary>
@@ -31,12 +33,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Position = position;
             FailingPartitions = failingPartitions;
         }
-
-        /// <summary>
-        /// Gets or sets the  MongoDB _id. This is used so that the class would have a valid '_id' field in mongo.
-        /// The classes 'true' id is comporomised from the combinaton of ScopeId, EventProcessorId and SourceStreamId.
-        /// </summary>
-        public ObjectId Id { get; set; }
 
         /// <summary>
         /// Gets or sets the scope id.

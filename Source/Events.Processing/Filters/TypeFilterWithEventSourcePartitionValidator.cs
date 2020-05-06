@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     [SingletonPerTenant]
     public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
     {
-        readonly IFetchEventsFromStreams _eventsFromStreams;
+        readonly IFetchRangeOfEventsFromStreams _eventsFromStreams;
         readonly IFetchEventTypesFromStreams _eventTypesFromStreams;
         readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
         readonly ILogger _logger;
@@ -28,12 +28,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
         /// </summary>
-        /// <param name="eventsFromStreams">The <see cref="IFetchEventsFromStreams" />.</param>
+        /// <param name="eventsFromStreams">The <see cref="IFetchRangeOfEventsFromStreams" />.</param>
         /// <param name="eventTypesFromStreams">The <see cref="IFetchEventTypesFromStreams" />.</param>
         /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public TypeFilterWithEventSourcePartitionValidator(
-            IFetchEventsFromStreams eventsFromStreams,
+            IFetchRangeOfEventsFromStreams eventsFromStreams,
             IFetchEventTypesFromStreams eventTypesFromStreams,
             IStreamProcessorStateRepository streamProcessorStateRepository,
             ILogger logger)
