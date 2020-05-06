@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Dolittle.Concepts;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -21,6 +22,20 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         {
             Position = streamPosition;
             FailingPartitions = failingPartitions;
+            LastSuccessfullyProcessed = DateTimeOffset.MinValue;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamProcessorState"/> class.
+        /// </summary>
+        /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
+        /// <param name="failingPartitions">The <see cref="IDictionary{PartitionId, FailingPartitionState}">states of the failing partitions</see>.</param>
+        /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
+        public StreamProcessorState(StreamPosition streamPosition, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
+        {
+            Position = streamPosition;
+            FailingPartitions = failingPartitions;
+            LastSuccessfullyProcessed = lastSuccessfullyProcessed;
         }
 
         /// <summary>
@@ -41,5 +56,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// Gets or sets the <see cref="IDictionary{PartitionId, FailingPartitionState}">states of the failing partitions</see>.
         /// </summary>
         public IDictionary<PartitionId, FailingPartitionState> FailingPartitions { get; set; }
+
+        /// <summary>
+        /// Gets the timestamp when the StreamProcessor has processed the stream.
+        /// </summary>
+        public DateTimeOffset LastSuccessfullyProcessed { get; }
     }
 }
