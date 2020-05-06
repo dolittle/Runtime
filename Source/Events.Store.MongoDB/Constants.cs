@@ -26,14 +26,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public const string AggregateRootInstanceCollection = "aggregates";
 
         /// <summary>
-        /// The collection name where type partition filters are stored.
-        /// </summary>
-        public const string FilterDefinitionCollection = "filters";
-
-        /// <summary>
         /// Gets the collection name where events in the event log are stored.
         /// </summary>
         public const string EventLogCollection = "event-log";
+
+        /// <summary>
+        /// Gets the collection name where the stream definitions are stored.
+        /// </summary>
+        public const string StreamDefinitionCollection = "stream-definitions";
 
         /// <summary>
         /// Gets the collection name for a stream.
@@ -54,7 +54,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <returns>The scoped event log stream collection name.</returns>
-        public static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-event-log";
+        public static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-{EventLogCollection}";
+
+        /// <summary>
+        /// Gets the collection name for scoped stream definitions.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <returns>The scoped event log stream collection name.</returns>
+        public static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope}-{StreamDefinitionCollection}";
 
         /// <summary>
         /// Gets the collection name for scoped stream.

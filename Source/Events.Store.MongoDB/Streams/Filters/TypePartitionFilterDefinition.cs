@@ -7,7 +7,7 @@ using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
 {
     /// <summary>
     /// Represents a persisted <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
@@ -25,7 +25,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters
             : base(filterId, sourceStream, partitioned)
         {
             Types = types;
-            Partitioned = partitioned;
         }
 
         /// <summary>

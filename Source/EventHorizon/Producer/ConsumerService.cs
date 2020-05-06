@@ -106,7 +106,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     _thisMicroservice,
                     producerTenant,
                     _executionContextManager.Current.CorrelationId);
-                var publicEvents = await _getEventFetchers().GetPublicEventsFetcherFor(new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, publicStream)), context.CancellationToken).ConfigureAwait(false);
+                var publicEvents = await _getEventFetchers().GetPartitionedFetcherFor(
+                    ScopeId.Default,
+                    new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, publicStream)),
+                    context.CancellationToken).ConfigureAwait(false);
                 while (!context.CancellationToken.IsCancellationRequested
                     && !_disposed)
                 {

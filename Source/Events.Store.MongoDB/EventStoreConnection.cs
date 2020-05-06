@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
-using Dolittle.Runtime.Events.Store.MongoDB.Processing.Filters;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
@@ -38,7 +37,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             Aggregates = connection.Database.GetCollection<AggregateRoot>(Constants.AggregateRootInstanceCollection);
 
             StreamProcessorStates = connection.Database.GetCollection<AbstractStreamProcessorState>(Constants.StreamProcessorStateCollection);
-            FilterDefinitions = connection.Database.GetCollection<FilterDefinition>(Constants.FilterDefinitionCollection);
+            StreamDefinitions = connection.Database.GetCollection<MongoDB.Streams.StreamDefinition>(Constants.StreamDefinitionCollection);
 
             CreateCollectionsAndIndexes();
         }
@@ -64,9 +63,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public IMongoCollection<AbstractStreamProcessorState> StreamProcessorStates { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMongoCollection{TDocument}" /> for <see cref="FilterDefinition" />.
+        /// Gets the <see cref="IMongoCollection{TDocument}" /> for <see cref="MongoDB.Streams.StreamDefinition" />.
         /// </summary>
-        public IMongoCollection<FilterDefinition> FilterDefinitions { get; }
+        public IMongoCollection<MongoDB.Streams.StreamDefinition> StreamDefinitions { get; }
 
         /// <summary>
         /// Gets the correct <see cref="IMongoCollection{TDocument}" /> for <see cref="Events.StreamEvent" />.
@@ -142,6 +141,28 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             scope == ScopeId.Default ? Task.FromResult(EventLog) : GetScopedEventLog(scope, cancellationToken);
 
         /// <summary>
+        /// Gets the correct Stream Definitions <see cref="IMongoCollection{TDocument}" /> for <see cref="MongoDB.Streams.StreamDefinition" />.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The collection.</returns>
+        public Task<IMongoCollection<MongoDB.Streams.StreamDefinition>> GetStreamDefinitionsCollection(ScopeId scope, CancellationToken cancellationToken) =>
+            scope == ScopeId.Default ? Task.FromResult(StreamDefinitions) : GetScopedStreamDefinitions(scope, cancellationToken);
+
+        /// <summary>
+        /// Gets the <see cref="IMongoCollection{T}" /> for the Stream Definitions.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>The <see cref="IMongoCollection{StreamEvent}" />.</returns>
+        public async Task<IMongoCollection<MongoDB.Streams.StreamDefinition>> GetScopedStreamDefinitions(ScopeId scope, CancellationToken cancellationToken)
+        {
+            var collection = _connection.Database.GetCollection<MongoDB.Streams.StreamDefinition>(Constants.CollectionNameForScopedStreamDefinitions(scope));
+            await CreateCollectionsIndexesForStreamDefinitionsAsync(collection, cancellationToken).ConfigureAwait(false);
+            return collection;
+        }
+
+        /// <summary>
         /// Gets the <see cref="IMongoCollection{ReceivedEvent}" /> that represents a collection of the events received from a microservice.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
@@ -215,9 +236,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         void CreateCollectionsAndIndexesForTypePartitionFilterDefinitions()
         {
-            FilterDefinitions.Indexes.CreateOne(new CreateIndexModel<FilterDefinition>(
-                Builders<FilterDefinition>.IndexKeys
-                    .Ascending(_ => _.FilterId)));
+            StreamDefinitions.Indexes.CreateOne(new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
+                Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
+                    .Ascending(_ => _.StreamId)));
         }
 
         async Task CreateCollectionsAndIndexesForStreamEventsAsync(IMongoCollection<Events.StreamEvent> stream, CancellationToken cancellationToken)
@@ -246,6 +267,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                     Builders<MongoDB.Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)
                         .Ascending(_ => _.Aggregate.TypeId)),
+                cancellationToken: cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task CreateCollectionsIndexesForStreamDefinitionsAsync(IMongoCollection<MongoDB.Streams.StreamDefinition> stream, CancellationToken cancellationToken)
+        {
+            await stream.Indexes.CreateOneAsync(
+                new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
+                    Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
+                        .Ascending(_ => _.StreamId),
+                    new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 

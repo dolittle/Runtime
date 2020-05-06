@@ -10,8 +10,8 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the state of an <see cref="AbstractStreamProcessor" />.
-    /// </summary> 
+    /// Represents the state of an <see cref="Runtime.Events.Processing.Streams.AbstractScopedStreamProcessor" />.
+    /// </summary>
     public class StreamProcessorState : AbstractStreamProcessorState
     {
         /// <summary>
