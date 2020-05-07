@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// Represents the base state of an <see cref="SubscriptionState" />.
     /// </summary>
     [BsonDiscriminator(RootClass = true, Required = true)]
-    [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.StreamProcessorState))]
+    [BsonKnownTypes(typeof(SubscriptionState))]
     [BsonIgnoreExtraElements]
     public abstract class AbstractSubscriptionState
     {
@@ -27,7 +27,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
         /// <param name="partitionId">The <see cref="Store.Streams.PartitionId" /> in the stream to subscribe to.</param>
         /// <param name="position">The position.</param>
-        /// <param name="partitioned">Wether it is partitioned.</param>
         protected AbstractSubscriptionState(
             Guid consumerTenantId,
             Guid producerMicroserviceId,
@@ -35,8 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Guid scope,
             Guid streamId,
             Guid partitionId,
-            ulong position,
-            bool partitioned)
+            ulong position)
         {
             ConsumerTenantId = consumerTenantId;
             ProducerMicroserviceId = producerMicroserviceId;
@@ -45,7 +43,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             StreamId = streamId;
             PartitionId = partitionId;
             Position = position;
-            Partitioned = partitioned;
         }
 
         /// <summary>
@@ -83,10 +80,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         [BsonRepresentation(BsonType.Decimal128)]
         public ulong Position { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the stream processor is processing a partitioned stream.
-        /// </summary>
-        public bool Partitioned { get; set; }
     }
 }
