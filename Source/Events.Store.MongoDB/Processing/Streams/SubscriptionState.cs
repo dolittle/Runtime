@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// <summary>
     /// Represents the state of an <see cref="SubscriptionState" />.
     /// </summary>
+    [BsonIgnoreExtraElements]
     public class SubscriptionState : AbstractSubscriptionState
     {
         /// <summary>

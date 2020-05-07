@@ -13,6 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
     /// <summary>
     /// Represents the state of a <see cref="Runtime.Events.Processing.Streams.Partitioned.ScopedStreamProcessor" />.
     /// </summary>
+    [BsonIgnoreExtraElements]
     public class PartitionedStreamProcessorState : AbstractStreamProcessorState
     {
         /// <summary>
