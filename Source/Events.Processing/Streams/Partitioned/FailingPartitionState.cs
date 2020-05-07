@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         public uint ProcessingAttempts { get; }
 
         /// <summary>
-        /// Gets the timestamp on when the partition failed.
+        /// Gets the <see cref="DateTimeOffset" /> for when this partition last failed.
         /// </summary>
         public DateTimeOffset LastFailed { get; }
     }
