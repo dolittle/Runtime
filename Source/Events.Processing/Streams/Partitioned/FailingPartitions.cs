@@ -99,7 +99,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         {
             var newFailingPartitions = oldState.FailingPartitions;
             newFailingPartitions.Remove(partition);
-            var newState = new StreamProcessorState(oldState.Position, newFailingPartitions);
+            var newState = new StreamProcessorState(oldState.Position, newFailingPartitions, oldState.LastSuccessfullyProcessed);
             oldState.FailingPartitions.Remove(partition);
 
             await PersistNewState(streamProcessorId, newState).ConfigureAwait(false);
@@ -117,7 +117,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             var newFailingPartitionState = new FailingPartitionState(position, retryTime, reason, processingAttempts, lastFailed);
             var newFailingPartitions = oldState.FailingPartitions;
             newFailingPartitions[partitionId] = newFailingPartitionState;
-            var newState = new StreamProcessorState(oldState.Position, newFailingPartitions);
+
+            var newState = position > oldState.FailingPartitions[partitionId].Position
+                ? new StreamProcessorState(oldState.Position, newFailingPartitions, DateTimeOffset.UtcNow)
+                : new StreamProcessorState(oldState.Position, newFailingPartitions, oldState.LastSuccessfullyProcessed);
 
             await PersistNewState(streamProcessorId, newState).ConfigureAwait(false);
 
