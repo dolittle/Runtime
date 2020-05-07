@@ -80,18 +80,38 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <inheritdoc/>
-        public async Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
+        public async Task Persist(IStreamProcessorId id, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
         {
             try
             {
-                // TODO: There are now two different collections for stream proecssor states. One for StreamProcessorId (Events.Processing) and one for SubscriptionId (EventHorizon)
-                var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
-                var state = await states.Find(
-                    _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
-                        & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
-                        & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
-                    .FirstOrDefaultAsync(cancellationToken)
-                    .ConfigureAwait(false);
+                if (streamProcessorState is Partitioned.StreamProcessorState)
+                {
+                    // do partionoed
+                }
+                else if (id is SubscriptionId subscriptionId)
+                {
+                    // like comment and subscribe
+                }
+                else 
+                {
+                    var streamProcessorId = id as StreamProcessorId;
+                    var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
+                    var state = await states.ReplaceOneAsync(
+                        _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
+                            & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
+                            & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value),
+                        streamProcessorState as MongoDB.Processing.Streams.StreamProcessorState,
+                        new ReplaceOptions { IsUpsert = true })
+                        .ConfigureAwait(false);
+
+                    // var state = await states.Find(
+                    //     _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
+                    //         & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
+                    //         & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
+                    //     .FirstOrDefaultAsync(cancellationToken)
+                    //     .ConfigureAwait(false);
+
+                }
             }
             catch (MongoWaitQueueFullException ex)
             {
