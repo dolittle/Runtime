@@ -16,7 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionState"/> class.
-        /// @joel should the partitioned allways be false? should it removed allthogether?.
         /// </summary>
         /// <param name="consumerTenantId">The consumer <see cref="TenantId" />.</param>
         /// <param name="producerMicroserviceId">The producer <see cref="Microservice" />.</param>
