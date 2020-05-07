@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         public IDictionary<PartitionId, FailingPartitionState> FailingPartitions { get; set; }
 
         /// <summary>
-        /// Gets the timestamp when the StreamProcessor has processed the stream.
+        /// Gets the <see cref="DateTimeOffset" /> for the last time when an Event in the Stream that the <see cref="ScopedStreamProcessor" /> processes was processed successfully
         /// </summary>
         public DateTimeOffset LastSuccessfullyProcessed { get; }
     }
