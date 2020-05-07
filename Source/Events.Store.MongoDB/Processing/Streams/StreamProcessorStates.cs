@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
@@ -106,23 +107,37 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             .ConfigureAwait(false);
                     }
                 }
-                else if (baseStreamProcessorState is Partitioned.StreamProcessorState partitionedStreamProcessorState)
+                else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedStreamProcessorState)
                 {
                     var streamProcessorId = id as StreamProcessorId;
                     var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var state = await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
-                        partitionedStreamProcessorState,
+                        new Partitioned.StreamProcessorState(
+                            streamProcessorId.ScopeId,
+                            streamProcessorId.EventProcessorId,
+                            streamProcessorId.SourceStreamId,
+                            partitionedStreamProcessorState.Position,
+                            partitionedStreamProcessorState.FailingPartitions.ToDictionary(
+                                kvp => kvp.Key.Value.ToString(),
+                                kvp => new FailingPartitionState(kvp.Value.Position, kvp.Value.RetryTime, kvp.Value.Reason, kvp.Value.ProcessingAttempts))),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
                 }
-                else if (baseStreamProcessorState is StreamProcessorState streamProcessorState)
+                else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState)
                 {
                     var streamProcessorId = id as StreamProcessorId;
                     var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var state = await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
-                        streamProcessorState,
+                        new StreamProcessorState(
+                            streamProcessorId.ScopeId,
+                            streamProcessorId.EventProcessorId,
+                            streamProcessorId.SourceStreamId,
+                            streamProcessorState.Position,
+                            streamProcessorState.RetryTime,
+                            streamProcessorState.FailureReason,
+                            streamProcessorState.ProcessingAttempts),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
                 }
