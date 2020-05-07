@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <returns>The converted <see cref="IStreamProcessorState" />.</returns>
         public static IStreamProcessorState ToRuntimeRepresentation(this AbstractStreamProcessorState state) =>
             state.Partitioned ?
-                (state as MongoDB.Processing.Streams.Partitioned.StreamProcessorState).ToPartitionedStreamProcessorState() as IStreamProcessorState
+                (state as MongoDB.Processing.Streams.Partitioned.PartitionedStreamProcessorState).ToPartitionedStreamProcessorState() as IStreamProcessorState
                 : (state as MongoDB.Processing.Streams.StreamProcessorState).ToUnpartitionedStreamProcessorState() as IStreamProcessorState;
     }
 }

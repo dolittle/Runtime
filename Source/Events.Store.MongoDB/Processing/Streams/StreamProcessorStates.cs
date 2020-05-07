@@ -73,7 +73,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
         /// <summary>
         /// Persist the <see cref="IStreamProcessorState" /> for <see cref="StreamProcessorId"/> and <see cref="SubscriptionId"/>.
-        /// Handles <see cref="Partitioned.StreamProcessorState"/> separately also.
+        /// Handles <see cref="Partitioned.PartitionedStreamProcessorState"/> separately also.
         /// IsUpsert option creates the document if one isn't found.
         /// </summary>
         /// <param name="id">The <see cref="StreamProcessorId" />.</param>
@@ -113,7 +113,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var state = await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
-                        new Partitioned.StreamProcessorState(
+                        new Partitioned.PartitionedStreamProcessorState(
                             streamProcessorId.ScopeId,
                             streamProcessorId.EventProcessorId,
                             streamProcessorId.SourceStreamId,
