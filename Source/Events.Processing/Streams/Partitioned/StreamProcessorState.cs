@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// </summary>
         /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
         /// <param name="failingPartitions">The <see cref="IDictionary{PartitionId, FailingPartitionState}">states of the failing partitions</see>.</param>
-        /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
+        /// <param name="lastSuccessfullyProcessed">The <see cref="DateTimeOffset" /> for the last time when an Event in the Stream that the <see cref="ScopedStreamProcessor" /> processes was processed successfully.</param>
         public StreamProcessorState(StreamPosition streamPosition, IDictionary<PartitionId, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
         {
             Position = streamPosition;
