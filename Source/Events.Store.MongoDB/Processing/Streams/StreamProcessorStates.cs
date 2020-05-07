@@ -49,13 +49,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 if (id is SubscriptionId subscriptionId)
                 {
                     var states = await _connection.GetSubscriptionStateCollection(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
-                    var persistedState = await states.Find(
-                        _subscriptionFilter.Eq(_ => _.ConsumerTenantId, subscriptionId.ConsumerTenantId.Value)
-                            & _subscriptionFilter.Eq(_ => _.ProducerMicroserviceId, subscriptionId.ProducerMicroserviceId.Value)
-                            & _subscriptionFilter.Eq(_ => _.ProducerTenantId, subscriptionId.ProducerTenantId.Value)
-                            & _subscriptionFilter.Eq(_ => _.ScopeId, subscriptionId.ScopeId.Value)
-                            & _subscriptionFilter.Eq(_ => _.StreamId, subscriptionId.StreamId.Value)
-                            & _subscriptionFilter.Eq(_ => _.PartitionId, subscriptionId.PartitionId.Value))
+                    var persistedState = await states.Find(CreateFilter(subscriptionId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
                     return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
@@ -64,10 +58,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 {
                     var streamProcessorId = id as StreamProcessorId;
                     var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
-                    var persistedState = await states.Find(
-                        _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
-                            & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
-                            & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
+                    var persistedState = await states.Find(CreateFilter(streamProcessorId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
                     return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
@@ -79,38 +70,65 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             }
         }
 
-        /// <inheritdoc/>
-        public async Task Persist(IStreamProcessorId id, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
+        /// <summary>
+        /// Persist the <see cref="IStreamProcessorState" /> for <see cref="StreamProcessorId"/> and <see cref="SubscriptionId"/>.
+        /// Handles <see cref="Partitioned.StreamProcessorState"/> separately also.
+        /// IsUpsert option creates the document if one isn't found.
+        /// </summary>
+        /// <param name="id">The <see cref="StreamProcessorId" />.</param>
+        /// <param name="baseStreamProcessorState">The <see cref="IStreamProcessorState" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
+        public async Task Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
         {
             try
             {
-                if (streamProcessorState is Partitioned.StreamProcessorState)
+                if (id is SubscriptionId subscriptionId)
                 {
-                    // do partionoed
+                    if (baseStreamProcessorState is StreamProcessorState streamProcessorState)
+                    {
+                        var replacementState = new SubscriptionState(
+                            subscriptionId.ConsumerTenantId,
+                            subscriptionId.ProducerMicroserviceId,
+                            subscriptionId.ProducerTenantId,
+                            subscriptionId.ScopeId,
+                            subscriptionId.StreamId,
+                            subscriptionId.PartitionId,
+                            streamProcessorState.Position,
+                            streamProcessorState.RetryTime,
+                            streamProcessorState.FailureReason,
+                            streamProcessorState.ProcessingAttempts);
+                        var states = await _connection.GetSubscriptionStateCollection(replacementState.ScopeId, cancellationToken).ConfigureAwait(false);
+                        var persistedState = await states.ReplaceOneAsync(
+                            CreateFilter(subscriptionId),
+                            replacementState,
+                            new ReplaceOptions { IsUpsert = true })
+                            .ConfigureAwait(false);
+                    }
                 }
-                else if (id is SubscriptionId subscriptionId)
-                {
-                    // like comment and subscribe
-                }
-                else 
+                else if (baseStreamProcessorState is Partitioned.StreamProcessorState partitionedStreamProcessorState)
                 {
                     var streamProcessorId = id as StreamProcessorId;
                     var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var state = await states.ReplaceOneAsync(
-                        _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
-                            & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
-                            & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value),
-                        streamProcessorState as MongoDB.Processing.Streams.StreamProcessorState,
+                        CreateFilter(streamProcessorId),
+                        partitionedStreamProcessorState,
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
-
-                    // var state = await states.Find(
-                    //     _streamProcessorFilter.Eq(_ => _.ScopeId, streamProcessorId.ScopeId.Value)
-                    //         & _streamProcessorFilter.Eq(_ => _.EventProcessorId, streamProcessorId.EventProcessorId.Value)
-                    //         & _streamProcessorFilter.Eq(_ => _.SourceStreamId, streamProcessorId.SourceStreamId.Value))
-                    //     .FirstOrDefaultAsync(cancellationToken)
-                    //     .ConfigureAwait(false);
-
+                }
+                else if (baseStreamProcessorState is StreamProcessorState streamProcessorState)
+                {
+                    var streamProcessorId = id as StreamProcessorId;
+                    var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
+                    var state = await states.ReplaceOneAsync(
+                        CreateFilter(streamProcessorId),
+                        streamProcessorState,
+                        new ReplaceOptions { IsUpsert = true })
+                        .ConfigureAwait(false);
+                }
+                else
+                {
+                    throw new CannotPersistStreamProcessorState(id, baseStreamProcessorState);
                 }
             }
             catch (MongoWaitQueueFullException ex)
@@ -118,5 +136,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
         }
+
+        FilterDefinition<AbstractStreamProcessorState> CreateFilter(StreamProcessorId id) =>
+            _streamProcessorFilter.Eq(_ => _.EventProcessorId, id.EventProcessorId.Value)
+                & _streamProcessorFilter.Eq(_ => _.ScopeId, id.SourceStreamId.Value)
+                & _streamProcessorFilter.Eq(_ => _.SourceStreamId, id.SourceStreamId.Value);
+
+        FilterDefinition<AbstractSubscriptionState> CreateFilter(SubscriptionId id) =>
+            _subscriptionFilter.Eq(_ => _.ConsumerTenantId, id.ConsumerTenantId.Value)
+                & _subscriptionFilter.Eq(_ => _.ProducerMicroserviceId, id.ProducerMicroserviceId.Value)
+                & _subscriptionFilter.Eq(_ => _.ProducerTenantId, id.ProducerTenantId.Value)
+                & _subscriptionFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
+                & _subscriptionFilter.Eq(_ => _.StreamId, id.StreamId.Value)
+                & _subscriptionFilter.Eq(_ => _.PartitionId, id.PartitionId.Value);
     }
 }
