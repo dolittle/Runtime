@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// Represents the base state of an <see cref="AbstractScopedStreamProcessor" />.
     /// </summary>
     [BsonDiscriminator(RootClass = true, Required = true)]
-    [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.StreamProcessorState))]
+    [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.PartitionedStreamProcessorState))]
     [BsonIgnoreExtraElements]
     public abstract class AbstractStreamProcessorState
     {

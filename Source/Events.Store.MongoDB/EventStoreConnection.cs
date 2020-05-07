@@ -323,8 +323,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
                     Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
-                        .Ascending(_ => _.StreamId),
-                    new CreateIndexOptions { Unique = true }),
+                        .Ascending(_ => _.StreamId)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
