@@ -100,7 +100,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             var scopeId = arguments.ScopeId.To<ScopeId>();
             var types = arguments.Types_.Select(_ => _.Id.To<ArtifactId>());
             var partitioned = arguments.Partitioned;
-
             if (targetStream.IsNonWriteable)
             {
                 _logger.Warning("Cannot register Event Handler: '{eventHandlerId}' because it is an invalid Stream Id", eventHandlerId);
@@ -112,7 +111,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
 
             var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(sourceStream, targetStream, types, partitioned);
-            var streamDefinition = new StreamDefinition(filterDefinition);
+            var filteredStreamDefinition = new StreamDefinition(filterDefinition);
             Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor = () => new TypeFilterWithEventSourcePartition(
                     scopeId,
                     filterDefinition,
@@ -121,14 +120,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             var successfullyRegisteredFilterStreamProcessor = _streamProcessors.TryRegister(
                 scopeId,
                 eventHandlerId,
-                streamDefinition,
+                new EventLogStreamDefinition(),
                 () => getFilterProcessor(),
                 context.CancellationToken,
                 out var filterStreamProcessor);
             var successfullyRegisteredEventProcessorStreamProcessor = _streamProcessors.TryRegister(
                 scopeId,
                 eventHandlerId,
-                streamDefinition,
+                filteredStreamDefinition,
                 () => new EventProcessor(
                     scopeId,
                     eventHandlerId,
@@ -163,7 +162,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 }
 
-                await _streamDefinitions.Persist(scopeId, streamDefinition, context.CancellationToken).ConfigureAwait(false);
+                await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, context.CancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

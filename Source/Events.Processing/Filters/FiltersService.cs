@@ -246,11 +246,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             where TConnectRequest : class
             where TResponse : class
         {
-            var streamDefinition = new StreamDefinition(filterDefinition);
+            var filteredStreamDefinition = new StreamDefinition(filterDefinition);
             var successfullyRegisteredFilter = _streamProcessors.TryRegister(
                 scopeId,
                 filterDefinition.TargetStream.Value,
-                streamDefinition,
+                new EventLogStreamDefinition(),
                 () => getFilterProcessor(),
                 cancellationToken,
                 out var filterStreamProcessor);
@@ -278,7 +278,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 }
 
-                await _streamDefinitions.Persist(scopeId, streamDefinition, cancellationToken).ConfigureAwait(false);
+                await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
