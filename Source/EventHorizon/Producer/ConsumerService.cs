@@ -115,13 +115,14 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 {
                     try
                     {
-                        var streamEvent = await publicEvents.FetchInPartition(partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
-                        if (streamEvent == default)
+                        var tryGetStreamEvent = await publicEvents.FetchInPartition(partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
+                        if (!tryGetStreamEvent.Success)
                         {
                             await Task.Delay(1000).ConfigureAwait(false);
                             continue;
                         }
 
+                        var streamEvent = tryGetStreamEvent.Result;
                         var eventHorizonEvent = new Contracts.EventHorizonEvent
                         {
                             Content = streamEvent.Event.Content,
