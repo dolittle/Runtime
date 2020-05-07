@@ -10,20 +10,20 @@ using Dolittle.Runtime.Events.Store.Streams.Filters;
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
-    /// Represents an implementation of <see cref="ICanValidateFilterFor{T}" /> that can validate a <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
+    /// Represents an implementation of <see cref="ICanValidateFilterFor{T}" /> that can validate a <see cref="FilterDefinition" />.
     /// </summary>
     [SingletonPerTenant]
-    public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
+    public class FilterValidator : ICanValidateFilterFor<FilterDefinition>
     {
         readonly IValidateFilterByComparingStreams _byComparingStreams;
         readonly ILogger _logger;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
+        /// Initializes a new instance of the <see cref="FilterValidator"/> class.
         /// </summary>
         /// <param name="byComparingStreams">The <see cref="IValidateFilterByComparingStreams" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public TypeFilterWithEventSourcePartitionValidator(
+        public FilterValidator(
             IValidateFilterByComparingStreams byComparingStreams,
             ILogger logger)
         {
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate(IFilterDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken) =>
+        public Task<FilterValidationResult> Validate(IFilterDefinition persistedDefinition, IFilterProcessor<FilterDefinition> filter, CancellationToken cancellationToken) =>
             _byComparingStreams.Validate(persistedDefinition, filter, cancellationToken);
     }
 }
