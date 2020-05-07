@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// <summary>
     /// Represents the state of an <see cref="Runtime.Events.Processing.Streams.AbstractScopedStreamProcessor" />.
     /// </summary>
+    [BsonIgnoreExtraElements]
     public class StreamProcessorState : AbstractStreamProcessorState
     {
         /// <summary>
