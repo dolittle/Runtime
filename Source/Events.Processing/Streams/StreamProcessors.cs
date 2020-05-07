@@ -58,40 +58,31 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         {
             streamProcessor = default;
             var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, streamDefinition.StreamId);
-            try
+            if (_streamProcessors.ContainsKey(streamProcessorId))
             {
-                if (!_streamProcessors.ContainsKey(streamProcessorId))
-                {
-                    _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
-                    return false;
-                }
-
-                streamProcessor = new StreamProcessor(
-                    streamProcessorId,
-                    _onAllTenants,
-                    streamDefinition,
-                    getEventProcessor,
-                    () => _streamProcessors.TryRemove(streamProcessorId, out var _),
-                    _getStreamProcessorStates,
-                    _getEventFetchers,
-                    _loggerManager,
-                    cancellationToken);
-                if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
-                {
-                    _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
-                    streamProcessor = default;
-                    return false;
-                }
-
-                _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", streamProcessorId);
-                return true;
+                _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
+                return false;
             }
-            catch (Exception ex)
+
+            streamProcessor = new StreamProcessor(
+                streamProcessorId,
+                _onAllTenants,
+                streamDefinition,
+                getEventProcessor,
+                () => _streamProcessors.TryRemove(streamProcessorId, out var _),
+                _getStreamProcessorStates,
+                _getEventFetchers,
+                _loggerManager,
+                cancellationToken);
+            if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
-                _logger.Warning(ex, "Failed to register Stream Processor with Id: '{streamProcessorId}' for Tenant: '{tenant}'", streamProcessorId);
+                _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
                 streamProcessor = default;
                 return false;
             }
+
+            _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", streamProcessorId);
+            return true;
         }
     }
 }
