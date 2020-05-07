@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
         /// <param name="position">The position.</param>
         /// <param name="retryTime">The time to retry processing.</param>
-        /// <param name="failureReason">THe reason for failing.</param>
+        /// <param name="failureReason">The reason for failing.</param>
         /// <param name="processingAttempts">The number of times the event at <see cref="AbstractStreamProcessorState.Position" /> has been processed.</param>
         public StreamProcessorState(Guid scopeId, Guid eventProcessorId, Guid sourceStreamId, ulong position, DateTimeOffset retryTime, string failureReason, uint processingAttempts)
             : base(scopeId, eventProcessorId, sourceStreamId, position, false)
