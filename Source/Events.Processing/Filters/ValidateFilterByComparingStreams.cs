@@ -65,8 +65,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 return new FilterValidationResult();
             }
 
-            var lastUnProcessedEventPosition = tryGetState.Result.Position;
-            if (lastUnProcessedEventPosition == 0)
+            var lastUnprocessedEventPosition = tryGetState.Result.Position;
+            if (lastUnprocessedEventPosition == 0)
             {
                 return new FilterValidationResult();
             }
@@ -75,12 +75,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var streamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
             var sourceStreamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, new EventLogStreamDefinition(), cancellationToken).ConfigureAwait(false);
             var oldStream = await streamEventsFetcher.FetchRange(
-                new StreamPositionRange(StreamPosition.Start, lastUnProcessedEventPosition),
+                new StreamPositionRange(StreamPosition.Start, uint.MaxValue),
                 cancellationToken)
                 .ConfigureAwait(false);
-            var lastUnprocessedEventLogEventPosition = oldStream.Last().Event.EventLogSequenceNumber;
             var sourceStreamEvents = await sourceStreamEventsFetcher.FetchRange(
-                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEventLogEventPosition),
+                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEventPosition),
                     cancellationToken)
                     .ConfigureAwait(false);
             var newStream = new List<StreamEvent>();
