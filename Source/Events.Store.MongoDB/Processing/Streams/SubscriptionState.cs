@@ -25,7 +25,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
         /// <param name="partitionId">The <see cref="Store.Streams.PartitionId" /> in the stream to subscribe to.</param>
         /// <param name="position">The position.</param>
-        /// <param name="partitioned">Wether it is partitioned.</param>
         /// <param name="retryTime">The time to retry processing.</param>
         /// <param name="failureReason">The reason for failing.</param>
         /// <param name="processingAttempts">The number of times the event at <see cref="AbstractSubscriptionState.Position" /> has been processed.</param>
@@ -37,11 +36,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Guid streamId,
             Guid partitionId,
             ulong position,
-            bool partitioned,
             DateTimeOffset retryTime,
             string failureReason,
             uint processingAttempts)
-            : base(consumerTenantId, producerMicroserviceId, producerTenantId, scope, streamId, partitionId, position, partitioned)
+            : base(consumerTenantId, producerMicroserviceId, producerTenantId, scope, streamId, partitionId, position)
         {
             RetryTime = retryTime;
             FailureReason = failureReason;
