@@ -16,20 +16,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Initializes a new instance of the <see cref="StreamProcessorState"/> class.
         /// </summary>
         /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
-        public StreamProcessorState(StreamPosition streamPosition)
-        {
-            IsFailing = false;
-            Position = streamPosition;
-            RetryTime = DateTimeOffset.UtcNow;
-            FailureReason = string.Empty;
-            ProcessingAttempts = 0;
-            LastSuccessfullyProcessed = DateTimeOffset.MinValue;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessorState"/> class.
-        /// </summary>
-        /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
         /// <param name="lastSuccessfullyProcessed">Timestamp of last successfull Stream process.</param>
         public StreamProcessorState(StreamPosition streamPosition, DateTimeOffset lastSuccessfullyProcessed)
         {
@@ -57,6 +43,20 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             FailureReason = failureReason;
             ProcessingAttempts = processingAttempts;
             LastSuccessfullyProcessed = lastSuccessfullyProcessed;
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamProcessorState"/> class.
+        /// </summary>
+        /// <param name="streamPosition">The <see cref="StreamPosition"/>position of the stream.</param>
+        StreamProcessorState(StreamPosition streamPosition)
+        {
+            IsFailing = false;
+            Position = streamPosition;
+            RetryTime = DateTimeOffset.UtcNow;
+            FailureReason = string.Empty;
+            ProcessingAttempts = 0;
+            LastSuccessfullyProcessed = DateTimeOffset.MinValue;
         }
 
         /// <summary>
