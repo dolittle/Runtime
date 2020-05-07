@@ -6,6 +6,7 @@ using Dolittle.Artifacts;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Services;
 using Machine.Specifications;
 using Moq;
