@@ -154,7 +154,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
         FilterDefinition<AbstractStreamProcessorState> CreateFilter(StreamProcessorId id) =>
             _streamProcessorFilter.Eq(_ => _.EventProcessorId, id.EventProcessorId.Value)
-                & _streamProcessorFilter.Eq(_ => _.ScopeId, id.SourceStreamId.Value)
+                & _streamProcessorFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
                 & _streamProcessorFilter.Eq(_ => _.SourceStreamId, id.SourceStreamId.Value);
 
         FilterDefinition<AbstractSubscriptionState> CreateFilter(SubscriptionId id) =>
