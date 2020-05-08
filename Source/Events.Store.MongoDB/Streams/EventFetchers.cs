@@ -33,6 +33,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 return await CreateStreamFetcherForEventLog(scopeId, cancellationToken).ConfigureAwait(false);
             }
 
+            if (streamDefinition.Public)
+            {
+                return CreateStreamFetcherForStreamEventCollection(
+                    await _connection.GetPublicStreamCollection(streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
+                    streamDefinition.StreamId);
+            }
+
             return CreateStreamFetcherForStreamEventCollection(
                 await _connection.GetStreamCollection(scopeId, streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
                 streamDefinition.StreamId);
