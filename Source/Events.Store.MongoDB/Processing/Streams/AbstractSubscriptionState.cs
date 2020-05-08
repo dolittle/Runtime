@@ -27,6 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
         /// <param name="partitionId">The <see cref="Store.Streams.PartitionId" /> in the stream to subscribe to.</param>
         /// <param name="position">The position.</param>
+        /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
         protected AbstractSubscriptionState(
             Guid consumerTenantId,
             Guid producerMicroserviceId,
@@ -34,7 +35,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Guid scope,
             Guid streamId,
             Guid partitionId,
-            ulong position)
+            ulong position,
+            DateTimeOffset lastSuccessfullyProcessed)
         {
             ConsumerTenantId = consumerTenantId;
             ProducerMicroserviceId = producerMicroserviceId;
@@ -43,6 +45,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             StreamId = streamId;
             PartitionId = partitionId;
             Position = position;
+            LastSuccessfullyProcessed = lastSuccessfullyProcessed;
         }
 
         /// <summary>
@@ -80,5 +83,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         [BsonRepresentation(BsonType.Decimal128)]
         public ulong Position { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
+        /// </summary>
+        [BsonRepresentation(BsonType.Document)]
+        public DateTimeOffset LastSuccessfullyProcessed { get; set; }
     }
 }

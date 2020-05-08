@@ -21,7 +21,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 state.Position,
                 state.FailureReason,
                 state.RetryTime,
-                state.ProcessingAttempts);
+                state.ProcessingAttempts,
+                state.LastSuccessfullyProcessed);
 
         /// <summary>
         /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.

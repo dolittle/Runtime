@@ -73,7 +73,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
             var oldState = currentState as StreamProcessorState;
-            var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1);
+            var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1, oldState.LastSuccessfullyProcessed);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }
@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
             var oldState = currentState as StreamProcessorState;
-            var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1);
+            var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1, oldState.LastSuccessfullyProcessed);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }
@@ -90,7 +90,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <inheritdoc/>
         protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
-            var newState = new StreamProcessorState(processedEvent.Position + 1);
+            var newState = new StreamProcessorState(processedEvent.Position + 1, DateTimeOffset.UtcNow);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }
