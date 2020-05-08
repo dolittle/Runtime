@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public async Task<SubscriptionResponse> HandleSubscription(SubscriptionId subscriptionId)
         {
-            if (!_subscriptions.HasSubscription(subscriptionId))
+            if (_subscriptions.HasSubscription(subscriptionId))
             {
                 _logger.Trace($"Already subscribed to subscription {subscriptionId}");
                 return new SuccessfulSubscriptionResponse();
