@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// Represents the state of an <see cref="SubscriptionState" />.
     /// </summary>
     [BsonIgnoreExtraElements]
-    public class SubscriptionState : AbstractSubscriptionState
+    public class SubscriptionState
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionState"/> class.
@@ -27,8 +27,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="position">The position.</param>
         /// <param name="retryTime">The time to retry processing.</param>
         /// <param name="failureReason">The reason for failing.</param>
-        /// <param name="processingAttempts">The number of times the event at <see cref="AbstractSubscriptionState.Position" /> has been processed.</param>
+        /// <param name="processingAttempts">The number of times the event at <see cref="SubscriptionState.Position" /> has been processed.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
+        /// <param name="isFailing">Whether the Stream Processor is failing.</param>
         public SubscriptionState(
             Guid consumerTenantId,
             Guid producerMicroserviceId,
@@ -40,13 +41,64 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             DateTimeOffset retryTime,
             string failureReason,
             uint processingAttempts,
-            DateTimeOffset lastSuccessfullyProcessed)
-            : base(consumerTenantId, producerMicroserviceId, producerTenantId, scope, streamId, partitionId, position, lastSuccessfullyProcessed)
+            DateTimeOffset lastSuccessfullyProcessed,
+            bool isFailing)
         {
+            ConsumerTenantId = consumerTenantId;
+            ProducerMicroserviceId = producerMicroserviceId;
+            ProducerTenantId = producerTenantId;
+            ScopeId = scope;
+            StreamId = streamId;
+            PartitionId = partitionId;
+            Position = position;
+            LastSuccessfullyProcessed = lastSuccessfullyProcessed;
             RetryTime = retryTime;
             FailureReason = failureReason;
             ProcessingAttempts = processingAttempts;
+            IsFailing = isFailing;
         }
+
+        /// <summary>
+        /// Gets or sets the consumer <see cref="TenantId" />.
+        /// </summary>
+        public Guid ConsumerTenantId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the producer <see cref="Microservice" />.
+        /// </summary>
+        public Guid ProducerMicroserviceId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the producer <see cref="TenantId" />.
+        /// </summary>
+        public Guid ProducerTenantId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="ScopeId" />.
+        /// </summary>
+        public Guid ScopeId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the public <see cref="Store.Streams.StreamId" />.
+        /// </summary>
+        public Guid StreamId { get; set; }
+
+        /// <summary>
+        /// Gets or setsthe <see cref="Store.Streams.PartitionId" /> in the public stream.
+        /// </summary>
+        public Guid PartitionId { get; set; }
+
+        /// <summary>
+        /// Gets or sets the position.
+        /// </summary>
+        [BsonRepresentation(BsonType.Decimal128)]
+        public ulong Position { get; set; }
+
+        /// <summary>
+        /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
+        /// </summary>
+        [BsonRepresentation(BsonType.Document)]
+        public DateTimeOffset LastSuccessfullyProcessed { get; set; }
 
         /// <summary>
         /// Gets or sets the retry time.
@@ -63,5 +115,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// Gets or sets the number of times that the event at position has been attempted processed.
         /// </summary>
         public uint ProcessingAttempts { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the Stream Processor is failing or not.
+        /// </summary>
+        public bool IsFailing { get; set; }
     }
 }
