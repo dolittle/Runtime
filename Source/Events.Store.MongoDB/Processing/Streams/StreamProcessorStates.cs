@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     public class StreamProcessorStates : IStreamProcessorStateRepository
     {
         readonly FilterDefinitionBuilder<AbstractStreamProcessorState> _streamProcessorFilter;
-        readonly FilterDefinitionBuilder<AbstractSubscriptionState> _subscriptionFilter;
+        readonly FilterDefinitionBuilder<SubscriptionState> _subscriptionFilter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public StreamProcessorStates(EventStoreConnection connection, ILogger logger)
         {
             _streamProcessorFilter = Builders<AbstractStreamProcessorState>.Filter;
-            _subscriptionFilter = Builders<AbstractSubscriptionState>.Filter;
+            _subscriptionFilter = Builders<SubscriptionState>.Filter;
             _connection = connection;
             _logger = logger;
         }
@@ -160,7 +160,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 & _streamProcessorFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
                 & _streamProcessorFilter.Eq(_ => _.SourceStreamId, id.SourceStreamId.Value);
 
-        FilterDefinition<AbstractSubscriptionState> CreateFilter(SubscriptionId id) =>
+        FilterDefinition<SubscriptionState> CreateFilter(SubscriptionId id) =>
             _subscriptionFilter.Eq(_ => _.ConsumerTenantId, id.ConsumerTenantId.Value)
                 & _subscriptionFilter.Eq(_ => _.ProducerMicroserviceId, id.ProducerMicroserviceId.Value)
                 & _subscriptionFilter.Eq(_ => _.ProducerTenantId, id.ProducerTenantId.Value)
