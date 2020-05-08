@@ -99,7 +99,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             streamProcessorState.RetryTime,
                             streamProcessorState.FailureReason,
                             streamProcessorState.ProcessingAttempts,
-                            streamProcessorState.LastSuccessfullyProcessed);
+                            streamProcessorState.LastSuccessfullyProcessed,
+                            streamProcessorState.IsFailing);
                         var states = await _connection.GetSubscriptionStateCollection(replacementState.ScopeId, cancellationToken).ConfigureAwait(false);
                         var persistedState = await states.ReplaceOneAsync(
                             CreateFilter(subscriptionId),
@@ -140,7 +141,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             streamProcessorState.RetryTime,
                             streamProcessorState.FailureReason,
                             streamProcessorState.ProcessingAttempts,
-                            streamProcessorState.LastSuccessfullyProcessed),
+                            streamProcessorState.LastSuccessfullyProcessed,
+                            streamProcessorState.IsFailing),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
                 }

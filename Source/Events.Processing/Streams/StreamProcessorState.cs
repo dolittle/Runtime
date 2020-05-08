@@ -35,9 +35,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="retryTime">The <see cref="DateTimeOffset" /> for when to retry processing.</param>
         /// <param name="processingAttempts">The number of times it has processed the Event at <see cref="Position" />.</param>
         /// <param name="lastSuccessfullyProcessed">Timestamp of last successfull Stream process.</param>
-        public StreamProcessorState(StreamPosition streamPosition, string failureReason, DateTimeOffset retryTime, uint processingAttempts, DateTimeOffset lastSuccessfullyProcessed)
+        /// <param name="isFailing">Whether the stream processor is failing.</param>
+        public StreamProcessorState(StreamPosition streamPosition, string failureReason, DateTimeOffset retryTime, uint processingAttempts, DateTimeOffset lastSuccessfullyProcessed, bool isFailing)
         {
-            IsFailing = true;
+            IsFailing = isFailing;
             Position = streamPosition;
             RetryTime = retryTime;
             FailureReason = failureReason;
