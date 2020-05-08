@@ -55,14 +55,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                         .ConfigureAwait(false);
                     return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
                 }
-                else
+                else if (id is StreamProcessorId streamProcessorId)
                 {
-                    var streamProcessorId = id as StreamProcessorId;
                     var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var persistedState = await states.Find(CreateFilter(streamProcessorId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
                     return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
+                }
+                else
+                {
+                    throw new StreamProcessorIdOfUnsupportedType(id);
                 }
             }
             catch (MongoWaitQueueFullException ex)
@@ -107,6 +110,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             new ReplaceOptions { IsUpsert = true })
                             .ConfigureAwait(false);
                     }
+                    else
+                    {
+                        throw new UnsupportedStreamProcessorStatewithSubscriptionId(subscriptionId, baseStreamProcessorState);
+                    }
                 }
                 else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedStreamProcessorState)
                 {
@@ -146,7 +153,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 }
                 else
                 {
-                    throw new CannotPersistStreamProcessorState(id, baseStreamProcessorState);
+                    throw new StreamProcessorStateOfUnsupportedType(id, baseStreamProcessorState);
                 }
             }
             catch (MongoWaitQueueFullException ex)
