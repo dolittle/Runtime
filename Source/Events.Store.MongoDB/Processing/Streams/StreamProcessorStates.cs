@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     public class StreamProcessorStates : IStreamProcessorStateRepository
     {
         readonly FilterDefinitionBuilder<AbstractStreamProcessorState> _streamProcessorFilter;
-        readonly FilterDefinitionBuilder<AbstractSubscriptionState> _subscriptionFilter;
+        readonly FilterDefinitionBuilder<SubscriptionState> _subscriptionFilter;
         readonly EventStoreConnection _connection;
         readonly ILogger _logger;
 
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public StreamProcessorStates(EventStoreConnection connection, ILogger logger)
         {
             _streamProcessorFilter = Builders<AbstractStreamProcessorState>.Filter;
-            _subscriptionFilter = Builders<AbstractSubscriptionState>.Filter;
+            _subscriptionFilter = Builders<SubscriptionState>.Filter;
             _connection = connection;
             _logger = logger;
         }
@@ -55,14 +55,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                         .ConfigureAwait(false);
                     return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
                 }
-                else
+                else if (id is StreamProcessorId streamProcessorId)
                 {
-                    var streamProcessorId = id as StreamProcessorId;
                     var states = await _connection.GetStreamProcessorStateCollection(streamProcessorId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var persistedState = await states.Find(CreateFilter(streamProcessorId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
                     return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
+                }
+                else
+                {
+                    throw new StreamProcessorIdOfUnsupportedType(id);
                 }
             }
             catch (MongoWaitQueueFullException ex)
@@ -108,6 +111,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             new ReplaceOptions { IsUpsert = true })
                             .ConfigureAwait(false);
                     }
+                    else
+                    {
+                        throw new UnsupportedStreamProcessorStatewithSubscriptionId(subscriptionId, baseStreamProcessorState);
+                    }
                 }
                 else if (baseStreamProcessorState is Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState partitionedStreamProcessorState)
                 {
@@ -148,7 +155,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 }
                 else
                 {
-                    throw new CannotPersistStreamProcessorState(id, baseStreamProcessorState);
+                    throw new StreamProcessorStateOfUnsupportedType(id, baseStreamProcessorState);
                 }
             }
             catch (MongoWaitQueueFullException ex)
@@ -162,7 +169,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 & _streamProcessorFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
                 & _streamProcessorFilter.Eq(_ => _.SourceStreamId, id.SourceStreamId.Value);
 
-        FilterDefinition<AbstractSubscriptionState> CreateFilter(SubscriptionId id) =>
+        FilterDefinition<SubscriptionState> CreateFilter(SubscriptionId id) =>
             _subscriptionFilter.Eq(_ => _.ConsumerTenantId, id.ConsumerTenantId.Value)
                 & _subscriptionFilter.Eq(_ => _.ProducerMicroserviceId, id.ProducerMicroserviceId.Value)
                 & _subscriptionFilter.Eq(_ => _.ProducerTenantId, id.ProducerTenantId.Value)
