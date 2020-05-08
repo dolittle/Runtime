@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var streamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
             var sourceStreamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, new EventLogStreamDefinition(), cancellationToken).ConfigureAwait(false);
             var oldStream = await streamEventsFetcher.FetchRange(
-                new StreamPositionRange(StreamPosition.Start, uint.MaxValue),
+                new StreamPositionRange(StreamPosition.Start, ulong.MaxValue),
                 cancellationToken)
                 .ConfigureAwait(false);
             var sourceStreamEvents = await sourceStreamEventsFetcher.FetchRange(
