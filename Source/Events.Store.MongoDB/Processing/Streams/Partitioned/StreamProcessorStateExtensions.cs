@@ -21,11 +21,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
             new Runtime.Events.Processing.Streams.Partitioned.FailingPartitionState(state.Position, state.RetryTime, state.Reason, state.ProcessingAttempts, state.LastFailed);
 
         /// <summary>
-        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.
+        /// Converts the <see cref="PartitionedStreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.
         /// </summary>
-        /// <param name="state">The <see cref="StreamProcessorState" />.</param>
+        /// <param name="state">The <see cref="PartitionedStreamProcessorState" />.</param>
         /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.</returns>
-        public static Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState ToPartitionedStreamProcessorState(this MongoDB.Processing.Streams.Partitioned.StreamProcessorState state) =>
+        public static Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState ToPartitionedStreamProcessorState(this MongoDB.Processing.Streams.Partitioned.PartitionedStreamProcessorState state) =>
             new Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState(
                 state.Position,
                 state.FailingPartitions.ToDictionary(_ => new PartitionId { Value = Guid.Parse(_.Key) }, _ => _.Value.ToRuntimeRepresentation()),

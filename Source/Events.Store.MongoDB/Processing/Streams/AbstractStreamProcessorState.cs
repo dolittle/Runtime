@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// Represents the base state of an <see cref="AbstractScopedStreamProcessor" />.
     /// </summary>
     [BsonDiscriminator(RootClass = true, Required = true)]
-    [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.StreamProcessorState))]
+    [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.PartitionedStreamProcessorState))]
     [BsonIgnoreExtraElements]
     public abstract class AbstractStreamProcessorState
     {
@@ -25,7 +25,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="position">The position.</param>
         /// <param name="partitioned">Whether it is partitioned.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
-        protected AbstractStreamProcessorState(Guid scopeId, Guid eventProcessorId, Guid sourceStreamId, ulong position, bool partitioned, DateTimeOffset lastSuccessfullyProcessed)
+        protected AbstractStreamProcessorState(
+            Guid scopeId,
+            Guid eventProcessorId,
+            Guid sourceStreamId,
+            ulong position,
+            bool partitioned,
+            DateTimeOffset lastSuccessfullyProcessed)
         {
             ScopeId = scopeId;
             EventProcessorId = eventProcessorId;
