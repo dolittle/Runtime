@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     {
         /// <summary>
         /// Converts the <see cref="SubscriptionState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" />
-        /// as the SubscriptionStates are represented by an unpartioned StreamProcesssorState in the runtime.
+        /// as the SubscriptionStates are represented by an unpartitioned Stream Processsor State in the runtime.
         /// </summary>
         /// <param name="state">The <see cref="StreamProcessorState" />.</param>
         /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.</returns>
@@ -21,7 +21,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 state.Position,
                 state.FailureReason,
                 state.RetryTime,
-                state.ProcessingAttempts);
+                state.ProcessingAttempts,
+                state.LastSuccessfullyProcessed);
 
         /// <summary>
         /// Converts the <see cref="AbstractSubscriptionState" /> to the runtime representation of

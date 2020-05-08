@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             var streamProcessorState = currentState as StreamProcessorState;
             if (streamProcessorState.FailingPartitions.Keys.Contains(@event.Partition))
             {
-                var newState = new StreamProcessorState(@event.Position + 1, streamProcessorState.FailingPartitions);
+                var newState = new StreamProcessorState(@event.Position + 1, streamProcessorState.FailingPartitions, streamProcessorState.LastSuccessfullyProcessed);
                 await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
                 return newState;
             }
@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         protected override async Task<IStreamProcessorState> OnSuccessfulProcessingResult(SuccessfulProcessing successfulProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
             var oldState = currentState as StreamProcessorState;
-            var newState = new StreamProcessorState(processedEvent.Position + 1, oldState.FailingPartitions);
+            var newState = new StreamProcessorState(processedEvent.Position + 1, oldState.FailingPartitions, DateTimeOffset.UtcNow);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }

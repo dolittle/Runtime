@@ -98,7 +98,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             streamProcessorState.Position,
                             streamProcessorState.RetryTime,
                             streamProcessorState.FailureReason,
-                            streamProcessorState.ProcessingAttempts);
+                            streamProcessorState.ProcessingAttempts,
+                            streamProcessorState.LastSuccessfullyProcessed);
                         var states = await _connection.GetSubscriptionStateCollection(replacementState.ScopeId, cancellationToken).ConfigureAwait(false);
                         var persistedState = await states.ReplaceOneAsync(
                             CreateFilter(subscriptionId),
@@ -120,7 +121,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             partitionedStreamProcessorState.Position,
                             partitionedStreamProcessorState.FailingPartitions.ToDictionary(
                                 kvp => kvp.Key.Value.ToString(),
-                                kvp => new FailingPartitionState(kvp.Value.Position, kvp.Value.RetryTime, kvp.Value.Reason, kvp.Value.ProcessingAttempts))),
+                                kvp => new FailingPartitionState(kvp.Value.Position, kvp.Value.RetryTime, kvp.Value.Reason, kvp.Value.ProcessingAttempts, kvp.Value.LastFailed)),
+                            partitionedStreamProcessorState.LastSuccessfullyProcessed),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
                 }
@@ -137,7 +139,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             streamProcessorState.Position,
                             streamProcessorState.RetryTime,
                             streamProcessorState.FailureReason,
-                            streamProcessorState.ProcessingAttempts),
+                            streamProcessorState.ProcessingAttempts,
+                            streamProcessorState.LastSuccessfullyProcessed),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
                 }
