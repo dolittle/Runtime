@@ -13,6 +13,7 @@ using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
 using Google.Protobuf.WellKnownTypes;
@@ -31,7 +32,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         readonly IExecutionContextManager _executionContextManager;
         readonly EventHorizonConsentsConfiguration _eventHorizonConsents;
         readonly ITenants _tenants;
-        readonly FactoryFor<IFetchEventsFromPublicStreams> _getEventsFromPublicStreamsFetcher;
+        readonly FactoryFor<IEventFetchers> _getEventFetchers;
         readonly ILogger _logger;
 
         bool _disposed;
@@ -43,21 +44,21 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="eventHorizonConsents">The <see cref="EventHorizonConsentsConfiguration" />.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
-        /// <param name="getEventsFromPublicStreamsFetcher">The <see cref="FactoryFor{T}" /> <see cref="IFetchEventsFromPublicStreams" />.</param>
+        /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConsumerService(
             BoundedContextConfiguration boundedContextConfiguration,
             IExecutionContextManager executionContextManager,
             EventHorizonConsentsConfiguration eventHorizonConsents,
             ITenants tenants,
-            FactoryFor<IFetchEventsFromPublicStreams> getEventsFromPublicStreamsFetcher,
+            FactoryFor<IEventFetchers> getEventFetchers,
             ILogger<ConsumerService> logger)
         {
             _thisMicroservice = boundedContextConfiguration.BoundedContext;
             _executionContextManager = executionContextManager;
             _eventHorizonConsents = eventHorizonConsents;
             _tenants = tenants;
-            _getEventsFromPublicStreamsFetcher = getEventsFromPublicStreamsFetcher;
+            _getEventFetchers = getEventFetchers;
             _logger = logger;
         }
 
@@ -105,20 +106,16 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     _thisMicroservice,
                     producerTenant,
                     _executionContextManager.Current.CorrelationId);
-                var publicEvents = _getEventsFromPublicStreamsFetcher();
+                var publicEvents = await _getEventFetchers().GetPartitionedFetcherFor(
+                    ScopeId.Default,
+                    new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, publicStream)),
+                    context.CancellationToken).ConfigureAwait(false);
                 while (!context.CancellationToken.IsCancellationRequested
                     && !_disposed)
                 {
                     try
                     {
-                        var streamPosition = await publicEvents.FindNext(publicStream, partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
-                        if (streamPosition == uint.MaxValue)
-                        {
-                            await Task.Delay(1000).ConfigureAwait(false);
-                            continue;
-                        }
-
-                        var streamEvent = await publicEvents.Fetch(publicStream, streamPosition, context.CancellationToken).ConfigureAwait(false);
+                        var streamEvent = await publicEvents.FetchInPartition(partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
                         if (streamEvent == default)
                         {
                             await Task.Delay(1000).ConfigureAwait(false);
@@ -135,10 +132,11 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                                 {
                                     Generation = streamEvent.Event.Type.Generation,
                                     Id = streamEvent.Event.Type.Id.ToProtobuf()
-                                }
+                                },
+                            StreamSequenceNumber = streamEvent.Position
                         };
                         await responseStream.WriteAsync(new Contracts.SubscriptionMessage { Event = eventHorizonEvent }).ConfigureAwait(false);
-                        publicStreamPosition = streamPosition.Increment();
+                        publicStreamPosition = streamEvent.Position + 1;
                     }
                     catch (EventStoreUnavailable)
                     {

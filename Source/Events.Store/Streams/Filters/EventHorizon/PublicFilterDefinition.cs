@@ -1,12 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Concepts;
+
 namespace Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon
 {
     /// <summary>
     /// Represents an implementation of <see cref="IFilterDefinition" /> for a public filter.
     /// </summary>
-    public class PublicFilterDefinition : IFilterDefinition
+    public class PublicFilterDefinition : Value<PublicFilterDefinition>, IFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicFilterDefinition"/> class.

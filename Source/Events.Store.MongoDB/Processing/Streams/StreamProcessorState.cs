@@ -2,76 +2,59 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.Options;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the state of an <see cref="StreamProcessor" />.
-    /// BsonIgnoreExtraElements is used so that we don't deserialize the '_id' from MongoDB as it's not a property in the class.
+    /// Represents the state of an <see cref="Runtime.Events.Processing.Streams.AbstractScopedStreamProcessor" />.
     /// </summary>
     [BsonIgnoreExtraElements]
-    public class StreamProcessorState
+    public class StreamProcessorState : AbstractStreamProcessorState
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessorState"/> class.
         /// </summary>
         /// <param name="scopeId">The <see cref="ScopeId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
-        /// <param name="sourceStreamId">The <see cref="SourceStreamId" />.</param>
+        /// <param name="sourceStreamId">The <see cref="StreamId" />.</param>
         /// <param name="position">The position.</param>
-        /// <param name="failingPartitions">The states of the failing partitions.</param>
-        public StreamProcessorState(Guid scopeId, Guid eventProcessorId, Guid sourceStreamId, ulong position, IDictionary<string, FailingPartitionState> failingPartitions)
+        /// <param name="retryTime">The time to retry processing.</param>
+        /// <param name="failureReason">The reason for failing.</param>
+        /// <param name="processingAttempts">The number of times the event at <see cref="AbstractStreamProcessorState.Position" /> has been processed.</param>
+        /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
+        /// <param name="isFailing">Whether the stream processor is failing.</param>
+        public StreamProcessorState(Guid scopeId, Guid eventProcessorId, Guid sourceStreamId, ulong position, DateTimeOffset retryTime, string failureReason, uint processingAttempts, DateTimeOffset lastSuccessfullyProcessed, bool isFailing)
+            : base(scopeId, eventProcessorId, sourceStreamId, position, false, lastSuccessfullyProcessed)
         {
-            ScopeId = scopeId;
-            EventProcessorId = eventProcessorId;
-            SourceStreamId = sourceStreamId;
-            Position = position;
-            FailingPartitions = failingPartitions;
+            RetryTime = retryTime;
+            FailureReason = failureReason;
+            ProcessingAttempts = processingAttempts;
+            IsFailing = isFailing;
         }
 
         /// <summary>
-        /// Gets or sets the scope id.
+        /// Gets or sets the retry time.
         /// </summary>
-        public Guid ScopeId { get; set; }
+        [BsonRepresentation(BsonType.Document)]
+        public DateTimeOffset RetryTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the event processor id.
+        /// Gets or sets the reason for failure.
         /// </summary>
-        public Guid EventProcessorId { get; set; }
+        public string FailureReason { get; set; }
 
         /// <summary>
-        /// Gets or sets the source stream id.
+        /// Gets or sets the number of times that the event at position has been attempted processed.
         /// </summary>
-        public Guid SourceStreamId { get; set; }
+        public uint ProcessingAttempts { get; set; }
 
         /// <summary>
-        /// Gets or sets the position.
+        /// Gets or sets a value indicating whether the Stream Processor is failing or not.
         /// </summary>
-        [BsonRepresentation(BsonType.Decimal128)]
-        public ulong Position { get; set; }
-
-        /// <summary>
-        /// Gets or sets the failing partitions.
-        /// </summary>
-        [BsonDictionaryOptions(DictionaryRepresentation.Document)]
-        public IDictionary<string, FailingPartitionState> FailingPartitions { get; set; }
-
-        /// <summary>
-        /// Creates a new, initial, <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" /> from a <see cref="Runtime.Events.Processing.EventProcessorId" />.
-        /// </summary>
-        /// <param name="id">The <see cref="StreamProcessorId" />.</param>
-        /// <returns>The new initial <see cref="StreamProcessorState" />.</returns>
-        public static StreamProcessorState NewFromId(Runtime.Events.Processing.Streams.StreamProcessorId id) =>
-            new StreamProcessorState(
-                id.ScopeId,
-                id.EventProcessorId,
-                id.SourceStreamId,
-                0,
-                new Dictionary<string, FailingPartitionState>());
+        public bool IsFailing { get; set; }
     }
 }

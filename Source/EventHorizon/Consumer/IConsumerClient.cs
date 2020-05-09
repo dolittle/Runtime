@@ -14,8 +14,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Handles a subscription request.
         /// </summary>
-        /// <param name="subscription">The <see cref="Subscription" />.</param>
+        /// <param name="subscriptionId">The <see cref="SubscriptionId" />.</param>
         /// <returns>The <see cref="SubscriptionResponse" />.</returns>
-        Task<SubscriptionResponse> HandleSubscription(Subscription subscription);
+        Task<SubscriptionResponse> HandleSubscription(SubscriptionId subscriptionId);
     }
 }

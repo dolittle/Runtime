@@ -66,8 +66,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="event">The <see cref="Event" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <returns>The converted <see cref="StreamEvent" />.</returns>
-        public static Runtime.Events.Store.Streams.StreamEvent ToRuntimeStreamEvent(this MongoDB.Events.StreamEvent @event, StreamId stream) =>
-            new Runtime.Events.Store.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition);
+        public static Store.Streams.StreamEvent ToRuntimeStreamEvent(this MongoDB.Events.StreamEvent @event, StreamId stream) =>
+            new Store.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition);
 
         /// <summary>
         /// Converts a <see cref="CommittedEvent" /> to <see cref="Event" />.

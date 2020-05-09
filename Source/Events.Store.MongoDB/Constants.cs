@@ -26,14 +26,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public const string AggregateRootInstanceCollection = "aggregates";
 
         /// <summary>
-        /// The collection name where type partition filters are stored.
-        /// </summary>
-        public const string FilterDefinitionCollection = "filters";
-
-        /// <summary>
         /// Gets the collection name where events in the event log are stored.
         /// </summary>
         public const string EventLogCollection = "event-log";
+
+        /// <summary>
+        /// Gets the collection name where the stream definitions are stored.
+        /// </summary>
+        public const string StreamDefinitionCollection = "stream-definitions";
+
+        /// <summary>
+        /// The collection name for subscription states.
+        /// </summary>
+        public const string SubscriptionStateCollection = "subscription-states";
 
         /// <summary>
         /// Gets the collection name for a stream.
@@ -54,7 +59,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <returns>The scoped event log stream collection name.</returns>
-        public static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-event-log";
+        public static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-{EventLogCollection}";
+
+        /// <summary>
+        /// Gets the collection name for scoped stream definitions.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <returns>The scoped event log stream collection name.</returns>
+        public static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope}-{StreamDefinitionCollection}";
 
         /// <summary>
         /// Gets the collection name for scoped stream.
@@ -70,5 +82,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <returns>The scoped StreamProcessorStates collection name.</returns>
         public static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{scope}-{StreamProcessorStateCollection}";
+
+        /// <summary>
+        /// Gets the collection name for scoped SubscriptionStates.
+        /// </summary>
+        /// <param name="scope">The <see cref="ScopeId" />.</param>
+        /// <returns>The scoped SubscriptionStateCollection name.</returns>
+        public static string CollectionNameForScopedSubscriptionStates(ScopeId scope) => $"x-{scope}-{SubscriptionStateCollection}";
     }
 }

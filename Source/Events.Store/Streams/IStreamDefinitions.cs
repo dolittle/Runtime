@@ -3,30 +3,32 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
-    /// Defines a system that knows about <see cref="StreamDefinition" /> stream definitions.
+    /// Defines a system that knows about <see cref="IStreamDefinition" /> for <see cref="ITenants" />.
     /// </summary>
     public interface IStreamDefinitions
     {
         /// <summary>
-        /// Checks whether there is a persisted <see cref="StreamDefinition" />.
+        /// Try to get the shared <see cref="IStreamDefinition" /> for <see cref="ITenants.All" />.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="stream">The <see cref="StreamId" />.</param>
+        /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns a value indicating whether there is a <see cref="StreamDefinition" /> persisted.</returns>
-        Task<bool> HasFor(ScopeId scope, StreamId stream, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="Try{TResult}" /> with <see cref="IStreamDefinition" /> result.</returns>
+        Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId streamId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Gets the persisted <see cref="StreamDefinition" />.
+        /// Persists an <see cref="IStreamDefinition" /> for <see cref="ITenants.All" />.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="stream">The <see cref="StreamId" />.</param>
+        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="StreamDefinition" />.</returns>
-        Task<StreamDefinition> GetFor(ScopeId scope, StreamId stream, CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
+        Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken);
     }
 }

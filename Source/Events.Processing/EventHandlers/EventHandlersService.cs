@@ -16,7 +16,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
@@ -28,44 +27,42 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventHandlersService : EventHandlersBase
     {
-        readonly IPerformActionOnAllTenants _onAllTenants;
-        readonly IRegisterStreamProcessorForAllTenants _streamProcessorForAllTenants;
+        readonly IValidateFilterForAllTenants _filterForAllTenants;
+        readonly IStreamProcessors _streamProcessors;
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
-        readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitionRepository;
-        readonly IFilterValidators _filterValidators;
+        readonly IStreamDefinitions _streamDefinitions;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly IExecutionContextManager _executionContextManager;
+        readonly ILoggerManager _loggerManager;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
         /// </summary>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-        /// <param name="streamProcessorForAllTenants">The <see cref="IRegisterStreamProcessorForAllTenants" />.</param>
+        /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
+        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> <see cref="IWriteEventsToStreams" />.</param>
-        /// <param name="getStreamDefinitionRepository">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitionRepository" />.</param>
-        /// <param name="filterValidators">The <see cref="IFilterValidators" />.</param>
+        /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+        /// <param name="loggerManager">The <see cref="ILoggerManager"/>.</param>
         public EventHandlersService(
-            IPerformActionOnAllTenants onAllTenants,
-            IRegisterStreamProcessorForAllTenants streamProcessorForAllTenants,
+            IValidateFilterForAllTenants filterForAllTenants,
+            IStreamProcessors streamProcessors,
             FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
-            FactoryFor<IStreamDefinitionRepository> getStreamDefinitionRepository,
-            IFilterValidators filterValidators,
+            IStreamDefinitions streamDefinitions,
             IReverseCallDispatchers reverseCallDispatchers,
             IExecutionContextManager executionContextManager,
-            ILogger<EventHandlersService> logger)
+            ILoggerManager loggerManager)
         {
-            _onAllTenants = onAllTenants;
-            _streamProcessorForAllTenants = streamProcessorForAllTenants;
+            _filterForAllTenants = filterForAllTenants;
+            _streamProcessors = streamProcessors;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
-            _getStreamDefinitionRepository = getStreamDefinitionRepository;
-            _filterValidators = filterValidators;
+            _streamDefinitions = streamDefinitions;
             _reverseCallDispatchers = reverseCallDispatchers;
             _executionContextManager = executionContextManager;
-            _logger = logger;
+            _loggerManager = loggerManager;
+            _logger = loggerManager.CreateLogger<EventHandlersService>();
         }
 
         /// <inheritdoc/>
@@ -97,7 +94,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _executionContextManager.CurrentFor(dispatcher.Arguments.CallContext.ExecutionContext);
             var arguments = dispatcher.Arguments;
 
-            var sourceStream = StreamId.AllStreamId;
+            var sourceStream = StreamId.EventLog;
             var eventHandlerId = arguments.EventHandlerId.To<EventProcessorId>();
             StreamId targetStream = eventHandlerId.Value;
             var scopeId = arguments.ScopeId.To<ScopeId>();
@@ -115,38 +112,70 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
 
             var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(sourceStream, targetStream, types, partitioned);
-            using var eventHandlerRegistration = new EventHandlerRegistration(
+            var streamDefinition = new StreamDefinition(filterDefinition);
+            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor = () => new TypeFilterWithEventSourcePartition(
+                    scopeId,
+                    filterDefinition,
+                    _getEventsToStreamsWriter(),
+                    _loggerManager.CreateLogger<TypeFilterWithEventSourcePartition>());
+            var successfullyRegisteredFilterStreamProcessor = _streamProcessors.TryRegister(
                 scopeId,
                 eventHandlerId,
-                filterDefinition,
-                () => Task.FromResult<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>(new TypeFilterWithEventSourcePartition(
-                                        scopeId,
-                                        filterDefinition,
-                                        _getEventsToStreamsWriter(),
-                                        _logger)),
-                () => Task.FromResult<IEventProcessor>(new EventProcessor(scopeId, eventHandlerId, dispatcher, _logger)),
-                _onAllTenants,
-                _streamProcessorForAllTenants,
-                _getStreamDefinitionRepository,
-                _filterValidators,
-                context.CancellationToken);
+                streamDefinition,
+                () => getFilterProcessor(),
+                context.CancellationToken,
+                out var filterStreamProcessor);
+            var successfullyRegisteredEventProcessorStreamProcessor = _streamProcessors.TryRegister(
+                scopeId,
+                eventHandlerId,
+                streamDefinition,
+                () => new EventProcessor(
+                    scopeId,
+                    eventHandlerId,
+                    dispatcher,
+                    _loggerManager.CreateLogger<EventProcessor>()),
+                context.CancellationToken,
+                out var eventProcessorStreamProcessor);
+
+            if (!successfullyRegisteredFilterStreamProcessor || !successfullyRegisteredEventProcessorStreamProcessor)
+            {
+                _logger.Warning("Failed during registration of Event Handler: '{eventHandlerId}'. Already registered", eventHandlerId);
+                var failure = new Failure(
+                    EventHandlersFailures.FailedToRegisterEventHandler,
+                    $"Failed during registration of Event Handler: '{eventHandlerId}'. Already registered");
+
+                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
+                return;
+            }
+
+            Task runningDispatcher;
             try
             {
-                var registrationResult = await eventHandlerRegistration.Register().ConfigureAwait(false);
-                if (!registrationResult.Succeeded)
-                {
-                    _logger.Warning("Failed during registration of Event Handler: '{eventHandlerId}'. {reason}", eventHandlerId, registrationResult.FailureReason);
-                    var failure = new Failure(
-                        EventHandlersFailures.FailedToRegisterEventHandler,
-                        $"Failed during registration of Event Handler: '{eventHandlerId}'. {registrationResult.FailureReason}");
+                await filterStreamProcessor.Initialize().ConfigureAwait(false);
+                await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
+                runningDispatcher = dispatcher.Accept(new EventHandlerRegistrationResponse(), context.CancellationToken);
+                var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, context.CancellationToken).ConfigureAwait(false);
 
-                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                }
-                else
+                if (filterValidationResults.Any(_ => !_.Value.Succeeded))
                 {
-                    await eventHandlerRegistration.Complete().ConfigureAwait(false);
-                    await dispatcher.Accept(new EventHandlerRegistrationResponse(), context.CancellationToken).ConfigureAwait(false);
+                    var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
+                    _logger.Warning("Failed to register EventHandler: {eventHandlerId}. Filter validation failed. {reason}", eventHandlerId, firstFailedValidation.FailureReason);
+                    throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 }
+
+                await _streamDefinitions.Persist(scopeId, streamDefinition, context.CancellationToken).ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "Error while registering Event Handler: {eventHandlerId}", eventHandlerId);
+                filterStreamProcessor.Unregister();
+                eventProcessorStreamProcessor.Unregister();
+                throw;
+            }
+
+            try
+            {
+                await Task.WhenAny(filterStreamProcessor.Start(), eventProcessorStreamProcessor.Start(), runningDispatcher).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -154,8 +183,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     _logger.Debug(ex, "Event Handler: '{eventHandlerId}' stopped", eventHandlerId);
                 }
-
-                if (!eventHandlerRegistration.Completed) await eventHandlerRegistration.Fail().ConfigureAwait(false);
             }
             finally
             {

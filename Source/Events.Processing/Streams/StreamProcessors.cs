@@ -4,86 +4,93 @@
 using System;
 using System.Collections.Concurrent;
 using System.Threading;
-using Dolittle.Execution;
+using Dolittle.DependencyInversion;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
     /// Represents an implementation of <see cref="IStreamProcessors" />.
     /// </summary>
-    [SingletonPerTenant]
+    [Singleton]
     public class StreamProcessors : IStreamProcessors
     {
+        readonly IPerformActionOnAllTenants _onAllTenants;
+        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
         readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
-        readonly IStreamProcessorStateRepository _streamProcessorStateRepository;
-        readonly IExecutionContextManager _executionContextManager;
+        readonly FactoryFor<IEventFetchers> _getEventFetchers;
+        readonly ILoggerManager _loggerManager;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessors"/> class.
         /// </summary>
-        /// <param name="streamProcessorStateRepository">The <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
+        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
+        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
+        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         public StreamProcessors(
-            IStreamProcessorStateRepository streamProcessorStateRepository,
-            IExecutionContextManager executionContextManager,
-            ILogger logger)
+            IPerformActionOnAllTenants onAllTenants,
+            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
+            FactoryFor<IEventFetchers> getEventFetchers,
+            ILoggerManager loggerManager)
         {
+            _onAllTenants = onAllTenants;
+            _getStreamProcessorStates = getStreamProcessorStates;
             _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
-            _streamProcessorStateRepository = streamProcessorStateRepository;
-            _executionContextManager = executionContextManager;
-            _logger = logger;
+            _getEventFetchers = getEventFetchers;
+            _loggerManager = loggerManager;
+            _logger = loggerManager.CreateLogger<StreamProcessors>();
         }
 
         /// <inheritdoc />
-        public StreamProcessorRegistration Register(
-            StreamDefinition streamDefinition,
-            IEventProcessor eventProcessor,
-            IFetchEventsFromStreams eventsFromStreamsFetcher,
-            CancellationToken cancellationToken)
+        public bool TryRegister(
+            ScopeId scopeId,
+            EventProcessorId eventProcessorId,
+            IStreamDefinition streamDefinition,
+            Func<IEventProcessor> getEventProcessor,
+            CancellationToken cancellationToken,
+            out StreamProcessor streamProcessor)
         {
-            var tenant = _executionContextManager.Current.Tenant;
-            var streamProcessorId = new StreamProcessorId(eventProcessor.Scope, eventProcessor.Identifier, streamDefinition.StreamId);
+            streamProcessor = default;
+            var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, streamDefinition.StreamId);
             try
             {
-                var streamProcessor = new StreamProcessor(
-                    tenant,
-                    streamDefinition.StreamId,
-                    eventProcessor,
-                    new StreamProcessorStates(
-                        new FailingPartitions(_streamProcessorStateRepository, eventsFromStreamsFetcher, _logger),
-                        _streamProcessorStateRepository,
-                        _logger),
-                    eventsFromStreamsFetcher,
-                    _logger,
+                if (!_streamProcessors.ContainsKey(streamProcessorId))
+                {
+                    _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
+                    return false;
+                }
+
+                streamProcessor = new StreamProcessor(
+                    streamProcessorId,
+                    _onAllTenants,
+                    streamDefinition,
+                    getEventProcessor,
+                    () => _streamProcessors.TryRemove(streamProcessorId, out var _),
+                    _getStreamProcessorStates,
+                    _getEventFetchers,
+                    _loggerManager,
                     cancellationToken);
                 if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
                 {
-                    _logger.Warning("Stream Processor with Id: '{streamProcessorId}' for Tenant: '{tenant}' already registered", streamProcessorId, tenant);
-                    return new FailedStreamProcessorRegistration($"Stream Processor with Id: '{streamProcessorId}' already registered", tenant);
+                    _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
+                    streamProcessor = default;
+                    return false;
                 }
 
-                _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", tenant);
-                return new SuccessfulStreamProcessorRegistration(streamProcessor, tenant, () => Unregister(streamProcessorId));
+                _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", streamProcessorId);
+                return true;
             }
             catch (Exception ex)
             {
                 _logger.Warning(ex, "Failed to register Stream Processor with Id: '{streamProcessorId}' for Tenant: '{tenant}'", streamProcessorId);
-                return new FailedStreamProcessorRegistration($"Failed to register Stream Processor with Id: '{streamProcessorId}'. {ex.Message}", tenant);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void Unregister(StreamProcessorId streamProcessorId)
-        {
-            if (_streamProcessors.TryRemove(streamProcessorId, out var streamProcessor))
-            {
-                _logger.Debug($"Removing and disposing of Stream Processor with Id: '{streamProcessorId}'");
-                streamProcessor.Stop();
+                streamProcessor = default;
+                return false;
             }
         }
     }

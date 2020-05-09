@@ -1,9 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Linq;
-using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
@@ -13,27 +12,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     public static class StreamProcessorStateExtensions
     {
         /// <summary>
-        /// Converts the <see cref="FailingPartitionState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.FailingPartitionState" />.
-        /// </summary>
-        /// <param name="state">The <see cref="FailingPartitionState" />.</param>
-        /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.FailingPartitionState" />.</returns>
-        public static Runtime.Events.Processing.Streams.FailingPartitionState ToRuntimeRepresentation(this FailingPartitionState state) =>
-            new Runtime.Events.Processing.Streams.FailingPartitionState
-                {
-                    Position = state.Position,
-                    RetryTime = state.RetryTime,
-                    Reason = state.Reason,
-                    ProcessingAttempts = state.ProcessingAttempts
-                };
-
-        /// <summary>
-        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" />.
+        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.
         /// </summary>
         /// <param name="state">The <see cref="StreamProcessorState" />.</param>
-        /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.StreamProcessorState" />.</returns>
-        public static Runtime.Events.Processing.Streams.StreamProcessorState ToRuntimeRepresentation(this StreamProcessorState state) =>
+        /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.</returns>
+        public static Runtime.Events.Processing.Streams.StreamProcessorState ToUnpartitionedStreamProcessorState(this MongoDB.Processing.Streams.StreamProcessorState state) =>
             new Runtime.Events.Processing.Streams.StreamProcessorState(
                 state.Position,
-                state.FailingPartitions.ToDictionary(_ => new PartitionId { Value = Guid.Parse(_.Key) }, _ => _.Value.ToRuntimeRepresentation()));
+                state.FailureReason,
+                state.RetryTime,
+                state.ProcessingAttempts,
+                state.LastSuccessfullyProcessed,
+                state.IsFailing);
+
+        /// <summary>
+        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.
+        /// </summary>
+        /// <param name="state">The <see cref="StreamProcessorState" />.</param>
+        /// <returns>The converted <see cref="IStreamProcessorState" />.</returns>
+        public static IStreamProcessorState ToRuntimeRepresentation(this AbstractStreamProcessorState state) =>
+            state.Partitioned ?
+                (state as MongoDB.Processing.Streams.Partitioned.PartitionedStreamProcessorState).ToPartitionedStreamProcessorState() as IStreamProcessorState
+                : (state as MongoDB.Processing.Streams.StreamProcessorState).ToUnpartitionedStreamProcessorState() as IStreamProcessorState;
     }
 }

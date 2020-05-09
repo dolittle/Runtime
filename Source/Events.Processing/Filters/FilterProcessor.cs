@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// <summary>
     /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
     /// </summary>
-    public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
+    public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
     {
         readonly IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
         readonly ILogger _logger;
@@ -25,16 +25,16 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="definition">The <see cref="RemoteFilterDefinition"/>.</param>
+        /// <param name="definition">The <see cref="FilterDefinition"/>.</param>
         /// <param name="dispatcher">The <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FilterProcessor(
             ScopeId scope,
-            RemoteFilterDefinition definition,
+            FilterDefinition definition,
             IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
-            ILogger logger)
+            ILogger<FilterProcessor> logger)
             : base(scope, definition, eventsToStreamsWriter, logger)
         {
             _dispatcher = dispatcher;

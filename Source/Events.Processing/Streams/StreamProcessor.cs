@@ -2,137 +2,201 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.DependencyInversion;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Represents a system that processes a stream of events.
+    /// Represents a system for working with all the <see cref="AbstractScopedStreamProcessor" /> registered for <see cref="ITenants.All" />.
     /// </summary>
     public class StreamProcessor
     {
-        readonly IEventProcessor _processor;
-        readonly IStreamProcessorStates _streamProcessorStates;
-        readonly IFetchEventsFromStreams _eventsFromStreamsFetcher;
-        readonly ILogger _logger;
+        readonly IDictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new Dictionary<TenantId, AbstractScopedStreamProcessor>();
+        readonly StreamProcessorId _identifier;
+        readonly IPerformActionOnAllTenants _onAllTenants;
+        readonly IStreamDefinition _streamDefinition;
+        readonly Func<IEventProcessor> _getEventProcessor;
+        readonly Action _unregister;
+        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
+        readonly FactoryFor<IEventFetchers> _getEventFetchers;
+        readonly ILoggerManager _loggerManager;
+        readonly ILogger<StreamProcessor> _logger;
         readonly CancellationToken _cancellationToken;
-        readonly string _logMessagePrefix;
-        Task _task;
-        bool _stopped;
+        bool _initialized;
+        bool _started;
+        bool _finishedProcessing;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
-        /// <param name="tenantId">The <see cref="TenantId"/>.</param>
-        /// <param name="sourceStreamId">The <see cref="StreamId" /> of the source stream.</param>
-        /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStates" />.</param>
-        /// <param name="eventsFromStreamsFetcher">The<see cref="IFetchEventsFromStreams" />.</param>
-        /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId" />.</param>
+        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
+        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
+        /// <param name="getEventProcessor">The <see cref="Func{TResult}" /> that returns an <see cref="IEventProcessor" />.</param>
+        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
+        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
+        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public StreamProcessor(
-            TenantId tenantId,
-            StreamId sourceStreamId,
-            IEventProcessor processor,
-            IStreamProcessorStates streamProcessorStates,
-            IFetchEventsFromStreams eventsFromStreamsFetcher,
-            ILogger logger,
+            StreamProcessorId streamProcessorId,
+            IPerformActionOnAllTenants onAllTenants,
+            IStreamDefinition streamDefinition,
+            Func<IEventProcessor> getEventProcessor,
+            Action unregister,
+            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
+            FactoryFor<IEventFetchers> getEventFetchers,
+            ILoggerManager loggerManager,
             CancellationToken cancellationToken)
         {
-            _processor = processor;
-            _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
-            _streamProcessorStates = streamProcessorStates;
-            _logger = logger;
+            _identifier = streamProcessorId;
+            _onAllTenants = onAllTenants;
+            _streamDefinition = streamDefinition;
+            _getEventProcessor = getEventProcessor;
+            _unregister = unregister;
+            _getStreamProcessorStates = getStreamProcessorStates;
+            _getEventFetchers = getEventFetchers;
+            _loggerManager = loggerManager;
+            _logger = loggerManager.CreateLogger<StreamProcessor>();
             _cancellationToken = cancellationToken;
-            Identifier = new StreamProcessorId(_processor.Scope, _processor.Identifier, sourceStreamId);
-            CurrentState = StreamProcessorState.New;
-            _logMessagePrefix = $"Stream Partition Processor for event processor '{Identifier.EventProcessorId}' in scope {Identifier.ScopeId} with source stream '{Identifier.SourceStreamId}' for tenant '{tenantId}'";
         }
 
         /// <summary>
-        /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="StreamProcessor"/>.
+        /// Initializes the stream processor.
         /// </summary>
-        public StreamProcessorId Identifier { get; }
-
-        /// <summary>
-        /// Gets the <see cref="EventProcessorId" />.
-        /// </summary>
-        public EventProcessorId EventProcessorId => _processor.Identifier;
-
-        /// <summary>
-        /// Gets the current <see cref="StreamProcessorState" />.
-        /// </summary>
-        /// <remarks>This <see cref="StreamProcessorState" /> does not reflect the persisted state until the BeginProcessing.</remarks>
-        public StreamProcessorState CurrentState { get; private set; }
-
-        /// <summary>
-        /// Stops the processing of events.
-        /// </summary>
-        public void Stop()
+        /// <returns>A <see cref="Task" />that represents the asynchronous operation.</returns>
+        public async Task Initialize()
         {
-            _stopped = true;
-        }
-
-        /// <summary>
-        /// Starts up the <see cref="StreamProcessor "/>.
-        /// </summary>
-        /// <returns>The stream processing task.</returns>
-        public Task Start() => _task ?? (_task = BeginProcessing());
-
-        Task BeginProcessing()
-        {
-            return _task ?? Task.Run(
-                async () =>
+            _cancellationToken.ThrowIfCancellationRequested();
+            if (_initialized) throw new StreamProcessorAlreadyInitialized(_identifier);
+            _initialized = true;
+            try
+            {
+                await _onAllTenants.PerformAsync(async tenant =>
                 {
-                    try
-                    {
-                        if (ShouldCancel()) return;
-                        CurrentState = await _streamProcessorStates.GetStoredStateFor(Identifier, _cancellationToken).ConfigureAwait(false);
-                        do
-                        {
-                            StreamEvent streamEvent = default;
-                            while (streamEvent == default && !ShouldCancel())
-                            {
-                                try
-                                {
-                                    CurrentState = await _streamProcessorStates.FailingPartitions.CatchupFor(Identifier, _processor, CurrentState, _cancellationToken).ConfigureAwait(false);
-                                    streamEvent = await FetchNextEventWithPartitionToProcess().ConfigureAwait(false);
-
-                                    if (streamEvent == default) await Task.Delay(250).ConfigureAwait(false);
-                                }
-                                catch (EventStoreUnavailable)
-                                {
-                                    await Task.Delay(1000).ConfigureAwait(false);
-                                }
-                            }
-
-                            if (ShouldCancel()) break;
-
-                            CurrentState = await _streamProcessorStates.ProcessEventAndChangeStateFor(Identifier, _processor, streamEvent, CurrentState, _cancellationToken).ConfigureAwait(false);
-                        }
-                        while (!ShouldCancel());
-                    }
-                    catch (Exception ex)
-                    {
-                        if (!ShouldCancel())
-                        {
-                            _logger.Error($"{_logMessagePrefix} failed - {ex}");
-                        }
-                    }
-                });
+                    var scopedStreamProcessor = await CreateScopedStreamProcessor(
+                        tenant,
+                        _getEventProcessor(),
+                        _getEventFetchers(),
+                        _getStreamProcessorStates()).ConfigureAwait(false);
+                    _streamProcessors.Add(tenant, scopedStreamProcessor);
+                }).ConfigureAwait(false);
+            }
+            catch
+            {
+                _unregister();
+                throw;
+            }
         }
 
-        Task<StreamEvent> FetchNextEventWithPartitionToProcess()
+        /// <summary>
+        /// Starts the stream processing for all tenants.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        public async Task Start()
         {
-            _logger.Debug($"{_logMessagePrefix} is fetching event at position '{CurrentState.Position}'.");
-            return _eventsFromStreamsFetcher.Fetch(Identifier.ScopeId, Identifier.SourceStreamId, CurrentState.Position, _cancellationToken);
+            if (!_initialized) throw new StreamProcessorNotInitialized(_identifier);
+            if (_started) throw new StreamProcessorAlreadyProcessingStream(_identifier);
+            _started = true;
+            try
+            {
+                var task = _streamProcessors.Count > 0 ?
+                                Task.WhenAll(_streamProcessors.Select(_ => _.Value.Start()))
+                                : Task.CompletedTask;
+                await task.ConfigureAwait(false);
+            }
+            finally
+            {
+                _finishedProcessing = true;
+                _unregister();
+            }
         }
 
-        bool ShouldCancel() => _stopped || _cancellationToken.IsCancellationRequested;
+        /// <summary>
+        /// Unregisters the <see cref="StreamProcessor" />.
+        /// </summary>
+        public void Unregister()
+        {
+            if (_started && !_finishedProcessing) throw new CannotUnregisterRunningStreamProcessor(_identifier);
+            _unregister();
+        }
+
+        async Task<AbstractScopedStreamProcessor> CreateScopedStreamProcessor(
+            TenantId tenant,
+            IEventProcessor eventProcessor,
+            IEventFetchers eventFetchers,
+            IStreamProcessorStateRepository streamProcessorStates)
+        {
+            if (_streamDefinition.Partitioned)
+            {
+                var eventFetcher = await eventFetchers.GetPartitionedFetcherFor(eventProcessor.Scope, _streamDefinition, _cancellationToken).ConfigureAwait(false);
+                return await CreatePartitionedScopedStreamProcessor(tenant, eventProcessor, eventFetcher, streamProcessorStates).ConfigureAwait(false);
+            }
+            else
+            {
+                var eventFetcher = await eventFetchers.GetFetcherFor(eventProcessor.Scope, _streamDefinition, _cancellationToken).ConfigureAwait(false);
+                return await CreateUnpartitionedScopedStreamProcessor(tenant, eventProcessor, eventFetcher, streamProcessorStates).ConfigureAwait(false);
+            }
+        }
+
+        async Task<Partitioned.ScopedStreamProcessor> CreatePartitionedScopedStreamProcessor(
+            TenantId tenant,
+            IEventProcessor eventProcessor,
+            ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
+            IStreamProcessorStateRepository streamProcessorStates)
+        {
+            var tryGetStreamProcessorState = await streamProcessorStates.TryGetFor(_identifier, _cancellationToken).ConfigureAwait(false);
+            if (!tryGetStreamProcessorState.Success)
+            {
+                tryGetStreamProcessorState = Partitioned.StreamProcessorState.New;
+                await streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, _cancellationToken).ConfigureAwait(false);
+            }
+
+            if (!tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedPartitionedStreamProcessorState(_identifier);
+
+            return new Partitioned.ScopedStreamProcessor(
+                tenant,
+                _identifier,
+                tryGetStreamProcessorState.Result as Partitioned.StreamProcessorState,
+                eventProcessor,
+                streamProcessorStates,
+                eventsFromStreamsFetcher,
+                new Partitioned.FailingPartitions(streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _loggerManager.CreateLogger<Partitioned.FailingPartitions>()),
+                _loggerManager.CreateLogger<Partitioned.ScopedStreamProcessor>(),
+                _cancellationToken);
+        }
+
+        async Task<ScopedStreamProcessor> CreateUnpartitionedScopedStreamProcessor(
+            TenantId tenant,
+            IEventProcessor eventProcessor,
+            ICanFetchEventsFromStream eventsFromStreamsFetcher,
+            IStreamProcessorStateRepository streamProcessorStates)
+        {
+            var tryGetStreamProcessorState = await streamProcessorStates.TryGetFor(_identifier, _cancellationToken).ConfigureAwait(false);
+            if (!tryGetStreamProcessorState.Success)
+            {
+                tryGetStreamProcessorState = StreamProcessorState.New;
+                await streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, _cancellationToken).ConfigureAwait(false);
+            }
+
+            if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(_identifier);
+            return new ScopedStreamProcessor(
+                tenant,
+                _identifier,
+                tryGetStreamProcessorState.Result as StreamProcessorState,
+                eventProcessor,
+                streamProcessorStates,
+                eventsFromStreamsFetcher,
+                _loggerManager.CreateLogger<ScopedStreamProcessor>(),
+                _cancellationToken);
+        }
     }
 }

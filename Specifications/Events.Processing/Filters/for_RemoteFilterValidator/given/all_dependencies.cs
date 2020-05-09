@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.g
     {
         protected static StreamId source_stream;
         protected static StreamId target_stream;
-        protected static Mock<IFilterProcessor<RemoteFilterDefinition>> filter_processor;
+        protected static Mock<IFilterProcessor<FilterDefinition>> filter_processor;
         protected static Mock<IFetchEventsFromStreams> events_fetcher;
         protected static Mock<IFetchEventTypesFromStreams> event_types_fetcher;
         protected static Mock<IStreamProcessorStateRepository> stream_processor_states;
@@ -25,8 +25,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_RemoteFilterValidator.g
         {
             source_stream = Guid.NewGuid();
             target_stream = Guid.NewGuid();
-            filter_processor = new Mock<IFilterProcessor<RemoteFilterDefinition>>();
-            filter_processor.SetupGet(_ => _.Definition).Returns(new RemoteFilterDefinition(source_stream, target_stream, true));
+            filter_processor = new Mock<IFilterProcessor<FilterDefinition>>();
+            filter_processor.SetupGet(_ => _.Definition).Returns(new FilterDefinition(source_stream, target_stream, true));
             stream_processor_states = new Mock<IStreamProcessorStateRepository>();
             events_fetcher = new Mock<IFetchEventsFromStreams>();
             event_types_fetcher = new Mock<IFetchEventTypesFromStreams>();

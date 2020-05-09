@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             ScopeId scope,
             TypeFilterWithEventSourcePartitionDefinition definition,
             IWriteEventsToStreams eventsToStreamsWriter,
-            ILogger logger)
+            ILogger<TypeFilterWithEventSourcePartition> logger)
             : base(scope, definition, eventsToStreamsWriter, logger)
         {
             _logger = logger;
@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
             var included = Definition.Types.Contains(@event.Type.Id);
-            var outPartitionId = PartitionId.NotSet;
+            var outPartitionId = Guid.Empty;
             if (Definition.Partitioned)
             {
                 outPartitionId = @event.EventSource.Value;

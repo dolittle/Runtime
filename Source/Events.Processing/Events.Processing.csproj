@@ -17,6 +17,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Async\Async.csproj" />
         <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
         <ProjectReference Include="..\Services\Services.csproj" />
         <ProjectReference Include="..\Events.Store\Events.Store.csproj" />

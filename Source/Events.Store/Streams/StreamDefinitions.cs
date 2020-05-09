@@ -3,47 +3,60 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.DependencyInversion;
 using Dolittle.Lifecycle;
-using Dolittle.Logging;
+using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Represents an implementation of <see cref="IStreamDefinitions" />.
     /// </summary>
-    [SingletonPerTenant]
+    [Singleton]
     public class StreamDefinitions : IStreamDefinitions
     {
-        readonly IStreamDefinitionRepository _streamDefinitionRepository;
-        readonly ILogger<StreamDefinitions> _logger;
+        readonly IPerformActionOnAllTenants _onAllTenants;
+        readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamDefinitions"/> class.
         /// </summary>
-        /// <param name="streamDefinitionRepository">The <see cref="IStreamDefinitionRepository" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public StreamDefinitions(
-            IStreamDefinitionRepository streamDefinitionRepository,
-            ILogger<StreamDefinitions> logger)
+        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
+        /// <param name="getStreamDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IStreamDefinitionRepository" />.</param>
+        public StreamDefinitions(IPerformActionOnAllTenants onAllTenants, FactoryFor<IStreamDefinitionRepository> getStreamDefinitions)
         {
-            _streamDefinitionRepository = streamDefinitionRepository;
-            _logger = logger;
+            _onAllTenants = onAllTenants;
+            _getStreamDefinitions = getStreamDefinitions;
         }
 
         /// <inheritdoc/>
-        public Task<StreamDefinition> GetFor(ScopeId scopeId, StreamId streamId, CancellationToken cancellationToken)
-        {
-            if (IsEventLogStream(scopeId, streamId)) return Task.FromResult(StreamDefinition.EventLog);
-            return _streamDefinitionRepository.GetFor(scopeId, streamId, cancellationToken);
-        }
+        public Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken) =>
+            _onAllTenants.PerformAsync(_ => _getStreamDefinitions().Persist(scope, streamDefinition, cancellationToken));
 
         /// <inheritdoc/>
-        public Task<bool> HasFor(ScopeId scopeId, StreamId streamId, CancellationToken cancellationToken)
+        public async Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId streamId, CancellationToken cancellationToken)
         {
-            if (IsEventLogStream(scopeId, streamId)) return Task.FromResult(true);
-            return _streamDefinitionRepository.HasFor(scopeId, streamId, cancellationToken);
-        }
+            IStreamDefinition result = default;
 
-        bool IsEventLogStream(ScopeId scopeId, StreamId sourceStreamId) => scopeId == ScopeId.Default && sourceStreamId == StreamId.AllStreamId;
+            await _onAllTenants.PerformAsync(async _ =>
+                {
+                    var tryGetStreamDefinition = await _getStreamDefinitions().TryGet(scope, streamId, cancellationToken).ConfigureAwait(false);
+                    if (tryGetStreamDefinition.Success)
+                    {
+                        var streamDefinition = tryGetStreamDefinition.Result;
+                        if (result == default)
+                        {
+                            result = streamDefinition;
+                        }
+                        else if (tryGetStreamDefinition.Result != result)
+                        {
+                            throw new StreamDefinitionNotTheSameForAllTenants(scope, streamId);
+                        }
+                    }
+                }).ConfigureAwait(false);
+
+            return new Try<IStreamDefinition>(result != default, result);
+        }
     }
 }
