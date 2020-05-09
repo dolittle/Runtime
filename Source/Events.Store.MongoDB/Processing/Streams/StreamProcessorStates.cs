@@ -104,7 +104,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             streamProcessorState.ProcessingAttempts,
                             streamProcessorState.LastSuccessfullyProcessed,
                             streamProcessorState.IsFailing);
-                        var states = await _connection.GetSubscriptionStateCollection(replacementState.ScopeId, cancellationToken).ConfigureAwait(false);
+                        var states = await _connection.GetSubscriptionStateCollection(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
                         var persistedState = await states.ReplaceOneAsync(
                             CreateFilter(subscriptionId),
                             replacementState,
