@@ -41,6 +41,11 @@ namespace Dolittle.Runtime.Async
         public Exception Exception { get; }
 
         /// <summary>
+        /// Gets a value indicating whether an <see cref="Exception" /> caused the operation to fail.
+        /// </summary>
+        public bool HasException => Exception != default;
+
+        /// <summary>
         /// Implicitly convert <see cref="Try{TResult}" /> to <see cref="Try{TResult}.Success" />.
         /// </summary>
         /// <param name="try">The <see cref="Try{TResult}" /> to convert.</param>
