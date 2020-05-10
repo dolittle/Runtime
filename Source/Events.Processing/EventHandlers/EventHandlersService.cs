@@ -2,7 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
@@ -10,6 +12,7 @@ using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -17,6 +20,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Services;
+using Google.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
 
@@ -117,14 +121,34 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     filterDefinition,
                     _getEventsToStreamsWriter(),
                     _loggerManager.CreateLogger<TypeFilterWithEventSourcePartition>());
-            var successfullyRegisteredFilterStreamProcessor = _streamProcessors.TryRegister(
+            var tryRegisterFilterStreamProcessor = TryRegisterFilterStreamProcessor<TypeFilterWithEventSourcePartitionDefinition>(
                 scopeId,
                 eventHandlerId,
-                new EventLogStreamDefinition(),
-                () => getFilterProcessor(),
-                context.CancellationToken,
-                out var filterStreamProcessor);
-            var successfullyRegisteredEventProcessorStreamProcessor = _streamProcessors.TryRegister(
+                getFilterProcessor,
+                context.CancellationToken);
+
+            if (!tryRegisterFilterStreamProcessor.Success)
+            {
+                if (tryRegisterFilterStreamProcessor.HasException)
+                {
+                    var exception = tryRegisterFilterStreamProcessor.Exception;
+                    _logger.Warning(exception, "An error occurred while registering Event Handler: {eventHandlerId}", eventHandlerId);
+                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                }
+                else
+                {
+                    _logger.Debug("Failed to register Event Handler: {eventHandlerId}. Filter already registered", eventHandlerId);
+                    var failure = new Failure(
+                        FiltersFailures.FailedToRegisterFilter,
+                        $"Failed to register Event Handler: {eventHandlerId}. Filter already registered.");
+                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
+                    return;
+                }
+            }
+
+            using var filterStreamProcessor = tryRegisterFilterStreamProcessor.Result;
+
+            var tryRegisterEventProcessorStreamProcessor = TryRegisterEventProcessorStreamProcessor(
                 scopeId,
                 eventHandlerId,
                 filteredStreamDefinition,
@@ -133,60 +157,181 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     eventHandlerId,
                     dispatcher,
                     _loggerManager.CreateLogger<EventProcessor>()),
-                context.CancellationToken,
-                out var eventProcessorStreamProcessor);
+                context.CancellationToken);
 
-            if (!successfullyRegisteredFilterStreamProcessor || !successfullyRegisteredEventProcessorStreamProcessor)
+            if (!tryRegisterEventProcessorStreamProcessor.Success)
             {
-                _logger.Warning("Failed during registration of Event Handler: '{eventHandlerId}'. Already registered", eventHandlerId);
-                var failure = new Failure(
-                    EventHandlersFailures.FailedToRegisterEventHandler,
-                    $"Failed during registration of Event Handler: '{eventHandlerId}'. Already registered");
-
-                await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
-                return;
+                if (tryRegisterEventProcessorStreamProcessor.HasException)
+                {
+                    var exception = tryRegisterEventProcessorStreamProcessor.Exception;
+                    _logger.Warning(exception, "An error occurred while registering Event Handler: {eventHandlerId}", eventHandlerId);
+                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                }
+                else
+                {
+                    _logger.Debug("Failed to register Event Handler: {eventHandlerId}. Event Processor already registered on Source Stream: '{sourceStreamId}'", eventHandlerId, eventHandlerId);
+                    var failure = new Failure(
+                        FiltersFailures.FailedToRegisterFilter,
+                        $"Failed to register Event Handler: {eventHandlerId}. Event Processor already registered on Source Stream: '{eventHandlerId}'");
+                    await WriteFailedRegistrationResponse(dispatcher, failure, context.CancellationToken).ConfigureAwait(false);
+                    return;
+                }
             }
 
-            Task runningDispatcher;
+            using var eventProcessorStreamProcessor = tryRegisterEventProcessorStreamProcessor.Result;
+
+            using var internalCancellationTokenSource = new CancellationTokenSource();
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(internalCancellationTokenSource.Token, context.CancellationToken);
+            var cancellationToken = linkedTokenSource.Token;
+
+            var tryStartEventHandler = await TryStartEventHandler(
+                dispatcher,
+                filterStreamProcessor,
+                eventProcessorStreamProcessor,
+                scopeId,
+                filterDefinition,
+                getFilterProcessor,
+                cancellationToken).ConfigureAwait(false);
+            if (!tryStartEventHandler.Success)
+            {
+                internalCancellationTokenSource.Cancel();
+                if (tryStartEventHandler.HasException)
+                {
+                    var exception = tryStartEventHandler.Exception;
+                    _logger.Debug(exception, "An error occurred while starting Event Handler: '{eventHandlerId}' in Scope: {scopeId}", eventHandlerId, scopeId);
+                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                }
+                else
+                {
+                    _logger.Debug("Could not start Event Handler: '{eventHandlerId}' in Scope: {scopeId}", eventHandlerId, scopeId);
+                    return;
+                }
+            }
+
+            var tasks = tryStartEventHandler.Result;
+            var anyTask = await Task.WhenAny().ConfigureAwait(false);
+            if (TryGetException(tasks, out var ex))
+            {
+                internalCancellationTokenSource.Cancel();
+                _logger.Warning(ex, "An error occurred while processing Event Handler: '{eventHandlerId}' in Scope: '{scopeId}'", eventHandlerId, scopeId);
+                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+            }
+
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+            if (!context.CancellationToken.IsCancellationRequested)
+            {
+                _logger.Warning(ex, "Event Handler: '{eventHandler}' in Scope: '{scopeId}' failed", eventHandlerId, scopeId);
+            }
+
+            _logger.Debug("Event Handler: '{eventHandler}' in Scope: '{scopeId}' stopped", eventHandlerId, scopeId);
+        }
+
+        async Task<Try<IEnumerable<Task>>> TryStartEventHandler<TClientMessage, TConnectRequest, TResponse, TFilterDefinition>(
+            IReverseCallDispatcher<TClientMessage, EventHandlerRuntimeToClientMessage, TConnectRequest, EventHandlerRegistrationResponse, HandleEventRequest, TResponse> dispatcher,
+            StreamProcessor filterStreamProcessor,
+            StreamProcessor eventProcessorStreamProcessor,
+            ScopeId scopeId,
+            TFilterDefinition filterDefinition,
+            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+            CancellationToken cancellationToken)
+            where TClientMessage : IMessage, new()
+            where TConnectRequest : class
+            where TResponse : class
+            where TFilterDefinition : IFilterDefinition
+        {
             try
             {
-                await filterStreamProcessor.Initialize().ConfigureAwait(false);
-                await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
-                runningDispatcher = dispatcher.Accept(new EventHandlerRegistrationResponse(), context.CancellationToken);
-                var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, context.CancellationToken).ConfigureAwait(false);
-
-                if (filterValidationResults.Any(_ => !_.Value.Succeeded))
-                {
-                    var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
-                    _logger.Warning("Failed to register EventHandler: {eventHandlerId}. Filter validation failed. {reason}", eventHandlerId, firstFailedValidation.FailureReason);
-                    throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
-                }
-
-                await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, context.CancellationToken).ConfigureAwait(false);
+                var runningDispatcher = dispatcher.Accept(new EventHandlerRegistrationResponse(), cancellationToken);
+                await filterStreamProcessor.Initialize(cancellationToken).ConfigureAwait(false);
+                await eventProcessorStreamProcessor.Initialize(cancellationToken).ConfigureAwait(false);
+                await ValidateFilter(
+                    scopeId,
+                    filterDefinition,
+                    getFilterProcessor,
+                    cancellationToken).ConfigureAwait(false);
+                return new[] { eventProcessorStreamProcessor.Start(), runningDispatcher };
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "Error while registering Event Handler: {eventHandlerId}", eventHandlerId);
-                filterStreamProcessor.Unregister();
-                eventProcessorStreamProcessor.Unregister();
-                throw;
+                return ex;
             }
+        }
 
-            try
+        Try<StreamProcessor> TryRegisterFilterStreamProcessor<TFilterDefinition>(
+            ScopeId scopeId,
+            EventProcessorId eventHandlerId,
+            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor,
+            CancellationToken cancellationToken)
+            where TFilterDefinition : IFilterDefinition
             {
-                await Task.WhenAny(filterStreamProcessor.Start(), eventProcessorStreamProcessor.Start(), runningDispatcher).ConfigureAwait(false);
-            }
-            catch (Exception ex)
-            {
-                if (!context.CancellationToken.IsCancellationRequested)
+                try
                 {
-                    _logger.Debug(ex, "Event Handler: '{eventHandlerId}' stopped", eventHandlerId);
+                    return (_streamProcessors.TryRegister(
+                        scopeId,
+                        eventHandlerId,
+                        new EventLogStreamDefinition(),
+                        getFilterProcessor,
+                        cancellationToken,
+                        out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
+                }
+                catch (Exception ex)
+                {
+                    return ex;
                 }
             }
-            finally
+
+        Try<StreamProcessor> TryRegisterEventProcessorStreamProcessor(
+            ScopeId scopeId,
+            EventProcessorId eventHandlerId,
+            IStreamDefinition streamDefinition,
+            Func<IEventProcessor> getEventProcessor,
+            CancellationToken cancellationToken)
             {
-                _logger.Debug("Event Handler: '{eventHandlerId}' stopped", eventHandlerId);
+                try
+                {
+                    return (_streamProcessors.TryRegister(
+                        scopeId,
+                        eventHandlerId,
+                        streamDefinition,
+                        getEventProcessor,
+                        cancellationToken,
+                        out var outputtedEventProcessorStreamProcessor), outputtedEventProcessorStreamProcessor);
+                }
+                catch (Exception ex)
+                {
+                    return ex;
+                }
             }
+
+        async Task ValidateFilter<TFilterDefinition>(
+            ScopeId scopeId,
+            TFilterDefinition filterDefinition,
+            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+            CancellationToken cancellationToken)
+            where TFilterDefinition : IFilterDefinition
+        {
+            var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
+
+            if (filterValidationResults.Any(_ => !_.Value.Succeeded))
+            {
+                var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
+                _logger.Warning("Failed to register Filter: {filterId}. Filter validation failed. {reason}", filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+                throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+            }
+
+            var filteredStreamDefinition = new StreamDefinition(filterDefinition);
+            await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
+        }
+
+        bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
+        {
+            exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
+            if (exception != default)
+            {
+                while (exception.InnerException != null) exception = exception.InnerException;
+            }
+
+            return exception != default;
         }
 
         Task WriteFailedRegistrationResponse(
