@@ -161,6 +161,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 }
 
                 if (!_internalCancellationTokenSource.IsCancellationRequested) _internalCancellationTokenSource.Cancel();
+                if (!_started) _unregister();
                 _disposed = true;
             }
         }
