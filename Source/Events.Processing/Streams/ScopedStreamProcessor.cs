@@ -28,7 +28,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public ScopedStreamProcessor(
             TenantId tenantId,
             IStreamProcessorId streamProcessorId,
@@ -36,9 +35,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IEventProcessor processor,
             IStreamProcessorStateRepository streamProcessorStates,
             ICanFetchEventsFromStream eventsFromStreamsFetcher,
-            ILogger<ScopedStreamProcessor> logger,
-            CancellationToken cancellationToken)
-            : base(tenantId, streamProcessorId, initialState, processor, logger, cancellationToken)
+            ILogger<ScopedStreamProcessor> logger)
+            : base(tenantId, streamProcessorId, initialState, processor, logger)
         {
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;

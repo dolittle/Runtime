@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using Dolittle.DependencyInversion;
+using Dolittle.Execution;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
@@ -23,6 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
         readonly ConcurrentDictionary<StreamProcessorId, StreamProcessor> _streamProcessors;
         readonly FactoryFor<IEventFetchers> _getEventFetchers;
+        readonly IExecutionContextManager _executionContextManager;
         readonly ILoggerManager _loggerManager;
         readonly ILogger _logger;
 
@@ -32,17 +34,20 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
         /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
+        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         public StreamProcessors(
             IPerformActionOnAllTenants onAllTenants,
             FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
             FactoryFor<IEventFetchers> getEventFetchers,
+            IExecutionContextManager executionContextManager,
             ILoggerManager loggerManager)
         {
             _onAllTenants = onAllTenants;
             _getStreamProcessorStates = getStreamProcessorStates;
             _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
             _getEventFetchers = getEventFetchers;
+            _executionContextManager = executionContextManager;
             _loggerManager = loggerManager;
             _logger = loggerManager.CreateLogger<StreamProcessors>();
         }
@@ -72,6 +77,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 () => _streamProcessors.TryRemove(streamProcessorId, out var _),
                 _getStreamProcessorStates,
                 _getEventFetchers,
+                _executionContextManager,
                 _loggerManager,
                 cancellationToken);
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))

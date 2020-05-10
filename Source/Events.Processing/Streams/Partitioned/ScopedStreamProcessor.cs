@@ -30,7 +30,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="failingPartitions">The <see cref="IFailingPartitions" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public ScopedStreamProcessor(
             TenantId tenantId,
             IStreamProcessorId streamProcessorId,
@@ -39,9 +38,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             IStreamProcessorStateRepository streamProcessorStates,
             ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             IFailingPartitions failingPartitions,
-            ILogger<ScopedStreamProcessor> logger,
-            CancellationToken cancellationToken)
-            : base(tenantId, streamProcessorId, initialState, processor, logger, cancellationToken)
+            ILogger<ScopedStreamProcessor> logger)
+            : base(tenantId, streamProcessorId, initialState, processor, logger)
         {
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;
