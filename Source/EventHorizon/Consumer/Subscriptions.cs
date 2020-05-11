@@ -36,7 +36,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         public bool HasSubscription(SubscriptionId subscriptionId) => _subscriptions.ContainsKey(subscriptionId);
 
         /// <inheritdoc />
-        public bool TrySubscribe(SubscriptionId subscriptionId, EventProcessor eventProcessor, EventsFromEventHorizonFetcher eventsFetcher, CancellationToken cancellationToken, out Subscription subscription)
+        public bool TrySubscribe(
+            SubscriptionId subscriptionId,
+            EventProcessor eventProcessor,
+            EventsFromEventHorizonFetcher eventsFetcher,
+            CancellationToken cancellationToken,
+            out Subscription subscription)
         {
             subscription = default;
             if (_subscriptions.ContainsKey(subscriptionId))
