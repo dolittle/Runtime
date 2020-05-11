@@ -7,7 +7,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
 {
     /// <summary>
-    /// Exception that gets thrown when the <see cref="StreamEvent"/> has a different <see cref="PartitionId"/> as expected.
+    /// Exception that gets thrown when a <see cref="StreamEvent"/> has a different <see cref="PartitionId"/> than expected.
     /// </summary>
     public class StreamEventInWrongPartition : Exception
     {
