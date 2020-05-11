@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessorState
             processing_attempts = 0;
         };
 
-        Because of = () => state = new StreamProcessorState(stream_position, failure_reason, retry_time, processing_attempts);
+        Because of = () => state = new StreamProcessorState(stream_position, failure_reason, retry_time, processing_attempts, DateTimeOffset.MinValue, false);
 
         It should_have_the_correct_stream_position = () => state.Position.ShouldEqual(stream_position);
         It should_have_the_correct_failure_reason = () => state.FailureReason.ShouldEqual(failure_reason);

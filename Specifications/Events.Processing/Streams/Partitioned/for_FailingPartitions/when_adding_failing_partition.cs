@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
             partition = Guid.NewGuid();
             stream_position = 0;
             retry_time = DateTimeOffset.Now;
-            old_state = new StreamProcessorState(stream_position, new Dictionary<PartitionId, FailingPartitionState>());
+            old_state = new StreamProcessorState(stream_position, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.UtcNow);
             reason = "";
         };
 

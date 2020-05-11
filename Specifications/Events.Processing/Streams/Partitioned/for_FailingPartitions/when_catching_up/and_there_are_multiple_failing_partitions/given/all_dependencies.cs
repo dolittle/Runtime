@@ -27,8 +27,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
             first_initial_failing_partition_position = second_initial_failing_partition_position = 0;
             first_initial_failing_partition_reason = second_initial_failing_partition_reason = "some reason";
             first_initial_failing_partition_retry_time = second_initial_failing_partition_retry_time = DateTimeOffset.UtcNow;
-            first_failing_partition_state = new FailingPartitionState(first_initial_failing_partition_position, first_initial_failing_partition_retry_time, first_initial_failing_partition_reason, 1);
-            second_failing_partition_state = new FailingPartitionState(second_initial_failing_partition_position, second_initial_failing_partition_retry_time, second_initial_failing_partition_reason, 1);
+            first_failing_partition_state = new FailingPartitionState(first_initial_failing_partition_position, first_initial_failing_partition_retry_time, first_initial_failing_partition_reason, 1, DateTimeOffset.MinValue);
+            second_failing_partition_state = new FailingPartitionState(second_initial_failing_partition_position, second_initial_failing_partition_retry_time, second_initial_failing_partition_reason, 1, DateTimeOffset.MinValue);
 
             stream_processor_state.FailingPartitions.Add(first_failing_partition_id, first_failing_partition_state);
             stream_processor_state.FailingPartitions.Add(second_failing_partition_id, second_failing_partition_state);

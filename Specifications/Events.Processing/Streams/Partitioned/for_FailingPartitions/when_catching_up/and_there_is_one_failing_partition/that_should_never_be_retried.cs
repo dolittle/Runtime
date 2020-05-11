@@ -15,7 +15,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 
         Establish context = () =>
         {
-            stream_processor_state.FailingPartitions[failing_partition_id] = new FailingPartitionState(failing_partition_state.Position, DateTimeOffset.MaxValue, failing_partition_state.Reason, failing_partition_state.ProcessingAttempts);
+            stream_processor_state.FailingPartitions[failing_partition_id] = new FailingPartitionState(
+                failing_partition_state.Position,
+                DateTimeOffset.MaxValue,
+                failing_partition_state.Reason,
+                failing_partition_state.ProcessingAttempts,
+                DateTimeOffset.UtcNow);
         };
 
         Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;

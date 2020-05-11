@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Async;
@@ -20,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var @event = committed_events.single(0);
             stream_processor_states
                 .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<IStreamProcessorState>>((true, new StreamProcessorState(1))));
+                .Returns(Task.FromResult<Try<IStreamProcessorState>>((true, new StreamProcessorState(1, DateTimeOffset.UtcNow))));
             add_event_to_event_log(@event);
             add_event_to_filtered_stream(@event);
             filter_processor

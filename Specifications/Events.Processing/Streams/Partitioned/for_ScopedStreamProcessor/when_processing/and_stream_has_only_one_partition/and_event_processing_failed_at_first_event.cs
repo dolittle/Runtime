@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 .Throws(new Exception());
         };
 
-        Because of = () => stream_processor.Start().GetAwaiter().GetResult();
+        Because of = () => stream_processor.Start(CancellationToken.None).GetAwaiter().GetResult();
 
         It should_process_one_event = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
         It should_process_first_event = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());

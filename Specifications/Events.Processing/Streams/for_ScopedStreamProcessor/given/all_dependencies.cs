@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -39,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
             event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
             event_processor.SetupGet(_ => _.Scope).Returns(scope_id);
             stream_processors = new Mock<IStreamProcessors>();
-            stream_processor = new ScopedStreamProcessor(tenant_id, stream_processor_id, StreamProcessorState.New, event_processor.Object, stream_processor_state_repository, events_fetcher.Object, Mock.Of<ILogger<ScopedStreamProcessor>>(), CancellationToken.None);
+            stream_processor = new ScopedStreamProcessor(tenant_id, stream_processor_id, StreamProcessorState.New, event_processor.Object, stream_processor_state_repository, events_fetcher.Object, Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
     }
 }

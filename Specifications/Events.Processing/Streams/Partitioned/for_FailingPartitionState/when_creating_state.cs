@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
         };
 
         Because of = () =>
-            state = new FailingPartitionState(position, retry_time, reason, processing_attempts);
+            state = new FailingPartitionState(position, retry_time, reason, processing_attempts, DateTimeOffset.UtcNow);
 
         It should_have_the_correct_position = () => state.Position.ShouldEqual(position);
         It should_have_the_correct_reason = () => state.Reason.ShouldEqual(reason);

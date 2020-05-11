@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Threading;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -49,8 +48,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 stream_processor_state_repository,
                 events_fetcher.Object,
                 failing_partitiones.Object,
-                Mock.Of<ILogger<ScopedStreamProcessor>>(),
-                CancellationToken.None);
+                Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
     }
 }
