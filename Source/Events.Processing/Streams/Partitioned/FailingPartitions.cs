@@ -81,7 +81,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
                 if (ShouldRetryProcessing(failingPartitionState))
                 {
                     var streamEvent = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
-                    if (streamEvent.Partition != partition) throw new ExpectedStreamEventWithSameGivenPartition(streamEvent, partition);
+                    if (streamEvent.Partition != partition) throw new StreamEventInWrongPartition(streamEvent, partition);
 
                     while (ShouldProcessNextEventInPartition(streamEvent.Position, streamProcessorState.Position))
                     {
