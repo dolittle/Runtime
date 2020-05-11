@@ -209,11 +209,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
 
             var tasks = tryStartEventHandler.Result;
-            var anyTask = await Task.WhenAny().ConfigureAwait(false);
+            var anyTask = await Task.WhenAny(tasks).ConfigureAwait(false);
             if (TryGetException(tasks, out var ex))
             {
                 internalCancellationTokenSource.Cancel();
                 _logger.Warning(ex, "An error occurred while processing Event Handler: '{eventHandlerId}' in Scope: '{scopeId}'", eventHandlerId, scopeId);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
                 ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
             }
 
@@ -242,14 +243,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             try
             {
                 var runningDispatcher = dispatcher.Accept(new EventHandlerRegistrationResponse(), cancellationToken);
-                await filterStreamProcessor.Initialize(cancellationToken).ConfigureAwait(false);
-                await eventProcessorStreamProcessor.Initialize(cancellationToken).ConfigureAwait(false);
+                await filterStreamProcessor.Initialize().ConfigureAwait(false);
+                await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
                 await ValidateFilter(
                     scopeId,
                     filterDefinition,
                     getFilterProcessor,
                     cancellationToken).ConfigureAwait(false);
-                return new[] { eventProcessorStreamProcessor.Start(), runningDispatcher };
+                return new[] { filterStreamProcessor.Start(), eventProcessorStreamProcessor.Start(), runningDispatcher };
             }
             catch (Exception ex)
             {

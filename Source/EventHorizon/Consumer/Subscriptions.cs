@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 eventProcessor,
                 eventsFetcher,
                 _streamProcessorStates,
-                () => _subscriptions.TryRemove(subscriptionId, out var _),
+                () => Unregister(subscriptionId),
                 _loggerManager,
                 cancellationToken);
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
@@ -62,6 +62,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
             _logger.Trace("Subscription: '{subscriptionId}' registered", subscriptionId);
             return true;
+        }
+
+        void Unregister(SubscriptionId id)
+        {
+            _logger.Debug("Unregistering Subscription: {subscriptionId}", id);
+            _subscriptions.TryRemove(id, out var _);
         }
     }
 }

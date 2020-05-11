@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.EventHorizon
     /// <summary>
     /// Represents a system for working with <see cref="ScopedStreamProcessor" /> registered for an Event Horizon Subscription.
     /// </summary>
-    public class Subscription
+    public class Subscription : IDisposable
     {
         readonly SubscriptionId _identifier;
         readonly IEventProcessor _eventProcessor;
@@ -25,10 +25,11 @@ namespace Dolittle.Runtime.EventHorizon
         readonly ILoggerManager _loggerManager;
         readonly ILogger _logger;
         readonly CancellationToken _cancellationToken;
+        readonly CancellationTokenRegistration _unregisterTokenRegistration;
         ScopedStreamProcessor _streamProcessor;
         bool _initialized;
         bool _started;
-        bool _finishedProcessing;
+        bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscription"/> class.
@@ -57,6 +58,7 @@ namespace Dolittle.Runtime.EventHorizon
             _loggerManager = loggerManager;
             _logger = loggerManager.CreateLogger<StreamProcessor>();
             _cancellationToken = cancellationToken;
+            _unregisterTokenRegistration = _cancellationToken.Register(_unregister);
         }
 
         /// <summary>
@@ -67,31 +69,22 @@ namespace Dolittle.Runtime.EventHorizon
         {
             _cancellationToken.ThrowIfCancellationRequested();
             if (_initialized) throw new StreamProcessorAlreadyInitialized(_identifier);
-            _initialized = true;
-            try
+            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, _cancellationToken).ConfigureAwait(false);
+            if (!tryGetStreamProcessorState.Success)
             {
-                var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, _cancellationToken).ConfigureAwait(false);
-                if (!tryGetStreamProcessorState.Success)
-                {
-                    tryGetStreamProcessorState = StreamProcessorState.New;
-                    await _streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, _cancellationToken).ConfigureAwait(false);
-                }
+                tryGetStreamProcessorState = StreamProcessorState.New;
+                await _streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, _cancellationToken).ConfigureAwait(false);
+            }
 
-                _streamProcessor = new ScopedStreamProcessor(
-                    _identifier.ConsumerTenantId,
-                    _identifier,
-                    tryGetStreamProcessorState.Result as StreamProcessorState,
-                    _eventProcessor,
-                    _streamProcessorStates,
-                    _eventsFetcher,
-                    _loggerManager.CreateLogger<ScopedStreamProcessor>(),
-                    _cancellationToken);
-            }
-            catch
-            {
-                _unregister();
-                throw;
-            }
+            _streamProcessor = new ScopedStreamProcessor(
+                _identifier.ConsumerTenantId,
+                _identifier,
+                tryGetStreamProcessorState.Result as StreamProcessorState,
+                _eventProcessor,
+                _streamProcessorStates,
+                _eventsFetcher,
+                _loggerManager.CreateLogger<ScopedStreamProcessor>());
+            _initialized = true;
         }
 
         /// <summary>
@@ -102,25 +95,39 @@ namespace Dolittle.Runtime.EventHorizon
         {
             if (!_initialized) throw new StreamProcessorNotInitialized(_identifier);
             if (_started) throw new StreamProcessorAlreadyProcessingStream(_identifier);
+            _unregisterTokenRegistration.Dispose();
             _started = true;
             try
             {
-                await _streamProcessor.Start().ConfigureAwait(false);
+                await _streamProcessor.Start(_cancellationToken).ConfigureAwait(false);
             }
             finally
             {
-                _finishedProcessing = true;
                 _unregister();
             }
         }
 
-        /// <summary>
-        /// Unregisters the <see cref="StreamProcessor" />.
-        /// </summary>
-        public void Unregister()
+        /// <inheritdoc/>
+        public void Dispose()
         {
-            if (_started && !_finishedProcessing) throw new CannotUnregisterRunningStreamProcessor(_identifier);
-            _unregister();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Disposes the object.
+        /// </summary>
+        /// <param name="disposing">Whether to dispose managed state.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (!_started && !_cancellationToken.IsCancellationRequested) _unregister();
+            if (disposing)
+            {
+                _unregisterTokenRegistration.Dispose();
+            }
+
+            _disposed = true;
         }
     }
 }

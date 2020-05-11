@@ -299,11 +299,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
 
             var tasks = tryStartFilter.Result;
-            var anyTask = await Task.WhenAny().ConfigureAwait(false);
+            var anyTask = await Task.WhenAny(tasks).ConfigureAwait(false);
             if (TryGetException(tasks, out var ex))
             {
                 internalCancellationTokenSource.Cancel();
                 _logger.Warning(ex, "An error occurred while processing Filter: '{filterId}' in Scope: '{scopeId}'", filterDefinition.TargetStream, scopeId);
+                await Task.WhenAll(tasks).ConfigureAwait(false);
                 ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
             }
 
@@ -331,7 +332,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             try
             {
                 var runningDispatcher = dispatcher.Accept(new FilterRegistrationResponse(), cancellationToken);
-                await streamProcessor.Initialize(cancellationToken).ConfigureAwait(false);
+                await streamProcessor.Initialize().ConfigureAwait(false);
                 await ValidateFilter(
                     scopeId,
                     filterDefinition,

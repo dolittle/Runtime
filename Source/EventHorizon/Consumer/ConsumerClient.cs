@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.ApplicationModel;
@@ -34,7 +36,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
         readonly IExecutionContextManager _executionContextManager;
         readonly CancellationTokenSource _cancellationTokenSource;
-        readonly CancellationToken _token;
+        readonly CancellationToken _cancellationToken;
         readonly ILogger _logger;
         bool _disposed;
 
@@ -68,7 +70,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _executionContextManager = executionContextManager;
             _logger = logger;
             _cancellationTokenSource = new CancellationTokenSource();
-            _token = _cancellationTokenSource.Token;
+            _cancellationToken = _cancellationTokenSource.Token;
         }
 
         /// <summary>
@@ -114,7 +116,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
                     if (response.Success) StartProcessingEventHorizon(subscriptionId, microserviceAddress, call.ResponseStream);
                     return response;
-                }, _token).ConfigureAwait(false);
+                }, _cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -155,12 +157,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         StreamId = subscriptionId.StreamId.ToProtobuf(),
                         PartitionId = subscriptionId.PartitionId.ToProtobuf(),
                         CallContext = new Dolittle.Services.Contracts.CallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() }
-                    }, cancellationToken: _token);
+                    }, cancellationToken: _cancellationToken);
         }
 
         async Task<SubscriptionResponse> HandleSubscriptionResponse(IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream, SubscriptionId subscriptionId)
         {
-            if (!await responseStream.MoveNext(_token).ConfigureAwait(false)
+            if (!await responseStream.MoveNext(_cancellationToken).ConfigureAwait(false)
                 || responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.SubscriptionResponse)
             {
                 var message = $"Did not receive subscription response when subscribing with subscription {subscriptionId}";
@@ -188,9 +190,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         await ReadEventsFromEventHorizon(subscriptionId, responseStream).ConfigureAwait(false);
                         throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                     }
-                    catch (Exception)
+                    catch (Exception ex)
                     {
-                        _logger.Debug($"Reconnecting to event horizon with subscription {subscriptionId}");
+                        _logger.Debug(ex, "Reconnecting to event horizon with subscription {subscriptionId}", subscriptionId);
                         await _policy.Execute(
                             async _ =>
                             {
@@ -199,32 +201,65 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                                 if (!response.Success) throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                                 await ReadEventsFromEventHorizon(subscriptionId, call.ResponseStream).ConfigureAwait(false);
                                 throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
-                            }, _token).ConfigureAwait(false);
+                            }, _cancellationToken).ConfigureAwait(false);
                     }
                 });
         }
 
         async Task ReadEventsFromEventHorizon(SubscriptionId subscriptionId, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
         {
-            _logger.Information($"Successfully connected event horizon with {subscriptionId}. Waiting for events to process");
+            _logger.Information("Successfully connected event horizon with {subscriptionId}. Waiting for events to process", subscriptionId);
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();
             var eventsFetcher = new EventsFromEventHorizonFetcher(queue);
 
-            using var streamProcessorCancellationSource = new CancellationTokenSource();
-            using var cancellationTokenRegistration = _token.Register(() => streamProcessorCancellationSource.Cancel());
+            using var internalCancellationSource = new CancellationTokenSource();
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(internalCancellationSource.Token, _cancellationToken);
+            var cancellationToken = linkedTokenSource.Token;
+            var tasks = new List<Task>();
+            try
+            {
+                _subscriptions.TrySubscribe(
+                    subscriptionId,
+                    new EventProcessor(subscriptionId, _eventHorizonEventsWriter, _logger),
+                    eventsFetcher,
+                    cancellationToken,
+                    out var outputtedStreamProcessor);
+                using var streamProcessor = outputtedStreamProcessor;
+                await streamProcessor.Initialize().ConfigureAwait(false);
 
-            _subscriptions.TrySubscribe(
-                subscriptionId,
-                new EventProcessor(subscriptionId, _eventHorizonEventsWriter, _logger),
-                eventsFetcher,
-                streamProcessorCancellationSource.Token,
-                out var streamProcessor);
+                tasks.Add(Task.Run(async () =>
+                    {
+                        await HandleEventHorizonResponses(subscriptionId, responseStream, queue, cancellationToken).ConfigureAwait(false);
+                        internalCancellationSource.Cancel();
+                    }));
+                tasks.Add(streamProcessor.Start());
+            }
+            catch (Exception ex)
+            {
+                internalCancellationSource.Cancel();
+                _logger.Warning(ex, "Error occurred while initializing Subscription: {subscriptionId}", subscriptionId);
+                return;
+            }
 
-            await streamProcessor.Initialize().ConfigureAwait(false);
-            _ = streamProcessor.Start();
+            var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
+            if (!internalCancellationSource.IsCancellationRequested) internalCancellationSource.Cancel();
+            if (TryGetException(tasks, out var exception))
+            {
+                internalCancellationSource.Cancel();
+                _logger.Warning(exception, "Error occurred while processing Subscription: {subscriptionId}", subscriptionId);
+            }
 
-            while (!_token.IsCancellationRequested
-                && await responseStream.MoveNext(_token).ConfigureAwait(false))
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
+
+        async Task HandleEventHorizonResponses(
+            SubscriptionId subscriptionId,
+            IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream,
+            AsyncProducerConsumerQueue<StreamEvent> queue,
+            CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested
+                && await responseStream.MoveNext(cancellationToken).ConfigureAwait(false))
             {
                 if (responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.Event)
                 {
@@ -239,10 +274,19 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         @event.StreamSequenceNumber,
                         StreamId.EventLog,
                         Guid.Empty),
-                    _token).ConfigureAwait(false);
+                    cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
+        {
+            exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
+            if (exception != default)
+            {
+                while (exception.InnerException != null) exception = exception.InnerException;
             }
 
-            streamProcessorCancellationSource.Cancel();
+            return exception != default;
         }
 
         bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress) =>

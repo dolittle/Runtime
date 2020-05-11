@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             {
                 if (id is SubscriptionId subscriptionId)
                 {
-                    if (baseStreamProcessorState is StreamProcessorState streamProcessorState)
+                    if (baseStreamProcessorState is Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState)
                     {
                         var replacementState = new SubscriptionState(
                             subscriptionId.ConsumerTenantId,

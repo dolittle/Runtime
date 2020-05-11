@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 _onAllTenants,
                 streamDefinition,
                 getEventProcessor,
-                () => _streamProcessors.TryRemove(streamProcessorId, out var _),
+                () => Unregister(streamProcessorId),
                 _getStreamProcessorStates,
                 _getEventFetchers,
                 _executionContextManager,
@@ -89,6 +89,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
             _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", streamProcessorId);
             return true;
+        }
+
+        void Unregister(StreamProcessorId id)
+        {
+            _logger.Debug("Unregistering Stream Processor: {streamProcessorId}", id);
+            _streamProcessors.TryRemove(id, out var _);
         }
     }
 }
