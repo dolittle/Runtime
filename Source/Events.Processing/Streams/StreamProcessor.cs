@@ -26,10 +26,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IStreamDefinition _streamDefinition;
         readonly Func<IEventProcessor> _getEventProcessor;
         readonly Action _unregister;
-        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
-        readonly FactoryFor<IEventFetchers> _getEventFetchers;
+        readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ILoggerManager _loggerManager;
         readonly ILogger<StreamProcessor> _logger;
         readonly CancellationToken _externalCancellationToken;
         readonly CancellationTokenSource _internalCancellationTokenSource;
@@ -46,10 +44,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
         /// <param name="getEventProcessor">The <see cref="Func{TResult}" /> that returns an <see cref="IEventProcessor" />.</param>
         /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
-        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
+        /// <param name="getScopedStreamProcessorsCreator">The <see cref="ICreateScopedStreamProcessors" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
+        /// <param name="logger">The <see cref="ILogger" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public StreamProcessor(
             StreamProcessorId streamProcessorId,
@@ -57,10 +54,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IStreamDefinition streamDefinition,
             Func<IEventProcessor> getEventProcessor,
             Action unregister,
-            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
-            FactoryFor<IEventFetchers> getEventFetchers,
+            FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
             IExecutionContextManager executionContextManager,
-            ILoggerManager loggerManager,
+            ILogger<StreamProcessor> logger,
             CancellationToken cancellationToken)
         {
             _identifier = streamProcessorId;
@@ -68,11 +64,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _streamDefinition = streamDefinition;
             _getEventProcessor = getEventProcessor;
             _unregister = unregister;
-            _getStreamProcessorStates = getStreamProcessorStates;
-            _getEventFetchers = getEventFetchers;
+            _getScopedStreamProcessorsCreator = getScopedStreamProcessorsCreator;
             _executionContextManager = executionContextManager;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<StreamProcessor>();
+            _logger = logger;
             _internalCancellationTokenSource = new CancellationTokenSource();
             _externalCancellationToken = cancellationToken;
             _unregisterTokenRegistration = _externalCancellationToken.Register(_unregister);
@@ -87,14 +81,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _externalCancellationToken.ThrowIfCancellationRequested();
             if (_initialized) throw new StreamProcessorAlreadyInitialized(_identifier);
             await _onAllTenants.PerformAsync(async tenant =>
-            {
-                var scopedStreamProcessor = await CreateScopedStreamProcessor(
-                    tenant,
-                    _getEventProcessor(),
-                    _getEventFetchers(),
-                    _getStreamProcessorStates()).ConfigureAwait(false);
-                _streamProcessors.Add(tenant, scopedStreamProcessor);
-            }).ConfigureAwait(false);
+                {
+                    var scopedStreamProcessorsCreators = _getScopedStreamProcessorsCreator();
+                    var scopedStreamProcessor = await scopedStreamProcessorsCreators.Create(
+                        _streamDefinition,
+                        _identifier,
+                        _getEventProcessor(),
+                        _externalCancellationToken).ConfigureAwait(false);
+                    _streamProcessors.Add(tenant, scopedStreamProcessor);
+                }).ConfigureAwait(false);
             _initialized = true;
         }
 
@@ -111,7 +106,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             try
             {
                 using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_internalCancellationTokenSource.Token, _externalCancellationToken);
-                var tasks = StartScopedStreamProessors(linkedTokenSource.Token);
+                var tasks = StartScopedStreamProcessors(linkedTokenSource.Token);
                 await Task.WhenAny(tasks).ConfigureAwait(false);
                 if (TryGetException(tasks, out var ex))
                 {
@@ -152,7 +147,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _disposed = true;
         }
 
-        IEnumerable<Task> StartScopedStreamProessors(CancellationToken cancellationToken) => _streamProcessors.Select(
+        IEnumerable<Task> StartScopedStreamProcessors(CancellationToken cancellationToken) => _streamProcessors.Select(
             _ => Task.Run(async () =>
                 {
                     (var tenant, var streamProcessor) = _;
@@ -169,74 +164,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
 
             return exception != default;
-        }
-
-        async Task<AbstractScopedStreamProcessor> CreateScopedStreamProcessor(
-            TenantId tenant,
-            IEventProcessor eventProcessor,
-            IEventFetchers eventFetchers,
-            IStreamProcessorStateRepository streamProcessorStates)
-        {
-            if (_streamDefinition.Partitioned)
-            {
-                var eventFetcher = await eventFetchers.GetPartitionedFetcherFor(eventProcessor.Scope, _streamDefinition, _externalCancellationToken).ConfigureAwait(false);
-                return await CreatePartitionedScopedStreamProcessor(tenant, eventProcessor, eventFetcher, streamProcessorStates).ConfigureAwait(false);
-            }
-            else
-            {
-                var eventFetcher = await eventFetchers.GetFetcherFor(eventProcessor.Scope, _streamDefinition, _externalCancellationToken).ConfigureAwait(false);
-                return await CreateUnpartitionedScopedStreamProcessor(tenant, eventProcessor, eventFetcher, streamProcessorStates).ConfigureAwait(false);
-            }
-        }
-
-        async Task<Partitioned.ScopedStreamProcessor> CreatePartitionedScopedStreamProcessor(
-            TenantId tenant,
-            IEventProcessor eventProcessor,
-            ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
-            IStreamProcessorStateRepository streamProcessorStates)
-        {
-            var tryGetStreamProcessorState = await streamProcessorStates.TryGetFor(_identifier, _externalCancellationToken).ConfigureAwait(false);
-            if (!tryGetStreamProcessorState.Success)
-            {
-                tryGetStreamProcessorState = Partitioned.StreamProcessorState.New;
-                await streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, _externalCancellationToken).ConfigureAwait(false);
-            }
-
-            if (!tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedPartitionedStreamProcessorState(_identifier);
-
-            return new Partitioned.ScopedStreamProcessor(
-                tenant,
-                _identifier,
-                tryGetStreamProcessorState.Result as Partitioned.StreamProcessorState,
-                eventProcessor,
-                streamProcessorStates,
-                eventsFromStreamsFetcher,
-                new Partitioned.FailingPartitions(streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _loggerManager.CreateLogger<Partitioned.FailingPartitions>()),
-                _loggerManager.CreateLogger<Partitioned.ScopedStreamProcessor>());
-        }
-
-        async Task<ScopedStreamProcessor> CreateUnpartitionedScopedStreamProcessor(
-            TenantId tenant,
-            IEventProcessor eventProcessor,
-            ICanFetchEventsFromStream eventsFromStreamsFetcher,
-            IStreamProcessorStateRepository streamProcessorStates)
-        {
-            var tryGetStreamProcessorState = await streamProcessorStates.TryGetFor(_identifier, _externalCancellationToken).ConfigureAwait(false);
-            if (!tryGetStreamProcessorState.Success)
-            {
-                tryGetStreamProcessorState = StreamProcessorState.New;
-                await streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, _externalCancellationToken).ConfigureAwait(false);
-            }
-
-            if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(_identifier);
-            return new ScopedStreamProcessor(
-                tenant,
-                _identifier,
-                tryGetStreamProcessorState.Result as StreamProcessorState,
-                eventProcessor,
-                streamProcessorStates,
-                eventsFromStreamsFetcher,
-                _loggerManager.CreateLogger<ScopedStreamProcessor>());
         }
     }
 }
