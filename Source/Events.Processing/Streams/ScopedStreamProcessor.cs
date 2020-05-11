@@ -46,8 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected override async Task<IStreamProcessorState> Catchup(IStreamProcessorState currentState, CancellationToken cancellationToken)
         {
             var streamProcessorState = currentState as StreamProcessorState;
-            if (!streamProcessorState.IsFailing) return streamProcessorState;
-            while (true)
+            while (streamProcessorState.IsFailing && !cancellationToken.IsCancellationRequested)
             {
                 if (!CanRetryProcessing(streamProcessorState.RetryTime))
                 {
@@ -58,9 +57,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 else
                 {
                     var @event = await _eventsFromStreamsFetcher.Fetch(streamProcessorState.Position, cancellationToken).ConfigureAwait(false);
-                    return await RetryProcessingEvent(@event, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, cancellationToken).ConfigureAwait(false);
+                    streamProcessorState = (await RetryProcessingEvent(@event, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, cancellationToken).ConfigureAwait(false)) as StreamProcessorState;
                 }
             }
+
+            return streamProcessorState;
         }
 
         /// <inheritdoc/>
@@ -80,7 +81,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected override async Task<IStreamProcessorState> OnRetryProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
             var oldState = currentState as StreamProcessorState;
-            var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1, oldState.LastSuccessfullyProcessed, true);
+            var newState = new StreamProcessorState(
+                oldState.Position,
+                failedProcessing.FailureReason,
+                DateTimeOffset.UtcNow.Add(failedProcessing.RetryTimeout),
+                oldState.ProcessingAttempts + 1,
+                oldState.LastSuccessfullyProcessed,
+                true);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }
