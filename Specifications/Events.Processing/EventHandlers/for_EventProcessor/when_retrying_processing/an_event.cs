@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.when_processing
+namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.when_retrying_processing
 {
     public class an_event : given.all_dependencies
     {
@@ -27,7 +27,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.wh
             dispatcher
                 .Setup(_ => _.Call(Moq.It.IsAny<Contracts.HandleEventRequest>(), CancellationToken.None))
                 .Returns(Task.FromResult(new Contracts.EventHandlerResponse()));
-
             @event = new CommittedEvent(
                 0,
                 DateTimeOffset.Now,
