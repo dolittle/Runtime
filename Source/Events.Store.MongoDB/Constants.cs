@@ -36,11 +36,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public const string StreamDefinitionCollection = "stream-definitions";
 
         /// <summary>
-        /// The collection name for subscription states.
-        /// </summary>
-        public const string SubscriptionStateCollection = "subscription-states";
-
-        /// <summary>
         /// Gets the collection name for a stream.
         /// </summary>
         /// <param name="streamId">The <see cref="StreamId" />.</param>
@@ -88,6 +83,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <returns>The scoped SubscriptionStateCollection name.</returns>
-        public static string CollectionNameForScopedSubscriptionStates(ScopeId scope) => $"x-{scope}-{SubscriptionStateCollection}";
+        public static string CollectionNameForScopedSubscriptionStates(ScopeId scope) => $"x-{scope}-subscription-states";
     }
 }
