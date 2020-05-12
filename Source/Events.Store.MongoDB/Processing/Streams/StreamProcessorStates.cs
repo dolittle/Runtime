@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             {
                 if (id is SubscriptionId subscriptionId)
                 {
-                    var states = await _connection.GetSubscriptionStateCollection(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
+                    var states = await _connection.GetScopedSubscriptionStateCollection(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
                     var persistedState = await states.Find(CreateFilter(subscriptionId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
@@ -104,7 +104,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             streamProcessorState.ProcessingAttempts,
                             streamProcessorState.LastSuccessfullyProcessed,
                             streamProcessorState.IsFailing);
-                        var states = await _connection.GetSubscriptionStateCollection(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
+                        var states = await _connection.GetScopedSubscriptionStateCollection(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
                         var persistedState = await states.ReplaceOneAsync(
                             CreateFilter(subscriptionId),
                             replacementState,
