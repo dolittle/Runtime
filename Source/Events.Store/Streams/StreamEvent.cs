@@ -17,12 +17,14 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         /// <param name="stream">The <see cref="StreamId" />.</param>
         /// <param name="partition">The <see cref="PartitionId" />.</param>
-        public StreamEvent(CommittedEvent @event, StreamPosition position, StreamId stream, PartitionId partition)
+        /// <param name="partitioned">Whether the event is partitioned.</param>
+        public StreamEvent(CommittedEvent @event, StreamPosition position, StreamId stream, PartitionId partition, bool partitioned)
         {
             Event = @event;
             Position = position;
             Stream = stream;
             Partition = partition;
+            Partitioned = partitioned;
         }
 
         /// <summary>
@@ -44,5 +46,10 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// Gets the <see cref="PartitionId">partition </see> that this event belongs to.
         /// </summary>
         public PartitionId Partition { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="StreamEvent"/> is partitioned.
+        /// </summary>
+        public bool Partitioned { get; }
     }
 }
