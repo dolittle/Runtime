@@ -3,7 +3,9 @@
 
 using System.Linq;
 using Dolittle.ResourceTypes.Configuration;
+using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -17,8 +19,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="configuration">A <see cref="IConfigurationFor{EventStoreConfiguration}"/> with database connection parameters.</param>
+        /// <remarks>
+        /// DiscriminatorConvetions need to be registered before everything else is done with MongoDB, otherwise the classes
+        /// will get assiged a BsonClassMapSerializer implicitly.
+        /// https://stackoverflow.com/a/30292486/5806412 .
+        /// </remarks>
         public DatabaseConnection(IConfigurationFor<EventStoreConfiguration> configuration)
         {
+            BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractStreamProcessorState), new StreamProcessorStateDiscriminatorConvetion());
             var config = configuration.Instance;
             var settings = new MongoClientSettings
             {
