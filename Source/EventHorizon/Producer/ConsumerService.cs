@@ -99,7 +99,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     return;
                 }
 
-                _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscrbed to tenant '{producerTenant}' starting at position '{lastReceivedPosition}' in partition '{partition}' in stream '{publicStream}'");
+                _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscribed to tenant '{producerTenant}' starting at position '{lastReceivedPosition}' in partition '{partition}' in stream '{publicStream}'");
 
                 var publicStreamPosition = new StreamPosition((ulong)(lastReceivedPosition + 1));
                 _executionContextManager.CurrentFor(
