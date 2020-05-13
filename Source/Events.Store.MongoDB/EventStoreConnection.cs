@@ -39,8 +39,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             StreamProcessorStates = connection.Database.GetCollection<AbstractStreamProcessorState>(Constants.StreamProcessorStateCollection);
             StreamDefinitions = connection.Database.GetCollection<MongoDB.Streams.StreamDefinition>(Constants.StreamDefinitionCollection);
 
-            SubscriptionStates = connection.Database.GetCollection<SubscriptionState>(Constants.SubscriptionStateCollection);
-
             CreateCollectionsAndIndexes();
         }
 
@@ -68,11 +66,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// Gets the <see cref="IMongoCollection{TDocument}" /> for <see cref="MongoDB.Streams.StreamDefinition" />.
         /// </summary>
         public IMongoCollection<MongoDB.Streams.StreamDefinition> StreamDefinitions { get; }
-
-        /// <summary>
-        /// Gets the <see cref="IMongoCollection{SubscriptionStates}" /> for <see cref="SubscriptionState" />.
-        /// </summary>
-        public IMongoCollection<SubscriptionState> SubscriptionStates { get; }
 
         /// <summary>
         /// Gets the correct <see cref="IMongoCollection{TDocument}" /> for <see cref="Events.StreamEvent" />.
@@ -196,23 +189,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         }
 
         /// <summary>
-        /// Gets the correct <see cref="IMongoCollection{TDocument}" /> for <see cref="SubscriptionState" />.
-        /// </summary>
-        /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The collection.</returns>
-        public Task<IMongoCollection<SubscriptionState>> GetSubscriptionStateCollection(
-            ScopeId scope,
-            CancellationToken cancellationToken) =>
-            scope == ScopeId.Default ? Task.FromResult(SubscriptionStates)
-                : GetScopedSubscriptionStateCollection(scope, cancellationToken);
-
-        /// <summary>
         /// Gets the scoped <see cref="IMongoCollection{TDocument}" /> for <see cref="SubscriptionState" />.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The collection.</returns>
+        /// <remarks>
+        /// All <see cref="SubscriptionState"/>'s are scoped, there is no collection for the default scope.
+        /// </remarks>
         public async Task<IMongoCollection<SubscriptionState>> GetScopedSubscriptionStateCollection(
             ScopeId scope,
             CancellationToken cancellationToken)
@@ -231,7 +215,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             CreateCollectionsAndIndexesForAggregates();
             CreateCollectionsAndIndexesForStreamProcessorStates();
             CreateCollectionsAndIndexesForTypePartitionFilterDefinitions();
-            CreateCollectionsAndIndexesForSubscriptionStates();
         }
 
         void CreateCollectionsAndIndexesForEventLog()
@@ -274,19 +257,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             StreamDefinitions.Indexes.CreateOne(new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
                 Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
                     .Ascending(_ => _.StreamId)));
-        }
-
-        void CreateCollectionsAndIndexesForSubscriptionStates()
-        {
-            SubscriptionStates.Indexes.CreateOne(new CreateIndexModel<SubscriptionState>(
-                    Builders<SubscriptionState>.IndexKeys
-                        .Ascending(_ => _.ConsumerTenantId)
-                        .Ascending(_ => _.ProducerMicroserviceId)
-                        .Ascending(_ => _.ProducerTenantId)
-                        .Ascending(_ => _.ScopeId)
-                        .Ascending(_ => _.StreamId)
-                        .Ascending(_ => _.PartitionId),
-                    new CreateIndexOptions { Unique = true }));
         }
 
         async Task CreateCollectionsAndIndexesForStreamEventsAsync(IMongoCollection<Events.StreamEvent> stream, CancellationToken cancellationToken)

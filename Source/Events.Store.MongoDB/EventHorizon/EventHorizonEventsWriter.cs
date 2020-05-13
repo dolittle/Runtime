@@ -45,6 +45,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                 cancellationToken).ConfigureAwait(false);
         }
 
+        // TODO add OriginSequenceNumber to GRPC so that we can use it
         MongoDB.Events.Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>
             new MongoDB.Events.Event(
                 sequenceNumber,
@@ -54,7 +55,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                     @event.EventSource,
                     @event.Type.Id,
                     @event.Type.Generation,
-                    @event.Public),
+                    @event.Public,
+                    true,
+                    sequenceNumber),
                 new AggregateMetadata(),
                 BsonDocument.Parse(@event.Content));
     }

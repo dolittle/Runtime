@@ -116,7 +116,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                         eventSource,
                         @event.Type.Id,
                         @event.Type.Generation,
-                        @event.Public),
+                        @event.Public,
+                        false,
+                        version),
                     aggregate,
                     BsonDocument.Parse(@event.Content)),
                 cancellationToken: cancellationToken);

@@ -24,7 +24,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.EventSource,
                 committedEvent.Type.Id,
                 committedEvent.Type.Generation,
-                committedEvent.Public);
+                committedEvent.Public,
+                false,
+                committedEvent.EventLogSequenceNumber);
 
         /// <summary>
         /// Converts a <see cref="Event" /> to <see cref="CommittedAggregateEvent" />.
