@@ -18,16 +18,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     {
         readonly FilterDefinitionBuilder<Events.StreamEvent> _streamFilter = Builders<Events.StreamEvent>.Filter;
         readonly IStreams _streams;
+        readonly IEventConverter _eventConverter;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsToStreamsWriter"/> class.
         /// </summary>
         /// <param name="streams">The <see cref="IStreams"/>.</param>
+        /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventsToStreamsWriter(IStreams streams, ILogger<EventsToStreamsWriter> logger)
+        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, ILogger<EventsToStreamsWriter> logger)
         {
             _streams = streams;
+            _eventConverter = eventConverter;
             _logger = logger;
         }
 
@@ -38,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             await Write(
                 await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamFilter,
-                streamPosition => @event.ToStoreStreamEvent(streamPosition, partition),
+                streamPosition => _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
                 cancellationToken).ConfigureAwait(false);
         }
 

@@ -15,14 +15,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     public class EventFetchers : IEventFetchers
     {
         readonly IStreams _streams;
+        readonly IEventConverter _eventConverter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventFetchers"/> class.
         /// </summary>
         /// <param name="streams">The <see cref="IStreams" />.</param>
-        public EventFetchers(IStreams streams)
+        /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
+        public EventFetchers(IStreams streams, IEventConverter eventConverter)
         {
             _streams = streams;
+            _eventConverter = eventConverter;
         }
 
         /// <inheritdoc/>
@@ -89,7 +92,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
                 Builders<MongoDB.Events.Event>.Filter,
                 _ => _.EventLogSequenceNumber,
-                Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent(false)),
+                Builders<MongoDB.Events.Event>.Projection.Expression(_ => _eventConverter.ToRuntimeStreamEvent(_)),
                 Builders<MongoDB.Events.Event>.Projection.Expression(_ => new Artifacts.Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)));
 
         StreamFetcher<MongoDB.Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<MongoDB.Events.StreamEvent> collection, StreamId streamId, bool partitioned) =>
@@ -97,7 +100,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 collection,
                 Builders<MongoDB.Events.StreamEvent>.Filter,
                 _ => _.StreamPosition,
-                Builders<MongoDB.Events.StreamEvent>.Projection.Expression(_ => _.ToRuntimeStreamEvent(streamId, partitioned)),
+                Builders<MongoDB.Events.StreamEvent>.Projection.Expression(_ => _eventConverter.ToRuntimeStreamEvent(_, streamId, partitioned)),
                 Builders<MongoDB.Events.StreamEvent>.Projection.Expression(_ => new Artifacts.Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)),
                 _ => _.Partition);
     }

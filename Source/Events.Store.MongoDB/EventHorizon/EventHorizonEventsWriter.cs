@@ -7,7 +7,6 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
@@ -20,6 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
         readonly IStreams _streams;
         readonly IEventsToStreamsWriter _eventsToStreamsWriter;
+        readonly IEventConverter _eventConverter;
         readonly ILogger _logger;
 
         /// <summary>
@@ -27,38 +27,30 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// </summary>
         /// <param name="streams">The <see cref="IStreams" />.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IEventsToStreamsWriter" />.</param>
+        /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public EventHorizonEventsWriter(IStreams streams, IEventsToStreamsWriter eventsToStreamsWriter, ILogger logger)
+        public EventHorizonEventsWriter(IStreams streams, IEventsToStreamsWriter eventsToStreamsWriter, IEventConverter eventConverter, ILogger logger)
         {
             _streams = streams;
             _eventsToStreamsWriter = eventsToStreamsWriter;
+            _eventConverter = eventConverter;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken)
         {
+            _logger.Trace(
+                "Writing Event Horizon Event: {EventLogSequenceNumber} from Tenant: {Tenant} in Microservice {Microservice} to Scope: {Scope}",
+                @event.EventLogSequenceNumber,
+                @event.ExecutionContext.Tenant,
+                @event.ExecutionContext.Microservice,
+                scope);
             await _eventsToStreamsWriter.Write(
                 await _streams.GetEventLog(scope, cancellationToken).ConfigureAwait(false),
                 _eventFilter,
-                streamPosition => CreateEventFromEventHorizonEvent(@event, streamPosition.Value),
+                streamPosition => _eventConverter.ToScopedEventLogEvent(@event, streamPosition.Value),
                 cancellationToken).ConfigureAwait(false);
         }
-
-        // TODO add OriginSequenceNumber to GRPC so that we can use it
-        MongoDB.Events.Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>
-            new MongoDB.Events.Event(
-                sequenceNumber,
-                @event.ExecutionContext.ToStoreRepresentation(),
-                new EventMetadata(
-                    @event.Occurred,
-                    @event.EventSource,
-                    @event.Type.Id,
-                    @event.Type.Generation,
-                    @event.Public,
-                    true,
-                    sequenceNumber),
-                new AggregateMetadata(),
-                BsonDocument.Parse(@event.Content));
     }
 }
