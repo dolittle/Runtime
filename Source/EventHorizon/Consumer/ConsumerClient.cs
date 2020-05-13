@@ -273,7 +273,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         @event.ToCommittedEvent(subscriptionId.ProducerMicroserviceId, subscriptionId.ConsumerTenantId),
                         @event.StreamSequenceNumber,
                         StreamId.EventLog,
-                        Guid.Empty),
+                        Guid.Empty,
+                        false),
                     cancellationToken).ConfigureAwait(false);
             }
         }

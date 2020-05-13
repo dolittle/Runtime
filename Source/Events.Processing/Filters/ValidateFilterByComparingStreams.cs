@@ -73,7 +73,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var streamDefinition = new StreamDefinition(filter.Definition);
             var streamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-            var sourceStreamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(filter.Scope, new EventLogStreamDefinition(), cancellationToken).ConfigureAwait(false);
+            var sourceStreamEventsFetcher = await _eventFetchers.GetRangeFetcherFor(
+                filter.Scope,
+                new EventLogStreamDefinition(),
+                cancellationToken).ConfigureAwait(false);
             var oldStream = await streamEventsFetcher.FetchRange(
                 new StreamPositionRange(StreamPosition.Start, ulong.MaxValue),
                 cancellationToken)
@@ -87,7 +90,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
             {
                 var processingResult = await filter.Filter(@event, Guid.Empty, filter.Identifier, cancellationToken).ConfigureAwait(false);
-                if (processingResult.IsIncluded) newStream.Add(new StreamEvent(@event, new StreamPosition((ulong)streamPosition++), filter.Definition.TargetStream, processingResult.Partition));
+                if (processingResult.IsIncluded)
+                {
+                    newStream.Add(new StreamEvent(
+                        @event,
+                        new StreamPosition((ulong)streamPosition++),
+                        filter.Definition.TargetStream,
+                        processingResult.Partition,
+                        streamDefinition.Partitioned));
+                }
             }
 
             var oldStreamList = oldStream.ToList();

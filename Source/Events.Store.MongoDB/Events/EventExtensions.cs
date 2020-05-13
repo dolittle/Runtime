@@ -63,8 +63,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Converts a <see cref="Event" /> to a <see cref="Store.Streams.StreamEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
+        /// <param name="partitioned">Whether the event is partitioned.</param>
         /// <returns>The converted <see cref="Store.Streams.StreamEvent" />.</returns>
-        public static Store.Streams.StreamEvent ToRuntimeStreamEvent(this Event @event) =>
-            new Store.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.EventLog, Guid.Empty);
+        public static Store.Streams.StreamEvent ToRuntimeStreamEvent(this Event @event, bool partitioned) =>
+            new Store.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.EventLog, Guid.Empty, partitioned);
     }
 }
