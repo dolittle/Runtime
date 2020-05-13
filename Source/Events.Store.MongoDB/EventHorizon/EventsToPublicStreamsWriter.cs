@@ -18,33 +18,36 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
     public class EventsToPublicStreamsWriter : IWriteEventsToPublicStreams
     {
         readonly FilterDefinitionBuilder<Events.StreamEvent> _filter = Builders<Events.StreamEvent>.Filter;
-        readonly EventStoreConnection _connection;
+        readonly IStreams _streams;
+        readonly IEventsToStreamsWriter _eventsToStreamsWriter;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsToPublicStreamsWriter"/> class.
         /// </summary>
-        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
+        /// <param name="streams">The <see cref="IStreams" />.</param>
+        /// <param name="eventsToStreamsWriter">The <see cref="IEventsToStreamsWriter" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public EventsToPublicStreamsWriter(EventStoreConnection connection, ILogger logger)
+        public EventsToPublicStreamsWriter(IStreams streams, IEventsToStreamsWriter eventsToStreamsWriter, ILogger logger)
         {
-            _connection = connection;
+            _streams = streams;
+            _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
         }
 
         /// <inheritdoc/>
-        public Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken) =>
-            Write(@event, ScopeId.Default, streamId, partitionId, cancellationToken);
-
-        /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, ScopeId scope, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken)
+        public async Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            await EventsToStreamsWriter.Write(
-                _connection,
-                await _connection.GetPublicStreamCollection(streamId, cancellationToken).ConfigureAwait(false),
+            _logger.Trace("Writing Event: {EventLogSequenceNumber} to Public Stream: {Stream}", @event.EventLogSequenceNumber, streamId);
+            await _eventsToStreamsWriter.Write(
+                await _streams.GetPublic(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,
                 streamPosition => @event.ToStoreStreamEvent(streamPosition, partitionId),
                 cancellationToken).ConfigureAwait(false);
         }
+
+        /// <inheritdoc/>
+        public Task Write(CommittedEvent @event, ScopeId scope, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken) =>
+            Write(@event, streamId, partitionId, cancellationToken);
     }
 }

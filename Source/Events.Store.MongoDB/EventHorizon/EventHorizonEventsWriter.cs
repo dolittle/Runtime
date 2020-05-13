@@ -18,28 +18,28 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
     public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     {
         readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
-        readonly EventStoreConnection _connection;
+        readonly IStreams _streams;
+        readonly IEventsToStreamsWriter _eventsToStreamsWriter;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHorizonEventsWriter"/> class.
         /// </summary>
-        /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
-        /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventHorizonEventsWriter(
-            EventStoreConnection connection,
-            ILogger logger)
+        /// <param name="streams">The <see cref="IStreams" />.</param>
+        /// <param name="eventsToStreamsWriter">The <see cref="IEventsToStreamsWriter" />.</param>
+        /// <param name="logger">The <see cref="ILogger" />.</param>
+        public EventHorizonEventsWriter(IStreams streams, IEventsToStreamsWriter eventsToStreamsWriter, ILogger logger)
         {
-            _connection = connection;
+            _streams = streams;
+            _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken)
         {
-            await EventsToStreamsWriter.Write(
-                _connection,
-                await _connection.GetScopedEventLog(scope, cancellationToken).ConfigureAwait(false),
+            await _eventsToStreamsWriter.Write(
+                await _streams.GetEventLog(scope, cancellationToken).ConfigureAwait(false),
                 _eventFilter,
                 streamPosition => CreateEventFromEventHorizonEvent(@event, streamPosition.Value),
                 cancellationToken).ConfigureAwait(false);

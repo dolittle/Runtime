@@ -7,7 +7,7 @@ using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
+namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
 {
     /// <summary>
     /// Represents the state of an <see cref="SubscriptionState" />.

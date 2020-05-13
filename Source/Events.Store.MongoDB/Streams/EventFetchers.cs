@@ -14,15 +14,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// </summary>
     public class EventFetchers : IEventFetchers
     {
-        readonly EventStoreConnection _connection;
+        readonly IStreams _streams;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventFetchers"/> class.
         /// </summary>
-        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
-        public EventFetchers(EventStoreConnection connection)
+        /// <param name="streams">The <see cref="IStreams" />.</param>
+        public EventFetchers(IStreams streams)
         {
-            _connection = connection;
+            _streams = streams;
         }
 
         /// <inheritdoc/>
@@ -36,12 +36,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             if (streamDefinition.Public)
             {
                 return CreateStreamFetcherForStreamEventCollection(
-                    await _connection.GetPublicStreamCollection(streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
+                    await _streams.GetPublic(streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
                     streamDefinition.StreamId);
             }
 
             return CreateStreamFetcherForStreamEventCollection(
-                await _connection.GetStreamCollection(scopeId, streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
+                await _streams.Get(scopeId, streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
                 streamDefinition.StreamId);
         }
 
@@ -53,12 +53,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             if (streamDefinition.Public)
             {
                 return CreateStreamFetcherForStreamEventCollection(
-                    await _connection.GetPublicStreamCollection(streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
+                    await _streams.GetPublic(streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
                     streamDefinition.StreamId);
             }
 
             return CreateStreamFetcherForStreamEventCollection(
-                await _connection.GetStreamCollection(scopeId, streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
+                await _streams.Get(scopeId, streamDefinition.StreamId, cancellationToken).ConfigureAwait(false),
                 streamDefinition.StreamId);
         }
 
@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         async Task<StreamFetcher<MongoDB.Events.Event>> CreateStreamFetcherForEventLog(ScopeId scopeId, CancellationToken cancellationToken) =>
             new StreamFetcher<MongoDB.Events.Event>(
-                await _connection.GetEventLogCollection(scopeId, cancellationToken).ConfigureAwait(false),
+                await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
                 Builders<MongoDB.Events.Event>.Filter,
                 _ => _.EventLogSequenceNumber,
                 Builders<MongoDB.Events.Event>.Projection.Expression(_ => _.ToRuntimeStreamEvent()),
