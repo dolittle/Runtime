@@ -10,8 +10,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
     /// Represents the base state of an <see cref="AbstractScopedStreamProcessor" />.
+    /// It has a programmatically assigned <see cref="StreamProcessorStateDiscriminatorConvetion"/> which takes care of
+    /// serializing <see cref="StreamProcessorState"/> and <see cref="Partitioned.PartitionedStreamProcessorState"/> to
+    /// this collection.
     /// </summary>
-    [BsonDiscriminator(RootClass = true, Required = true)]
     [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.PartitionedStreamProcessorState))]
     [BsonIgnoreExtraElements]
     public abstract class AbstractStreamProcessorState
@@ -25,13 +27,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="position">The position.</param>
         /// <param name="partitioned">Whether it is partitioned.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
+        /// <param name="typeName">Name of the inheriting type.</param>
         protected AbstractStreamProcessorState(
             Guid scopeId,
             Guid eventProcessorId,
             Guid sourceStreamId,
             ulong position,
             bool partitioned,
-            DateTimeOffset lastSuccessfullyProcessed)
+            DateTimeOffset lastSuccessfullyProcessed,
+            string typeName)
         {
             ScopeId = scopeId;
             EventProcessorId = eventProcessorId;
@@ -39,6 +43,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Position = position;
             Partitioned = partitioned;
             LastSuccessfullyProcessed = lastSuccessfullyProcessed;
+            TypeName = typeName;
         }
 
         /// <summary>
@@ -72,5 +77,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         [BsonRepresentation(BsonType.Document)]
         public DateTimeOffset LastSuccessfullyProcessed { get; set; }
+
+        /// <summary>
+        /// Gets or sets the inheriting types name.
+        /// </summary>
+        public string TypeName { get; set; }
     }
 }
