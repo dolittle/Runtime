@@ -14,37 +14,36 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// <summary>
     /// Represents an implementation of <see cref="IWriteEventsToStreams" />.
     /// </summary>
-    public class EventsToStreamsWriter : IWriteEventsToStreams
+    public class EventsToStreamsWriter : IEventsToStreamsWriter, IWriteEventsToStreams
     {
-        readonly FilterDefinitionBuilder<Events.StreamEvent> _streamEventFilter = Builders<Events.StreamEvent>.Filter;
-        readonly EventStoreConnection _connection;
+        readonly FilterDefinitionBuilder<Events.StreamEvent> _streamFilter = Builders<Events.StreamEvent>.Filter;
+        readonly IStreams _streams;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsToStreamsWriter"/> class.
         /// </summary>
-        /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
+        /// <param name="streams">The <see cref="IStreams"/>.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventsToStreamsWriter(
-            EventStoreConnection connection,
-            ILogger logger)
+        public EventsToStreamsWriter(IStreams streams, ILogger<EventsToStreamsWriter> logger)
         {
-            _connection = connection;
+            _streams = streams;
             _logger = logger;
         }
 
-        /// <summary>
-        /// Writes an event to a stream collection.
-        /// </summary>
-        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
-        /// <param name="stream">The <see cref="IMongoCollection{TDocument}" /> to write to.</param>
-        /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" /> for the event type.</param>
-        /// <param name="createStoreEvent">The callback that creates the event to store.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <typeparam name="TEvent">The type of the stored event.</typeparam>
-        /// <returns>A task representing the write transaction.</returns>
-        public static async Task Write<TEvent>(
-            EventStoreConnection connection,
+        /// <inheritdoc/>
+        public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken)
+        {
+            _logger.Trace("Writing Event: {EventLogSequenceNumber} to Stream: {Stream} in Scope: {Scope}", @event.EventLogSequenceNumber, stream, scope);
+            await Write(
+                await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
+                _streamFilter,
+                streamPosition => @event.ToStoreStreamEvent(streamPosition, partition),
+                cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public async Task Write<TEvent>(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             Func<StreamPosition, TEvent> createStoreEvent,
@@ -54,7 +53,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             StreamPosition streamPosition = null;
             try
             {
-                using var session = await connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
+                using var session = await _streams.StartSessionAsync().ConfigureAwait(false);
                 await session.WithTransactionAsync(
                     async (transaction, cancellationToken) =>
                     {
@@ -74,17 +73,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
-        }
-
-        /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken)
-        {
-            await Write(
-                _connection,
-                await _connection.GetStreamCollection(scope, stream, cancellationToken).ConfigureAwait(false),
-                _streamEventFilter,
-                streamPosition => @event.ToStoreStreamEvent(streamPosition, partition),
-                cancellationToken).ConfigureAwait(false);
         }
     }
 }
