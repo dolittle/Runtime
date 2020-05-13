@@ -14,9 +14,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// This way we skip the need for the '_t' field in the StreamProcessorState collection.
     /// </summary>
     /// <remarks>
-    /// DiscriminatorConvetions need to be registered before everything else is done with MongoDB, otherwise the classes
-    /// will get assiged a BsonClassMapSerializer implicitly.
-    /// See: https://stackoverflow.com/a/30292486/5806412
     /// This class was based mostly on information I gathered from these 2 sources:
     /// https://groups.google.com/forum/#!topic/mongodb-user/iOeEXbUYbo4
     /// https://github.com/mongodb/mongo-csharp-driver/blob/6b73e381827f83af368a949a807076dad01607fc/MongoDB.DriverUnitTests/Samples/MagicDiscriminatorTests.cs#L53 .
@@ -32,8 +29,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             var actualType = nominalType;
             while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
             {
-                var name = bsonReader.ReadName();
-                if (name == "Partitioned")
+                var fieldName = bsonReader.ReadName();
+                if (fieldName == "Partitioned")
                 {
                     var partitioned = bsonReader.ReadBoolean();
                     if (partitioned)
