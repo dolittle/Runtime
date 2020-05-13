@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.w
         Establish context = () =>
         {
             cancellation_token_source = new CancellationTokenSource();
-            var event_with_partition = new StreamEvent(first_event, StreamPosition.Start, Guid.NewGuid(), partition_id);
+            var event_with_partition = new StreamEvent(first_event, StreamPosition.Start, Guid.NewGuid(), partition_id, false);
             event_processor
                 .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
