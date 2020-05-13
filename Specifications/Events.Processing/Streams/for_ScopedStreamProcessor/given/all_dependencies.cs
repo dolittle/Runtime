@@ -38,7 +38,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
             event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
             event_processor.SetupGet(_ => _.Scope).Returns(scope_id);
             stream_processors = new Mock<IStreamProcessors>();
-            stream_processor = new ScopedStreamProcessor(tenant_id, stream_processor_id, StreamProcessorState.New, event_processor.Object, stream_processor_state_repository, events_fetcher.Object, Mock.Of<ILogger<ScopedStreamProcessor>>());
+            stream_processor = new ScopedStreamProcessor(
+                tenant_id,
+                stream_processor_id,
+                StreamProcessorState.New,
+                event_processor.Object,
+                stream_processor_state_repository,
+                events_fetcher.Object,
+                Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
     }
 }
