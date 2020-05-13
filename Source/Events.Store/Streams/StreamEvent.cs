@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public PartitionId Partition { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the StreamEvent is partitioned.
+        /// Gets a value indicating whether the <see cref="StreamEvent"/> is partitioned.
         /// </summary>
         public bool Partitioned { get; }
     }
