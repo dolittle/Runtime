@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
@@ -17,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="StreamEvent" />.</returns>
-        Task<StreamEvent> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken);
+        /// <returns>The <see cref="Try{TResult}" /> with <see cref="StreamEvent" /> result.</returns>
+        Task<Try<StreamEvent>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken);
     }
 }

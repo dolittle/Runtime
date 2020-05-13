@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     {
         readonly TenantId _tenantId;
         readonly IEventProcessor _processor;
-        readonly CancellationToken _cancellationToken;
         IStreamProcessorState _currentState;
         bool _started;
 
@@ -30,21 +29,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="initialState">The initial state of the <see cref="IStreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         protected AbstractScopedStreamProcessor(
             TenantId tenantId,
             IStreamProcessorId streamProcessorId,
             IStreamProcessorState initialState,
             IEventProcessor processor,
-            ILogger logger,
-            CancellationToken cancellationToken)
+            ILogger logger)
         {
             Identifier = streamProcessorId;
             Logger = logger;
             _currentState = initialState;
             _tenantId = tenantId;
             _processor = processor;
-            _cancellationToken = cancellationToken;
         }
 
         /// <summary>
@@ -58,19 +54,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected ILogger Logger { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the processing should stop.
-        /// </summary>
-        protected bool ShouldStop => _cancellationToken.IsCancellationRequested;
-
-        /// <summary>
         /// Starts the stream processing.
         /// </summary>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public Task Start()
+        public Task Start(CancellationToken cancellationToken)
         {
             if (_started) throw new StreamProcessorAlreadyProcessingStream(Identifier);
             _started = true;
-            return BeginProcessing();
+            return BeginProcessing(cancellationToken);
         }
 
         /// <summary>
@@ -165,19 +157,19 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return OnSuccessfulProcessingResult(processingResult as SuccessfulProcessing, processedEvent, currentState);
         }
 
-        async Task BeginProcessing()
+        async Task BeginProcessing(CancellationToken cancellationToken)
         {
             try
             {
                 do
                 {
                     StreamEvent @event = default;
-                    while (@event == default && !ShouldStop)
+                    while (@event == default && !cancellationToken.IsCancellationRequested)
                     {
                         try
                         {
-                            _currentState = await Catchup(_currentState, _cancellationToken).ConfigureAwait(false);
-                            @event = await FetchEventToProcess(_currentState, _cancellationToken).ConfigureAwait(false);
+                            _currentState = await Catchup(_currentState, cancellationToken).ConfigureAwait(false);
+                            @event = await FetchEventToProcess(_currentState, cancellationToken).ConfigureAwait(false);
                             if (@event == default) await Task.Delay(250).ConfigureAwait(false);
                         }
                         catch (EventStoreUnavailable)
@@ -186,14 +178,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         }
                     }
 
-                    if (ShouldStop) break;
-                    _currentState = await ProcessEvent(@event, _currentState, _cancellationToken).ConfigureAwait(false);
+                    if (cancellationToken.IsCancellationRequested) break;
+                    _currentState = await ProcessEvent(@event, _currentState, cancellationToken).ConfigureAwait(false);
                 }
-                while (!ShouldStop);
+                while (!cancellationToken.IsCancellationRequested);
             }
             catch (Exception ex)
             {
-                if (!ShouldStop)
+                if (!cancellationToken.IsCancellationRequested)
                 {
                     Logger.Warning(ex, "{streamProcessorId} for tenant {tenantId} failed", Identifier, _tenantId);
                 }

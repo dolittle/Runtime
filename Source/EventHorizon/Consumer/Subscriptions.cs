@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using Dolittle.Lifecycle;
@@ -37,41 +36,43 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         public bool HasSubscription(SubscriptionId subscriptionId) => _subscriptions.ContainsKey(subscriptionId);
 
         /// <inheritdoc />
-        public bool TrySubscribe(SubscriptionId subscriptionId, EventProcessor eventProcessor, EventsFromEventHorizonFetcher eventsFetcher, CancellationToken cancellationToken, out Subscription subscription)
+        public bool TrySubscribe(
+            SubscriptionId subscriptionId,
+            EventProcessor eventProcessor,
+            EventsFromEventHorizonFetcher eventsFetcher,
+            CancellationToken cancellationToken,
+            out Subscription subscription)
         {
             subscription = default;
-            try
+            if (_subscriptions.ContainsKey(subscriptionId))
             {
-                if (!_subscriptions.ContainsKey(subscriptionId))
-                {
-                    _logger.Warning("Subscription: '{streamProcessorId}' already registered", subscriptionId);
-                    return false;
-                }
-
-                subscription = new Subscription(
-                    subscriptionId,
-                    eventProcessor,
-                    eventsFetcher,
-                    _streamProcessorStates,
-                    () => _subscriptions.TryRemove(subscriptionId, out var _),
-                    _loggerManager,
-                    cancellationToken);
-                if (!_subscriptions.TryAdd(subscriptionId, subscription))
-                {
-                    _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", subscriptionId);
-                    subscription = default;
-                    return false;
-                }
-
-                _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", subscriptionId);
-                return true;
+                _logger.Warning("Subscription: '{subscriptionId}' already registered", subscriptionId);
+                return false;
             }
-            catch (Exception ex)
+
+            subscription = new Subscription(
+                subscriptionId,
+                eventProcessor,
+                eventsFetcher,
+                _streamProcessorStates,
+                () => Unregister(subscriptionId),
+                _loggerManager,
+                cancellationToken);
+            if (!_subscriptions.TryAdd(subscriptionId, subscription))
             {
-                _logger.Warning(ex, "Failed to register Stream Processor with Id: '{streamProcessorId}' for Tenant: '{tenant}'", subscriptionId);
+                _logger.Warning("Subscription: '{subscriptionId}' already registered", subscriptionId);
                 subscription = default;
                 return false;
             }
+
+            _logger.Trace("Subscription: '{subscriptionId}' registered", subscriptionId);
+            return true;
+        }
+
+        void Unregister(SubscriptionId id)
+        {
+            _logger.Debug("Unregistering Subscription: {subscriptionId}", id);
+            _subscriptions.TryRemove(id, out var _);
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
+using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
@@ -70,15 +71,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Store.Streams.StreamEvent> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
+        public async Task<Try<Store.Streams.StreamEvent>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             try
             {
-                return await _stream.Find(
+                var @event = await _stream.Find(
                     _filter.Eq(_partitionIdExpression, partitionId.Value)
                         & _filter.Gte(_sequenceNumberExpression, streamPosition.Value))
+                    .Limit(1)
                     .Project(_eventToStreamEvent)
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                return (@event != default, @event);
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -94,12 +97,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             try
             {
                 var maxNumEvents = range.Length;
-                int? limit = (int)maxNumEvents;
-                if (limit < 0) limit = null;
                 var events = await _stream.Find(
                         _filter.Gte(_sequenceNumberExpression, range.From.Value)
-                            & _filter.Lte(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Limit(limit)
+                            & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
                     .Project(_eventToStreamEvent)
                     .ToListAsync(cancellationToken)
                     .ConfigureAwait(false);
@@ -118,13 +118,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var maxNumEvents = range.Length;
-                int? limit = (int)maxNumEvents;
-                if (limit < 0) limit = null;
                 return await _stream
                     .Find(_filter.Gte(_sequenceNumberExpression, range.From.Value)
-                        & _filter.Lte(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Limit(limit)
+                        & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
                     .Project(_eventToArtifact)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -139,14 +135,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var maxNumEvents = range.Length;
-                int? limit = (int)maxNumEvents;
-                if (limit < 0) limit = null;
                 return await _stream
                     .Find(_filter.Eq(_partitionIdExpression, partitionId.Value)
                         & _filter.Gte(_sequenceNumberExpression, range.From.Value)
-                        & _filter.Lte(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Limit(limit)
+                        & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
                     .Project(_eventToArtifact)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
             }

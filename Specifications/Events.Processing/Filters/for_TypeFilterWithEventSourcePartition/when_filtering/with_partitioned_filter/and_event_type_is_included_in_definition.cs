@@ -6,6 +6,7 @@ using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.when_filtering.with_partitioned_filter
@@ -25,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
                 scope,
                 new TypeFilterWithEventSourcePartitionDefinition(Guid.NewGuid(), Guid.NewGuid(), new ArtifactId[] { artifact.Id }.AsEnumerable(), true),
                 writer.Object,
-                Moq.Mock.Of<ILogger>());
+                Moq.Mock.Of<ILogger<TypeFilterWithEventSourcePartition>>());
         };
 
         Because of = () => result = filter.Filter(given.committed_events.single_with_artifact(partition.Value, artifact), Guid.NewGuid(), Guid.NewGuid(), default).GetAwaiter().GetResult();

@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store
             {
                 AggregateRootId = committedAggregateEvents.AggregateRoot.Value.ToProtobuf(),
                 EventSourceId = committedAggregateEvents.EventSource.ToProtobuf(),
-                AggregateRootVersion = committedAggregateEvents[^1]?.AggregateRootVersion
+                AggregateRootVersion = committedAggregateEvents.AsEnumerable().LastOrDefault()?.AggregateRootVersion
             };
             protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));
             return protobuf;

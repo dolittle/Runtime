@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Dolittle.Artifacts;
 using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.when_filtering.with_non_partitioned_filter
@@ -21,12 +21,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
                 scope,
                 new TypeFilterWithEventSourcePartitionDefinition(Guid.NewGuid(), Guid.NewGuid(), new ArtifactId[] { given.artifacts.single().Id }.AsEnumerable(), false),
                 writer.Object,
-                Moq.Mock.Of<ILogger>());
+                Moq.Mock.Of<ILogger<TypeFilterWithEventSourcePartition>>());
         };
 
         Because of = () => result = filter.Filter(given.committed_events.single(Guid.NewGuid()), Guid.NewGuid(), Guid.NewGuid(), default).GetAwaiter().GetResult();
 
-        It should_have_the_correct_partition = () => result.Partition.ShouldEqual(PartitionId.NotSet);
+        It should_have_the_correct_partition = () => result.Partition.Value.ShouldEqual(Guid.Empty);
         It should_be_successful = () => result.Succeeded.ShouldBeTrue();
         It should_not_retry = () => result.Retry.ShouldBeFalse();
         It should_not_be_included = () => result.IsIncluded.ShouldBeFalse();
