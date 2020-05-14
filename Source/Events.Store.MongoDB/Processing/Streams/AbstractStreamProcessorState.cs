@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
     /// Represents the base state of an <see cref="AbstractScopedStreamProcessor" />.
-    /// It has a programmatically assigned <see cref="StreamProcessorStateDiscriminatorConvetion"/> which takes care of
+    /// It has a programmatically assigned <see cref="StreamProcessorStateDiscriminatorConvention"/> which takes care of
     /// serializing <see cref="StreamProcessorState"/> and <see cref="Partitioned.PartitionedStreamProcessorState"/> to
     /// this collection.
     /// </summary>

@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </remarks>
         void RegisterCustomDiscriminators()
         {
-            BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractStreamProcessorState), new StreamProcessorStateDiscriminatorConvetion());
+            BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractStreamProcessorState), new StreamProcessorStateDiscriminatorConvention());
         }
     }
 }
