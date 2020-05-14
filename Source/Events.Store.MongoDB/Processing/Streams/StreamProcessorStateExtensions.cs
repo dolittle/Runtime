@@ -26,13 +26,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 state.IsFailing);
 
         /// <summary>
-        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.
+        /// Converts the given derived class of <see cref="AbstractStreamProcessorState"/> to its corresponding runtime representation.
         /// </summary>
-        /// <param name="state">The <see cref="StreamProcessorState" />.</param>
+        /// <param name="state">The <see cref="AbstractStreamProcessorState" />.</param>
         /// <returns>The converted <see cref="IStreamProcessorState" />.</returns>
-        public static IStreamProcessorState ToRuntimeRepresentation(this AbstractStreamProcessorState state) =>
-            state.Partitioned ?
-                (state as MongoDB.Processing.Streams.Partitioned.PartitionedStreamProcessorState).ToPartitionedStreamProcessorState() as IStreamProcessorState
-                : (state as MongoDB.Processing.Streams.StreamProcessorState).ToUnpartitionedStreamProcessorState() as IStreamProcessorState;
+        public static IStreamProcessorState ToRuntimeRepresentation(this AbstractStreamProcessorState state)
+        {
+            return state switch
+            {
+                PartitionedStreamProcessorState partitionedState => partitionedState.ToPartitionedStreamProcessorState(),
+                StreamProcessorState streamState => streamState.ToUnpartitionedStreamProcessorState(),
+                _ => throw new UnsupportedStateDerivedFromAbstractStreamProcessorState(state)
+            };
+        }
     }
 }
