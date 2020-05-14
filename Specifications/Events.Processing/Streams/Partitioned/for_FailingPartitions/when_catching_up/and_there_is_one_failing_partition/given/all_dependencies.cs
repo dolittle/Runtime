@@ -25,9 +25,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
             stream_processor_state.FailingPartitions.Add(failing_partition_id, failing_partition_state);
             events = new[]
                 {
-                    new StreamEvent(committed_events.single(), 0, stream_id, failing_partition_id),
-                    new StreamEvent(committed_events.single(), 1, stream_id, failing_partition_id),
-                    new StreamEvent(committed_events.single(), 2, stream_id, failing_partition_id),
+                    new StreamEvent(committed_events.single(), 0, stream_id, failing_partition_id, true),
+                    new StreamEvent(committed_events.single(), 1, stream_id, failing_partition_id, true),
+                    new StreamEvent(committed_events.single(), 2, stream_id, failing_partition_id, true),
                 };
         };
     }

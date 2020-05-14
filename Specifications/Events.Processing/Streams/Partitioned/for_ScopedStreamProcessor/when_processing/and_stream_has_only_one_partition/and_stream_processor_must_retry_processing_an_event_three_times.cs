@@ -34,13 +34,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(failure_reason)));
             events_fetcher
                 .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id)));
+                .Returns(Task.FromResult(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true)));
             events_fetcher
                 .Setup(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()))
                 .Throws(new Exception());
             events_fetcher
                 .Setup(_ => _.FetchInPartition(partition_id, 0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<StreamEvent>>((true, new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id))));
+                .Returns(Task.FromResult<Try<StreamEvent>>((true, new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true))));
         };
 
         Because of = () => stream_processor.Start(CancellationToken.None).GetAwaiter().GetResult();

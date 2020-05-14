@@ -7,7 +7,6 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
@@ -18,47 +17,40 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
     public class EventHorizonEventsWriter : IWriteEventHorizonEvents
     {
         readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
-        readonly EventStoreConnection _connection;
+        readonly IStreams _streams;
+        readonly IWriteEventsToStreamCollection _eventsToStreamsWriter;
+        readonly IEventConverter _eventConverter;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHorizonEventsWriter"/> class.
         /// </summary>
-        /// <param name="connection">An <see cref="EventStoreConnection"/> to a MongoDB EventStore.</param>
-        /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventHorizonEventsWriter(
-            EventStoreConnection connection,
-            ILogger logger)
+        /// <param name="streams">The <see cref="IStreams" />.</param>
+        /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreamCollection" />.</param>
+        /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
+        /// <param name="logger">The <see cref="ILogger" />.</param>
+        public EventHorizonEventsWriter(IStreams streams, IWriteEventsToStreamCollection eventsToStreamsWriter, IEventConverter eventConverter, ILogger logger)
         {
-            _connection = connection;
+            _streams = streams;
+            _eventsToStreamsWriter = eventsToStreamsWriter;
+            _eventConverter = eventConverter;
             _logger = logger;
         }
 
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken)
         {
-            await EventsToStreamsWriter.Write(
-                _connection,
-                await _connection.GetScopedEventLog(scope, cancellationToken).ConfigureAwait(false),
+            _logger.Trace(
+                "Writing Event Horizon Event: {EventLogSequenceNumber} from Tenant: {Tenant} in Microservice {Microservice} to Scope: {Scope}",
+                @event.EventLogSequenceNumber,
+                @event.ExecutionContext.Tenant,
+                @event.ExecutionContext.Microservice,
+                scope);
+            await _eventsToStreamsWriter.Write(
+                await _streams.GetEventLog(scope, cancellationToken).ConfigureAwait(false),
                 _eventFilter,
-                streamPosition => CreateEventFromEventHorizonEvent(@event, streamPosition.Value),
+                streamPosition => _eventConverter.ToScopedEventLogEvent(@event, streamPosition.Value),
                 cancellationToken).ConfigureAwait(false);
         }
-
-        // TODO add OriginSequenceNumber to GRPC so that we can use it
-        MongoDB.Events.Event CreateEventFromEventHorizonEvent(CommittedEvent @event, EventLogSequenceNumber sequenceNumber) =>
-            new MongoDB.Events.Event(
-                sequenceNumber,
-                @event.ExecutionContext.ToStoreRepresentation(),
-                new EventMetadata(
-                    @event.Occurred,
-                    @event.EventSource,
-                    @event.Type.Id,
-                    @event.Type.Generation,
-                    @event.Public,
-                    true,
-                    sequenceNumber),
-                new AggregateMetadata(),
-                BsonDocument.Parse(@event.Content));
     }
 }

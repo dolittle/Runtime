@@ -15,15 +15,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     /// </summary>
     public class StreamDefinitionRepository : IStreamDefinitionRepository
     {
-        readonly EventStoreConnection _connection;
+        readonly IStreams _streams;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamDefinitionRepository"/> class.
         /// </summary>
-        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
-        public StreamDefinitionRepository(EventStoreConnection connection)
+        /// <param name="streams">The <see cref="IStreams" />.</param>
+        public StreamDefinitionRepository(IStreams streams)
         {
-            _connection = connection;
+            _streams = streams;
         }
 
         /// <inheritdoc/>
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var streamDefinitions = await _connection.GetStreamDefinitionsCollection(scope, cancellationToken).ConfigureAwait(false);
+                var streamDefinitions = await _streams.GetDefinitions(scope, cancellationToken).ConfigureAwait(false);
                 await streamDefinitions.ReplaceOneAsync(
                     Builders<StreamDefinition>.Filter.Eq(_ => _.StreamId, streamDefinition.StreamId.Value),
                     new StreamDefinition(
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var streamDefinitions = await _connection.GetStreamDefinitionsCollection(scope, cancellationToken).ConfigureAwait(false);
+                var streamDefinitions = await _streams.GetDefinitions(scope, cancellationToken).ConfigureAwait(false);
                 var streamDefinition = await streamDefinitions.Find(
                     Builders<StreamDefinition>.Filter.Eq(_ => _.StreamId, stream.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);

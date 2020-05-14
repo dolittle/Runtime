@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <returns>The <see cref="CommittedEvent" />.</returns>
         public static CommittedEvent ToCommittedEvent(this Contracts.EventHorizonEvent @event, Microservice producerMicroservice, TenantId consumerTenant) =>
             new CommittedEvent(
-                uint.MaxValue,
+                uint.MaxValue, // TODO: Origin event log sequence number here.
                 @event.Occurred.ToDateTimeOffset(),
                 @event.EventSourceId.To<EventSourceId>(),
                 new ExecutionContext(
