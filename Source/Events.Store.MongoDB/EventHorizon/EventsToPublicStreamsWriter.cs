@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
     {
         readonly FilterDefinitionBuilder<Events.StreamEvent> _filter = Builders<Events.StreamEvent>.Filter;
         readonly IStreams _streams;
-        readonly IEventsToStreamsWriter _eventsToStreamsWriter;
+        readonly IWriteEventsToStreamCollection _eventsToStreamsWriter;
         readonly IEventConverter _eventConverter;
         readonly ILogger _logger;
 
@@ -27,10 +27,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// Initializes a new instance of the <see cref="EventsToPublicStreamsWriter"/> class.
         /// </summary>
         /// <param name="streams">The <see cref="IStreams" />.</param>
-        /// <param name="eventsToStreamsWriter">The <see cref="IEventsToStreamsWriter" />.</param>
+        /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreamCollection" />.</param>
         /// <param name="eventConverter">THe <see cref="IEventConverter" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public EventsToPublicStreamsWriter(IStreams streams, IEventsToStreamsWriter eventsToStreamsWriter, IEventConverter eventConverter, ILogger logger)
+        public EventsToPublicStreamsWriter(IStreams streams, IWriteEventsToStreamCollection eventsToStreamsWriter, IEventConverter eventConverter, ILogger logger)
         {
             _streams = streams;
             _eventsToStreamsWriter = eventsToStreamsWriter;

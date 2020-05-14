@@ -12,9 +12,9 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IWriteEventsToStreams" />.
+    /// Represents an implementation of <see cref="IWriteEventsToStreams" /> and <see cref="IWriteEventsToStreamCollection" />..
     /// </summary>
-    public class EventsToStreamsWriter : IEventsToStreamsWriter, IWriteEventsToStreams
+    public class EventsToStreamsWriter : IWriteEventsToStreamCollection, IWriteEventsToStreams
     {
         readonly FilterDefinitionBuilder<Events.StreamEvent> _streamFilter = Builders<Events.StreamEvent>.Filter;
         readonly IStreams _streams;

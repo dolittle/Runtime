@@ -10,12 +10,12 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
     /// <summary>
-    /// Defines a that can write events to a Stream.
+    /// Defines a that can write events to a Stream <see cref="IMongoCollection{TDocument}" />.
     /// </summary>
-    public interface IEventsToStreamsWriter
+    public interface IWriteEventsToStreamCollection
     {
         /// <summary>
-        /// Writes an <typeparamref name="TEvent">Event</typeparamref> to <see cref="IMongoCollection{TDocument}" /> Stream.
+        /// Writes an <typeparamref name="TEvent">Event</typeparamref> to <see cref="IMongoCollection{TDocument}" /> Stream collection.
         /// </summary>
         /// <typeparam name="TEvent">The event type.</typeparam>
         /// <param name="stream">The Stream <see cref="IMongoCollection{TDocument}" />.</param>
