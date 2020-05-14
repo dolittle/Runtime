@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
+using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -15,15 +16,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public class EventCommitter : IEventCommitter
     {
-        readonly IMongoCollection<MongoDB.Events.Event> _allStream;
+        readonly IStreams _streams;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventCommitter"/> class.
         /// </summary>
-        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
-        public EventCommitter(EventStoreConnection connection)
+        /// <param name="streams">The <see cref="IStreams" />.</param>
+        public EventCommitter(IStreams streams)
         {
-            _allStream = connection.EventLog;
+            _streams = streams;
         }
 
         /// <inheritdoc/>
@@ -106,7 +107,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Execution.ExecutionContext executionContext,
             CancellationToken cancellationToken)
         {
-            return _allStream.InsertOneAsync(
+            return _streams.DefaultEventLog.InsertOneAsync(
                 transaction,
                 new Event(
                     version,

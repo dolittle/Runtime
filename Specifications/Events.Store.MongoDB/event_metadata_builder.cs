@@ -16,7 +16,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 0,
-                false);
+                false,
+                false,
+                0);
 
         public EventMetadata build() => _instance;
 

@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
+using Dolittle.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
@@ -15,15 +16,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
     {
         readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
         readonly UpdateDefinitionBuilder<AggregateRoot> _update = Builders<AggregateRoot>.Update;
-        readonly IMongoCollection<AggregateRoot> _aggregates;
+        readonly IAggregatesCollection _aggregates;
+        readonly ILogger<AggregateRoots> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateRoots"/> class.
         /// </summary>
-        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
-        public AggregateRoots(EventStoreConnection connection)
+        /// <param name="aggregates">The <see cref="IAggregatesCollection" />.</param>
+        /// <param name="logger">The <see cref="ILogger" />.</param>
+        public AggregateRoots(IAggregatesCollection aggregates, ILogger<AggregateRoots> logger)
         {
-            _aggregates = connection.Aggregates;
+            _aggregates = aggregates;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -35,6 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             AggregateRootVersion nextVersion,
             CancellationToken cancellationToken)
         {
+            _logger.Trace("Incrementing version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
             ThrowIfNextVersionIsNotGreaterThanExpectedVersion(expectedVersion, nextVersion);
 
             if (expectedVersion == AggregateRootVersion.Initial)
@@ -66,9 +71,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             ArtifactId aggregateRoot,
             CancellationToken cancellationToken)
         {
+            _logger.Trace("Fetching version version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
             var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
                 & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
-            var aggregateDocuments = await _aggregates.Find(
+            var aggregateDocuments = await _aggregates.Aggregates.Find(
                 transaction,
                 eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
 
@@ -91,7 +97,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             try
             {
                 var aggregateRootDocument = new AggregateRoot(eventSource, aggregateRoot, nextVersion);
-                await _aggregates.InsertOneAsync(
+                await _aggregates.Aggregates.InsertOneAsync(
                     transaction,
                     aggregateRootDocument,
                     cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -153,7 +159,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     & _filter.Eq(_ => _.Version, expectedVersion.Value);
 
             var updateDefinition = _update.Set(_ => _.Version, nextVersion.Value);
-            var result = await _aggregates.UpdateOneAsync(
+            var result = await _aggregates.Aggregates.UpdateOneAsync(
                 transaction,
                 aggregateRootFilter,
                 updateDefinition,
