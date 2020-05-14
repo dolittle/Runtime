@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
         /// <param name="isFailing">Whether the stream processor is failing.</param>
         public StreamProcessorState(Guid scopeId, Guid eventProcessorId, Guid sourceStreamId, ulong position, DateTimeOffset retryTime, string failureReason, uint processingAttempts, DateTimeOffset lastSuccessfullyProcessed, bool isFailing)
-            : base(scopeId, eventProcessorId, sourceStreamId, position, false, lastSuccessfullyProcessed, typeof(StreamProcessorState).Name)
+            : base(scopeId, eventProcessorId, sourceStreamId, position, lastSuccessfullyProcessed)
         {
             RetryTime = retryTime;
             FailureReason = failureReason;

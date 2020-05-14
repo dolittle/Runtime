@@ -25,25 +25,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <param name="sourceStreamId">The <see cref="SourceStreamId" />.</param>
         /// <param name="position">The position.</param>
-        /// <param name="partitioned">Whether it is partitioned.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
-        /// <param name="typeName">Name of the inheriting type.</param>
         protected AbstractStreamProcessorState(
             Guid scopeId,
             Guid eventProcessorId,
             Guid sourceStreamId,
             ulong position,
-            bool partitioned,
-            DateTimeOffset lastSuccessfullyProcessed,
-            string typeName)
+            DateTimeOffset lastSuccessfullyProcessed)
         {
             ScopeId = scopeId;
             EventProcessorId = eventProcessorId;
             SourceStreamId = sourceStreamId;
             Position = position;
-            Partitioned = partitioned;
             LastSuccessfullyProcessed = lastSuccessfullyProcessed;
-            TypeName = typeName;
         }
 
         /// <summary>
@@ -68,19 +62,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public ulong Position { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the stream processor is processing a partitioned stream.
-        /// </summary>
-        public bool Partitioned { get; set; }
-
-        /// <summary>
         /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
         /// </summary>
         [BsonRepresentation(BsonType.Document)]
         public DateTimeOffset LastSuccessfullyProcessed { get; set; }
-
-        /// <summary>
-        /// Gets or sets the inheriting types name.
-        /// </summary>
-        public string TypeName { get; set; }
     }
 }
