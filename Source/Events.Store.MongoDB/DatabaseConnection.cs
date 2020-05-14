@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Dolittle.Lifecycle;
 using Dolittle.ResourceTypes.Configuration;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using MongoDB.Bson;
@@ -14,6 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     /// <summary>
     /// Represents a connection to the MongoDB database.
     /// </summary>
+    [SingletonPerTenant]
     public class DatabaseConnection
     {
         /// <summary>
@@ -54,6 +56,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </remarks>
         void RegisterCustomDiscriminators()
         {
+            System.Console.WriteLine("MOM THE DISCRIMATOR ISA CLLAED EPIC STYLE!");
             BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractStreamProcessorState), new StreamProcessorStateDiscriminatorConvention());
         }
     }
