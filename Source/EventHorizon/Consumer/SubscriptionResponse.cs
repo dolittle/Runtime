@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Protobuf;
+using Dolittle.Runtime.EventHorizon.Producer;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -13,7 +14,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionResponse"/> class.
         /// </summary>
-        protected SubscriptionResponse() => Success = true;
+        /// <param name="consentId">The <see cref="EventHorizonConsentId" />.</param>
+        protected SubscriptionResponse(EventHorizonConsentId consentId)
+        {
+            Success = true;
+            ConsentId = consentId;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionResponse"/> class.
@@ -25,6 +31,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Gets a value indicating whether the subscription is fine.
         /// </summary>
         public bool Success { get; }
+
+        /// <summary>
+        /// Gets the <see cref="EventHorizonConsentId" />.
+        /// </summary>
+        public EventHorizonConsentId ConsentId { get; }
 
         /// <summary>
         /// Gets the reason for why the subscription failed.

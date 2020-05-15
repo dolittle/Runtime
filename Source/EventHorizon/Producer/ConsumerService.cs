@@ -16,7 +16,6 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Tenancy;
 using Dolittle.Tenancy;
-using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using static Dolittle.Runtime.EventHorizon.Contracts.Consumer;
 
@@ -86,9 +85,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             var producerTenant = subscription.TenantId.To<TenantId>();
             var publicStream = subscription.StreamId.To<StreamId>();
             var partition = subscription.PartitionId.To<PartitionId>();
-            var lastReceivedPosition = subscription.LastReceived; // -1 if not received any events
+            var streamPosition = subscription.StreamPosition;
 
-            _logger.Debug($"Incomming Event Horizon subscription from microservice '{consumerMicroservice}' and tenant '{consumerTenant}' to tenant '{producerTenant}' starting at position '{lastReceivedPosition}' in partition '{partition}' in stream '{publicStream}'");
+            _logger.Debug($"Incomming Event Horizon subscription from microservice '{consumerMicroservice}' and tenant '{consumerTenant}' to tenant '{producerTenant}' starting at position '{streamPosition}' in partition '{partition}' in stream '{publicStream}'");
             try
             {
                 var subscriptionResponse = CreateSubscriptionResponse(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition);
@@ -99,9 +98,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     return;
                 }
 
-                _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscrbed to tenant '{producerTenant}' starting at position '{lastReceivedPosition}' in partition '{partition}' in stream '{publicStream}'");
+                _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscrbed to tenant '{producerTenant}' starting at position '{streamPosition}' in partition '{partition}' in stream '{publicStream}'");
 
-                var publicStreamPosition = new StreamPosition((ulong)(lastReceivedPosition + 1));
+                var publicStreamPosition = new StreamPosition((ulong)(streamPosition + 1));
                 _executionContextManager.CurrentFor(
                     _thisMicroservice,
                     producerTenant,
@@ -118,25 +117,12 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         var tryGetStreamEvent = await publicEvents.FetchInPartition(partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
                         if (!tryGetStreamEvent.Success)
                         {
-                            await Task.Delay(1000).ConfigureAwait(false);
+                            await Task.Delay(250).ConfigureAwait(false);
                             continue;
                         }
 
                         var streamEvent = tryGetStreamEvent.Result;
-                        var eventHorizonEvent = new Contracts.EventHorizonEvent
-                        {
-                            Content = streamEvent.Event.Content,
-                            CorrelationId = streamEvent.Event.ExecutionContext.CorrelationId.ToProtobuf(),
-                            EventSourceId = streamEvent.Event.EventSource.ToProtobuf(),
-                            Occurred = Timestamp.FromDateTimeOffset(streamEvent.Event.Occurred),
-                            Type = new Artifacts.Contracts.Artifact
-                                {
-                                    Generation = streamEvent.Event.Type.Generation,
-                                    Id = streamEvent.Event.Type.Id.ToProtobuf()
-                                },
-                            StreamSequenceNumber = streamEvent.Position
-                        };
-                        await responseStream.WriteAsync(new Contracts.SubscriptionMessage { Event = eventHorizonEvent }).ConfigureAwait(false);
+                        await responseStream.WriteAsync(new Contracts.SubscriptionMessage { Event = streamEvent.ToEventHorizonEvent() }).ConfigureAwait(false);
                         publicStreamPosition = streamEvent.Position + 1;
                     }
                     catch (EventStoreUnavailable)
@@ -181,18 +167,19 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Reason = message } };
             }
 
-            if (!HasConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition))
+            if (!TryGetConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition, out var consentId))
             {
                 var message = $"There are no consent configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'";
                 _logger.Debug(message);
                 return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Reason = message } };
             }
 
-            return new Contracts.SubscriptionResponse();
+            return new Contracts.SubscriptionResponse { ConsentId = consentId.ToProtobuf() };
         }
 
-        bool HasConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
+        bool TryGetConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out EventHorizonConsentId consentId)
         {
+            consentId = null;
             _logger.Trace($"Checking consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
 
             var consentsForSubscription = _eventHorizonConsents
@@ -211,7 +198,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 _logger.Warning($"There are multiple consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
             }
 
-            return true;
+            consentId = consentsForSubscription.SingleOrDefault()?.Consent;
+            return consentId != null;
         }
 
         bool ProducerTenantExists(TenantId producerTenant) =>
