@@ -141,11 +141,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger.Debug($"Tenant '{subscriptionId.ConsumerTenantId}' is subscribing to events from tenant '{subscriptionId.ProducerTenantId}' in microservice '{subscriptionId.ProducerMicroserviceId}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
 
             var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, CancellationToken.None).ConfigureAwait(false);
-            StreamPosition publicEventsPosition = 0;
-            if (tryGetStreamProcessorState.Success)
-            {
-                publicEventsPosition = tryGetStreamProcessorState.Result.Position;
-            }
+            var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
 
             return _clientManager
                 .Get<Contracts.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
@@ -153,7 +149,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     new Contracts.ConsumerSubscription
                     {
                         TenantId = subscriptionId.ProducerTenantId.ToProtobuf(),
-                        LastReceived = (int)publicEventsPosition.Value - 1,
+                        StreamPosition = publicEventsPosition.Value,
                         StreamId = subscriptionId.StreamId.ToProtobuf(),
                         PartitionId = subscriptionId.PartitionId.ToProtobuf(),
                         CallContext = new Dolittle.Services.Contracts.CallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() }
