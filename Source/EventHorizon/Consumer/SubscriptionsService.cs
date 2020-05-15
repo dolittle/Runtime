@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading.Tasks;
 using Dolittle.ApplicationModel;
 using Dolittle.DependencyInversion;
@@ -50,24 +51,32 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public override async Task<Contracts.SubscriptionResponse> Subscribe(Contracts.Subscription subscriptionRequest, ServerCallContext context)
         {
-            _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
-            var consumerTenant = _executionContextManager.Current.Tenant;
-            var subscriptionId = new SubscriptionId(
-                consumerTenant,
-                subscriptionRequest.MicroserviceId.To<Microservice>(),
-                subscriptionRequest.TenantId.To<TenantId>(),
-                subscriptionRequest.ScopeId.To<ScopeId>(),
-                subscriptionRequest.StreamId.To<StreamId>(),
-                subscriptionRequest.PartitionId.To<PartitionId>());
+            try
+            {
+                _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
+                var consumerTenant = _executionContextManager.Current.Tenant;
+                var subscriptionId = new SubscriptionId(
+                    consumerTenant,
+                    subscriptionRequest.MicroserviceId.To<Microservice>(),
+                    subscriptionRequest.TenantId.To<TenantId>(),
+                    subscriptionRequest.ScopeId.To<ScopeId>(),
+                    subscriptionRequest.StreamId.To<StreamId>(),
+                    subscriptionRequest.PartitionId.To<PartitionId>());
 
-            _logger.Information($"Incomming event horizon subscription request from head to runtime. {subscriptionId}");
-            var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscriptionId).ConfigureAwait(false);
+                _logger.Information($"Incoming event horizon subscription request from head to runtime. {subscriptionId}");
+                var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscriptionId).ConfigureAwait(false);
 
-            return subscriptionResponse switch
+                return subscriptionResponse switch
                 {
                     { Success: false } => new Contracts.SubscriptionResponse { Failure = subscriptionResponse.Failure },
                     _ => new Contracts.SubscriptionResponse(),
                 };
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, $"An error occurred while trying to Subscribe SubscriptionRequest: {subscriptionRequest}");
+                return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };
+            }
         }
     }
 }
