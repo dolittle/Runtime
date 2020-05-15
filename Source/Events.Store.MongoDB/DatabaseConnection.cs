@@ -56,7 +56,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </remarks>
         void RegisterCustomDiscriminators()
         {
-            System.Console.WriteLine("MOM THE DISCRIMATOR ISA CLLAED EPIC STYLE!");
             BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractStreamProcessorState), new StreamProcessorStateDiscriminatorConvention());
         }
     }
