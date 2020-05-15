@@ -100,7 +100,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
                 _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscrbed to tenant '{producerTenant}' starting at position '{streamPosition}' in partition '{partition}' in stream '{publicStream}'");
 
-                var publicStreamPosition = new StreamPosition((ulong)(streamPosition + 1));
                 _executionContextManager.CurrentFor(
                     _thisMicroservice,
                     producerTenant,
@@ -114,7 +113,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 {
                     try
                     {
-                        var tryGetStreamEvent = await publicEvents.FetchInPartition(partition, publicStreamPosition, context.CancellationToken).ConfigureAwait(false);
+                        var tryGetStreamEvent = await publicEvents.FetchInPartition(partition, streamPosition, context.CancellationToken).ConfigureAwait(false);
                         if (!tryGetStreamEvent.Success)
                         {
                             await Task.Delay(250).ConfigureAwait(false);
@@ -123,7 +122,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
                         var streamEvent = tryGetStreamEvent.Result;
                         await responseStream.WriteAsync(new Contracts.SubscriptionMessage { Event = streamEvent.ToEventHorizonEvent() }).ConfigureAwait(false);
-                        publicStreamPosition = streamEvent.Position + 1;
+                        streamPosition = streamEvent.Position + 1;
                     }
                     catch (EventStoreUnavailable)
                     {
