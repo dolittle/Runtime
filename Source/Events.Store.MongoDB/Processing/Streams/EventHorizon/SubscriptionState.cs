@@ -38,10 +38,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             Guid streamId,
             Guid partitionId,
             ulong position,
-            DateTimeOffset retryTime,
+            DateTime retryTime,
             string failureReason,
             uint processingAttempts,
-            DateTimeOffset lastSuccessfullyProcessed,
+            DateTime lastSuccessfullyProcessed,
             bool isFailing)
         {
             ConsumerTenantId = consumerTenantId;
@@ -97,14 +97,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <summary>
         /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset LastSuccessfullyProcessed { get; set; }
+        public DateTime LastSuccessfullyProcessed { get; set; }
 
         /// <summary>
         /// Gets or sets the retry time.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset RetryTime { get; set; }
+        public DateTime RetryTime { get; set; }
 
         /// <summary>
         /// Gets or sets the reason for failure.

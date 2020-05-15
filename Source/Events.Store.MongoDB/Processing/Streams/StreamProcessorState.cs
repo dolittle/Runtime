@@ -4,7 +4,6 @@
 using System;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store.Streams;
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
@@ -27,7 +26,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="processingAttempts">The number of times the event at <see cref="AbstractStreamProcessorState.Position" /> has been processed.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
         /// <param name="isFailing">Whether the stream processor is failing.</param>
-        public StreamProcessorState(Guid scopeId, Guid eventProcessorId, Guid sourceStreamId, ulong position, DateTimeOffset retryTime, string failureReason, uint processingAttempts, DateTimeOffset lastSuccessfullyProcessed, bool isFailing)
+        public StreamProcessorState(
+            Guid scopeId,
+            Guid eventProcessorId,
+            Guid sourceStreamId,
+            ulong position,
+            DateTime retryTime,
+            string failureReason,
+            uint processingAttempts,
+            DateTime lastSuccessfullyProcessed,
+            bool isFailing)
             : base(scopeId, eventProcessorId, sourceStreamId, position, false, lastSuccessfullyProcessed)
         {
             RetryTime = retryTime;
@@ -39,8 +47,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <summary>
         /// Gets or sets the retry time.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset RetryTime { get; set; }
+        public DateTime RetryTime { get; set; }
 
         /// <summary>
         /// Gets or sets the reason for failure.

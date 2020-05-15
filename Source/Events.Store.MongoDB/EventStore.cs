@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             var committedEvent = await _eventCommitter.CommitEvent(
                                 transaction,
                                 eventLogSequenceNumber,
-                                DateTimeOffset.UtcNow,
+                                DateTime.UtcNow,
                                 _executionContextManager.Current,
                                 @event,
                                 cancel).ConfigureAwait(false);
@@ -112,7 +112,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 events.AggregateRoot,
                                 aggregateRootVersion,
                                 eventLogSequenceNumber,
-                                DateTimeOffset.UtcNow,
+                                DateTime.UtcNow,
                                 events.EventSource,
                                 _executionContextManager.Current,
                                 @event,

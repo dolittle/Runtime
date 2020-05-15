@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             Guid sourceStreamId,
             ulong position,
             bool partitioned,
-            DateTimeOffset lastSuccessfullyProcessed)
+            DateTime lastSuccessfullyProcessed)
         {
             ScopeId = scopeId;
             EventProcessorId = eventProcessorId;
@@ -70,7 +70,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <summary>
         /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset LastSuccessfullyProcessed { get; set; }
+        public DateTime LastSuccessfullyProcessed { get; set; }
     }
 }

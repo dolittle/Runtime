@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="fromEventHorizon">Wether the Event is from an EventHorizon.</param>
         /// <param name="originEventLogSequenceNumber">The Event's original event log sequence number if it came from EventHorizon.</param>
         public EventMetadata(
-            DateTimeOffset occurred,
+            DateTime occurred,
             Guid eventSource,
             Guid typeId,
             uint typeGeneration,
@@ -42,15 +42,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="DateTimeOffset"/> of when the event was committed to the event store.
+        /// Gets or sets the <see cref="DateTime"/> of when the event was committed to the event store.
         /// </summary>
         /// <remarks>
         /// BsonType.Document saves a UTC DateTime, ticks and an offset(in minutes) to the document. This way we can
         /// query for the DateTime from the database and it looks nicer than the string representation.
         /// https://github.com/mongodb/mongo-csharp-driver/blob/master/src/MongoDB.Bson/Serialization/Serializers/DateTimeOffsetSerializer.cs#L158 .
         /// </remarks>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset Occurred { get; set; }
+        public DateTime Occurred { get; set; }
 
         /// <summary>
         /// Gets or sets the event source id.

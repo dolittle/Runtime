@@ -25,7 +25,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
         /// <param name="position">The position.</param>
         /// <param name="failingPartitions">The states of the failing partitions.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
-        public PartitionedStreamProcessorState(Guid scopeId, Guid eventProcessorId, Guid sourceStreamId, ulong position, IDictionary<string, FailingPartitionState> failingPartitions, DateTimeOffset lastSuccessfullyProcessed)
+        public PartitionedStreamProcessorState(
+            Guid scopeId,
+            Guid eventProcessorId,
+            Guid sourceStreamId,
+            ulong position,
+            IDictionary<string, FailingPartitionState> failingPartitions,
+            DateTime lastSuccessfullyProcessed)
             : base(scopeId, eventProcessorId, sourceStreamId, position, true, lastSuccessfullyProcessed)
         {
             FailingPartitions = failingPartitions;

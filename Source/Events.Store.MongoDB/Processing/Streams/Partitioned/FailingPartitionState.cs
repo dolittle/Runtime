@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <param name="reason">The reason for failure.</param>
         /// <param name="processingAttempts">The number of times the event at position has been processed.</param>
         /// <param name="lastFailed">The timestamp of when this partition last failed.</param>
-        public FailingPartitionState(ulong position, DateTimeOffset retryTime, string reason, uint processingAttempts, DateTimeOffset lastFailed)
+        public FailingPartitionState(ulong position, DateTime retryTime, string reason, uint processingAttempts, DateTime lastFailed)
         {
             Position = position;
             RetryTime = retryTime;
@@ -43,8 +43,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// query for the DateTime from the database and it looks nicer than the string representation.
         /// https://github.com/mongodb/mongo-csharp-driver/blob/master/src/MongoDB.Bson/Serialization/Serializers/DateTimeOffsetSerializer.cs#L158 .
         /// </remarks>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset RetryTime { get; set; }
+        public DateTime RetryTime { get; set; }
 
         /// <summary>
         /// Gets or sets the reason for failure.
@@ -59,7 +58,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <summary>
         /// Gets or sets the timestamp on when the partition failed.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset LastFailed { get; set; }
+        public DateTime LastFailed { get; set; }
     }
 }
