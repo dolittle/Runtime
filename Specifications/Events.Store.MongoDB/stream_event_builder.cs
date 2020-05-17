@@ -13,10 +13,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         Events.StreamEvent _instance;
 
         public stream_event_builder(uint stream_position, Guid partition) =>
-            _instance = new Events.StreamEvent(stream_position, partition, execution_contexts.create_store(), metadata.random_stream_event_metadata, metadata.aggregate_metadata_from_non_aggregate_event, events.some_event_content_bson_document);
+            _instance = new Events.StreamEvent(
+                stream_position,
+                partition,
+                execution_contexts.create_store(),
+                metadata.random_stream_event_metadata,
+                metadata.aggregate_metadata_from_non_aggregate_event,
+                new EventHorizonMetadata(),
+                events.some_event_content_bson_document);
 
         public stream_event_builder(uint stream_position, Guid partition, uint aggregate_version) =>
-            _instance = new Events.StreamEvent(stream_position, partition, execution_contexts.create_store(), metadata.random_stream_event_metadata, metadata.random_aggregate_metadata_from_aggregate_event_with_version(aggregate_version), events.some_event_content_bson_document);
+            _instance = new Events.StreamEvent(
+                stream_position,
+                partition,
+                execution_contexts.create_store(),
+                metadata.random_stream_event_metadata,
+                metadata.random_aggregate_metadata_from_aggregate_event_with_version(aggregate_version),
+                new EventHorizonMetadata(),
+                events.some_event_content_bson_document);
 
         public Events.StreamEvent build() => _instance;
 
@@ -49,6 +63,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public stream_event_builder with_event_log_sequence_number(EventLogSequenceNumber event_log_sequence_number)
         {
             _instance.Metadata.EventLogSequenceNumber = event_log_sequence_number;
+            return this;
+        }
+
+        public stream_event_builder from_event_horizon()
+        {
+            _instance.EventHorizonMetadata.FromEventHorizon = true;
+            _instance.EventHorizonMetadata.Consent = Guid.NewGuid();
+            _instance.EventHorizonMetadata.ExternalEventLogSequenceNumber = (ulong)new Random().Next();
+            _instance.EventHorizonMetadata.Received = DateTimeOffset.UtcNow;
             return this;
         }
     }
