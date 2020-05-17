@@ -14,6 +14,7 @@ using Dolittle.Protobuf;
 using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
@@ -217,7 +218,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _subscriptions.TrySubscribe(
                     consentId,
                     subscriptionId,
-                    new EventProcessor(subscriptionId, _eventHorizonEventsWriter, _logger),
+                    new EventProcessor(consentId, subscriptionId, _eventHorizonEventsWriter, _logger),
                     eventsFetcher,
                     cancellationToken,
                     out var outputtedStreamProcessor);

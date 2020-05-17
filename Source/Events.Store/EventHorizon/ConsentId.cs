@@ -4,10 +4,10 @@
 using System;
 using Dolittle.Concepts;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.Events.Store.EventHorizon
 {
     /// <summary>
-    /// Represents the identifier of a consent between tenants in two microservices for a specific <see cref="Subscription" />..
+    /// Represents the identifier of a consent between tenants in two microservices.
     /// </summary>
     public class ConsentId : ConceptAs<Guid>
     {

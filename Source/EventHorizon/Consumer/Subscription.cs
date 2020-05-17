@@ -9,6 +9,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon
 {

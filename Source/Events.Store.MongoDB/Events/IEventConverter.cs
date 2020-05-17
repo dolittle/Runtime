@@ -22,15 +22,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         mongoDB.StreamEvent ToStoreStreamEvent(CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition);
 
         /// <summary>
-        /// Converts a <see cref="CommittedEvent" /> to a Scoped <see cref="mongoDB.StreamEvent" />.
-        /// </summary>
-        /// <param name="committedEvent">The <see cref="CommittedEvent" />.</param>
-        /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
-        /// <param name="partition">The <see cref="PartitionId" />.</param>
-        /// <returns>The converted <see cref="mongoDB.Event" />.</returns>
-        mongoDB.StreamEvent ToScopedStoreStreamEvent(CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition);
-
-        /// <summary>
         /// Converts a <see cref="mongoDB.Event" /> to <see cref="runtime.Streams.StreamEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="mongoDB.Event" />.</param>
@@ -47,11 +38,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned);
 
         /// <summary>
-        /// Converts the <see cref="CommittedEvent" /> to a <see cref="mongoDB.Event" /> for a Scoped Event Log.
+        /// Converts the <see cref="CommittedExternalEvent" /> to a <see cref="mongoDB.Event" /> for a Scoped Event Log.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
-        /// <param name="eventLogSequenceNumber">The generated <see cref="EventLogSequenceNumber" />.</param>
+        /// <param name="event">The <see cref="CommittedExternalEvent" />.</param>
         /// <returns>The converted <see cref="mongoDB.Event" />.</returns>
-        mongoDB.Event ToScopedEventLogEvent(CommittedEvent @event, EventLogSequenceNumber eventLogSequenceNumber);
+        mongoDB.Event ToScopedEventLogEvent(CommittedExternalEvent @event);
+
+        /// <summary>
+        /// Converts a <see cref="CommittedExternalEvent" /> to a Scoped <see cref="mongoDB.StreamEvent" />.
+        /// </summary>
+        /// <param name="committedEvent">The <see cref="CommittedExternalEvent" />.</param>
+        /// <param name="streamPosition">The <see cref="StreamPosition" />.</param>
+        /// <param name="partition">The <see cref="PartitionId" />.</param>
+        /// <returns>The converted <see cref="mongoDB.Event" />.</returns>
+        mongoDB.StreamEvent ToScopedStoreStreamEvent(CommittedExternalEvent committedEvent, StreamPosition streamPosition, PartitionId partition);
     }
 }

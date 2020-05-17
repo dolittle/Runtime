@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
