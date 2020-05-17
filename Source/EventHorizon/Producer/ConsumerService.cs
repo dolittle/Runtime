@@ -176,7 +176,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             return new Contracts.SubscriptionResponse { ConsentId = consentId.ToProtobuf() };
         }
 
-        bool TryGetConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out EventHorizonConsentId consentId)
+        bool TryGetConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out ConsentId consentId)
         {
             consentId = null;
             _logger.Trace($"Checking consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");

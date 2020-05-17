@@ -7,21 +7,16 @@ using System.Linq;
 using Dolittle.Configuration;
 using Dolittle.Tenancy;
 
-namespace Dolittle.Runtime.EventHorizon.Producer
+namespace Dolittle.Runtime.EventHorizon
 {
     /// <summary>
     /// Represents the configuration for event horizon consents.
     /// </summary>
-    [Name(ConfigurationName)]
+    [Name("event-horizon-consents")]
     public class EventHorizonConsentsConfiguration :
         ReadOnlyDictionary<TenantId, IEnumerable<EventHorizonConsent>>,
         IConfigurationObject
     {
-        /// <summary>
-        /// The name of the configuration.
-        /// </summary>
-        public const string ConfigurationName = "event-horizon-consents";
-
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHorizonConsentsConfiguration"/> class.
         /// </summary>

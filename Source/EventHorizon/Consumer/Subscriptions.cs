@@ -5,7 +5,6 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Dolittle.Lifecycle;
 using Dolittle.Logging;
-using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Events.Processing.Streams;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -34,7 +33,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public bool TryGetConsentFor(SubscriptionId subscriptionId, out EventHorizonConsentId consentId)
+        public bool TryGetConsentFor(SubscriptionId subscriptionId, out ConsentId consentId)
         {
             var result = _subscriptions.TryGetValue(subscriptionId, out var subscription);
             consentId = subscription?.ConsentId;
@@ -43,7 +42,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         /// <inheritdoc />
         public bool TrySubscribe(
-            EventHorizonConsentId consentId,
+            ConsentId consentId,
             SubscriptionId subscriptionId,
             EventProcessor eventProcessor,
             EventsFromEventHorizonFetcher eventsFetcher,

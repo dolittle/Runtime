@@ -12,7 +12,6 @@ using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Resilience;
-using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -175,10 +174,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             }
 
             _logger.Trace($"Subscription response for subscription {subscriptionId} was successful");
-            return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.To<EventHorizonConsentId>());
+            return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.To<ConsentId>());
         }
 
-        void StartProcessingEventHorizon(EventHorizonConsentId consentId, SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
+        void StartProcessingEventHorizon(ConsentId consentId, SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
         {
             Task.Run(async () =>
                 {
@@ -203,7 +202,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 });
         }
 
-        async Task ReadEventsFromEventHorizon(EventHorizonConsentId consentId, SubscriptionId subscriptionId, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
+        async Task ReadEventsFromEventHorizon(ConsentId consentId, SubscriptionId subscriptionId, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
         {
             _logger.Information("Successfully connected event horizon with {subscriptionId}. Waiting for events to process", subscriptionId);
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();
