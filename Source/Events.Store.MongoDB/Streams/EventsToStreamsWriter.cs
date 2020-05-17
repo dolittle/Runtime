@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 _streamFilter,
                 streamPosition =>
                     @event is CommittedExternalEvent externalEvent ?
-                        _eventConverter.ToScopedStoreStreamEvent(externalEvent, streamPosition, partition)
+                        _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition, partition)
                         : _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
                 cancellationToken).ConfigureAwait(false);
         }

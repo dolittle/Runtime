@@ -19,28 +19,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new runtime.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.EventLog, Guid.Empty, false);
 
         /// <inheritdoc/>
-        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(StreamEvent @event, StreamId stream, bool partitioned) =>
+        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned) =>
             new runtime.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition, partitioned);
 
         /// <inheritdoc/>
-        public mongoDB.Event ToScopedEventLogEvent(CommittedExternalEvent @event) =>
+        public mongoDB.Event ToEventLogEvent(CommittedExternalEvent committedEvent) =>
             new mongoDB.Event(
-                @event.EventLogSequenceNumber,
-                @event.ExecutionContext.ToStoreRepresentation(),
-                @event.GetEventMetadata(),
-                new AggregateMetadata(),
-                new EventHorizonMetadata(@event.ExternalEventLogSequenceNumber, @event.Received, @event.Consent),
-                BsonDocument.Parse(@event.Content));
-
-        /// <inheritdoc/>
-        public mongoDB.StreamEvent ToScopedStoreStreamEvent(CommittedExternalEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
-            new mongoDB.StreamEvent(
-                streamPosition,
-                partition,
+                committedEvent.EventLogSequenceNumber,
                 committedEvent.ExecutionContext.ToStoreRepresentation(),
-                committedEvent.GetStreamEventMetadata(),
-                committedEvent.GetAggregateMetadata(),
-                new EventHorizonMetadata(committedEvent.EventLogSequenceNumber, committedEvent.Received, committedEvent.Consent),
+                committedEvent.GetEventMetadata(),
+                new AggregateMetadata(),
+                committedEvent.GetEventHorizonMetadata(),
                 BsonDocument.Parse(committedEvent.Content));
 
         /// <inheritdoc/>
@@ -51,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.ExecutionContext.ToStoreRepresentation(),
                 committedEvent.GetStreamEventMetadata(),
                 committedEvent.GetAggregateMetadata(),
-                new EventHorizonMetadata(),
+                committedEvent.GetEventHorizonMetadata(),
                 BsonDocument.Parse(committedEvent.Content));
     }
 }

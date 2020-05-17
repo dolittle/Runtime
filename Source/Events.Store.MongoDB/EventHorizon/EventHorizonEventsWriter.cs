@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
             await _eventsToStreamsWriter.Write(
                 await _streams.GetEventLog(scope, cancellationToken).ConfigureAwait(false),
                 _eventFilter,
-                streamPosition => _eventConverter.ToScopedEventLogEvent(
+                streamPosition => _eventConverter.ToEventLogEvent(
                     new CommittedExternalEvent(
                         streamPosition.Value,
                         @event.Occurred,

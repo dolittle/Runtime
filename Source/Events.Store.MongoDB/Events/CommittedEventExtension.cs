@@ -38,6 +38,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.Public);
 
         /// <summary>
+        /// Gets the <see cref="EventHorizonMetadata"/> from the <see cref="CommittedExternalEvent"/>.
+        /// </summary>
+        /// <param name="committedEvent">The <see cref="CommittedExternalEvent"/>.</param>
+        /// <returns>The converted <see cref="EventHorizonMetadata" />.</returns>
+        public static EventHorizonMetadata GetEventHorizonMetadata(this CommittedExternalEvent committedEvent) =>
+            new EventHorizonMetadata(
+                committedEvent.ExternalEventLogSequenceNumber,
+                committedEvent.Received,
+                committedEvent.Consent);
+
+        /// <summary>
+        /// Gets the <see cref="EventHorizonMetadata"/> from the <see cref="CommittedEvent"/>.
+        /// </summary>
+        /// <param name="committedEvent">The <see cref="CommittedEvent"/>.</param>
+        /// <returns>The converted <see cref="EventHorizonMetadata" />.</returns>
+        public static EventHorizonMetadata GetEventHorizonMetadata(this CommittedEvent committedEvent) =>
+            committedEvent is CommittedExternalEvent externalEvent ?
+                externalEvent.GetEventHorizonMetadata()
+                : new EventHorizonMetadata();
+
+        /// <summary>
         /// Converts a <see cref="Event" /> to <see cref="CommittedEvent" />.
         /// </summary>
         /// <param name="event">The <see cref="Event" />.</param>
