@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
                         @event.EventSource,
                         @event.ExecutionContext,
                         @event.Type,
-                        @event.Public,
+                        false,
                         @event.Content,
                         @event.EventLogSequenceNumber,
                         DateTimeOffset.UtcNow,

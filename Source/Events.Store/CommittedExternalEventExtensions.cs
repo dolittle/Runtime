@@ -17,25 +17,23 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="event"><see cref="CommittedExternalEvent"/> to convert from.</param>
         /// <returns>Converted <see cref="Contracts.CommittedEvent"/>.</returns>
-        public static Contracts.CommittedEvent ToProtobuf(this CommittedExternalEvent @event)
-        {
-            return new Contracts.CommittedEvent
-            {
-                EventLogSequenceNumber = @event.EventLogSequenceNumber,
-                Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-                EventSourceId = @event.EventSource.ToProtobuf(),
-                ExecutionContext = @event.ExecutionContext.ToProtobuf(),
-                Type = new Artifacts.Contracts.Artifact
+        public static Contracts.CommittedEvent ToProtobuf(this CommittedExternalEvent @event) =>
+            new Contracts.CommittedEvent
                 {
-                    Id = @event.Type.Id.ToProtobuf(),
-                    Generation = @event.Type.Generation
-                },
-                Content = @event.Content,
-                Public = @event.Public,
-                External = true,
-                ExternalEventLogSequenceNumber = @event.ExternalEventLogSequenceNumber,
-                ExternalEventReceived = Timestamp.FromDateTimeOffset(@event.Received)
-            };
-        }
+                    EventLogSequenceNumber = @event.EventLogSequenceNumber,
+                    Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
+                    EventSourceId = @event.EventSource.ToProtobuf(),
+                    ExecutionContext = @event.ExecutionContext.ToProtobuf(),
+                    Type = new Artifacts.Contracts.Artifact
+                    {
+                        Id = @event.Type.Id.ToProtobuf(),
+                        Generation = @event.Type.Generation
+                    },
+                    Content = @event.Content,
+                    Public = @event.Public,
+                    External = true,
+                    ExternalEventLogSequenceNumber = @event.ExternalEventLogSequenceNumber,
+                    ExternalEventReceived = Timestamp.FromDateTimeOffset(@event.Received)
+                };
     }
 }
