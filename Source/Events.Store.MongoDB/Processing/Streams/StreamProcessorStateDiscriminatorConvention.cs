@@ -40,13 +40,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <returns>The actual wanted type.</returns>
         public Type GetActualType(IBsonReader bsonReader, Type nominalType)
         {
-            if (nominalType == typeof(StreamProcessorState))
+            if (nominalType == typeof(StreamProcessorState) || nominalType == typeof(Partitioned.PartitionedStreamProcessorState))
             {
-                return typeof(StreamProcessorState);
-            }
-            else if (nominalType == typeof(Partitioned.PartitionedStreamProcessorState))
-            {
-                return typeof(Partitioned.PartitionedStreamProcessorState);
+                return nominalType;
             }
             else if (nominalType == typeof(AbstractStreamProcessorState))
             {
