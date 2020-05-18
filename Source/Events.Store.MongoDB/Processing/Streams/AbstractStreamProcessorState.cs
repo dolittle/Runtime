@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Events.Processing.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -67,5 +68,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         [BsonRepresentation(BsonType.Document)]
         public DateTimeOffset LastSuccessfullyProcessed { get; set; }
+
+        /// <summary>
+        /// Converts the state to it's runtime representation.
+        /// </summary>
+        /// <returns>The converted <see cref="IStreamProcessorState" />.</returns>
+        public abstract IStreamProcessorState ToRuntimeRepresentation();
     }
 }

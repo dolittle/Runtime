@@ -3,7 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson.Serialization.Options;
@@ -36,5 +38,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
         /// </summary>
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public IDictionary<string, FailingPartitionState> FailingPartitions { get; set; }
+
+        /// <summary>
+        /// Converts the <see cref="PartitionedStreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.
+        /// </summary>
+        /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.</returns>
+        public override IStreamProcessorState ToRuntimeRepresentation() =>
+            new Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState(
+                Position,
+                FailingPartitions.ToDictionary(_ => new PartitionId { Value = Guid.Parse(_.Key) }, _ => _.Value.ToRuntimeRepresentation()),
+                LastSuccessfullyProcessed);
     }
 }

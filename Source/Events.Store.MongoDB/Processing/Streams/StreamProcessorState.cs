@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -56,5 +57,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// Gets or sets a value indicating whether the Stream Processor is failing or not.
         /// </summary>
         public bool IsFailing { get; set; }
+
+        /// <summary>
+        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.StreamProcessorState"/>.
+        /// </summary>
+        /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.</returns>
+        public override IStreamProcessorState ToRuntimeRepresentation() =>
+            new Runtime.Events.Processing.Streams.StreamProcessorState(
+                Position,
+                FailureReason,
+                RetryTime,
+                ProcessingAttempts,
+                LastSuccessfullyProcessed,
+                IsFailing);
     }
 }
