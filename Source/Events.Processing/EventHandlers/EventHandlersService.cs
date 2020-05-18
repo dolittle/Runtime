@@ -71,11 +71,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
         /// <inheritdoc/>
         public override async Task Connect(
-            IAsyncStreamReader<EventHandlersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<EventHandlerClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>(
+            var dispatcher = _reverseCallDispatchers.GetFor<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>(
                 runtimeStream,
                 clientStream,
                 context,
@@ -336,7 +336,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         }
 
         Task WriteFailedRegistrationResponse(
-            IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse> dispatcher,
+            IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse> dispatcher,
             Failure failure,
             CancellationToken cancellationToken) => dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, cancellationToken);
     }

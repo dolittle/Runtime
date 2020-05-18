@@ -75,11 +75,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public override async Task Connect(
-            IAsyncStreamReader<FiltersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<FilterClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
+            var dispatcher = _reverseCallDispatchers.GetFor<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,
@@ -117,11 +117,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public override async Task ConnectPartitioned(
-            IAsyncStreamReader<PartitionedFiltersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<PartitionedFilterClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
+            var dispatcher = _reverseCallDispatchers.GetFor<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,
@@ -160,11 +160,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         /// <inheritdoc/>
         public override async Task ConnectPublic(
-            IAsyncStreamReader<PublicFiltersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<PublicFilterClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
+            var dispatcher = _reverseCallDispatchers.GetFor<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,

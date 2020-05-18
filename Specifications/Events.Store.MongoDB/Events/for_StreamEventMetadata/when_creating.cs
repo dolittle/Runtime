@@ -14,8 +14,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEventMetadata
         static Guid type_id;
         static uint type_generation;
         static bool is_public;
-        static bool from_event_horizon;
-        static ulong origin_event_log_sequence_number;
         static StreamEventMetadata result;
 
         Establish context = () =>
@@ -26,8 +24,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEventMetadata
             type_id = Guid.NewGuid();
             type_generation = 3;
             is_public = true;
-            from_event_horizon = false;
-            origin_event_log_sequence_number = 2;
         };
 
         Because of = () => result = new StreamEventMetadata(
@@ -36,9 +32,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEventMetadata
             event_source,
             type_id,
             type_generation,
-            is_public,
-            from_event_horizon,
-            origin_event_log_sequence_number);
+            is_public);
 
         It should_have_the_correct_event_log_sequence_number = () => result.EventLogSequenceNumber.ShouldEqual(event_log_sequence_number);
         It should_have_the_correct_occurred_value = () => result.Occurred.ShouldEqual(occurred);
@@ -46,7 +40,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEventMetadata
         It should_have_the_correct_type_id = () => result.TypeId.ShouldEqual(type_id);
         It should_have_the_correct_type_generation = () => result.TypeGeneration.ShouldEqual(type_generation);
         It should_have_the_correct_public_value = () => result.Public.ShouldEqual(is_public);
-        It should_have_the_correct_from_event_horizon_value = () => result.FromEventHorizon.ShouldEqual(from_event_horizon);
-        It should_have_the_correct_from_origin_event_log_sequence_number = () => result.OriginEventLogSequenceNumber.ShouldEqual(origin_event_log_sequence_number);
     }
 }

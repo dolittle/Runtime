@@ -21,6 +21,16 @@ namespace Dolittle.Runtime.EventHorizon
                 Claims.Empty,
                 CultureInfo.InvariantCulture);
 
+        public static ExecutionContext create_with_claims(Claims claims) =>
+            new ExecutionContext(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Versioning.Version.NotSet,
+                "",
+                Guid.NewGuid(),
+                claims,
+                CultureInfo.InvariantCulture);
+
         public static Execution.Contracts.ExecutionContext create_protobuf() => create().ToProtobuf();
     }
 }

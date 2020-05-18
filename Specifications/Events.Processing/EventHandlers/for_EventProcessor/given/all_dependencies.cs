@@ -15,14 +15,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.gi
     {
         protected static ScopeId scope;
         protected static EventProcessorId event_processor_id;
-        protected static Mock<IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>> dispatcher;
+        protected static Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>> dispatcher;
         protected static Mock<IExecutionContextManager> execution_context_manager;
 
         Establish context = () =>
         {
             scope = Guid.NewGuid();
             event_processor_id = Guid.NewGuid();
-            dispatcher = new Mock<IReverseCallDispatcher<EventHandlersClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlersRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>>();
+            dispatcher = new Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>>();
             execution_context_manager = new Mock<IExecutionContextManager>();
         };
     }
