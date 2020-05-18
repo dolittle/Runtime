@@ -46,7 +46,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             await subscriptionStates.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>(
                     Builders<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>.IndexKeys
-                        .Ascending(_ => _.ConsumerTenantId)
                         .Ascending(_ => _.ProducerMicroserviceId)
                         .Ascending(_ => _.ProducerTenantId)
                         .Ascending(_ => _.StreamId)

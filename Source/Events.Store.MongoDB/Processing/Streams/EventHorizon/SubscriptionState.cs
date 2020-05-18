@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionState"/> class.
         /// </summary>
-        /// <param name="consumerTenantId">The consumer <see cref="TenantId" />.</param>
         /// <param name="producerMicroserviceId">The producer <see cref="Microservice" />.</param>
         /// <param name="producerTenantId">The producer <see cref="TenantId" />.</param>
         /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
@@ -30,7 +29,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
         /// <param name="isFailing">Whether the Stream Processor is failing.</param>
         public SubscriptionState(
-            Guid consumerTenantId,
             Guid producerMicroserviceId,
             Guid producerTenantId,
             Guid streamId,
@@ -42,7 +40,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             DateTimeOffset lastSuccessfullyProcessed,
             bool isFailing)
         {
-            ConsumerTenantId = consumerTenantId;
             ProducerMicroserviceId = producerMicroserviceId;
             ProducerTenantId = producerTenantId;
             StreamId = streamId;
@@ -54,11 +51,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             ProcessingAttempts = processingAttempts;
             IsFailing = isFailing;
         }
-
-        /// <summary>
-        /// Gets or sets the consumer <see cref="TenantId" />.
-        /// </summary>
-        public Guid ConsumerTenantId { get; set; }
 
         /// <summary>
         /// Gets or sets the producer <see cref="Microservice" />.

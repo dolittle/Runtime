@@ -101,10 +101,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     if (baseStreamProcessorState is Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState)
                     {
                         var replacementState = new SubscriptionState(
-                            subscriptionId.ConsumerTenantId,
                             subscriptionId.ProducerMicroserviceId,
                             subscriptionId.ProducerTenantId,
-                            subscriptionId.ScopeId,
                             subscriptionId.StreamId,
                             subscriptionId.PartitionId,
                             streamProcessorState.Position,
@@ -173,14 +171,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
         FilterDefinition<AbstractStreamProcessorState> CreateFilter(StreamProcessorId id) =>
             _streamProcessorFilter.Eq(_ => _.EventProcessorId, id.EventProcessorId.Value)
-                & _streamProcessorFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
                 & _streamProcessorFilter.Eq(_ => _.SourceStreamId, id.SourceStreamId.Value);
 
         FilterDefinition<SubscriptionState> CreateFilter(SubscriptionId id) =>
-            _subscriptionFilter.Eq(_ => _.ConsumerTenantId, id.ConsumerTenantId.Value)
-                & _subscriptionFilter.Eq(_ => _.ProducerMicroserviceId, id.ProducerMicroserviceId.Value)
+            _subscriptionFilter.Eq(_ => _.ProducerMicroserviceId, id.ProducerMicroserviceId.Value)
                 & _subscriptionFilter.Eq(_ => _.ProducerTenantId, id.ProducerTenantId.Value)
-                & _subscriptionFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
                 & _subscriptionFilter.Eq(_ => _.StreamId, id.StreamId.Value)
                 & _subscriptionFilter.Eq(_ => _.PartitionId, id.PartitionId.Value);
     }
