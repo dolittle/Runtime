@@ -30,26 +30,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 false,
                 events.some_event_content);
 
-        public static CommittedAggregateEvent a_committed_aggregate_event_with_type(EventLogSequenceNumber event_log_sequence_number, ArtifactId aggregate, EventSourceId event_source, AggregateRootVersion aggregate_root_version, Artifact event_type) =>
-            new CommittedAggregateEvent(
-                new Artifact(aggregate, 0),
-                aggregate_root_version,
-                event_log_sequence_number,
-                DateTimeOffset.UtcNow,
-                event_source,
-                execution_contexts.create(),
-                event_type,
-                false,
-                events.some_event_content);
-
-        public static CommittedEvent a_committed_event_with_type(EventLogSequenceNumber event_log_sequence_number, Artifact event_type) =>
-            new CommittedEvent(
+        public static CommittedExternalEvent a_committed_external_event(EventLogSequenceNumber event_log_sequence_number, EventLogSequenceNumber external_event_log_sequence_number) =>
+            new CommittedExternalEvent(
                 event_log_sequence_number,
                 DateTimeOffset.UtcNow,
                 EventSourceId.NotSet,
                 execution_contexts.create(),
-                event_type,
+                new Artifact(Guid.NewGuid(), 1),
                 false,
-                events.some_event_content);
+                events.some_event_content,
+                external_event_log_sequence_number,
+                DateTimeOffset.UtcNow,
+                Guid.NewGuid());
     }
 }

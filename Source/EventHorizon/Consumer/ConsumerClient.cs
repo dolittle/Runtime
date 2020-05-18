@@ -14,6 +14,7 @@ using Dolittle.Protobuf;
 using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
@@ -91,10 +92,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public async Task<SubscriptionResponse> HandleSubscription(SubscriptionId subscriptionId)
         {
-            if (_subscriptions.HasSubscription(subscriptionId))
+            if (_subscriptions.TryGetConsentFor(subscriptionId, out var consentId))
             {
                 _logger.Trace($"Already subscribed to subscription {subscriptionId}");
-                return new SuccessfulSubscriptionResponse();
+                return new SuccessfulSubscriptionResponse(consentId);
             }
 
             _logger.Trace($"Getting microservice address");
@@ -114,7 +115,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         call.ResponseStream,
                         subscriptionId).ConfigureAwait(false);
 
-                    if (response.Success) StartProcessingEventHorizon(subscriptionId, microserviceAddress, call.ResponseStream);
+                    if (response.Success) StartProcessingEventHorizon(response.ConsentId, subscriptionId, microserviceAddress, call.ResponseStream);
                     return response;
                 }, _cancellationToken).ConfigureAwait(false);
         }
@@ -141,11 +142,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger.Debug($"Tenant '{subscriptionId.ConsumerTenantId}' is subscribing to events from tenant '{subscriptionId.ProducerTenantId}' in microservice '{subscriptionId.ProducerMicroserviceId}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
 
             var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, CancellationToken.None).ConfigureAwait(false);
-            StreamPosition publicEventsPosition = 0;
-            if (tryGetStreamProcessorState.Success)
-            {
-                publicEventsPosition = tryGetStreamProcessorState.Result.Position;
-            }
+            var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
 
             return _clientManager
                 .Get<Contracts.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
@@ -153,7 +150,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     new Contracts.ConsumerSubscription
                     {
                         TenantId = subscriptionId.ProducerTenantId.ToProtobuf(),
-                        LastReceived = (int)publicEventsPosition.Value - 1,
+                        StreamPosition = publicEventsPosition.Value,
                         StreamId = subscriptionId.StreamId.ToProtobuf(),
                         PartitionId = subscriptionId.PartitionId.ToProtobuf(),
                         CallContext = new Dolittle.Services.Contracts.CallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() }
@@ -178,16 +175,16 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             }
 
             _logger.Trace($"Subscription response for subscription {subscriptionId} was successful");
-            return new SuccessfulSubscriptionResponse();
+            return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.To<ConsentId>());
         }
 
-        void StartProcessingEventHorizon(SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
+        void StartProcessingEventHorizon(ConsentId consentId, SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
         {
             Task.Run(async () =>
                 {
                     try
                     {
-                        await ReadEventsFromEventHorizon(subscriptionId, responseStream).ConfigureAwait(false);
+                        await ReadEventsFromEventHorizon(consentId, subscriptionId, responseStream).ConfigureAwait(false);
                         throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                     }
                     catch (Exception ex)
@@ -199,14 +196,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                                 var call = await Subscribe(subscriptionId, microserviceAddress).ConfigureAwait(false);
                                 var response = await HandleSubscriptionResponse(call.ResponseStream, subscriptionId).ConfigureAwait(false);
                                 if (!response.Success) throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
-                                await ReadEventsFromEventHorizon(subscriptionId, call.ResponseStream).ConfigureAwait(false);
+                                await ReadEventsFromEventHorizon(response.ConsentId, subscriptionId, call.ResponseStream).ConfigureAwait(false);
                                 throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                             }, _cancellationToken).ConfigureAwait(false);
                     }
                 });
         }
 
-        async Task ReadEventsFromEventHorizon(SubscriptionId subscriptionId, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
+        async Task ReadEventsFromEventHorizon(ConsentId consentId, SubscriptionId subscriptionId, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
         {
             _logger.Information("Successfully connected event horizon with {subscriptionId}. Waiting for events to process", subscriptionId);
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();
@@ -219,8 +216,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             try
             {
                 _subscriptions.TrySubscribe(
+                    consentId,
                     subscriptionId,
-                    new EventProcessor(subscriptionId, _eventHorizonEventsWriter, _logger),
+                    new EventProcessor(consentId, subscriptionId, _eventHorizonEventsWriter, _logger),
                     eventsFetcher,
                     cancellationToken,
                     out var outputtedStreamProcessor);
@@ -267,11 +265,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     continue;
                 }
 
-                var @event = responseStream.Current.Event;
+                var eventHorizonEvent = responseStream.Current.Event;
                 await queue.EnqueueAsync(
                     new StreamEvent(
-                        @event.ToCommittedEvent(subscriptionId.ProducerMicroserviceId, subscriptionId.ConsumerTenantId),
-                        @event.StreamSequenceNumber,
+                        eventHorizonEvent.Event.ToCommittedEvent(),
+                        eventHorizonEvent.StreamSequenceNumber,
                         StreamId.EventLog,
                         Guid.Empty,
                         false),

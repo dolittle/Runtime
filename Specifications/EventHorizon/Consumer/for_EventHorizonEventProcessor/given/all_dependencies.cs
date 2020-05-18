@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -10,6 +11,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_EventHorizonEventProcessor.
 {
     public class all_dependencies
     {
+        protected static ConsentId consent_id;
         protected static SubscriptionId subscription_id;
         protected static Moq.Mock<IWriteEventHorizonEvents> event_horizon_events_writer;
         protected static CommittedEvent @event;
@@ -17,6 +19,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_EventHorizonEventProcessor.
 
         Establish context = () =>
         {
+            consent_id = Guid.NewGuid();
             subscription_id = new SubscriptionId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
             partition = Guid.NewGuid();
             event_horizon_events_writer = new Moq.Mock<IWriteEventHorizonEvents>();

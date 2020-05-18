@@ -21,24 +21,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
         /// <param name="isPublic">Whether the Event is public.</param>
-        /// <param name="fromEventHorizon">Wether the Event is from an EventHorizon.</param>
-        /// <param name="originEventLogSequenceNumber">The Event's original event log sequence number if it came from EventHorizon.</param>
         public EventMetadata(
             DateTimeOffset occurred,
             Guid eventSource,
             Guid typeId,
             uint typeGeneration,
-            bool isPublic,
-            bool fromEventHorizon,
-            ulong originEventLogSequenceNumber)
+            bool isPublic)
         {
             Occurred = occurred;
             EventSource = eventSource;
             TypeId = typeId;
             TypeGeneration = typeGeneration;
             Public = isPublic;
-            FromEventHorizon = fromEventHorizon;
-            OriginEventLogSequenceNumber = originEventLogSequenceNumber;
         }
 
         /// <summary>
@@ -72,16 +66,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets a value indicating whether this is a public Event.
         /// </summary>
         public bool Public { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this event came from EventHorizon.
-        /// </summary>
-        public bool FromEventHorizon { get; set; }
-
-        /// <summary>
-        /// Gets or sets the origin event log sequence number of the event if it came from EventHorizon.
-        /// </summary>
-        [BsonRepresentation(BsonType.Decimal128)]
-        public ulong OriginEventLogSequenceNumber { get; set; }
     }
 }
