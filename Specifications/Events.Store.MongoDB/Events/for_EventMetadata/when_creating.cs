@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventMetadata
     public class when_creating
     {
         static ulong event_log_sequence_number;
-        static DateTimeOffset occurred;
+        static DateTime occurred;
         static Guid event_source;
         static Guid type_id;
         static uint type_generation;
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventMetadata
 
         Establish context = () =>
         {
-            occurred = DateTimeOffset.Now;
+            occurred = DateTime.Now;
             event_source = Guid.NewGuid();
             type_id = Guid.NewGuid();
             type_generation = 3;

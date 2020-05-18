@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public stream_event_metadata_builder() =>
             _instance = new StreamEventMetadata(
                 0,
-                DateTimeOffset.UtcNow,
+                DateTime.UtcNow,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 0,
