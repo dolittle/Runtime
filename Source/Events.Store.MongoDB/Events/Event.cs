@@ -18,13 +18,21 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="executionContext">The execution context.</param>
         /// <param name="metadata">The event metadata.</param>
         /// <param name="aggregate">The aggregate metadata.</param>
+        /// <param name="eventHorizonMetadata">The event horizon metadata.</param>
         /// <param name="content">The event content.</param>
-        public Event(ulong eventLogSequenceNumber, ExecutionContext executionContext, EventMetadata metadata, AggregateMetadata aggregate, BsonDocument content)
+        public Event(
+            ulong eventLogSequenceNumber,
+            ExecutionContext executionContext,
+            EventMetadata metadata,
+            AggregateMetadata aggregate,
+            EventHorizonMetadata eventHorizonMetadata,
+            BsonDocument content)
         {
             EventLogSequenceNumber = eventLogSequenceNumber;
             ExecutionContext = executionContext;
             Metadata = metadata;
             Aggregate = aggregate;
+            EventHorizonMetadata = eventHorizonMetadata;
             Content = content;
         }
 
@@ -49,6 +57,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the event sourcing specific <see cref="AggregateMetadata"/>.
         /// </summary>
         public AggregateMetadata Aggregate { get; set; }
+
+        /// <summary>
+        /// Gets or sets the <see cref="EventHorizonMetadata" />.
+        /// </summary>
+        public EventHorizonMetadata EventHorizonMetadata { get; set; }
 
         /// <summary>
         /// Gets or sets the domain specific event data.

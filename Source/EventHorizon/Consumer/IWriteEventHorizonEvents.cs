@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -16,9 +17,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Writes a received event.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
+        /// <param name="consentId">The <see cref="ConsentId" />.</param>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The task.</returns>
-        Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken);
+        Task Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken);
     }
 }
