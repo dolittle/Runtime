@@ -6,7 +6,7 @@ using System;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Exception that gets thrown when an inconsistency is detected in the the event store at runtime.
+    /// Exception that gets thrown when an inconsistency is detected in the event store at runtime.
     /// </summary>
     public class EventStoreConsistencyError : Exception
     {
