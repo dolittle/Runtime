@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
     /// </summary>
     public class PublicFilterProcessor : AbstractFilterProcessor<PublicFilterDefinition>
     {
-        readonly IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
+        readonly IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public PublicFilterProcessor(
             PublicFilterDefinition definition,
-            IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> dispatcher,
+            IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> dispatcher,
             IWriteEventsToPublicStreams eventsToPublicStreamsWriter,
             ILogger logger)
             : base(ScopeId.Default, definition, eventsToPublicStreamsWriter, logger)

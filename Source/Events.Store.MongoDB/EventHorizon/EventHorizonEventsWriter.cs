@@ -1,10 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using MongoDB.Driver;
@@ -38,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         }
 
         /// <inheritdoc/>
-        public async Task Write(CommittedEvent @event, ScopeId scope, CancellationToken cancellationToken)
+        public async Task Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken)
         {
             _logger.Trace(
                 "Writing Event Horizon Event: {EventLogSequenceNumber} from Tenant: {Tenant} in Microservice {Microservice} to Scope: {Scope}",
@@ -49,7 +51,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
             await _eventsToStreamsWriter.Write(
                 await _streams.GetEventLog(scope, cancellationToken).ConfigureAwait(false),
                 _eventFilter,
-                streamPosition => _eventConverter.ToScopedEventLogEvent(@event, streamPosition.Value),
+                streamPosition => _eventConverter.ToEventLogEvent(
+                    new CommittedExternalEvent(
+                        streamPosition.Value,
+                        @event.Occurred,
+                        @event.EventSource,
+                        @event.ExecutionContext,
+                        @event.Type,
+                        false,
+                        @event.Content,
+                        @event.EventLogSequenceNumber,
+                        DateTimeOffset.UtcNow,
+                        consentId)),
                 cancellationToken).ConfigureAwait(false);
         }
     }

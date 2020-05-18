@@ -41,7 +41,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             await Write(
                 await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamFilter,
-                streamPosition => _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
+                streamPosition =>
+                    @event is CommittedExternalEvent externalEvent ?
+                        _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition, partition)
+                        : _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
                 cancellationToken).ConfigureAwait(false);
         }
 

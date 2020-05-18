@@ -19,33 +19,28 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             new runtime.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.EventLog, Guid.Empty, false);
 
         /// <inheritdoc/>
-        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(StreamEvent @event, StreamId stream, bool partitioned) =>
+        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned) =>
             new runtime.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition, partitioned);
 
         /// <inheritdoc/>
-        public mongoDB.Event ToScopedEventLogEvent(CommittedEvent @event, EventLogSequenceNumber eventLogSequenceNumber) =>
+        public mongoDB.Event ToEventLogEvent(CommittedExternalEvent committedEvent) =>
             new mongoDB.Event(
-                eventLogSequenceNumber,
-                @event.ExecutionContext.ToStoreRepresentation(),
-                @event.GetEventMetadata(true),
+                committedEvent.EventLogSequenceNumber,
+                committedEvent.ExecutionContext.ToStoreRepresentation(),
+                committedEvent.GetEventMetadata(),
                 new AggregateMetadata(),
-                BsonDocument.Parse(@event.Content));
-
-        /// <inheritdoc/>
-        public StreamEvent ToScopedStoreStreamEvent(CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
-            ToStoreStreamEvent(committedEvent, streamPosition, partition, true);
+                committedEvent.GetEventHorizonMetadata(),
+                BsonDocument.Parse(committedEvent.Content));
 
         /// <inheritdoc/>
         public mongoDB.StreamEvent ToStoreStreamEvent(CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
-            ToStoreStreamEvent(committedEvent, streamPosition, partition, false);
-
-        mongoDB.StreamEvent ToStoreStreamEvent(CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition, bool fromEventHorizon) =>
-            new MongoDB.Events.StreamEvent(
+            new mongoDB.StreamEvent(
                 streamPosition,
                 partition,
                 committedEvent.ExecutionContext.ToStoreRepresentation(),
-                committedEvent.GetStreamEventMetadata(fromEventHorizon),
+                committedEvent.GetStreamEventMetadata(),
                 committedEvent.GetAggregateMetadata(),
+                committedEvent.GetEventHorizonMetadata(),
                 BsonDocument.Parse(committedEvent.Content));
     }
 }

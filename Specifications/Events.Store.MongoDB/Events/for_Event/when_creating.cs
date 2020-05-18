@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_Event
         static ExecutionContext execution_context;
         static EventMetadata event_metadata;
         static AggregateMetadata aggregate_metadata;
+        static EventHorizonMetadata event_horizon_metadata;
         static BsonDocument content;
         static Event result;
 
@@ -21,6 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_Event
             execution_context = execution_contexts.create_store();
             event_metadata = metadata.random_event_metadata;
             aggregate_metadata = metadata.aggregate_metadata_from_non_aggregate_event;
+            event_horizon_metadata = metadata.random_event_horizon_metadata;
             content = BsonDocument.Parse("{\"something\": \"something\"}");
         };
 
@@ -29,12 +31,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_Event
             execution_context,
             event_metadata,
             aggregate_metadata,
+            event_horizon_metadata,
             content);
 
         It should_have_the_correct_event_log_sequence_number = () => result.EventLogSequenceNumber.ShouldEqual(event_log_sequence_number);
         It should_have_the_correct_execution_context = () => result.ExecutionContext.ShouldEqual(execution_context);
         It should_have_the_correct_event_metadata = () => result.Metadata.ShouldEqual(event_metadata);
         It should_have_the_correct_aggregate_metadata = () => result.Aggregate.ShouldEqual(aggregate_metadata);
+        It should_have_the_correct_event_horizon_metadata = () => result.EventHorizonMetadata.ShouldEqual(event_horizon_metadata);
         It should_have_the_correct_content = () => result.Content.ShouldEqual(content);
     }
 }

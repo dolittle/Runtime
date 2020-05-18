@@ -9,6 +9,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -34,6 +35,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscription"/> class.
         /// </summary>
+        /// <param name="consentId">The <see cref="ConsentId" />.</param>
         /// <param name="subscriptionId">The <see cref="StreamProcessorId" />.</param>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="eventsFetcher">The <see cref="EventsFromEventHorizonFetcher" />.</param>
@@ -42,6 +44,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public Subscription(
+            ConsentId consentId,
             SubscriptionId subscriptionId,
             EventProcessor eventProcessor,
             EventsFromEventHorizonFetcher eventsFetcher,
@@ -59,7 +62,14 @@ namespace Dolittle.Runtime.EventHorizon
             _logger = loggerManager.CreateLogger<StreamProcessor>();
             _cancellationToken = cancellationToken;
             _unregisterTokenRegistration = _cancellationToken.Register(_unregister);
+
+            ConsentId = consentId;
         }
+
+        /// <summary>
+        /// Gets the <see cref="ConsentId" />.
+        /// </summary>
+        public ConsentId ConsentId { get; }
 
         /// <summary>
         /// Initializes the stream processor.

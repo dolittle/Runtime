@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// </summary>
     public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
     {
-        readonly IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
+        readonly IReverseCallDispatcher<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FilterProcessor(
             ScopeId scope,
             FilterDefinition definition,
-            IReverseCallDispatcher<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+            IReverseCallDispatcher<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger<FilterProcessor> logger)
             : base(scope, definition, eventsToStreamsWriter, logger)

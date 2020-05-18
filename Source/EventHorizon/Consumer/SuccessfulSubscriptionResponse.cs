@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Store.EventHorizon;
+
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
@@ -11,7 +13,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Initializes a new instance of the <see cref="SuccessfulSubscriptionResponse"/> class.
         /// </summary>
-        public SuccessfulSubscriptionResponse()
+        /// <param name="consentId">The <see cref="ConsentId" />.</param>
+        public SuccessfulSubscriptionResponse(ConsentId consentId)
+            : base(consentId)
         {
         }
     }
