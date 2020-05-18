@@ -33,39 +33,56 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
         /// <summary>
         /// Gets the correct type when deserializing objects from  <see cref="AbstractStreamProcessorState"/> collection
-        /// depending on the "Partitioned" field, which is set by this class.
+        /// depending on the given nominal type or "Partitioned" field.
         /// </summary>
         /// <param name="bsonReader">A <see cref="IBsonReader"/>.</param>
         /// <param name="nominalType">The nominal type.</param>
         /// <returns>The actual wanted type.</returns>
         public Type GetActualType(IBsonReader bsonReader, Type nominalType)
         {
-            var bookmark = bsonReader.GetBookmark();
-            bsonReader.ReadStartDocument();
-            var actualType = nominalType;
-            while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
+            if (nominalType == typeof(StreamProcessorState))
             {
-                var fieldName = bsonReader.ReadName();
-                if (fieldName == "Partitioned")
+                return typeof(StreamProcessorState);
+            }
+            else if (nominalType == typeof(Partitioned.PartitionedStreamProcessorState))
+            {
+                return typeof(Partitioned.PartitionedStreamProcessorState);
+            }
+            else if (nominalType == typeof(AbstractStreamProcessorState))
+            {
+                var bookmark = bsonReader.GetBookmark();
+                bsonReader.ReadStartDocument();
+                var actualType = nominalType;
+                while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
                 {
-                    var partitioned = bsonReader.ReadBoolean();
-                    if (partitioned)
+                    var fieldName = bsonReader.ReadName();
+                    if (fieldName == "Partitioned")
                     {
-                        actualType = typeof(Partitioned.PartitionedStreamProcessorState);
-                        break;
+                        var partitioned = bsonReader.ReadBoolean();
+                        if (partitioned)
+                        {
+                            actualType = typeof(Partitioned.PartitionedStreamProcessorState);
+                            break;
+                        }
+                        else
+                        {
+                            actualType = typeof(StreamProcessorState);
+                            break;
+                        }
                     }
                     else
                     {
-                        actualType = typeof(StreamProcessorState);
-                        break;
+                        bsonReader.SkipValue();
                     }
                 }
 
-                bsonReader.SkipValue();
+                bsonReader.ReturnToBookmark(bookmark);
+                return actualType;
             }
-
-            bsonReader.ReturnToBookmark(bookmark);
-            return actualType;
+            else
+            {
+                throw new UnsupportedTypeForStreamProcessorStateDiscriminatorConvention(nominalType);
+            }
         }
     }
 }
