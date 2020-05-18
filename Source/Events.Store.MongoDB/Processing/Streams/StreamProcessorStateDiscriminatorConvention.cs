@@ -48,23 +48,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             {
                 var bookmark = bsonReader.GetBookmark();
                 bsonReader.ReadStartDocument();
-                var actualType = nominalType;
+                ObjectId id = default;
                 while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
                 {
                     var fieldName = bsonReader.ReadName();
                     if (fieldName == "Partitioned")
                     {
                         var partitioned = bsonReader.ReadBoolean();
-                        if (partitioned)
-                        {
-                            actualType = typeof(Partitioned.PartitionedStreamProcessorState);
-                            break;
-                        }
-                        else
-                        {
-                            actualType = typeof(StreamProcessorState);
-                            break;
-                        }
+                        bsonReader.ReturnToBookmark(bookmark);
+                        return partitioned ? typeof(Partitioned.PartitionedStreamProcessorState) : typeof(StreamProcessorState);
+                    }
+                    else if (fieldName == "_id")
+                    {
+                        id = bsonReader.ReadObjectId();
                     }
                     else
                     {
@@ -73,7 +69,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 }
 
                 bsonReader.ReturnToBookmark(bookmark);
-                return actualType;
+                throw new StreamProcessorStateDocumentIsMissingPartitionedField(nominalType, id);
             }
             else
             {
