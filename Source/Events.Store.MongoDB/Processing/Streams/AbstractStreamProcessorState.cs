@@ -2,18 +2,19 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Processing.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the base state of an <see cref="AbstractScopedStreamProcessor" />.
-    /// It has a programmatically assigned <see cref="StreamProcessorStateDiscriminatorConvention"/> which takes care of
-    /// serializing <see cref="StreamProcessorState"/> and <see cref="Partitioned.PartitionedStreamProcessorState"/> to
-    /// this collection.
+    /// Represents the base class for <see cref="StreamProcessorState"/> and <see cref="Partitioned.PartitionedStreamProcessorState"/>.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="StreamProcessorStateDiscriminatorConvention"/> is used to deserialise either a
+    /// <see cref="StreamProcessorState"/> or a <see cref="Partitioned.PartitionedStreamProcessorState"/> from a stream
+    /// processor state collection.
+    /// </remarks>
     [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.PartitionedStreamProcessorState))]
     [BsonIgnoreExtraElements]
     public abstract class AbstractStreamProcessorState
