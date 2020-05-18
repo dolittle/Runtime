@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <param name="consumerTenantId">The consumer <see cref="TenantId" />.</param>
         /// <param name="producerMicroserviceId">The producer <see cref="Microservice" />.</param>
         /// <param name="producerTenantId">The producer <see cref="TenantId" />.</param>
-        /// <param name="scope">The <see cref="Store.ScopeId" />.</param>
         /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
         /// <param name="partitionId">The <see cref="Store.Streams.PartitionId" /> in the stream to subscribe to.</param>
         /// <param name="position">The position.</param>
@@ -34,7 +33,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             Guid consumerTenantId,
             Guid producerMicroserviceId,
             Guid producerTenantId,
-            Guid scope,
             Guid streamId,
             Guid partitionId,
             ulong position,
@@ -47,7 +45,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             ConsumerTenantId = consumerTenantId;
             ProducerMicroserviceId = producerMicroserviceId;
             ProducerTenantId = producerTenantId;
-            ScopeId = scope;
             StreamId = streamId;
             PartitionId = partitionId;
             Position = position;
@@ -72,11 +69,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// Gets or sets the producer <see cref="TenantId" />.
         /// </summary>
         public Guid ProducerTenantId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the <see cref="ScopeId" />.
-        /// </summary>
-        public Guid ScopeId { get; set; }
 
         /// <summary>
         /// Gets or sets the public <see cref="Store.Streams.StreamId" />.

@@ -132,7 +132,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var state = await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new Partitioned.PartitionedStreamProcessorState(
-                            streamProcessorId.ScopeId,
                             streamProcessorId.EventProcessorId,
                             streamProcessorId.SourceStreamId,
                             partitionedStreamProcessorState.Position,
@@ -150,7 +149,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var state = await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new StreamProcessorState(
-                            streamProcessorId.ScopeId,
                             streamProcessorId.EventProcessorId,
                             streamProcessorId.SourceStreamId,
                             streamProcessorState.Position,

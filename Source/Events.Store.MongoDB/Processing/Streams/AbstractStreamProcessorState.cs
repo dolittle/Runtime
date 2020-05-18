@@ -19,32 +19,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractStreamProcessorState"/> class.
         /// </summary>
-        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
         /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
         /// <param name="sourceStreamId">The <see cref="SourceStreamId" />.</param>
         /// <param name="position">The position.</param>
         /// <param name="partitioned">Whether it is partitioned.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
         protected AbstractStreamProcessorState(
-            Guid scopeId,
             Guid eventProcessorId,
             Guid sourceStreamId,
             ulong position,
             bool partitioned,
             DateTimeOffset lastSuccessfullyProcessed)
         {
-            ScopeId = scopeId;
             EventProcessorId = eventProcessorId;
             SourceStreamId = sourceStreamId;
             Position = position;
             Partitioned = partitioned;
             LastSuccessfullyProcessed = lastSuccessfullyProcessed;
         }
-
-        /// <summary>
-        /// Gets or sets the scope id.
-        /// </summary>
-        public Guid ScopeId { get; set; }
 
         /// <summary>
         /// Gets or sets the event processor id.

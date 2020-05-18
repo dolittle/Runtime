@@ -49,7 +49,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
                         .Ascending(_ => _.ConsumerTenantId)
                         .Ascending(_ => _.ProducerMicroserviceId)
                         .Ascending(_ => _.ProducerTenantId)
-                        .Ascending(_ => _.ScopeId)
                         .Ascending(_ => _.StreamId)
                         .Ascending(_ => _.PartitionId),
                     new CreateIndexOptions { Unique = true }),
