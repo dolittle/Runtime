@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
                 {
                     var fieldName = bsonReader.ReadName();
-                    if (fieldName == "Partitioned")
+                    if (fieldName == ElementName)
                     {
                         var partitioned = bsonReader.ReadBoolean();
                         bsonReader.ReturnToBookmark(bookmark);
@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 }
 
                 bsonReader.ReturnToBookmark(bookmark);
-                throw new StreamProcessorStateDocumentIsMissingPartitionedField(nominalType, id);
+                throw new StreamProcessorStateDocumentIsMissingPartitionedField(id);
             }
             else
             {
