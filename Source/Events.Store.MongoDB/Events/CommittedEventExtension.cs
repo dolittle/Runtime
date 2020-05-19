@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static EventHorizonMetadata GetEventHorizonMetadata(this CommittedExternalEvent committedEvent) =>
             new EventHorizonMetadata(
                 committedEvent.ExternalEventLogSequenceNumber,
-                committedEvent.Received,
+                committedEvent.Received.UtcDateTime,
                 committedEvent.Consent);
 
         /// <summary>

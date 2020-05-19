@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public EventHorizonMetadata()
         {
             FromEventHorizon = false;
-            Received = DateTimeOffset.MinValue;
+            Received = DateTime.MinValue;
             Consent = Guid.Empty;
         }
 
@@ -26,11 +26,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Initializes a new instance of the <see cref="EventHorizonMetadata"/> class.
         /// </summary>
         /// <param name="externalEventLogSequenceNumber">The Event's original event log sequence number if it came from EventHorizon.</param>
-        /// <param name="received">The <see cref="DateTimeOffset" /> ƒor when this Event was received.</param>
+        /// <param name="received">The <see cref="DateTime" /> ƒor when this Event was received.</param>
         /// <param name="consent">The consent id of the subscription this Event was received from.</param>
         public EventHorizonMetadata(
             ulong externalEventLogSequenceNumber,
-            DateTimeOffset received,
+            DateTime received,
             Guid consent)
         {
             FromEventHorizon = true;
@@ -51,10 +51,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public ulong ExternalEventLogSequenceNumber { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="DateTimeOffset"/> of when the Event was received.
+        /// Gets or sets the <see cref="DateTime"/> of when the Event was received.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset Received { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime Received { get; set; }
 
         /// <summary>
         /// Gets or sets the consent id.
