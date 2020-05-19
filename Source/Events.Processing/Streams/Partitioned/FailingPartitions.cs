@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 
@@ -17,27 +18,31 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     /// </summary>
     public class FailingPartitions : IFailingPartitions
     {
-        readonly IStreamProcessorStateRepository _streamProcessorStates;
+        readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IEventProcessor _eventProcessor;
         readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
+        readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
         /// </summary>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
-        /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromStream" />.</param>
+        /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromPartitionedStream" />.</param>
+        /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public FailingPartitions(
-            IStreamProcessorStateRepository streamProcessorStates,
+            IResilientStreamProcessorStateRepository streamProcessorStates,
             IEventProcessor eventProcessor,
             ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
+            IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
             ILogger<FailingPartitions> logger)
         {
             _streamProcessorStates = streamProcessorStates;
             _eventProcessor = eventProcessor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
+            _eventsFetcherPolicy = eventsFetcherPolicy;
             _logger = logger;
         }
 
@@ -82,7 +87,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
                 {
                     while (ShouldProcessNextEventInPartition(failingPartitionState.Position, streamProcessorState.Position))
                     {
-                        var tryGetEvent = await _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken).ConfigureAwait(false);
+                        var tryGetEvent = await _eventsFetcherPolicy.Execute(
+                            cancellationToken => _eventsFromStreamsFetcher.FetchInPartition(partition, failingPartitionState.Position, cancellationToken),
+                            cancellationToken).ConfigureAwait(false);
                         if (!tryGetEvent.Success) break;
                         var streamEvent = tryGetEvent.Result;
                         if (streamEvent.Partition != partition) throw new StreamEventInWrongPartition(streamEvent, partition);
@@ -172,7 +179,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         Task<IProcessingResult> RetryProcessingEvent(FailingPartitionState failingPartitionState, CommittedEvent @event, PartitionId partition, CancellationToken cancellationToken) =>
             _eventProcessor.Process(@event, partition, failingPartitionState.Reason, failingPartitionState.ProcessingAttempts - 1, cancellationToken);
 
-        Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState) => _streamProcessorStates.Persist(streamProcessorId, newState, CancellationToken.None);
+        Task PersistNewState(IStreamProcessorId streamProcessorId, StreamProcessorState newState) =>
+            _streamProcessorStates.Persist(streamProcessorId, newState, CancellationToken.None);
 
         bool ShouldProcessNextEventInPartition(StreamPosition failingPartitionPosition, StreamPosition streamProcessorPosition) =>
             failingPartitionPosition.Value < streamProcessorPosition.Value;
