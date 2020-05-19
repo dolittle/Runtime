@@ -3,15 +3,15 @@
 
 using System;
 using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using runtime = Dolittle.Runtime.Events.Processing.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the state of an <see cref="Runtime.Events.Processing.Streams.AbstractScopedStreamProcessor" />.
+    /// Represents the state of an <see cref="runtime.AbstractScopedStreamProcessor" />.
     /// </summary>
     [BsonIgnoreExtraElements]
     public class StreamProcessorState : AbstractStreamProcessorState
@@ -59,11 +59,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public bool IsFailing { get; set; }
 
         /// <summary>
-        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="Runtime.Events.Processing.Streams.StreamProcessorState"/>.
+        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="runtime.StreamProcessorState"/>.
         /// </summary>
-        /// <returns>The converted <see cref="Runtime.Events.Processing.Streams.Partitioned.StreamProcessorState" />.</returns>
-        public override IStreamProcessorState ToRuntimeRepresentation() =>
-            new Runtime.Events.Processing.Streams.StreamProcessorState(
+        /// <returns>The converted <see cref="runtime.Partitioned.StreamProcessorState" />.</returns>
+        public override runtime.IStreamProcessorState ToRuntimeRepresentation() =>
+            new runtime.StreamProcessorState(
                 Position,
                 FailureReason,
                 RetryTime,
