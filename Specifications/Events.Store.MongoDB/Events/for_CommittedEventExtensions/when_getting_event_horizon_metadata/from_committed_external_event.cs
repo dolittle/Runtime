@@ -20,6 +20,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensi
         It should_have_the_correct_consent = () => result.Consent.ShouldEqual(committed_event.Consent.Value);
         It should_have_the_correct_external_event_log_sequence_number = () => result.ExternalEventLogSequenceNumber.ShouldEqual(committed_event.ExternalEventLogSequenceNumber.Value);
         It should_be_from_event_horizon = () => result.FromEventHorizon.ShouldBeTrue();
-        It should_have_the_correct_received_value = () => result.Received.ShouldEqual(committed_event.Received);
+        It should_have_the_correct_received_value = () => result.Received.ShouldEqual(committed_event.Received.UtcDateTime);
     }
 }

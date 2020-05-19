@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensi
 
         It should_have_the_correct_event_log_sequence_number = () => result.EventLogSequenceNumber.ShouldEqual(committed_event.EventLogSequenceNumber.Value);
         It should_have_the_event_source = () => result.EventSource.ShouldEqual(committed_event.EventSource.Value);
-        It should_have_the_correct_occurred_value = () => result.Occurred.ShouldEqual(committed_event.Occurred);
+        It should_have_the_correct_occurred_value = () => result.Occurred.ShouldEqual(committed_event.Occurred.DateTime);
         It should_have_the_correct_public_value = () => result.Public.ShouldEqual(committed_event.Public);
         It should_have_the_correct_type_id = () => result.TypeId.ShouldEqual(committed_event.Type.Id.Value);
         It should_have_the_correct_type_generation = () => result.TypeGeneration.ShouldEqual(committed_event.Type.Generation.Value);
