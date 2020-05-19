@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public event_metadata_builder() =>
             _instance = new EventMetadata(
-                DateTimeOffset.UtcNow,
+                DateTime.UtcNow,
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 0,
