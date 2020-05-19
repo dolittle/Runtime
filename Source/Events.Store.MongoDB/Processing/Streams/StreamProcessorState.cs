@@ -56,10 +56,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         public bool IsFailing { get; set; }
 
-        /// <summary>
-        /// Converts the <see cref="StreamProcessorState" /> to the runtime representation of <see cref="runtime.StreamProcessorState"/>.
-        /// </summary>
-        /// <returns>The converted <see cref="runtime.Partitioned.StreamProcessorState" />.</returns>
+        /// <inheritdoc/>
         public override runtime.IStreamProcessorState ToRuntimeRepresentation() =>
             new runtime.StreamProcessorState(
                 Position,

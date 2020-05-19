@@ -38,10 +38,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public IDictionary<string, FailingPartitionState> FailingPartitions { get; set; }
 
-        /// <summary>
-        /// Converts the <see cref="PartitionedStreamProcessorState" /> to the runtime representation of <see cref="runtime.Partitioned.StreamProcessorState" />.
-        /// </summary>
-        /// <returns>The converted <see cref="runtime.Partitioned.StreamProcessorState" />.</returns>
+        /// <inheritdoc/>
         public override runtime.IStreamProcessorState ToRuntimeRepresentation() =>
             new runtime.Partitioned.StreamProcessorState(
                 Position,
