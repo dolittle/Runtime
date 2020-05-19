@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoot
         {
             event_source = Guid.NewGuid();
             aggregate_type = Guid.NewGuid();
-            version = 0;
+            version = random.aggregate_root_version;
         };
 
         Because of = () => aggregate_root = new AggregateRoot(event_source, aggregate_type, version);

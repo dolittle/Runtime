@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
 
         Establish context = () =>
         {
-            committed_event = committed_events.a_committed_aggregate_event(0, Guid.NewGuid(), Guid.NewGuid(), 1);
+            committed_event = committed_events.a_committed_aggregate_event(random.event_log_sequence_number, Guid.NewGuid(), Guid.NewGuid(), random.aggregate_root_version);
             event_converter = new EventConverter();
             stream_position = 3;
             partition = Guid.NewGuid();

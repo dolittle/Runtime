@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
 
         Establish context = () =>
         {
-            committed_event = committed_events.a_committed_external_event(0, 0);
+            committed_event = committed_events.a_committed_external_event(random.event_log_sequence_number, random.event_log_sequence_number);
             event_converter = new EventConverter();
         };
 

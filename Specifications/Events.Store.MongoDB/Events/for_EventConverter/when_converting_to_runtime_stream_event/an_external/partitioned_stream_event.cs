@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
 
         Establish context = () =>
         {
-            stream_position = 2;
+            stream_position = random.stream_position;
             partition = Guid.NewGuid();
             stream = Guid.NewGuid();
             stored_event = events.an_external_stream_event(stream_position, partition);

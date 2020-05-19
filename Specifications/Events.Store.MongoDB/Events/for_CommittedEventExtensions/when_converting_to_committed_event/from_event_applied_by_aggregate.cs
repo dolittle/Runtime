@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensi
 
         Establish context = () =>
         {
-            @event = events.an_event(0, 0);
+            @event = events.an_event(random.event_log_sequence_number, random.aggregate_root_version);
         };
 
         Because of = () => result = @event.ToCommittedEvent();

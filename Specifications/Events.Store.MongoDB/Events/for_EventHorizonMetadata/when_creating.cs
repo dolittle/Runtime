@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventHorizonMetadata
 
         Establish context = () =>
         {
-            external_event_log_sequence_number = 1;
+            external_event_log_sequence_number = random.event_log_sequence_number;
             received = DateTimeOffset.Now;
             consent = Guid.NewGuid();
         };

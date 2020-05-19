@@ -11,6 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
     {
         static MongoDB.Events.StreamEvent stored_event;
         static StreamPosition stream_position;
+        static AggregateRootVersion aggregate_root_version;
         static PartitionId partition;
         static StreamId stream;
 
@@ -19,10 +20,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
 
         Establish context = () =>
         {
-            stream_position = 2;
+            stream_position = random.stream_position;
+            aggregate_root_version = random.aggregate_root_version;
             partition = Guid.NewGuid();
             stream = Guid.NewGuid();
-            stored_event = events.a_stream_event(stream_position, partition, 0);
+            stored_event = events.a_stream_event(stream_position, partition, aggregate_root_version);
             event_converter = new EventConverter();
         };
 
