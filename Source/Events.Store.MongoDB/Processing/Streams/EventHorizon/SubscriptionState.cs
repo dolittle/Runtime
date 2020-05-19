@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.ApplicationModel;
 using Dolittle.Tenancy;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -18,14 +17,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionState"/> class.
         /// </summary>
-        /// <param name="producerMicroserviceId">The producer <see cref="Microservice" />.</param>
+        /// <param name="producerMicroserviceId">The producer <see cref="ApplicationModel.Microservice" />.</param>
         /// <param name="producerTenantId">The producer <see cref="TenantId" />.</param>
         /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
         /// <param name="partitionId">The <see cref="Store.Streams.PartitionId" /> in the stream to subscribe to.</param>
         /// <param name="position">The position.</param>
         /// <param name="retryTime">The time to retry processing.</param>
         /// <param name="failureReason">The reason for failing.</param>
-        /// <param name="processingAttempts">The number of times the event at <see cref="SubscriptionState.Position" /> has been processed.</param>
+        /// <param name="processingAttempts">The number of times the event at <see cref="Position" /> has been processed.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
         /// <param name="isFailing">Whether the Stream Processor is failing.</param>
         public SubscriptionState(
@@ -34,16 +33,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             Guid streamId,
             Guid partitionId,
             ulong position,
-            DateTimeOffset retryTime,
+            DateTime retryTime,
             string failureReason,
             uint processingAttempts,
-            DateTimeOffset lastSuccessfullyProcessed,
+            DateTime lastSuccessfullyProcessed,
             bool isFailing)
         {
-            ProducerMicroserviceId = producerMicroserviceId;
-            ProducerTenantId = producerTenantId;
-            StreamId = streamId;
-            PartitionId = partitionId;
+            Microservice = producerMicroserviceId;
+            Tenant = producerTenantId;
+            Stream = streamId;
+            Partition = partitionId;
             Position = position;
             LastSuccessfullyProcessed = lastSuccessfullyProcessed;
             RetryTime = retryTime;
@@ -53,24 +52,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         }
 
         /// <summary>
-        /// Gets or sets the producer <see cref="Microservice" />.
+        /// Gets or sets the producer <see cref="ApplicationModel.Microservice" />.
         /// </summary>
-        public Guid ProducerMicroserviceId { get; set; }
+        public Guid Microservice { get; set; }
 
         /// <summary>
-        /// Gets or sets the producer <see cref="TenantId" />.
+        /// Gets or sets the producer <see cref="Dolittle.Tenancy.TenantId" />.
         /// </summary>
-        public Guid ProducerTenantId { get; set; }
+        public Guid Tenant { get; set; }
 
         /// <summary>
         /// Gets or sets the public <see cref="Store.Streams.StreamId" />.
         /// </summary>
-        public Guid StreamId { get; set; }
+        public Guid Stream { get; set; }
 
         /// <summary>
         /// Gets or setsthe <see cref="Store.Streams.PartitionId" /> in the public stream.
         /// </summary>
-        public Guid PartitionId { get; set; }
+        public Guid Partition { get; set; }
 
         /// <summary>
         /// Gets or sets the position.
@@ -81,14 +80,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <summary>
         /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset LastSuccessfullyProcessed { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime LastSuccessfullyProcessed { get; set; }
 
         /// <summary>
         /// Gets or sets the retry time.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset RetryTime { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime RetryTime { get; set; }
 
         /// <summary>
         /// Gets or sets the reason for failure.
