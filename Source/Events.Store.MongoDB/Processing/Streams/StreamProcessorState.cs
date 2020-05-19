@@ -45,8 +45,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         /// <summary>
-        /// Gets or sets the retry time.
+        /// Gets or sets the retry time with Kind of UTC.
         /// </summary>
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime RetryTime { get; set; }
 
         /// <summary>

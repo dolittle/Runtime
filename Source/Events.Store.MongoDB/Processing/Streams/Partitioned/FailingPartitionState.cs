@@ -36,13 +36,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public ulong Position { get; set; }
 
         /// <summary>
-        /// Gets or sets the retry time.
+        /// Gets or sets the retry time with Kind of UTC.
         /// </summary>
-        /// <remarks>
-        /// BsonType.Document saves a UTC DateTime, ticks and an offset(in minutes) to the document. This way we can
-        /// query for the DateTime from the database and it looks nicer than the string representation.
-        /// https://github.com/mongodb/mongo-csharp-driver/blob/master/src/MongoDB.Bson/Serialization/Serializers/DateTimeOffsetSerializer.cs#L158 .
-        /// </remarks>
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime RetryTime { get; set; }
 
         /// <summary>
@@ -56,8 +52,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public uint ProcessingAttempts { get; set; }
 
         /// <summary>
-        /// Gets or sets the timestamp on when the partition failed.
+        /// Gets or sets the timestamp on when the partition failed with Kind of UTC.
         /// </summary>
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime LastFailed { get; set; }
     }
 }
