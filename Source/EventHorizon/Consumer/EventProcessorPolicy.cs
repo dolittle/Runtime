@@ -37,12 +37,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         _logger.Debug(_, "Event Store is unavailable");
                         return true;
                     })
-                .Or<TimeoutException>(
-                    _ =>
-                    {
-                        _logger.Debug(_, "Event store timed out");
-                        return true;
-                    })
                 .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));
     }
 }

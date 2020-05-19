@@ -35,6 +35,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
+        readonly IAsyncPolicyFor<EventProcessor> _eventProcessorPolicy;
         readonly IExecutionContextManager _executionContextManager;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly CancellationToken _cancellationToken;
@@ -50,6 +51,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
         /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
+        /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
@@ -59,6 +61,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IStreamProcessorStateRepository streamProcessorStates,
             IWriteEventHorizonEvents eventHorizonEventsWriter,
             IAsyncPolicyFor<ConsumerClient> policy,
+            IAsyncPolicyFor<EventProcessor> eventProcessorPolicy,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
@@ -68,6 +71,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _streamProcessorStates = streamProcessorStates;
             _eventHorizonEventsWriter = eventHorizonEventsWriter;
             _policy = policy;
+            _eventProcessorPolicy = eventProcessorPolicy;
             _executionContextManager = executionContextManager;
             _logger = logger;
             _cancellationTokenSource = new CancellationTokenSource();
@@ -94,11 +98,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             if (_subscriptions.TryGetConsentFor(subscriptionId, out var consentId))
             {
-                _logger.Trace($"Already subscribed to subscription {subscriptionId}");
+                _logger.Trace("Already subscribed to subscription {SubscriptionId}", subscriptionId);
                 return new SuccessfulSubscriptionResponse(consentId);
             }
 
-            _logger.Trace($"Getting microservice address");
+            _logger.Trace("Getting microservice address");
             if (!TryGetMicroserviceAddress(subscriptionId.ProducerMicroserviceId, out var microserviceAddress))
             {
                 var message = $"There is no microservice configuration for the producer microservice '{subscriptionId.ProducerMicroserviceId}'.";
@@ -218,7 +222,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _subscriptions.TrySubscribe(
                     consentId,
                     subscriptionId,
-                    new EventProcessor(consentId, subscriptionId, _eventHorizonEventsWriter, _logger),
+                    new EventProcessor(consentId, subscriptionId, _eventHorizonEventsWriter, _eventProcessorPolicy, _logger),
                     eventsFetcher,
                     cancellationToken,
                     out var outputtedStreamProcessor);
