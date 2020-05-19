@@ -19,12 +19,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     public class DatabaseConnection
     {
         /// <summary>
+        /// Initializes static members of the <see cref="DatabaseConnection"/> class.
+        /// </summary>
+        static DatabaseConnection()
+        {
+            RegisterCustomDiscriminators();
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
         /// <param name="configuration">A <see cref="IConfigurationFor{EventStoreConfiguration}"/> with database connection parameters.</param>
         public DatabaseConnection(IConfigurationFor<EventStoreConfiguration> configuration)
         {
-            RegisterCustomDiscriminators();
             var config = configuration.Instance;
             var settings = new MongoClientSettings
             {
@@ -51,10 +58,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <remarks>
         /// DiscriminatorConvetions need to be registered before everything else is done with MongoDB, otherwise the classes
-        /// will get assiged a BsonClassMapSerializer implicitly.
+        /// will get assiged a BsonClassMapSerializer implicitly. We can also only register them once, multiple registrations
+        /// result in errors.
         /// https://stackoverflow.com/a/30292486/5806412 .
         /// </remarks>
-        void RegisterCustomDiscriminators()
+        static void RegisterCustomDiscriminators()
         {
             BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractStreamProcessorState), new StreamProcessorStateDiscriminatorConvention());
         }
