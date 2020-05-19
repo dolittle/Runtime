@@ -59,9 +59,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             _streamProcessorStates.Indexes.CreateOne(
                 new CreateIndexModel<AbstractStreamProcessorState>(
                     Builders<AbstractStreamProcessorState>.IndexKeys
-                        .Ascending(_ => _.ScopeId)
-                        .Ascending(_ => _.EventProcessorId)
-                        .Ascending(_ => _.SourceStreamId),
+                        .Ascending(_ => _.EventProcessor)
+                        .Ascending(_ => _.SourceStream),
                     new CreateIndexOptions { Unique = true }));
         }
 
@@ -79,9 +78,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             await streamProcessorStates.Indexes.CreateOneAsync(
                 new CreateIndexModel<AbstractStreamProcessorState>(
                     Builders<AbstractStreamProcessorState>.IndexKeys
-                        .Ascending(_ => _.ScopeId)
-                        .Ascending(_ => _.EventProcessorId)
-                        .Ascending(_ => _.SourceStreamId),
+                        .Ascending(_ => _.EventProcessor)
+                        .Ascending(_ => _.SourceStream),
                     new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
