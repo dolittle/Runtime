@@ -40,41 +40,37 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <returns>The actual wanted type.</returns>
         public Type GetActualType(IBsonReader bsonReader, Type nominalType)
         {
-            if (nominalType == typeof(StreamProcessorState) || nominalType == typeof(Partitioned.PartitionedStreamProcessorState))
+            ThrowIfNominalTypeIsIncorrect(nominalType);
+            var bookmark = bsonReader.GetBookmark();
+            bsonReader.ReadStartDocument();
+            ObjectId id = default;
+            while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
             {
-                return nominalType;
-            }
-            else if (nominalType == typeof(AbstractStreamProcessorState))
-            {
-                var bookmark = bsonReader.GetBookmark();
-                bsonReader.ReadStartDocument();
-                ObjectId id = default;
-                while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
+                var fieldName = bsonReader.ReadName();
+                if (fieldName == ElementName)
                 {
-                    var fieldName = bsonReader.ReadName();
-                    if (fieldName == ElementName)
-                    {
-                        var partitioned = bsonReader.ReadBoolean();
-                        bsonReader.ReturnToBookmark(bookmark);
-                        return partitioned ? typeof(Partitioned.PartitionedStreamProcessorState) : typeof(StreamProcessorState);
-                    }
-                    else if (fieldName == "_id")
-                    {
-                        id = bsonReader.ReadObjectId();
-                    }
-                    else
-                    {
-                        bsonReader.SkipValue();
-                    }
+                    var partitioned = bsonReader.ReadBoolean();
+                    bsonReader.ReturnToBookmark(bookmark);
+                    return partitioned ? typeof(Partitioned.PartitionedStreamProcessorState) : typeof(StreamProcessorState);
                 }
+                else if (fieldName == "_id")
+                {
+                    id = bsonReader.ReadObjectId();
+                }
+                else
+                {
+                    bsonReader.SkipValue();
+                }
+            }
 
-                bsonReader.ReturnToBookmark(bookmark);
-                throw new StreamProcessorStateDocumentIsMissingPartitionedField(id);
-            }
-            else
-            {
+            bsonReader.ReturnToBookmark(bookmark);
+            throw new StreamProcessorStateDocumentIsMissingPartitionedField(id);
+        }
+
+        void ThrowIfNominalTypeIsIncorrect(Type nominalType)
+        {
+            if (nominalType != typeof(AbstractStreamProcessorState))
                 throw new UnsupportedTypeForStreamProcessorStateDiscriminatorConvention(nominalType);
-            }
         }
     }
 }

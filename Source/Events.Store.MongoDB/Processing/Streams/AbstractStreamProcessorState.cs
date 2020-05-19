@@ -16,7 +16,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     /// <see cref="StreamProcessorState"/> or a <see cref="Partitioned.PartitionedStreamProcessorState"/> from a stream
     /// processor state collection.
     /// </remarks>
-    [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.PartitionedStreamProcessorState))]
     [BsonIgnoreExtraElements]
     public abstract class AbstractStreamProcessorState
     {
