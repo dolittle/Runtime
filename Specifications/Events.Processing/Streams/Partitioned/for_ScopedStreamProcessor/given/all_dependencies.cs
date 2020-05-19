@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Logging;
+using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
@@ -18,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
         protected static TenantId tenant_id;
         protected static StreamId source_stream_id;
         protected static StreamProcessorId stream_processor_id;
-        protected static IStreamProcessorStateRepository stream_processor_state_repository;
+        protected static IResilientStreamProcessorStateRepository stream_processor_state_repository;
         protected static Mock<ICanFetchEventsFromPartitionedStream> events_fetcher;
         protected static IFailingPartitions failing_partitiones;
         protected static Mock<IStreamProcessors> stream_processors;
@@ -27,6 +28,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
 
         Establish context = () =>
         {
+            var events_fetcher_policy = new AsyncPolicyFor<ICanFetchEventsFromStream>(new EventFetcherPolicy(Mock.Of<ILogger<ICanFetchEventsFromStream>>()).Define());
             var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
             event_processor_id = Guid.NewGuid();
             scope_id = Guid.NewGuid();
@@ -39,7 +41,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
             event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
             event_processor.SetupGet(_ => _.Scope).Returns(scope_id);
             stream_processors = new Mock<IStreamProcessors>();
-            failing_partitiones = new FailingPartitions(stream_processor_state_repository, event_processor.Object, events_fetcher.Object, Mock.Of<ILogger<FailingPartitions>>());
+            failing_partitiones = new FailingPartitions(
+                stream_processor_state_repository,
+                event_processor.Object,
+                events_fetcher.Object,
+                events_fetcher_policy,
+                Mock.Of<ILogger<FailingPartitions>>());
             stream_processor = new ScopedStreamProcessor(
                 tenant_id,
                 stream_processor_id,
@@ -48,6 +55,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 stream_processor_state_repository,
                 events_fetcher.Object,
                 failing_partitiones,
+                events_fetcher_policy,
                 Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
     }

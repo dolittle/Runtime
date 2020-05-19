@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
+using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Tenancy;
@@ -41,7 +42,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given
             on_all_tenants = new PerformActionOnAllTenants(tenants.Object, execution_context_manager.Object);
             scoped_stream_processors_creator
                 .Setup(_ => _.Create(Moq.It.IsAny<IStreamDefinition>(), Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<IEventProcessor>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new Moq.Mock<AbstractScopedStreamProcessor>(new TenantId { Value = Guid.NewGuid() }, Moq.Mock.Of<IStreamProcessorId>(), Moq.Mock.Of<IStreamProcessorState>(), Moq.Mock.Of<IEventProcessor>(), Moq.Mock.Of<ILogger>()).Object));
+                .Returns(Task.FromResult(new Mock<AbstractScopedStreamProcessor>(
+                    new TenantId { Value = Guid.NewGuid() },
+                    Mock.Of<IStreamProcessorId>(),
+                    Mock.Of<IStreamProcessorState>(),
+                    Mock.Of<IEventProcessor>(),
+                    Mock.Of<ICanFetchEventsFromStream>(),
+                    Mock.Of<IAsyncPolicyFor<ICanFetchEventsFromStream>>(),
+                    Mock.Of<ILogger>()).Object));
             stream_processor = new StreamProcessor(
                 stream_processor_id,
                 on_all_tenants,

@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Logging;
+using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
@@ -18,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
         protected static TenantId tenant_id;
         protected static StreamId source_stream_id;
         protected static StreamProcessorId stream_processor_id;
-        protected static IStreamProcessorStateRepository stream_processor_state_repository;
+        protected static IResilientStreamProcessorStateRepository stream_processor_state_repository;
         protected static Mock<ICanFetchEventsFromStream> events_fetcher;
         protected static Mock<IStreamProcessors> stream_processors;
         protected static Mock<IEventProcessor> event_processor;
@@ -26,6 +27,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
 
         Establish context = () =>
         {
+            var events_fetcher_policy = new AsyncPolicyFor<ICanFetchEventsFromStream>(new EventFetcherPolicy(Mock.Of<ILogger<ICanFetchEventsFromStream>>()).Define());
             var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
             event_processor_id = Guid.NewGuid();
             scope_id = Guid.NewGuid();
@@ -45,6 +47,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
                 event_processor.Object,
                 stream_processor_state_repository,
                 events_fetcher.Object,
+                events_fetcher_policy,
                 Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
     }
