@@ -35,6 +35,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     _logger.Debug(_, "Unable to subscribe to event horizon");
                     return true;
                 })
-                .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(5));
+                .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));
     }
 }
