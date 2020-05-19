@@ -9,7 +9,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the base class for <see cref="StreamProcessorState"/> and <see cref="Partitioned.PartitionedStreamProcessorState"/>.
+    /// Represents the persisted version of <see cref="IStreamProcessorState"/>.
     /// </summary>
     /// <remarks>
     /// The <see cref="StreamProcessorStateDiscriminatorConvention"/> is used to deserialise either a
