@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public event_horizon_metadata_builder() =>
             _instance = new EventHorizonMetadata(
                 0,
-                DateTimeOffset.UtcNow,
+                DateTime.UtcNow,
                 Guid.Empty);
 
         public EventHorizonMetadata build() => _instance;

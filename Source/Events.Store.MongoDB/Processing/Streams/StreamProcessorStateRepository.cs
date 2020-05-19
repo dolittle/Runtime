@@ -101,17 +101,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     if (baseStreamProcessorState is Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState)
                     {
                         var replacementState = new SubscriptionState(
-                            subscriptionId.ConsumerTenantId,
                             subscriptionId.ProducerMicroserviceId,
                             subscriptionId.ProducerTenantId,
-                            subscriptionId.ScopeId,
                             subscriptionId.StreamId,
                             subscriptionId.PartitionId,
                             streamProcessorState.Position,
-                            streamProcessorState.RetryTime,
+                            streamProcessorState.RetryTime.UtcDateTime,
                             streamProcessorState.FailureReason,
                             streamProcessorState.ProcessingAttempts,
-                            streamProcessorState.LastSuccessfullyProcessed,
+                            streamProcessorState.LastSuccessfullyProcessed.UtcDateTime,
                             streamProcessorState.IsFailing);
                         var states = await _subscriptionStates.Get(subscriptionId.ScopeId, cancellationToken).ConfigureAwait(false);
                         var persistedState = await states.ReplaceOneAsync(
@@ -132,14 +130,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var state = await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new Partitioned.PartitionedStreamProcessorState(
-                            streamProcessorId.ScopeId,
                             streamProcessorId.EventProcessorId,
                             streamProcessorId.SourceStreamId,
                             partitionedStreamProcessorState.Position,
                             partitionedStreamProcessorState.FailingPartitions.ToDictionary(
                                 kvp => kvp.Key.Value.ToString(),
-                                kvp => new FailingPartitionState(kvp.Value.Position, kvp.Value.RetryTime, kvp.Value.Reason, kvp.Value.ProcessingAttempts, kvp.Value.LastFailed)),
-                            partitionedStreamProcessorState.LastSuccessfullyProcessed),
+                                kvp => new FailingPartitionState(
+                                    kvp.Value.Position,
+                                    kvp.Value.RetryTime.UtcDateTime,
+                                    kvp.Value.Reason,
+                                    kvp.Value.ProcessingAttempts,
+                                    kvp.Value.LastFailed.UtcDateTime)),
+                            partitionedStreamProcessorState.LastSuccessfullyProcessed.UtcDateTime),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
                 }
@@ -150,14 +152,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var state = await states.ReplaceOneAsync(
                         CreateFilter(streamProcessorId),
                         new StreamProcessorState(
-                            streamProcessorId.ScopeId,
                             streamProcessorId.EventProcessorId,
                             streamProcessorId.SourceStreamId,
                             streamProcessorState.Position,
-                            streamProcessorState.RetryTime,
+                            streamProcessorState.RetryTime.UtcDateTime,
                             streamProcessorState.FailureReason,
                             streamProcessorState.ProcessingAttempts,
-                            streamProcessorState.LastSuccessfullyProcessed,
+                            streamProcessorState.LastSuccessfullyProcessed.UtcDateTime,
                             streamProcessorState.IsFailing),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
@@ -174,16 +175,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         }
 
         FilterDefinition<AbstractStreamProcessorState> CreateFilter(StreamProcessorId id) =>
-            _streamProcessorFilter.Eq(_ => _.EventProcessorId, id.EventProcessorId.Value)
-                & _streamProcessorFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
-                & _streamProcessorFilter.Eq(_ => _.SourceStreamId, id.SourceStreamId.Value);
+            _streamProcessorFilter.Eq(_ => _.EventProcessor, id.EventProcessorId.Value)
+                & _streamProcessorFilter.Eq(_ => _.SourceStream, id.SourceStreamId.Value);
 
         FilterDefinition<SubscriptionState> CreateFilter(SubscriptionId id) =>
-            _subscriptionFilter.Eq(_ => _.ConsumerTenantId, id.ConsumerTenantId.Value)
-                & _subscriptionFilter.Eq(_ => _.ProducerMicroserviceId, id.ProducerMicroserviceId.Value)
-                & _subscriptionFilter.Eq(_ => _.ProducerTenantId, id.ProducerTenantId.Value)
-                & _subscriptionFilter.Eq(_ => _.ScopeId, id.ScopeId.Value)
-                & _subscriptionFilter.Eq(_ => _.StreamId, id.StreamId.Value)
-                & _subscriptionFilter.Eq(_ => _.PartitionId, id.PartitionId.Value);
+            _subscriptionFilter.Eq(_ => _.Microservice, id.ProducerMicroserviceId.Value)
+                & _subscriptionFilter.Eq(_ => _.Tenant, id.ProducerTenantId.Value)
+                & _subscriptionFilter.Eq(_ => _.Stream, id.StreamId.Value)
+                & _subscriptionFilter.Eq(_ => _.Partition, id.PartitionId.Value);
     }
 }

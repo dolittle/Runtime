@@ -9,52 +9,44 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
     /// <summary>
-    /// Represents the base state of an <see cref="AbstractScopedStreamProcessor" />.
+    /// Represents the persisted version of <see cref="IStreamProcessorState"/>.
     /// </summary>
-    [BsonDiscriminator(RootClass = true, Required = true)]
-    [BsonKnownTypes(typeof(StreamProcessorState), typeof(Partitioned.PartitionedStreamProcessorState))]
+    /// <remarks>
+    /// The <see cref="StreamProcessorStateDiscriminatorConvention"/> is used to deserialise either a
+    /// <see cref="StreamProcessorState"/> or a <see cref="Partitioned.PartitionedStreamProcessorState"/> from a stream
+    /// processor state collection.
+    /// </remarks>
     [BsonIgnoreExtraElements]
     public abstract class AbstractStreamProcessorState
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractStreamProcessorState"/> class.
         /// </summary>
-        /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-        /// <param name="eventProcessorId">The <see cref="EventProcessorId" />.</param>
-        /// <param name="sourceStreamId">The <see cref="SourceStreamId" />.</param>
+        /// <param name="eventProcessorId">The <see cref="EventProcessor" />.</param>
+        /// <param name="sourceStreamId">The <see cref="SourceStream" />.</param>
         /// <param name="position">The position.</param>
-        /// <param name="partitioned">Whether it is partitioned.</param>
         /// <param name="lastSuccessfullyProcessed">The timestamp of when the Stream was last processed successfully.</param>
         protected AbstractStreamProcessorState(
-            Guid scopeId,
             Guid eventProcessorId,
             Guid sourceStreamId,
             ulong position,
-            bool partitioned,
-            DateTimeOffset lastSuccessfullyProcessed)
+            DateTime lastSuccessfullyProcessed)
         {
-            ScopeId = scopeId;
-            EventProcessorId = eventProcessorId;
-            SourceStreamId = sourceStreamId;
+            EventProcessor = eventProcessorId;
+            SourceStream = sourceStreamId;
             Position = position;
-            Partitioned = partitioned;
             LastSuccessfullyProcessed = lastSuccessfullyProcessed;
         }
 
         /// <summary>
-        /// Gets or sets the scope id.
-        /// </summary>
-        public Guid ScopeId { get; set; }
-
-        /// <summary>
         /// Gets or sets the event processor id.
         /// </summary>
-        public Guid EventProcessorId { get; set; }
+        public Guid EventProcessor { get; set; }
 
         /// <summary>
         /// Gets or sets the source stream id.
         /// </summary>
-        public Guid SourceStreamId { get; set; }
+        public Guid SourceStream { get; set; }
 
         /// <summary>
         /// Gets or sets the position.
@@ -63,14 +55,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public ulong Position { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the stream processor is processing a partitioned stream.
-        /// </summary>
-        public bool Partitioned { get; set; }
-
-        /// <summary>
         /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
         /// </summary>
-        [BsonRepresentation(BsonType.Document)]
-        public DateTimeOffset LastSuccessfullyProcessed { get; set; }
+        [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
+        public DateTime LastSuccessfullyProcessed { get; set; }
+
+        /// <summary>
+        /// Converts the state to it's runtime representation.
+        /// </summary>
+        /// <returns>The converted <see cref="IStreamProcessorState" />.</returns>
+        public abstract IStreamProcessorState ToRuntimeRepresentation();
     }
 }
