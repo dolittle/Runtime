@@ -16,8 +16,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         /// <param name="type">The given state.</param>
         /// <param name="id">The _id field.</param>
-        public StreamProcessorStateDocumentIsMissingPartitionedField(Type type, ObjectId id)
-            : base($"Type: {type} with id: {id} didn't contain a \"Partitioned\" field.", null)
+        public StreamProcessorStateDocumentIsMissingPartitionedField(ObjectId id)
+            : base($"StreamProcessorStateDiscriminatorConvention couldn't find a \"Partitioned\" field from document with id: {id}, causing AbstractStreamProcessorState collection deserialization to fail.", null)
         {
         }
     }
