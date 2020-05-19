@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
@@ -14,7 +13,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessorStateDocumentIsMissingPartitionedField"/> class.
         /// </summary>
-        /// <param name="type">The given state.</param>
         /// <param name="id">The _id field.</param>
         public StreamProcessorStateDocumentIsMissingPartitionedField(ObjectId id)
             : base($"StreamProcessorStateDiscriminatorConvention couldn't find a \"Partitioned\" field from document with id: {id}, causing AbstractStreamProcessorState collection deserialization to fail.", null)
