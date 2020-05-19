@@ -31,8 +31,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public async Task<CommittedEvent> CommitEvent(
             IClientSessionHandle transaction,
             EventLogSequenceNumber sequenceNumber,
-            DateTime occurred,
-            Dolittle.Execution.ExecutionContext executionContext,
+            DateTimeOffset occurred,
+            Execution.ExecutionContext executionContext,
             UncommittedEvent @event,
             CancellationToken cancellationToken)
         {
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Artifact aggregateRoot,
             AggregateRootVersion aggregateRootVersion,
             EventLogSequenceNumber version,
-            DateTime occurred,
+            DateTimeOffset occurred,
             EventSourceId eventSource,
             Execution.ExecutionContext executionContext,
             UncommittedEvent @event,
@@ -100,7 +100,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         Task InsertEvent(
             IClientSessionHandle transaction,
             EventLogSequenceNumber version,
-            DateTime occurred,
+            DateTimeOffset occurred,
             EventSourceId eventSource,
             UncommittedEvent @event,
             AggregateMetadata aggregate,
@@ -113,7 +113,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     version,
                     executionContext.ToStoreRepresentation(),
                     new EventMetadata(
-                        occurred,
+                        occurred.UtcDateTime,
                         eventSource,
                         @event.Type.Id,
                         @event.Type.Generation,
