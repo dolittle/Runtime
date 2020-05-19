@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventLogSequenceNumber);
             committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
             committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
-            committedEvent.Occurred.ShouldEqual(storedEvent.Metadata.Occurred);
+            committedEvent.Occurred.UtcDateTime.ShouldEqual(storedEvent.Metadata.Occurred);
             committedEvent.Public.ShouldEqual(storedEvent.Metadata.Public);
             committedEvent.Type.Id.Value.ShouldEqual(storedEvent.Metadata.TypeId);
             committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         {
             (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
             committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizonMetadata.ExternalEventLogSequenceNumber);
-            committedEvent.Received.ShouldEqual(storedEvent.EventHorizonMetadata.Received);
+            committedEvent.Received.UtcDateTime.ShouldEqual(storedEvent.EventHorizonMetadata.Received);
             committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
         }
 
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.Metadata.EventLogSequenceNumber);
             committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
             committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
-            committedEvent.Occurred.ShouldEqual(storedEvent.Metadata.Occurred);
+            committedEvent.Occurred.UtcDateTime.ShouldEqual(storedEvent.Metadata.Occurred);
             committedEvent.Public.ShouldEqual(storedEvent.Metadata.Public);
             committedEvent.Type.Id.Value.ShouldEqual(storedEvent.Metadata.TypeId);
             committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
@@ -106,7 +106,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
             storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
             storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
-            storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred);
+            storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred.UtcDateTime);
             storedEvent.Metadata.Public.ShouldEqual(committedEvent.Public);
             storedEvent.Metadata.TypeId.ShouldEqual(committedEvent.Type.Id.Value);
             storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);
@@ -120,7 +120,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
             storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
             storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
-            storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred);
+            storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred.UtcDateTime);
             storedEvent.Metadata.Public.ShouldEqual(committedEvent.Public);
             storedEvent.Metadata.TypeId.ShouldEqual(committedEvent.Type.Id.Value);
             storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);

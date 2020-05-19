@@ -25,6 +25,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         It should_not_come_from_event_horizon = () => result.EventHorizonMetadata.FromEventHorizon.ShouldBeTrue();
         It should_have_the_same_consent = () => result.EventHorizonMetadata.Consent.ShouldEqual(committed_event.Consent.Value);
         It should_have_the_same_external_event_log_sequence_number = () => result.EventHorizonMetadata.ExternalEventLogSequenceNumber.ShouldEqual(committed_event.ExternalEventLogSequenceNumber.Value);
-        It shoul_have_the_same_received_value = () => result.EventHorizonMetadata.Received.ShouldEqual(committed_event.Received);
+        It shoul_have_the_same_received_value = () => result.EventHorizonMetadata.Received.ShouldEqual(committed_event.Received.UtcDateTime);
     }
 }
