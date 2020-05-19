@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         Because of = () => result = event_converter.ToEventLogEvent(committed_event);
 
         It should_have_the_same_content = () => result.Content.ToString().ShouldEqual(committed_event.Content);
-        It should_represent_the_same_event = () => result.ShouldRepresentTheSameBaseEventAs(committed_event);
+        It should_represent_the_same_event = () => result.ShouldBeTheSameAs(committed_event);
         It should_not_be_applied_by_aggregate = () => result.Aggregate.WasAppliedByAggregate.ShouldBeFalse();
         It should_not_come_from_event_horizon = () => result.EventHorizonMetadata.FromEventHorizon.ShouldBeTrue();
         It should_have_the_same_consent = () => result.EventHorizonMetadata.Consent.ShouldEqual(committed_event.Consent.Value);

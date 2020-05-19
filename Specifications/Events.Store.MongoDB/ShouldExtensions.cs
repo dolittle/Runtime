@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -101,7 +100,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
         }
 
-        public static void ShouldRepresentTheSameBaseEventAs(this MongoDB.Events.Event storedEvent, CommittedEvent committedEvent)
+        public static void ShouldBeTheSameAs(this MongoDB.Events.Event storedEvent, CommittedEvent committedEvent)
         {
             storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
             storedEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
@@ -113,15 +112,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);
         }
 
-        public static void ShouldRepresentTheSameBaseEventAs(
+        public static void ShouldBeTheSameAs(
             this MongoDB.Events.StreamEvent storedEvent,
-            CommittedEvent committedEvent,
-            StreamPosition streamPosition,
-            PartitionId partition)
+            CommittedEvent committedEvent)
         {
             storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
-            storedEvent.StreamPosition.ShouldEqual(streamPosition.Value);
-            storedEvent.Partition.ShouldEqual(partition.Value);
             storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
             storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
             storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
