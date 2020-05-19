@@ -111,6 +111,13 @@ namespace Dolittle.Runtime.EventHorizon
             {
                 await _streamProcessor.Start(_cancellationToken).ConfigureAwait(false);
             }
+            catch (Exception ex)
+            {
+                if (!_cancellationToken.IsCancellationRequested)
+                {
+                    _logger.Warning(ex, "Subscription: {SubscriptionId} failed", _identifier);
+                }
+            }
             finally
             {
                 _unregister();
