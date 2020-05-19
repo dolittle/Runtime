@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             IClientSessionHandle transaction,
             EventLogSequenceNumber sequenceNumber,
             DateTimeOffset occurred,
-            Dolittle.Execution.ExecutionContext executionContext,
+            Execution.ExecutionContext executionContext,
             UncommittedEvent @event,
             CancellationToken cancellationToken)
         {
@@ -113,7 +113,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     version,
                     executionContext.ToStoreRepresentation(),
                     new EventMetadata(
-                        occurred,
+                        occurred.UtcDateTime,
                         eventSource,
                         @event.Type.Id,
                         @event.Type.Generation,

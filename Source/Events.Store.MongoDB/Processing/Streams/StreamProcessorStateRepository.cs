@@ -135,8 +135,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             partitionedStreamProcessorState.Position,
                             partitionedStreamProcessorState.FailingPartitions.ToDictionary(
                                 kvp => kvp.Key.Value.ToString(),
-                                kvp => new FailingPartitionState(kvp.Value.Position, kvp.Value.RetryTime, kvp.Value.Reason, kvp.Value.ProcessingAttempts, kvp.Value.LastFailed)),
-                            partitionedStreamProcessorState.LastSuccessfullyProcessed),
+                                kvp => new FailingPartitionState(
+                                    kvp.Value.Position,
+                                    kvp.Value.RetryTime.UtcDateTime,
+                                    kvp.Value.Reason,
+                                    kvp.Value.ProcessingAttempts,
+                                    kvp.Value.LastFailed.UtcDateTime)),
+                            partitionedStreamProcessorState.LastSuccessfullyProcessed.UtcDateTime),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);
                 }
@@ -150,10 +155,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                             streamProcessorId.EventProcessorId,
                             streamProcessorId.SourceStreamId,
                             streamProcessorState.Position,
-                            streamProcessorState.RetryTime,
+                            streamProcessorState.RetryTime.UtcDateTime,
                             streamProcessorState.FailureReason,
                             streamProcessorState.ProcessingAttempts,
-                            streamProcessorState.LastSuccessfullyProcessed,
+                            streamProcessorState.LastSuccessfullyProcessed.UtcDateTime,
                             streamProcessorState.IsFailing),
                         new ReplaceOptions { IsUpsert = true })
                         .ConfigureAwait(false);

@@ -78,13 +78,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         public ulong Position { get; set; }
 
         /// <summary>
-        /// Gets or sets the timestamp when the StreamProcessor has processed the stream.
+        /// Gets or sets the timestamp when the StreamProcessor has processed the stream with Kind of UTC.
         /// </summary>
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime LastSuccessfullyProcessed { get; set; }
 
         /// <summary>
-        /// Gets or sets the retry time.
+        /// Gets or sets the retry time with Kind of UTC.
         /// </summary>
         [BsonDateTimeOptions(Kind = DateTimeKind.Utc)]
         public DateTime RetryTime { get; set; }

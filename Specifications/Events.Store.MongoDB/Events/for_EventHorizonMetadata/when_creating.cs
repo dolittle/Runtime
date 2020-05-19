@@ -9,14 +9,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventHorizonMetadata
     public class when_creating
     {
         static ulong external_event_log_sequence_number;
-        static DateTimeOffset received;
+        static DateTime received;
         static Guid consent;
         static EventHorizonMetadata result;
 
         Establish context = () =>
         {
             external_event_log_sequence_number = 1;
-            received = DateTimeOffset.Now;
+            received = DateTime.Now;
             consent = Guid.NewGuid();
         };
 

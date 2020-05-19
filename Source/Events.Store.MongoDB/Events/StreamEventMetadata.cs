@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="isPublic">Whether the Event is public.</param>
         public StreamEventMetadata(
             ulong eventLogSequenceNumber,
-            DateTimeOffset occurred,
+            DateTime occurred,
             Guid eventSource,
             Guid typeId,
             uint typeGeneration,

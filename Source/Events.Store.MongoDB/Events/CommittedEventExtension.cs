@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <returns>The converted <see cref="EventMetadata" />.</returns>
         public static EventMetadata GetEventMetadata(this CommittedEvent committedEvent) =>
             new EventMetadata(
-                committedEvent.Occurred,
+                committedEvent.Occurred.UtcDateTime,
                 committedEvent.EventSource,
                 committedEvent.Type.Id,
                 committedEvent.Type.Generation,
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static StreamEventMetadata GetStreamEventMetadata(this CommittedEvent committedEvent) =>
             new StreamEventMetadata(
                 committedEvent.EventLogSequenceNumber,
-                committedEvent.Occurred,
+                committedEvent.Occurred.UtcDateTime,
                 committedEvent.EventSource,
                 committedEvent.Type.Id,
                 committedEvent.Type.Generation,
@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static EventHorizonMetadata GetEventHorizonMetadata(this CommittedExternalEvent committedEvent) =>
             new EventHorizonMetadata(
                 committedEvent.ExternalEventLogSequenceNumber,
-                committedEvent.Received,
+                committedEvent.Received.UtcDateTime,
                 committedEvent.Consent);
 
         /// <summary>
