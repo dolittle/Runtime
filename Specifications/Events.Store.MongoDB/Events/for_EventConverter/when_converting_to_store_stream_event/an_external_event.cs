@@ -1,0 +1,36 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using Dolittle.Runtime.Events.Store.Streams;
+using Machine.Specifications;
+
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_converting_to_store_stream_event
+{
+    public class an_external_event
+    {
+        static CommittedExternalEvent committed_event;
+        static IEventConverter event_converter;
+        static StreamPosition stream_position;
+        static PartitionId partition;
+        static StreamEvent result;
+
+        Establish context = () =>
+        {
+            committed_event = committed_events.a_committed_external_event(0, 0);
+            event_converter = new EventConverter();
+            stream_position = 3;
+            partition = Guid.NewGuid();
+        };
+
+        Because of = () => result = event_converter.ToStoreStreamEvent(committed_event, stream_position, partition);
+
+        It should_have_the_same_content = () => result.Content.ToString().ShouldEqual(committed_event.Content);
+        It should_represent_the_same_event = () => result.ShouldRepresentTheSameBaseEventAs(committed_event, stream_position, partition);
+        It should_not_be_applied_by_aggregate = () => result.Aggregate.WasAppliedByAggregate.ShouldBeFalse();
+        It should_not_come_from_event_horizon = () => result.EventHorizonMetadata.FromEventHorizon.ShouldBeTrue();
+        It should_have_the_same_consent = () => result.EventHorizonMetadata.Consent.ShouldEqual(committed_event.Consent.Value);
+        It should_have_the_same_external_event_log_sequence_number = () => result.EventHorizonMetadata.ExternalEventLogSequenceNumber.ShouldEqual(committed_event.ExternalEventLogSequenceNumber.Value);
+        It shoul_have_the_same_received_value = () => result.EventHorizonMetadata.Received.ShouldEqual(committed_event.Received);
+    }
+}

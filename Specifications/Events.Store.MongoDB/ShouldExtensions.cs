@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -42,6 +43,92 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             version.Patch.ShouldEqual(storedVersion.Patch);
             version.Build.ShouldEqual(storedVersion.Build);
             version.PreReleaseString.ShouldEqual(storedVersion.PreRelease);
+        }
+
+        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, MongoDB.Events.Event storedEvent)
+        {
+            committedEvent.Content.ShouldEqual(storedEvent.Content.ToString());
+            committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventLogSequenceNumber);
+            committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
+            committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
+            committedEvent.Occurred.ShouldEqual(storedEvent.Metadata.Occurred);
+            committedEvent.Public.ShouldEqual(storedEvent.Metadata.Public);
+            committedEvent.Type.Id.Value.ShouldEqual(storedEvent.Metadata.TypeId);
+            committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
+        }
+
+        public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, MongoDB.Events.Event storedEvent)
+        {
+            (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
+            committedEvent.AggregateRoot.Id.Value.ShouldEqual(storedEvent.Aggregate.TypeId);
+            committedEvent.AggregateRoot.Generation.Value.ShouldEqual(storedEvent.Aggregate.TypeGeneration);
+            committedEvent.AggregateRootVersion.Value.ShouldEqual(storedEvent.Aggregate.Version);
+        }
+
+        public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, MongoDB.Events.Event storedEvent)
+        {
+            (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
+            committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizonMetadata.ExternalEventLogSequenceNumber);
+            committedEvent.Received.ShouldEqual(storedEvent.EventHorizonMetadata.Received);
+            committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
+        }
+
+        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, MongoDB.Events.StreamEvent storedEvent)
+        {
+            committedEvent.Content.ShouldEqual(storedEvent.Content.ToString());
+            committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.Metadata.EventLogSequenceNumber);
+            committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
+            committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
+            committedEvent.Occurred.ShouldEqual(storedEvent.Metadata.Occurred);
+            committedEvent.Public.ShouldEqual(storedEvent.Metadata.Public);
+            committedEvent.Type.Id.Value.ShouldEqual(storedEvent.Metadata.TypeId);
+            committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
+        }
+
+        public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, MongoDB.Events.StreamEvent storedEvent)
+        {
+            (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
+            committedEvent.AggregateRoot.Id.Value.ShouldEqual(storedEvent.Aggregate.TypeId);
+            committedEvent.AggregateRoot.Generation.Value.ShouldEqual(storedEvent.Aggregate.TypeGeneration);
+            committedEvent.AggregateRootVersion.Value.ShouldEqual(storedEvent.Aggregate.Version);
+        }
+
+        public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, MongoDB.Events.StreamEvent storedEvent)
+        {
+            (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
+            committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizonMetadata.ExternalEventLogSequenceNumber);
+            committedEvent.Received.ShouldEqual(storedEvent.EventHorizonMetadata.Received);
+            committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
+        }
+
+        public static void ShouldRepresentTheSameBaseEventAs(this MongoDB.Events.Event storedEvent, CommittedEvent committedEvent)
+        {
+            storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
+            storedEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
+            storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
+            storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
+            storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred);
+            storedEvent.Metadata.Public.ShouldEqual(committedEvent.Public);
+            storedEvent.Metadata.TypeId.ShouldEqual(committedEvent.Type.Id.Value);
+            storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);
+        }
+
+        public static void ShouldRepresentTheSameBaseEventAs(
+            this MongoDB.Events.StreamEvent storedEvent,
+            CommittedEvent committedEvent,
+            StreamPosition streamPosition,
+            PartitionId partition)
+        {
+            storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
+            storedEvent.StreamPosition.ShouldEqual(streamPosition.Value);
+            storedEvent.Partition.ShouldEqual(partition.Value);
+            storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
+            storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
+            storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
+            storedEvent.Metadata.Occurred.ShouldEqual(committedEvent.Occurred);
+            storedEvent.Metadata.Public.ShouldEqual(committedEvent.Public);
+            storedEvent.Metadata.TypeId.ShouldEqual(committedEvent.Type.Id.Value);
+            storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);
         }
     }
 }
