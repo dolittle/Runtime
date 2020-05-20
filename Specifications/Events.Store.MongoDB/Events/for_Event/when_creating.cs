@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_Event
 
         Establish context = () =>
         {
-            event_log_sequence_number = 2;
+            event_log_sequence_number = random.event_log_sequence_number;
             execution_context = execution_contexts.create_store();
             event_metadata = metadata.random_event_metadata;
             aggregate_metadata = metadata.aggregate_metadata_from_non_aggregate_event;

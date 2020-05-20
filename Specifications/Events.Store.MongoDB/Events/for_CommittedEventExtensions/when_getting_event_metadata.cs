@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensions
@@ -13,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensi
 
         Establish context = () =>
         {
-            committed_event = committed_events.a_committed_event(0);
+            committed_event = committed_events.a_committed_event(random.event_log_sequence_number);
         };
 
         Because of = () => result = committed_event.GetEventMetadata();

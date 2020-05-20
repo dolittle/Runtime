@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         Events.StreamEvent _instance;
 
-        public stream_event_builder(uint stream_position, Guid partition) =>
+        public stream_event_builder(StreamPosition stream_position, PartitionId partition) =>
             _instance = new Events.StreamEvent(
                 stream_position,
                 partition,
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 new EventHorizonMetadata(),
                 events.some_event_content_bson_document);
 
-        public stream_event_builder(uint stream_position, Guid partition, uint aggregate_version) =>
+        public stream_event_builder(StreamPosition stream_position, PartitionId partition, AggregateRootVersion aggregate_version) =>
             _instance = new Events.StreamEvent(
                 stream_position,
                 partition,
@@ -69,9 +69,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public stream_event_builder from_event_horizon()
         {
             _instance.EventHorizon.FromEventHorizon = true;
-            _instance.EventHorizon.Consent = Guid.NewGuid();
-            _instance.EventHorizon.ExternalEventLogSequenceNumber = (ulong)new Random().Next();
-            _instance.EventHorizon.Received = DateTime.UtcNow;
+            _instance.EventHorizon.Consent = Guid.Parse("e1af7d82-b11a-4766-bcfa-f5405ac0b133");
+            _instance.EventHorizon.ExternalEventLogSequenceNumber = 205;
+            _instance.EventHorizon.Received = new DateTime(226397148, DateTimeKind.Utc);
             return this;
         }
     }

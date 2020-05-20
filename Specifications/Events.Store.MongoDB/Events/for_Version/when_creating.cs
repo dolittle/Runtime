@@ -16,11 +16,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_Version
 
         Establish context = () =>
         {
-            major = 1;
-            minor = 0;
-            patch = 1;
-            build = 0;
-            pre_release = string.Empty;
+            major = 1943339427;
+            minor = 811944027;
+            patch = 40905905;
+            build = 1275155639;
+            pre_release = "Something";
         };
 
         Because of = () => result = new Version(

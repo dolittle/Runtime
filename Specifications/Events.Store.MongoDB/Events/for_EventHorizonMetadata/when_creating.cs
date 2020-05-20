@@ -15,9 +15,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventHorizonMetadata
 
         Establish context = () =>
         {
-            external_event_log_sequence_number = 1;
-            received = DateTime.Now;
-            consent = Guid.NewGuid();
+            external_event_log_sequence_number = random.event_log_sequence_number;
+            received = new DateTime(2077067360, DateTimeKind.Utc);
+            consent = Guid.Parse("94e80e63-f2ea-4c6a-8643-70da16d7d099");
         };
 
         Because of = () => result = new EventHorizonMetadata(
