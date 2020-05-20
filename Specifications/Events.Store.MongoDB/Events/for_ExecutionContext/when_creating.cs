@@ -29,7 +29,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_ExecutionContext
             microservice,
             tenant,
             version,
-            environment);
+            environment,
+            );
 
         It should_have_the_correct_correlation = () => result.Correlation.ShouldEqual(correlation);
         It should_have_the_correct_microservice = () => result.Microservice.ShouldEqual(microservice);

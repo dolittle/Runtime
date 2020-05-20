@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using Dolittle.Execution;
 using Dolittle.Tenancy;
 
@@ -20,13 +21,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="tenant">The tenant.</param>
         /// <param name="version">The version.</param>
         /// <param name="environment">The environment.</param>
-        public ExecutionContext(Guid correlation, Guid microservice, Guid tenant, Version version, string environment)
+        /// <param name="claims">The claims.</param>
+        public ExecutionContext(Guid correlation, Guid microservice, Guid tenant, Version version, string environment, IEnumerable<Claim> claims)
         {
             Correlation = correlation;
             Microservice = microservice;
             Tenant = tenant;
             Version = version;
             Environment = environment;
+            Claims = claims;
         }
 
         /// <summary>
@@ -53,5 +56,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// Gets or sets the environment.
         /// </summary>
         public string Environment { get; set; }
+
+        /// <summary>
+        /// Gets or sets the claims.
+        /// </summary>
+        public IEnumerable<Claim> Claims { get; set; }
     }
 }
