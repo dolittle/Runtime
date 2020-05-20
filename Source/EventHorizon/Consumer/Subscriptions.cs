@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     {
         readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new ConcurrentDictionary<SubscriptionId, Subscription>();
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
-        readonly IPolicies _policies;
+        readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
         readonly ILoggerManager _loggerManager;
         readonly ILogger<Subscriptions> _logger;
 
@@ -28,12 +28,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Initializes a new instance of the <see cref="Subscriptions"/> class.
         /// </summary>
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-        /// <param name="policies">The <see cref="IPolicies" />.</param>
+        /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
-        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IPolicies policies, ILoggerManager loggerManager)
+        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy, ILoggerManager loggerManager)
         {
             _streamProcessorStates = streamProcessorStates;
-            _policies = policies;
+            _eventsFetcherPolicy = eventsFetcherPolicy;
             _loggerManager = loggerManager;
             _logger = loggerManager.CreateLogger<Subscriptions>();
         }
@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 eventsFetcher,
                 _streamProcessorStates,
                 () => Unregister(subscriptionId),
-                _policies.GetAsyncFor<ICanFetchEventsFromStream>(),
+                _eventsFetcherPolicy,
                 _loggerManager,
                 cancellationToken);
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
