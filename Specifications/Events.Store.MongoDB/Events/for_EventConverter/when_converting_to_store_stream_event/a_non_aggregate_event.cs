@@ -30,6 +30,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         It should_have_the_correct_stream_position = () => result.StreamPosition.ShouldEqual(stream_position.Value);
         It should_have_the_correct_partition = () => result.Partition.ShouldEqual(partition.Value);
         It should_not_be_applied_by_aggregate = () => result.Aggregate.WasAppliedByAggregate.ShouldBeFalse();
-        It should_not_come_from_event_horizon = () => result.EventHorizonMetadata.FromEventHorizon.ShouldBeFalse();
+        It should_not_come_from_event_horizon = () => result.EventHorizon.FromEventHorizon.ShouldBeFalse();
     }
 }

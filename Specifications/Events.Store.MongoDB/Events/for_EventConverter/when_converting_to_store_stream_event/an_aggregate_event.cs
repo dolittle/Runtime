@@ -32,6 +32,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         It should_have_the_same_aggregate_root_type_generation = () => result.Aggregate.TypeGeneration.ShouldEqual(committed_event.AggregateRoot.Generation.Value);
         It should_have_the_same_aggregate_root_type_id = () => result.Aggregate.TypeId.ShouldEqual(committed_event.AggregateRoot.Id.Value);
         It should_have_the_same_aggregate_root_version = () => result.Aggregate.Version.ShouldEqual(committed_event.AggregateRootVersion.Value);
-        It should_not_come_from_event_horizon = () => result.EventHorizonMetadata.FromEventHorizon.ShouldBeFalse();
+        It should_not_come_from_event_horizon = () => result.EventHorizon.FromEventHorizon.ShouldBeFalse();
     }
 }

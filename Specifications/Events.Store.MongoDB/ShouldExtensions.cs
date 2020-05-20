@@ -94,9 +94,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, MongoDB.Events.Event storedEvent)
         {
             (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
-            committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizonMetadata.ExternalEventLogSequenceNumber);
-            committedEvent.Received.UtcDateTime.ShouldEqual(storedEvent.EventHorizonMetadata.Received);
-            committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
+            committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizon.ExternalEventLogSequenceNumber);
+            committedEvent.Received.UtcDateTime.ShouldEqual(storedEvent.EventHorizon.Received);
+            committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizon.Consent);
         }
 
         public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, StreamEvent storedEvent)
@@ -122,9 +122,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, StreamEvent storedEvent)
         {
             (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
-            committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizonMetadata.ExternalEventLogSequenceNumber);
-            committedEvent.Received.ShouldEqual(storedEvent.EventHorizonMetadata.Received);
-            committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
+            committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizon.ExternalEventLogSequenceNumber);
+            committedEvent.Received.ShouldEqual(storedEvent.EventHorizon.Received);
+            committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizon.Consent);
         }
 
         public static void ShouldBeTheSameAs(this Events.Event storedEvent, CommittedEvent committedEvent)

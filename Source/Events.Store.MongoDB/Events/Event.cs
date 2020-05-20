@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             ExecutionContext = executionContext;
             Metadata = metadata;
             Aggregate = aggregate;
-            EventHorizonMetadata = eventHorizonMetadata;
+            EventHorizon = eventHorizonMetadata;
             Content = content;
         }
 
@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the <see cref="EventHorizonMetadata" />.
         /// </summary>
-        public EventHorizonMetadata EventHorizonMetadata { get; set; }
+        public EventHorizonMetadata EventHorizon { get; set; }
 
         /// <summary>
         /// Gets or sets the domain specific event data.
