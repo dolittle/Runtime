@@ -18,9 +18,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
 
         Establish context = () =>
         {
-            stream_position = 2;
-            stream = Guid.NewGuid();
-            stored_event = events.an_aggregate_stream_event(stream_position, Guid.Empty, random.aggregate_root_version);
+            stream_position = random.stream_position;
+            stream = Guid.Parse("6793bb6f-b36f-4fc0-966b-9e66e499b1f4");
+            stored_event = events.an_aggregate_stream_event(stream_position, Guid.Parse("5e8b7530-5e63-4efd-bfa3-c88c14a0e853"), random.aggregate_root_version);
             event_converter = new EventConverter();
         };
 

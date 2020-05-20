@@ -19,11 +19,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_ExecutionContext
 
         Establish context = () =>
         {
-            correlation = Guid.NewGuid();
-            microservice = Guid.NewGuid();
-            tenant = Guid.NewGuid();
-            version = new Version(random.natural_number, random.natural_number, random.natural_number, random.natural_number, "Something");
-            environment = "some environmen";
+            correlation = Guid.Parse("8d42c5d0-1753-4d88-9228-837ddc64d416");
+            microservice = Guid.Parse("5586f689-407b-49cf-ac2e-fd12ceeccd83");
+            tenant = Guid.Parse("5c9dfb13-8599-4211-8eec-9d5f3d808d1b");
+            version = new Version(62007350, 808463667, 41937649, 1632080924, "Something very random");
+            environment = "some very random environmen";
             claims = new[]
                 {
                     new Claim("claim1", "value1", "valuetype1"),

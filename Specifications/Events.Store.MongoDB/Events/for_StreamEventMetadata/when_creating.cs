@@ -19,10 +19,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEventMetadata
         Establish context = () =>
         {
             event_log_sequence_number = random.event_log_sequence_number;
-            occurred = DateTime.Now;
-            event_source = Guid.NewGuid();
-            type_id = Guid.NewGuid();
-            type_generation = (uint)random.natural_number;
+            occurred = new DateTime(137599714, DateTimeKind.Utc);
+            event_source = Guid.Parse("adc4819f-5d9b-44fc-aef3-1520fc7c1713");
+            type_id = Guid.Parse("24352369-fd47-4950-8e62-963f2c402970");
+            type_generation = 1227724615;
             is_public = true;
         };
 
