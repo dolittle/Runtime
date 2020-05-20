@@ -17,9 +17,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_AggregateMetadata
         Establish context = () =>
         {
             was_applied_by_aggregate = true;
-            type_id = Guid.NewGuid();
-            type_generation = (uint)random.natural_number;
-            version = (ulong)random.natural_number;
+            type_id = Guid.Parse("2fbf871b-a5e2-4600-8e4f-563c1a200cf0");
+            type_generation = 2901939569;
+            version = 1670515463;
         };
 
         Because of = () => result = new AggregateMetadata(

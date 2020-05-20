@@ -12,7 +12,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public static EventLogSequenceNumber event_log_sequence_number => new EventLogSequenceNumber { Value = 4286306012 };
 
         public static StreamPosition stream_position => new StreamPosition(3714684996);
-
-        public static int natural_number => 4875;
     }
 }

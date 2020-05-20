@@ -16,10 +16,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_Version
 
         Establish context = () =>
         {
-            major = random.natural_number;
-            minor = random.natural_number;
-            patch = random.natural_number;
-            build = random.natural_number;
+            major = 1943339427;
+            minor = 811944027;
+            patch = 40905905;
+            build = 1275155639;
             pre_release = "Something";
         };
 
