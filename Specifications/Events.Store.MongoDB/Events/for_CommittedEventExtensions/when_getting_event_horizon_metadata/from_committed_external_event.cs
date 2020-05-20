@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensi
 
         Establish context = () =>
         {
-            committed_event = committed_events.a_committed_external_event(0, 0);
+            committed_event = committed_events.a_committed_external_event(random.event_log_sequence_number, random.event_log_sequence_number);
         };
 
         Because of = () => result = committed_event.GetEventHorizonMetadata();

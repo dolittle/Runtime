@@ -12,16 +12,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public event_horizon_metadata_builder() =>
             _instance = new EventHorizonMetadata(
-                0,
-                DateTime.UtcNow,
-                Guid.Empty);
+                3547732730,
+                new DateTime(4241561645, DateTimeKind.Utc),
+                Guid.Parse("93491243-6602-4a68-a313-fda290a88e3d"));
 
         public EventHorizonMetadata build() => _instance;
-
-        public event_horizon_metadata_builder with_external_event_log_sequence_number(uint event_log_sequence_number)
-        {
-            _instance.ExternalEventLogSequenceNumber = event_log_sequence_number;
-            return this;
-        }
     }
 }
