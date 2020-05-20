@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Machine.Specifications;
 
@@ -26,6 +28,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedVersion.PreRelease.ShouldEqual(version.PreReleaseString);
         }
 
+        public static void ShouldBeTheSameAs(this Claim storedClaim, Security.Claim claim)
+        {
+            storedClaim.Name.ShouldEqual(claim.Name);
+            storedClaim.Value.ShouldEqual(claim.Value);
+            storedClaim.ValueType.ShouldEqual(claim.ValueType);
+        }
+
+        public static void ShouldBeTheSameAs(this IEnumerable<Claim> storedClaims, Security.Claims claims)
+        {
+            storedClaims.ShouldContainOnly(claims.Select(_ => _.ToStoreRepresentation()));
+        }
+
         public static void ShouldBeTheSameAs(this Execution.ExecutionContext executionContext, ExecutionContext storedExecutionContext)
         {
             executionContext.CorrelationId.Value.ShouldEqual(storedExecutionContext.Correlation);
@@ -42,6 +56,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             version.Patch.ShouldEqual(storedVersion.Patch);
             version.Build.ShouldEqual(storedVersion.Build);
             version.PreReleaseString.ShouldEqual(storedVersion.PreRelease);
+        }
+
+        public static void ShouldBeTheSameAs(this Security.Claim claim, Claim storedClaim)
+        {
+            claim.Name.ShouldEqual(storedClaim.Name);
+            claim.Value.ShouldEqual(storedClaim.Value);
+            claim.ValueType.ShouldEqual(storedClaim.ValueType);
+        }
+
+        public static void ShouldBeTheSameAs(this Security.Claims claims, IEnumerable<Claim> storedClaims)
+        {
+            claims.ShouldContainOnly(storedClaims.Select(_ => _.ToClaim()));
         }
 
         public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, MongoDB.Events.Event storedEvent)
