@@ -23,8 +23,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public static AggregateMetadata random_aggregate_metadata_from_aggregate_event_with_version(AggregateRootVersion version) =>
             new AggregateMetadata(
                 true,
-                Guid.NewGuid(),
-                1,
+                Guid.Parse("31e26598-838b-47b1-82e8-a4f8e7085ff8"),
+                51434,
                 version);
 
         public static AggregateMetadata aggregate_metadata_from_non_aggregate_event =>

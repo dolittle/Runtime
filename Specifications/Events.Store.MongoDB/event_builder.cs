@@ -54,9 +54,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public event_builder from_event_horizon()
         {
             _instance.EventHorizonMetadata.FromEventHorizon = true;
-            _instance.EventHorizonMetadata.Consent = Guid.NewGuid();
-            _instance.EventHorizonMetadata.ExternalEventLogSequenceNumber = (ulong)new Random().Next();
-            _instance.EventHorizonMetadata.Received = DateTime.UtcNow;
+            _instance.EventHorizonMetadata.Consent = Guid.Parse("df838974-100b-4a07-9e44-08e2c7d7e99a");
+            _instance.EventHorizonMetadata.ExternalEventLogSequenceNumber = 71883084;
+            _instance.EventHorizonMetadata.Received = new DateTime(2944480155, DateTimeKind.Utc);
             return this;
         }
     }
