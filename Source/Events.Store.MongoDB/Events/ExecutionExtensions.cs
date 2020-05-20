@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Globalization;
-using Dolittle.Security;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
@@ -23,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 executionContext.Version.ToVersion(),
                 executionContext.Environment,
                 executionContext.Correlation,
-                Claims.Empty,
+                executionContext.Claims.ToClaims(),
                 CultureInfo.InvariantCulture);
 
         /// <summary>
@@ -37,6 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 executionContext.Microservice,
                 executionContext.Tenant,
                 executionContext.Version.ToStoreRepresentation(),
-                executionContext.Environment);
+                executionContext.Environment,
+                executionContext.Claims.ToStoreRepresentation());
     }
 }
