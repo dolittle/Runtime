@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 
@@ -15,8 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// </summary>
     public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     {
-        readonly ICanFetchEventsFromStream _eventsFromStreamsFetcher;
-        readonly IStreamProcessorStateRepository _streamProcessorStates;
+        readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
@@ -25,20 +25,21 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
         /// <param name="initialState">The <see cref="StreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
+        /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
+        /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public ScopedStreamProcessor(
             TenantId tenantId,
             IStreamProcessorId streamProcessorId,
             StreamProcessorState initialState,
             IEventProcessor processor,
-            IStreamProcessorStateRepository streamProcessorStates,
+            IResilientStreamProcessorStateRepository streamProcessorStates,
             ICanFetchEventsFromStream eventsFromStreamsFetcher,
+            IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
             ILogger<ScopedStreamProcessor> logger)
-            : base(tenantId, streamProcessorId, initialState, processor, logger)
+            : base(tenantId, streamProcessorId, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, logger)
         {
-            _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _streamProcessorStates = streamProcessorStates;
         }
 
@@ -56,17 +57,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 }
                 else
                 {
-                    var @event = await _eventsFromStreamsFetcher.Fetch(streamProcessorState.Position, cancellationToken).ConfigureAwait(false);
+                    var @event = await FetchNextEventToProcess(streamProcessorState, cancellationToken).ConfigureAwait(false);
                     streamProcessorState = (await RetryProcessingEvent(@event, streamProcessorState.FailureReason, streamProcessorState.ProcessingAttempts, streamProcessorState, cancellationToken).ConfigureAwait(false)) as StreamProcessorState;
                 }
             }
 
             return streamProcessorState;
         }
-
-        /// <inheritdoc/>
-        protected override Task<StreamEvent> FetchEventToProcess(IStreamProcessorState currentState, CancellationToken cancellationToken) =>
-            _eventsFromStreamsFetcher.Fetch(currentState.Position, cancellationToken);
 
         /// <inheritdoc/>
         protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)

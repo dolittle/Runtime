@@ -74,7 +74,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, $"An error occurred while trying to Subscribe SubscriptionRequest: {subscriptionRequest}");
+                if (!context.CancellationToken.IsCancellationRequested)
+                {
+                    _logger.Warning(ex, $"An error occurred while trying to Subscribe SubscriptionRequest: {subscriptionRequest}");
+                }
+
                 return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };
             }
         }

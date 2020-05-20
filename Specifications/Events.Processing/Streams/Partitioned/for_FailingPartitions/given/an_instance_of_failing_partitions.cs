@@ -15,6 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
             stream_processor_state_repository.Object,
             event_processor.Object,
             events_fetcher.Object,
+            events_fetcher_policy,
             Mock.Of<ILogger<FailingPartitions>>());
     }
 }

@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_EventHorizonEventProcessor.
         static EventProcessor processor;
         static IProcessingResult result;
 
-        Establish context = () => processor = new EventProcessor(consent_id, subscription_id, event_horizon_events_writer.Object, Moq.Mock.Of<ILogger>());
+        Establish context = () => processor = new EventProcessor(consent_id, subscription_id, event_horizon_events_writer.Object, event_processor_policy, Moq.Mock.Of<ILogger>());
 
         Because of = () => result = processor.Process(@event, partition, default).GetAwaiter().GetResult();
 
