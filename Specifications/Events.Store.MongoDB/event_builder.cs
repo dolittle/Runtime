@@ -53,10 +53,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public event_builder from_event_horizon()
         {
-            _instance.EventHorizonMetadata.FromEventHorizon = true;
-            _instance.EventHorizonMetadata.Consent = Guid.NewGuid();
-            _instance.EventHorizonMetadata.ExternalEventLogSequenceNumber = (ulong)new Random().Next();
-            _instance.EventHorizonMetadata.Received = DateTime.UtcNow;
+            _instance.EventHorizon.FromEventHorizon = true;
+            _instance.EventHorizon.Consent = Guid.NewGuid();
+            _instance.EventHorizon.ExternalEventLogSequenceNumber = (ulong)new Random().Next();
+            _instance.EventHorizon.Received = DateTime.UtcNow;
             return this;
         }
     }

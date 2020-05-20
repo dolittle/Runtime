@@ -44,8 +44,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensi
                 result.Type.Generation.Value.ShouldEqual(@event.Metadata.TypeGeneration);
             };
 
-        It should_have_the_correct_consent = () => (result as CommittedExternalEvent).Consent.Value.ShouldEqual(@event.EventHorizonMetadata.Consent);
-        It should_have_the_correct_external_event_log_sequence_number = () => (result as CommittedExternalEvent).ExternalEventLogSequenceNumber.Value.ShouldEqual(@event.EventHorizonMetadata.ExternalEventLogSequenceNumber);
-        It should_have_the_correct_received_value = () => (result as CommittedExternalEvent).Received.ShouldEqual(@event.EventHorizonMetadata.Received);
+        It should_have_the_correct_consent = () => (result as CommittedExternalEvent).Consent.Value.ShouldEqual(@event.EventHorizon.Consent);
+        It should_have_the_correct_external_event_log_sequence_number = () => (result as CommittedExternalEvent).ExternalEventLogSequenceNumber.Value.ShouldEqual(@event.EventHorizon.ExternalEventLogSequenceNumber);
+        It should_have_the_correct_received_value = () => (result as CommittedExternalEvent).Received.ShouldEqual(@event.EventHorizon.Received);
     }
 }
