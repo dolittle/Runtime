@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedExecutionContext.Version.ShouldBeTheSameAs(executionContext.Version);
         }
 
-        public static void ShouldBeTheSameAs(this MongoDB.Events.Version storedVersion, Dolittle.Versioning.Version version)
+        public static void ShouldBeTheSameAs(this Version storedVersion, Versioning.Version version)
         {
             storedVersion.Major.ShouldEqual(version.Major);
             storedVersion.Minor.ShouldEqual(version.Minor);
@@ -47,9 +47,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             executionContext.Microservice.Value.ShouldEqual(storedExecutionContext.Microservice);
             executionContext.Tenant.Value.ShouldEqual(storedExecutionContext.Tenant);
             executionContext.Version.ShouldBeTheSameAs(storedExecutionContext.Version);
+            executionContext.Claims.ShouldBeTheSameAs(storedExecutionContext.Claims);
         }
 
-        public static void ShouldBeTheSameAs(this Dolittle.Versioning.Version version, MongoDB.Events.Version storedVersion)
+        public static void ShouldBeTheSameAs(this Versioning.Version version, Version storedVersion)
         {
             version.Major.ShouldEqual(storedVersion.Major);
             version.Minor.ShouldEqual(storedVersion.Minor);
@@ -70,7 +71,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             claims.ShouldContainOnly(storedClaims.Select(_ => _.ToClaim()));
         }
 
-        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, MongoDB.Events.Event storedEvent)
+        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, Events.Event storedEvent)
         {
             committedEvent.Content.ShouldEqual(storedEvent.Content.ToString());
             committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventLogSequenceNumber);
@@ -82,7 +83,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
         }
 
-        public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, MongoDB.Events.Event storedEvent)
+        public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, Events.Event storedEvent)
         {
             (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
             committedEvent.AggregateRoot.Id.Value.ShouldEqual(storedEvent.Aggregate.TypeId);
@@ -98,7 +99,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
         }
 
-        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, MongoDB.Events.StreamEvent storedEvent)
+        public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, StreamEvent storedEvent)
         {
             committedEvent.Content.ShouldEqual(storedEvent.Content.ToString());
             committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.Metadata.EventLogSequenceNumber);
@@ -110,7 +111,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.Type.Generation.Value.ShouldEqual(storedEvent.Metadata.TypeGeneration);
         }
 
-        public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, MongoDB.Events.StreamEvent storedEvent)
+        public static void ShouldBeTheSameAs(this CommittedAggregateEvent committedEvent, StreamEvent storedEvent)
         {
             (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
             committedEvent.AggregateRoot.Id.Value.ShouldEqual(storedEvent.Aggregate.TypeId);
@@ -118,7 +119,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.AggregateRootVersion.Value.ShouldEqual(storedEvent.Aggregate.Version);
         }
 
-        public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, MongoDB.Events.StreamEvent storedEvent)
+        public static void ShouldBeTheSameAs(this CommittedExternalEvent committedEvent, StreamEvent storedEvent)
         {
             (committedEvent as CommittedEvent).ShouldBeTheSameAs(storedEvent);
             committedEvent.ExternalEventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventHorizonMetadata.ExternalEventLogSequenceNumber);
@@ -126,7 +127,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             committedEvent.Consent.Value.ShouldEqual(storedEvent.EventHorizonMetadata.Consent);
         }
 
-        public static void ShouldBeTheSameAs(this MongoDB.Events.Event storedEvent, CommittedEvent committedEvent)
+        public static void ShouldBeTheSameAs(this Events.Event storedEvent, CommittedEvent committedEvent)
         {
             storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
             storedEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
@@ -138,9 +139,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             storedEvent.Metadata.TypeGeneration.ShouldEqual(committedEvent.Type.Generation.Value);
         }
 
-        public static void ShouldBeTheSameAs(
-            this MongoDB.Events.StreamEvent storedEvent,
-            CommittedEvent committedEvent)
+        public static void ShouldBeTheSameAs(this StreamEvent storedEvent, CommittedEvent committedEvent)
         {
             storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
             storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
