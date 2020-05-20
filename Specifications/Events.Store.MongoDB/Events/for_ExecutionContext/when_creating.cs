@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_ExecutionContext
             correlation = Guid.NewGuid();
             microservice = Guid.NewGuid();
             tenant = Guid.NewGuid();
-            version = new Version(0, 0, 1, 0, "");
+            version = new Version(random.natural_number, random.natural_number, random.natural_number, random.natural_number, "Something");
             environment = "some environmen";
         };
 

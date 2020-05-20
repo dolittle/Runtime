@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static EventHorizonMetadata random_event_horizon_metadata => new event_horizon_metadata_builder().build();
 
-        public static AggregateMetadata random_aggregate_metadata_from_aggregate_event_with_version(uint version) =>
+        public static AggregateMetadata random_aggregate_metadata_from_aggregate_event_with_version(AggregateRootVersion version) =>
             new AggregateMetadata(
                 true,
                 Guid.NewGuid(),

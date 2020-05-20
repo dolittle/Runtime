@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         MongoDB.Events.Event _instance;
 
-        public event_builder(uint event_log_sequence_number) =>
+        public event_builder(EventLogSequenceNumber event_log_sequence_number) =>
             _instance = new MongoDB.Events.Event(
                 event_log_sequence_number,
                 execution_contexts.create_store(),
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 new EventHorizonMetadata(),
                 events.some_event_content_bson_document);
 
-        public event_builder(uint event_log_sequence_number, uint aggregate_version) =>
+        public event_builder(EventLogSequenceNumber event_log_sequence_number, AggregateRootVersion aggregate_version) =>
             _instance = new MongoDB.Events.Event(
                 event_log_sequence_number,
                 execution_contexts.create_store(),

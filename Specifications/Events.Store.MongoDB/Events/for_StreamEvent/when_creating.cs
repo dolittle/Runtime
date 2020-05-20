@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEvent
 
         Establish context = () =>
         {
-            stream_position = 2;
+            stream_position = random.stream_position;
             partition = Guid.NewGuid();
             execution_context = execution_contexts.create_store();
             stream_event_metadata = metadata.random_stream_event_metadata;

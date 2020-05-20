@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventMetadata
             occurred = DateTime.Now;
             event_source = Guid.NewGuid();
             type_id = Guid.NewGuid();
-            type_generation = 3;
+            type_generation = (uint)random.natural_number;
             is_public = true;
         };
 
