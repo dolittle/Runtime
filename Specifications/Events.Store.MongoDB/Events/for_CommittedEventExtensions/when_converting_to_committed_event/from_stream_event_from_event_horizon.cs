@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_CommittedEventExtensi
 
         Establish context = () =>
         {
-            @event = events.new_stream_event_not_from_aggregate(random.stream_position, Guid.NewGuid()).from_event_horizon().build();
+            @event = events.a_stream_event_not_from_aggregate_builder(random.stream_position, Guid.NewGuid()).from_event_horizon().build();
         };
 
         Because of = () => result = @event.ToCommittedEvent();

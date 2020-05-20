@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
             aggregate_root_version = random.aggregate_root_version;
             partition = Guid.NewGuid();
             stream = Guid.NewGuid();
-            stored_event = events.a_stream_event(stream_position, partition, aggregate_root_version);
+            stored_event = events.an_aggregate_stream_event(stream_position, partition, aggregate_root_version);
             event_converter = new EventConverter();
         };
 
