@@ -11,11 +11,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
 {
     /// <summary>
     /// Represents our own custom <see cref="IDiscriminatorConvention"/> used to deal with our MongoDB representation of
-    /// <see cref="FilterDefinition"/>.
+    /// <see cref="RemoteFilterDefinition"/>.
     /// </summary>
     public class FilterDefinitionDiscriminatorConvention : IDiscriminatorConvention
     {
-        const string Public = "Public";
         const string Type = "Type";
 
         /// <summary>
@@ -40,18 +39,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// <inheritdoc/>
         public BsonValue GetDiscriminator(Type nominalType, Type actualType)
         {
-            if (actualType == typeof(FilterDefinition) || actualType == typeof(PublicFilterDefinition))
+            if (actualType == typeof(RemoteFilterDefinition))
             {
                 return nameof(FilterType.Remote);
             }
-            else if (actualType == typeof(TypePartitionFilterDefinition))
+
+            if (actualType == typeof(TypePartitionFilterDefinition))
             {
                 return nameof(FilterType.EventTypeId);
             }
-            else
-            {
-                throw new UnsupportedTypeForFilterDefinitionDiscriminatorConvention(actualType);
-            }
+
+            throw new UnsupportedTypeForFilterDefinitionDiscriminatorConvention(actualType);
         }
 
         /// <inheritdoc/>
@@ -61,25 +59,22 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             var bookmark = bsonReader.GetBookmark();
             bsonReader.ReadStartDocument();
             Guid id = default;
-            FilterType filterType = default;
-            bool isFilterSet = false;
-            bool publicValue = default;
-            bool isPublicSet = false;
 
             while (bsonReader.ReadBsonType() != BsonType.EndOfDocument)
             {
                 switch (bsonReader.ReadName())
                 {
                     case Type:
-                        filterType = Enum.Parse<FilterType>(bsonReader.ReadString());
-                        isFilterSet = true;
-                        break;
-                    case Public:
-                        publicValue = bsonReader.ReadBoolean();
-                        isPublicSet = true;
-                        break;
+                        var filterType = Enum.Parse<FilterType>(bsonReader.ReadString());
+                        bsonReader.ReturnToBookmark(bookmark);
+                        return filterType switch
+                        {
+                            FilterType.EventTypeId => typeof(TypePartitionFilterDefinition),
+                            FilterType.Remote => typeof(RemoteFilterDefinition),
+                            _ => throw new UnsupportedFilterTypeEnumValue(filterType, id)
+                        };
                     case "_id":
-                        id = (Guid)bsonReader.ReadBinaryData();
+                        id = bsonReader.ReadBinaryData().ToGuid(GuidRepresentation.Standard);
                         break;
                     default:
                         bsonReader.SkipValue();
@@ -88,27 +83,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             }
 
             bsonReader.ReturnToBookmark(bookmark);
-            ThrowIfFieldsNotFound(isFilterSet, isPublicSet, id);
-
-            return filterType switch
-            {
-                FilterType.EventTypeId => typeof(TypePartitionFilterDefinition),
-                FilterType.Remote => publicValue ? typeof(PublicFilterDefinition) : typeof(FilterDefinition),
-                _ => throw new UnsupportedFilterTypeEnumValue(filterType, id)
-            };
-        }
-
-        void ThrowIfFieldsNotFound(bool isFilterSet, bool isPublicSet, Guid id)
-        {
-            if (!isFilterSet)
-            {
-                throw new AbstractFilterDefinitionDocumentIsMissingAField(id, Type);
-            }
-
-            if (!isPublicSet)
-            {
-                throw new AbstractFilterDefinitionDocumentIsMissingAField(id, Public);
-            }
+            throw new AbstractFilterDefinitionDocumentIsMissingTypeField(id);
         }
 
         void ThrowIfNominalTypeIsIncorrect(Type nominalType)
