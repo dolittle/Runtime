@@ -38,6 +38,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         _logger.Error(_, "Could not persist stream processor state to the event store, will retry in one second.");
                         return true;
                     })
-                .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));
+                .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(1);
     }
 }
