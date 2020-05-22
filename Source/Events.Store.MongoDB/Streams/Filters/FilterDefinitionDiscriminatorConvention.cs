@@ -34,9 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             EventTypeId
         }
 
-        /// <summary>
-        /// Gets the fields name in mongo.
-        /// </summary>
+        /// <inheritdoc/>
         public string ElementName => Type;
 
         /// <inheritdoc/>
