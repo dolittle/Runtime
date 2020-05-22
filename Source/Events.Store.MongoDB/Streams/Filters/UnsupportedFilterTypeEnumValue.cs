@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// <param name="filterType">string of the given FilterType.</param>
         /// <param name="id">Id of the document.</param>
         public UnsupportedFilterTypeEnumValue(FilterDefinitionDiscriminatorConvention.FilterType filterType, Guid id)
-            : base($"Document id: {id} has an unsupported FilterType: {filterType}. Check supportd types from {typeof(FilterDefinitionDiscriminatorConvention)}.")
+            : base($"Filter definition document id: {id} has an unsupported FilterType: {filterType}. Supported types are \"Remote\", \"EventTypeId\".")
         {
         }
     }
