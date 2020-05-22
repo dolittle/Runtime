@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// <param name="id">The _id field.</param>
         /// <param name="field">The missing field.</param>
         public AbstractFilterDefinitionDocumentIsMissingAField(Guid id, string field)
-            : base($"The {field} was missing from the document with id: {id}", null)
+            : base($"The {field} was missing from the filter definition document with id: {id}", null)
         {
         }
     }
