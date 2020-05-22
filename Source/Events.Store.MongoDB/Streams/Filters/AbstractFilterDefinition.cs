@@ -10,8 +10,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
     /// <summary>
     /// Represents a persisted <see cref="Store.Streams.Filters.IFilterDefinition" />.
     /// </summary>
-    [BsonDiscriminator(RootClass = true, Required = true)]
-    [BsonKnownTypes(typeof(FilterDefinition), typeof(PublicFilterDefinition))]
     public abstract class AbstractFilterDefinition
     {
         /// <summary>
@@ -19,10 +17,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// </summary>
         /// <param name="filterId">The filter id.</param>
         /// <param name="sourceStream">The source stream.</param>
-        protected AbstractFilterDefinition(Guid filterId, Guid sourceStream)
+        /// <param name="partitioned">Whether the filter is partitioned.</param>
+        /// <param name="isPublic">Whether the filter is public.</param>
+        protected AbstractFilterDefinition(Guid filterId, Guid sourceStream, bool partitioned, bool isPublic)
         {
             FilterId = filterId;
             SourceStream = sourceStream;
+            Partitioned = partitioned;
+            Public = isPublic;
         }
 
         /// <summary>
@@ -35,6 +37,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// Gets or sets the source stream.
         /// </summary>
         public Guid SourceStream { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the filter is partitioned or not.
+        /// </summary>
+        public bool Partitioned { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the filter defines a public stream definition.
+        /// </summary>
+        public bool Public { get; set; }
 
         /// <summary>
         /// Converts the stored filter into the runtime <see cref="IFilterDefinition" /> that it represents.

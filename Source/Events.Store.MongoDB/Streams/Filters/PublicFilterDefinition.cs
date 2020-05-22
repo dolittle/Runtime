@@ -17,10 +17,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// <param name="filterId">The filter id.</param>
         /// <param name="sourceStream">The source stream.</param>
         public PublicFilterDefinition(Guid filterId, Guid sourceStream)
-            : base(filterId, sourceStream)
+            : base(filterId, sourceStream, true, true)
         {
-            FilterId = filterId;
-            SourceStream = sourceStream;
         }
 
         /// <summary>

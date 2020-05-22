@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
     /// <summary>
     /// Represents a persisted <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
     /// </summary>
-    public class TypePartitionFilterDefinition : FilterDefinition
+    public class TypePartitionFilterDefinition : AbstractFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TypePartitionFilterDefinition"/> class.
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// <param name="types">The event artifact types.</param>
         /// <param name="partitioned">Whether it is partitioned or not.</param>
         public TypePartitionFilterDefinition(Guid filterId, Guid sourceStream, IEnumerable<Guid> types, bool partitioned)
-            : base(filterId, sourceStream, partitioned)
+            : base(filterId, sourceStream, partitioned, false)
         {
             Types = types;
         }

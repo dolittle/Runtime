@@ -3,14 +3,12 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
 {
     /// <summary>
     /// Represents a persisted <see cref="Store.Streams.Filters.FilterDefinition" />.
     /// </summary>
-    [BsonKnownTypes(typeof(TypePartitionFilterDefinition))]
     public class FilterDefinition : AbstractFilterDefinition
     {
         /// <summary>
@@ -20,17 +18,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// <param name="sourceStream">The source stream.</param>
         /// <param name="partitioned">Whether the filter is partitioned or not.</param>
         public FilterDefinition(Guid filterId, Guid sourceStream, bool partitioned)
-            : base(filterId, sourceStream)
+            : base(filterId, sourceStream, partitioned, false)
         {
-            FilterId = filterId;
-            SourceStream = sourceStream;
-            Partitioned = partitioned;
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the filter is partitioned or not.
-        /// </summary>
-        public bool Partitioned { get; set; }
 
         /// <summary>
         /// Converts the stored filter into the runtime <see cref="IFilterDefinition" /> that it represents.
