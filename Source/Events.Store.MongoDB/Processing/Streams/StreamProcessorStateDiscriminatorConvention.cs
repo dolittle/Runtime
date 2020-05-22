@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
         /// <summary>
         /// Gets the correct type when deserializing objects from  <see cref="AbstractStreamProcessorState"/> collection
-        /// depending on the given nominal type or "Partitioned" field.
+        /// depending on the "Partitioned" field. Also saves the _id field for the exception if needed.
         /// </summary>
         /// <param name="bsonReader">A <see cref="IBsonReader"/>.</param>
         /// <param name="nominalType">The nominal type.</param>
@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
         void ThrowIfNominalTypeIsIncorrect(Type nominalType)
         {
-            if (nominalType != typeof(AbstractStreamProcessorState))
+            if (!typeof(AbstractStreamProcessorState).IsAssignableFrom(nominalType))
                 throw new UnsupportedTypeForStreamProcessorStateDiscriminatorConvention(nominalType);
         }
     }
