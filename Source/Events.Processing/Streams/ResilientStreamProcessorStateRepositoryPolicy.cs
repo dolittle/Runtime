@@ -4,8 +4,6 @@
 using System;
 using Dolittle.Logging;
 using Dolittle.Resilience;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Streams;
 using Polly;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -38,6 +36,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         _logger.Error(_, "Could not persist stream processor state to the event store, will retry in one second.");
                         return true;
                     })
-                .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(1);
+                .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(1));
     }
 }
