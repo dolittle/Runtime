@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <inheritdoc/>
         public Polly.IAsyncPolicy Define() =>
             Polly.Policy
-                .Handle<EventStoreUnavailable>(
+                .Handle<Exception>(
                     _ =>
                     {
                         _logger.Debug(_, "Event Store is unavailable");
