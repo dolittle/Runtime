@@ -39,13 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         /// </summary>
         public string ElementName => Type;
 
-        /// <summary>
-        /// Gets the value to be put into the ElementName field. The enum is saved as a string so that it looks prettier
-        /// when inspecting the db.
-        /// </summary>
-        /// <param name="nominalType">The nominal type.</param>
-        /// <param name="actualType">The actual type.</param>
-        /// <returns>A string.</returns>
+        /// <inheritdoc/>
         public BsonValue GetDiscriminator(Type nominalType, Type actualType)
         {
             if (actualType == typeof(FilterDefinition) || actualType == typeof(PublicFilterDefinition))
