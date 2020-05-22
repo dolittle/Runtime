@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Artifacts;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
@@ -12,17 +13,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
     /// <summary>
     /// Represents a persisted <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
     /// </summary>
-    public class TypePartitionFilterDefinition : FilterDefinition
+    public class TypePartitionFilterDefinition : AbstractFilterDefinition
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TypePartitionFilterDefinition"/> class.
         /// </summary>
-        /// <param name="filterId">The filter id.</param>
-        /// <param name="sourceStream">The source stream id.</param>
         /// <param name="types">The event artifact types.</param>
-        /// <param name="partitioned">Whether it is partitioned or not.</param>
-        public TypePartitionFilterDefinition(Guid filterId, Guid sourceStream, IEnumerable<Guid> types, bool partitioned)
-            : base(filterId, sourceStream, partitioned)
+        public TypePartitionFilterDefinition(IEnumerable<Guid> types)
         {
             Types = types;
         }
@@ -33,11 +30,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         public IEnumerable<Guid> Types { get; set; }
 
         /// <inheritdoc/>
-        public override IFilterDefinition AsRuntimeRepresentation() =>
+        public override IFilterDefinition AsRuntimeRepresentation(Guid streamId, bool partitioned, bool @public) =>
             new TypeFilterWithEventSourcePartitionDefinition(
-                SourceStream,
-                FilterId,
+                StreamId.EventLog,
+                streamId,
                 Types.Cast<ArtifactId>(),
-                Partitioned);
+                partitioned);
     }
 }

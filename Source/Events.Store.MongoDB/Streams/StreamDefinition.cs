@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public StreamDefinition(Guid streamId, AbstractFilterDefinition filterDefinition, bool partitioned, bool @public)
         {
             StreamId = streamId;
-            FilterDefinition = filterDefinition;
+            Filter = filterDefinition;
             Partitioned = partitioned;
             Public = @public;
         }
@@ -47,12 +47,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <summary>
         /// Gets or sets the <see cref="AbstractFilterDefinition" />.
         /// </summary>
-        public AbstractFilterDefinition FilterDefinition { get; set; }
+        public AbstractFilterDefinition Filter { get; set; }
 
         /// <summary>
         /// Converts the stored Stream Definition to the Runtime <see cref="IStreamDefinition" /> representation.
         /// </summary>
         /// <returns><see cref="IStreamDefinition" />.</returns>
-        public IStreamDefinition AsRuntimeRepresentation() => new Store.Streams.StreamDefinition(FilterDefinition.AsRuntimeRepresentation());
+        public IStreamDefinition AsRuntimeRepresentation() =>
+            new Store.Streams.StreamDefinition(Filter.AsRuntimeRepresentation(
+                StreamId,
+                Partitioned,
+                Public));
     }
 }

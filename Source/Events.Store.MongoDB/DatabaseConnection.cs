@@ -5,6 +5,7 @@ using System.Linq;
 using Dolittle.Lifecycle;
 using Dolittle.ResourceTypes.Configuration;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
+using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
@@ -65,6 +66,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         static void RegisterCustomDiscriminators()
         {
             BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractStreamProcessorState), new StreamProcessorStateDiscriminatorConvention());
+            BsonSerializer.RegisterDiscriminatorConvention(typeof(AbstractFilterDefinition), new FilterDefinitionDiscriminatorConvention());
         }
     }
 }
