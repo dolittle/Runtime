@@ -6,7 +6,7 @@ using System;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
 {
     /// <summary>
-    /// Exception that gets thrown when a field is missing from <see cref="AbstractFilterDefinition"/> document.
+    /// Exception that gets thrown when a required field is missing from <see cref="AbstractFilterDefinition"/> document.
     /// </summary>
     public class AbstractFilterDefinitionDocumentIsMissingAField : EventStoreConsistencyError
     {
