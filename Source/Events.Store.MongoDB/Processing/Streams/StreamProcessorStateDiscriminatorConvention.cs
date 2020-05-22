@@ -21,23 +21,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     {
         public string ElementName => "Partitioned";
 
-        /// <summary>
-        /// Gets the value to be put into the ElementName key when writing <see cref="AbstractStreamProcessorState"/>
-        /// into the collection.
-        /// </summary>
-        /// <param name="nominalType">The nominal type.</param>
-        /// <param name="actualType">The actual type.</param>
-        /// <returns>Boolean indicating whether the StreamProcessorState is partitioned.</returns>
+        /// <inheritdoc/>
         public BsonValue GetDiscriminator(Type nominalType, Type actualType) =>
             actualType == typeof(Partitioned.PartitionedStreamProcessorState);
 
-        /// <summary>
-        /// Gets the correct type when deserializing objects from  <see cref="AbstractStreamProcessorState"/> collection
-        /// depending on the "Partitioned" field. Also saves the _id field for the exception if needed.
-        /// </summary>
-        /// <param name="bsonReader">A <see cref="IBsonReader"/>.</param>
-        /// <param name="nominalType">The nominal type.</param>
-        /// <returns>The actual wanted type.</returns>
+        /// <inheritdoc/>
         public Type GetActualType(IBsonReader bsonReader, Type nominalType)
         {
             ThrowIfNominalTypeIsIncorrect(nominalType);
