@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Initializes a new instance of the <see cref="ResilientStreamProcessorStateRepositoryPolicy"/> class.
         /// </summary>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public ResilientStreamProcessorStateRepositoryPolicy(ILogger<ICanFetchEventsFromStream> logger)
+        public ResilientStreamProcessorStateRepositoryPolicy(ILogger<ResilientStreamProcessorStateRepository> logger)
         {
             _logger = logger;
         }
