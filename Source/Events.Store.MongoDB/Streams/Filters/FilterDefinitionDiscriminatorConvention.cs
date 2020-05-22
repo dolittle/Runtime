@@ -101,7 +101,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             }
 
             bsonReader.ReturnToBookmark(bookmark);
-            ThrownIfFieldsNotFound(isFilterSet, isPublicSet, id);
+            ThrowIfFieldsNotFound(isFilterSet, isPublicSet, id);
 
             return filterType switch
             {
@@ -111,7 +111,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             };
         }
 
-        void ThrownIfFieldsNotFound(bool isFilterSet, bool isPublicSet, Guid id)
+        void ThrowIfFieldsNotFound(bool isFilterSet, bool isPublicSet, Guid id)
         {
             if (!isFilterSet)
             {
