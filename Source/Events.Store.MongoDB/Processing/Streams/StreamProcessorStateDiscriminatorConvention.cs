@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 
         void ThrowIfNominalTypeIsIncorrect(Type nominalType)
         {
-            if (nominalType != typeof(AbstractStreamProcessorState))
+            if (!typeof(AbstractStreamProcessorState).IsAssignableFrom(nominalType))
                 throw new UnsupportedTypeForStreamProcessorStateDiscriminatorConvention(nominalType);
         }
     }
