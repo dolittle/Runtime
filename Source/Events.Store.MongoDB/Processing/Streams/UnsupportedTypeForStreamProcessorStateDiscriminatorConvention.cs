@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// </summary>
         /// <param name="type">Nominal type used in the discriminator convention.</param>
         public UnsupportedTypeForStreamProcessorStateDiscriminatorConvention(Type type)
-            : base($"Type: {type} isn't derived from AbstractStreamProcessorState and is not supported by StreamProcessorStateDiscriminatorConvention. Was this type erroneously registered with BsonSerializer.RegisterDiscriminatorConvention?", null)
+            : base($"Type: {type} isn't derived from {typeof(AbstractStreamProcessorState)} and is not supported by {typeof(StreamProcessorStateDiscriminatorConvention)}. Was this type erroneously registered with BsonSerializer.RegisterDiscriminatorConvention?", null)
         {
         }
     }
