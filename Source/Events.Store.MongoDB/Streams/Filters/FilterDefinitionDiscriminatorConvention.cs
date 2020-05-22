@@ -107,7 +107,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             {
                 FilterType.EventTypeId => typeof(TypePartitionFilterDefinition),
                 FilterType.Remote => publicValue ? typeof(PublicFilterDefinition) : typeof(FilterDefinition),
-                _ => throw new UnsupportedFilterTypeEnumValue(filterType, id);
+                _ => throw new UnsupportedFilterTypeEnumValue(filterType, id)
             };
         }
 
