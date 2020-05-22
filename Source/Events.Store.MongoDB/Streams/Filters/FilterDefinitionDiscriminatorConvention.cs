@@ -62,12 +62,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             }
         }
 
-        /// <summary>
-        /// Gets the correct type when deserializing objects from  <see cref="AbstractFilterDefinition"/> collection.
-        /// </summary>
-        /// <param name="bsonReader">A <see cref="IBsonReader"/>.</param>
-        /// <param name="nominalType">The nominal type.</param>
-        /// <returns>The actual wanted type.</returns>
+        /// <inheritdoc/>
         public Type GetActualType(IBsonReader bsonReader, Type nominalType)
         {
             ThrowIfNominalTypeIsIncorrect(nominalType);
