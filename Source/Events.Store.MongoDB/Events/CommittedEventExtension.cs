@@ -66,7 +66,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static CommittedEvent ToCommittedEvent(this Event @event) =>
             @event.Aggregate.WasAppliedByAggregate ?
                 @event.ToCommittedAggregateEvent()
-                : @event.EventHorizonMetadata.FromEventHorizon ?
+                : @event.EventHorizon.FromEventHorizon ?
                     new CommittedExternalEvent(
                         @event.EventLogSequenceNumber,
                         @event.Metadata.Occurred,
@@ -75,9 +75,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                         new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                         @event.Metadata.Public,
                         @event.Content.ToString(),
-                        @event.EventHorizonMetadata.ExternalEventLogSequenceNumber,
-                        @event.EventHorizonMetadata.Received,
-                        @event.EventHorizonMetadata.Consent)
+                        @event.EventHorizon.ExternalEventLogSequenceNumber,
+                        @event.EventHorizon.Received,
+                        @event.EventHorizon.Consent)
                     : new CommittedEvent(
                       @event.EventLogSequenceNumber,
                       @event.Metadata.Occurred,
@@ -95,7 +95,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public static CommittedEvent ToCommittedEvent(this StreamEvent @event) =>
             @event.Aggregate.WasAppliedByAggregate ?
                 @event.ToCommittedAggregateEvent()
-                : @event.EventHorizonMetadata.FromEventHorizon ?
+                : @event.EventHorizon.FromEventHorizon ?
                     new CommittedExternalEvent(
                         @event.Metadata.EventLogSequenceNumber,
                         @event.Metadata.Occurred,
@@ -104,9 +104,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                         new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                         @event.Metadata.Public,
                         @event.Content.ToString(),
-                        @event.EventHorizonMetadata.ExternalEventLogSequenceNumber,
-                        @event.EventHorizonMetadata.Received,
-                        @event.EventHorizonMetadata.Consent)
+                        @event.EventHorizon.ExternalEventLogSequenceNumber,
+                        @event.EventHorizon.Received,
+                        @event.EventHorizon.Consent)
                     : new CommittedEvent(
                         @event.Metadata.EventLogSequenceNumber,
                         @event.Metadata.Occurred,

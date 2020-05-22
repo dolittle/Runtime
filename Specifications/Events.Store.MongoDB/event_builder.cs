@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         MongoDB.Events.Event _instance;
 
-        public event_builder(uint event_log_sequence_number) =>
+        public event_builder(EventLogSequenceNumber event_log_sequence_number) =>
             _instance = new MongoDB.Events.Event(
                 event_log_sequence_number,
                 execution_contexts.create_store(),
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 new EventHorizonMetadata(),
                 events.some_event_content_bson_document);
 
-        public event_builder(uint event_log_sequence_number, uint aggregate_version) =>
+        public event_builder(EventLogSequenceNumber event_log_sequence_number, AggregateRootVersion aggregate_version) =>
             _instance = new MongoDB.Events.Event(
                 event_log_sequence_number,
                 execution_contexts.create_store(),
@@ -53,10 +53,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public event_builder from_event_horizon()
         {
-            _instance.EventHorizonMetadata.FromEventHorizon = true;
-            _instance.EventHorizonMetadata.Consent = Guid.NewGuid();
-            _instance.EventHorizonMetadata.ExternalEventLogSequenceNumber = (ulong)new Random().Next();
-            _instance.EventHorizonMetadata.Received = DateTime.UtcNow;
+            _instance.EventHorizon.FromEventHorizon = true;
+            _instance.EventHorizon.Consent = Guid.Parse("df838974-100b-4a07-9e44-08e2c7d7e99a");
+            _instance.EventHorizon.ExternalEventLogSequenceNumber = 71883084;
+            _instance.EventHorizon.Received = new DateTime(2944480155, DateTimeKind.Utc);
             return this;
         }
     }

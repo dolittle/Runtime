@@ -95,7 +95,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 await responseStream.WriteAsync(new Contracts.SubscriptionMessage { SubscriptionResponse = subscriptionResponse }).ConfigureAwait(false);
                 if (subscriptionResponse.Failure != null)
                 {
-                    _logger.Debug($"Denied subscription from microservice '{consumerMicroservice}' and tenant '{consumerTenant}' to partition '{partition}' in stream '{publicStream}' for tenant '{producerTenant}'");
                     return;
                 }
 
@@ -135,14 +134,23 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Error(ex, $"Error occurred in Event Horizon between consumer microservice '{consumerMicroservice}' and tenant '{consumerTenant}' and producer tenant '{producerTenant}'");
+                    _logger.Warning(
+                        ex,
+                        "Error occurred in Event Horizon between Consumer Microservice {ConsumerMicroservice} and Tenant {consumerTenant} and Producer Tenant {ProducerTenant}",
+                        consumerMicroservice,
+                        consumerTenant,
+                        producerTenant);
                 }
 
                 throw;
             }
             finally
             {
-                _logger.Warning($"Disconnecting Event Horizon between consumer microservice '{consumerMicroservice}' and tenant '{consumerTenant}' and producer tenant '{producerTenant}'");
+                _logger.Debug(
+                    "Disconnecting Event Horizon between Consumer Microservice {ConsumerMicroservice} and Tenant {consumerTenant} and Producer Tenant {ProducerTenant}",
+                    consumerMicroservice,
+                    consumerTenant,
+                    producerTenant);
             }
         }
 
@@ -159,28 +167,43 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
         Contracts.SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
         {
-            _logger.Trace($"Checking if producer tenant '{producerTenant}' exists.");
-            if (!ProducerTenantExists(producerTenant))
+            try
             {
-                var message = $"";
-                _logger.Debug(message);
-                return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Reason = message } };
-            }
+                _logger.Trace("Checking whether Producer Tenant {ProducerTenant} exists", producerTenant);
+                if (!ProducerTenantExists(producerTenant))
+                {
+                    var message = $"There are no consents configured for Producer Tenant {producerTenant}";
+                    _logger.Debug(message);
+                    return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message,  } };
+                }
 
-            if (!TryGetConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition, out var consentId))
+                if (!TryGetConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition, out var consentId))
+                {
+                    var message = $"There are no consent configured for Partition {partition} in Public Stream {publicStream} in Tenant {producerTenant} to Consumer Tenant {consumerTenant} in Microservice {consumerMicroservice}";
+                    _logger.Debug(message);
+                    return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message } };
+                }
+
+                return new Contracts.SubscriptionResponse { ConsentId = consentId.ToProtobuf() };
+            }
+            catch (Exception ex)
             {
-                var message = $"There are no consent configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'";
-                _logger.Debug(message);
-                return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Reason = message } };
+                const string message = "Error ocurred while creating subscription response";
+                _logger.Warning(ex, message);
+                return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = FailureId.Other.ToProtobuf(), Reason = message } };
             }
-
-            return new Contracts.SubscriptionResponse { ConsentId = consentId.ToProtobuf() };
         }
 
         bool TryGetConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out ConsentId consentId)
         {
             consentId = null;
-            _logger.Trace($"Checking consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
+            _logger.Trace(
+                "Checking consents configured for Partition: {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}",
+                partition,
+                publicStream,
+                producerTenant,
+                consumerTenant,
+                consumerMicroservice);
 
             var consentsForSubscription = _eventHorizonConsents
                                             .GetConsentConfigurationsFor(producerTenant)
@@ -195,7 +218,13 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
             if (consentsForSubscription.Length > 1)
             {
-                _logger.Warning($"There are multiple consents configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'");
+                _logger.Warning(
+                    "There are multiple consents configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}",
+                    partition,
+                    publicStream,
+                    producerTenant,
+                    consumerTenant,
+                    consumerMicroservice);
             }
 
             consentId = consentsForSubscription.SingleOrDefault()?.Consent;

@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 
 namespace Dolittle.Runtime.Events.Processing
 {
-    public class in_memory_stream_processor_state_repository : IStreamProcessorStateRepository
+    public class in_memory_stream_processor_state_repository : IResilientStreamProcessorStateRepository
     {
         readonly IDictionary<StreamProcessorId, IStreamProcessorState> states = new NullFreeDictionary<StreamProcessorId, IStreamProcessorState>();
 

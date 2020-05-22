@@ -17,10 +17,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventMetadata
 
         Establish context = () =>
         {
-            occurred = DateTime.Now;
-            event_source = Guid.NewGuid();
-            type_id = Guid.NewGuid();
-            type_generation = 3;
+            occurred = new DateTime(2852152428, DateTimeKind.Utc);
+            event_source = Guid.Parse("bfbfb1aa-b6c1-4bc3-9269-23d5e4205231");
+            type_id = Guid.Parse("5b92f887-a986-4cde-a375-cb868c50eee2");
+            type_generation = 678275961;
             is_public = true;
         };
 

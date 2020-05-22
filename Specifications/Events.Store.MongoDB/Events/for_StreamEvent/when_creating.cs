@@ -20,8 +20,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEvent
 
         Establish context = () =>
         {
-            stream_position = 2;
-            partition = Guid.NewGuid();
+            stream_position = random.stream_position;
+            partition = Guid.Parse("c485009f-397f-48b1-bf8c-6040f0efe523");
             execution_context = execution_contexts.create_store();
             stream_event_metadata = metadata.random_stream_event_metadata;
             aggregate_metadata = metadata.aggregate_metadata_from_non_aggregate_event;
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEvent
         It should_have_the_correct_execution_context = () => result.ExecutionContext.ShouldEqual(execution_context);
         It should_have_the_correct_stream_event_metadata = () => result.Metadata.ShouldEqual(stream_event_metadata);
         It should_have_the_correct_aggregate_metadata = () => result.Aggregate.ShouldEqual(aggregate_metadata);
-        It should_have_the_correct_event_horizon_metadata = () => result.EventHorizonMetadata.ShouldEqual(event_horizon_metadata);
+        It should_have_the_correct_event_horizon_metadata = () => result.EventHorizon.ShouldEqual(event_horizon_metadata);
         It should_have_the_correct_content = () => result.Content.ShouldEqual(content);
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Security;
+using Claim = Dolittle.Security.Claim;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {
@@ -14,12 +15,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static Execution.ExecutionContext create() =>
             new Execution.ExecutionContext(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Versioning.Version.NotSet,
-                "",
-                Guid.NewGuid(),
-                Claims.Empty,
+                Guid.Parse("1cec3f3c-1752-4210-bcd0-5add96e7172d"),
+                Guid.Parse("86e7a8fc-b0e9-4709-bf59-10b33005497e"),
+                new Versioning.Version(873112588, 241520971, 367002811, 1885758720, "something very random"),
+                "somethign also very random",
+                Guid.Parse("2fd440e7-84c6-4f88-a5f3-f8b5a038464f"),
+                new Claims(new[] { new Claim("some very random name", "some very random value", "some very random value type") }),
                 CultureInfo.InvariantCulture);
     }
 }
