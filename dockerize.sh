@@ -12,12 +12,12 @@ BUILD_VERSION=$(echo $VERSION | sed 's/v*[0-9]*.[0.9]*.[0-9]-[a-zA-Z]*.\([0-9]*\
 
 echo Building version $IMAGE_VERSION
 
-docker build --no-cache -f ./Dockerfile -t dolittle/runtime . --build-arg CONFIGURATION="Release"
-docker tag dolittle/runtime dolittle/runtime:$IMAGE_VERSION
+docker build --no-cache -f ./Dockerfile -t dolittle/runtime:$IMAGE_VERSION . --build-arg CONFIGURATION="Release"
+docker tag dolittle/runtime:$IMAGE_VERSION dolittle/runtime:latest
+
+docker push dolittle/runtime:$IMAGE_VERSION
 
 if [ $PRE_RELEASE_TAG = $VERSION ]; then
     echo Pushing latest
     docker push dolittle/runtime:latest
 fi
-
-docker push dolittle/runtime:$IMAGE_VERSION
