@@ -22,21 +22,21 @@ WORKDIR /app/Source/Server
 RUN dotnet restore
 RUN dotnet publish -c ${CONFIGURATION} -o out
 
-# Web Build
-FROM node:13.12 AS web-build
-WORKDIR /app
+# # Web Build
+# FROM node:13.12 AS web-build
+# WORKDIR /app
 
-COPY tslint.json ./
-COPY tsconfig.settings.json ./
-COPY Source/ManagementUI ./Source/ManagementUI
+# COPY tslint.json ./
+# COPY tsconfig.settings.json ./
+# COPY Source/ManagementUI ./Source/ManagementUI
 
-WORKDIR /app/Source/ManagementUI
+# WORKDIR /app/Source/ManagementUI
 
-RUN yarn
-RUN yarn build
+# RUN yarn
+# RUN yarn build
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 as base
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 ARG CONFIGURATION=Release
 
 RUN echo Configuration = $CONFIGURATION
@@ -51,7 +51,7 @@ RUN if [ "$CONFIGURATION" = "debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
 COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
-COPY --from=web-build /app/Source/ManagementUI/wwwroot ./wwwroot
+#COPY --from=web-build /app/Source/ManagementUI/wwwroot ./wwwroot
 
 EXPOSE 81
 EXPOSE 9700
