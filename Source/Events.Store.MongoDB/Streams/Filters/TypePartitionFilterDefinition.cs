@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             new TypeFilterWithEventSourcePartitionDefinition(
                 StreamId.EventLog,
                 streamId,
-                Types.Cast<ArtifactId>(),
+                Types.Select(_ => new ArtifactId { Value = _ }),
                 partitioned);
     }
 }
