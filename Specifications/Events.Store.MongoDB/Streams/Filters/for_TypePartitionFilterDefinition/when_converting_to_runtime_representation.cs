@@ -32,11 +32,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters.for_TypePartitio
             filter_definition = new TypePartitionFilterDefinition(types);
         };
 
-        Because of = () =>
-        {
-            while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(50);
-            result = filter_definition.AsRuntimeRepresentation(stream_id, partitioned, true);
-        };
+        Because of = () => result = filter_definition.AsRuntimeRepresentation(stream_id, partitioned, true);
 
         It should_be_a_type_partition_filter_definition = () => result.ShouldBeOfExactType<TypeFilterWithEventSourcePartitionDefinition>();
         It should_be_partitioned = () => result.Partitioned.ShouldBeTrue();
