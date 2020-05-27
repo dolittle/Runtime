@@ -105,8 +105,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger.Trace("Getting microservice address");
             if (!TryGetMicroserviceAddress(subscriptionId.ProducerMicroserviceId, out var microserviceAddress))
             {
-                var message = $"There is no microservice configuration for the producer microservice '{subscriptionId.ProducerMicroserviceId}'.";
-                _logger.Warning(message);
+                _logger.Warning("There is no microservice configuration for the producer microservice {ProducerMicroserviceId}.", subscriptionId.ProducerMicroserviceId);
                 return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.MissingMicroserviceConfiguration, message));
             }
 
@@ -178,7 +177,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 return new FailedSubscriptionResponse(subscriptionResponse.Failure);
             }
 
-            _logger.Trace($"Subscription response for subscription {subscriptionId} was successful");
+            _logger.Trace("Subscription response for subscription {SubscriptionId} was successful", subscriptionId);
             return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.To<ConsentId>());
         }
 

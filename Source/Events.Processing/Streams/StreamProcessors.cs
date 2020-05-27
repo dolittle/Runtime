@@ -77,12 +77,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 cancellationToken);
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
-                _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
+                _logger.Warning("Stream Processor with Id: '{StreamProcessorId}' already registered", streamProcessorId);
                 streamProcessor = default;
                 return false;
             }
 
-            _logger.Trace("Stream Processor with Id: '{streamProcessorId}' registered for Tenant: '{tenant}'", streamProcessorId);
+            _logger.Trace("Stream Processor with Id: '{StreamProcessorId}' registered", streamProcessorId);
             return true;
         }
 

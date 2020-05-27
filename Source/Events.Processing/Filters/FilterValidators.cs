@@ -44,11 +44,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public Task<FilterValidationResult> Validate<TDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.Trace($"Finding validator for filter '{filter.Definition.TargetStream}'");
+            _logger.Trace("Finding validator for filter '{TargetStream}'", filter.Definition.TargetStream);
 
             if (TryGetValidatorFor<TDefinition>(out var validator))
             {
-                _logger.Trace($"Validating filter '{filter.Definition.TargetStream}'");
+                _logger.Trace("Validating filter '{TargetStream}'", filter.Definition.TargetStream);
                 return validator.Validate(persistedDefinition, filter, cancellationToken);
             }
 
@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
                 {
-                    _logger.Trace($"Filter definition type {filterDefinitionType.FullName} can be validated by validator type {validatorType.FullName}");
+                    _logger.Trace("Filter definition type {FilterFullName} can be validated by validator type {ValidatorFullName}", filterDefinitionType.FullName, validatorType.FullName);
                     _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
                 }
             });
