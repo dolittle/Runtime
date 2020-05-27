@@ -5,7 +5,7 @@ keywords: setup, configuration, json, resources, tenancy
 author: joel
 ---
 
-To run a runtime with the SDK you have to provide some configuration files to both the runtime and SDK. These files are in JSON format.
+To run a runtime with a had you have to provide some configuration files to both the runtime and SDK. These files are in JSON format.
 
 ## Runtime
 
@@ -47,7 +47,7 @@ Configurations for the read models and event store.
 ```
 
 ### endpoints.json
-Ports for the public and private 
+Ports for the public and private which to the head can connect.
 ```json
 {
     "public": {
@@ -115,6 +115,7 @@ Defines the EventHorizons the head uses.
 ```
 
 ### clients.json
+Ports which to connect to in the runtime.
 ```json
 {
     "public": {
