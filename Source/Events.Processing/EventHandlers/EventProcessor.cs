@@ -50,7 +50,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc />
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}'");
+            _logger.Debug("{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}'",
+                _logMessagePrefix,
+                @event.Type.Id.Value,
+                partitionId.Value
+            );
 
             var request = new HandleEventRequest
                 {
@@ -62,7 +66,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc/>
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug($"{_logMessagePrefix} is processing event '{@event.Type.Id.Value}' for partition '{partitionId.Value}' again for the {retryCount}. time because: {failureReason}");
+            _logger.Debug("{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
+                _logMessagePrefix,
+                @event.Type.Id.Value,
+                partitionId.Value,
+                retryCount,
+                failureReason);
             var request = new HandleEventRequest
                 {
                     Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },

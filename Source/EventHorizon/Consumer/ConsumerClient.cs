@@ -142,7 +142,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         async Task<AsyncServerStreamingCall<Contracts.SubscriptionMessage>> Subscribe(SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress)
         {
-            _logger.Debug($"Tenant '{subscriptionId.ConsumerTenantId}' is subscribing to events from tenant '{subscriptionId.ProducerTenantId}' in microservice '{subscriptionId.ProducerMicroserviceId}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
+            _logger.Debug(
+                "Tenant '{ConsumerTenantId}' is subscribing to events from tenant '{ProducerTenantId}' in microservice '{ProducerMicroserviceId}' on address '{Host}:{Port}'",
+                subscriptionId.ConsumerTenantId,
+                subscriptionId.ProducerTenantId,
+                subscriptionId.ProducerMicroserviceId,
+                microserviceAddress.Host,
+                microserviceAddress.Port);
 
             var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, CancellationToken.None).ConfigureAwait(false);
             var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
