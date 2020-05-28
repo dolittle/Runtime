@@ -18,7 +18,7 @@ The tenants in the system. (mounted from head?)
 ```
 
 ### metrics.json
-This port is opened for requesting the runtime for metrics.
+The port to expose the metrics server on.
 ```json
 {
     "Port": <port>
@@ -60,7 +60,7 @@ Ports for the public and private which to the head can connect.
 ```
 
 ### event-horizon-consents.json
-Each tenant has a set of consents 
+Each tenant can give consents to a set of entities given by their id's.
 ```json
 {
     <tenant-id>: [
@@ -99,7 +99,7 @@ The tenants in the head.
 ```
 
 ### event-horizons.json
-Defines the EventHorizons the head uses.
+Defines a event horizon subscription for a tenant.
 ```json
 {
     <tenant-id>: [
@@ -128,22 +128,3 @@ Ports which to connect to in the runtime.
     }
 }
 ```
-
-{{% alert info %}}
-We have a [Github repository](https://github.com/dolittle-tools/) where our public tools will be kept. We welcome anyone to have a look at the source code and we'd be more than happy for any pull request, issues and feature request!
-{{% /alert %}}
-
-## Tools
-* [**DotNET Build Tool**](https://dolittle.io/dotnet-sdk/tooling/)
-* [**CLI Tool**](https://dolittle.io/cli/) 
-
-## Languages we currently support
-{{% notice note %}}
-Note that these are the languages that we currently are supporting on our platform and will eventually have tools for. The tools will be extended to support more languages when new SDKs for other programming languages are developed.
-{{% /notice %}}
-
-* Core (Backend)
-    * C#
-
-* Frontend
-    * Javascript 201x
