@@ -60,7 +60,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug("{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}'",
+            _logger.Debug(
+                "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}'",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
                 partitionId);
@@ -74,7 +75,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug("{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
+            _logger.Debug(
+                "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
                 partitionId.Value,
@@ -89,13 +91,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug("{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
+            _logger.Debug(
+                "{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
                 result.Succeeded);
             if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug("{LogMessagePrefix} writing event '{EventTypeId}' to stream '{TargetStream}' in partition '{PartitionId}'",
+                _logger.Debug(
+                    "{LogMessagePrefix} writing event '{EventTypeId}' to stream '{TargetStream}' in partition '{PartitionId}'",
                     _logMessagePrefix,
                     @event.Type.Id.Value,
                     Definition.TargetStream,

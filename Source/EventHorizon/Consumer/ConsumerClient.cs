@@ -180,7 +180,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var subscriptionResponse = responseStream.Current.SubscriptionResponse;
             if (subscriptionResponse.Failure != null)
             {
-                _logger.Warning("Failed subscribing with subscription {SubscriptionId}. {Reason}",
+                _logger.Warning(
+                    "Failed subscribing with subscription {SubscriptionId}. {Reason}",
                     subscriptionId,
                     subscriptionResponse.Failure.Reason);
                 return new FailedSubscriptionResponse(subscriptionResponse.Failure);

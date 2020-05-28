@@ -50,11 +50,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc />
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug("{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}'",
+            _logger.Debug(
+                "{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}'",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
-                partitionId.Value
-            );
+                partitionId.Value);
 
             var request = new HandleEventRequest
                 {
@@ -66,7 +66,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc/>
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug("{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
+            _logger.Debug(
+                "{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
                 partitionId.Value,

@@ -58,7 +58,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug("Filter event that occurred @ {Occurred} again for the {RetryCount}. time because: {FailureReason}",
+            _logger.Debug(
+                "Filter event that occurred @ {Occurred} again for the {RetryCount}. time because: {FailureReason}",
                 @event.Occurred,
                 retryCount,
                 failureReason);
