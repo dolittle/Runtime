@@ -74,7 +74,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (implementations.Count() > 1)
                 {
-                    _logger.Warning($"There are multiple validators that can validate filter defintion of type {filterDefinitionType.FullName}:\n{string.Join("\n", implementations.Select(_ => _.FullName))}\nUsing the first validator.");
+                    _logger.Warning("There are multiple validators that can validate filter defintion of type {FullName}:\n{Implementations}\nUsing the first validator.",
+                        filterDefinitionType.FullName,
+                        string.Join("\n", implementations.Select(_ => _.FullName)));
                 }
 
                 validatorType = implementations.First();

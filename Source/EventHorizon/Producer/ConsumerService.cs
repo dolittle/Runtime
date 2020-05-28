@@ -186,20 +186,15 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 _logger.Trace("Checking whether Producer Tenant {ProducerTenant} exists", producerTenant);
                 if (!ProducerTenantExists(producerTenant))
                 {
-                    _logger.Debug("There are no consents configured for Producer Tenant {ProducerTenant}", producerTenant);
+                    var message = $"There are no consents configured for Producer Tenant {producerTenant}";
+                    _logger.Debug(message);
                     return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message,  } };
                 }
 
                 if (!TryGetConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition, out var consentId))
                 {
-                    _logger.Debug(
-                        "There are no consent configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}",
-                        partition,
-                        publicStream,
-                        producerTenant,
-                        consumerTenant,
-                        consumerMicroservice
-                        );
+                    var message = $"There are no consent configured for Partition {partition} in Public Stream {publicStream} in Tenant {producerTenant} to Consumer Tenant {consumerTenant} in Microservice {consumerMicroservice}";
+                    _logger.Debug(message);
                     return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message } };
                 }
 

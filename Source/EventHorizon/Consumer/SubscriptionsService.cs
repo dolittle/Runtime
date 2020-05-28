@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     subscriptionRequest.StreamId.To<StreamId>(),
                     subscriptionRequest.PartitionId.To<PartitionId>());
 
-                _logger.Information($"Incoming event horizon subscription request from head to runtime. {subscriptionId}");
+                _logger.Information("Incoming event horizon subscription request from head to runtime. {SubscriptionId}", subscriptionId);
                 var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscriptionId).ConfigureAwait(false);
 
                 return subscriptionResponse switch
@@ -76,7 +76,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(ex, $"An error occurred while trying to Subscribe SubscriptionRequest: {subscriptionRequest}");
+                    _logger.Warning(ex, "An error occurred while trying to Subscribe SubscriptionRequest: {Request}", subscriptionRequest);
                 }
 
                 return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };
