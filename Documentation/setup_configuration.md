@@ -5,25 +5,64 @@ keywords: setup, configuration, json, resources, tenancy
 author: joel
 ---
 
-To run a runtime with a had you have to provide some configuration files to both the runtime and SDK. These files are in JSON format.
+To run a runtime with a had you have to provide some JSON configuration files to both the runtime and the head.
+If you are using our Dolittle Platform some of these configurations will be provided for you, others you have to manually set yourself.
 
-## Runtime
+| Configuration               | Head | Runtime | Required | Provided by Dolittle Platform
+|-----------------------------|------|---------|----------|----------|
+| event-horizons.json         | ✔️    |         |          |          |
+| clients.json                | ✔️    |         |          | ✔️        |
+| tenants.json                | ✔️    | ✔️       | ✔️        | ✔️        |
+| resources.json              | ✔️    | ✔️       | ✔️        | ✔️        |
+| microsevices.json           |      | ✔️       | ✔️        | ✔️        |
+| endpoints.json              |      | ✔️       |          | ✔️        |
+| metrics.json                |      | ✔️       |          | ✔️        |
+| event-horizon-consents.json |      | ✔️       |          | ✔️        |
+
+
+
+## Head
+
+### event-horizons.json
+Defines a event horizon subscription for a tenant.
+```json
+{
+    <tenant-id>: [
+        {
+            "scope": <scope-id>,
+            "microservice": <microservice-id>,
+            "tenant": <tenant-id>,
+            "stream": <stream-id>,
+            "partition": <parition-id>,
+        }
+    ]
+}
+```
+
+### clients.json
+Ports which to connect to in the runtime.
+```json
+{
+    "public": {
+        "host": <host>,
+        "port": <port>
+    },
+    "private": {
+        "host": <host>,
+        "port": <port>
+    }
+}
+```
 
 ### tenants.json
-The tenants in the system. (mounted from head?)
+The tenants in the head.
 ```json
 {
     <tenant-id>: {}
 }
 ```
 
-### metrics.json
-The port to expose the metrics server on.
-```json
-{
-    "Port": <port>
-}
-```
+## Runtime
 
 ### resources.json
 Configurations for the read models and event store.
@@ -45,6 +84,23 @@ Configurations for the read models and event store.
 }
 
 ```
+
+### tenants.json
+The tenants in the system.
+```json
+{
+    <tenant-id>: {}
+}
+```
+
+### metrics.json
+The port to expose the metrics server on.
+```json
+{
+    "Port": <port>
+}
+```
+
 
 ### endpoints.json
 Ports for the public and private which to the head can connect.
@@ -81,48 +137,6 @@ Defines the microservices configuration
 ```json
 {
     <microservice-id>: {
-        "host": <host>,
-        "port": <port>
-    }
-}
-```
-
-
-## Head
-
-### tenants.json
-The tenants in the head.
-```json
-{
-    <tenant-id>: {}
-}
-```
-
-### event-horizons.json
-Defines a event horizon subscription for a tenant.
-```json
-{
-    <tenant-id>: [
-        {
-            "scope": <scope-id>,
-            "microservice": <microservice-id>,
-            "tenant": <tenant-id>,
-            "stream": <stream-id>,
-            "partition": <parition-id>,
-        }
-    ]
-}
-```
-
-### clients.json
-Ports which to connect to in the runtime.
-```json
-{
-    "public": {
-        "host": <host>,
-        "port": <port>
-    },
-    "private": {
         "host": <host>,
         "port": <port>
     }
