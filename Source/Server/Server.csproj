@@ -13,7 +13,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.AspNetCore.Bootstrap" Version="$(AspNetCoreVersion)" />
         <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Configuration.Files" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="$(FundamentalsVersion)" />
