@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
                 {
-                    _logger.Trace("Filter definition type {FilterFullName} can be validated by validator type {ValidatorFullName}", filterDefinitionType.FullName, validatorType.FullName);
+                    _logger.Trace("Filter definition type {FilterType} can be validated by validator type {ValidatorType}", filterDefinitionType, validatorType);
                     _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
                 }
             });
