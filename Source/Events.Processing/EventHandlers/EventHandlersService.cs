@@ -254,6 +254,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
             catch (Exception ex)
             {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    _logger.Warning(
+                        ex,
+                        "Error occurred while trying to start Event Handler '{EventHandlerId}'",
+                        filterDefinition.TargetStream);
+                }
+
                 return ex;
             }
         }
@@ -277,6 +285,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 }
                 catch (Exception ex)
                 {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.Warning(
+                            ex,
+                            "Error occurred while trying to register filter stream processor for Event Handler '{EventHandlerId}'",
+                            eventHandlerId);
+                    }
+
                     return ex;
                 }
             }
@@ -300,6 +316,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 }
                 catch (Exception ex)
                 {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.Warning(
+                            ex,
+                            "Error occurred while trying to register event processor stream processor for Event Handler '{EventHandlerId}'",
+                            eventHandlerId);
+                    }
+
                     return ex;
                 }
             }
