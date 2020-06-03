@@ -105,7 +105,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger.Trace("Getting microservice address");
             if (!TryGetMicroserviceAddress(subscriptionId.ProducerMicroserviceId, out var microserviceAddress))
             {
-                var message = $"There is no microservice configuration for the producer microservice '{subscriptionId.ProducerMicroserviceId}'.";
+                var message = $"There is no microservice configuration for the producer microservice {subscriptionId.ProducerMicroserviceId}.";
                 _logger.Warning(message);
                 return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.MissingMicroserviceConfiguration, message));
             }
@@ -143,7 +143,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         async Task<AsyncServerStreamingCall<Contracts.SubscriptionMessage>> Subscribe(SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress)
         {
-            _logger.Debug($"Tenant '{subscriptionId.ConsumerTenantId}' is subscribing to events from tenant '{subscriptionId.ProducerTenantId}' in microservice '{subscriptionId.ProducerMicroserviceId}' on address '{microserviceAddress.Host}:{microserviceAddress.Port}'");
+            _logger.Debug(
+                "Tenant '{ConsumerTenantId}' is subscribing to events from tenant '{ProducerTenantId}' in microservice '{ProducerMicroserviceId}' on address '{Host}:{Port}'",
+                subscriptionId.ConsumerTenantId,
+                subscriptionId.ProducerTenantId,
+                subscriptionId.ProducerMicroserviceId,
+                microserviceAddress.Host,
+                microserviceAddress.Port);
 
             var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, CancellationToken.None).ConfigureAwait(false);
             var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
@@ -174,11 +180,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var subscriptionResponse = responseStream.Current.SubscriptionResponse;
             if (subscriptionResponse.Failure != null)
             {
-                _logger.Warning($"Failed subscribing with subscription {subscriptionId}. {subscriptionResponse.Failure.Reason}");
+                _logger.Warning(
+                    "Failed subscribing with subscription {SubscriptionId}. {Reason}",
+                    subscriptionId,
+                    subscriptionResponse.Failure.Reason);
                 return new FailedSubscriptionResponse(subscriptionResponse.Failure);
             }
 
-            _logger.Trace($"Subscription response for subscription {subscriptionId} was successful");
+            _logger.Trace("Subscription response for subscription {SubscriptionId} was successful", subscriptionId);
             return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.To<ConsentId>());
         }
 

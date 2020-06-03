@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             subscription = default;
             if (_subscriptions.ContainsKey(subscriptionId))
             {
-                _logger.Warning("Subscription: '{subscriptionId}' already registered", subscriptionId);
+                _logger.Warning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
                 return false;
             }
 
@@ -74,12 +74,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 cancellationToken);
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
             {
-                _logger.Warning("Subscription: '{subscriptionId}' already registered", subscriptionId);
+                _logger.Warning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
                 subscription = default;
                 return false;
             }
 
-            _logger.Trace("Subscription: '{subscriptionId}' registered", subscriptionId);
+            _logger.Trace("Subscription: '{SubscriptionId}' registered", subscriptionId);
             return true;
         }
 

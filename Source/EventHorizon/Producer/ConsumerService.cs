@@ -88,7 +88,14 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             var partition = subscription.PartitionId.To<PartitionId>();
             var streamPosition = subscription.StreamPosition;
 
-            _logger.Debug($"Incomming Event Horizon subscription from microservice '{consumerMicroservice}' and tenant '{consumerTenant}' to tenant '{producerTenant}' starting at position '{streamPosition}' in partition '{partition}' in stream '{publicStream}'");
+            _logger.Debug(
+                "Incomming Event Horizon subscription from microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' to tenant '{ProducerTenant}' starting at position '{StreamPosition}' in partition '{Partition}' in stream '{PublicStream}'",
+                consumerMicroservice,
+                consumerTenant,
+                producerTenant,
+                streamPosition,
+                partition,
+                publicStream);
             try
             {
                 var subscriptionResponse = CreateSubscriptionResponse(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition);
@@ -98,7 +105,14 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     return;
                 }
 
-                _logger.Information($"Microservice '{consumerMicroservice}' and tenant '{consumerTenant}' successfully subscribed to tenant '{producerTenant}' starting at position '{streamPosition}' in partition '{partition}' in stream '{publicStream}'");
+                _logger.Information(
+                    "Microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' successfully subscribed to tenant '{ProducerTenant}' starting at position '{StreamPosition}' in partition '{Partition}' in stream '{PublicStream}'",
+                    consumerMicroservice,
+                    consumerTenant,
+                    producerTenant,
+                    streamPosition,
+                    partition,
+                    publicStream);
 
                 _executionContextManager.CurrentFor(
                     _thisMicroservice,
@@ -211,8 +225,13 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
             if (consentsForSubscription.Length == 0)
             {
-                var message = $"There are no consent configured for partition '{partition}' in public stream '{publicStream}' in tenant '{producerTenant}' to consumer tenant '{consumerTenant}' in microservice '{consumerMicroservice}'";
-                _logger.Debug(message);
+                _logger.Debug(
+                    "There are no consent configured for partition '{Partition}' in public stream '{PublicStream}' in tenant '{ProducerTenant}' to consumer tenant '{ConsumerTenant}' in microservice '{ConsumerMicroservice}'",
+                    partition,
+                    publicStream,
+                    producerTenant,
+                    consumerTenant,
+                    consumerMicroservice);
                 return false;
             }
 
