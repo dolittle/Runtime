@@ -3,7 +3,9 @@ title: Providing Metrics
 description: How to provide metrics that gets exposed
 keywords: Metrics
 author: Dolittle
-weight: 1
+weight: 2
+aliases:
+    - /runtime/runtime/metrics/providing_metrics
 ---
 The type of metrics that are exposed is extensible. Any part of the runtime
 and extensions to the runtime can provide metrics that they independently

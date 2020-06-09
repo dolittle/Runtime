@@ -3,6 +3,8 @@ title: Querying for Data
 description: About Reading data
 keywords: read model, query, ddd, read, cqrs,  
 author: pavsaund
+aliases:
+    - /runtime/runtime/querying_for_data
 ---
 
 

@@ -3,6 +3,8 @@ title: Artifacts
 description: Introduction to Artifacts in dolittle
 keywords: artifact, migration, identity  
 author: smithmx
+aliases:
+    - /runtime/runtime/artifacts
 ---
 
 # Artifacts

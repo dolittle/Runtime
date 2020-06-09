@@ -60,3 +60,9 @@ Go to our [documentation site](http://www.dolittle.io) and learn more about the 
 Samples can also be found [here](https://github.com/Dolittle-Samples).
 You can find entropy projects [here](https://github.com/Dolittle-Entropy).
 
+# Issues and Contributing
+To learn how to contribute please read our [contributing](https://dolittle.io/contributing/) guide.
+
+File issues to our [Home](https://github.com/dolittle/Home/issues) repository.
+
+

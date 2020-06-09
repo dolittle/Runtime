@@ -3,6 +3,8 @@ title: Resource System
 description: About the resource system
 keywords: resources, system 
 author: woksin
+aliases:
+    - /runtime/runtime/resources/resources
 ---
 
 # Resource
