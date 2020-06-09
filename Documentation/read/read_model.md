@@ -3,6 +3,8 @@ title: Read Model
 description: About Read Models
 keywords: read model, ddd, read, 
 author: pavsaund, tomasekeli
+aliases:
+    - /runtime/runtime/read/read_model
 ---
 
 # Principle

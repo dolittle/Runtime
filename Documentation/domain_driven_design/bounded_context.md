@@ -3,6 +3,8 @@ title: Bounded Context
 description: Learn about Bounded Context
 keywords: Runtime, Overview, Bounded Context
 author: woksin
+aliases:
+    - /runtime/runtime/domain_driven_design/bounded_context
 ---
 
 ## DDD Bounded Context Definition

@@ -3,6 +3,8 @@ title: Event Store
 description: Introduction to the Event Store
 keywords: Overview, Events, Event Store, Event Sourcing
 author: smithmx
+aliases:
+    - /runtime/runtime/events/event_store
 ---
 
 # Event Store

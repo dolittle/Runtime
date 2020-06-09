@@ -342,6 +342,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
             catch (Exception ex)
             {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    _logger.Warning(
+                        ex,
+                        "Error occurred while trying to start Filter '{FilterId}'",
+                        filterDefinition.TargetStream);
+                }
+
                 return ex;
             }
         }
@@ -365,6 +373,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 }
                 catch (Exception ex)
                 {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.Warning(
+                            ex,
+                            "Error occurred while trying to register stream processor for Filter '{FilterId}'",
+                            filterDefinition.TargetStream);
+                    }
+
                     return ex;
                 }
             }
