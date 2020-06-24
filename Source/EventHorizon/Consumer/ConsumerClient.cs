@@ -160,7 +160,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 (response, context) => response.CallContext = context,
                 message => message.Ping,
                 (message, pong) => message.Pong = pong,
-                TimeSpan.FromSeconds(1));
+                TimeSpan.FromSeconds(7));
         }
 
         async Task<bool> Subscribe(
