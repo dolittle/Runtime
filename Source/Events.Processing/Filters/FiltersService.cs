@@ -89,7 +89,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _ => _.FilterResult,
                 _ => _.CallContext,
                 (request, context) => request.CallContext = context,
-                _ => _.CallContext);
+                _ => _.CallContext,
+                (message, ping) => message.Ping = ping,
+                message => message.Pong);
 
             if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
 
@@ -131,7 +133,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _ => _.FilterResult,
                 _ => _.CallContext,
                 (request, context) => request.CallContext = context,
-                _ => _.CallContext);
+                _ => _.CallContext,
+                (message, ping) => message.Ping = ping,
+                message => message.Pong);
 
             if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
 
@@ -174,7 +178,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _ => _.FilterResult,
                 _ => _.CallContext,
                 (request, context) => request.CallContext = context,
-                _ => _.CallContext);
+                _ => _.CallContext,
+                (message, ping) => message.Ping = ping,
+                message => message.Pong);
 
             if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
 
