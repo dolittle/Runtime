@@ -12,6 +12,7 @@ using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Resilience;
+using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
@@ -39,6 +40,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IExecutionContextManager _executionContextManager;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly CancellationToken _cancellationToken;
+        readonly IReverseCallClients _reverseCallClients;
         readonly ILogger _logger;
         bool _disposed;
 
@@ -53,6 +55,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
         /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
+        /// <param name="reverseCallClients"><see cref="IReverseCallClients"/>.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
             IClientManager clientManager,
@@ -63,6 +66,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IAsyncPolicyFor<ConsumerClient> policy,
             IAsyncPolicyFor<EventProcessor> eventProcessorPolicy,
             IExecutionContextManager executionContextManager,
+            IReverseCallClients reverseCallClients,
             ILogger logger)
         {
             _clientManager = clientManager;
@@ -76,6 +80,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger = logger;
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;
+            _reverseCallClients = reverseCallClients;
         }
 
         /// <summary>
@@ -154,21 +159,39 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, CancellationToken.None).ConfigureAwait(false);
             var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
 
-            return _clientManager
-                .Get<Contracts.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
-                .Subscribe(
-                    new Contracts.ConsumerSubscription
-                    {
-                        TenantId = subscriptionId.ProducerTenantId.ToProtobuf(),
-                        StreamPosition = publicEventsPosition.Value,
-                        StreamId = subscriptionId.StreamId.ToProtobuf(),
-                        PartitionId = subscriptionId.PartitionId.ToProtobuf(),
-                        CallContext = new Dolittle.Services.Contracts.CallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() }
-                    }, cancellationToken: _cancellationToken);
+            // use the reersecallcleint here
+            var client = _clientManager.Get<Contracts.Consumer.ConsumerClient>(
+                microserviceAddress.Host,
+                microserviceAddress.Port);
+            var reverseClient =_reverseCallClients.GetFor<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>(
+                () => client.Subscribe(),
+                (message, arguments) => message.SubscriptionRequest = arguments,
+                message => message.SubscriptionResponse,
+                message => message.Request,
+                (message, response) => message.Response = response,
+                (arguments, context) => arguments.CallContext = context,
+                request => request.CallContext,
+                (response, context) => response.CallContext = context,
+                message => message.Ping,
+                (message, pong) => message.Pong = pong,
+                // 1 second sounds fine for now
+                TimeSpan.FromSeconds(1)
+            );
+            await reverseClient.Connect(
+                new ConsumerSubscriptionRequest
+                {
+                    TenantId = subscriptionId.ProducerTenantId.ToProtobuf(),
+                    StreamPosition = publicEventsPosition.Value,
+                    StreamId = subscriptionId.StreamId.ToProtobuf(),
+                    PartitionId = subscriptionId.PartitionId.ToProtobuf(),
+                },
+                _cancellationToken
+            );
         }
 
         async Task<SubscriptionResponse> HandleSubscriptionResponse(IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream, SubscriptionId subscriptionId)
         {
+            // also handle pong
             if (!await responseStream.MoveNext(_cancellationToken).ConfigureAwait(false)
                 || responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.SubscriptionResponse)
             {
@@ -272,6 +295,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             while (!cancellationToken.IsCancellationRequested
                 && await responseStream.MoveNext(cancellationToken).ConfigureAwait(false))
             {
+                // handle pongs here?
                 if (responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.Event)
                 {
                     _logger.Warning("Expected the response to contain an event in subscription {subscription}. Getting next response", subscriptionId);
