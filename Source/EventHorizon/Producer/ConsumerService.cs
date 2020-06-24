@@ -23,7 +23,7 @@ using static Dolittle.Runtime.EventHorizon.Contracts.Consumer;
 namespace Dolittle.Runtime.EventHorizon.Producer
 {
     /// <summary>
-    /// Represents the implementation of <see creF="FiltersBase"/>.
+    /// Represents the implementation of <see cref="ConsumerBase"/>.
     /// </summary>
     [Singleton]
     public class ConsumerService : ConsumerBase, IDisposable
