@@ -12,13 +12,13 @@ using Dolittle.Lifecycle;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
 using Dolittle.Resilience;
+using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Services.Clients;
-using Grpc.Core;
 using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -39,6 +39,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IExecutionContextManager _executionContextManager;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly CancellationToken _cancellationToken;
+        readonly IReverseCallClients _reverseCallClients;
         readonly ILogger _logger;
         bool _disposed;
 
@@ -53,6 +54,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
         /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
+        /// <param name="reverseCallClients"><see cref="IReverseCallClients"/>.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
             IClientManager clientManager,
@@ -63,6 +65,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IAsyncPolicyFor<ConsumerClient> policy,
             IAsyncPolicyFor<EventProcessor> eventProcessorPolicy,
             IExecutionContextManager executionContextManager,
+            IReverseCallClients reverseCallClients,
             ILogger logger)
         {
             _clientManager = clientManager;
@@ -76,6 +79,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger = logger;
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;
+            _reverseCallClients = reverseCallClients;
         }
 
         /// <summary>
@@ -113,13 +117,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             return await _policy.Execute(
                 async _ =>
                 {
-                    var call = await Subscribe(subscriptionId, microserviceAddress).ConfigureAwait(false);
-
-                    var response = await HandleSubscriptionResponse(
-                        call.ResponseStream,
-                        subscriptionId).ConfigureAwait(false);
-
-                    if (response.Success) StartProcessingEventHorizon(response.ConsentId, subscriptionId, microserviceAddress, call.ResponseStream);
+                    var client = CreateClient(microserviceAddress, _cancellationToken);
+                    var receivedResponse = await Subscribe(client, subscriptionId, microserviceAddress, _cancellationToken).ConfigureAwait(false);
+                    var response = HandleSubscriptionResponse(receivedResponse, client.ConnectResponse, subscriptionId);
+                    if (response.Success) StartProcessingEventHorizon(response.ConsentId, subscriptionId, microserviceAddress, client);
                     return response;
                 }, _cancellationToken).ConfigureAwait(false);
         }
@@ -141,7 +142,32 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _disposed = true;
         }
 
-        async Task<AsyncServerStreamingCall<Contracts.SubscriptionMessage>> Subscribe(SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress)
+        IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> CreateClient(
+            MicroserviceAddress microserviceAddress,
+            CancellationToken cancellationToken)
+        {
+            var client = _clientManager.Get<Contracts.Consumer.ConsumerClient>(
+                microserviceAddress.Host,
+                microserviceAddress.Port);
+            return _reverseCallClients.GetFor<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>(
+                () => client.Subscribe(cancellationToken: cancellationToken),
+                (message, arguments) => message.SubscriptionRequest = arguments,
+                message => message.SubscriptionResponse,
+                message => message.Request,
+                (message, response) => message.Response = response,
+                (arguments, context) => arguments.CallContext = context,
+                request => request.CallContext,
+                (response, context) => response.CallContext = context,
+                message => message.Ping,
+                (message, pong) => message.Pong = pong,
+                TimeSpan.FromSeconds(7));
+        }
+
+        async Task<bool> Subscribe(
+            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,
+            SubscriptionId subscriptionId,
+            MicroserviceAddress microserviceAddress,
+            CancellationToken cancellationToken)
         {
             _logger.Debug(
                 "Tenant '{ConsumerTenantId}' is subscribing to events from tenant '{ProducerTenantId}' in microservice '{ProducerMicroserviceId}' on address '{Host}:{Port}'",
@@ -150,34 +176,27 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 subscriptionId.ProducerMicroserviceId,
                 microserviceAddress.Host,
                 microserviceAddress.Port);
+            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, cancellationToken).ConfigureAwait(false);
 
-            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, CancellationToken.None).ConfigureAwait(false);
             var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
-
-            return _clientManager
-                .Get<Contracts.Consumer.ConsumerClient>(microserviceAddress.Host, microserviceAddress.Port)
-                .Subscribe(
-                    new Contracts.ConsumerSubscription
-                    {
-                        TenantId = subscriptionId.ProducerTenantId.ToProtobuf(),
-                        StreamPosition = publicEventsPosition.Value,
-                        StreamId = subscriptionId.StreamId.ToProtobuf(),
-                        PartitionId = subscriptionId.PartitionId.ToProtobuf(),
-                        CallContext = new Dolittle.Services.Contracts.CallRequestContext { ExecutionContext = _executionContextManager.Current.ToProtobuf() }
-                    }, cancellationToken: _cancellationToken);
+            return await reverseCallClient.Connect(
+                new ConsumerSubscriptionRequest
+                {
+                    PartitionId = subscriptionId.PartitionId.ToProtobuf(),
+                    StreamId = subscriptionId.StreamId.ToProtobuf(),
+                    StreamPosition = publicEventsPosition.Value,
+                    TenantId = subscriptionId.ProducerTenantId.ToProtobuf()
+                }, cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<SubscriptionResponse> HandleSubscriptionResponse(IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream, SubscriptionId subscriptionId)
+        SubscriptionResponse HandleSubscriptionResponse(bool receivedResponse, Contracts.SubscriptionResponse subscriptionResponse, SubscriptionId subscriptionId)
         {
-            if (!await responseStream.MoveNext(_cancellationToken).ConfigureAwait(false)
-                || responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.SubscriptionResponse)
+            if (!receivedResponse)
             {
-                var message = $"Did not receive subscription response when subscribing with subscription {subscriptionId}";
-                _logger.Warning(message);
-                return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.DidNotReceiveSubscriptionResponse, message));
+                _logger.Warning("Reverse call client did not receive a subscription response while subscribing {Subscription}", subscriptionId);
+                return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.DidNotReceiveSubscriptionResponse, "Reverse call client did not receive a subscription response"));
             }
 
-            var subscriptionResponse = responseStream.Current.SubscriptionResponse;
             if (subscriptionResponse.Failure != null)
             {
                 _logger.Warning(
@@ -191,13 +210,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.To<ConsentId>());
         }
 
-        void StartProcessingEventHorizon(ConsentId consentId, SubscriptionId subscriptionId, MicroserviceAddress microserviceAddress, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
+        void StartProcessingEventHorizon(
+            ConsentId consentId,
+            SubscriptionId subscriptionId,
+            MicroserviceAddress microserviceAddress,
+            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
         {
             Task.Run(async () =>
                 {
                     try
                     {
-                        await ReadEventsFromEventHorizon(consentId, subscriptionId, responseStream).ConfigureAwait(false);
+                        await ReadEventsFromEventHorizon(consentId, subscriptionId, reverseCallClient).ConfigureAwait(false);
                         throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                     }
                     catch (Exception ex)
@@ -206,25 +229,28 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         await _policy.Execute(
                             async _ =>
                             {
-                                var call = await Subscribe(subscriptionId, microserviceAddress).ConfigureAwait(false);
-                                var response = await HandleSubscriptionResponse(call.ResponseStream, subscriptionId).ConfigureAwait(false);
+                                reverseCallClient = CreateClient(microserviceAddress, _cancellationToken);
+                                var receivedResponse = await Subscribe(reverseCallClient, subscriptionId, microserviceAddress, _cancellationToken).ConfigureAwait(false);
+                                var response = HandleSubscriptionResponse(receivedResponse, reverseCallClient.ConnectResponse, subscriptionId);
                                 if (!response.Success) throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
-                                await ReadEventsFromEventHorizon(response.ConsentId, subscriptionId, call.ResponseStream).ConfigureAwait(false);
+
+                                await ReadEventsFromEventHorizon(response.ConsentId, subscriptionId, reverseCallClient).ConfigureAwait(false);
                                 throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
                             }, _cancellationToken).ConfigureAwait(false);
                     }
                 });
         }
 
-        async Task ReadEventsFromEventHorizon(ConsentId consentId, SubscriptionId subscriptionId, IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream)
-        {
+        async Task ReadEventsFromEventHorizon(
+            ConsentId consentId,
+            SubscriptionId subscriptionId,
+            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
+            {
             _logger.Information("Successfully connected event horizon with {subscriptionId}. Waiting for events to process", subscriptionId);
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();
             var eventsFetcher = new EventsFromEventHorizonFetcher(queue);
 
-            using var internalCancellationSource = new CancellationTokenSource();
-            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(internalCancellationSource.Token, _cancellationToken);
-            var cancellationToken = linkedTokenSource.Token;
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken);
             var tasks = new List<Task>();
             try
             {
@@ -233,52 +259,47 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     subscriptionId,
                     new EventProcessor(consentId, subscriptionId, _eventHorizonEventsWriter, _eventProcessorPolicy, _logger),
                     eventsFetcher,
-                    cancellationToken,
+                    linkedTokenSource.Token,
                     out var outputtedStreamProcessor);
                 using var streamProcessor = outputtedStreamProcessor;
                 await streamProcessor.Initialize().ConfigureAwait(false);
 
                 tasks.Add(Task.Run(async () =>
                     {
-                        await HandleEventHorizonResponses(subscriptionId, responseStream, queue, cancellationToken).ConfigureAwait(false);
-                        internalCancellationSource.Cancel();
+                        await reverseCallClient.Handle(
+                            (request, cancellationToken) => HandleConsumerRequest(subscriptionId, queue, request, cancellationToken),
+                            linkedTokenSource.Token).ConfigureAwait(false);
+                        linkedTokenSource.Cancel();
                     }));
                 tasks.Add(streamProcessor.Start());
             }
             catch (Exception ex)
             {
-                internalCancellationSource.Cancel();
+                linkedTokenSource.Cancel();
                 _logger.Warning(ex, "Error occurred while initializing Subscription: {subscriptionId}", subscriptionId);
                 return;
             }
 
             var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
-            if (!internalCancellationSource.IsCancellationRequested) internalCancellationSource.Cancel();
+            if (!linkedTokenSource.IsCancellationRequested) linkedTokenSource.Cancel();
             if (TryGetException(tasks, out var exception))
             {
-                internalCancellationSource.Cancel();
+                linkedTokenSource.Cancel();
                 _logger.Warning(exception, "Error occurred while processing Subscription: {subscriptionId}", subscriptionId);
             }
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
         }
 
-        async Task HandleEventHorizonResponses(
+        async Task<ConsumerResponse> HandleConsumerRequest(
             SubscriptionId subscriptionId,
-            IAsyncStreamReader<Contracts.SubscriptionMessage> responseStream,
             AsyncProducerConsumerQueue<StreamEvent> queue,
+            ConsumerRequest request,
             CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested
-                && await responseStream.MoveNext(cancellationToken).ConfigureAwait(false))
+            try
             {
-                if (responseStream.Current.MessageCase != Contracts.SubscriptionMessage.MessageOneofCase.Event)
-                {
-                    _logger.Warning("Expected the response to contain an event in subscription {subscription}. Getting next response", subscriptionId);
-                    continue;
-                }
-
-                var eventHorizonEvent = responseStream.Current.Event;
+                var eventHorizonEvent = request.Event;
                 await queue.EnqueueAsync(
                     new StreamEvent(
                         eventHorizonEvent.Event.ToCommittedEvent(),
@@ -287,6 +308,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         Guid.Empty,
                         false),
                     cancellationToken).ConfigureAwait(false);
+                return new ConsumerResponse();
+            }
+            catch (Exception ex)
+            {
+                _logger.Warning(ex, "An error occurred while handling event horizon event coming from subscription {Subscription}", subscriptionId);
+                return new ConsumerResponse
+                    {
+                        Failure = new Failure(FailureId.Other, $"An error occurred while handling event horizon event coming from subscription {subscriptionId}. {ex.Message}")
+                    };
             }
         }
 

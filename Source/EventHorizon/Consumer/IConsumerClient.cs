@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
-    /// Defines a system for handling inncomming public events from other microservices.
+    /// Defines a system for handling incoming public events from other microservices.
     /// </summary>
     public interface IConsumerClient : IDisposable
     {

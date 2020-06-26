@@ -14,5 +14,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// Gets the <see cref="FailureId" /> that represents the 'MissingConsent' failure type.
         /// </summary>
         public static FailureId MissingConsent => FailureId.Create("be1ba4e6-81e3-49c4-bec2-6c7e262bfb77");
+
+        /// <summary>
+        /// Gets the <see cref="FailureId" /> that represents the 'MissingSubscriptionArguments' failure type.
+        /// </summary>
+        public static FailureId MissingSubscriptionArguments => FailureId.Create("3f88dfb6-93d6-40d3-9d28-8be149f9e02d");
     }
 }

@@ -33,6 +33,15 @@ jobs:
       uses: dolittle/establish-context-action@v2
       with:
         prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
+    - name: Build Docker image
+      uses: docker/build-push-action@v1
+      if: ${{ env.DOCKER_HUB_REPO != '' }}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.DOCKER_HUB_REPO }}
+        tag_with_sha: true
+        push: false
 
   release:
     name: Deploy

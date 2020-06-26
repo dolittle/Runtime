@@ -85,7 +85,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 _ => _.HandleResult,
                 _ => _.CallContext,
                 (request, context) => request.CallContext = context,
-                _ => _.CallContext);
+                _ => _.CallContext,
+                (message, ping) => message.Ping = ping,
+                message => message.Pong);
             if (!await dispatcher.ReceiveArguments(context.CancellationToken).ConfigureAwait(false))
             {
                 const string message = "Event Handlers connection arguments were not received";
