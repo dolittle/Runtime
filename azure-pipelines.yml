@@ -10,8 +10,3 @@ resources:
 
 jobs:
 - template: Source/DotNet/pipeline.yml@templates
-  parameters:
-    cascades:
-      - 'dolittle-runtime/DotNET.SDK'      
-      - 'dolittle-runtime/Runtime.Events.MongoDB'
-      - 'dolittle-extensions/ReadModels.MongoDB'

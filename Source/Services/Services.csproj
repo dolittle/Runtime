@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Services</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Management/Management.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+  </ItemGroup>
+</Project>

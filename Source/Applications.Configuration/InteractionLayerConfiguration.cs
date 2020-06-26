@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Applications.Configuration
+namespace Dolittle.ApplicationModel.Configuration
 {
     /// <summary>
-    /// Represents the configuration for an interaction layer of the <see cref="BoundedContext"/>.
+    /// Represents the configuration for an interaction layer of the <see cref="Microservice"/>.
     /// </summary>
     public class InteractionLayerConfiguration
     {

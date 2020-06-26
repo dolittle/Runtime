@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Dolittle.ApplicationModel" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.ResourceTypes" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="Dolittle.Tenancy" Version="$(FundamentalsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Async\Async.csproj" />
+    <ProjectReference Include="..\Services\Services.csproj" />
+    <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
+  </ItemGroup>
+
+</Project>

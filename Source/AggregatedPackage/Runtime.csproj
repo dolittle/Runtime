@@ -6,7 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../**/*.csproj" Exclude="../AggregatedPackage/Runtime.csproj;../Build/Build.csproj" />
+        <ProjectReference Include="../**/*.csproj" Exclude="../AggregatedPackage/Runtime.csproj;../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj" />
     </ItemGroup>
 </Project>
 

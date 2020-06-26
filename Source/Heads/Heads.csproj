@@ -4,10 +4,16 @@
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Heads</AssemblyName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Metrics/Metrics.csproj"/>
+    <ProjectReference Include="../Services/Services.csproj"/>
+  </ItemGroup>
  
   <ItemGroup>
-    <PackageReference Include="Dolittle.Services" Version="4.*"/>
-    <PackageReference Include="Dolittle.Protobuf" Version="4.*"/>
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="4.*"/>    
+    <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)"/>
+    <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)"/>
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="system.reactive" Version="4.3.2" />
   </ItemGroup>
 </Project>

@@ -1,0 +1,10 @@
+**/bin
+**/obj
+Schemas
+Samples
+Packages
+Documentation
+Build
+Artifacts
+.vscode
+**/node_modules

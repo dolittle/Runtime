@@ -25,14 +25,14 @@ namespace Dolittle.Runtime.Heads
         /// <param name="disconnected">The <see cref="HeadDisconnected"/> callback.</param>
         public static void OnDisconnected(this ServerCallContext serverCallContext, HeadDisconnected disconnected)
         {
-            var clientIdEntry = serverCallContext.RequestHeaders.SingleOrDefault(_ => _.Key.Equals("clientid", StringComparison.InvariantCultureIgnoreCase));
-            if (clientIdEntry != null)
+            var headIdEntry = serverCallContext.RequestHeaders.SingleOrDefault(_ => _.Key.Equals($"headid{Metadata.BinaryHeaderSuffix}", StringComparison.InvariantCultureIgnoreCase));
+            if (headIdEntry != null)
             {
-                var clientId = (HeadId)Guid.Parse(clientIdEntry.Value);
-                var client = ConnectedHeads.GetById(clientId);
-                if (client != null)
+                var headId = Guid.Parse(headIdEntry.Value);
+                var head = ConnectedHeads.GetById(headId);
+                if (head != null)
                 {
-                    client.Disconnected += disconnected;
+                    head.Disconnected += disconnected;
                 }
             }
         }
