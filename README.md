@@ -2,6 +2,8 @@
 
 ![CI/CD](https://github.com/dolittle/Runtime/workflows/.NET%20Docker%20Image%20CI/CD/badge.svg)
 
+[![codecov](https://codecov.io/gh/dolittle/runtime/branch/master/graph/badge.svg)](https://codecov.io/gh/dolittle/runtime)
+
 ## Cloning
 
 This repository has sub modules, clone it with:
