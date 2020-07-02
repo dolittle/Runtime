@@ -78,6 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <returns>A <see cref="Task" />that represents the asynchronous operation.</returns>
         public async Task Initialize()
         {
+            _logger.Debug("Initializing StreamProcessor with Id: {StreamProcessorId}", _identifier);
             _externalCancellationToken.ThrowIfCancellationRequested();
             if (_initialized) throw new StreamProcessorAlreadyInitialized(_identifier);
             await _onAllTenants.PerformAsync(async tenant =>
@@ -99,6 +100,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task Start()
         {
+            _logger.Debug("Starting StreamProcessor with Id: {StreamProcessorId}", _identifier);
             if (!_initialized) throw new StreamProcessorNotInitialized(_identifier);
             if (_started) throw new StreamProcessorAlreadyProcessingStream(_identifier);
             _started = true;
