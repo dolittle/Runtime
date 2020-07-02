@@ -102,13 +102,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             var sourceStream = StreamId.EventLog;
             var eventHandlerId = arguments.EventHandlerId.To<EventProcessorId>();
+            _logger.Debug("Connecting Event Handler '{EventHandlerId}'", eventHandlerId);
             StreamId targetStream = eventHandlerId.Value;
             var scopeId = arguments.ScopeId.To<ScopeId>();
             var types = arguments.Types_.Select(_ => _.Id.To<ArtifactId>());
             var partitioned = arguments.Partitioned;
             if (targetStream.IsNonWriteable)
             {
-                _logger.Warning("Cannot register Event Handler: '{eventHandlerId}' because it is an invalid Stream Id", eventHandlerId);
+                _logger.Warning("Cannot register Event Handler: '{EventHandlerId}' because it is an invalid Stream Id", eventHandlerId);
                 var failure = new Failure(
                     EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
                     $"Cannot register Event Handler: '{eventHandlerId}' because it is an invalid Stream Id");
@@ -182,8 +183,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             using var eventProcessorStreamProcessor = tryRegisterEventProcessorStreamProcessor.Result;
 
-            using var internalCancellationTokenSource = new CancellationTokenSource();
-            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(internalCancellationTokenSource.Token, context.CancellationToken);
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken);
             var cancellationToken = linkedTokenSource.Token;
 
             var tryStartEventHandler = await TryStartEventHandler(
@@ -196,37 +196,44 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 cancellationToken).ConfigureAwait(false);
             if (!tryStartEventHandler.Success)
             {
-                internalCancellationTokenSource.Cancel();
+                linkedTokenSource.Cancel();
                 if (tryStartEventHandler.HasException)
                 {
                     var exception = tryStartEventHandler.Exception;
-                    _logger.Debug(exception, "An error occurred while starting Event Handler: '{eventHandlerId}' in Scope: {scopeId}", eventHandlerId, scopeId);
+                    _logger.Debug(exception, "An error occurred while starting Event Handler: '{EventHandlerId}' in Scope: {ScopeId}", eventHandlerId, scopeId);
                     ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
                 }
                 else
                 {
-                    _logger.Debug("Could not start Event Handler: '{eventHandlerId}' in Scope: {scopeId}", eventHandlerId, scopeId);
+                    _logger.Debug("Could not start Event Handler: '{EventHandlerId}' in Scope: {ScopeId}", eventHandlerId, scopeId);
                     return;
                 }
             }
 
             var tasks = tryStartEventHandler.Result;
             var anyTask = await Task.WhenAny(tasks).ConfigureAwait(false);
+
             if (TryGetException(tasks, out var ex))
             {
-                internalCancellationTokenSource.Cancel();
-                _logger.Warning(ex, "An error occurred while processing Event Handler: '{eventHandlerId}' in Scope: '{scopeId}'", eventHandlerId, scopeId);
+                _logger.Warning(ex, "An error occurred while processing Event Handler: '{EventHandlerId}' in Scope: '{ScopeId}'", eventHandlerId, scopeId);
+                linkedTokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
                 ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
             }
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            if (!context.CancellationToken.IsCancellationRequested)
+            else
             {
-                _logger.Warning(ex, "Event Handler: '{eventHandler}' in Scope: '{scopeId}' failed", eventHandlerId, scopeId);
+                linkedTokenSource.Cancel();
+                await Task.WhenAll(tasks).ConfigureAwait(false);
             }
 
-            _logger.Debug("Event Handler: '{eventHandler}' in Scope: '{scopeId}' stopped", eventHandlerId, scopeId);
+            if (!context.CancellationToken.IsCancellationRequested)
+            {
+                _logger.Warning("Event Handler: '{EventHandler}' in Scope: '{ScopeId}' failed", eventHandlerId, scopeId);
+            }
+            else
+            {
+                _logger.Debug("Event Handler: '{EventHandler}' in Scope: '{ScopeId}' stopped because client disconnected", eventHandlerId, scopeId);
+            }
         }
 
         async Task<Try<IEnumerable<Task>>> TryStartEventHandler<TClientMessage, TConnectRequest, TResponse, TFilterDefinition>(
@@ -244,6 +251,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             try
             {
+                _logger.Debug("Starting Event Handler '{EventHandlerId}'", filterDefinition.TargetStream);
                 var runningDispatcher = dispatcher.Accept(new EventHandlerRegistrationResponse(), cancellationToken);
                 await filterStreamProcessor.Initialize().ConfigureAwait(false);
                 await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
