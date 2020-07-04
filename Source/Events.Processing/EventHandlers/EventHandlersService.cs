@@ -211,28 +211,21 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
 
             var tasks = tryStartEventHandler.Result;
-            var anyTask = await Task.WhenAny(tasks).ConfigureAwait(false);
-
-            if (TryGetException(tasks, out var ex))
+            try
             {
-                _logger.Warning(ex, "An error occurred while processing Event Handler: '{EventHandlerId}' in Scope: '{ScopeId}'", eventHandlerId, scopeId);
+                await Task.WhenAny(tasks).ConfigureAwait(false);
+
+                if (TryGetException(tasks, out var ex))
+                {
+                    _logger.Warning(ex, "An error occurred while running Event Handler: '{EventHandlerId}' in Scope: '{ScopeId}'", eventHandlerId, scopeId);
+                    ExceptionDispatchInfo.Capture(ex).Throw();
+                }
+            }
+            finally
+            {
                 linkedTokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                ExceptionDispatchInfo.Capture(ex).Throw();
-            }
-            else
-            {
-                linkedTokenSource.Cancel();
-                await Task.WhenAll(tasks).ConfigureAwait(false);
-            }
-
-            if (!context.CancellationToken.IsCancellationRequested)
-            {
-                _logger.Warning("Event Handler: '{EventHandler}' in Scope: '{ScopeId}' failed", eventHandlerId, scopeId);
-            }
-            else
-            {
-                _logger.Debug("Event Handler: '{EventHandler}' in Scope: '{ScopeId}' stopped because client disconnected", eventHandlerId, scopeId);
+                _logger.Debug("Event Handler: '{EventHandler}' in Scope: '{ScopeId}' disconnected", eventHandlerId, scopeId);
             }
         }
 
