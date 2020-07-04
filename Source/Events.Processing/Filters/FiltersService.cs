@@ -255,8 +255,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             where TConnectRequest : class
             where TResponse : class
         {
-            using var internalCancellationTokenSource = new CancellationTokenSource();
-            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(internalCancellationTokenSource.Token, externalCancellationToken);
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(externalCancellationToken);
             var cancellationToken = linkedTokenSource.Token;
 
             _logger.Debug("Connecting Filter '{FilterId}'", filterDefinition.TargetStream);
@@ -292,7 +291,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 cancellationToken).ConfigureAwait(false);
             if (!tryStartFilter.Success)
             {
-                internalCancellationTokenSource.Cancel();
+                linkedTokenSource.Cancel();
                 if (tryStartFilter.HasException)
                 {
                     var exception = tryStartFilter.Exception;
@@ -307,22 +306,22 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
 
             var tasks = tryStartFilter.Result;
-            var anyTask = await Task.WhenAny(tasks).ConfigureAwait(false);
-            if (TryGetException(tasks, out var ex))
+            try
             {
-                internalCancellationTokenSource.Cancel();
-                _logger.Warning(ex, "An error occurred while processing Filter: '{filterId}' in Scope: '{scopeId}'", filterDefinition.TargetStream, scopeId);
+                await Task.WhenAny(tasks).ConfigureAwait(false);
+                if (TryGetException(tasks, out var ex))
+                {
+                    _logger.Warning(ex, "An error occurred while running Filter: '{filterId}' in Scope: '{scopeId}'", filterDefinition.TargetStream, scopeId);
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                    ExceptionDispatchInfo.Capture(ex).Throw();
+                }
+            }
+            finally
+            {
+                linkedTokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                ExceptionDispatchInfo.Capture(ex).Throw();
+                _logger.Debug("Filter: '{filterId}' in Scope: '{scopeId}' stopped", filterDefinition.TargetStream, scopeId);
             }
-
-            await Task.WhenAll(tasks).ConfigureAwait(false);
-            if (!externalCancellationToken.IsCancellationRequested)
-            {
-                _logger.Warning(ex, "Filter: '{filterId}' in Scope: '{scopeId}' failed", filterDefinition.TargetStream, scopeId);
-            }
-
-            _logger.Debug("Filter: '{filterId}' in Scope: '{scopeId}' stopped", filterDefinition.TargetStream, scopeId);
         }
 
         async Task<Try<IEnumerable<Task>>> TryStartFilter<TClientMessage, TConnectRequest, TResponse, TFilterDefinition>(
