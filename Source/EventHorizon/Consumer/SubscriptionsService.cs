@@ -71,14 +71,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     _ => new Contracts.SubscriptionResponse(),
                 };
             }
-            catch (TaskCanceledException ex)
+            catch (TaskCanceledException)
             {
-                if (!context.CancellationToken.IsCancellationRequested)
-                {
-                    _logger.Warning(ex, "An error occurred while trying to handling event horizon subscription: {Subscription}", subscriptionId);
-                }
-
-                return new Contracts.SubscriptionResponse { Failure = new Failure(SubscriptionFailures.SubscriptionCancelled, "Event Horizon subscription cancelled by client") };
+                return new Contracts.SubscriptionResponse { Failure = new Failure(SubscriptionFailures.SubscriptionCancelled, "Event Horizon subscription was cancelled") };
             }
             catch (Exception ex)
             {
