@@ -136,7 +136,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     var exception = tryRegisterFilterStreamProcessor.Exception;
                     _logger.Warning(exception, "An error occurred while registering Event Handler: {eventHandlerId}", eventHandlerId);
-                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
@@ -168,7 +168,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     var exception = tryRegisterEventProcessorStreamProcessor.Exception;
                     _logger.Warning(exception, "An error occurred while registering Event Handler: {eventHandlerId}", eventHandlerId);
-                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
@@ -201,7 +201,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     var exception = tryStartEventHandler.Exception;
                     _logger.Debug(exception, "An error occurred while starting Event Handler: '{EventHandlerId}' in Scope: {ScopeId}", eventHandlerId, scopeId);
-                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
@@ -218,7 +218,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 _logger.Warning(ex, "An error occurred while processing Event Handler: '{EventHandlerId}' in Scope: '{ScopeId}'", eventHandlerId, scopeId);
                 linkedTokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                ExceptionDispatchInfo.Capture(ex).Throw();
             }
             else
             {

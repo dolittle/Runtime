@@ -259,6 +259,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(internalCancellationTokenSource.Token, externalCancellationToken);
             var cancellationToken = linkedTokenSource.Token;
 
+            _logger.Debug("Connecting Filter '{FilterId}'", filterDefinition.TargetStream);
+
             var tryRegisterFilter = TryRegisterStreamProcessor(scopeId, filterDefinition, getFilterProcessor, cancellationToken);
             if (!tryRegisterFilter.Success)
             {
@@ -267,7 +269,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 {
                     var exception = tryRegisterFilter.Exception;
                     _logger.Warning(exception, "An error occurred while registering Filter: {filterId}", filterDefinition.TargetStream);
-                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
@@ -295,7 +297,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 {
                     var exception = tryStartFilter.Exception;
                     _logger.Debug(exception, "An error occurred while starting Filter: '{filterId}' in Scope: {scopeId}", filterDefinition.TargetStream, scopeId);
-                    ExceptionDispatchInfo.Capture(exception.InnerException).Throw();
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
@@ -311,7 +313,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 internalCancellationTokenSource.Cancel();
                 _logger.Warning(ex, "An error occurred while processing Filter: '{filterId}' in Scope: '{scopeId}'", filterDefinition.TargetStream, scopeId);
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                ExceptionDispatchInfo.Capture(ex.InnerException).Throw();
+                ExceptionDispatchInfo.Capture(ex).Throw();
             }
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
