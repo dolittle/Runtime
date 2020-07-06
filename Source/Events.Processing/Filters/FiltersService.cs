@@ -22,6 +22,7 @@ using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Services;
 using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.Extensions.Hosting;
 using static Dolittle.Runtime.Events.Processing.Contracts.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -31,6 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// </summary>
     public class FiltersService : FiltersBase
     {
+        readonly IHostApplicationLifetime _hostApplicationLifetime;
         readonly IStreamProcessors _streamProcessors;
         readonly IValidateFilterForAllTenants _filterForAllTenants;
         readonly IExecutionContextManager _executionContextManager;
@@ -44,6 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="FiltersService"/> class.
         /// </summary>
+        /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
         /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
         /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
@@ -53,6 +56,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager"/>.</param>
         public FiltersService(
+            IHostApplicationLifetime hostApplicationLifetime,
             IStreamProcessors streamProcessors,
             IValidateFilterForAllTenants filterForAllTenants,
             IExecutionContextManager executionContextManager,
@@ -62,6 +66,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             FactoryFor<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
             ILoggerManager loggerManager)
         {
+            _hostApplicationLifetime = hostApplicationLifetime;
             _streamProcessors = streamProcessors;
             _filterForAllTenants = filterForAllTenants;
             _executionContextManager = executionContextManager;
@@ -79,6 +84,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
+            var cancellationToken = cts.Token;
             var dispatcher = _reverseCallDispatchers.GetFor<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
                 runtimeStream,
                 clientStream,
@@ -93,7 +100,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 (message, ping) => message.Ping = ping,
                 message => message.Pong);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
@@ -101,7 +108,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = arguments.ScopeId.To<ScopeId>();
             var sourceStreamId = StreamId.EventLog;
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
             var filterDefinition = new FilterDefinition(sourceStreamId, filterId, partitioned: false);
             await RegisterFilter(
@@ -114,7 +121,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     dispatcher,
                     _getEventsToStreamsWriter(),
                     _loggerManager.CreateLogger<FilterProcessor>()),
-                context.CancellationToken).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -123,6 +130,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
+            var cancellationToken = cts.Token;
             var dispatcher = _reverseCallDispatchers.GetFor<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
                 runtimeStream,
                 clientStream,
@@ -137,7 +146,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 (message, ping) => message.Ping = ping,
                 message => message.Pong);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
@@ -145,7 +154,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = arguments.ScopeId.To<ScopeId>();
             var sourceStreamId = StreamId.EventLog;
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
             var filterDefinition = new FilterDefinition(sourceStreamId, filterId, partitioned: true);
 
@@ -159,7 +168,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     dispatcher,
                     _getEventsToStreamsWriter(),
                     _loggerManager.CreateLogger<Partitioned.FilterProcessor>()),
-                context.CancellationToken).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -168,6 +177,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
+            var cancellationToken = cts.Token;
             var dispatcher = _reverseCallDispatchers.GetFor<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
                 runtimeStream,
                 clientStream,
@@ -182,7 +193,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 (message, ping) => message.Ping = ping,
                 message => message.Pong);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
@@ -191,7 +202,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var scopeId = ScopeId.Default;
             var sourceStreamId = StreamId.EventLog;
 
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
             var filterDefinition = new PublicFilterDefinition(sourceStreamId, filterId);
             await RegisterFilter(
@@ -203,7 +214,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     dispatcher,
                     _getEventsToPublicStreamsWriter(),
                     _loggerManager.CreateLogger<PublicFilterProcessor>()),
-                context.CancellationToken).ConfigureAwait(false);
+                cancellationToken).ConfigureAwait(false);
         }
 
         async Task<bool> RejectIfNotReceivedArguments<TClientMessage, TConnectRequest, TResponse>(

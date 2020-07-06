@@ -14,6 +14,7 @@
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Services.Clients" Version="$(FundamentalsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.2" />
     </ItemGroup>
 
     <ItemGroup>
