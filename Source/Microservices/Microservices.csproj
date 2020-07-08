@@ -6,8 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Configuration" Version="4.*" />
-    <PackageReference Include="Dolittle.Services" Version="4.*" />
+    <PackageReference Include="Dolittle.ApplicationModel" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Configuration" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)" />
   </ItemGroup>
 
 </Project>

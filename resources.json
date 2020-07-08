@@ -1,0 +1,11 @@
+{
+    "445f8ea8-1a6f-40d7-b2fc-796dba92dc44": {
+        "eventStore": {
+            "servers": [
+                "mongo"
+            ],
+            "database": "event_store"
+        }
+    }
+}
+

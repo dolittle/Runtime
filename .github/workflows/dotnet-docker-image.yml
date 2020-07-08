@@ -1,0 +1,76 @@
+name: .NET Docker Image CI/CD
+
+env:
+  PRERELEASE_BRANCHES: experimental,alpha,beta,rc # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  DOCKER_HUB_REPO: dolittle/runtime # The docker hub repo to push to
+  COVERAGE_FOLDER: Coverage
+
+on:
+  push:
+    branches:
+    - '**'
+  pull_request:
+    types: [closed]
+
+jobs:
+  ci:
+    name: Integration
+    runs-on: ubuntu-latest
+    outputs:
+      should-publish: ${{ steps.context.outputs.should-publish }}
+      current-version: ${{ steps.context.outputs.current-version }}
+      release-type: ${{ steps.context.outputs.release-type }}
+      cascading-release: ${{ steps.context.outputs.cascading-release }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1.x'
+    - name: Build
+      run: dotnet build --configuration Release
+    - name: Test and report coverage
+      run: dotnet test --no-build --configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutput=${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/ /p:MergeWith=${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/coverage.json /p:CoverletOutputFormat=\"opencover,json\" -m:1
+    - name: Build Docker image
+      uses: docker/build-push-action@v1
+      if: ${{ env.DOCKER_HUB_REPO != '' }}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.DOCKER_HUB_REPO }}
+        tag_with_sha: true
+        push: false
+    - name: Establish context
+      id: context
+      uses: dolittle/establish-context-action@v2
+      with:
+        prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
+    - name: Increment version
+      id: increment-version
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      uses: dolittle/increment-version-action@v2
+      with:
+        version: ${{ steps.context.outputs.current-version }}
+        release-type: ${{ steps.context.outputs.release-type }}
+
+    - name: Push to Docker Hub
+      uses: docker/build-push-action@v1
+      if: ${{ steps.context.outputs.should-publish == 'true' && env.DOCKER_HUB_REPO != '' }}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.DOCKER_HUB_REPO }}
+        tags: ${{ steps.increment-version.outputs.next-version }}
+    
+    - name: Create GitHub Release
+      uses: dolittle/github-release-action@v1
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      with:
+        cascading-release: ${{ steps.context.outputs.cascading-release }}
+        version: ${{ steps.increment-version.outputs.next-version }}
+
+    - name: Upload coverage to CodeCov
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      run: bash <(curl -s https://codecov.io/bash) -f "$FILE_PATH"
+      env:
+        FILE_PATH: ${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/coverage.opencover.xml
