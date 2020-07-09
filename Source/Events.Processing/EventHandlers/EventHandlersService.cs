@@ -107,18 +107,18 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
 
             _logger.Trace("Received connection arguments");
-            var executionContext = dispatcher.Arguments.CallContext.ExecutionContext.ToExecutionContext();
+            var arguments = dispatcher.Arguments;
+            var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
             _logger.Trace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
             _executionContextManager.CurrentFor(executionContext);
 
-            var arguments = dispatcher.Arguments;
             var sourceStream = StreamId.EventLog;
-            _logger.Trace("Received Source Stream Id '{SourceStream}'", sourceStream);
+            _logger.Trace("Received Source Stream '{SourceStream}'", sourceStream);
             var eventHandlerId = arguments.EventHandlerId.To<EventProcessorId>();
-            _logger.Trace("Received Event Handler Id '{EventHandler}'", eventHandlerId);
+            _logger.Trace("Received Event Handler '{EventHandler}'", eventHandlerId);
             StreamId targetStream = eventHandlerId.Value;
             var scopeId = arguments.ScopeId.To<ScopeId>();
-            _logger.Trace("Received Scope Id '{Scope}'", scopeId);
+            _logger.Trace("Received Scope '{Scope}'", scopeId);
             var types = arguments.Types_.Select(_ => _.Id.To<ArtifactId>());
             _logger.Trace("Received Types: [{Types}]'", string.Join(", ", types.Select(_ => $"'{_}'")));
             var partitioned = arguments.Partitioned;
@@ -256,9 +256,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             where TResponse : class
             where TFilterDefinition : IFilterDefinition
         {
+            _logger.Debug("Starting Event Handler '{EventHandlerId}'", filterDefinition.TargetStream);
             try
             {
-                _logger.Debug("Starting Event Handler '{EventHandlerId}'", filterDefinition.TargetStream);
                 var runningDispatcher = dispatcher.Accept(new EventHandlerRegistrationResponse(), cancellationToken);
                 await filterStreamProcessor.Initialize().ConfigureAwait(false);
                 await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
