@@ -70,8 +70,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                         var committedEvents = new List<CommittedEvent>();
                         foreach (var @event in events)
                         {
-                            _metrics.IncrementUncommittedEvents(@event);
-
                             var committedEvent = await _eventCommitter.CommitEvent(
                                 transaction,
                                 eventLogSequenceNumber,
@@ -113,8 +111,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                         var aggregateRootVersion = events.ExpectedAggregateRootVersion.Value;
 
                         var committedEvents = new List<CommittedAggregateEvent>();
-
-                        _metrics.IncrementUncommittedAggregateEvents(events);
 
                         foreach (var @event in events)
                         {

@@ -29,13 +29,7 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <inheritdoc/>
-        public Counter UncommittedEvents { get; private set; }
-
-        /// <inheritdoc/>
         public Counter FailedUncommittedEvents { get; private set; }
-
-        /// <inheritdoc/>
-        public Counter UncommittedAggregateEvents { get; private set; }
 
         /// <inheritdoc/>
         public Counter FailedUncommittedAggregateEvents { get; private set; }
@@ -45,30 +39,6 @@ namespace Dolittle.Runtime.Events.Store
 
         /// <inheritdoc/>
         public Counter CommittedAggregateEvents { get; private set; }
-
-        /// <inheritdoc/>
-        public void IncrementUncommittedEvents(UncommittedEvent @event)
-        {
-            CommittedAggregateEvents.WithLabels(
-                _executionContextManager.Current.Tenant.Value.ToString(),
-                @event.Type.Id.Value.ToString(),
-                @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
-        }
-
-        /// <inheritdoc/>
-        public void IncrementUncommittedAggregateEvents(UncommittedAggregateEvents events)
-        {
-            events.ForEach(@event =>
-            {
-                var counter = CommittedAggregateEvents.WithLabels(
-                    _executionContextManager.Current.Tenant.Value.ToString(),
-                    events.EventSource.Value.ToString(),
-                    events.AggregateRoot.Id.Value.ToString(),
-                    @event.Type.Id.Value.ToString(),
-                    @event.Public.ToString(CultureInfo.InvariantCulture));
-                counter.Inc();
-            });
-        }
 
         /// <inheritdoc/>
         public void IncrementCommittedEvents(CommittedEvent @event)
@@ -120,18 +90,14 @@ namespace Dolittle.Runtime.Events.Store
         /// <inheritdoc/>
         public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
         {
-            UncommittedEvents = metricFactory.Counter("UncommittedEvents", "Number of uncommitted events", "TenantId", "EventArtifactId", "Public");
             FailedUncommittedEvents = metricFactory.Counter("FailedCommittedEvents", "Number of failed uncommitted events", "TenantId", "EventSourceId", "EventArtifactId", "Public");
-            UncommittedAggregateEvents = metricFactory.Counter("UncommittedAggregateEvents", "Number of uncommitted aggregate events", "TenantId", "EventSourceId", "AggregateArtifactId", "EventArtifactId", "Public");
             FailedUncommittedAggregateEvents = metricFactory.Counter("FailedUncommittedAggregateEvents", "Number of failed uncommitted aggregate events", "TenantId", "EventSourceId", "AggregateArtifactId", "EventArtifactId", "Public");
             CommittedEvents = metricFactory.Counter("CommittedEvents", "Number of committed events", "TenantId", "EventSourceId", "EventArtifactId", "Public");
             CommittedAggregateEvents = metricFactory.Counter("CommittedAggregateEvents", "Number of committed aggregate events", "TenantId", "EventSourceId", "AggregateArtifactId", "EventArtifactId", "Public");
 
             return new Collector[]
             {
-                UncommittedEvents,
                 FailedUncommittedEvents,
-                UncommittedAggregateEvents,
                 FailedUncommittedAggregateEvents,
                 CommittedEvents,
                 CommittedAggregateEvents
