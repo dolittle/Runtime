@@ -6,6 +6,7 @@ using Dolittle.Artifacts;
 using Dolittle.Logging;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Services;
 using Machine.Specifications;
 using Moq;
@@ -34,13 +35,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
                 false,
                 "");
 
-        protected static Mock<IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>> dispatcher;
+        protected static Mock<IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>> dispatcher;
 
         protected static PublicFilterProcessor filter;
 
         Establish context = () =>
         {
-            dispatcher = new Mock<IReverseCallDispatcher<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>>();
+            dispatcher = new Mock<IReverseCallDispatcher<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>>();
             filter = new PublicFilterProcessor(
                 new PublicFilterDefinition(Guid.NewGuid(), Guid.NewGuid()),
                 dispatcher.Object,

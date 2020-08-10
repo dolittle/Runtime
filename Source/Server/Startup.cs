@@ -49,8 +49,6 @@ namespace Dolittle.Runtime.Server
 
             app.UseGrpcWeb();
             app.UseCors();
-
-            app.RunAsSinglePageApplication();
         }
     }
 }

@@ -2,47 +2,37 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
-using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_registering
 {
-    [Ignore("Not implemented")]
     public class and_processor_key_has_not_been_registered_before : given.all_dependencies
     {
-        static readonly ScopeId scope = Guid.NewGuid();
-        static readonly TenantId tenant = Guid.NewGuid();
-        static readonly EventProcessorId event_processor_id = Guid.NewGuid();
-        static readonly StreamId source_stream_id = Guid.NewGuid();
-        static Moq.Mock<IEventProcessor> event_processor_mock;
-        static IStreamProcessors stream_processors;
-        static IEnumerable<StreamProcessor> registered_stream_processors;
+        static EventProcessorId event_processor_id;
+        static StreamId source_stream_id;
+        static ScopeId scope_id;
+        static IStreamDefinition stream_definition;
+        static Moq.Mock<IEventProcessor> event_processor;
+        static StreamProcessor registered_stream_processor;
+        static bool registration_result;
 
         Establish context = () =>
         {
-            execution_context_manager_mock.SetupGet(_ => _.Current).Returns(execution_contexts.create());
-            event_processor_mock = new Moq.Mock<IEventProcessor>();
-            event_processor_mock.SetupGet(_ => _.Identifier).Returns(event_processor_id);
-            stream_processors = new StreamProcessors(
-                stream_processor_state_repository,
-                execution_context_manager_mock.Object,
-                Moq.Mock.Of<ILogger>());
+            event_processor_id = Guid.NewGuid();
+            source_stream_id = Guid.NewGuid();
+            scope_id = Guid.NewGuid();
+            stream_definition = new StreamDefinition(new FilterDefinition(source_stream_id, event_processor_id.Value, false));
+            event_processor = new Moq.Mock<IEventProcessor>();
+            event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
         };
 
-        Because of = () =>
-        {
-            stream_processors.Register(event_processor_mock.Object, next_event_fetcher_mock.Object, source_stream_id, CancellationToken.None);
-            registered_stream_processors = stream_processors.Processors;
-        };
+        Because of = () => registration_result = stream_processors.TryRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None, out registered_stream_processor);
 
-        It should_have_registered_one_stream_processor = () => registered_stream_processors.Count().ShouldEqual(1);
-
-        It should_register_a_stream_processor_with_the_correct_key = () => registered_stream_processors.First().Identifier.ShouldEqual(new StreamProcessorId(scope, event_processor_id, source_stream_id));
+        It should_register_stream_processor = () => registration_result.ShouldBeTrue();
+        It should_return_the_registered_stream_processor = () => registered_stream_processor.ShouldNotBeNull();
     }
 }

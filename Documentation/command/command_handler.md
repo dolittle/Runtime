@@ -3,6 +3,8 @@ title: Handling Commands
 description: Recommendations and Requirements when Handling a Command
 keywords: 
 author: einari, smithmx
+aliases:
+    - /runtime/runtime/command/command_handler
 ---
 
 # Command Handler

@@ -11,14 +11,6 @@
             ],
             "database": "event_store"
         }
-    },
-    "a74fed4a-cd5f-4599-bf98-57dae4062ff0": {
-        "eventStore": {
-            "servers": [
-                "localhost"
-            ],
-            "database": "dolittle_event_store_pricing"
-        }
     }
 }
 

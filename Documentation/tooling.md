@@ -3,6 +3,8 @@ title: Tooling
 description: Learn about tooling in Dolittle
 keywords: Overview, Tooling
 author: woksin
+aliases:
+    - /runtime/runtime/tooling
 ---
 
 Here in Dolittle, one of our greatest visions is to enable developers to become highly productive while building products that are scalable and easy to maintain. We want the process of building software to be as easy and enjoyable as possible. In order for us to give the developers using our platform an enjoyable experience when building software on Dolittle we'll provide a set of tools that will increase productivity and automatically generate vital information of the [*Application*, *Bounded Context*]({{< relref bounded_context >}}) and [*Artifacts*]({{< relref artifacts >}}) for the platform.

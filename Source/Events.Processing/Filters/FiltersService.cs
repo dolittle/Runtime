@@ -2,12 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.DependencyInversion;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Protobuf;
+using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
@@ -15,10 +19,10 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
-using Dolittle.Runtime.Tenancy;
 using Dolittle.Services;
 using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.Extensions.Hosting;
 using static Dolittle.Runtime.Events.Processing.Contracts.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -28,57 +32,62 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// </summary>
     public class FiltersService : FiltersBase
     {
-        readonly IPerformActionOnAllTenants _onAllTenants;
-        readonly IRegisterStreamProcessorForAllTenants _streamProcessorForAllTenants;
-        readonly IFilterValidators _filterValidators;
+        readonly IHostApplicationLifetime _hostApplicationLifetime;
+        readonly IStreamProcessors _streamProcessors;
+        readonly IValidateFilterForAllTenants _filterForAllTenants;
         readonly IExecutionContextManager _executionContextManager;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly FactoryFor<IWriteEventsToPublicStreams> _getEventsToPublicStreamsWriter;
-        readonly FactoryFor<IStreamDefinitionRepository> _getStreamDefinitionRepository;
+        readonly IStreamDefinitions _streamDefinitions;
+        readonly ILoggerManager _loggerManager;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FiltersService"/> class.
         /// </summary>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-        /// <param name="streamProcessorForAllTenants">The <see cref="IRegisterStreamProcessorForAllTenants" />.</param>
-        /// <param name="filterValidators">The <see cref="IFilterValidators" />.</param>
+        /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
+        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
+        /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
+        /// <param name="streamDefinitions">The <see cref="IFilterDefinitions" />.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
         /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
-        /// <param name="getStreamDefinitionRepository">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitionRepository" />.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+        /// <param name="loggerManager">The <see cref="ILoggerManager"/>.</param>
         public FiltersService(
-            IPerformActionOnAllTenants onAllTenants,
-            IRegisterStreamProcessorForAllTenants streamProcessorForAllTenants,
-            IFilterValidators filterValidators,
+            IHostApplicationLifetime hostApplicationLifetime,
+            IStreamProcessors streamProcessors,
+            IValidateFilterForAllTenants filterForAllTenants,
             IExecutionContextManager executionContextManager,
             IReverseCallDispatchers reverseCallDispatchers,
+            IStreamDefinitions streamDefinitions,
             FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
             FactoryFor<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
-            FactoryFor<IStreamDefinitionRepository> getStreamDefinitionRepository,
-            ILogger<FiltersService> logger)
+            ILoggerManager loggerManager)
         {
-            _onAllTenants = onAllTenants;
-            _streamProcessorForAllTenants = streamProcessorForAllTenants;
-            _filterValidators = filterValidators;
+            _hostApplicationLifetime = hostApplicationLifetime;
+            _streamProcessors = streamProcessors;
+            _filterForAllTenants = filterForAllTenants;
             _executionContextManager = executionContextManager;
             _reverseCallDispatchers = reverseCallDispatchers;
+            _streamDefinitions = streamDefinitions;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _getEventsToPublicStreamsWriter = getEventsToPublicStreamsWriter;
-            _getStreamDefinitionRepository = getStreamDefinitionRepository;
-            _logger = logger;
+            _loggerManager = loggerManager;
+            _logger = loggerManager.CreateLogger<FiltersService>();
         }
 
         /// <inheritdoc/>
         public override async Task Connect(
-            IAsyncStreamReader<FiltersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<FilterClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<FiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, FiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
+            _logger.Debug("Connecting Unpartitioned Filter");
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
+            var cancellationToken = cts.Token;
+            var dispatcher = _reverseCallDispatchers.GetFor<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,
@@ -88,40 +97,46 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _ => _.FilterResult,
                 _ => _.CallContext,
                 (request, context) => request.CallContext = context,
-                _ => _.CallContext);
+                _ => _.CallContext,
+                (message, ping) => message.Ping = ping,
+                message => message.Pong);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
+            var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
+            _logger.Trace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = arguments.ScopeId.To<ScopeId>();
-            var sourceStreamId = StreamId.AllStreamId;
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
+            var sourceStreamId = StreamId.EventLog;
+            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
-            var filterDefinition = new RemoteFilterDefinition(sourceStreamId, filterId, partitioned: false);
-            using var filterRegistration = CreateFilterRegistration(
+            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, partitioned: false);
+            await RegisterFilter(
+                dispatcher,
                 scopeId,
                 filterDefinition,
-                () => Task.FromResult<IFilterProcessor<RemoteFilterDefinition>>(
-                    new FilterProcessor(
-                        scopeId,
-                        filterDefinition,
-                        dispatcher,
-                        _getEventsToStreamsWriter(),
-                        _logger)),
-                context.CancellationToken);
-            await RegisterFilter(dispatcher, filterId, filterRegistration, context.CancellationToken).ConfigureAwait(false);
+                () => new FilterProcessor(
+                    scopeId,
+                    filterDefinition,
+                    dispatcher,
+                    _getEventsToStreamsWriter(),
+                    _loggerManager.CreateLogger<FilterProcessor>()),
+                cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public override async Task ConnectPartitioned(
-            IAsyncStreamReader<PartitionedFiltersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<PartitionedFilterClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
+            _logger.Debug("Connecting Partitioned Filter");
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
+            var cancellationToken = cts.Token;
+            var dispatcher = _reverseCallDispatchers.GetFor<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,
@@ -131,41 +146,47 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _ => _.FilterResult,
                 _ => _.CallContext,
                 (request, context) => request.CallContext = context,
-                _ => _.CallContext);
+                _ => _.CallContext,
+                (message, ping) => message.Ping = ping,
+                message => message.Pong);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
+            var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
+            _logger.Trace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = arguments.ScopeId.To<ScopeId>();
-            var sourceStreamId = StreamId.AllStreamId;
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
+            var sourceStreamId = StreamId.EventLog;
+            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
-            var filterDefinition = new RemoteFilterDefinition(sourceStreamId, filterId, partitioned: true);
+            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, partitioned: true);
 
-            using var filterRegistration = CreateFilterRegistration(
+            await RegisterFilter(
+                dispatcher,
                 scopeId,
                 filterDefinition,
-                () => Task.FromResult<IFilterProcessor<RemoteFilterDefinition>>(
-                    new Partitioned.FilterProcessor(
-                        scopeId,
-                        filterDefinition,
-                        dispatcher,
-                        _getEventsToStreamsWriter(),
-                        _logger)),
-                context.CancellationToken);
-            await RegisterFilter(dispatcher, filterId, filterRegistration, context.CancellationToken).ConfigureAwait(false);
+                () => new Partitioned.FilterProcessor(
+                    scopeId,
+                    filterDefinition,
+                    dispatcher,
+                    _getEventsToStreamsWriter(),
+                    _loggerManager.CreateLogger<Partitioned.FilterProcessor>()),
+                cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public override async Task ConnectPublic(
-            IAsyncStreamReader<PublicFiltersClientToRuntimeMessage> runtimeStream,
+            IAsyncStreamReader<PublicFilterClientToRuntimeMessage> runtimeStream,
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            var dispatcher = _reverseCallDispatchers.GetFor<PublicFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
+            _logger.Debug("Connecting Public Filter");
+            using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
+            var cancellationToken = cts.Token;
+            var dispatcher = _reverseCallDispatchers.GetFor<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
                 runtimeStream,
                 clientStream,
                 context,
@@ -175,31 +196,34 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 _ => _.FilterResult,
                 _ => _.CallContext,
                 (request, context) => request.CallContext = context,
-                _ => _.CallContext);
+                _ => _.CallContext,
+                (message, ping) => message.Ping = ping,
+                message => message.Pong);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
 
             var arguments = dispatcher.Arguments;
+            var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
+            _logger.Trace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
             var filterId = arguments.FilterId.To<StreamId>();
             var scopeId = ScopeId.Default;
-            var sourceStreamId = StreamId.AllStreamId;
+            var sourceStreamId = StreamId.EventLog;
 
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, context.CancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
             var filterDefinition = new PublicFilterDefinition(sourceStreamId, filterId);
-            using var filterRegistration = CreateFilterRegistration(
+            await RegisterFilter(
+                dispatcher,
                 scopeId,
                 filterDefinition,
-                () => Task.FromResult<IFilterProcessor<PublicFilterDefinition>>(
-                    new PublicFilterProcessor(
-                        filterDefinition,
-                        dispatcher,
-                        _getEventsToPublicStreamsWriter(),
-                        _logger)),
-                context.CancellationToken);
-            await RegisterFilter(dispatcher, filterId, filterRegistration, context.CancellationToken).ConfigureAwait(false);
+                () => new PublicFilterProcessor(
+                    filterDefinition,
+                    dispatcher,
+                    _getEventsToPublicStreamsWriter(),
+                    _loggerManager.CreateLogger<PublicFilterProcessor>()),
+                cancellationToken).ConfigureAwait(false);
         }
 
         async Task<bool> RejectIfNotReceivedArguments<TClientMessage, TConnectRequest, TResponse>(
@@ -209,6 +233,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             where TConnectRequest : class
             where TResponse : class
         {
+            _logger.Trace("Waiting for connection arguments...");
             if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
             {
                 const string message = "Connection arguments were not received";
@@ -218,6 +243,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 return true;
             }
 
+            _logger.Trace("Received connection arguments");
             return false;
         }
 
@@ -231,7 +257,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             if (filterId.IsNonWriteable)
             {
-                _logger.Warning("Filter Id: '{filterId}' is an invalid Stream Id", filterId);
+                _logger.Warning("Filter: '{Filter}' is an invalid Stream Id", filterId);
                 var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId}' is an invalid Stream Id");
                 await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                 return true;
@@ -242,62 +268,189 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         async Task RegisterFilter<TFilterDefinition, TClientMessage, TConnectRequest, TResponse>(
             IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
-            StreamId filterId,
-            FilterRegistration<TFilterDefinition> filterRegistration,
-            CancellationToken cancellationToken)
+            ScopeId scopeId,
+            TFilterDefinition filterDefinition,
+            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+            CancellationToken externalCancellationToken)
             where TFilterDefinition : IFilterDefinition
             where TClientMessage : IMessage, new()
             where TConnectRequest : class
             where TResponse : class
         {
-            try
-            {
-                var registrationResult = await filterRegistration.Register().ConfigureAwait(false);
-                if (!registrationResult.Succeeded)
-                {
-                    _logger.Warning("Failed during registration of Filter: '{filterId}'. {reason}", filterId, registrationResult.FailureReason);
-                    var failure = new Failure(
-                        FiltersFailures.FailedToRegisterFilter,
-                        $"Failed during registration of Filter: '{filterId}'. {registrationResult.FailureReason}");
+            _logger.Trace("Received Source Stream '{SourceStream}'", filterDefinition.SourceStream);
+            _logger.Trace("Received Filter '{Filter}'", filterDefinition.TargetStream);
+            _logger.Trace("Received Scope '{Scope}'", scopeId);
+            using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(externalCancellationToken);
+            var cancellationToken = linkedTokenSource.Token;
 
-                    await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
+            _logger.Debug("Connecting Filter '{Filter}'", filterDefinition.TargetStream);
+
+            var tryRegisterFilter = TryRegisterStreamProcessor(scopeId, filterDefinition, getFilterProcessor, cancellationToken);
+            if (!tryRegisterFilter.Success)
+            {
+                linkedTokenSource.Cancel();
+                if (tryRegisterFilter.HasException)
+                {
+                    var exception = tryRegisterFilter.Exception;
+                    _logger.Warning(exception, "An error occurred while registering Filter '{Filter}'", filterDefinition.TargetStream);
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    await filterRegistration.Complete().ConfigureAwait(false);
-                    await dispatcher.Accept(new FilterRegistrationResponse(), cancellationToken).ConfigureAwait(false);
+                    _logger.Warning("Failed to register Filter '{Filter}'. Filter already registered", filterDefinition.TargetStream);
+                    var failure = new Failure(
+                        FiltersFailures.FailedToRegisterFilter,
+                        $"Failed to register Filter '{filterDefinition.TargetStream}'. Filter already registered.");
+                    await WriteFailedRegistrationResponse(dispatcher, failure, externalCancellationToken).ConfigureAwait(false);
+                    return;
                 }
+            }
+
+            using var filterStreamProcessor = tryRegisterFilter.Result;
+            var tryStartFilter = await TryStartFilter(
+                dispatcher,
+                filterStreamProcessor,
+                scopeId,
+                filterDefinition,
+                getFilterProcessor,
+                cancellationToken).ConfigureAwait(false);
+            if (!tryStartFilter.Success)
+            {
+                linkedTokenSource.Cancel();
+                if (tryStartFilter.HasException)
+                {
+                    var exception = tryStartFilter.Exception;
+                    _logger.Warning(exception, "An error occurred while starting Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream, scopeId);
+                    ExceptionDispatchInfo.Capture(exception).Throw();
+                }
+                else
+                {
+                    _logger.Warning("Could not start Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream, scopeId);
+                    return;
+                }
+            }
+
+            var tasks = tryStartFilter.Result;
+            try
+            {
+                await Task.WhenAny(tasks).ConfigureAwait(false);
+                if (TryGetException(tasks, out var ex))
+                {
+                    _logger.Warning(ex, "An error occurred while running Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream, scopeId);
+                    await Task.WhenAll(tasks).ConfigureAwait(false);
+                    ExceptionDispatchInfo.Capture(ex).Throw();
+                }
+            }
+            finally
+            {
+                linkedTokenSource.Cancel();
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+                _logger.Debug("Filter '{Filter}' in Scope '{Scope}' stopped", filterDefinition.TargetStream, scopeId);
+            }
+        }
+
+        async Task<Try<IEnumerable<Task>>> TryStartFilter<TClientMessage, TConnectRequest, TResponse, TFilterDefinition>(
+            IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
+            StreamProcessor streamProcessor,
+            ScopeId scopeId,
+            TFilterDefinition filterDefinition,
+            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+            CancellationToken cancellationToken)
+            where TClientMessage : IMessage, new()
+            where TConnectRequest : class
+            where TResponse : class
+            where TFilterDefinition : IFilterDefinition
+        {
+            _logger.Debug("Starting Filter '{Filter}'", filterDefinition.TargetStream);
+            try
+            {
+                var runningDispatcher = dispatcher.Accept(new FilterRegistrationResponse(), cancellationToken);
+                await streamProcessor.Initialize().ConfigureAwait(false);
+                await ValidateFilter(
+                    scopeId,
+                    filterDefinition,
+                    getFilterProcessor,
+                    cancellationToken).ConfigureAwait(false);
+                return new[] { streamProcessor.Start(), runningDispatcher };
             }
             catch (Exception ex)
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Debug(ex, "Filter: '{filterId}' failed", filterId);
+                    _logger.Warning(
+                        ex,
+                        "Error occurred while trying to start Filter '{Filter}'",
+                        filterDefinition.TargetStream);
                 }
 
-                if (!filterRegistration.Completed) await filterRegistration.Fail().ConfigureAwait(false);
-            }
-            finally
-            {
-                _logger.Debug("Filter: '{filterId}' stopped", filterId);
+                return ex;
             }
         }
 
-        FilterRegistration<TFilterDefinition> CreateFilterRegistration<TFilterDefinition>(
+        Try<StreamProcessor> TryRegisterStreamProcessor<TFilterDefinition>(
             ScopeId scopeId,
             TFilterDefinition filterDefinition,
-            Func<Task<IFilterProcessor<TFilterDefinition>>> getFilterProcessor,
+            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
             CancellationToken cancellationToken)
-            where TFilterDefinition : IFilterDefinition =>
-                new FilterRegistration<TFilterDefinition>(
-                    scopeId,
-                    filterDefinition,
-                    getFilterProcessor,
-                    _onAllTenants,
-                    _streamProcessorForAllTenants,
-                    _filterValidators,
-                    _getStreamDefinitionRepository,
-                    cancellationToken);
+            where TFilterDefinition : IFilterDefinition
+            {
+                _logger.Debug("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream, filterDefinition.SourceStream);
+                try
+                {
+                    return (_streamProcessors.TryRegister(
+                        scopeId,
+                        filterDefinition.TargetStream.Value,
+                        new EventLogStreamDefinition(),
+                        () => getFilterProcessor(),
+                        cancellationToken,
+                        out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
+                }
+                catch (Exception ex)
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        _logger.Warning(
+                            ex,
+                            "Error occurred while trying to register stream processor for Filter '{Filter}'",
+                            filterDefinition.TargetStream);
+                    }
+
+                    return ex;
+                }
+            }
+
+        async Task ValidateFilter<TFilterDefinition>(
+            ScopeId scopeId,
+            TFilterDefinition filterDefinition,
+            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+            CancellationToken cancellationToken)
+            where TFilterDefinition : IFilterDefinition
+        {
+            _logger.Debug("Validating Filter '{Filter}'", filterDefinition.TargetStream);
+            var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
+
+            if (filterValidationResults.Any(_ => !_.Value.Succeeded))
+            {
+                var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
+                _logger.Warning("Failed to register Filter '{Filter}'. Filter validation failed. {Reason}", filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+                throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+            }
+
+            var filteredStreamDefinition = new StreamDefinition(filterDefinition);
+            _logger.Debug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId);
+            await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
+        }
+
+        bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
+        {
+            exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
+            if (exception != default)
+            {
+                while (exception.InnerException != null) exception = exception.InnerException;
+            }
+
+            return exception != default;
+        }
 
         Task WriteFailedRegistrationResponse<TClientMessage, TConnectRequest, TResponse>(
             IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,

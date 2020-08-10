@@ -1,6 +1,8 @@
 # Runtime
 
-[![Build Status](https://dolittle.visualstudio.com/Dolittle%20open-source%20repositories/_apis/build/status/dolittle-runtime.Runtime?branchName=master)](https://dolittle.visualstudio.com/Dolittle%20open-source%20repositories/_build/latest?definitionId=9&branchName=master)
+![CI/CD](https://github.com/dolittle/Runtime/workflows/.NET%20Docker%20Image%20CI/CD/badge.svg)
+
+[![codecov](https://codecov.io/gh/dolittle/runtime/branch/master/graph/badge.svg)](https://codecov.io/gh/dolittle/runtime)
 
 ## Cloning
 
@@ -59,4 +61,10 @@ To learn more about the projects of Dolittle and how to contribute, please go [h
 Go to our [documentation site](http://www.dolittle.io) and learn more about the project and how to get started.
 Samples can also be found [here](https://github.com/Dolittle-Samples).
 You can find entropy projects [here](https://github.com/Dolittle-Entropy).
+
+# Issues and Contributing
+To learn how to contribute please read our [contributing](https://dolittle.io/contributing/) guide.
+
+File issues to our [Home](https://github.com/dolittle/Home/issues) repository.
+
 

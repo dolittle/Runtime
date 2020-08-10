@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading.Tasks;
 using Dolittle.ApplicationModel;
 using Dolittle.DependencyInversion;
@@ -52,22 +53,37 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
             var consumerTenant = _executionContextManager.Current.Tenant;
-            var subscription = new Subscription(
+            var subscriptionId = new SubscriptionId(
                 consumerTenant,
                 subscriptionRequest.MicroserviceId.To<Microservice>(),
                 subscriptionRequest.TenantId.To<TenantId>(),
                 subscriptionRequest.ScopeId.To<ScopeId>(),
                 subscriptionRequest.StreamId.To<StreamId>(),
                 subscriptionRequest.PartitionId.To<PartitionId>());
+            try
+            {
+                _logger.Information("Incoming event horizon subscription request from head to runtime. {SubscriptionId}", subscriptionId);
+                var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscriptionId).ConfigureAwait(false);
 
-            _logger.Information($"Incomming event horizon subscription request from head to runtime. {subscription}");
-            var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscription).ConfigureAwait(false);
-
-            return subscriptionResponse switch
+                return subscriptionResponse switch
                 {
                     { Success: false } => new Contracts.SubscriptionResponse { Failure = subscriptionResponse.Failure },
                     _ => new Contracts.SubscriptionResponse(),
                 };
+            }
+            catch (TaskCanceledException)
+            {
+                return new Contracts.SubscriptionResponse { Failure = new Failure(SubscriptionFailures.SubscriptionCancelled, "Event Horizon subscription was cancelled") };
+            }
+            catch (Exception ex)
+            {
+                if (!context.CancellationToken.IsCancellationRequested)
+                {
+                    _logger.Warning(ex, "An error occurred while trying to handling event horizon subscription: {Subscription}", subscriptionId);
+                }
+
+                return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };
+            }
         }
     }
 }

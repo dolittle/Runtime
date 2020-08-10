@@ -14,9 +14,11 @@
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Services.Clients" Version="$(FundamentalsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.2" />
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Async\Async.csproj" />
         <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
         <ProjectReference Include="..\Services\Services.csproj" />
         <ProjectReference Include="..\Events.Store\Events.Store.csproj" />

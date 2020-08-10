@@ -16,23 +16,23 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
     /// <summary>
     /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
     /// </summary>
-    public class FilterProcessor : AbstractFilterProcessor<RemoteFilterDefinition>
+    public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
     {
-        readonly IReverseCallDispatcher<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
+        readonly IReverseCallDispatcher<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
         /// </summary>
         /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="definition">The <see cref="RemoteFilterDefinition"/>.</param>
+        /// <param name="definition">The <see cref="FilterDefinition"/>.</param>
         /// <param name="dispatcher">The <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public FilterProcessor(
             ScopeId scope,
-            RemoteFilterDefinition definition,
-            IReverseCallDispatcher<PartitionedFiltersClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFiltersRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> dispatcher,
+            FilterDefinition definition,
+            IReverseCallDispatcher<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> dispatcher,
             IWriteEventsToStreams eventsToStreamsWriter,
             ILogger logger)
             : base(scope, definition, eventsToStreamsWriter, logger)
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Filter event that occurred @ {@event.Occurred}");
+            _logger.Debug("Filter event that occurred @ {Occurred}", @event.Occurred);
 
             var request = new FilterEventRequest
                 {
@@ -58,7 +58,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug($"Filter event that occurred @ {@event.Occurred} again for the {retryCount}. time because: {failureReason}");
+            _logger.Debug(
+                "Filter event that occurred @ {Occurred} again for the {RetryCount}. time because: {FailureReason}",
+                @event.Occurred,
+                retryCount,
+                failureReason);
 
             var request = new FilterEventRequest
                 {

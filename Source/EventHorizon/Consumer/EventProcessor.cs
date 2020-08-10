@@ -4,8 +4,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Logging;
+using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -15,25 +17,33 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
-        readonly Subscription _subscription;
+        readonly ConsentId _consentId;
+        readonly SubscriptionId _subscriptionId;
         readonly IWriteEventHorizonEvents _receivedEventsWriter;
+        readonly IAsyncPolicyFor<EventProcessor> _policy;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventProcessor"/> class.
         /// </summary>
+        /// <param name="consentId">THe <see cref="ConsentId" />.</param>
         /// <param name="subscription">The <see cref="Subscription" />.</param>
         /// <param name="receivedEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
+        /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
-            Subscription subscription,
+            ConsentId consentId,
+            SubscriptionId subscription,
             IWriteEventHorizonEvents receivedEventsWriter,
+            IAsyncPolicyFor<EventProcessor> policy,
             ILogger logger)
         {
-            Scope = subscription.Scope;
-            Identifier = subscription.ProducerTenant.Value;
-            _subscription = subscription;
+            _consentId = consentId;
+            Scope = subscription.ScopeId;
+            Identifier = subscription.ProducerTenantId.Value;
+            _subscriptionId = subscription;
             _receivedEventsWriter = receivedEventsWriter;
+            _policy = policy;
             _logger = logger;
         }
 
@@ -44,20 +54,27 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         public EventProcessorId Identifier { get; }
 
         /// <inheritdoc/>
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
-        {
-            _logger.Trace($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_subscription.ProducerMicroservice}' and tenant '{_subscription.ProducerTenant}'");
-
-            await _receivedEventsWriter.Write(@event, Scope, cancellationToken).ConfigureAwait(false);
-            return new SuccessfulProcessing();
-        }
+        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken) => Process(@event, cancellationToken);
 
         /// <inheritdoc/>
-        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Trace($"Processing event '{@event.Type.Id}' in scope '{Scope}' from microservice '{_subscription.ProducerMicroservice}' and tenant '{_subscription.ProducerTenant}'");
+            _logger.Trace("Retrying processing of Event from Event Horizon");
+            return Process(@event, cancellationToken);
+        }
 
-            await _receivedEventsWriter.Write(@event, Scope, cancellationToken).ConfigureAwait(false);
+        async Task<IProcessingResult> Process(CommittedEvent @event, CancellationToken cancellationToken)
+        {
+            _logger.Trace(
+                "Processing Event {EventType} from Event Horizon in Scope {Scope} from Microservice {ProducerMicroservice} and Tenant {ProducerTenant}",
+                @event.Type.Id,
+                Scope,
+                _subscriptionId.ProducerMicroserviceId,
+                _subscriptionId.ProducerTenantId);
+
+            await _policy.Execute(
+                cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),
+                cancellationToken).ConfigureAwait(false);
             return new SuccessfulProcessing();
         }
     }

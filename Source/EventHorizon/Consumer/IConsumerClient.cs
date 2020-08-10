@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
-    /// Defines a system for handling inncomming public events from other microservices.
+    /// Defines a system for handling incoming public events from other microservices.
     /// </summary>
     public interface IConsumerClient : IDisposable
     {
         /// <summary>
         /// Handles a subscription request.
         /// </summary>
-        /// <param name="subscription">The <see cref="Subscription" />.</param>
+        /// <param name="subscriptionId">The <see cref="SubscriptionId" />.</param>
         /// <returns>The <see cref="SubscriptionResponse" />.</returns>
-        Task<SubscriptionResponse> HandleSubscription(Subscription subscription);
+        Task<SubscriptionResponse> HandleSubscription(SubscriptionId subscriptionId);
     }
 }

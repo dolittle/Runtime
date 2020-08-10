@@ -32,9 +32,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             Polly.Policy
             .Handle<Exception>(_ =>
                 {
-                    _logger.Warning($"Unable to subscribe to event horizon : {_.Message}\nTrying to reconnect.");
+                    _logger.Debug(_, "Unable to subscribe to event horizon");
                     return true;
                 })
-                .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(5));
+                .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));
     }
 }

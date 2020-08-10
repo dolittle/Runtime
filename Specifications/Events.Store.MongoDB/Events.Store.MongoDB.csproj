@@ -8,12 +8,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\Source\Events.Store.MongoDB\Events.Store.MongoDB.csproj" />
   </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Mongo2Go" Version="2.2.12" />
-    <PackageReference Include="MongoDB.Bson" Version="2.10.1" />
-    <PackageReference Include="MongoDB.Driver" Version="2.10.1" />
-    <PackageReference Include="MongoDB.Driver.Core" Version="2.10.1" />
-  </ItemGroup>
   
 </Project>

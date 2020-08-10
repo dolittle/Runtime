@@ -17,5 +17,14 @@ namespace Dolittle.Runtime.Events.Processing
                 new Artifact(ArtifactId.New(), ArtifactGeneration.First),
                 false,
                 "{\"something\":42}");
+
+        public static CommittedEvent single(uint event_log_sequence_number) => new CommittedEvent(
+                event_log_sequence_number,
+                DateTimeOffset.UtcNow,
+                EventSourceId.New(),
+                execution_contexts.create(),
+                new Artifact(ArtifactId.New(), ArtifactGeneration.First),
+                false,
+                "{\"something\":42}");
     }
 }

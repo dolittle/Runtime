@@ -10,46 +10,37 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         public static CommittedAggregateEvent a_committed_aggregate_event(EventLogSequenceNumber event_log_sequence_number, ArtifactId aggregate, EventSourceId event_source, AggregateRootVersion aggregate_root_version) =>
             new CommittedAggregateEvent(
-                new Artifact(aggregate, 0),
+                new Artifact(aggregate, 1266306380),
                 aggregate_root_version,
                 event_log_sequence_number,
-                DateTimeOffset.UtcNow,
+                new DateTimeOffset(2732723935, TimeSpan.Zero),
                 event_source,
                 execution_contexts.create(),
-                new Artifact(Guid.NewGuid(), 1),
+                new Artifact(Guid.Parse("2120418a-7869-46b6-9435-09ba6ab9a4cf"), 2010766075),
                 false,
                 events.some_event_content);
 
         public static CommittedEvent a_committed_event(EventLogSequenceNumber event_log_sequence_number) =>
             new CommittedEvent(
                 event_log_sequence_number,
-                DateTimeOffset.UtcNow,
-                EventSourceId.NotSet,
+                new DateTimeOffset(2232571935, TimeSpan.Zero),
+                Guid.Parse("914990bd-9c3b-4909-a448-989a2df7951b"),
                 execution_contexts.create(),
-                new Artifact(Guid.NewGuid(), 1),
+                new Artifact(Guid.Parse("e61f3f6e-fc31-4e76-9274-c37cacbb74eb"), 2405803362),
                 false,
                 events.some_event_content);
 
-        public static CommittedAggregateEvent a_committed_aggregate_event_with_type(EventLogSequenceNumber event_log_sequence_number, ArtifactId aggregate, EventSourceId event_source, AggregateRootVersion aggregate_root_version, Artifact event_type) =>
-            new CommittedAggregateEvent(
-                new Artifact(aggregate, 0),
-                aggregate_root_version,
+        public static CommittedExternalEvent a_committed_external_event(EventLogSequenceNumber event_log_sequence_number, EventLogSequenceNumber external_event_log_sequence_number) =>
+            new CommittedExternalEvent(
                 event_log_sequence_number,
-                DateTimeOffset.UtcNow,
-                event_source,
+                new DateTimeOffset(1242521935, TimeSpan.Zero),
+                Guid.Parse("5538a71c-fc8d-4f93-8e18-a2aadf070175"),
                 execution_contexts.create(),
-                event_type,
+                new Artifact(Guid.Parse("9e2f39c6-4824-4054-b714-8ccf63921cd9"), 2575047027),
                 false,
-                events.some_event_content);
-
-        public static CommittedEvent a_committed_event_with_type(EventLogSequenceNumber event_log_sequence_number, Artifact event_type) =>
-            new CommittedEvent(
-                event_log_sequence_number,
+                events.some_event_content,
+                external_event_log_sequence_number,
                 DateTimeOffset.UtcNow,
-                EventSourceId.NotSet,
-                execution_contexts.create(),
-                event_type,
-                false,
-                events.some_event_content);
+                Guid.Parse("b9113871-09de-413e-8530-ba6f1b2465cb"));
     }
 }

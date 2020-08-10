@@ -3,6 +3,9 @@ title: Tenancy System
 description: About the tenancy system
 keywords: tenancy, system 
 author: woksin
+aliases:
+    - /runtime/runtime/tenancy/tenancy_system
+repository: https://github.com/dolittle-runtime/Runtime
 ---
 
 # Tenancy

@@ -60,7 +60,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId}'");
+            _logger.Debug(
+                "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}'",
+                _logMessagePrefix,
+                @event.Type.Id.Value,
+                partitionId);
             var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
 
             await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
@@ -71,7 +75,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug($"{_logMessagePrefix} is filtering event '{@event.Type.Id}' for partition '{partitionId} again for the {retryCount}. time because: {failureReason}'");
+            _logger.Debug(
+                "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
+                _logMessagePrefix,
+                @event.Type.Id.Value,
+                partitionId.Value,
+                retryCount,
+                failureReason);
             var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount, cancellationToken).ConfigureAwait(false);
 
             await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
@@ -81,10 +91,19 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug($"{_logMessagePrefix} filtered event '{@event.Type.Id}' for partition '{partitionId}' with result 'Succeeded' = {result.Succeeded}");
+            _logger.Debug(
+                "{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
+                _logMessagePrefix,
+                @event.Type.Id.Value,
+                result.Succeeded);
             if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug($"{_logMessagePrefix} writing event '{@event.Type.Id}' to stream '{Definition.TargetStream}' in partition '{partitionId}'");
+                _logger.Debug(
+                    "{LogMessagePrefix} writing event '{EventTypeId}' to stream '{TargetStream}' in partition '{PartitionId}'",
+                    _logMessagePrefix,
+                    @event.Type.Id.Value,
+                    Definition.TargetStream,
+                    partitionId);
                 return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
             }
 

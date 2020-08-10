@@ -21,7 +21,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="typeId">The id of the event artifact type.</param>
         /// <param name="typeGeneration">The generation of the event artifact.</param>
         /// <param name="isPublic">Whether the Event is public.</param>
-        public StreamEventMetadata(ulong eventLogSequenceNumber, DateTimeOffset occurred, Guid eventSource, Guid typeId, uint typeGeneration, bool isPublic)
+        public StreamEventMetadata(
+            ulong eventLogSequenceNumber,
+            DateTime occurred,
+            Guid eventSource,
+            Guid typeId,
+            uint typeGeneration,
+            bool isPublic)
             : base(occurred, eventSource, typeId, typeGeneration, isPublic)
         {
             EventLogSequenceNumber = eventLogSequenceNumber;

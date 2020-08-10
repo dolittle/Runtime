@@ -1,8 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.DependencyInversion;
 using Dolittle.Execution;
-using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Logging;
+using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Moq;
 
@@ -10,15 +12,24 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.given
 {
     public class all_dependencies
     {
-        protected static Mock<IExecutionContextManager> execution_context_manager_mock;
-        protected static Mock<IFetchEventsFromStreams> next_event_fetcher_mock;
-        protected static IStreamProcessorStateRepository stream_processor_state_repository;
+        protected static Mock<IPerformActionOnAllTenants> on_all_tenants;
+        protected static Mock<ILoggerManager> logger_manager;
+        protected static Mock<FactoryFor<ICreateScopedStreamProcessors>> get_scoped_stream_processors_creator;
+        protected static Mock<IExecutionContextManager> execution_context_manager;
+        protected static IStreamProcessors stream_processors;
 
         Establish context = () =>
         {
-            execution_context_manager_mock = new Mock<IExecutionContextManager>();
-            next_event_fetcher_mock = new Mock<IFetchEventsFromStreams>();
-            stream_processor_state_repository = new in_memory_stream_processor_state_repository();
+            get_scoped_stream_processors_creator = new Mock<FactoryFor<ICreateScopedStreamProcessors>>();
+            on_all_tenants = new Mock<IPerformActionOnAllTenants>();
+            logger_manager = new Mock<ILoggerManager>();
+            execution_context_manager = new Mock<IExecutionContextManager>();
+            logger_manager.Setup(_ => _.CreateLogger<StreamProcessors>()).Returns(Mock.Of<ILogger<StreamProcessors>>());
+            stream_processors = new StreamProcessors(
+                on_all_tenants.Object,
+                get_scoped_stream_processors_creator.Object,
+                execution_context_manager.Object,
+                logger_manager.Object);
         };
     }
 }

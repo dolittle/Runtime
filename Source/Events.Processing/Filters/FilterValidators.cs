@@ -41,15 +41,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
+        public Task<FilterValidationResult> Validate<TDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.Trace($"Finding validator for filter '{filter.Definition.TargetStream}'");
+            _logger.Trace("Finding validator for filter '{TargetStream}'", filter.Definition.TargetStream);
 
             if (TryGetValidatorFor<TDefinition>(out var validator))
             {
-                _logger.Trace($"Validating filter '{filter.Definition.TargetStream}'");
-                return validator.Validate(filter, cancellationToken);
+                _logger.Trace("Validating filter '{TargetStream}'", filter.Definition.TargetStream);
+                return validator.Validate(persistedDefinition, filter, cancellationToken);
             }
 
             return Task.FromResult(new FilterValidationResult());
@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
                 {
-                    _logger.Trace($"Filter definition type {filterDefinitionType.FullName} can be validated by validator type {validatorType.FullName}");
+                    _logger.Trace("Filter definition type {FilterType} can be validated by validator type {ValidatorType}", filterDefinitionType, validatorType);
                     _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
                 }
             });
@@ -74,7 +74,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (implementations.Count() > 1)
                 {
-                    _logger.Warning($"There are multiple validators that can validate filter defintion of type {filterDefinitionType.FullName}:\n{string.Join("\n", implementations.Select(_ => _.FullName))}\nUsing the first validator.");
+                    _logger.Warning(
+                        "There are multiple validators that can validate filter definition of type {FilterDefinitionType}:\n{ImplementationTypes}\nUsing the first validator.",
+                        filterDefinitionType,
+                        string.Join("\n", implementations.Select(_ => _.ToString())));
                 }
 
                 validatorType = implementations.First();

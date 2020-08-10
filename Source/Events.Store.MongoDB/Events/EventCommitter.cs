@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
-using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -16,15 +16,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public class EventCommitter : IEventCommitter
     {
-        readonly IMongoCollection<MongoDB.Events.Event> _allStream;
+        readonly IStreams _streams;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventCommitter"/> class.
         /// </summary>
-        /// <param name="connection">The <see cref="EventStoreConnection" />.</param>
-        public EventCommitter(EventStoreConnection connection)
+        /// <param name="streams">The <see cref="IStreams" />.</param>
+        public EventCommitter(IStreams streams)
         {
-            _allStream = connection.EventLog;
+            _streams = streams;
         }
 
         /// <inheritdoc/>
@@ -32,13 +32,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             IClientSessionHandle transaction,
             EventLogSequenceNumber sequenceNumber,
             DateTimeOffset occurred,
-            Dolittle.Execution.ExecutionContext executionContext,
+            Execution.ExecutionContext executionContext,
             UncommittedEvent @event,
             CancellationToken cancellationToken)
         {
-            var correlation = executionContext.CorrelationId;
-            var microservice = executionContext.Microservice;
-            var tenant = executionContext.Tenant;
             var eventSource = EventSourceId.NotSet;
 
             await InsertEvent(
@@ -100,7 +97,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.Content);
         }
 
-        async Task InsertEvent(
+        Task InsertEvent(
             IClientSessionHandle transaction,
             EventLogSequenceNumber version,
             DateTimeOffset occurred,
@@ -110,48 +107,21 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             Execution.ExecutionContext executionContext,
             CancellationToken cancellationToken)
         {
-            try
-            {
-                await _allStream.InsertOneAsync(
-                    transaction,
-                    new Event(
-                        version,
-                        executionContext.ToStoreRepresentation(),
-                        new EventMetadata(
-                            occurred,
-                            eventSource,
-                            @event.Type.Id,
-                            @event.Type.Generation,
-                            @event.Public),
-                        aggregate,
-                        BsonDocument.Parse(@event.Content)),
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (MongoDuplicateKeyException)
-            {
-                throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId, ScopeId.Default);
-            }
-            catch (MongoWriteException exception)
-            {
-                if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
-                {
-                    throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId, ScopeId.Default);
-                }
-
-                throw;
-            }
-            catch (MongoBulkWriteException exception)
-            {
-                foreach (var error in exception.WriteErrors)
-                {
-                    if (error.Category == ServerErrorCategory.DuplicateKey)
-                    {
-                        throw new EventAlreadyWrittenToStream(@event.Type.Id, version, StreamId.AllStreamId, ScopeId.Default);
-                    }
-                }
-
-                throw;
-            }
+            return _streams.DefaultEventLog.InsertOneAsync(
+                transaction,
+                new Event(
+                    version,
+                    executionContext.ToStoreRepresentation(),
+                    new EventMetadata(
+                        occurred.UtcDateTime,
+                        eventSource,
+                        @event.Type.Id,
+                        @event.Type.Generation,
+                        @event.Public),
+                    aggregate,
+                    new EventHorizonMetadata(),
+                    BsonDocument.Parse(@event.Content)),
+                cancellationToken: cancellationToken);
         }
     }
 }
