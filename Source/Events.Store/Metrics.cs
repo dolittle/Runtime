@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <inheritdoc/>
         public void IncrementCommittedEvents(CommittedEvent @event)
         {
-            CommittedAggregateEvents.WithLabels(
+            CommittedEvents.WithLabels(
                 @event.ExecutionContext.Tenant.Value.ToString(),
                 @event.EventSource.Value.ToString(),
                 @event.Type.Id.Value.ToString(),
@@ -71,6 +71,11 @@ namespace Dolittle.Runtime.Events.Store
                 @event.AggregateRoot.Id.Value.ToString(),
                 @event.Type.Id.Value.ToString(),
                 @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
+            CommittedEvents.WithLabels(
+                @event.ExecutionContext.Tenant.Value.ToString(),
+                @event.EventSource.Value.ToString(),
+                @event.Type.Id.Value.ToString(),
+                @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
         }
 
         /// <inheritdoc/>
@@ -93,7 +98,7 @@ namespace Dolittle.Runtime.Events.Store
             FailedUncommittedEvents = metricFactory.Counter("FailedCommittedEvents", "Number of failed uncommitted events", "TenantId", "EventSourceId", "EventArtifactId", "Public");
             FailedUncommittedAggregateEvents = metricFactory.Counter("FailedUncommittedAggregateEvents", "Number of failed uncommitted aggregate events", "TenantId", "EventSourceId", "AggregateArtifactId", "EventArtifactId", "Public");
             CommittedEvents = metricFactory.Counter("CommittedEvents", "Number of committed events", "TenantId", "EventSourceId", "EventArtifactId", "Public");
-            CommittedAggregateEvents = metricFactory.Counter("CommittedAggregateEvents", "Number of committed aggregate events", "TenantId", "EventSourceId", "AggregateArtifactId", "EventArtifactId", "Public");
+            CommittedAggregateEvents = metricFactory.Counter("CommittedAggregateEvents", "Number of committed aggregate events and events", "TenantId", "EventSourceId", "AggregateArtifactId", "EventArtifactId", "Public");
 
             return new Collector[]
             {

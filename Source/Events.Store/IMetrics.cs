@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store
         Counter CommittedEvents { get; }
 
         /// <summary>
-        /// Gets the counter used for counting number of committed aggregate events.
+        /// Gets the counter used for counting number of committed aggregate events and committed events.
         /// </summary>
         Counter CommittedAggregateEvents { get; }
 
@@ -49,7 +49,8 @@ namespace Dolittle.Runtime.Events.Store
         void IncrementCommittedEvents(CommittedEvent @event);
 
         /// <summary>
-        /// Increment number of committed aggregate events based on an event for labelling.
+        /// Increment number of committed aggregate events and committed events based on an
+        /// event for labelling.
         /// </summary>
         /// <param name="event">The <see cref="CommittedAggregateEvent"/> used for labelling.</param>
         void IncrementCommittedAggregateEvents(CommittedAggregateEvent @event);
