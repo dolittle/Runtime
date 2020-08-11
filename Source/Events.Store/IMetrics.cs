@@ -23,24 +23,24 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Gets the counter used for counting number of failed committed events.
         /// </summary>
-        Counter FailedUncommittedEvents { get; }
+        Counter FailedEvents { get; }
 
         /// <summary>
         /// Gets the counter used for counting number of failed committed aggregate events.
         /// </summary>
-        Counter FailedUncommittedAggregateEvents { get; }
+        Counter FailedAggregateEvents { get; }
 
         /// <summary>
         /// Increment number of failed uncommitted events based on an event for labelling.
         /// </summary>
         /// <param name="events">The <see cref="UncommittedEvents"/> used for labelling.</param>
-        void IncrementFailedUncommittedEvents(UncommittedEvents events);
+        void IncrementFailedEvents(UncommittedEvents events);
 
         /// <summary>
         /// Increment number of failed uncommitted aggregate events based on an event for labelling.
         /// </summary>
         /// <param name="events">The <see cref="UncommittedAggregateEvents"/> with all events and context used for labelling.</param>
-        void IncrementFailedUncommittedAggregateEvents(UncommittedAggregateEvents events);
+        void IncrementFailedAggregateEvents(UncommittedAggregateEvents events);
 
         /// <summary>
         /// Increment number of committed events based on an event for labelling.

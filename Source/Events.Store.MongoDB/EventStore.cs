@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             }
             catch (MongoWaitQueueFullException ex)
             {
-                _metrics.IncrementFailedUncommittedEvents(events);
+                _metrics.IncrementFailedEvents(events);
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
         }
@@ -145,7 +145,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             }
             catch (MongoWaitQueueFullException ex)
             {
-                _metrics.IncrementFailedUncommittedAggregateEvents(events);
+                _metrics.IncrementFailedAggregateEvents(events);
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
         }
