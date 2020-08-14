@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             transaction,
                             _eventFilter.Empty,
                             cancellationToken: cancel).ConfigureAwait(false);
-                        var committedEvents = new List<CommittedEvent>();
+                        var committedEventsList = new List<CommittedEvent>();
                         foreach (var @event in events)
                         {
                             var committedEvent = await _eventCommitter.CommitEvent(
@@ -77,13 +77,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 _executionContextManager.Current,
                                 @event,
                                 cancel).ConfigureAwait(false);
-                            committedEvents.Add(committedEvent);
+                            committedEventsList.Add(committedEvent);
                             eventLogSequenceNumber++;
-
-                            _metrics.IncrementCommittedEvents(committedEvent);
                         }
 
-                        return new CommittedEvents(committedEvents);
+                        var committedEvents = new CommittedEvents(committedEventsList);
+                        _metrics.IncrementCommittedEvents(committedEvents);
+                        return committedEvents;
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }
@@ -127,8 +127,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             committedEvents.Add(committedEvent);
                             eventLogSequenceNumber++;
                             aggregateRootVersion++;
-
-                            _metrics.IncrementCommittedAggregateEvents(committedEvent);
                         }
 
                         await _aggregateRoots.IncrementVersionFor(
@@ -139,7 +137,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             aggregateRootVersion,
                             cancel).ConfigureAwait(false);
 
-                        return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
+                        var committedAggregateEvents = new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
+                        _metrics.IncrementCommittedAggregateEvents(committedAggregateEvents);
+                        return committedAggregateEvents;
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
             }

@@ -41,13 +41,16 @@ namespace Dolittle.Runtime.Events.Store
         public Counter CommittedAggregateEvents { get; private set; }
 
         /// <inheritdoc/>
-        public void IncrementCommittedEvents(CommittedEvent @event)
+        public void IncrementCommittedEvents(CommittedEvents events)
         {
-            CommittedEvents.WithLabels(
-                @event.ExecutionContext.Tenant.Value.ToString(),
-                @event.EventSource.Value.ToString(),
-                @event.Type.Id.Value.ToString(),
-                @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
+            events.ForEach(@event =>
+            {
+                CommittedEvents.WithLabels(
+                    @event.ExecutionContext.Tenant.Value.ToString(),
+                    @event.EventSource.Value.ToString(),
+                    @event.Type.Id.Value.ToString(),
+                    @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
+            });
         }
 
         /// <inheritdoc/>
@@ -63,19 +66,22 @@ namespace Dolittle.Runtime.Events.Store
         }
 
         /// <inheritdoc/>
-        public void IncrementCommittedAggregateEvents(CommittedAggregateEvent @event)
+        public void IncrementCommittedAggregateEvents(CommittedAggregateEvents events)
         {
-            CommittedAggregateEvents.WithLabels(
-                @event.ExecutionContext.Tenant.Value.ToString(),
-                @event.EventSource.Value.ToString(),
-                @event.AggregateRoot.Id.Value.ToString(),
-                @event.Type.Id.Value.ToString(),
-                @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
-            CommittedEvents.WithLabels(
-                @event.ExecutionContext.Tenant.Value.ToString(),
-                @event.EventSource.Value.ToString(),
-                @event.Type.Id.Value.ToString(),
-                @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
+            events.ForEach(@event =>
+            {
+                CommittedAggregateEvents.WithLabels(
+                    @event.ExecutionContext.Tenant.Value.ToString(),
+                    @event.EventSource.Value.ToString(),
+                    @event.AggregateRoot.Id.Value.ToString(),
+                    @event.Type.Id.Value.ToString(),
+                    @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
+                CommittedEvents.WithLabels(
+                    @event.ExecutionContext.Tenant.Value.ToString(),
+                    @event.EventSource.Value.ToString(),
+                    @event.Type.Id.Value.ToString(),
+                    @event.Public.ToString(CultureInfo.InvariantCulture)).Inc();
+            });
         }
 
         /// <inheritdoc/>

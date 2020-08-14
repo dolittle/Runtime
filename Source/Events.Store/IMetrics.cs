@@ -45,14 +45,14 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Increment number of committed events based on an event for labelling.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent"/> used for labelling.</param>
-        void IncrementCommittedEvents(CommittedEvent @event);
+        /// <param name="event">The <see cref="CommittedEvents"/> used for labelling.</param>
+        void IncrementCommittedEvents(CommittedEvents @event);
 
         /// <summary>
         /// Increment number of committed aggregate events and committed events based on an
         /// event for labelling.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedAggregateEvent"/> used for labelling.</param>
-        void IncrementCommittedAggregateEvents(CommittedAggregateEvent @event);
+        /// <param name="event">The <see cref="CommittedAggregateEvents"/> used for labelling.</param>
+        void IncrementCommittedAggregateEvents(CommittedAggregateEvents @event);
     }
 }
