@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 return subscriptionResponse switch
                 {
                     { Success: false } => new Contracts.SubscriptionResponse { Failure = subscriptionResponse.Failure },
-                    _ => new Contracts.SubscriptionResponse(),
+                    _ => new Contracts.SubscriptionResponse { ConsentId = subscriptionResponse.ConsentId.ToProtobuf() },
                 };
             }
             catch (TaskCanceledException)
