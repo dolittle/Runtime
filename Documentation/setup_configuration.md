@@ -20,48 +20,6 @@ If you are using our Dolittle Platform some of these configurations will be prov
 | event-horizon-consents.json |      | ✔️       |          | ✔️        |
 
 
-
-## Head
-
-### event-horizons.json
-Defines a event horizon subscription for a tenant.
-```json
-{
-    <tenant-id>: [
-        {
-            "scope": <scope-id>,
-            "microservice": <microservice-id>,
-            "tenant": <tenant-id>,
-            "stream": <stream-id>,
-            "partition": <parition-id>,
-        }
-    ]
-}
-```
-
-### clients.json
-Ports which to connect to in the runtime.
-```json
-{
-    "public": {
-        "host": <host>,
-        "port": <port>
-    },
-    "private": {
-        "host": <host>,
-        "port": <port>
-    }
-}
-```
-
-### tenants.json
-The tenants in the head.
-```json
-{
-    <tenant-id>: {}
-}
-```
-
 ## Runtime
 
 ### resources.json
