@@ -24,13 +24,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.x'
+
     - name: Build
       run: dotnet build --configuration Release
+
     - name: Test and report coverage
       run: dotnet test --no-build --configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutput=${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/ /p:MergeWith=${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/coverage.json /p:CoverletOutputFormat=\"opencover,json\" -m:1
+
     - name: Build Docker image
       uses: docker/build-push-action@v1
       if: ${{ env.DOCKER_HUB_REPO != '' }}
@@ -38,13 +42,17 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: ${{ env.DOCKER_HUB_REPO }}
+        context: .
+        file: ./Docker/Production/Dockerfile
         tag_with_sha: true
         push: false
+
     - name: Establish context
       id: context
       uses: dolittle/establish-context-action@v2
       with:
         prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
+
     - name: Increment version
       id: increment-version
       if: ${{ steps.context.outputs.should-publish == 'true' }}
@@ -60,7 +68,10 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: ${{ env.DOCKER_HUB_REPO }}
+        context: .
+        file: ./Docker/Production/Dockerfile
         tags: ${{ steps.increment-version.outputs.next-version }}
+
     - name: Update latest tag on Docker Hub
       uses: docker/build-push-action@v1
       if: ${{ steps.context.outputs.should-publish == 'true' && env.DOCKER_HUB_REPO != '' && steps.context.outputs.release-type != 'prerelease'}}
