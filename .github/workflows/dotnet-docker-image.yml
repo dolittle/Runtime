@@ -77,6 +77,7 @@ jobs:
       with:
         context: .
         file: ./Docker/Production/Dockerfile
+        push: true
         tags: ${{ env.DOCKER_HUB_REPO }}:${{ steps.increment-version.outputs.next-version }}, ${{ env.DOCKER_HUB_REPO }}:latest
 
     - name: Push Development Image to Docker Hub
@@ -85,6 +86,7 @@ jobs:
       with:
         context: .
         file: ./Docker/Development/Dockerfile
+        push: true
         tags: ${{ env.DOCKER_HUB_REPO }}:${{ steps.increment-version.outputs.next-version }}-development, ${{ env.DOCKER_HUB_REPO }}:latest-development
 
     - name: Create GitHub Release
