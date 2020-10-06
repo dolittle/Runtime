@@ -50,18 +50,10 @@ ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini /usr/bin/tini
 RUN chmod +x /usr/bin/tini
 
 # Create entrypoint that runs both MongoDB and Runtime
-RUN echo '\
-#!/bin/bash                                                     \n\
-set -e                                                          \n\
-                                                                \n\
-/usr/bin/mongod --replSet "rs0" --bind_ip 0.0.0.0 > /dev/null & \n\
-/usr/bin/dotnet "Dolittle.Runtime.Server.dll" &                 \n\
-                                                                \n\
-wait -n                                                         \n\
-' > /usr/bin/entrypoint.sh
-RUN chmod +x /usr/bin/entrypoint.sh
+COPY Docker/Development/docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
+RUN chmod +x /usr/bin/docker-entrypoint.sh
 
 # Expose all the ports that are usefull
 EXPOSE 1880 27017 9007 50052 50053
 
-ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/usr/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/usr/bin/docker-entrypoint.sh"]
