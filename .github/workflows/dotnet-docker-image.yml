@@ -35,7 +35,7 @@ jobs:
     - name: Test and report coverage
       run: dotnet test --no-build --configuration Release --no-build /p:CollectCoverage=true /p:CoverletOutput=${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/ /p:MergeWith=${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/coverage.json /p:CoverletOutputFormat=\"opencover,json\" -m:1
 
-    - name: Build Docker image
+    - name: Build Production Docker image
       uses: docker/build-push-action@v1
       if: ${{ env.DOCKER_HUB_REPO != '' }}
       with:
@@ -44,6 +44,18 @@ jobs:
         repository: ${{ env.DOCKER_HUB_REPO }}
         context: .
         file: ./Docker/Production/Dockerfile
+        tag_with_sha: true
+        push: false
+
+    - name: Build Development Docker image
+      uses: docker/build-push-action@v1
+      if: ${{ env.DOCKER_HUB_REPO != '' }}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.DOCKER_HUB_REPO }}
+        context: .
+        file: ./Docker/Development/Dockerfile
         tag_with_sha: true
         push: false
 
@@ -61,7 +73,7 @@ jobs:
         version: ${{ steps.context.outputs.current-version }}
         release-type: ${{ steps.context.outputs.release-type }}
 
-    - name: Push to Docker Hub
+    - name: Push Production Image to Docker Hub
       uses: docker/build-push-action@v1
       if: ${{ steps.context.outputs.should-publish == 'true' && env.DOCKER_HUB_REPO != '' }}
       with:
@@ -72,15 +84,39 @@ jobs:
         file: ./Docker/Production/Dockerfile
         tags: ${{ steps.increment-version.outputs.next-version }}
 
-    - name: Update latest tag on Docker Hub
+    - name: Update Production latest tag on Docker Hub
       uses: docker/build-push-action@v1
       if: ${{ steps.context.outputs.should-publish == 'true' && env.DOCKER_HUB_REPO != '' && steps.context.outputs.release-type != 'prerelease'}}
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
         repository: ${{ env.DOCKER_HUB_REPO }}
+        context: .
+        file: ./Docker/Production/Dockerfile
         tags: latest
-    
+
+    - name: Push Development Image to Docker Hub
+      uses: docker/build-push-action@v1
+      if: ${{ steps.context.outputs.should-publish == 'true' && env.DOCKER_HUB_REPO != '' }}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.DOCKER_HUB_REPO }}
+        context: .
+        file: ./Docker/Development/Dockerfile
+        tags: ${{ steps.increment-version.outputs.next-version }}-development
+
+    - name: Update Development latest tag on Docker Hub
+      uses: docker/build-push-action@v1
+      if: ${{ steps.context.outputs.should-publish == 'true' && env.DOCKER_HUB_REPO != '' && steps.context.outputs.release-type != 'prerelease'}}
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.DOCKER_HUB_REPO }}
+        context: .
+        file: ./Docker/Development/Dockerfile
+        tags: latest-development
+
     - name: Create GitHub Release
       uses: dolittle/github-release-action@v1
       if: ${{ steps.context.outputs.should-publish == 'true' }}
