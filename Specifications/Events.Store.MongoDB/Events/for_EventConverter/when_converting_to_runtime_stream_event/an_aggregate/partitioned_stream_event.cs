@@ -7,7 +7,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_converting_to_runtime_stream_event.an_aggregate
 {
-    public class partitioned_stream_event
+    public class partitioned_stream_event : given.an_event_content_converter
     {
         static MongoDB.Events.StreamEvent stored_event;
         static StreamPosition stream_position;
@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
             partition = Guid.Parse("76fe52e0-9b3f-4484-9581-7bf014a4de4a");
             stream = Guid.Parse("6d3bf849-dfbf-4526-8ef0-c01d7620be94");
             stored_event = events.an_aggregate_stream_event(stream_position, partition, aggregate_root_version);
-            event_converter = new EventConverter();
+            event_converter = new EventConverter(event_content_converter.Object);
         };
 
         Because of = () => result = event_converter.ToRuntimeStreamEvent(stored_event, stream, true);
@@ -36,5 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         It should_be_partitioned = () => result.Partitioned.ShouldBeTrue();
         It should_come_from_the_correct_partition = () => result.Partition.ShouldEqual(partition);
         It should_come_from_the_correct_stream = () => result.Stream.ShouldEqual(stream);
+        It should_have_the_content_returned_by_the_content_converter = () => result.Event.Content.ShouldBeTheSameAs(json_returned_by_event_converter);
+        It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToJSON(stored_event.Content));
     }
 }

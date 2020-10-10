@@ -73,7 +73,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, Events.Event storedEvent)
         {
-            committedEvent.Content.ShouldEqual(storedEvent.Content.ToString());
             committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.EventLogSequenceNumber);
             committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
             committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
@@ -101,7 +100,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static void ShouldBeTheSameAs(this CommittedEvent committedEvent, StreamEvent storedEvent)
         {
-            committedEvent.Content.ShouldEqual(storedEvent.Content.ToString());
             committedEvent.EventLogSequenceNumber.Value.ShouldEqual(storedEvent.Metadata.EventLogSequenceNumber);
             committedEvent.EventSource.Value.ShouldEqual(storedEvent.Metadata.EventSource);
             committedEvent.ExecutionContext.ShouldBeTheSameAs(storedEvent.ExecutionContext);
@@ -129,7 +127,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static void ShouldBeTheSameAs(this Events.Event storedEvent, CommittedEvent committedEvent)
         {
-            storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
             storedEvent.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
             storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
             storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
@@ -141,7 +138,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         public static void ShouldBeTheSameAs(this StreamEvent storedEvent, CommittedEvent committedEvent)
         {
-            storedEvent.Content.ToString().ShouldEqual(committedEvent.Content);
             storedEvent.Metadata.EventLogSequenceNumber.ShouldEqual(committedEvent.EventLogSequenceNumber.Value);
             storedEvent.ExecutionContext.ShouldBeTheSameAs(committedEvent.ExecutionContext);
             storedEvent.Metadata.EventSource.ShouldEqual(committedEvent.EventSource.Value);
