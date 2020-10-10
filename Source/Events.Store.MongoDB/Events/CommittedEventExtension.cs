@@ -1,8 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Artifacts;
-
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
     /// <summary>
@@ -57,97 +55,5 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             committedEvent is CommittedExternalEvent externalEvent ?
                 externalEvent.GetEventHorizonMetadata()
                 : new EventHorizonMetadata();
-
-        /// <summary>
-        /// Converts a <see cref="Event" /> to <see cref="CommittedEvent" />.
-        /// </summary>
-        /// <param name="event">The <see cref="Event" />.</param>
-        /// <returns>The converted <see cref="CommittedEvent" />.</returns>
-        public static CommittedEvent ToCommittedEvent(this Event @event) =>
-            @event.Aggregate.WasAppliedByAggregate ?
-                @event.ToCommittedAggregateEvent()
-                : @event.EventHorizon.FromEventHorizon ?
-                    new CommittedExternalEvent(
-                        @event.EventLogSequenceNumber,
-                        @event.Metadata.Occurred,
-                        @event.Metadata.EventSource,
-                        @event.ExecutionContext.ToExecutionContext(),
-                        new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                        @event.Metadata.Public,
-                        @event.Content.ToString(),
-                        @event.EventHorizon.ExternalEventLogSequenceNumber,
-                        @event.EventHorizon.Received,
-                        @event.EventHorizon.Consent)
-                    : new CommittedEvent(
-                      @event.EventLogSequenceNumber,
-                      @event.Metadata.Occurred,
-                      @event.Metadata.EventSource,
-                      @event.ExecutionContext.ToExecutionContext(),
-                      new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                      @event.Metadata.Public,
-                      @event.Content.ToString());
-
-        /// <summary>
-        /// Converts a <see cref="StreamEvent" /> to <see cref="CommittedEvent" />.
-        /// </summary>
-        /// <param name="event">The <see cref="StreamEvent" />.</param>
-        /// <returns>The converted <see cref="CommittedEvent" />.</returns>
-        public static CommittedEvent ToCommittedEvent(this StreamEvent @event) =>
-            @event.Aggregate.WasAppliedByAggregate ?
-                @event.ToCommittedAggregateEvent()
-                : @event.EventHorizon.FromEventHorizon ?
-                    new CommittedExternalEvent(
-                        @event.Metadata.EventLogSequenceNumber,
-                        @event.Metadata.Occurred,
-                        @event.Metadata.EventSource,
-                        @event.ExecutionContext.ToExecutionContext(),
-                        new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                        @event.Metadata.Public,
-                        @event.Content.ToString(),
-                        @event.EventHorizon.ExternalEventLogSequenceNumber,
-                        @event.EventHorizon.Received,
-                        @event.EventHorizon.Consent)
-                    : new CommittedEvent(
-                        @event.Metadata.EventLogSequenceNumber,
-                        @event.Metadata.Occurred,
-                        @event.Metadata.EventSource,
-                        @event.ExecutionContext.ToExecutionContext(),
-                        new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                        @event.Metadata.Public,
-                        @event.Content.ToString());
-
-        /// <summary>
-        /// Converts a <see cref="Event" /> to <see cref="CommittedAggregateEvent" />.
-        /// </summary>
-        /// <param name="event">The <see cref="Event" />.</param>
-        /// <returns>The converted <see cref="CommittedAggregateEvent" />.</returns>
-        public static CommittedAggregateEvent ToCommittedAggregateEvent(this Event @event) =>
-            new CommittedAggregateEvent(
-                new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
-                @event.Aggregate.Version,
-                @event.EventLogSequenceNumber,
-                @event.Metadata.Occurred,
-                @event.Metadata.EventSource,
-                @event.ExecutionContext.ToExecutionContext(),
-                new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                @event.Metadata.Public,
-                @event.Content.ToString());
-
-        /// <summary>
-        /// Converts a <see cref="Event" /> to <see cref="CommittedAggregateEvent" />.
-        /// </summary>
-        /// <param name="event">The <see cref="Event" />.</param>
-        /// <returns>The converted <see cref="CommittedAggregateEvent" />.</returns>
-        public static CommittedAggregateEvent ToCommittedAggregateEvent(this StreamEvent @event) =>
-            new CommittedAggregateEvent(
-                new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
-                @event.Aggregate.Version,
-                @event.Metadata.EventLogSequenceNumber,
-                @event.Metadata.Occurred,
-                @event.Metadata.EventSource,
-                @event.ExecutionContext.ToExecutionContext(),
-                new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
-                @event.Metadata.Public,
-                @event.Content.ToString());
     }
 }

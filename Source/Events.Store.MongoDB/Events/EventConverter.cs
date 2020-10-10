@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Bson;
 using mongoDB = Dolittle.Runtime.Events.Store.MongoDB.Events;
@@ -14,14 +15,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public class EventConverter : IEventConverter
     {
-        /// <inheritdoc/>
-        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.Event @event) =>
-            new runtime.Streams.StreamEvent(@event.ToCommittedEvent(), @event.EventLogSequenceNumber, StreamId.EventLog, Guid.Empty, false);
-
-        /// <inheritdoc/>
-        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned) =>
-            new runtime.Streams.StreamEvent(@event.ToCommittedEvent(), @event.StreamPosition, stream, @event.Partition, partitioned);
-
         /// <inheritdoc/>
         public mongoDB.Event ToEventLogEvent(CommittedExternalEvent committedEvent) =>
             new mongoDB.Event(
@@ -42,5 +35,113 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.GetAggregateMetadata(),
                 committedEvent.GetEventHorizonMetadata(),
                 BsonDocument.Parse(committedEvent.Content));
+
+        /// <inheritdoc/>
+        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.Event @event) =>
+            new runtime.Streams.StreamEvent(
+                ToRuntimeCommittedEvent(@event),
+                @event.EventLogSequenceNumber,
+                StreamId.EventLog,
+                Guid.Empty,
+                false);
+
+        /// <inheritdoc/>
+        public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned) =>
+            new runtime.Streams.StreamEvent(
+                ToRuntimeCommittedEvent(@event),
+                @event.StreamPosition,
+                stream,
+                @event.Partition,
+                partitioned);
+
+        runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.Event @event) =>
+            @event.Aggregate.WasAppliedByAggregate
+                ? ToRuntimeCommittedAggregateEvent(@event)
+                : @event.EventHorizon.FromEventHorizon
+                    ? ToRuntimeCommittedExternalEvent(@event)
+                    : new runtime.CommittedEvent(
+                        @event.EventLogSequenceNumber,
+                        @event.Metadata.Occurred,
+                        @event.Metadata.EventSource,
+                        @event.ExecutionContext.ToExecutionContext(),
+                        new Artifact(
+                            @event.Metadata.TypeId,
+                            @event.Metadata.TypeGeneration),
+                        @event.Metadata.Public,
+                        @event.Content.ToString());
+
+        runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.Event @event) =>
+            new runtime.CommittedAggregateEvent(
+                new Artifact(
+                    @event.Aggregate.TypeId,
+                    @event.Aggregate.TypeGeneration),
+                @event.Aggregate.Version,
+                @event.EventLogSequenceNumber,
+                @event.Metadata.Occurred,
+                @event.Metadata.EventSource,
+                @event.ExecutionContext.ToExecutionContext(),
+                new Artifact(
+                    @event.Metadata.TypeId,
+                    @event.Metadata.TypeGeneration),
+                @event.Metadata.Public,
+                @event.Content.ToString());
+
+        runtime.CommittedExternalEvent ToRuntimeCommittedExternalEvent(mongoDB.Event @event) =>
+            new runtime.CommittedExternalEvent(
+                @event.EventLogSequenceNumber,
+                @event.Metadata.Occurred,
+                @event.Metadata.EventSource,
+                @event.ExecutionContext.ToExecutionContext(),
+                new Artifact(
+                    @event.Metadata.TypeId,
+                    @event.Metadata.TypeGeneration),
+                @event.Metadata.Public,
+                @event.Content.ToString(),
+                @event.EventHorizon.ExternalEventLogSequenceNumber,
+                @event.EventHorizon.Received,
+                @event.EventHorizon.Consent);
+
+        runtime.CommittedEvent ToRuntimeCommittedEvent(mongoDB.StreamEvent @event) =>
+            @event.Aggregate.WasAppliedByAggregate
+                ? ToRuntimeCommittedAggregateEvent(@event)
+                : @event.EventHorizon.FromEventHorizon
+                    ? ToRuntimeCommittedExternalEvent(@event)
+                    : new runtime.CommittedEvent(
+                        @event.Metadata.EventLogSequenceNumber,
+                        @event.Metadata.Occurred,
+                        @event.Metadata.EventSource,
+                        @event.ExecutionContext.ToExecutionContext(),
+                        new Artifact(
+                            @event.Metadata.TypeId,
+                            @event.Metadata.TypeGeneration),
+                        @event.Metadata.Public,
+                        @event.Content.ToString());
+
+        runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.StreamEvent @event) =>
+            new runtime.CommittedAggregateEvent(
+                new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
+                @event.Aggregate.Version,
+                @event.Metadata.EventLogSequenceNumber,
+                @event.Metadata.Occurred,
+                @event.Metadata.EventSource,
+                @event.ExecutionContext.ToExecutionContext(),
+                new Artifact(
+                    @event.Metadata.TypeId,
+                    @event.Metadata.TypeGeneration),
+                @event.Metadata.Public,
+                @event.Content.ToString());
+
+        runtime.CommittedExternalEvent ToRuntimeCommittedExternalEvent(mongoDB.StreamEvent @event) =>
+            new runtime.CommittedExternalEvent(
+                @event.Metadata.EventLogSequenceNumber,
+                @event.Metadata.Occurred,
+                @event.Metadata.EventSource,
+                @event.ExecutionContext.ToExecutionContext(),
+                new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
+                @event.Metadata.Public,
+                @event.Content.ToString(),
+                @event.EventHorizon.ExternalEventLogSequenceNumber,
+                @event.EventHorizon.Received,
+                @event.EventHorizon.Consent);
     }
 }

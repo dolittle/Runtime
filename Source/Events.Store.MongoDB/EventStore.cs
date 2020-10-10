@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Artifacts;
@@ -24,6 +25,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         readonly IExecutionContextManager _executionContextManager;
         readonly IStreams _streams;
         readonly IEventCommitter _eventCommitter;
+        readonly IEventConverter _eventConverter;
         readonly IAggregateRoots _aggregateRoots;
         readonly ILogger _logger;
 
@@ -33,18 +35,21 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="streams">The <see cref="IStreams"/>.</param>
         /// <param name="eventCommitter">The <see cref="IEventCommitter" />.</param>
+        /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
         public EventStore(
             IExecutionContextManager executionContextManager,
             IStreams streams,
             IEventCommitter eventCommitter,
+            IEventConverter eventConverter,
             IAggregateRoots aggregateRoots,
             ILogger logger)
         {
             _executionContextManager = executionContextManager;
             _streams = streams;
             _eventCommitter = eventCommitter;
+            _eventConverter = eventConverter;
             _aggregateRoots = aggregateRoots;
             _logger = logger;
         }
@@ -160,16 +165,22 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 & _eventFilter.Eq(_ => _.Metadata.EventSource, eventSource.Value)
                                 & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
                                 & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
+
                             var events = await _streams.DefaultEventLog
                                 .Find(transaction, filter)
                                 .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
-                                .Project(_ => _.ToCommittedAggregateEvent())
                                 .ToListAsync(cancel).ConfigureAwait(false);
+
+                            var aggregateEvents = events
+                                .Select(_ => _eventConverter.ToRuntimeStreamEvent(_))
+                                .Select(_ => _.Event)
+                                .Cast<CommittedAggregateEvent>()
+                                .ToList();
 
                             return new CommittedAggregateEvents(
                                 eventSource,
                                 aggregateRoot,
-                                events);
+                                aggregateEvents);
                         }
                         else
                         {
