@@ -35,6 +35,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         It should_come_from_the_correct_partition = () => result.Partition.ShouldEqual(partition);
         It should_come_from_the_correct_stream = () => result.Stream.ShouldEqual(stream);
         It should_have_the_content_returned_by_the_content_converter = () => result.Event.Content.ShouldBeTheSameAs(json_returned_by_event_converter);
-        It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToJSON(stored_event.Content));
+        It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToJson(stored_event.Content));
     }
 }

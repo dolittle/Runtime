@@ -15,13 +15,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// </summary>
         /// <param name="json">The JSON content to convert.</param>
         /// <returns>The converted <see cref="BsonDocument"/>.</returns>
-        BsonDocument ToBSON(string json);
+        BsonDocument ToBson(string json);
 
         /// <summary>
         /// Convertsa a <see cref="BsonDocument"/> to a JSON <see cref="string"/>.
         /// </summary>
         /// <param name="bson">The BSON content to convert.</param>
         /// <returns>The converted JSON <see cref="string"/>.</returns>
-        string ToJSON(BsonDocument bson);
+        string ToJson(BsonDocument bson);
     }
 }

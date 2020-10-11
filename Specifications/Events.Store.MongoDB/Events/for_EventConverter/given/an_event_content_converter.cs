@@ -20,12 +20,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.given
 
             bson_returned_by_event_converter = new BsonDocument();
             event_content_converter
-                .Setup(_ => _.ToBSON(It.IsAny<string>()))
+                .Setup(_ => _.ToBson(It.IsAny<string>()))
                 .Returns(bson_returned_by_event_converter);
 
             json_returned_by_event_converter = "{}";
             event_content_converter
-                .Setup(_ => _.ToJSON(It.IsAny<BsonDocument>()))
+                .Setup(_ => _.ToJson(It.IsAny<BsonDocument>()))
                 .Returns(json_returned_by_event_converter);
         };
     }

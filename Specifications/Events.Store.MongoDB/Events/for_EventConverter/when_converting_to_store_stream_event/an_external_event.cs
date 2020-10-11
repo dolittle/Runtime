@@ -33,6 +33,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         It should_have_the_same_external_event_log_sequence_number = () => result.EventHorizon.ExternalEventLogSequenceNumber.ShouldEqual(committed_event.ExternalEventLogSequenceNumber.Value);
         It shoul_have_the_same_received_value = () => result.EventHorizon.Received.ShouldEqual(committed_event.Received.UtcDateTime);
         It should_have_the_content_returned_by_the_content_converter = () => result.Content.ShouldBeTheSameAs(bson_returned_by_event_converter);
-        It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToBSON(committed_event.Content));
+        It should_call_the_content_converter_with_the_content = () => event_content_converter.VerifyOnlyCall(_ => _.ToBson(committed_event.Content));
     }
 }

@@ -18,11 +18,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         };
 
         /// <inheritdoc/>
-        public BsonDocument ToBSON(string json)
+        public BsonDocument ToBson(string json)
             => BsonDocument.Parse(json);
 
         /// <inheritdoc/>
-        public string ToJSON(BsonDocument bson)
+        public string ToJson(BsonDocument bson)
             => bson.ToJson(ToJsonSettings);
     }
 }

@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.GetEventMetadata(),
                 new AggregateMetadata(),
                 committedEvent.GetEventHorizonMetadata(),
-                _contentConverter.ToBSON(committedEvent.Content));
+                _contentConverter.ToBson(committedEvent.Content));
 
         /// <inheritdoc/>
         public mongoDB.StreamEvent ToStoreStreamEvent(CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 committedEvent.GetStreamEventMetadata(),
                 committedEvent.GetAggregateMetadata(),
                 committedEvent.GetEventHorizonMetadata(),
-                _contentConverter.ToBSON(committedEvent.Content));
+                _contentConverter.ToBson(committedEvent.Content));
 
         /// <inheritdoc/>
         public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.Event @event) =>
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                             @event.Metadata.TypeId,
                             @event.Metadata.TypeGeneration),
                         @event.Metadata.Public,
-                        _contentConverter.ToJSON(@event.Content));
+                        _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.Event @event) =>
             new runtime.CommittedAggregateEvent(
@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     @event.Metadata.TypeId,
                     @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
-                _contentConverter.ToJSON(@event.Content));
+                _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedExternalEvent ToRuntimeCommittedExternalEvent(mongoDB.Event @event) =>
             new runtime.CommittedExternalEvent(
@@ -106,7 +106,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     @event.Metadata.TypeId,
                     @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
-                _contentConverter.ToJSON(@event.Content),
+                _contentConverter.ToJson(@event.Content),
                 @event.EventHorizon.ExternalEventLogSequenceNumber,
                 @event.EventHorizon.Received,
                 @event.EventHorizon.Consent);
@@ -125,7 +125,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                             @event.Metadata.TypeId,
                             @event.Metadata.TypeGeneration),
                         @event.Metadata.Public,
-                        _contentConverter.ToJSON(@event.Content));
+                        _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.StreamEvent @event) =>
             new runtime.CommittedAggregateEvent(
@@ -139,7 +139,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                     @event.Metadata.TypeId,
                     @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
-                _contentConverter.ToJSON(@event.Content));
+                _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedExternalEvent ToRuntimeCommittedExternalEvent(mongoDB.StreamEvent @event) =>
             new runtime.CommittedExternalEvent(
@@ -149,7 +149,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 @event.ExecutionContext.ToExecutionContext(),
                 new Artifact(@event.Metadata.TypeId, @event.Metadata.TypeGeneration),
                 @event.Metadata.Public,
-                _contentConverter.ToJSON(@event.Content),
+                _contentConverter.ToJson(@event.Content),
                 @event.EventHorizon.ExternalEventLogSequenceNumber,
                 @event.EventHorizon.Received,
                 @event.EventHorizon.Consent);
