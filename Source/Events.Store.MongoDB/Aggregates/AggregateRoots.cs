@@ -106,7 +106,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             catch (MongoDuplicateKeyException)
             {
                 var currentVersion = await FetchVersionFor(
-                    transaction,
                     eventSource,
                     aggregateRoot,
                     cancellationToken).ConfigureAwait(false);
@@ -117,7 +116,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                 if (exception.WriteError.Category == ServerErrorCategory.DuplicateKey)
                 {
                     var currentVersion = await FetchVersionFor(
-                        transaction,
                         eventSource,
                         aggregateRoot,
                         cancellationToken).ConfigureAwait(false);
@@ -133,7 +131,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     if (error.Category == ServerErrorCategory.DuplicateKey)
                     {
                         var currentVersion = await FetchVersionFor(
-                            transaction,
                             eventSource,
                             aggregateRoot,
                             cancellationToken).ConfigureAwait(false);
@@ -178,6 +175,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 
             if (result.ModifiedCount > 1) throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot);
             return new AggregateRoot(eventSource, aggregateRoot, nextVersion);
+        }
+
+        async Task<AggregateRootVersion> FetchVersionFor(
+            EventSourceId eventSource,
+            ArtifactId aggregateRoot,
+            CancellationToken cancellationToken)
+        {
+            var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
+                & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
+            var aggregateDocuments = await _aggregates.Aggregates.Find(eqFilter).ToListAsync(cancellationToken).ConfigureAwait(false);
+
+            return aggregateDocuments.Count switch
+            {
+                0 => AggregateRootVersion.Initial,
+                1 => aggregateDocuments[0].Version,
+                _ => throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot),
+            };
         }
 
         void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)
