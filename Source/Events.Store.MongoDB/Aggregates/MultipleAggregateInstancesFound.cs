@@ -3,7 +3,7 @@
 
 using Dolittle.Artifacts;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 {
     /// <summary>
     /// Exception that gets thrown when multiple versions of a single aggregate root instance is found in the MongoDB.

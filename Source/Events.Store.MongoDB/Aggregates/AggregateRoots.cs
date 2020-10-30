@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             CancellationToken cancellationToken)
         {
             _logger.Trace("Incrementing version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
-            ThrowIfNextVersionIsNotGreaterThanExpectedVersion(expectedVersion, nextVersion);
+            ThrowIfNextVersionIsNotGreaterThanExpectedVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
 
             if (expectedVersion == AggregateRootVersion.Initial)
             {
@@ -109,7 +109,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     eventSource,
                     aggregateRoot,
                     cancellationToken).ConfigureAwait(false);
-                throw new AggregateRootConcurrencyConflict(currentVersion, expectedVersion);
+                throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
             }
             catch (MongoWriteException exception)
             {
@@ -119,7 +119,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                         eventSource,
                         aggregateRoot,
                         cancellationToken).ConfigureAwait(false);
-                    throw new AggregateRootConcurrencyConflict(currentVersion, expectedVersion);
+                    throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
                 }
 
                 throw;
@@ -134,7 +134,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                             eventSource,
                             aggregateRoot,
                             cancellationToken).ConfigureAwait(false);
-                        throw new AggregateRootConcurrencyConflict(currentVersion, expectedVersion);
+                        throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
                     }
                 }
 
@@ -170,7 +170,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
                     eventSource,
                     aggregateRoot,
                     cancellationToken).ConfigureAwait(false);
-                throw new AggregateRootConcurrencyConflict(currentVersion, expectedVersion);
+                throw new AggregateRootConcurrencyConflict(eventSource, aggregateRoot, currentVersion, expectedVersion);
             }
 
             if (result.ModifiedCount > 1) throw new MultipleAggregateInstancesFound(eventSource, aggregateRoot);
@@ -194,11 +194,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             };
         }
 
-        void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)
+        void ThrowIfNextVersionIsNotGreaterThanExpectedVersion(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion expectedVersion, AggregateRootVersion nextVersion)
         {
             if (nextVersion <= expectedVersion)
             {
-                throw new NextAggregateRootVersionMustBeGreaterThanCurrentVersion(expectedVersion, nextVersion);
+                throw new NextAggregateRootVersionMustBeGreaterThanCurrentVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
             }
         }
     }
