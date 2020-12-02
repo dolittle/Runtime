@@ -36,8 +36,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             var config = configuration.Instance;
             var settings = new MongoClientSettings
             {
-                Servers = config.Servers.Select(_ => new MongoServerAddress(_)),
-                GuidRepresentation = GuidRepresentation.Standard
+                Servers = config.Servers.Select(_ => MongoServerAddress.Parse(_)),
+                GuidRepresentation = GuidRepresentation.Standard,
+                MaxConnectionPoolSize = config.MaxConnectionPoolSize,
             };
 
             MongoClient = new MongoClient(settings.Freeze());

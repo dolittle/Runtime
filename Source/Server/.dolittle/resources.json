@@ -4,7 +4,8 @@
             "servers": [
                 "localhost"
             ],
-            "database": "event_store"
+            "database": "event_store",
+            "maxConnectionPoolSize": 1000
         }
     }
 }
