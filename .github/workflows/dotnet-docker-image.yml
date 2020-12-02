@@ -81,7 +81,7 @@ jobs:
         push: true
         context: .
         file: ./Docker/Production/Dockerfile
-        tags: ${{ env.DOCKER_HUB_REPO }}:${{ steps.increment-version.outputs.next-version }}, ${{ env.DOCKER_HUB_REPO }}:latest
+        tags: ${{ env.DOCKER_HUB_REPO }}:${{ steps.increment-version.outputs.next-version }},${{ env.DOCKER_HUB_REPO }}:latest
 
     - name: Push Development Image to Docker Hub
       uses: docker/build-push-action@v2
@@ -90,7 +90,7 @@ jobs:
         push: true
         context: .
         file: ./Docker/Development/Dockerfile
-        tags: ${{ env.DOCKER_HUB_REPO }}:${{ steps.increment-version.outputs.next-version }}-development, ${{ env.DOCKER_HUB_REPO }}:latest-development
+        tags: ${{ env.DOCKER_HUB_REPO }}:${{ steps.increment-version.outputs.next-version }}-development,${{ env.DOCKER_HUB_REPO }}:latest-development
 
     - name: Create GitHub Release
       uses: dolittle/github-release-action@v1
