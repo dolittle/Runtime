@@ -27,6 +27,15 @@ RUN apt-get update \
         gnupg \
     && rm -rf /var/lib/apt/lists/*
 
+# Hack to get MongoDB to install even without systemctl
+# See https://www.julienrouse.com/blog/systemctl_not_found_while_installing_mongodb_server/#spoiler-a-solution
+RUN ln -s /bin/true /usr/local/sbin/systemctl
+RUN ln -s /bin/true /usr/local/bin/systemctl
+RUN ln -s /bin/true /usr/sbin/systemctl
+RUN ln -s /bin/true /usr/bin/systemctl
+RUN ln -s /bin/true /sbin/systemctl
+RUN ln -s /bin/true /bin/systemctl
+
 # Install MongoDB
 RUN wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | apt-key add - \
     && echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.2.list \
