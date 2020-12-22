@@ -6,7 +6,7 @@ keywords: runtime, sdk, fundamentals, concepts, building, block, essentials
 weight: 20
 type: "space"
 icon: "ti-package"
-repository: https://github.com/dolittle-runtime/Runtime
+repository: https://github.com/dolittle/Runtime
 aliases:
     - /runtime
 ---
