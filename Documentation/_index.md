@@ -1,6 +1,6 @@
 ---
-title: Building blocks
-description: The essential building blocks of the Dolittle framework
+title: Concepts
+description: The essential concepts of Dolittle
 author: Dolittle
 keywords: runtime, sdk, fundamentals, concepts, building, block, essentials
 weight: 20
@@ -19,6 +19,3 @@ For a more high-level explanation read our [overview.]({{< ref "/getting-started
 
 
 The Dolittle [runtime](https://github.com/dolittle-runtime/Runtime) provides you with: [Commands]({{< ref about_commands >}}), [Events]({{< ref domain_events >}}), [ReadModels]({{< ref read_model >}}), [Events]({{< ref query >}}), [metrics]({{< ref metrics >}}), [tenancy]({{< ref tenancy_system >}}) and [resource management]({{< ref resources >}}) systems to build web apps.
-
-
-
