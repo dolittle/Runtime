@@ -18,9 +18,9 @@ There are two fundamental concepts for the Event Store:
 1. A **Commit** which is a series of Events for a particular *Event Source* that is persisted as an atomic unit.
 2. A **Stream** which is a series of Commits linked to a particular *Event Source*.  
 
-{{% notice Important %}}
+{{% alert color="warning" %}}
 An Event Source is any Entity that can generate events that are persisted in a stream in the Event Store.  In DDD terms, these are most often identified as Aggregate Roots although Polices and other Event Processors can also generate Events.
-{{% /notice %}}
+{{% /alert %}}
 
 A *Commit* is most closely associated with the concept of a *Command* and a *Command Handler* which form a *Transaction*.  A transaction operates against a single Event Source (Aggregate).  There is no explicit concept of a **Unit of Work** whereby multiple Event Streams are generated for multiple Event Sources, or where Events for multiple event sources are persisted in a single commit.  A Commit is a series of one or more events that belong to a single Event Source that are persisted in an atomic manner i.e. all events are persisted successfully or none of them are.  By focusing on the commit as the atomic unit for persistence, we avoid the need for distributed transactions or two-phase commits and enable a wider variety or storage engines for our Event Store.
 
@@ -53,11 +53,11 @@ The timestamp indicating when the event occurred - when it was persisted - in UT
 
 In addition, the Commit contains an Event Store assigned, globally increasing number indicating the order in which commits were committed to the Event Store (cutting across all Event Sources).  This **Commit Sequence Number** is important in allowing *Event Processors* to track which events they have processed and to “catch up” when they re-start.
 
-{{% notice Info %}}
+{{% alert %}}
 Event Processors track the last version of the event that they processed in the form of the **CommittedEventVersion**.  This offset into the Event Stream is persisted.  
 The CommittedEventVersion is like the EventSourceVersion mentioned above but with the CommitSequenceNumber appended in the form:
 {Commit Sequence Number}.{Event Source Commit Number}.{ Event Sequence Number }
-{{% /notice %}}
+{{% /alert %}}
 
 
 ## Event Persistence

@@ -41,11 +41,11 @@ A Domain Event should be expressed in the Ubiquitous Language of the Domain.  As
 
 The concept of serialisation is inextricably linked to the concept of a Domain Event and this imposes further restrictions on the shape, form and content of our events.  The shape of your Events should be kept as simple as possible utilising only primitives or, if necessary, other DTO structures.  Events cannot contain any Entities or Aggregates.  Where required, these can be referenced by Id.  It is also strongly advised to avoid structures and types that require versioning.  You should not include anything declared within your Domain (e.g. Concepts or Value Objects) on your event as these are Type definitions that can change over time.  Similarly structures within C# such as Enums should not be included directly.  Instead the underlying primitive value should be included on the Event.  
 
-{{% notice tip %}}
+{{% alert %}}
 Dolittle requires that the event properties are read-only and match the name of constructor-parameters. The constructor-parameter names must start with a small letter, while the property-names must start with a capital letter.
 
 Thus, if you have a property "UnitPrice" it must match a constructor-parameter "unitPrice" of the same type.
-{{% /notice %}}
+{{% /alert %}}
 
 ```csharp
 public class ItemAddedToCart(AddRecommendationToCart cmd)
@@ -143,7 +143,3 @@ When designing events, you should consider the purpose of the event, particularl
 An Event has a lot of common contextual information that is useful in the tracing and processing of the Event.  This metadata includes which Entity / Aggregate the event relates to, the User or System that caused the event, a Correlation id that allows the Event to be related to a Command or other action within the system, a UTC timestamp indicating when the Event occurred, the version of the Event and Aggregate, the Source (Application, Bounded Context, Tenant) and so on.  This combination of the Event and Contextual metadata is often referred to as the EventEnvelope.  The metaphor being that the metadata is the envelope and address and so on which the event is that actual contents of the letter.
 
 Dolittle supports such Event Envelopes.  It is therefore redundant to include this contextual information on your Events.  It also draws attention away from the important aspects of the Event (the state change).
-
-
-
-

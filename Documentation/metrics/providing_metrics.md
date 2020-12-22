@@ -38,10 +38,10 @@ and gives you functionality for creating:
 * [Histogram](https://prometheus.io/docs/concepts/metric_types/#histogram)
 * [Summary](https://prometheus.io/docs/concepts/metric_types/#summary)
 
-{{% notice note %}}
+{{% alert %}}
 Recommend reading the [best practices](https://prometheus.io/docs/practices/instrumentation/#counter-vs.-gauge-vs.-summary)
 for when to use which type of `Collector`
-{{% /notice %}}
+{{% /alert %}}
 
 ## Exposing Metrics to the outside
 
@@ -50,11 +50,11 @@ The provider itself is only responsible for creating the different `Collectors`,
 by exposing public properties on the provider itself and make sure we have it as a singleton
 for us to be able use them across the system.
 
-{{% notice warning %}}
+{{% alert color="warning" %}}
 The `Collectors` are not per tenant. This means they are to be considered global variables.
 Look at [dynamic metrics]({{< relref dynamic_metrics >}}) for an example of how you could
 have tenant specific `Collectors`.
-{{% /notice %}}
+{{% /alert %}}
 
 The following example shows how you can achieve this:
 

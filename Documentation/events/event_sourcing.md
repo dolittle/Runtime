@@ -68,6 +68,6 @@ It would be unecessary to go through event replay when creating an aggregate roo
 
 While retrieving events to replay is a simple process, since events are a cumulative process, the number of events to be retrieved is eternally and unboundedly growing.  This has obvious potential performance implications for aggregates with a large number of events.
 
-{{% notice note %}} An Event Sourced System, as it is fundamentally sharded on Aggregate Id, is more suited to partition and scale than a traditional relational database system
+{{% alert %}} An Event Sourced System, as it is fundamentally sharded on Aggregate Id, is more suited to partition and scale than a traditional relational database system
 
 To improve the performance of an individual aggregate, it is *recommended* to implement the **memento pattern** through the medium of rolling snapshots.  In effect, a snapshot captures the state at a particular time and store this.  To rehydrate your object, you load the snapshot then reapply all the events that have occurred since the snapshot was made.  There are many strategies that can be used to decide when to snapshot state. Snapshots can also be discarded and rebuilt as required.

@@ -12,10 +12,10 @@ Instead of using the [provider model]({{< relref providing_metrics >}}),
 you can simply take a dependency to the `IMetricFactory` and create
 collectors on the fly.
 
-{{% notice note %}}
+{{% alert %}}
 The underlying metric system will reuse the collector based on the name
 and matching labels and will therefor not impact memory consumption.
-{{% /notice %}}
+{{% /alert %}}
 
 Below is an example of how a tenant specific counter could be created and
 used:
