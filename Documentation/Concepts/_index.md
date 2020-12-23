@@ -1,14 +1,8 @@
 ---
 title: Concepts
 description: The essential concepts of Dolittle
-author: Dolittle
-keywords: runtime, sdk, fundamentals, concepts, building, block, essentials
 weight: 20
-type: "space"
-icon: "ti-package"
 repository: https://github.com/dolittle/Runtime
-aliases:
-    - /runtime
 ---
 
 This section documents the main building blocks of a Dolittle application. It covers both the backend and the front end.
