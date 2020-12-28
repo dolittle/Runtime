@@ -44,7 +44,7 @@ The _Read Cache_ in these pictures is not part of Dolittle. Different situations
 {{< /alert >}}
 
 ### Multi-tenancy
-Multi-tenancy means that a single instance of the software and its supporting infrastructure serves multiple customers. Dolittle supports multi-tenancy by separating the event stores for each tenant so that each tenant can only its own data.
+Multi-tenancy means that a single instance of the software and its supporting infrastructure serves multiple customers. Dolittle supports multi-tenancy by separating the event stores for each tenant so that each tenant only has access to its own data.
 
 This diagram shows a microservice with 2 tenants, each of them with their own resources.
 
