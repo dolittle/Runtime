@@ -23,7 +23,7 @@ When runtimes subscribe to events from other runtimes, these events are transfer
 ## Event-Driven
 Dolittle uses a style of Event-Driven Architecture called [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html), which means to _"capture all changes to an applications state as a sequence of events"_, these events then form the _"truth"_ of the system. Events **cannot be changed or deleted** as they represent things that have happened.
 
-With event sourcing your applications state is no longer stored as a snapshot of your current state but rather as a whole history of all state changing events. These events can then be replayed to recreate the state whenever needed, eg. replay them to a test environment to see how it would behave. The system can also produce the state it had at any point in time.
+With event sourcing your applications state is no longer stored as a snapshot of your current state but rather as a whole history of all state-changing events. These events can then be replayed to recreate the state whenever needed, eg. replay them to a test environment to see how it would behave. The system can also produce the state it had at any point in time.
 
 Event sourcing allows for high scalability thanks to being a very loosely coupled system, eg. a stream of events can keep a set of in-memory databases updated instead of having to query a master database.
 
