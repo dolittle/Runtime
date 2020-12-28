@@ -7,7 +7,7 @@
 [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest)](https://hub.docker.com/r/dolittle/runtime)
 
 
-Dolittle is a decentralized, distributed, event-driven microservice library built to harness the power of events.
+Dolittle is a decentralized, distributed, event-driven microservice platform built to harness the power of events.
 
 The runtime is the backend of our system and manages connections from the SDKs and other runtimes to it's Event Store. It's called the runtime as it's what runs and powers the SDK's to do their job.
 
