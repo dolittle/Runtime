@@ -23,15 +23,14 @@ As streams are append-only, an event can be uniquely identified by its position 
 
 Event streams are perhaps the most important part of the Dolittle platform. To get a different and more detailed perspective on streams, please read our section on [event sourcing and streams]({{< ref "event_sourcing.md#streams" >}}).
 
-### Stream Partition
+###  Partitions
+If we dive deeper into event streams we'll see that we have two types of streams in the Runtime; partitioned and unpartitioned streams.
 
-If we go deeper down the hole that is event streams we'll see that we have two types of streams in the Runtime; partitioned and unpartitioned streams.
+A partitioned stream is a stream that is split into chunks. These chunks are uniquely identified by a `PartitionId` (GUID). Each item in a partitioned stream can only belong to a single partition.
 
-A partitioned stream is a stream that is split into chunks. These chunks are uniquely identified by a partition id (GUID). Each item in a partitioned stream can only belong to a single partition.
+An unpartitioned stream only has one chunk with a `PartitionId` of `00000000-0000-0000-0000-000000000000`.
 
-While an unpartitioned stream is, as you'd probably guess, a stream that is not split into chunks. It only consists of one big chunk if you will.
-
-There are multiple reasons for partitioning streams. One of the benefits is that it gives a way for the developers to naturally partition their events and the way they are processed in an event handler (we'll talk more about this [later]({{< ref "#event-handlers" >}})). Another reason for having partitions becomes apparent when needing to subscribe to other streams in other microservices. We'll talk more about that in the section about the [Event Horizon]({{< ref "event_horizon.md" >}})
+There are multiple reasons for partitioning streams. One of the benefits is that it gives a way for the developers to partition their events and the way they are processed in an event handler (we'll talk more about this in [Event Handlers]({{< ref "#event-handlers" >}})). Another reason for having partitions becomes apparent when needing to subscribe to other streams in other microservices. We'll talk more about that in the [Event Horizon]({{< ref "event_horizon.md" >}}) section.
 
 ### Stream Processor
 
