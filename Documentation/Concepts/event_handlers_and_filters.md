@@ -34,14 +34,18 @@ There are multiple reasons for partitioning streams. One of the benefits is that
 
 ### Stream Processor
 
-Before talking about the actual event [processors]({{< ref "#processors" >}}) we should just touch upon the main building block of the event processors, the stream processor. Stream processors are constructs that are internal to the Runtime and there is no way for applications to directly interact with stream processors. It is almost the same as an event processor on a conceptual level; it takes in as input a stream of events and processes each event in order. But it does not know how to process the event, that's the event processor's job. Each stream processor can be seen as the lowest level unit-of-work in regards to streams in the Runtime and they all run at the same time, side by side, in parallel.
+A stream processor consists of an event stream and an event processor. It takes in a stream of events, calls the event processor to process the events in order, and keeps track of which events have already been processed. Each stream processor can be seen as the lowest level unit-of-work in regards to streams and they all run at the same time, side by side, in parallel.
 
-They do have a resource cost associated with them (and right now as of Runtime version 5.2.0 they are very resource heavy). That cost comes due to the fact that the stream processor needs to get the first unprocessed event in the stream and then send it over to the event processor for processing. And while there are no new events to process it needs to wait.
+The stream processors plays a central role in the Runtime. They enforce the most important rules of Event Sourcing; an event in a stream is not processed twice (unless the stream is being replayed) and that no event in a stream is skipped while processing.
 
-Since the stream processors work on streams, and streams can be partitioned or unpartitioned, we naturally need two different kinds of stream processors. They operate slightly different, though the difference is of significant importance.
-The difference comes into play when the processing of an event fails for any reason. What should then happen? We cannot really just skip that faulty event so that means that the processing of events would come to a halt and continue until we can successfully process the faulty event again. The severity of halting the processing of events can be quite significant, however this is mitigated in partitioned streams because the processing only stops for that single partition. So that's one of the reasons why you'd want to partition event streams, to be able to try continue processing the event stream even though one, or several, of the events cannot be processed right now. Remember that an event in a stream can only belong to one partition? We can continue processing events as long as the event to process does not belong to a partition that is failing. The faulty partitions won't necessarily be halted forever we can retry processing again at any time and if it succeeds the processing of that partition will continue as normal again.
+{{< alert title="Resource usage" color="warning">}}
+Stream processors in Runtime version 5.2.0 and earlier are particularly resource-heavy, we're working on a fix.
+{{< /alert >}}
 
-The stream processors plays a central role in the Runtime, and without it the Runtime would be completely useless. They also enforce the most important rules of the Event Sourced Runtime; that an event in a stream is not processed twice (unless the stream is being replayed) and that no event in a stream is skipped while processing.
+Stream processors are constructs that are internal to the Runtime and there is no way for the SDK to directly interact with stream processors.
+
+### Dealing with failures
+What should happen when a processor fails? We cannot skip faulty events, which means that the event processor has to halt until we can successfully process the event. This problem can be mitigated with a [partitioned]({{< ref "#partitions" >}}) streams because the processing only stops for that single partition. This way we can keep processing the event stream even though one, or several, of the processors fail. The failing processors will keep retrying and will continue processing consequent events normally if they succeed.
 
 #### Event Processor
 
