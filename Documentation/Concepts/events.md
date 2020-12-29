@@ -40,25 +40,50 @@ For example, in the domain of opening up the kitchen for the day and adding a ne
 - ❌ `TakeoutServerReadyForRequests`
 - ❌ `MenuListingElementUpdated`
 
+## Structure of an Event
+
+```csharp
+Event {
+    Content object
+    EventSourceId Guid
+    EventType {
+        EventTypeId Guid
+        Generation int
+    }
+}
+```
 
 ## EventSourceId
 `EventSourceId` represents the source of the event like a "primary key" in a traditional database.
 
 ## EventType
-@joel the sdk also needs teh eventype to deserialize the data coign back from runtime.
-
-An EventType is a GUID to uniquely identify the type of event it is and the event types _generation_.
+An EventType is a combination of a GUID to uniquely identify the type of event it is and the event types _generation_.
 This decouples the event from a programming language and enables renaming of events as the domain language evolves.
+Simply put, event types are a wrapper for the actual type of your event.
+
+```csharp
+// simplified structure of an EventType
+EventType {
+    EventTypeId Guid
+    // optional, defaults to 1
+    Generation uint
+}
+```
 
 The runtime doesn't know or care about the event's content, properties or type (in its respective programming language). The runtime saves the event to the event store and then filters it to the respective [EventHandlers & Filters]({{< ref "event-handlers" >}}) which exist on the client side. For this event to be accurately serialized to JSON and then deserialized back to a type that the client understands, an event type is required.
 
-This diagram shows us a simplified view of committing a single event with the type of `DishPrepared`. The runtime receives the event, and and sends it back to us to be handled. Without the event type, the SDK wouldn't know how to deserialize the JSON message coming from the runtime.
+This diagram shows us a simplified view of committing a single event with the type of `DishPrepared`. The runtime receives the event, and sends it back to us to be handler. Without the event type, the SDK wouldn't know how to deserialize the JSON message coming from the runtime.
 
 ![Flow of committing an event type](/images/concepts/eventtype.png)
 
-This is important when wanting to deserialize events coming from other microservices. As the other microservice could be written in a completely different programming language
+Event types are also important when wanting to deserialize events coming from other microservices. As the other microservice could be written in a completely different programming language, event types provide a level of abstraction for deserializing the events. Using event types 
+
+{{< alert title="Why not use class/type names instead of GUIDs?" color="primary" >}}
+When consuming events from other microservices it's important to remember that they both have their own domain and name things according to their own domain. For example what another microservice calls `CustomerRegistered` could be 
+{{< /alert >}}
 
 ### Generations
+As the code changes, the event type is also bound to change at some point. 
 
 ## Commit vs Publish
 
