@@ -54,15 +54,12 @@ All stream processors consists of an event stream and an event processor that pr
 When the processing of an event is completed it returns a processing result back to the stream processor. This results contains information on whether or not the processing succeeded or not. If it did not succeed it will say how many times it has attempted to process that event, whether or not it should retry and how long it will wait until retrying.
 
 ### Rules
-
-In order to maintain the [idempotency](https://en.wikipedia.org/wiki/Idempotence) of your event processors and the predictability of the Runtime we need to establish a couple of rules on streams. Some of the rules are directly related to the attributes of a stream.
+There are rules on streams to maintain [idempotency](https://en.wikipedia.org/wiki/Idempotence) and the predictability of Runtime. These rules are enforced by the Runtime:
 
 * The ordering of the events cannot change
 * Events can only be appended to the end of the stream
 * Events cannot be removed from the stream
 * A partitioned stream cannot be changed to be unpartitioned and vice versa
-
-The Runtime will enforce these rules. You're not allowed to do anything that breaks these rules.
 
 ## Processors
 
