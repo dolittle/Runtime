@@ -19,7 +19,7 @@ This is common in accounting, for example:
 Sally adds 100$ into her bank, which would result in an event like "Add 100$ to Sally's account". But if the bank accidentally adds 1000$ instead of the 100$ then a correcting event should be played, like "Subtract 900$ from Sally's account". And with event sourcing, this information is preserved in the event store for eg. later auditing purposes.
 
 ### Naming
-To indicate that the event “has happened in the past”, it should be named as verb in the past tense.  Often it can contain the name of the entity that the change or action is affecting.
+To indicate that the event “has happened in the past”, it should be named as a verb in the past tense.  Often it can contain the name of the entity that the change or action is affecting.
 
 - ✅ `DishPrepared`
 - ✅ `ItemAddedToCart`
@@ -37,10 +37,11 @@ An event should be expressed in language that makes sense in the domain, also kn
 For example, in the domain of opening up the kitchen for the day and adding a new item to the menu:
 - ✅ `KitchenOpened`
 - ✅ `DishAddedToMenu`
-- ❌ `TakeoutServerReadyForRequests`
+- ❌ `TakeoutServerReady`
 - ❌ `MenuListingElementUpdated`
 
-## Structure of an Event
+## Main structure of an Event
+This is a simplified structure of the main parts of an event.
 
 ```csharp
 Event {
@@ -50,44 +51,72 @@ Event {
         EventTypeId Guid
         Generation int
     }
+    Public bool
 }
 ```
 
-## EventSourceId
-`EventSourceId` represents the source of the event like a "primary key" in a traditional database.
+For the whole structure of an event as defined in the gRPC, please check [Contracts](https://github.com/dolittle/Contracts/tree/master/Source/Runtime/Events).
 
-## EventType
-An EventType is a combination of a GUID to uniquely identify the type of event it is and the event types _generation_.
-This decouples the event from a programming language and enables renaming of events as the domain language evolves.
-Simply put, event types are a wrapper for the actual type of your event.
+### Content
+This is the object the user commits.
 
-```csharp
-// simplified structure of an EventType
-EventType {
-    EventTypeId Guid
-    // optional, defaults to 1
-    Generation uint
-}
-```
+### EventSourceId
+`EventSourceId` represents the source of the event like a "primary key" in a traditional database. By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it as the `PartitionId`.
 
-The runtime doesn't know or care about the event's content, properties or type (in its respective programming language). The runtime saves the event to the event store and then filters it to the respective [EventHandlers & Filters]({{< ref "event-handlers" >}}) which exist on the client side. For this event to be accurately serialized to JSON and then deserialized back to a type that the client understands, an event type is required.
+### EventType
+An `EventType` is a combination of an `EventTypeId` to uniquely identify the type of event it is and the event types `Generation`.
+This decouples the event from a programming language and enables the renaming of events as the domain language evolves.
+Simply put, event types are a wrapper for the actual type of your event. They mask the underlying language-specific type implementation and conventions.
 
-This diagram shows us a simplified view of committing a single event with the type of `DishPrepared`. The runtime receives the event, and sends it back to us to be handler. Without the event type, the SDK wouldn't know how to deserialize the JSON message coming from the runtime.
+The Runtime doesn't know or care about the event's content, properties, or type (in its respective programming language). The Runtime saves the event to the event store and then calls the respective [EventHandlers & Filters]({{< ref "event_handlers_and_filters" >}}). For this event to be serialized to JSON and then deserialized back to a type that the client's filters and event handlers understand, an event type is required.
+
+This diagram shows us a simplified view of committing a single event with the type of `DishPrepared`. The Runtime receives the event, and sends it back to us to be handled. Without the event type, the SDK wouldn't know how to deserialize the JSON message coming from the Runtime.
 
 ![Flow of committing an event type](/images/concepts/eventtype.png)
 
-Event types are also important when wanting to deserialize events coming from other microservices. As the other microservice could be written in a completely different programming language, event types provide a level of abstraction for deserializing the events. Using event types 
+Event types are also important when wanting to deserialize events coming from other microservices. As the other microservice could be written in a completely different programming language, event types provide a level of abstraction for deserializing the events.
 
-{{< alert title="Why not use class/type names instead of GUIDs?" color="primary" >}}
-When consuming events from other microservices it's important to remember that they both have their own domain and name things according to their own domain. For example what another microservice calls `CustomerRegistered` could be 
+{{< alert title="Why not use class/type names instead of GUIDs?" color="info" >}}
+When consuming events from other microservices it's important to remember that they name things according to their own domain and conventions.
+
+As an extreme example, a microservice could have an event with a type `CustomerRegistered`. But in another microservice in a different domain, written in a different language, this event type could be called `user_added`.
+
+GUIDs also solve the problem of having duplicate names, it's not hard to imagine having to have multiple events with the type of `CustomerRegisterd` in your code coming from different microservices.
 {{< /alert >}}
 
-### Generations
-As the code changes, the event type is also bound to change at some point. 
+#### Generations
+As the code changes, the event type is also bound to change at some point. These iterations on the same event type are called _generations_. Whenever you add or change a property in an event you should increase this number. This way the filters and handlers can handle a specific generation of an event.
 
-## Commit vs Publish
+For example, imagine an older generation of an event type didn't have a property. You can have a separate handler for that particular generation that handles the missing property.
+```csharp
+// C# like pseudo-code
+[EventType("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 1)]
+DishPrepared {
+    Dish string;
+}
 
-## Public vs. Private
+// Generation 2
+[EventType("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 2)]
+DishPrepared {
+    Dish string;
+    Chef string;
+}
+
+// handlers generations separately
+[Handle("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 1)]
+Handle(DishPrepared @event) {
+    // handle the missing property
+}
+
+[Handle("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 2)]
+Handle(DishPrepared @event) { ... }
+```
+
+{{< alert title="Production ready" color="info" >}}
+For making development easier, you shouldn't worry about incrementing the generation until you're in production.
+{{< /alert >}}
+
+### Public vs. Private
 There is a basic distinction between private events and public events. In much the same way that you would not grant access to other applications to your internal database, you do not allow other applications to subscribe to your private events.
 
 Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}) so that an event committed for one tenant cannot be handled outside of that tenant. Private events model the system within its domain and should be named in a way that makes sense inside the domain.
@@ -96,9 +125,9 @@ Public events are also accessible within a single tenant but they can also be ad
 
 Your external stream of public events is your contract to the outside world, your API.
 
-{{< alert color="primary" >}}
+{{< alert title="Changes to public events" color="primary" >}}
 Extra caution should be paid to changing public events so as not to break other microservices consuming those events.
 {{< /alert >}}
 
-
-## Metadata
+## Commit vs Publish
+We use the word `Commit` rather than `Publish` when talking about saving events to the [Event Store]({{< ref "event_store" >}}). We want to emphasize that it's the event store that is the source of truth in the system. The act of calling filters/event handlers comes _after_ the event has been committed to the event store.
