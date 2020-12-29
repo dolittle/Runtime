@@ -33,7 +33,7 @@ The history of events also forms an audit log to help with debugging and auditin
 Dolittle applications are built from microservices that communicate with each other using events. These microservices can scale and fail independently as there is no centralized message bus like in [Kafka](https://kafka.apache.org/). The runtimes and event stores are independent of other parts of the system.
 
 ## Microservice
-A _microservice_ consists of one or many heads talking to one runtimes. The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like.
+A _microservice_ consists of one or many heads talking to one runtime. The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like.
 
 This diagram shows the anatomy of a microservice with one head.
 
