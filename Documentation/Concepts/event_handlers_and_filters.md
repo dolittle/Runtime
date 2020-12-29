@@ -17,9 +17,11 @@ So, what is a stream? A stream is simply a list with two specific attributes:
 
 * Streams are append-only. Meaning that items can only be put at the very end of the stream, and that the stream is not of a fixed length.
 * Items in the stream immutable. The items or their order cannot change.
-So this means that an event stream is a stream where each item is an event. Each stream is also uniquely identified within an [Event Store]({{< ref "event_sourcing.md#event-store" >}}) by a GUID. An event can belong to as many streams as you want, and it most cases it will at least belong to two streams (one being the [event log]({{< ref "event_sourcing.md#event-log" >}})). An important property of an event in a stream that can be derived from the attributes of the stream is that an event is uniquely identified within a stream by its position in that stream (an event is also globally uniquely identified by its position in the event log. You can read more about that [here]({{< ref "event_sourcing.md#event-log" >}})).
+An event stream is simply a stream of events. Each stream is uniquely identified within an [Event Store]({{< ref "event_sourcing.md#event-store" >}}) by a GUID. An event can belong many streams, and in most cases it will at least belong to two streams (one being the [event log]({{< ref "event_sourcing.md#event-log" >}})).
 
-The event streams is perhaps the most important part of the Runtime and the Dolittle platform. And by time you'll see that your Runtimes will have lots and lots of streams! To get a different and more detailed perspective on streams in the context of [event sourcing]({{< ref "event_sourcing.md" >}}) go [here]({{< ref "event_sourcing.md#streams" >}})
+As streams are append-only, an event can be uniquely identified by its position in a stream, including in the [event log]({{< ref "event_sourcing.md#event-log" >}}).
+
+Event streams are perhaps the most important part of the Dolittle platform. To get a different and more detailed perspective on streams, please read our section on [event sourcing and streams]({{< ref "event_sourcing.md#streams" >}}).
 
 ### Stream Partition
 
