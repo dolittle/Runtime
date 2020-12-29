@@ -1,7 +1,7 @@
 ---
 title: Concepts
 description: The essential concepts of Dolittle
-weight: 1
+weight: 10
 repository: https://github.com/dolittle/Runtime
 ---
 
