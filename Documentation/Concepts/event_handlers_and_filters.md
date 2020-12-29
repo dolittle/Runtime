@@ -7,7 +7,7 @@ repository: https://github.com/dolittle/Runtime
 
 In event-driven systems it is usually not enough to just say that an [event]({{< ref "events.md" >}} "Events") occurred. Usually you'd expect that something should happen as a result of that event occurring as well.
 
-In the [Runtime]({{< ref "overview.md" >}} "Runtime Overview") we have a couple of constructs that can process events; [Event Handlers]({{< ref "#event-handlers">}}), [Filters]({{< ref "#filters">}}) and [Event Processors]({{< ref "#event-processors">}}). In essence these "processors" takes in a [stream]({{< ref "#event-streams" >}}) of events as input and does something to each individual event. What it does to the event is dependent on what kind of processor it is. We'll talk more in about the different processors later in this section.
+In the [Runtime]({{< ref "overview.md" >}}) we have 3 constructs that can process events; [Event Handlers]({{< ref "#event-handlers">}}), [Filters]({{< ref "#filters">}}) and [Event Processors]({{< ref "#event-processors">}}). A "processor" takes in a [stream]({{< ref "#event-streams" >}}) of events as an input and does something to each individual event. What it does to the event is dependent on what kind of processor it is. We'll talk more about different processors later in this section.
 
 But first, let's get started with the fundamentals, the event streams.
 
