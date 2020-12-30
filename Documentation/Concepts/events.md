@@ -128,7 +128,7 @@ Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}
 
 Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "event-handlers" >}}) for other microservices to consume.
 
-Your external stream of public events is your contract to the outside world, your API.
+Your [public event streams]({{< ref "streams.md#public-streams" >}}) are your contract to the outside world, your API.
 
 {{< alert title="Changes to public events" color="primary" >}}
 Extra caution should be paid to changing public events so as not to break other microservices consuming those events.
