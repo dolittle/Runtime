@@ -29,7 +29,7 @@ However with great power comes great responsibility. The filters cannot be chang
 
 ### Public Filters
 
-Since there are [two types of streams]({{< ref "streams.md#public-streams" >}}) there are two kinds of filters; public and private. They function in the same way, except that a private filters creates private streams and a public filter creates [public streams]({{< ref "streams.md#public-streams" >}}).
+Since there are [two types of streams]({{< ref "streams.md#public-vs.-private-streams" >}}) there are two kinds of filters; public and private. They function in the same way, except that a private filters creates private streams and a public filter creates [public streams]({{< ref "streams.md#public-streams" >}}).
 
 ## Event Handlers
 
@@ -49,6 +49,6 @@ The event handler registration fails if your event handler suddenly stops handli
 
 When registering processors they are registered for every tenant in the Runtime, resulting in every tenant having their own copy of the [Stream Processor]({{< ref "streams#multi-tenancy" >}}).
 
-{{< alert title="Perfomance" color="warning">}}
+{{< alert title="Performance" color="warning">}}
 There are performance considerations related to having too many stream processors. Read more in [Stream Processors & Multi-tenancy]({{< ref "streams#multi-tenancy" >}}).
 {{< /alert >}}
