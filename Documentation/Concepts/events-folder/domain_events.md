@@ -9,7 +9,7 @@ aliases:
 
 ## Definition
 
-A Domain Event is a serializable representation of a fact that has happened within your domain.
+A Domain Event is a serializable representation of _"a fact that has happened within your system"_.
 
 The definition of a Domain Event is simple, however it has some profound implications for systems that utilise Domain Events.
 

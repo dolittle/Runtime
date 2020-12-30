@@ -75,3 +75,7 @@ Formula for calculating the total number of stream processors created:
 (((2 x event handlers) + filters) x tenants)  + event horizon subscriptions = stream processors
 ```
 {{< /alert >}}
+
+Let's provide an example:
+
+For both the filter and the event processor "processors" only one stream processor is needed. But for event handlers we need two because it consists of both a filter and an event processor. If the Runtime has 10 tenants and the head has registered 20 event handlers we'd end up with a total of 20 x 2 x 10 = 400 stream processors.
