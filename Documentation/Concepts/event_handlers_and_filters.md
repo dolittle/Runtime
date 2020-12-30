@@ -47,8 +47,8 @@ The event handler registration fails if your event handler suddenly stops handli
 
 ## Multi-tenancy
 
-When registering processors they are registered for every tenant in the Runtime. In terms of processing streams of events, the stream processor is the lowest level unit-of-work. It is what actually does the work, fetches event from the stream, processes the event, etc.  This is important to keep in mind when thinking about the performance and load the the Runtime.
+When registering processors they are registered for every tenant in the Runtime, resulting in every tenant having their own copy of the [Stream Processor]({{< ref "streams#multi-tenancy" >}}).
 
-Let's provide an example:
-
-For both the filter and the event processor "processors" only one stream processor is needed. But for event handlers we need two because it consists of both a filter and an event processor. If the Runtime has 10 tenants and the head has registered 20 event handlers we'd end up with a total of 20 x 2 x 10 = 400 stream processors.
+{{< alert title="Perfomance" color="warning">}}
+There are performance considerations related to having too many stream processors. Read more in [Stream Processors & Multi-tenancy]({{< ref "streams#multi-tenancy" >}}).
+{{< /alert >}}

@@ -82,6 +82,10 @@ Formula for calculating the total number of stream processors created:
 ```
 {{< /alert >}}
 
+Let's provide an example:
+
+For both the filter and the event processor "processors" only one stream processor is needed. But for event handlers we need two because it consists of both a filter and an event processor. If the Runtime has 10 tenants and the head has registered 20 event handlers we'd end up with a total of 20 x 2 x 10 = 400 stream processors.
+
 ## Public Streams
 
 We differentiate between two different types of event streams; public and private. Public streams are, in addition to what we have explained above, simply streams that are exposed to other microservices. Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
