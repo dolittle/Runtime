@@ -16,6 +16,7 @@ As streams are append-only, an event can be uniquely identified by its position 
 Event streams are perhaps the most important part of the Dolittle platform. To get a different and more detailed perspective on streams, please read our section on [event sourcing and streams]({{< ref "event_sourcing.md#streams" >}}).
 
 ## Rules
+
 There are rules on streams to maintain [idempotency](https://en.wikipedia.org/wiki/Idempotence) and the predictability of Runtime. These rules are enforced by the Runtime:
 
 * The ordering of the events cannot change
@@ -23,7 +24,8 @@ There are rules on streams to maintain [idempotency](https://en.wikipedia.org/wi
 * Events cannot be removed from the stream
 * A partitioned stream cannot be changed to be unpartitioned and vice versa
 
-##  Partitions
+## Partitions
+
 If we dive deeper into event streams we'll see that we have two types of streams in the Runtime; partitioned and unpartitioned streams.
 
 A partitioned stream is a stream that is split into chunks. These chunks are uniquely identified by a `PartitionId` (GUID). Each item in a partitioned stream can only belong to a single partition.
@@ -33,6 +35,7 @@ An unpartitioned stream only has one chunk with a `PartitionId` of `00000000-000
 There are multiple reasons for partitioning streams. One of the benefits is that it gives a way for the developers to partition their events and the way they are processed in an [Event Handler]({{< ref "#event-handlers" >}}). Another reason for having partitions becomes apparent when needing to subscribe to other streams in other microservices. We'll talk more about that in the [Event Horizon]({{< ref "event_horizon.md" >}}) section.
 
 ## Stream Processor
+
 A stream processor consists of an event stream and an event processor. It takes in a stream of events, calls the event processor to process the events in order, and keeps track of which events have already been processed. Each stream processor can be seen as the lowest level unit-of-work in regards to streams and they all run at the same time, side by side, in parallel.
 
 Since the streams are also uniquely identified by a stream id we can identify each stream processor by their `SourceStream, EventProcessor` pairing.
@@ -51,12 +54,14 @@ The stream processors play a central role in the Runtime. They enforce the most 
 
 Stream processors are constructs that are internal to the Runtime and there is no way for the SDK to directly interact with stream processors.
 
-
 ### Dealing with failures
+
 What should happen when a processor fails? We cannot skip faulty events, which means that the event processor has to halt until we can successfully process the event. This problem can be mitigated with a [partitioned]({{< ref "#partitions" >}}) stream because the processing only stops for that single partition. This way we can keep processing the event stream even though one, or several, of the partitions fail. The stream processor will at some point retry processing the failing partitions and continue normally if it succeeds.
 
 ### Event Processors
+
 There are 2 different types of event processors:
+
 - Filters that can create new streams
 - Processors that process the event in the user's code
 
@@ -65,6 +70,7 @@ These are defined by the user with [Event Handlers & Filters]({{< ref "event_han
 When the processing of an event is completed it returns a processing result back to the stream processor. This result contains information on whether or not the processing succeeded or not. If it did not succeed it will say how many times it has attempted to process that event, whether or not it should retry and how long it will wait until retrying.
 
 ### Multi-tenancy
+
 When registering [processors]({{< ref "event_handlers_and_filters.md" >}}) they are registered for every tenant in the Runtime, resulting in every tenant having their own copy of the stream processor. This is important to keep in mind when thinking about the performance of the Runtime.
 
 {{< alert title="Resource usage" color="warning">}}
@@ -75,3 +81,7 @@ Formula for calculating the total number of stream processors created:
 (((2 x event handlers) + filters) x tenants)  + event horizon subscriptions = stream processors
 ```
 {{< /alert >}}
+
+## Public Streams
+
+We differentiate between two different types of event streams; public and private. Public streams are, in addition to what we have explained above, simply streams that are exposed to other microservices. Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
