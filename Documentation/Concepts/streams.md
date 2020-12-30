@@ -24,11 +24,6 @@ There are rules on streams to maintain [idempotency](https://en.wikipedia.org/wi
 * Events cannot be removed from the stream
 * A partitioned stream cannot be changed to be unpartitioned and vice versa
 
-### Public vs. Private Streams
-
-There are two different types of event streams; public and private. Private streams are exposed within their [Tenant]({{< ref "#multi-tenancy" >}}) and public streams are additionally exposed to other microservices.
-Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
-
 ## Partitions
 
 If we dive deeper into event streams we'll see that we have two types of streams in the Runtime; partitioned and unpartitioned streams.
@@ -38,6 +33,11 @@ A partitioned stream is a stream that is split into chunks. These chunks are uni
 An unpartitioned stream only has one chunk with a `PartitionId` of `00000000-0000-0000-0000-000000000000`.
 
 There are multiple reasons for partitioning streams. One of the benefits is that it gives a way for the developers to partition their events and the way they are processed in an [Event Handler]({{< ref "#event-handlers" >}}). Another reason for having partitions becomes apparent when needing to subscribe to other streams in other microservices. We'll talk more about that in the [Event Horizon]({{< ref "event_horizon.md" >}}) section.
+
+### Public vs. Private Streams
+
+There are two different types of event streams; public and private. Private streams are exposed within their [Tenant]({{< ref "#multi-tenancy" >}}) and public streams are additionally exposed to other microservices.
+Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
 
 ## Stream Processor
 
