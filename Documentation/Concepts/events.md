@@ -122,7 +122,7 @@ For making development easier, you shouldn't worry about incrementing the genera
 -->
 
 ### Public vs. Private
-There is a basic distinction between private events and public events. In much the same way that you would not grant access to other applications to your internal database, you do not allow other applications to subscribe to your private events.
+There is a basic distinction between private events and public events. In much the same way that you would not grant access to other applications to your internal database, you do not allow other applications to receive any of your private events.
 
 Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}) so that an event committed for one tenant cannot be handled outside of that tenant.
 
