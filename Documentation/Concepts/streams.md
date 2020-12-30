@@ -24,6 +24,11 @@ There are rules on streams to maintain [idempotency](https://en.wikipedia.org/wi
 * Events cannot be removed from the stream
 * A partitioned stream cannot be changed to be unpartitioned and vice versa
 
+### Public vs. Private Streams
+
+There are two different types of event streams; public and private. Private streams are exposed within their [Tenant]({{< ref "#multi-tenancy" >}}) and public streams are additionally exposed to other microservices.
+Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
+
 ## Partitions
 
 If we dive deeper into event streams we'll see that we have two types of streams in the Runtime; partitioned and unpartitioned streams.
@@ -85,7 +90,3 @@ Formula for calculating the total number of stream processors created:
 Let's provide an example:
 
 For both the filter and the event processor "processors" only one stream processor is needed. But for event handlers we need two because it consists of both a filter and an event processor. If the Runtime has 10 tenants and the head has registered 20 event handlers we'd end up with a total of 20 x 2 x 10 = 400 stream processors.
-
-### Public vs. Private Streams
-
-There are two different types of event streams; public and private. Private streams are exposed within their [Tenant]({{< ref "#multi-tenancy" >}}) and public streams are additionally exposed to other microservices. Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
