@@ -64,7 +64,7 @@ This is the content of the to be committed. It needs to be serializable to JSON.
 `EventSourceId` represents the source of the event like a "primary key" in a traditional database. By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it as the `PartitionId`.
 
 ### EventType
-An `EventType` is a combination of an `EventTypeId` to uniquely identify the type of event it is and the event types `Generation`.
+An `EventType` is the combination of an `EventTypeId` to uniquely identify the type of event it is and the event type's `Generation`.
 This decouples the event from a programming language and enables the renaming of events as the domain language evolves.
 Simply put, event types are a wrapper for the actual type of your event. They mask the underlying language-specific type implementation and conventions.
 
