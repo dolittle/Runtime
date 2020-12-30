@@ -14,9 +14,11 @@ Each of these processors is a combination of one or more [Stream Processors]({{<
 What it does to the event is dependent on what kind of processor it is. We'll talk more about different processors later in this section.
 
 ## Registration
+
 In order to be able to deal with committed events, the heads needs to register their processors. The Runtime offers endpoints which initiates the registration of the different processors. Only registered processors will be ran. When the head disconnects from the Runtime all of the registered processors will be automatically unregistered and when it re-connects it will re-register them again. Processors that have been unregistered are idle in the Runtime until they are re-registered again.
 
 ## Filters
+
 The filter is a processor that creates a new stream of events from the [event log]({{< ref "event-log" >}}). It is identified by a `FilterId` and it can create either a partitioned or unpartitioned stream. The processing in the filter itself is however not partitioned since it can only operate on the event log stream which is an unpartitioned stream.
 
 ![Filter](/images/concepts/filter.png)
@@ -25,7 +27,12 @@ The filter is a powerful tool because it can create an entirely customized strea
 
 However with great power comes great responsibility. The filters cannot be changed in a way so that it breaks the [rules of streams]({{< ref "#rules" >}}). If it does, the Runtime would notice it and return a failed registration response to the head that tried to register the filter.
 
+### Public Filters
+
+Since there are [two types of streams]({{< ref "streams.md#public-vs.-private-streams" >}}) there are two kinds of filters; public and private. They function in the same way, except that a private filters creates private streams and a public filter creates [public streams]({{< ref "streams.md#public-streams" >}}).
+
 ## Event Handlers
+
 The event handler is a combination of a filter and an event processor. It has is identified by an `EventHandlerId` which will be both the id of both the filter and the event processor.
 
 ![Event Handler](/images/concepts/eventhandler.png)
@@ -39,8 +46,9 @@ The event handler registration fails if your event handler suddenly stops handli
 {{< /alert >}}
 
 ## Multi-tenancy
+
 When registering processors they are registered for every tenant in the Runtime, resulting in every tenant having their own copy of the [Stream Processor]({{< ref "streams#multi-tenancy" >}}).
 
-{{< alert title="Perfomance" color="warning">}}
+{{< alert title="Performance" color="warning">}}
 There are performance considerations related to having too many stream processors. Read more in [Stream Processors & Multi-tenancy]({{< ref "streams#multi-tenancy" >}}).
 {{< /alert >}}
