@@ -12,13 +12,13 @@ The Dolittle stack is composed of the SDKs, the Runtime, and the [Event Store]({
 
 The user code (also called _Head_) is written using the SDKs, which connect to the Runtime in the same way as a client (SDK) connects to a server (runtime).
 
-The runtime is the core of all Dolittle applications and manages connections from the SDKs and other runtimes to its [Event Store]({{< ref "event-store" >}}).
+The Runtime is the core of all Dolittle applications and manages connections from the SDKs and other Runtimes to its [Event Store]({{< ref "event-store" >}}). The Runtime is packaged as a [Docker image](https://hub.docker.com/r/dolittle/runtime)
 
 The [Event Store]({{< ref "event-store" >}}) is the underlying database where the events are stored.
 
 [Events]({{< ref "events" >}}) are "facts that have happened" in your system and they form the state/_truth_ of the system.
 
-When runtimes subscribe to events from other runtimes, these events are transferred over what we call the [Event Horizon]({{< ref "event-horizon" >}}).
+When Runtimes subscribe to events from other Runtimes, these events are transferred over what we call the [Event Horizon]({{< ref "event-horizon" >}}).
 
 ## Event-Driven
 Dolittle uses a style of Event-Driven Architecture called [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html), which means to _"capture all changes to an applications state as a sequence of events"_, these events then form the _"truth"_ of the system. Events **cannot be changed or deleted** as they represent things that have happened.
@@ -30,10 +30,10 @@ Event sourcing allows for high scalability thanks to being a very loosely couple
 The history of events also forms an audit log to help with debugging and auditing.
 
 ### Distributed & Decentralized
-Dolittle applications are built from microservices that communicate with each other using events. These microservices can scale and fail independently as there is no centralized message bus like in [Kafka](https://kafka.apache.org/). The runtimes and event stores are independent of other parts of the system.
+Dolittle applications are built from microservices that communicate with each other using events. These microservices can scale and fail independently as there is no centralized message bus like in [Kafka](https://kafka.apache.org/). The Runtimes and event stores are independent of other parts of the system.
 
 ## Microservice
-A _microservice_ consists of one or many heads talking to one runtime. The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like.
+A _microservice_ consists of one or many heads talking to one Runtime. The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like.
 
 This diagram shows the anatomy of a microservice with one head.
 
