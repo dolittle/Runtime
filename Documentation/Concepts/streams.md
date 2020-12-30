@@ -82,6 +82,5 @@ Formula for calculating the total number of stream processors created:
 ```
 {{< /alert >}}
 
-## Public Streams
-
-We differentiate between two different types of event streams; public and private. Public streams are, in addition to what we have explained above, simply streams that are exposed to other microservices. Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
+### Public vs. Private Streams
+There are two different types of event streams; public and private. Private streams are exposed within their [Tenant]({{< ref "#multi-tenancy" >}}) and public streams are additionally exposed to other microservices. Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handles_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
