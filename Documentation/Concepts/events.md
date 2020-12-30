@@ -84,7 +84,7 @@ GUIDs also solve the problem of having duplicate names, it's not hard to imagine
 {{< /alert >}}
 
 #### Generations
-As the code changes, the event type is also bound to change at some point. These iterations on the same event type are called _generations_. Whenever you add or change a property in an event you should increase this number. This way the filters and handlers can handle a specific generation of an event.
+As the code changes, the structures and contents of your events are also bound to change at some point. In most scenarios you will see that you have the need to add more information to events. These iterations on the same event type are called _generations_. Whenever you add or change a property in an event you should increase this number. This way the filters and handlers can handle a specific generation of an event.
 
 For example, imagine an older generation of an event type didn't have a property. You can have a separate handler for that particular generation that handles the missing property.
 ```csharp
