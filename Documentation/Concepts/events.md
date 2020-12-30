@@ -55,7 +55,7 @@ Event {
 }
 ```
 
-For the whole structure of an event as defined in the gRPC, please check [Contracts](https://github.com/dolittle/Contracts/tree/master/Source/Runtime/Events).
+For the whole structure of an event as defined in protobuf, please check [Contracts](https://github.com/dolittle/Contracts/tree/master/Source/Runtime/Events).
 
 ### Content
 This is the object the user commits.
