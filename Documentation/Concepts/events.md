@@ -67,7 +67,7 @@ This is the content of the to be committed. It needs to be serializable to JSON.
 An `EventType` is the combination of an `EventTypeId` to uniquely identify the type of event it is and the event type's `Generation`.
 This decouples the event from a programming language and enables the renaming of events as the domain language evolves.
 
-For the Runtime, the event is just a JSON-string. It doesn't know about the event's content, properties, or type (in its respective programming language). The Runtime saves the event to the event store and then calls the respective [EventHandlers & Filters]({{< ref "event_handlers_and_filters" >}}). For this event to be serialized to JSON and then deserialized back to a type that the client's filters and event handlers understand, an event type is required.
+For the Runtime, the event is just a JSON-string. It doesn't know about the event's content, properties, or type (in its respective programming language). The Runtime saves the event to the event log and from that point the event is ready to be processed by the [EventHandlers & Filters]({{< ref "event_handlers_and_filters" >}}). For this event to be serialized to JSON and then deserialized back to a type that the client's filters and event handlers understand, an event type is required.
 
 This diagram shows us a simplified view of committing a single event with the type of `DishPrepared`. The Runtime receives the event, and sends it back to us to be handled. Without the event type, the SDK wouldn't know how to deserialize the JSON message coming from the Runtime.
 
