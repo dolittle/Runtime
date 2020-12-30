@@ -29,7 +29,7 @@ However with great power comes great responsibility. The filters cannot be chang
 
 ### Public Filters
 
-Since there are [two types of streams]({{< ref "streams.md#public-streams" >}}) there needs to be two different kinds of filters; public and private. The private filter is explained above, and the public filter functions exactly the same way. The only difference is that it creates a [public stream]({{< ref "streams.md#public-streams" >}}).
+Since there are [two types of streams]({{< ref "streams.md#public-streams" >}}) there are two kinds of filters; public and private. They function in the same way, except that a private filters creates private streams and a public filter creates [public streams]({{< ref "streams.md#public-streams" >}}).
 
 ## Event Handlers
 
