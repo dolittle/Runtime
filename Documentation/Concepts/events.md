@@ -61,7 +61,7 @@ For the whole structure of an event as defined in protobuf, please check [Contra
 This is the content of the to be committed. It needs to be serializable to JSON.
 
 ### EventSourceId
-`EventSourceId` represents the source of the event like a "primary key" in a traditional database. By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it as the `PartitionId`.
+`EventSourceId` represents the source of the event like a "primary key" in a traditional database. By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it for [partitioning]({{< ref "streams.md#partitions" >}}).
 
 ### EventType
 An `EventType` is the combination of an `EventTypeId` to uniquely identify the type of event it is and the event type's `Generation`.
