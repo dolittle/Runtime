@@ -3,6 +3,7 @@ title: Event Sourcing
 description: Overview of Event Sourcing
 keywords: Overview, Domain Events, Event Sourcing, Event Store, Log
 author: smithmx
+weight: 80
 aliases:
     - /runtime/runtime/events/event_sourcing
 ---
