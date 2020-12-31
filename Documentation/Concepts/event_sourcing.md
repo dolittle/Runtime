@@ -2,19 +2,50 @@
 title: Event Sourcing
 description: Overview of Event Sourcing
 keywords: Overview, Domain Events, Event Sourcing, Event Store, Log
-author: smithmx
-aliases:
-    - /runtime/runtime/events/event_sourcing
+weight: 30
 ---
 
-## Definition
+Event Sourcing is an approach that derives the current state of an application from the sequential [Events]({{< ref "events" >}}) that have happened within the application. These events are stored to an append-only [Event Store]({{< ref "event_store" >}}) that acts as a record for all state changes in the system.
 
-Event Sourcing is an approach that derives the current state of an application from the sequential, incemental changes (events) that have
-happened within the application. 
+Here's an overview of Event Sourcing:
+
+![Basic anatomy of event sourcing](/images/concepts/eventsourcing.png)
+
+## Why not use CRUD?
+
+CRUD (create, read, update, delete) is a traditional model for dealing with data in many applications. A typical example is to read data from the database, modify it, and update the current state of the data. Simple enough, but it has some limitations:
+
+- Data operations are done directly against a central database, which can slow down performance and limit scalability
+- Same piece of data is often accessed from multiple sources at the same time. To avoid conflicts, transactions and locks are needed
+- Without additional auditing logs, the history of operations is lost. More importantly, the _reason_ for changes is lost.
+
+## Advantages with Event Sourcing
+
+- **Horizontal scalability**
+    - With an event store, it's easy to separate read and write operations to different databases.
+    - Event producers and consumers are decoupled and can be scaled independently.
+- **Flexibility**
+    - The event store raises events and any number of [Event Handlers]({{< ref "event_handlers_and_filters" >}}) can process the events. This separation of concerns provides great flexibility and can be easily extended/integrated with other systems.
+- **Replayable state**
+    - The state of the application can be recreated by just applying the events.
+    - Temporal queries make it possible to determine  the state of the application/entity at any point in time.
+- **Events are natural**
+    - Events are easily modeled in domain terms, avoiding [object-relational impedance mismatch](https://en.wikipedia.org/wiki/Object%E2%80%93relational_impedance_mismatch). Events are simple objects describing actions.
+- **Audit log**
+    - The whole history of changes is recorded in an append-only store for later auditing.
+    - Instead of being a simple record of reads/writes, the _reason_ for change is saved within the events.
+
+## Problems with Event Sourcing
+
+- **Eventual consistency**
+    - As the events are separated from the projections made from them, there will be some delay between committing an event and handling it in handlers and consumers.
+- **Event store is append-only**
+    - As the event store is append-only, the only way to update an entity is to create a compensating event.
+    - Changing the structure of events is hard as the old events still exist in the store and need to also be handled.
 
 ## Managing State
 
-While Event Sourcing is a fringe approach for maintaining state within application development, it has a long history within mature business domains, especially where there is a requirement to have a dependable audit log (e.g. finance/accounting).  The traditional approach to managing state involves storing the current state of a particular record (in a database table or document).  This may be supplemented by an audit table that records changes in the data for the particular entity.  The source of truth is the current state in the table, not the audit log. 
+Event Sourcing has a long history within mature business domains, especially where there is a requirement to have a dependable audit log (e.g. finance/accounting). The traditional approach to managing state involves storing the current state of a particular record (in a database table or document). This may be supplemented by an audit table that records changes in the data for the particular entity. The source of truth is the current state in the table, not the audit log. 
 
 Event Sourcing turn this approach on its head. Rather than storing the current state it advocates storing the changes / deltas in the form of immutable events in the seqeuence that they happened.  It is then possible to derive the state of any particular entity be replaying all the changes that have happened to this entity.  In an event sourced system the event log and current state are one and the same.  There is no possibility that they can be out of sync (and, being immutable, there is no possibility that your log is incorrect).  By explicitly capturing and recording state changes (deltas) as Events (see Domain Events), we can know how and why our system is in the state it is.  This is often enormously valueable to the business (see The Business Value of the Event Log).
 
