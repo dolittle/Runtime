@@ -19,7 +19,7 @@ CRUD (create, read, update, delete) is a traditional model for dealing with data
 
 - Data operations are done directly against a central database, which can slow down performance and limit scalability
 - Same piece of data is often accessed from multiple sources at the same time. To avoid conflicts, transactions and locks are needed
-- Without additional auditing logs, the history of operations is lost. More importantly, the _reason_ for changes is lost.
+- Without additional auditing logs, the history of operations is lost. More importantly, the [_reason_]({{< ref "#reason-for-change" >}}) for changes is lost.
 
 ### Advantages with Event Sourcing
 
@@ -35,7 +35,7 @@ CRUD (create, read, update, delete) is a traditional model for dealing with data
     - Events are easily modeled in domain terms, avoiding [object-relational impedance mismatch](https://en.wikipedia.org/wiki/Object%E2%80%93relational_impedance_mismatch). Events are simple objects describing actions.
 - **Audit log**
     - The whole history of changes is recorded in an append-only store for later auditing.
-    - Instead of being a simple record of reads/writes, the _reason_ for change is saved within the events.
+    - Instead of being a simple record of reads/writes, the [_reason_]({{< ref "#reason-for-change" >}}) for change is saved within the events.
 
 ### Problems with Event Sourcing
 
