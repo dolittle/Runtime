@@ -13,7 +13,7 @@ An event is a change (fact) within our system. The event itself contains all the
 More usually, it is a simple Data Transfer Object (DTO) that contains state and properties that describe the change. It does not contain any calculations or behavior.
 
 ## “that has happened” 
-As the event has happened, it cannot be changed, rejected, or deleted. This forms the basis of [Event Sourcing]({{< ref "event-sourcing" >}}) If you wish to change the action or the state change that the event encapsulates, then it is necessary to initiate an action that results in another event that nullifies the impact of the first event.
+As the event has happened, it cannot be changed, rejected, or deleted. This forms the basis of [Event Sourcing]({{< ref "event_sourcing" >}}) If you wish to change the action or the state change that the event encapsulates, then it is necessary to initiate an action that results in another event that nullifies the impact of the first event.
 
 This is common in accounting, for example:
 Sally adds 100$ into her bank, which would result in an event like "Add 100$ to Sally's account". But if the bank accidentally adds 1000$ instead of the 100$ then a correcting event should be played, like "Subtract 900$ from Sally's account". And with event sourcing, this information is preserved in the event store for eg. later auditing purposes.
@@ -126,7 +126,7 @@ There is a basic distinction between private events and public events. In much t
 
 Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}) so that an event committed for one tenant cannot be handled outside of that tenant.
 
-Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "event-handlers" >}}) for other microservices to consume. Your [public event streams]({{< ref "streams.md#public-streams" >}}) essentially form a public API for the other microservices to subscribe to.
+Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "streams" >}}) for other microservices to consume. Your [public event streams]({{< ref "streams#public-vs-private-streams" >}}) essentially form a public API for the other microservices to subscribe to.
 
 {{< alert title="Changes to public events" color="primary" >}}
 Extra caution should be paid to changing public events so as not to break other microservices consuming those events. We're developing strategies to working with changes in your events and microservices.

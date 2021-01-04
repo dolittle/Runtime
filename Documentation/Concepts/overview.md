@@ -8,17 +8,17 @@ repository: https://github.com/dolittle/Runtime
 Dolittle is a decentralized, distributed, event-driven microservice platform built to harness the power of events.
 
 ## Components
-The Dolittle stack is composed of the SDKs, the Runtime, and the [Event Store]({{< ref "event-store" >}}).
+The Dolittle stack is composed of the SDKs, the Runtime, and the [Event Store]({{< ref "event_store" >}}).
 
 The user code (also called _Head_) is written using the SDKs, which connect to the Runtime in the same way as a client (SDK) connects to a server (runtime).
 
-The Runtime is the core of all Dolittle applications and manages connections from the SDKs and other Runtimes to its [Event Store]({{< ref "event-store" >}}). The Runtime is packaged as a [Docker image](https://hub.docker.com/r/dolittle/runtime)
+The Runtime is the core of all Dolittle applications and manages connections from the SDKs and other Runtimes to its [Event Store]({{< ref "event_store" >}}). The Runtime is packaged as a [Docker image](https://hub.docker.com/r/dolittle/runtime)
 
-The [Event Store]({{< ref "event-store" >}}) is the underlying database where the events are stored.
+The [Event Store]({{< ref "event_store" >}}) is the underlying database where the events are stored.
 
 [Events]({{< ref "events" >}}) are "facts that have happened" in your system and they form the state/_truth_ of the system.
 
-When Runtimes subscribe to events from other Runtimes, these events are transferred over what we call the [Event Horizon]({{< ref "event-horizon" >}}).
+When Runtimes subscribe to events from other Runtimes, these events are transferred over what we call the [Event Horizon]({{< ref "event_horizon" >}}).
 
 ## Event-Driven
 Dolittle uses a style of Event-Driven Architecture called [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html), which means to _"capture all changes to an applications state as a sequence of events"_, these events then form the _"truth"_ of the system. Events **cannot be changed or deleted** as they represent things that have happened.
@@ -40,7 +40,7 @@ This diagram shows the anatomy of a microservice with one head.
 ![Example anatomy of a Dolittle microservice](/images/concepts/anatomy.png)
 
 {{< alert title="Read Cache" color="info" >}}
-The _Read Cache_ in these pictures is not part of Dolittle. Different situations call for different databases depending on the sort of load and data to be stored.
+The _Read Cache_ in these pictures is not part of Dolittle. Different [projections]({{< ref "event_sourcing#projections" >}}) call for different solutions depending on the sort of load and data to be stored.
 {{< /alert >}}
 
 ### Multi-tenancy
@@ -50,10 +50,12 @@ This diagram shows a microservice with 2 tenants, each of them with their own re
 
 ![Example of multi-tenant microservice](/images/concepts/multitenant.png)
 
-### What Dolittle isn't
-Dolittle is not a traditional backend library nor an event driven message bus like [Kafka](https://kafka.apache.org/). Dolittle uses _Event Sourcing_, which means that the state of the system is built from an immutable event store that has all the events ever produced by the application.
+## What Dolittle isn't
+Dolittle is not a traditional backend library nor an event driven message bus like [Kafka](https://kafka.apache.org/). Dolittle uses [Event Sourcing]({{< ref "event_sourcing" >}}), which means that the state of the system is built from an append-only [Event Store]({{< ref "event_store" >}}) that has all the events ever produced by the application.
 
-Dolittle does not provide a read cache. Different situations call for different databases depending on the sort of load and data to be stored. The event store only defines how the events are written in the system, it doesn't define how things are read of interpreted.
+Dolittle does not provide a solution for [read models/cache]({{< ref "event_sourcing#projections" >}}). Different situations call for different databases depending on the sort of load and data to be stored. The event store only defines how the events are written in the system, it doesn't define how things are read or interpreted.
+
+Dolittle isn't a CQRS framework, but [it used to be](https://github.com/dolittle/Bifrost).
 
 ## Technology
 - [Runtime repository](https://github.com/dolittle/runtime)
