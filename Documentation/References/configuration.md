@@ -90,7 +90,7 @@ Defines the private and public ports for the Runtime.
 }
 ```
 
-## metrics.json
+## `metrics.json`
 The port to expose the Prometheus Runtimes metrics server on.
 ```json
 {
