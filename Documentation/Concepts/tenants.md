@@ -4,7 +4,7 @@ description: What is a Tenant & Multi-tenancy
 weight: 13
 ---
 
-Dolittle supports defining multiple tenants using the same software out of the box.
+Dolittle supports having multiple tenants using the same software out of the box.
 
 ## What is a Tenant?
 
