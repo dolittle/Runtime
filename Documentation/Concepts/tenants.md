@@ -8,7 +8,7 @@ Dolittle supports having multiple tenants using the same software out of the box
 
 ## What is a Tenant?
 
-A Tenant is a single client that's using the hosted software and infrastructure. In a SaaS (Software-as-a-Service) domain, a tenant would be a single customer using the service. The tenant has its privileges and resources only it has access to.
+A Tenant is a single client that's using the hosted software and infrastructure. In a SaaS (Software-as-a-Service) domain, a tenant would usually be a single customer using the service. The tenant has its privileges and resources only it has access to.
 
 ## What is Multi-tenancy?
 
