@@ -29,7 +29,7 @@ CRUD (create, read, update, delete) is a traditional model for dealing with data
 - **Flexibility**
     - The event store raises events and any number of [Event Handlers]({{< ref "event_handlers_and_filters" >}}) can process the events. This separation of concerns provides great flexibility and can be easily extended/integrated with other systems.
 - **Replayable state**
-    - The state of the application can be recreated by just applying the events. This enables rollbacks to any previous point in time.
+    - The state of the application can be recreated by just re-applying the events. This enables rollbacks to any previous point in time.
     - Temporal queries make it possible to determine the state of the application/entity at any point in time.
 - **Events are natural**
     - Events are easily modeled in domain terms, avoiding [object-relational impedance mismatch](https://en.wikipedia.org/wiki/Object%E2%80%93relational_impedance_mismatch). Events are simple objects describing actions.
