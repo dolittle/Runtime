@@ -33,7 +33,7 @@ The [Runtime]({{< ref "concepts/overview" >}}) uses JSON configuration files to 
                 <MongoDB connection URI>
             ],
             "database": <MongoDB database name>,
-            // optional. MongoDB max connection amount
+            // defaults to 1000. MongoDB max connection amount
             "maxConnectionPoolSize": 1000
         }
     }
