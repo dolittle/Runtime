@@ -1,5 +1,5 @@
 --- 
-title: Runtime Configuration
+title: Runtime
 description: Reference documentation for the Runtime configuration
 weight: 20
 repository: https://github.com/dolittle/Runtime
