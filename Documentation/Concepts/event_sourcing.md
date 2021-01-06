@@ -13,9 +13,8 @@ Here's an overview of Event Sourcing:
 
 ![Basic anatomy of event sourcing](/images/concepts/eventsourcing.png)
 
-## Why not use CRUD?
-
-CRUD (create, read, update, delete) is a traditional model for dealing with data in many applications. A typical example is to read data from the database, modify it, and update the current state of the data. Simple enough, but it has some limitations:
+## Problem
+A traditional model of dealing with data in applications is [CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete) (create, read, update, delete). A typical example is to read data from the database, modify it, and update the current state of the data. Simple enough, but it has some limitations:
 
 - Data operations are done directly against a central database, which can slow down performance and limit scalability
 - Same piece of data is often accessed from multiple sources at the same time. To avoid conflicts, transactions and locks are needed
