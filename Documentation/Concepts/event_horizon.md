@@ -36,15 +36,15 @@ and a scale perspective.
 ### Api changes
 
 One of the biggest challenges with communication between the systems is that the shape of the event might change over time.
-This brings versioning to the table, which is probably the single biggest challenge in decoupled systems. Being able to deliver
-on the promise of autonomy is very hard when you have systems relying on events from you.
+This brings versioning to the table, which is probably the single biggest challenge in decoupled systems.
+Being able to deliver on the promise of autonomy is very hard when you have systems relying on events from you.
 
 ## Event Horizon
 
 At the heart of the Dolittle runtime sits the concept of an Event Horizon. With a vocabulary loosely based on [general relativity](https://en.wikipedia.org/wiki/General_relativity) and a tribute to the late professor [Stephen Hawking](https://en.wikipedia.org/wiki/Stephen_Hawkings) with a semi scientific approach linking the concepts to what they actually do in the software. You can find a fun video [here](https://www.youtube.com/watch?v=E8hzLM0JpYw) that explains event horizons in 60 seconds.
 
-The event horizon is considered the last a microservice will see of an event, once it moves past the horizon - the microservice
-will no longer see it. What we mean with that is that a microservice doesn't really know what happens with an event after it has gone past the event horizon, and nor dos it care. At the center of it sits singularities that will receive the event.
+The event horizon is considered the last a microservice will see of an event, once it moves past the horizon - the microservice will no longer see it.
+What we mean with that is that a microservice doesn't really know what happens with an event after it has gone past the event horizon, and nor dos it care. At the center of it sits singularities that will receive the event.
 The singularities makes sure that the received events are transmitted to the event store.
 
 {{< alert title="About event migrations" color="warning" >}}
@@ -58,7 +58,7 @@ From this point on we won't introduce any new terms in the general relativity li
 
 ### Subscriber
 
-A subscriber is a microservice that subscribes to a [partition]({{< ref "streams.md#partitions" >}}) of a [public stream]({{< ref "streams.md#public-vs-private-streams" >}}) from another microservice. Meaning that every event that is put into that partition of that specific public stream in another microservice
+A subscriber is a microservice that subscribes to a [partition]({{< ref "streams.md#partitions" >}}) of a [public stream]({{< ref "streams.md#public-vs-private-streams" >}}) from another microservice. Meaning that every event that is put into that partition of that specific public stream in another microservice.
 
 ### Producer
 
