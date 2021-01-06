@@ -24,7 +24,7 @@ CRUD (create, read, update, delete) is a traditional model for dealing with data
 ### Advantages with Event Sourcing
 
 - **Horizontal scalability**
-    - With an event store, it's easy to separate read and write operations to different databases.
+    - With an event store, it's easy to separate change handling and state querying, allowing for easier horizontal scaling. The events and their projections can be scaled independently of each other.
     - Event producers and consumers are decoupled and can be scaled independently.
 - **Flexibility**
     - The event store raises events and any number of [Event Handlers]({{< ref "event_handlers_and_filters" >}}) can process the events. This separation of concerns provides great flexibility and can be easily extended/integrated with other systems.
