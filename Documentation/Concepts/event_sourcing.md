@@ -26,7 +26,7 @@ A traditional model of dealing with data in applications is [CRUD](https://en.wi
     - With an event store, it's easy to separate change handling and state querying, allowing for easier horizontal scaling. The events and their projections can be scaled independently of each other.
     - Event producers and consumers are decoupled and can be scaled independently.
 - **Flexibility**
-    - The event store raises events and any number of [Event Handlers]({{< ref "event_handlers_and_filters" >}}) can process the events. This separation of concerns provides great flexibility and can be easily extended/integrated with other systems.
+   - The [Event Handlers]({{< ref "event_handlers_and_filters" >}}) react to events committed to the event store. The handlers know about the event and its data, but they don't know or care what caused the event. This provides great flexibility and can be easily extended/integrated with other systems.
 - **Replayable state**
     - The state of the application can be recreated by just re-applying the events. This enables rollbacks to any previous point in time.
     - Temporal queries make it possible to determine the state of the application/entity at any point in time.
