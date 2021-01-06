@@ -19,7 +19,7 @@ In order to be able to deal with committed events, the heads needs to register t
 
 ## Filters
 
-The filter is a processor that creates a new stream of events from the [event log]({{< ref "event-log" >}}). It is identified by a `FilterId` and it can create either a partitioned or unpartitioned stream. The processing in the filter itself is however not partitioned since it can only operate on the event log stream which is an unpartitioned stream.
+The filter is a processor that creates a new stream of events from the [event log]({{< ref "event_store#event-log" >}}). It is identified by a `FilterId` and it can create either a partitioned or unpartitioned stream. The processing in the filter itself is however not partitioned since it can only operate on the event log stream which is an unpartitioned stream.
 
 ![Filter](/images/concepts/filter.png)
 
@@ -29,7 +29,7 @@ However with great power comes great responsibility. The filters cannot be chang
 
 ### Public Filters
 
-Since there are [two types of streams]({{< ref "streams.md#public-vs.-private-streams" >}}) there are two kinds of filters; public and private. They function in the same way, except that a private filters creates private streams and a public filter creates [public streams]({{< ref "streams.md#public-streams" >}}).
+Since there are [two types of streams]({{< ref "streams.md#public-vs-private-streams" >}}) there are two kinds of filters; public and private. They function in the same way, except that a private filters creates private streams and a public filter creates [public streams]({{< ref "streams.md#public-streams" >}}).
 
 ## Event Handlers
 
