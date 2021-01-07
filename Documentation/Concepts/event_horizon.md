@@ -1,16 +1,15 @@
 ---
 title: Event Horizon
 description: Learn about Event Horizon, Subscriptions, Consumers and Producers
-weight: 10
+weight: 15
 ---
 
 At the heart of the Dolittle runtime sits the concept of Event Horizon. Event horizon is the mechanism for a microservice to give [Consent]({{< ref "#consent" >}}) for another microservice to [Subscribe]({{< ref "#subscription" >}}) to its [Public Stream]({{< ref "streams#public-vs-private-streams" >}}) and receive [Public Events]({{< ref "events#public-vs-private" >}}).
-<!-- diagram here showing the subscriver and consumer and the streams, partitions, scoped event log etc -->
-<!-- There could also be an example consent that shows how the setup in the example diagram would look like. and a link to the reference config page -->
+
 ![Anatomy of an Event Horizon subscription](/images/concepts/eventhorizon.png)
 
 ## Producer
-<!-- also lets have example of microservices.json maybe? or maybe its too much. i sense a tutorial a brewing. -->
+
 The producer is a [Tenant]({{< ref "tenants" >}}) in a [Microservice]({{< ref "overview#microservice" >}}) that has one or more [public streams]({{< ref "streams#public-vs-private-streams">}}) that [Consumer]({{< ref "#consumer" >}}) can subscribe to.
 Only [public events]({{< ref "events#public-vs-private" >}}) are eligible for being filtered into a public stream.
 

@@ -5,20 +5,18 @@ weight: 1
 repository: https://github.com/dolittle/Runtime
 ---
 
-Dolittle is a decentralized, distributed, event-driven microservice platform built to harness the power of events.
+Dolittle is a decentralized, distributed, event-driven microservice platform built to harness the power of events. It's a reliable ecosystem for microservices to thrive so that you can build complex applications with small, focused microservices that are loosely coupled, event driven and highly maintainable.
 
 ## Components
-The Dolittle stack is composed of the SDKs, the Runtime, and the [Event Store]({{< ref "event_store" >}}).
+<!-- The Dolittle stack is composed of the SDKs, the Runtime, and the [Event Store]({{< ref "event_store" >}}). -->
 
-The user code (also called _Head_) is written using the SDKs, which connect to the Runtime in the same way as a client (SDK) connects to a server (runtime).
-
-The Runtime is the core of all Dolittle applications and manages connections from the SDKs and other Runtimes to its [Event Store]({{< ref "event_store" >}}). The Runtime is packaged as a [Docker image](https://hub.docker.com/r/dolittle/runtime)
-
-The [Event Store]({{< ref "event_store" >}}) is the underlying database where the events are stored.
-
-[Events]({{< ref "events" >}}) are "facts that have happened" in your system and they form the state/_truth_ of the system.
-
-When Runtimes subscribe to events from other Runtimes, these events are transferred over what we call the [Event Horizon]({{< ref "event_horizon" >}}).
+- [**Events**]({{< ref "events" >}}) are _"facts that have happened"_ in your system and they form the _truth_ of the system.
+- [**Event Handlers & Filter**]({{< ref "event_handlers_and_filters" >}}) process events.
+- The **Runtime** is the core of all Dolittle applications and manages connections from the SDKs and other Runtimes to its [Event Store]({{< ref "event_store" >}}). The Runtime is packaged as a [Docker image](https://hub.docker.com/r/dolittle/runtime)
+- The [**Event Store**]({{< ref "event_store" >}}) is the underlying database where the events are stored.
+- The **Head** is the user code that uses the SDKs, which connect to the Runtime in the same way as a client (SDK) connects to a server (runtime).
+- A [**Microservice**]({{< ref "#microservice" >}}) is one or more Heads talking to a Runtime.
+- Microservices can [produce]({{< ref "event_horizon#producer" >}}) and [consume]({{< ref "event_horizon#consumer" >}}) events between each other over the [**Event Horizon**]({{< ref "event_horizon" >}}).
 
 ## Event-Driven
 Dolittle uses a style of Event-Driven Architecture called [Event Sourcing](https://martinfowler.com/eaaDev/EventSourcing.html), which means to _"capture all changes to an applications state as a sequence of events"_, these events then form the _"truth"_ of the system. Events **cannot be changed or deleted** as they represent things that have happened.
@@ -33,7 +31,7 @@ The history of events also forms an audit log to help with debugging and auditin
 Dolittle applications are built from microservices that communicate with each other using events. These microservices can scale and fail independently as there is no centralized message bus like in [Kafka](https://kafka.apache.org/). The Runtimes and event stores are independent of other parts of the system.
 
 ## Microservice
-A _microservice_ consists of one or many heads talking to one Runtime. The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like.
+A _microservice_ consists of one or many heads talking to one Runtime. The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like. Each microservice is autonomous and has its own resources and [event store]({{< ref "event_store" >}}).
 
 This diagram shows the anatomy of a microservice with one head.
 
