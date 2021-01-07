@@ -4,7 +4,7 @@ description: Runtime configuration files reference
 weight: 10
 ---
 
-The [Runtime]({{< ref "concepts/overview" >}}) uses JSON configuration files to define it's tenants and [Event Horizon]({{< ref "concepts/event_horizon" >}}) consents. They are mounted inside the Docker image inside the `.dolittle/` folder.
+The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration files. The files are mounted to the `.dolittle/` folder inside the Docker image.
 
 | Configuration file            | Required |
 |-------------------------------|----------|
@@ -16,7 +16,7 @@ The [Runtime]({{< ref "concepts/overview" >}}) uses JSON configuration files to 
 | `endpoints.json`              |          |
 
 ## `tenants.json`
-**Required.** Defines each tenant in the Runtime. 
+**Required.** Defines each [Tenant]({{< ref "docs/concepts/tenants" >}}) in the Runtime.
 ```json
 {
     <tenant-id>: {}
@@ -24,7 +24,7 @@ The [Runtime]({{< ref "concepts/overview" >}}) uses JSON configuration files to 
 ```
 
 ## `resources.json`
-**Required.** Configurations for the event store per tenant. 
+**Required.** Configurations for the [Event Store]({{< ref "docs/concepts/event_store" >}}) per [Tenant]({{< ref "docs/concepts/tenants" >}}).
 ```json
 {
     <tenant-id>: {
@@ -41,16 +41,16 @@ The [Runtime]({{< ref "concepts/overview" >}}) uses JSON configuration files to 
 ```
 
 ## `event-horizon-consents.json`
-**Required.** Defines the consents a producer tenant gives to consuming `microservices` so that they can receive events over the [Event Horizon]({{< ref "concepts/event_horizon" >}}).
+**Required.** Defines the [Consents]({{< ref "docs/concepts/event_horizon#consent" >}}) a [Producer]({{< ref "docs/concepts/event_horizon#producer" >}}) tenant gives to [Consumers]({{< ref "docs/concepts/event_horizon#consumer" >}}) so that they can receive events over the [Event Horizon]({{< ref "docs/concepts/event_horizon" >}}).
 ```json
 {
     // The producer tenant that gives the consent
     <tenant-id>: [
         {
-            // the consumer microservice and tenant to give consent to
+            // the consumers microservice and tenant to give consent to
             "microservice": <microservice-id>,
             "tenant": <tenant-id>,
-            // the public stream to receive events to
+            // the producers public stream and partition to give consent to
             "stream": <stream-id>,
             "partition": <partition-id>,
             // an identifier for this consent 
@@ -64,11 +64,12 @@ If there are no subscriptions, the file should only contain an empty JSON object
 {{< /alert >}}
 
 ## `microservices.json`
-Defines where the external microservices are so that the [Event Horizon]({{< ref "concepts/event_horizon" >}}) can find them.
+Defines where the [Producer]({{< ref "docs/concepts/event_horizon#producer" >}}) microservices are so that the [Consumer]({{< ref "docs/concepts/event_horizon#consumer" >}}) can [Subscribe]({{< ref "docs/concepts/event_horizon#subscription" >}}) to them.
 ```json
 {
-    // the id of the external microservice
+    // the id of the producer microservice
     <microservice-id>: {
+        // producer microservices Runtime host and public port
         "host": <host>,
         "port": <port>
     }
