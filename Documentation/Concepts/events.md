@@ -126,7 +126,7 @@ There is a basic distinction between private events and public events. In much t
 
 Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}) so that an event committed for one tenant cannot be handled outside of that tenant.
 
-Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "streams" >}}) for other microservices to consume. Your [public event streams]({{< ref "streams#public-vs-private-streams" >}}) essentially form a public API for the other microservices to subscribe to.
+Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "streams" >}}) through a [public filter]({{< ref "event_handlers_and_filters#public-filter" >}})for other microservices to consume. Your [public event streams]({{< ref "streams#public-vs-private-streams" >}}) essentially form a public API for the other microservices to subscribe to.
 
 {{< alert title="Changes to public events" color="primary" >}}
 Extra caution should be paid to changing public events so as not to break other microservices consuming those events. We're developing strategies to working with changes in your events and microservices.

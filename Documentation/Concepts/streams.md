@@ -37,7 +37,7 @@ There are multiple reasons for partitioning streams. One of the benefits is that
 ## Public vs Private Streams
 
 There are two different types of event streams; public and private. Private streams are exposed within their [Tenant]({{< ref "#multi-tenancy" >}}) and public streams are additionally exposed to other microservices.
-Through the [Event Horizon]({{< ref "event_horizon.md" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handlers_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs.-private" >}}) to public streams.
+Through the [Event Horizon]({{< ref "event_horizon" >}}) other microservices can subscribe to your public streams. Using a [public filter]({{< ref "event_handlers_and_filters.md#public-filters" >}}) you can filter out [public events]({{< ref "events.md#public-vs-private" >}}) to public streams.
 
 ## Stream Processor
 
