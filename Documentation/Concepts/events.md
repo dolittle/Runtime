@@ -46,24 +46,42 @@ This is a simplified structure of the main parts of an event. For the Runtime, t
 ```csharp
 Event {
     Content object
+    EventLogSequenceNumber int
     EventSourceId Guid
+    Public bool
     EventType {
         EventTypeId Guid
         Generation int
     }
-    Public bool
 }
 ```
 
 For the whole structure of an event as defined in protobuf, please check [Contracts](https://github.com/dolittle/Contracts/tree/master/Source/Runtime/Events).
 
-### Content
+### `Content`
+
 This is the content of the to be committed. It needs to be serializable to JSON.
 
-### EventSourceId
+### `EventLogSequenceNumber`
+
+This is the events position in the [Event Log]({{< ref "event_store#event-log" >}}). It uniquely identifies the event.
+
+### `EventSourceId`
+
 `EventSourceId` represents the source of the event like a "primary key" in a traditional database. By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it for [partitioning]({{< ref "streams.md#partitions" >}}).
 
-### EventType
+### Public vs. Private
+There is a basic distinction between private events and public events. In much the same way that you would not grant access to other applications to your internal database, you do not allow other applications to receive any of your private events.
+
+Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}) so that an event committed for one tenant cannot be handled outside of that tenant.
+
+Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "streams" >}}) through a [public filter]({{< ref "event_handlers_and_filters#public-filter" >}})for other microservices to consume. Your [public event streams]({{< ref "streams#public-vs-private-streams" >}}) essentially form a public API for the other microservices to subscribe to.
+
+{{< alert title="Changes to public events" color="primary" >}}
+Extra caution should be paid to changing public events so as not to break other microservices consuming those events. We're developing strategies to working with changes in your events and microservices.
+{{< /alert >}}
+
+### `EventType`
 An `EventType` is the combination of an `EventTypeId` to uniquely identify the type of event it is and the event type's `Generation`.
 This decouples the event from a programming language and enables the renaming of events as the domain language evolves.
 
@@ -83,7 +101,7 @@ As an extreme example, a microservice could have an event with a type `CustomerR
 GUIDs also solve the problem of having duplicate names, it's not hard to imagine having to have multiple events with the type of `CustomerRegisterd` in your code coming from different microservices.
 {{< /alert >}}
 
-#### Generations
+#### `Generations`
 {{% pageinfo color="warning" %}}
 `Generations` are still under development. At the moment they are best to be left alone.
 {{% /pageinfo %}}
@@ -120,17 +138,6 @@ Handle(DishPrepared @event) { ... }
 For making development easier, you shouldn't worry about incrementing the generation until you're in production.
 {{< /alert >}}
 -->
-
-### Public vs. Private
-There is a basic distinction between private events and public events. In much the same way that you would not grant access to other applications to your internal database, you do not allow other applications to receive any of your private events.
-
-Private events are only accessible within a single [Tenant]({{< ref "tenant" >}}) so that an event committed for one tenant cannot be handled outside of that tenant.
-
-Public events are also accessible within a single tenant but they can also be added to a public [Stream]({{< ref "streams" >}}) through a [public filter]({{< ref "event_handlers_and_filters#public-filter" >}})for other microservices to consume. Your [public event streams]({{< ref "streams#public-vs-private-streams" >}}) essentially form a public API for the other microservices to subscribe to.
-
-{{< alert title="Changes to public events" color="primary" >}}
-Extra caution should be paid to changing public events so as not to break other microservices consuming those events. We're developing strategies to working with changes in your events and microservices.
-{{< /alert >}}
 
 ## Commit vs Publish
 We use the word `Commit` rather than `Publish` when talking about saving events to the [Event Store]({{< ref "event_store" >}}). We want to emphasize that it's the event store that is the source of truth in the system. The act of calling filters/event handlers comes _after_ the event has been committed to the event store. We also don't publish to any specific stream, event handler or microservice. After the event has been committed, it's ready to be picked up by any processor that listens to that type of event.
