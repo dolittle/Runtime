@@ -3,14 +3,164 @@ title: Event Store
 description: Introduction to the Event Store
 keywords: Overview, Events, Event Store, Event Sourcing
 author: smithmx
-weight: 80
+weight: 20
 aliases:
     - /runtime/runtime/events/event_store
 ---
 
-# Event Store
+An Event Store is a database optimized for storing events in an [Event Sourced]({{< ref "event_sourcing" >}}) system. The [Runtime]({{< ref "overview" >}}) manages the connections and structure of the stored data.
 
-An Event Store is the mechanism by which a stream of events are persisted to durable storage.  It is the storage mechanism for an Event Sourced system (see Event Sourcing).
+## Structure of the Event Store
+
+{{< tabs name="collections" >}}
+{{% tab name="MongoDB" %}}
+This is the structure of the event store implemented in [MongoDB](https://www.mongodb.com/) in a database called `event_store`. It includes several collections, which are built as needed:
+
+- `event-log`
+- `aggregates`
+- `stream-processor-states`
+- `stream-definitions`
+- `stream-<streamID>`
+- `public-stream-<streamID>`
+
+Collections can also be [scoped]({{< ref "#scope" >}}), which is reflected in their naming:
+
+- `x-<scopeID>-event-log`
+- `x-<scopeID>-stream-definitions`
+- `x-<scopeID>-stream-processor-states`
+- `x-<scopeID>-stream-<streamID>`
+- `x-<scopeID>-subscription-states`
+
+Following JSON structure examples have each fields [BSON type](https://docs.mongodb.com/manual/reference/bson-types/) as the value.
+
+### `event-log`
+The Event Log includes all the [Events]({{< ref "events" >}}) committed to the event store in chronological order. [Aggregate]({{< ref "aggregates" >}}) events have `"wasAppliedByAggregate":  true` set and events coming over the [Event Horizon]({{< ref "event_horizon" >}}) have `"FromEventHorizon": true"` set.
+
+This is the structure of a committed event:
+```json
+{
+    // this it the events EventLogSequenceNumber,
+    // which identifies the event uniquely within the event log
+    "_id": "decimal",
+    "Content": "object",
+    // Aggregate metadata
+    "Aggregate": {
+        "wasAppliedByAggregate": "bool",
+        // AggregateRootId
+        "TypeId": "UUID",
+        // AggregateRoot Version
+        "TypeGeneration": "long",
+        "Version": "decimal"
+    },
+    // EventHorizon metadata
+    "EventHorizon": {
+        "FromEventHorizon": "bool",
+        "ExternalEventLogSequenceNumber": "decimal",
+        "Received": "date",
+        "Concent": "UUID"
+    },
+    // the committing microservices metadata
+    "ExecutionContext": {
+        // 
+        "Correlation": "UUID",
+        "Microservice": "UUID",
+        "Tenant": "UUID",
+        "Version": "object",
+        "Environment": "string",
+    },
+    // the events metadata
+    "Metadata": {
+        "Occurred": "date",
+        "EventSource": "UUID",
+        // EventTypeId and Generation
+        "TypeId": "UUID",
+        "TypeGeneration": "long",
+        "Public": "bool"
+    }
+}
+```
+
+### `aggregates`
+This collection keeps track of all [AggregateRoots]({{< ref "aggregates" >}})
+
+```json
+{
+    // all AggregateRoots
+    "aggregates": [
+        "EventSource": "UUID",
+        "AggregateType": "UUID",
+        "Version": "decimal"
+    ],
+    // all Events in the Stream
+    "stream-<streamID>": [
+        // same as an Event in the "event-log" + Partition
+        "Partition": "UUID",
+    ],
+    // all Public Events in the Public Stream, same structure as "stream"
+    "public-stream-<streamID>": [],
+    // Filters that define the Streams
+    "stream-definitions": [
+        // id of the Stream it defines
+        "_id": "UUID",
+        "Partitioned": "bool",
+        "Public": "bool",
+        "Filter": {
+            "Type": "Remote | EventTypeId",
+            "Types": [
+                // EventTypeId's to filter into the stream
+            ]
+        }
+    ],
+    // state of registered Stream Processors
+    "stream-processor-states": [],
+
+    // Scoped event-log
+    "x-<scopeID>-event-log": [],
+    // Scoped stream processor states
+    "x-<scopeID>-stream-processor-states": [],
+    // Scoped stream definitions
+    "x-<scopeID>-stream-definitions": [],
+    // Scoped stream definitions
+    "x-<scopeID>-stream-<streamID>": [],
+    // State of each Event Horizon Subscription
+    "x-<scopeID>-subscription-states": [
+        {
+            "Microservice": "UUID",
+            "Tenant": "UUID",
+            "Stream": "UUID",
+            "Partition": "UUID",
+            "Position": "decimal",
+            "LastSuccesfullyProcessed": "date",
+            "RetryTime": "date",
+            "FailureReason": "string",
+            "ProcessingAttempts": "int",
+            "IsFailing": "bool
+        }
+    ],
+}
+```
+
+
+
+### Aggregates
+
+### Stream
+
+### Public Stream
+
+### Stream Processor States
+Keeps track of each [Stream Processor]({{< ref "streams#stream-processor" >}}).
+
+### Stream Definitions
+
+### Scope
+
+#### Subscription States
+
+{{% /tab %}}
+{{< /tabs >}}
+
+### Implementation
 
 ## Basics
 
@@ -34,6 +184,7 @@ In addition to the event itself, metadata associated with the Commit and with th
 ### Event Metadata
 
 The event metadata consists of 
+
 
 ### Event Id.  
 A unique guid for the event.

@@ -41,17 +41,23 @@ Through the [Event Horizon]({{< ref "event_horizon" >}}) other microservices can
 
 ## Stream Processor
 
-A stream processor consists of an event stream and an event processor. It takes in a stream of events, calls the event processor to process the events in order, and keeps track of which events have already been processed. Each stream processor can be seen as the lowest level unit-of-work in regards to streams and they all run at the same time, side by side, in parallel.
+A stream processor consists of an event stream and an event processor. It takes in a stream of events, calls the event processor to process the events in order, keeps track of which events have already been processed, which have failed and when to retry. Each stream processor can be seen as the lowest level unit-of-work in regards to streams and they all run at the same time, side by side, in parallel.
 
 Since the streams are also uniquely identified by a stream id we can identify each stream processor by their `SourceStream, EventProcessor` pairing.
 
 ```csharp
-// simplified structure of a StreamProcessor
+// structure of a StreamProcessor
 StreamProcessor {
     SourceStream Guid
     EventProcessor Guid
     // the next event to be processed
     Position int
+    // for keeping track of failures and retry attempts
+    LastSuccesfullyProcessed DateTime
+    RetryTime DateTime
+    FailureReason string
+    ProcessingAttempts int
+    IsFailing bool
 }
 ```
 

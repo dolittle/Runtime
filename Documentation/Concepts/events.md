@@ -41,7 +41,7 @@ For example, in the domain of opening up the kitchen for the day and adding a ne
 - ❌ `MenuListingElementUpdated`
 
 ## Main structure of an Event
-This is a simplified structure of the main parts of an event. For the Runtime, the event is only a JSON-string.
+This is a simplified structure of the main parts of an event. For the Runtime, the event is only a JSON-string which is saved into the [Event Store]({{< ref "event_store#event-log" >}}).
 
 ```csharp
 Event {
