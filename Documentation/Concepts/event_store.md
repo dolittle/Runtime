@@ -10,11 +10,13 @@ aliases:
 
 An Event Store is a database optimized for storing events in an [Event Sourced]({{< ref "event_sourcing" >}}) system. The [Runtime]({{< ref "overview" >}}) manages the connections and structure of the stored data.
 
+Each [Tenant]({{< ref "tenants" >}}) has their own event store database, which is configured in [`resources.json`]({{< ref "docs/reference/runtime/configuration#resourcesjson" >}}).
+
 ## Structure of the Event Store
 
 {{< tabs name="collections" >}}
 {{% tab name="MongoDB" %}}
-This is the structure of the event store implemented in [MongoDB](https://www.mongodb.com/) in a database called `event_store`. It includes several collections, which are built as needed:
+This is the structure of the event store implemented in [MongoDB](https://www.mongodb.com/). It includes the following collections in the default [Scope]({{< ref "#scope" >}}):
 
 - `event-log`
 - `aggregates`
@@ -23,17 +25,11 @@ This is the structure of the event store implemented in [MongoDB](https://www.mo
 - `stream-<streamID>`
 - `public-stream-<streamID>`
 
-Collections can also be [scoped]({{< ref "#scope" >}}), which is reflected in their naming:
 
-- `x-<scopeID>-event-log`
-- `x-<scopeID>-stream-definitions`
-- `x-<scopeID>-stream-processor-states`
-- `x-<scopeID>-stream-<streamID>`
-- `x-<scopeID>-subscription-states`
-
-Following JSON structure examples have each fields [BSON type](https://docs.mongodb.com/manual/reference/bson-types/) as the value.
+Following JSON structure examples have each property's [BSON type](https://docs.mongodb.com/manual/reference/bson-types/) as the value.
 
 ### `event-log`
+
 The Event Log includes all the [Events]({{< ref "events" >}}) committed to the event store in chronological order. [Aggregate]({{< ref "aggregates" >}}) events have `"wasAppliedByAggregate":  true` set and events coming over the [Event Horizon]({{< ref "event_horizon" >}}) have `"FromEventHorizon": true"` set.
 
 This is the structure of a committed event:
@@ -81,86 +77,113 @@ This is the structure of a committed event:
 ```
 
 ### `aggregates`
-This collection keeps track of all [AggregateRoots]({{< ref "aggregates" >}})
+
+This collection keeps track of all [Aggregate Roots]({{< ref "aggregates#aggregates-in-dolittle" >}}) registered with the Runtime.
 
 ```json
 {
-    // all AggregateRoots
-    "aggregates": [
-        "EventSource": "UUID",
-        "AggregateType": "UUID",
-        "Version": "decimal"
-    ],
-    // all Events in the Stream
-    "stream-<streamID>": [
-        // same as an Event in the "event-log" + Partition
-        "Partition": "UUID",
-    ],
-    // all Public Events in the Public Stream, same structure as "stream"
-    "public-stream-<streamID>": [],
-    // Filters that define the Streams
-    "stream-definitions": [
-        // id of the Stream it defines
-        "_id": "UUID",
-        "Partitioned": "bool",
-        "Public": "bool",
-        "Filter": {
-            "Type": "Remote | EventTypeId",
-            "Types": [
-                // EventTypeId's to filter into the stream
-            ]
-        }
-    ],
-    // state of registered Stream Processors
-    "stream-processor-states": [],
+    "EventSource": "UUID",
+    // the AggregateRootId
+    "AggregateType": "UUID",
+    "Version": "decimal"
+}
+```
 
-    // Scoped event-log
-    "x-<scopeID>-event-log": [],
-    // Scoped stream processor states
-    "x-<scopeID>-stream-processor-states": [],
-    // Scoped stream definitions
-    "x-<scopeID>-stream-definitions": [],
-    // Scoped stream definitions
-    "x-<scopeID>-stream-<streamID>": [],
-    // State of each Event Horizon Subscription
-    "x-<scopeID>-subscription-states": [
-        {
-            "Microservice": "UUID",
-            "Tenant": "UUID",
-            "Stream": "UUID",
-            "Partition": "UUID",
-            "Position": "decimal",
-            "LastSuccesfullyProcessed": "date",
-            "RetryTime": "date",
-            "FailureReason": "string",
-            "ProcessingAttempts": "int",
-            "IsFailing": "bool
-        }
-    ],
+### `stream`
+A [Stream]({{< ref "streams" >}}) contains all the events filtered into it. It's structure is the same as the [`event-log`]({{< ref "#event-log" >}}), with the extra `Partition` property used for [partitions]({{< ref "streams#partitions" >}})
+
+The streams `StreamId` is added to the collections name, eg. a stream with the id of `323bcdb2-5bbd-4f13-a7c3-b19bc2cc2452` would be in a collection called `stream-323bcdb2-5bbd-4f13-a7c3-b19bc2cc2452`.
+
+```json
+{
+    // same as an Event in the "event-log" + Partition
+    "Partition": "UUID",
+}
+```
+
+### `public-stream`
+
+The same as a [`stream`]({{< ref "#stream" >}}), except only for [Public Stream]({{< ref "streams#public-vs-private-streams" >}}) with the `public` prefix in collection name. Public streams can only exist on the default [scope]({{< ref "#scope" >}}).
+
+### `stream-definitions`
+
+This collection contains all [Filters]({{< ref "event_handlers_and_filters#filters" >}}) registered with the Runtime.
+
+Filters defined by an [Event Handler]({{< ref "event_handlers_and_filters#event-handlers" >}}) have a type of `EventTypeId`, while other filters have a type of `Remote`.
+
+```json
+{
+    // id of the Stream the Filter creates
+    "_id": "UUID",
+    "Partitioned": "bool",
+    "Public": "bool",
+    "Filter": {
+        "Type": "string",
+        "Types": [
+            // EventTypeIds to filter into the stream
+        ]
+    }
+}
+```
+
+### `stream-processor-states`
+
+This collection keeps track of all [Stream Processors]({{< ref "streams#stream-processor" >}}) and their state. Partitioned streams will have a `FailingPartitions` property for tracking the fail information per partition.
+
+```json
+{
+    "SourceStream": "UUID",
+    "EventProcessor": "UUID",
+    "Position": "decimal",
+    "LastSuccesfullyProcessed": "date",
+    // failure tracking information
+    "RetryTime": "date",
+    "FailureReason": "string",
+    "ProcessingAttempts": "int",
+    "IsFailing": "bool
 }
 ```
 
 
-
-### Aggregates
-
-### Stream
-
-### Public Stream
-
-### Stream Processor States
-Keeps track of each [Stream Processor]({{< ref "streams#stream-processor" >}}).
-
-### Stream Definitions
-
 ### Scope
 
-#### Subscription States
+Events that came over the [Event Horizon]({{< ref "event_horizon" >}}) need to be put into a scoped collection so they won't be mixed with the other events from the system.
+
+Scoped collections work in the same way as other collections, except:
+- You can't have [Public Streams]({{< ref "streams#public-stream" >}}) or [Aggregates]({{< ref "aggregates" >}}).
+- There is a [`subscription-states`]({{< ref "#subscription-states" >}}) collection for [Subscription]({{< ref "event_horizon#subscription" >}}).
+- Scoped collections have a `x-scopeID-` prefix in their names
+
+<!-- The default alert shortcode wouldn't work properly inside the tab so I copied the alert HTML here -->
+<div class="alert alert-info" role="alert">
+    <h4 class="alert-heading">Default scope</h4>
+    Technically all collections are scoped, with the default scopeID being <code>00000000-0000-0000-0000-000000000000</code>.
+    This is left out of the naming to make the event store more readable. When we talk about scoped concepts, we always refer to non-default scopes.
+</div>
+
+#### `subscription-states`
+
+This collection keeps track of [Event Horizon Subscriptions]({{< ref "event_horizon#subscription" >}}) in a very similar way to [`stream-processor-states`]({{< ref "#stream-processor-states" >}}).
+```json
+{
+    // producers microservice and tenant
+    "Microservice": "UUID",
+    "Tenant": "UUID",
+    // consumers stream
+    "Stream": "UUID",
+    "Partition": "UUID",
+    "Position": "decimal",
+    "LastSuccesfullyProcessed": "date",
+    "RetryTime": "date",
+    "FailureReason": "string",
+    "ProcessingAttempts": "int",
+    "IsFailing": "bool
+}
+```
 
 {{% /tab %}}
 {{< /tabs >}}
 
-### Implementation
 
 ## Basics
 
