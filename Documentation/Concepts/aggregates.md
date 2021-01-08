@@ -57,53 +57,52 @@ public class Kitchen
 
 ## Aggregates in Dolittle
 
-With [Event Sourcing]({{< ref "event_sourcing" >}}) the aggregates are the key components to enforcing the business rules and the state of domain objects. Dolittle has a concept called `AggregateRoot` in the [Event Store]({{< ref "event_store" >}}) that acts as an aggregate root to the `AggregateEvents` committed to it. Each aggregate event is _applied_ to the aggregate root so that it 
+With [Event Sourcing]({{< ref "event_sourcing" >}}) the aggregates are the key components to enforcing the business rules and the state of domain objects. Dolittle has a concept called `AggregateRoot` in the [Event Store]({{< ref "event_store" >}}) that acts as an aggregate root to the `AggregateEvents` _applied_ to it. The root holds a reference to all the aggregate events applied to it and it can fetch all of them.
 
 ### Structure of an `AggregateRoot`
 
 This is a simplified structure of the main parts of an aggregate root.
 ```csharp
 AggregateRoot {
-    EventSourceId Guid
     AggregateRootId Guid
+    EventSourceId Guid
     Version int
-    AggregateEvents AggregateEvent[]
+    AggregateEvents AggregateEvent[] {
+        EventSourceId Guid
+        AggregateRootId Guid
+        // normal Event properties also included
+        ...
+    }
 }
 ```
 
-#### `EventSourceId`
-
-`EventSourceId` represents the source of the event like a "primary key" in a traditional database. By default, [partitioned event handlers]({{< ref "event_handlers_and_filters#event-handlers" >}}) use it for [partitioning]({{< ref "streams.md#partitions" >}}).
-
 ##### `AggregateRootId`
 
-Identifies this specific aggregate root.
+Identifies this specific type of aggregate root. In the kitchen example this would a unique id given to the `Kitchen` class to identify it from other aggregate roots.
+
+#### `EventSourceId`
+
+`EventSourceId` represents the source of the event like a "primary key" in a traditional database.  In the kitchen example this would be the unique id for each instance of the `Kitchen` aggregate root.
 
 #### `Version`
 
-`Version` is the position of the next `AggregateEvent` to be processed. It's incremented after each `AggregateEvent` has been applied by the `AggregateRoot`.
+`Version` is the position of the next `AggregateEvent` to be processed. It's incremented after each `AggregateEvent` has been applied by the `AggregateRoot`. This ensures that the root will always apply the events in the correct order.
+
+### `AggregateEvents`
+The list holds the reference ids to the actual `AggregateEvent` instances that are stored in the [Event Log]({{< ref "event_store#event-log" >}}). With this list the root can ask the Runtime to fetch all of the events with matching `EventSourceId` and `AggregateRootId`.
 
 
 ## Designing aggregates
 
-<!-- do we really ned to tal about aggregates? or just link to other places. aggregates are optional after all... -->
-
-There are a few rules for using aggregates:
-1. It has to have a single root/parent named after the purpose of the aggregate as a whole.
-2. You cannot ask the aggregate any questions (no public properties, no query methods).
-3. You cannot access any of its internals (children, properties)
-4. An aggregate cannot contain another aggregate, only a link/reference.
-
-### Aggregates rules
-
-An aggregate defines which rules must succeed or fail together. There are 2 categories of rules:
-1. Immediate rules: they have to be correct immediately and they can never be broken. They have concurrency and performance implications.
-2. Eventual Rules: they can be broken for a while, but they will eventually be enforced.
-
-Figuring out what kind of rules to put in place depends wholly on the domain. You should ask yourself: _"What is the impact of breaking this rule?" What happens in the domain if this rule is broken? Remember, that aggregates are not a technical concern, they are a domain concern.
+When building your aggregates, roots and rules, it is helpful to ask yourself these questions:
+- _"What is the impact of breaking this rule?"_
+- _"What happens in the domain if this rule is broken?"_
+- _"Am I modelling a domain concern or a technical concern?"_
+- _"Can this rule be broken for a moment or does it need to be enforced immediately?"_
+- _"Do these rules and domain objects break together or can they be split into another aggregate?"_
 
 ## Further reading
 
 - [Aggregates by Martin Fowler](https://martinfowler.com/bliki/DDD_Aggregate.html)
-- [Aggregates in domain Driven Design](https://medium.com/ingeniouslysimple/aggregates-in-domain-driven-design-5aab3ef9901d)
+- [Aggregates in Domain Driven Design](https://medium.com/ingeniouslysimple/aggregates-in-domain-driven-design-5aab3ef9901d)
 - [Uncovering Hidden Business Rules with DDD Aggregates by Nick Tune](https://medium.com/nick-tune-tech-strategy-blog/uncovering-hidden-business-rules-with-ddd-aggregates-67fb02abc4b)
