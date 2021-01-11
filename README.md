@@ -17,8 +17,8 @@ The runtime is the backend of our system and manages connections from the SDKs a
 
 ## Packages
 
-| Platform | Version   |
-| ------- | ------- | ------ |
+| Platform | Version |
+| ------- | ------- |
 | Docker | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest)](https://hub.docker.com/r/dolittle/runtime)
 
 # Developing
