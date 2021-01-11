@@ -138,6 +138,3 @@ Handle(DishPrepared @event) { ... }
 For making development easier, you shouldn't worry about incrementing the generation until you're in production.
 {{< /alert >}}
 -->
-
-## Commit vs Publish
-We use the word `Commit` rather than `Publish` when talking about saving events to the [Event Store]({{< ref "event_store" >}}). We want to emphasize that it's the event store that is the source of truth in the system. The act of calling filters/event handlers comes _after_ the event has been committed to the event store. We also don't publish to any specific stream, event handler or microservice. After the event has been committed, it's ready to be picked up by any processor that listens to that type of event.
