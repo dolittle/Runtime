@@ -12,6 +12,19 @@ The event store is an append-only database. Any events saved to it **cannot be c
 
 Each [Tenant]({{< ref "tenants" >}}) has their own event store database, which is configured in [`resources.json`]({{< ref "docs/reference/runtime/configuration#resourcesjson" >}}).
 
+## Scope
+
+Events that came over the [Event Horizon]({{< ref "event_horizon" >}}) need to be put into a scoped collection so they won't be mixed with the other events from the system.
+
+Scoped collections work the same way as other collections, except you can't have [Public Streams]({{< ref "streams#public-stream" >}}) or [Aggregates]({{< ref "aggregates" >}}).
+
+<!-- The default alert shortcode wouldn't work properly so I copied the alert HTML here -->
+<div class="alert alert-info" role="alert">
+    <h4 class="alert-heading">Default scope</h4>
+    Technically all collections are scoped, with the default scopeID being <code>00000000-0000-0000-0000-000000000000</code>.
+    This is left out of the naming to make the event store more readable. When we talk about scoped concepts, we always refer to non-default scopes.
+</div>
+
 ## Structure of the Event Store
 
 {{< tabs name="collections" >}}
@@ -25,12 +38,16 @@ This is the structure of the event store implemented in [MongoDB](https://www.mo
 - `stream-<streamID>`
 - `public-stream-<streamID>`
 
+For scoped collections:
+- Scoped collections have a `x-scopeID-` prefix in their names
+- There is a [`subscription-states`]({{< ref "#subscription-states" >}}) collection for tracking [Subscriptions]({{< ref "event_horizon#subscription" >}})
+
 
 Following JSON structure examples have each property's [BSON type](https://docs.mongodb.com/manual/reference/bson-types/) as the value.
 
 ### `event-log`
 
-The Event Log includes all the [Events]({{< ref "events" >}}) committed to the event store in chronological order. All [streams]({{< ref "streams" >}}) are created from the event log.
+The Event Log includes all the [Events]({{< ref "events" >}}) committed to the event store in chronological order. All [streams]({{< ref "streams" >}}) are derived from the event log.
 
 [Aggregate]({{< ref "aggregates" >}}) events have `"wasAppliedByAggregate":  true` set and events coming over the [Event Horizon]({{< ref "event_horizon" >}}) have `"FromEventHorizon": true"` set.
 
@@ -80,7 +97,7 @@ This is the structure of a committed event:
 
 ### `aggregates`
 
-This collection keeps track of all [Aggregate Roots]({{< ref "aggregates#aggregates-in-dolittle" >}}) registered with the Runtime.
+This collection keeps track of all [Aggregates]({{< ref "aggregates#aggregates-in-dolittle" >}}) registered with the Runtime.
 
 ```json
 {
@@ -147,31 +164,15 @@ This collection keeps track of all [Stream Processors]({{< ref "streams#stream-p
 }
 ```
 
-### Scope
-
-Events that came over the [Event Horizon]({{< ref "event_horizon" >}}) need to be put into a scoped collection so they won't be mixed with the other events from the system.
-
-Scoped collections work in the same way as other collections, except:
-- You can't have [Public Streams]({{< ref "streams#public-stream" >}}) or [Aggregates]({{< ref "aggregates" >}})
-- There is a [`subscription-states`]({{< ref "#subscription-states" >}}) collection for [Subscription]({{< ref "event_horizon#subscription" >}})
-- Scoped collections have a `x-scopeID-` prefix in their names
-
-<!-- The default alert shortcode wouldn't work properly inside the tab so I copied the alert HTML here -->
-<div class="alert alert-info" role="alert">
-    <h4 class="alert-heading">Default scope</h4>
-    Technically all collections are scoped, with the default scopeID being <code>00000000-0000-0000-0000-000000000000</code>.
-    This is left out of the naming to make the event store more readable. When we talk about scoped concepts, we always refer to non-default scopes.
-</div>
 
 #### `subscription-states`
 
 This collection keeps track of [Event Horizon Subscriptions]({{< ref "event_horizon#subscription" >}}) in a very similar way to [`stream-processor-states`]({{< ref "#stream-processor-states" >}}).
 ```json
 {
-    // producers microservice and tenant
+    // producers microservice, tenant and stream info
     "Microservice": "UUID",
     "Tenant": "UUID",
-    // consumers stream
     "Stream": "UUID",
     "Partition": "UUID",
     "Position": "decimal",
