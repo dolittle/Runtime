@@ -8,7 +8,7 @@ aliases:
 ---
 An Event Store is a database optimized for storing [Events]({{< ref "events" >}}) in an [Event Sourced]({{< ref "event_sourcing" >}}) system. The [Runtime]({{< ref "overview" >}}) manages the connections and structure of the stored data. All [Streams]({{< ref "streams" >}}), [Event Handlers & Filters]({{< ref "event_handlers_and_filters" >}}), [Aggregates]({{< ref "aggregates" >}}) and [Event Horizon Subscriptions]({{< ref "event_horizon#subscription" >}}) are being kept track inside the event store.
 
-The event store is an append-only database. Any events saved to it **cannot be changed** or **deleted**. It acts as the record of all events that have happened in the system from the beginning of time.
+Events saved to the event store **cannot be changed** or **deleted**. It acts as the record of all events that have happened in the system from the beginning of time. 
 
 Each [Tenant]({{< ref "tenants" >}}) has their own event store database, which is configured in [`resources.json`]({{< ref "docs/reference/runtime/configuration#resourcesjson" >}}).
 
