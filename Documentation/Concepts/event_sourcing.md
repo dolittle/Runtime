@@ -55,7 +55,7 @@ To negate the effect of an Event that has happened, another Event has to occur t
 
 ## Commit vs Publish
 
-Dolittle doesn't publish events, rather they are [_committed_]({{< ref "events#commit-vs-publish" >}}). Events are committed to the [event log]({{< ref "event_store#event-log" >}}), from which any potential subscribers will pick up the event from and process it. There is no way to "publish" to a particular subscriber as all the events are available on the event log, but you can create a [Filter]({{< ref "event_handlers_and_filters#filter" >}}) that creates a [Stream]({{< ref "streams" >}}).
+Dolittle doesn't publish events, rather they are [_committed_]({{< ref "event_store#commit-vs-publish" >}}). Events are committed to the [event log]({{< ref "event_store#event-log" >}}), from which any potential subscribers will pick up the event from and process it. There is no way to "publish" to a particular subscriber as all the events are available on the event log, but you can create a [Filter]({{< ref "event_handlers_and_filters#filter" >}}) that creates a [Stream]({{< ref "streams" >}}).
 
 ## Reason for change
 
