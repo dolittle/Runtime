@@ -97,7 +97,7 @@ This is the structure of a committed event:
 
 ### `aggregates`
 
-This collection keeps track of all [Aggregates]({{< ref "aggregates#aggregates-in-dolittle" >}}) registered with the Runtime.
+This collection keeps track of all instances of [Aggregates]({{< ref "aggregates#aggregates-in-dolittle" >}}) registered with the Runtime.
 
 ```json
 {
