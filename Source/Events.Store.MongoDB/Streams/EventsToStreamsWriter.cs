@@ -19,6 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         readonly FilterDefinitionBuilder<Events.StreamEvent> _streamFilter = Builders<Events.StreamEvent>.Filter;
         readonly IStreams _streams;
         readonly IEventConverter _eventConverter;
+        readonly INotifyOfStreamEvents _streamNotifier;
         readonly ILogger _logger;
 
         /// <summary>
@@ -26,11 +27,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// </summary>
         /// <param name="streams">The <see cref="IStreams"/>.</param>
         /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
+        /// <param name="streamNotifier">The <see cref="INotifyOfStreamEvents" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, ILogger<EventsToStreamsWriter> logger)
+        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, INotifyOfStreamEvents streamNotifier, ILogger<EventsToStreamsWriter> logger)
         {
             _streams = streams;
             _eventConverter = eventConverter;
+            _streamNotifier = streamNotifier;
             _logger = logger;
         }
 
@@ -38,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken)
         {
             _logger.Trace("Writing Event: {EventLogSequenceNumber} to Stream: {Stream} in Scope: {Scope}", @event.EventLogSequenceNumber, stream, scope);
-            await Write(
+            var writtenStreamPosition = await Write(
                 await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamFilter,
                 streamPosition =>
@@ -46,10 +49,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                         _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition, partition)
                         : _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
                 cancellationToken).ConfigureAwait(false);
+            _streamNotifier.NotifyForEvent(scope, stream, writtenStreamPosition);
         }
 
         /// <inheritdoc/>
-        public async Task Write<TEvent>(
+        public async Task<StreamPosition> Write<TEvent>(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             Func<StreamPosition, TEvent> createStoreEvent,
@@ -74,6 +78,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                         return Task.CompletedTask;
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
+                return streamPosition;
             }
             catch (MongoWaitQueueFullException ex)
             {

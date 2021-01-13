@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="createStoreEvent">A <see cref="Func{T, TResult}" /> that creates a <typeparamref name="TEvent" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
-        Task Write<TEvent>(
+        Task<StreamPosition> Write<TEvent>(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             Func<StreamPosition, TEvent> createStoreEvent,

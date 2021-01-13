@@ -14,7 +14,9 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public void Provide(IBindingProviderBuilder builder)
         {
             builder.Bind<IWaitForEventInStream>().To<StreamEventWatcher>();
+            builder.Bind<IWaitForEventInPublicStream>().To<StreamEventWatcher>();
             builder.Bind<INotifyOfStreamEvents>().To<StreamEventWatcher>();
+            builder.Bind<INotifyOfPublicStreamEvents>().To<StreamEventWatcher>();
         }
     }
 }
