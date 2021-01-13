@@ -11,7 +11,7 @@ services:
       driver: none
 
   runtime:
-    image: dolittle/runtime:latest
+    image: dolittle/runtime:latest-dotnet-benchmark
     volumes:
       - ${PWD}/.dolittle/resources.json:/app/.dolittle/resources.json
       - ${PWD}/.dolittle/tenants.json:/app/.dolittle/tenants.json
