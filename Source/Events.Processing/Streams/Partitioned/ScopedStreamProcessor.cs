@@ -24,24 +24,28 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// </summary>
         /// <param name="tenantId">The <see cref="TenantId"/>.</param>
         /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+        /// <param name="sourceStreamDefinition">The source stream <see cref="StreamDefinition" />.</param>
         /// <param name="initialState">The <see cref="StreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="failingPartitions">The <see cref="IFailingPartitions" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
+        /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public ScopedStreamProcessor(
             TenantId tenantId,
             IStreamProcessorId streamProcessorId,
+            IStreamDefinition sourceStreamDefinition,
             StreamProcessorState initialState,
             IEventProcessor processor,
             IResilientStreamProcessorStateRepository streamProcessorStates,
             ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             IFailingPartitions failingPartitions,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+            IWaitForEventInStream eventWaiter,
             ILogger<ScopedStreamProcessor> logger)
-            : base(tenantId, streamProcessorId, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, logger)
+            : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, eventWaiter, logger)
         {
             _streamProcessorStates = streamProcessorStates;
             _failingPartitions = failingPartitions;

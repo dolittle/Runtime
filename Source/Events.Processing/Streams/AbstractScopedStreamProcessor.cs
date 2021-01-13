@@ -16,10 +16,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// </summary>
     public abstract class AbstractScopedStreamProcessor
     {
+        readonly IStreamDefinition _sourceStreamDefinition;
         readonly TenantId _tenantId;
         readonly IEventProcessor _processor;
         readonly ICanFetchEventsFromStream _eventsFetcher;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _fetchEventToProcessPolicy;
+        readonly IWaitForEventInStream _eventWaiter;
         IStreamProcessorState _currentState;
         bool _started;
 
@@ -28,27 +30,33 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// </summary>
         /// <param name="tenantId">The <see cref="TenantId"/>.</param>
         /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+        /// <param name="sourceStreamDefinition">The source stream <see cref="IStreamDefinition" />.</param>
         /// <param name="initialState">The initial state of the <see cref="IStreamProcessorState" />.</param>
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="eventsFetcher">The <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="fetchEventsToProcessPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
+        /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" /> to wait for events to be available in stream.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         protected AbstractScopedStreamProcessor(
             TenantId tenantId,
             IStreamProcessorId streamProcessorId,
+            IStreamDefinition sourceStreamDefinition,
             IStreamProcessorState initialState,
             IEventProcessor processor,
             ICanFetchEventsFromStream eventsFetcher,
             IAsyncPolicyFor<ICanFetchEventsFromStream> fetchEventsToProcessPolicy,
+            IWaitForEventInStream eventWaiter,
             ILogger logger)
         {
             Identifier = streamProcessorId;
             Logger = logger;
             _currentState = initialState;
+            _sourceStreamDefinition = sourceStreamDefinition;
             _tenantId = tenantId;
             _processor = processor;
             _eventsFetcher = eventsFetcher;
             _fetchEventToProcessPolicy = fetchEventsToProcessPolicy;
+            _eventWaiter = eventWaiter;
         }
 
         /// <summary>
@@ -177,7 +185,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     {
                         _currentState = await Catchup(_currentState, cancellationToken).ConfigureAwait(false);
                         @event = await FetchNextEventToProcess(_currentState, cancellationToken).ConfigureAwait(false);
-                        if (@event == default) await Task.Delay(250).ConfigureAwait(false);
+                        if (@event == default) await _eventWaiter.WaitForEvent(Identifier.ScopeId, _sourceStreamDefinition.StreamId, _currentState.Position, cancellationToken).ConfigureAwait(false);
                     }
 
                     if (cancellationToken.IsCancellationRequested) break;

@@ -11,6 +11,7 @@ using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -94,11 +95,13 @@ namespace Dolittle.Runtime.EventHorizon
             _streamProcessor = new ScopedStreamProcessor(
                 _identifier.ConsumerTenantId,
                 _identifier,
+                new StreamDefinition(new FilterDefinition(_identifier.ProducerTenantId.Value, _identifier.ConsumerTenantId.Value, false)),
                 tryGetStreamProcessorState.Result as StreamProcessorState,
                 _eventProcessor,
                 _streamProcessorStates,
                 _eventsFetcher,
                 _eventsFetcherPolicy,
+                _eventsFetcher,
                 _loggerManager.CreateLogger<ScopedStreamProcessor>());
             _initialized = true;
         }
