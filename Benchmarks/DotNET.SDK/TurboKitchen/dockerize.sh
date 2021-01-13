@@ -1,0 +1,1 @@
+docker build -t dolittle/runtime:latest-dotnet-benchmark -f ../../Dockerfile ../../..
