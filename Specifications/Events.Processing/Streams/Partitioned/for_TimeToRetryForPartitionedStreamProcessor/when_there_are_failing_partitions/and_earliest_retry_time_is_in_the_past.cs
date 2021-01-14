@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_TimeToRetry
                         DateTimeOffset.UtcNow)
                 },
                 {
-                    "9b025684-130c-4789-b904-878a8e26c2d0",
+                    "e90f7d42-0a21-4d90-93a8-e56bca822b67",
                     new FailingPartitionState(
                         0,
                         DateTimeOffset.UtcNow.AddSeconds(64),
@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_TimeToRetry
                         DateTimeOffset.UtcNow)
                 },
                 {
-                    "9b025684-130c-4789-b904-878a8e26c2d0",
+                    "36975349-318d-4c01-bbbb-4f1aeaf4e7ea",
                     new FailingPartitionState(
                         0,
                         DateTimeOffset.UtcNow.AddSeconds(78),

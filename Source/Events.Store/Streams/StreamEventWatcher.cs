@@ -19,27 +19,27 @@ namespace Dolittle.Runtime.Events.Store.Streams
         readonly ConcurrentDictionary<EventWaiterId, EventWaiter> _publicWaiters = new ConcurrentDictionary<EventWaiterId, EventWaiter>();
 
         /// <inheritdoc/>
-        void INotifyOfStreamEvents.NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)
+        public void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)
             => NotifyForEvent(scope, stream, position, false);
 
         /// <inheritdoc/>
-        Task IWaitForEventInStream.WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token)
+        public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token)
             => WaitForWaiter(scope, stream, position, TimeSpan.FromMinutes(1), false, token);
 
         /// <inheritdoc/>
-        Task IWaitForEventInStream.WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token)
+        public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token)
             => WaitForWaiter(scope, stream, position, timeout, false, token);
 
         /// <inheritdoc/>
-        void INotifyOfPublicStreamEvents.NotifyForEvent(StreamId stream, StreamPosition position)
+        public void NotifyForEvent(StreamId stream, StreamPosition position)
             => NotifyForEvent(ScopeId.Default, stream, position, true);
 
         /// <inheritdoc/>
-        Task IWaitForEventInPublicStream.WaitForEvent(StreamId stream, StreamPosition position, CancellationToken token)
+        public Task WaitForEvent(StreamId stream, StreamPosition position, CancellationToken token)
             => WaitForWaiter(ScopeId.Default, stream, position, TimeSpan.FromMinutes(1), true, token);
 
         /// <inheritdoc/>
-        Task IWaitForEventInPublicStream.WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token)
+        public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token)
             => WaitForWaiter(ScopeId.Default, stream, position, timeout, true, token);
 
         async Task WaitForWaiter(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, bool isPublic, CancellationToken token)
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
 
         void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position, bool isPublic)
         {
-            var waiterId = new EventWaiterId(ScopeId.Default, stream);
+            var waiterId = new EventWaiterId(scope, stream);
             var newWaiter = new EventWaiter(scope, stream);
             var waiter = isPublic
                 ? _publicWaiters.GetOrAdd(waiterId, id => newWaiter)

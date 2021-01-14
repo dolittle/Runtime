@@ -28,10 +28,18 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
             stream_position = 0;
             tokenSource = new CancellationTokenSource();
             token = tokenSource.Token;
+        };
+
+        Because of = () =>
+        {
+            result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, token);
             tokenSource.Cancel();
         };
 
-        Because of = () => result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, token).Wait();
         It should_be_cancelled = () => result.IsCanceled.ShouldBeTrue();
+        Cleanup clean = () =>
+        {
+            tokenSource.Dispose();
+        };
     }
 }

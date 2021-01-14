@@ -4,8 +4,6 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
@@ -13,7 +11,6 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
     public class when_a_public_event_is_notified
     {
         static StreamEventWatcher event_watcher;
-        static ScopeId scope_id;
         static StreamId stream_id;
         static StreamPosition stream_position;
         static CancellationTokenSource tokenSource;
@@ -22,14 +19,23 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
         Establish context = () =>
         {
             event_watcher = new StreamEventWatcher();
-            scope_id = Guid.NewGuid();
             stream_id = Guid.NewGuid();
             stream_position = 0;
-            event_watcher.NotifyForEvent(stream_id, stream_position);
             tokenSource = new CancellationTokenSource();
         };
 
-        Because of = () => result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, tokenSource.Token).Wait();
+        Because of = () =>
+        {
+            result = event_watcher.WaitForEvent(stream_id, stream_position, tokenSource.Token);
+            event_watcher.NotifyForEvent(stream_id, stream_position);
+            result.Wait();
+        };
+
         It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
+
+        Cleanup clean = () =>
+        {
+            tokenSource.Dispose();
+        };
     }
 }

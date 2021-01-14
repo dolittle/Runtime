@@ -4,17 +4,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
 {
     public class when_multiple_waiters_are_notified
     {
-        static StreamEventWatcher event_watcher1;
-        static StreamEventWatcher event_watcher2;
-        static StreamEventWatcher event_watcher3;
+        static StreamEventWatcher event_watcher;
         static ScopeId scope_id;
         static StreamId stream_id;
         static StreamPosition stream_position;
@@ -25,9 +21,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
 
         Establish context = () =>
         {
-            event_watcher1 = new StreamEventWatcher();
-            event_watcher2 = new StreamEventWatcher();
-            event_watcher3 = new StreamEventWatcher();
+            event_watcher = new StreamEventWatcher();
             scope_id = Guid.NewGuid();
             stream_id = Guid.NewGuid();
             stream_position = 0;
@@ -36,15 +30,20 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
 
         Because of = () =>
         {
-            result1 = event_watcher1.WaitForEvent(scope_id, stream_id, stream_position, tokenSource.Token);
-            result2 = event_watcher2.WaitForEvent(scope_id, stream_id, stream_position, tokenSource.Token);
-            result3 = event_watcher3.WaitForEvent(scope_id, stream_id, stream_position, tokenSource.Token);
-
+            result1 = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, tokenSource.Token);
+            result2 = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, tokenSource.Token);
+            result3 = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, tokenSource.Token);
             event_watcher.NotifyForEvent(scope_id, stream_id, stream_position);
+
             Task.WaitAll(result1, result2, result3);
         };
+
         It first_should_be_completed = () => result1.IsCompleted.ShouldBeTrue();
         It second_should_be_completed = () => result2.IsCompleted.ShouldBeTrue();
         It thid_should_be_completed = () => result3.IsCompleted.ShouldBeTrue();
+        Cleanup clean = () =>
+        {
+            tokenSource.Dispose();
+        };
     }
 }

@@ -10,15 +10,17 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamEventWatcher
 {
-    public class when_no_event_is_notified
+    public class when_it_timeouts
     {
         static StreamEventWatcher event_watcher;
         static ScopeId scope_id;
         static StreamId stream_id;
         static StreamPosition stream_position;
+        static TimeSpan timeout;
         static CancellationTokenSource tokenSource;
         static CancellationToken token;
         static Task result;
+        static Exception exception;
 
         Establish context = () =>
         {
@@ -26,13 +28,24 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamEventWatcher
             scope_id = Guid.NewGuid();
             stream_id = Guid.NewGuid();
             stream_position = 0;
-            event_watcher.NotifyForEvent(scope_id, stream_id, stream_position);
             tokenSource = new CancellationTokenSource();
-            token = tokenSource.Token();
+            token = tokenSource.Token;
+            timeout = TimeSpan.FromMilliseconds(500);
         };
 
-        Because of = () => result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, token).Wait();
-        It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
-        It should_have_cancelled_the_token = () => token.IsCancellationRequested.ShouldBeFalse();
+        Because of = () =>
+        {
+            result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, timeout, token);
+            exception = Catch.Exception(() => result.Wait());
+            System.Console.WriteLine(exception.InnerException);
+        };
+
+        It should_have_timed_out = () => result.IsCanceled.ShouldBeTrue();
+        It should_have_thrown_an_exception = () => exception.InnerException.ShouldBeOfExactType<TaskCanceledException>();
+        Cleanup clean = () =>
+        {
+            tokenSource.Cancel();
+            tokenSource.Dispose();
+        };
     }
 }
