@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
@@ -17,6 +18,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="streamPosition"><see cref="StreamPosition">the position in the stream</see>.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="StreamEvent" />.</returns>
-        Task<StreamEvent> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken);
+        Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken);
     }
 }
