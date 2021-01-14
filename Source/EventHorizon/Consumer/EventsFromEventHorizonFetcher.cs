@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Nito.AsyncEx;
@@ -27,8 +28,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public Task<StreamEvent> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken) =>
-            _events.DequeueAsync(cancellationToken);
+        public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
+        {
+            return await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         /// <inheritdoc/>
         public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000);

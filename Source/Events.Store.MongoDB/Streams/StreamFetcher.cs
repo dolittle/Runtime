@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Store.Streams.StreamEvent> Fetch(
+        public async Task<Try<Store.Streams.StreamEvent>> Fetch(
             StreamPosition streamPosition,
             CancellationToken cancellationToken)
         {
