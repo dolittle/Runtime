@@ -5,9 +5,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting
+namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting_for_10ms
 {
-    public class and_it_is_never_notified : given.an_event_waiter
+    public class and_has_already_been_notified : given.an_event_waiter
     {
         static StreamPosition position;
         static CancellationTokenSource token_source;
@@ -19,11 +19,16 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting
             position = 2;
             token_source = new CancellationTokenSource();
             token = token_source.Token;
+            event_waiter.Notify(position);
         };
 
-        Because of = () => result = event_waiter.Wait(position, token);
+        Because of = () =>
+        {
+            result = event_waiter.Wait(position, token);
+            Thread.Sleep(10);
+        };
 
-        It should_wait_for_event = () => result.IsCompleted.ShouldBeFalse();
+        It should_be_done_waiting_for_event = () => result.IsCompleted.ShouldBeTrue();
 
         Cleanup clean = () =>
         {
