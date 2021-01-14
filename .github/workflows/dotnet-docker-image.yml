@@ -1,7 +1,7 @@
 name: .NET Docker Image CI/CD
 
 env:
-  PRERELEASE_BRANCHES: experimental,alpha,beta,rc,turbo-kitchen # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: experimental,alpha,beta,rc,turbo # Comma separated list of prerelease branch names. 'alpha,rc, ...'
   DOCKER_HUB_REPO: dolittle/runtime # The docker hub repo to push to
   COVERAGE_FOLDER: Coverage
 
@@ -98,9 +98,3 @@ jobs:
       with:
         cascading-release: ${{ steps.context.outputs.cascading-release }}
         version: ${{ steps.increment-version.outputs.next-version }}
-
-    - name: Upload coverage to CodeCov
-      if: ${{ steps.context.outputs.should-publish == 'true' }}
-      run: bash <(curl -s https://codecov.io/bash) -f "$FILE_PATH"
-      env:
-        FILE_PATH: ${{ github.workspace }}/${{ env.COVERAGE_FOLDER }}/coverage.opencover.xml
