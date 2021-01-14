@@ -42,16 +42,17 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token)
             => WaitForWaiter(ScopeId.Default, stream, position, timeout, true, token);
 
+        static EventWaiter CreateNewWaiter(EventWaiterId id)
+            => new EventWaiter(id.Scope, id.Stream);
+
         async Task WaitForWaiter(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, bool isPublic, CancellationToken token)
         {
             var waiterId = new EventWaiterId(scope, stream);
             using var timeoutSource = new CancellationTokenSource(timeout);
             using var linkedSource = CancellationTokenSource.CreateLinkedTokenSource(token, timeoutSource.Token);
-
-            var newWaiter = new EventWaiter(scope, stream);
             var waiter = isPublic
-                ? _publicWaiters.GetOrAdd(waiterId, id => newWaiter)
-                : _waiters.GetOrAdd(waiterId, id => newWaiter);
+                ? _publicWaiters.GetOrAdd(waiterId, CreateNewWaiter)
+                : _waiters.GetOrAdd(waiterId, CreateNewWaiter);
 
             await waiter.Wait(position, linkedSource.Token).ConfigureAwait(false);
         }
@@ -59,10 +60,9 @@ namespace Dolittle.Runtime.Events.Store.Streams
         void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position, bool isPublic)
         {
             var waiterId = new EventWaiterId(scope, stream);
-            var newWaiter = new EventWaiter(scope, stream);
             var waiter = isPublic
-                ? _publicWaiters.GetOrAdd(waiterId, id => newWaiter)
-                : _waiters.GetOrAdd(waiterId, id => newWaiter);
+                ? _publicWaiters.GetOrAdd(waiterId, CreateNewWaiter)
+                : _waiters.GetOrAdd(waiterId, CreateNewWaiter);
             waiter.Notify(position);
         }
     }
