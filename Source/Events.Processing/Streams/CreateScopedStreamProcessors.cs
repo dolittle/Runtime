@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Resilience;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 
@@ -21,6 +22,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
         readonly ILoggerManager _loggerManager;
         readonly IWaitForEventInStream _eventWaiter;
+        readonly INotifyOfStreamEvents _streamNotifier;
+        readonly INotifyOfPublicStreamEvents _publicStreamNotifier;
         readonly TenantId _tenant;
 
         /// <summary>
@@ -31,6 +34,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" />.</param>
+        /// <param name="streamNotifier">The <see cref="INotifyOfStreamEvents" />.</param>
+        /// <param name="publicStreamNotifier">The <see cref="INotifyOfPublicStreamEvents" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         public CreateScopedStreamProcessors(
             IEventFetchers eventFetchers,
@@ -38,6 +43,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IExecutionContextManager executionContextManager,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
             IWaitForEventInStream eventWaiter,
+            INotifyOfStreamEvents streamNotifier,
+            INotifyOfPublicStreamEvents publicStreamNotifier,
             ILoggerManager loggerManager)
         {
             _eventFetchers = eventFetchers;
@@ -45,6 +52,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _eventsFetcherPolicy = eventsFetcherPolicy;
             _eventWaiter = eventWaiter;
             _tenant = executionContextManager.Current.Tenant;
+            _streamNotifier = streamNotifier;
+            _publicStreamNotifier = publicStreamNotifier;
             _loggerManager = loggerManager;
         }
 
@@ -82,6 +91,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
 
             if (!tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedPartitionedStreamProcessorState(streamProcessorId);
+            NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
 
             return new Partitioned.ScopedStreamProcessor(
                 _tenant,
@@ -113,6 +123,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
 
             if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
+            NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
             return new ScopedStreamProcessor(
                 _tenant,
                 streamProcessorId,
@@ -125,6 +136,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 _eventWaiter,
                 new TimeToRetryForUnpartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<ScopedStreamProcessor>());
+        }
+
+        void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
+        {
+            if (position == StreamPosition.Start) return;
+            if (streamDefinition.Public) _publicStreamNotifier.NotifyForEvent(streamDefinition.StreamId, position - 1);
+            else _streamNotifier.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
         }
     }
 }
