@@ -16,7 +16,9 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// </remarks>
     public class EventWaiter
     {
-        readonly IDictionary<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
+        readonly object _notifiedLock = new object();
+        readonly object _readWriteLock = new object();
+        readonly SortedList<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
         StreamPosition _lastNotified;
 
         /// <summary>
@@ -27,7 +29,8 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public EventWaiter(ScopeId scope, StreamId stream)
         {
             Id = new EventWaiterId(scope, stream);
-            _taskCompletionSources = new Dictionary<StreamPosition, TaskCompletionSource<bool>>();
+            _taskCompletionSources = new SortedList<StreamPosition, TaskCompletionSource<bool>>(
+                Comparer<StreamPosition>.Create((a, b) => a.Value.CompareTo(b.Value)));
         }
 
         /// <summary>
@@ -45,11 +48,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public async Task Wait(StreamPosition position, CancellationToken token)
         {
             if (IsAlreadyNotified(position)) return;
+            var tcs = GetOrAddTaskCompletionSourceLocking(position);
 
-            if (!_taskCompletionSources.TryGetValue(position, out var tcs))
+            // Additional check in case of race condition with Notify
+            if (IsAlreadyNotified(position))
             {
-                tcs = new TaskCompletionSource<bool>();
-                _taskCompletionSources.Add(position, tcs);
+                _taskCompletionSources.Remove(position);
+                return;
             }
 
             await tcs.Task.WaitAsync(token).ConfigureAwait(false);
@@ -62,21 +67,47 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         public void Notify(StreamPosition position)
         {
-            SetLastNotified(position);
-            if (!_taskCompletionSources.TryGetValue(position, out var tcs))
+            if (_lastNotified == null || _lastNotified < position.Value)
             {
-                tcs = new TaskCompletionSource<bool>();
-                _taskCompletionSources.Add(position, tcs);
+                lock (_notifiedLock)
+                {
+                    if (!IsAlreadyNotified(position)) _lastNotified = position;
+                }
             }
 
-            tcs.SetResult(true);
+            RemoveAllAtAndBellowLocking(position);
         }
 
-        void SetLastNotified(StreamPosition position)
-            => _lastNotified = IsAlreadyNotified(position)
-                ? _lastNotified : position;
+        void RemoveAllAtAndBellowLocking(StreamPosition position)
+        {
+            lock (_readWriteLock)
+            {
+                foreach (var kvp in _taskCompletionSources)
+                {
+                    if (kvp.Key.Value <= position) kvp.Value.TrySetResult(true);
+                    if (kvp.Key.Value == position) break;
+                }
+            }
+        }
+
+        TaskCompletionSource<bool> GetOrAddTaskCompletionSourceLocking(StreamPosition position)
+        {
+            if (!_taskCompletionSources.TryGetValue(position, out var tcs))
+            {
+                lock (_readWriteLock)
+                {
+                    if (!_taskCompletionSources.TryGetValue(position, out tcs))
+                    {
+                        tcs = new TaskCompletionSource<bool>();
+                        _taskCompletionSources.Add(position, tcs);
+                    }
+                }
+            }
+
+            return tcs;
+        }
 
         bool IsAlreadyNotified(StreamPosition position)
-            => _lastNotified != null && _lastNotified.Value > position.Value;
+            => _lastNotified != null && _lastNotified.Value >= position.Value;
     }
 }
