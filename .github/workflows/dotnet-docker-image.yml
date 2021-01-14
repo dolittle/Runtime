@@ -1,7 +1,7 @@
 name: .NET Docker Image CI/CD
 
 env:
-  PRERELEASE_BRANCHES: experimental,alpha,beta,rc # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: experimental,alpha,beta,rc,turbo-kitchen # Comma separated list of prerelease branch names. 'alpha,rc, ...'
   DOCKER_HUB_REPO: dolittle/runtime # The docker hub repo to push to
   COVERAGE_FOLDER: Coverage
 
