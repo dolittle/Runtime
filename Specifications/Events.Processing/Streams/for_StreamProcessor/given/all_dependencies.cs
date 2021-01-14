@@ -45,10 +45,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given
                 .Returns(Task.FromResult(new Mock<AbstractScopedStreamProcessor>(
                     new TenantId { Value = Guid.NewGuid() },
                     Mock.Of<IStreamProcessorId>(),
+                    Mock.Of<IStreamDefinition>(),
                     Mock.Of<IStreamProcessorState>(),
                     Mock.Of<IEventProcessor>(),
                     Mock.Of<ICanFetchEventsFromStream>(),
                     Mock.Of<IAsyncPolicyFor<ICanFetchEventsFromStream>>(),
+                    Mock.Of<IWaitForEventInStream>(),
                     Mock.Of<ILogger>()).Object));
             stream_processor = new StreamProcessor(
                 stream_processor_id,
