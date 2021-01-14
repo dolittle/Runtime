@@ -102,6 +102,7 @@ namespace Dolittle.Runtime.EventHorizon
                 _eventsFetcher,
                 _eventsFetcherPolicy,
                 _eventsFetcher,
+                new TimeToRetryForUnpartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<ScopedStreamProcessor>());
             _initialized = true;
         }

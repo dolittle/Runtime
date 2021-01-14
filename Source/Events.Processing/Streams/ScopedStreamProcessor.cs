@@ -17,6 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     {
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+        readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
@@ -30,6 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" /> to wait for events to be available in stream.</param>
+        /// <param name="timeToRetryGetter">The <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public ScopedStreamProcessor(
             TenantId tenantId,
@@ -41,10 +43,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             ICanFetchEventsFromStream eventsFromStreamsFetcher,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
             IWaitForEventInStream eventWaiter,
+            ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
             ILogger<ScopedStreamProcessor> logger)
             : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, eventWaiter, logger)
         {
             _streamProcessorStates = streamProcessorStates;
+            _timeToRetryGetter = timeToRetryGetter;
         }
 
         /// <inheritdoc/>
@@ -55,7 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 if (!CanRetryProcessing(streamProcessorState.RetryTime))
                 {
-                    await Task.Delay(500).ConfigureAwait(false);
+                    await Task.Delay(GetTimeToRetryProcessing(streamProcessorState), cancellationToken).ConfigureAwait(false);
                     var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(Identifier, cancellationToken).ConfigureAwait(false);
                     if (tryGetStreamProcessorState.Success) streamProcessorState = tryGetStreamProcessorState.Result as StreamProcessorState;
                 }
@@ -101,6 +105,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             return newState;
         }
 
-        bool CanRetryProcessing(DateTimeOffset retryTime) => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
+        /// <inheritdoc/>
+        protected override bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
+            => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
+
+        bool CanRetryProcessing(DateTimeOffset retryTime)
+            => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
     }
 }

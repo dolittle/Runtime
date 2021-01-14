@@ -94,6 +94,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy, _loggerManager.CreateLogger<Partitioned.FailingPartitions>()),
                 _eventsFetcherPolicy,
                 _eventWaiter,
+                new Partitioned.TimeToRetryForPartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<Partitioned.ScopedStreamProcessor>());
         }
 
@@ -122,6 +123,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 eventsFromStreamsFetcher,
                 _eventsFetcherPolicy,
                 _eventWaiter,
+                new TimeToRetryForUnpartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<ScopedStreamProcessor>());
         }
     }

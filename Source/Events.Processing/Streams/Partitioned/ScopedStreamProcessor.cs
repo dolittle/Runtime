@@ -18,6 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
     {
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IFailingPartitions _failingPartitions;
+        readonly ICanGetTimeToRetryFor<StreamProcessorState> _timeToRetryGetter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScopedStreamProcessor"/> class.
@@ -32,6 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <param name="failingPartitions">The <see cref="IFailingPartitions" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" />.</param>
+        /// <param name="timeToRetryGetter">The <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public ScopedStreamProcessor(
             TenantId tenantId,
@@ -44,11 +46,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             IFailingPartitions failingPartitions,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
             IWaitForEventInStream eventWaiter,
+            ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
             ILogger<ScopedStreamProcessor> logger)
             : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, eventWaiter, logger)
         {
             _streamProcessorStates = streamProcessorStates;
             _failingPartitions = failingPartitions;
+            _timeToRetryGetter = timeToRetryGetter;
         }
 
         /// <inheritdoc/>
@@ -99,5 +103,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }
+
+        /// <inheritdoc/>
+        protected override bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
+            => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
     }
 }
