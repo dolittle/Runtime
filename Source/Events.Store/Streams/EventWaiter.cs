@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
@@ -75,14 +76,16 @@ namespace Dolittle.Runtime.Events.Store.Streams
                 }
             }
 
-            RemoveAllAtAndBellowLocking(position);
+            RemoveAllAtAndBelowLocking(position);
         }
 
-        void RemoveAllAtAndBellowLocking(StreamPosition position)
+        void RemoveAllAtAndBelowLocking(StreamPosition position)
         {
             lock (_readWriteLock)
             {
-                foreach (var kvp in _taskCompletionSources)
+                // have to use ToArray() here as the enumeration changes because they should be removed
+                // at the same time in the Wait().
+                foreach (var kvp in _taskCompletionSources.ToArray())
                 {
                     if (kvp.Key.Value <= position) kvp.Value.TrySetResult(true);
                     if (kvp.Key.Value == position) break;
