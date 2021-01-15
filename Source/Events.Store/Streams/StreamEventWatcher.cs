@@ -58,6 +58,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
 
         async Task WaitForWaiter(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, bool isPublic, CancellationToken token)
         {
+            _logger.Debug("Start waiting for event coming in at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
             var waiterId = new EventWaiterId(scope, stream);
 
             using var timeoutSource = new CancellationTokenSource(timeout);
@@ -69,8 +70,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
             try
             {
                 await waiter.Wait(position, linkedSource.Token).ConfigureAwait(false);
-
-                // _logger.Information("Finished waiting for {Position} with WaiterId {WaiterId}", position, waiter.Id);
             }
             catch (TaskCanceledException)
             {
@@ -80,16 +79,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
 
         void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position, bool isPublic)
         {
-            // System.Console.WriteLine($"Notify: My Hash: {GetHashCode()}");
+            _logger.Debug("Notifying that an event has been written at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
             var waiterId = new EventWaiterId(scope, stream);
 
-            // _logger.Information("Notified position {Position} and waiter {Text}", position, _waiters.ContainsKey(waiterId) ? "exists" : "does not exist");
             var waiter = isPublic
                 ? _publicWaiters.GetOrAdd(waiterId, CreateNewWaiter)
                 : _waiters.GetOrAdd(waiterId, CreateNewWaiter);
             waiter.Notify(position);
-
-            // _logger.Information("Notified position {Position} for waiter in stream with hash {WaiterHash}", position, waiter.Id.Stream.Value, waiter.GetHashCode());
         }
     }
 }

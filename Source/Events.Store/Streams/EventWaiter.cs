@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
@@ -66,14 +66,12 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         public void Notify(StreamPosition position)
         {
-            // System.Console.WriteLine($"In Notify for Id {Id} and Position {position} with last notified {_lastNotified}");
             if (NeverNotifiedOrNotNotifiedOfPosition(position))
             {
                 lock (_notifiedLock)
                 {
                     if (NeverNotifiedOrNotNotifiedOfPosition(position))
                     {
-                        // System.Console.WriteLine($"In Notify for Id {Id} and Position {position} with last notified {_lastNotified} settings last notified");
                         _lastNotified = position;
                     }
                 }
@@ -86,13 +84,11 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             lock (_readWriteLock)
             {
-                // System.Console.WriteLine($"There are {_taskCompletionSources.Count} waiters waiting in waiter with hash {GetHashCode()}");
-                foreach (var storedPosition in _taskCompletionSources.Keys)
+                var keys = _taskCompletionSources.Keys.ToArray();
+                foreach (var storedPosition in keys)
                 {
-                    // System.Console.WriteLine($"Looping through position {storedPosition.Value} and wanted position {position.Value}");
                     if (storedPosition.Value <= position)
                     {
-                        // System.Console.WriteLine($"In Notify for Id {Id} and Position {position} setting position {storedPosition.Value} to completed");
                         _taskCompletionSources[storedPosition].TrySetResult(true);
                     }
 
@@ -103,7 +99,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
 
         TaskCompletionSource<bool> GetOrAddTaskCompletionSourceLocking(StreamPosition position)
         {
-            // System.Console.WriteLine($"Getting or adding {position} to waiter {Id}");
             if (!_taskCompletionSources.TryGetValue(position, out var tcs))
             {
                 lock (_readWriteLock)
@@ -112,8 +107,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
                     {
                         tcs = new TaskCompletionSource<bool>();
                         _taskCompletionSources.Add(position, tcs);
-
-                        // System.Console.WriteLine($"Added position {position} to waiter {Id} with hash {GetHashCode()}");
                     }
                 }
             }

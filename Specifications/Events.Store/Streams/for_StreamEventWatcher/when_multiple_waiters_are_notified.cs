@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Logging;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
@@ -21,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
 
         Establish context = () =>
         {
-            event_watcher = new StreamEventWatcher();
+            event_watcher = new StreamEventWatcher(Moq.Mock.Of<ILogger<StreamEventWatcher>>());
             scope_id = Guid.NewGuid();
             stream_id = Guid.NewGuid();
             stream_position = 0;
