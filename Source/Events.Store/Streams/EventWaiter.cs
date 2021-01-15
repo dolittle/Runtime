@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Linq;
+
 using System.Threading;
 using System.Threading.Tasks;
 using Nito.AsyncEx;
@@ -50,8 +50,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (IsAlreadyNotifiedOfPosition(position)) return;
             var tcs = GetOrAddTaskCompletionSourceLocking(position);
-
-            // Additional check in case of race condition with Notify
             if (IsAlreadyNotifiedOfPosition(position))
             {
                 _taskCompletionSources.Remove(position);
@@ -68,11 +66,16 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         public void Notify(StreamPosition position)
         {
+            // System.Console.WriteLine($"In Notify for Id {Id} and Position {position} with last notified {_lastNotified}");
             if (NeverNotifiedOrNotNotifiedOfPosition(position))
             {
                 lock (_notifiedLock)
                 {
-                    if (NeverNotifiedOrNotNotifiedOfPosition(position)) _lastNotified = position;
+                    if (NeverNotifiedOrNotNotifiedOfPosition(position))
+                    {
+                        // System.Console.WriteLine($"In Notify for Id {Id} and Position {position} with last notified {_lastNotified} settings last notified");
+                        _lastNotified = position;
+                    }
                 }
             }
 
@@ -83,18 +86,24 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             lock (_readWriteLock)
             {
-                // have to use ToArray() here as the enumeration changes because they should be removed
-                // at the same time in the Wait().
-                foreach (var kvp in _taskCompletionSources.ToArray())
+                // System.Console.WriteLine($"There are {_taskCompletionSources.Count} waiters waiting in waiter with hash {GetHashCode()}");
+                foreach (var storedPosition in _taskCompletionSources.Keys)
                 {
-                    if (kvp.Key.Value <= position) kvp.Value.TrySetResult(true);
-                    if (kvp.Key.Value == position) break;
+                    // System.Console.WriteLine($"Looping through position {storedPosition.Value} and wanted position {position.Value}");
+                    if (storedPosition.Value <= position)
+                    {
+                        // System.Console.WriteLine($"In Notify for Id {Id} and Position {position} setting position {storedPosition.Value} to completed");
+                        _taskCompletionSources[storedPosition].TrySetResult(true);
+                    }
+
+                    if (storedPosition == position) break;
                 }
             }
         }
 
         TaskCompletionSource<bool> GetOrAddTaskCompletionSourceLocking(StreamPosition position)
         {
+            // System.Console.WriteLine($"Getting or adding {position} to waiter {Id}");
             if (!_taskCompletionSources.TryGetValue(position, out var tcs))
             {
                 lock (_readWriteLock)
@@ -103,6 +112,8 @@ namespace Dolittle.Runtime.Events.Store.Streams
                     {
                         tcs = new TaskCompletionSource<bool>();
                         _taskCompletionSources.Add(position, tcs);
+
+                        // System.Console.WriteLine($"Added position {position} to waiter {Id} with hash {GetHashCode()}");
                     }
                 }
             }

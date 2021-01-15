@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         readonly FilterDefinitionBuilder<Events.StreamEvent> _streamFilter = Builders<Events.StreamEvent>.Filter;
         readonly IStreams _streams;
         readonly IEventConverter _eventConverter;
-        readonly INotifyOfStreamEvents _streamNotifier;
+        readonly IStreamEventWatcher _streamWatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -27,13 +27,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// </summary>
         /// <param name="streams">The <see cref="IStreams"/>.</param>
         /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
-        /// <param name="streamNotifier">The <see cref="INotifyOfStreamEvents" />.</param>
+        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, INotifyOfStreamEvents streamNotifier, ILogger<EventsToStreamsWriter> logger)
+        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger<EventsToStreamsWriter> logger)
         {
             _streams = streams;
             _eventConverter = eventConverter;
-            _streamNotifier = streamNotifier;
+            _streamWatcher = streamWatcher;
             _logger = logger;
         }
 
@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                         _eventConverter.ToStoreStreamEvent(externalEvent, streamPosition, partition)
                         : _eventConverter.ToStoreStreamEvent(@event, streamPosition, partition),
                 cancellationToken).ConfigureAwait(false);
-            _streamNotifier.NotifyForEvent(scope, stream, writtenStreamPosition);
+            _streamWatcher.NotifyForEvent(scope, stream, writtenStreamPosition);
         }
 
         /// <inheritdoc/>

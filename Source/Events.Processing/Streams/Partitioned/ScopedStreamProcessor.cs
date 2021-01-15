@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="failingPartitions">The <see cref="IFailingPartitions" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" />.</param>
+        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="timeToRetryGetter">The <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public ScopedStreamProcessor(
@@ -45,10 +45,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             IFailingPartitions failingPartitions,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
-            IWaitForEventInStream eventWaiter,
+            IStreamEventWatcher streamWatcher,
             ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
             ILogger<ScopedStreamProcessor> logger)
-            : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, eventWaiter, logger)
+            : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, streamWatcher, logger)
         {
             _streamProcessorStates = streamProcessorStates;
             _failingPartitions = failingPartitions;

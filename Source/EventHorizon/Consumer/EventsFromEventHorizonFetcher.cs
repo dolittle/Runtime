@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// <summary>
     /// Represents an implementation of <see cref="ICanFetchEventsFromStream" />.
     /// </summary>
-    public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IWaitForEventInStream
+    public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamEventWatcher
     {
         readonly AsyncProducerConsumerQueue<StreamEvent> _events;
 
@@ -35,9 +35,25 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
+        public void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position)
+        {
+        }
+
+        /// <inheritdoc/>
+        public void NotifyForEvent(StreamId stream, StreamPosition position)
+        {
+        }
+
+        /// <inheritdoc/>
         public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000);
 
         /// <inheritdoc/>
         public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000);
+
+        /// <inheritdoc/>
+        public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000);
+
+        /// <inheritdoc/>
+        public Task WaitForEvent(StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000);
     }
 }
