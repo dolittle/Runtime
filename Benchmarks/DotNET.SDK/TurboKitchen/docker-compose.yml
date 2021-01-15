@@ -10,13 +10,13 @@ services:
     logging:
       driver: none
 
-  runtime:
-    image: dolittle/runtime:latest-dotnet-benchmark
-    volumes:
-      - ${PWD}/.dolittle/resources.json:/app/.dolittle/resources.json
-      - ${PWD}/.dolittle/tenants.json:/app/.dolittle/tenants.json
-      - ${PWD}/appsettings.json:/app/appsettings.json
-    ports:
-      - 9700:9700
-      - 50052:50052
-      - 50053:50053
+  # runtime:
+  #   image: dolittle/runtime:5.3.0-turbo.0
+  #   volumes:
+  #     - ${PWD}/.dolittle/resources.json:/app/.dolittle/resources.json
+  #     - ${PWD}/.dolittle/tenants.json:/app/.dolittle/tenants.json
+  #     - ${PWD}/appsettings.json:/app/appsettings.json
+  #   ports:
+  #     - 9700:9700
+  #     - 50052:50052
+  #     - 50053:50053

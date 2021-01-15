@@ -30,7 +30,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
         {
-            return await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
+            var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
+            return (@event != default, @event);
         }
 
         /// <inheritdoc/>

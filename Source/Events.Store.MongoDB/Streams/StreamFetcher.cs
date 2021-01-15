@@ -59,10 +59,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                return await _stream.Find(
+                var @event = await _stream.Find(
                     _filter.Eq(_sequenceNumberExpression, streamPosition.Value))
                     .Project(_eventToStreamEvent)
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                return (@event != default, @event);
             }
             catch (MongoWaitQueueFullException ex)
             {
