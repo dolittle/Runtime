@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher
             tokenSource.Cancel();
         };
 
-        It should_be_cancelled = () => result.IsCanceled.ShouldBeTrue();
+        It should_be_cancelled = () => result.IsCompleted.ShouldBeTrue();
         Cleanup clean = () =>
         {
             tokenSource.Dispose();

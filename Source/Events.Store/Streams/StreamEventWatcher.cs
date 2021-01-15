@@ -53,8 +53,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
             var waiter = isPublic
                 ? _publicWaiters.GetOrAdd(waiterId, CreateNewWaiter)
                 : _waiters.GetOrAdd(waiterId, CreateNewWaiter);
-
-            await waiter.Wait(position, linkedSource.Token).ConfigureAwait(false);
+            try
+            {
+                await waiter.Wait(position, linkedSource.Token).ConfigureAwait(false);
+            }
+            catch (TaskCanceledException)
+            {
+            }
         }
 
         void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position, bool isPublic)
