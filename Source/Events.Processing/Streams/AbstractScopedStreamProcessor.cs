@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IEventProcessor _processor;
         readonly ICanFetchEventsFromStream _eventsFetcher;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _fetchEventToProcessPolicy;
-        readonly IWaitForEventInStream _eventWaiter;
+        readonly IStreamEventWatcher _eventWaiter;
         IStreamProcessorState _currentState;
         bool _started;
 
@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="processor">An <see cref="IEventProcessor" /> to process the event.</param>
         /// <param name="eventsFetcher">The <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="fetchEventsToProcessPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" /> to wait for events to be available in stream.</param>
+        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" /> to wait for events to be available in stream.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         protected AbstractScopedStreamProcessor(
             TenantId tenantId,
@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IEventProcessor processor,
             ICanFetchEventsFromStream eventsFetcher,
             IAsyncPolicyFor<ICanFetchEventsFromStream> fetchEventsToProcessPolicy,
-            IWaitForEventInStream eventWaiter,
+            IStreamEventWatcher streamWatcher,
             ILogger logger)
         {
             Identifier = streamProcessorId;
@@ -59,7 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _processor = processor;
             _eventsFetcher = eventsFetcher;
             _fetchEventToProcessPolicy = fetchEventsToProcessPolicy;
-            _eventWaiter = eventWaiter;
+            _eventWaiter = streamWatcher;
         }
 
         /// <summary>

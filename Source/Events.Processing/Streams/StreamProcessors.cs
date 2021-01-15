@@ -52,13 +52,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public bool TryRegister(
             ScopeId scopeId,
             EventProcessorId eventProcessorId,
-            IStreamDefinition streamDefinition,
+            IStreamDefinition sourceStreamDefinition,
             Func<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken,
             out StreamProcessor streamProcessor)
         {
             streamProcessor = default;
-            var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, streamDefinition.StreamId);
+            var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
             if (_streamProcessors.ContainsKey(streamProcessorId))
             {
                 _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             streamProcessor = new StreamProcessor(
                 streamProcessorId,
                 _onAllTenants,
-                streamDefinition,
+                sourceStreamDefinition,
                 getEventProcessor,
                 () => Unregister(streamProcessorId),
                 _getScopedStreamProcessorsCreator,

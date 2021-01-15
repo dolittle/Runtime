@@ -18,20 +18,23 @@ namespace Kitchen
             var client = Client
                 .ForMicroservice("f39b1f61-d360-4675-b859-53c05c87c0e6")
                 .WithEventTypes(eventTypes => eventTypes.Register<DishPrepared>())
-                .WithEventHandlers(builder => CreateEventHandlers(builder, 1))
+                .WithEventHandlers(builder => CreateEventHandlers(builder, 4))
                 .Build();
-            
-            System.Console.WriteLine("Starting client");
+
+            Console.WriteLine("Starting client");
 
             foreach (var tenant in GetTenants())
             {
-                var taco = new DishPrepared($"Taco med lefse till {tenant}", "Mrs. Turbo Taco, with love");
-                client.EventStore
-                    .ForTenant(tenant)
-                    .Commit(eventsBuilder =>
-                        eventsBuilder
-                            .CreateEvent(taco)
-                            .FromEventSource("79354376-c7c4-4a0b-89f1-87092c6b2706"));
+                for (var i = 0; i < 200; i++)
+                {
+                    var taco = new DishPrepared($"Taco {i} med lefse till {tenant}", "Mrs. Turbo Taco, with love");
+                    client.EventStore
+                        .ForTenant(tenant)
+                        .Commit(eventsBuilder =>
+                            eventsBuilder
+                                .CreateEvent(taco)
+                                .FromEventSource("79354376-c7c4-4a0b-89f1-87092c6b2706"));
+                }
             }
 
             client.Start().Wait();
@@ -44,14 +47,14 @@ namespace Kitchen
                 builder
                     .CreateEventHandler(Guid.NewGuid())
                     .Partitioned()
-                    .Handle<DishPrepared>((@event, ctx) => System.Console.WriteLine($"Handled in Partitioned:  {i}. Event: {@event}"));
+                    .Handle<DishPrepared>((@event, ctx) => System.Console.WriteLine($"Handled in Partitioned:  {i}. Event: {@event.Dish} with sequence number {ctx.SequenceNumber}"));
                 builder
                     .CreateEventHandler(Guid.NewGuid())
                     .Unpartitioned()
-                    .Handle<DishPrepared>((@event, ctx) => System.Console.WriteLine($"Handled in Unpartitioned:  {i}. Event: {@event}"));
+                    .Handle<DishPrepared>((@event, ctx) => System.Console.WriteLine($"Handled in Unpartitioned:  {i}. Event: {@event.Dish} with sequence number {ctx.SequenceNumber}"));
             }
         }
-        
+
         static IEnumerable<TenantId> GetTenants()
             => new List<TenantId>()
                 {

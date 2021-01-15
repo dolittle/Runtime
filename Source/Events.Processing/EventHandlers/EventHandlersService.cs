@@ -135,7 +135,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             _logger.Debug("Connecting Event Handler '{EventHandlerId}'", eventHandlerId);
             var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(sourceStream, targetStream, types, partitioned);
-            var filteredStreamDefinition = new StreamDefinition(filterDefinition);
+
             Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor = () => new TypeFilterWithEventSourcePartition(
                     scopeId,
                     filterDefinition,
@@ -168,6 +168,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             using var filterStreamProcessor = tryRegisterFilterStreamProcessor.Result;
 
+            // This should be the stream definition of the filtered stream for an event processor to use
+            var filteredStreamDefinition = new StreamDefinition(new TypeFilterWithEventSourcePartitionDefinition(targetStream, targetStream, types, partitioned));
             var tryRegisterEventProcessorStreamProcessor = TryRegisterEventProcessorStreamProcessor(
                 scopeId,
                 eventHandlerId,
@@ -318,17 +320,17 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         Try<StreamProcessor> TryRegisterEventProcessorStreamProcessor(
             ScopeId scopeId,
             EventProcessorId eventHandlerId,
-            IStreamDefinition streamDefinition,
+            IStreamDefinition sourceStreamDefinition,
             Func<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken)
             {
-                _logger.Debug("Registering stream processor for Event Processor '{EventProcessor}' on Stream '{SourceStream}'", eventHandlerId, streamDefinition.StreamId);
+                _logger.Debug("Registering stream processor for Event Processor '{EventProcessor}' on Stream '{SourceStream}'", eventHandlerId, sourceStreamDefinition.StreamId);
                 try
                 {
                     return (_streamProcessors.TryRegister(
                         scopeId,
                         eventHandlerId,
-                        streamDefinition,
+                        sourceStreamDefinition,
                         getEventProcessor,
                         cancellationToken,
                         out var outputtedEventProcessorStreamProcessor), outputtedEventProcessorStreamProcessor);

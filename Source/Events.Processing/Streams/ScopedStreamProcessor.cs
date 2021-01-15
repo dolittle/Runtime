@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFromStreamsFetcher">The<see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" /> to wait for events to be available in stream.</param>
+        /// <param name="eventWatcher">The <see cref="IStreamEventWatcher" /> to wait for events to be available in stream.</param>
         /// <param name="timeToRetryGetter">The <see cref="ICanGetTimeToRetryFor{T}" /> <see cref="StreamProcessorState" />.</param>
         /// <param name="logger">An <see cref="ILogger" /> to log messages.</param>
         public ScopedStreamProcessor(
@@ -42,10 +42,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IResilientStreamProcessorStateRepository streamProcessorStates,
             ICanFetchEventsFromStream eventsFromStreamsFetcher,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
-            IWaitForEventInStream eventWaiter,
+            IStreamEventWatcher eventWatcher,
             ICanGetTimeToRetryFor<StreamProcessorState> timeToRetryGetter,
             ILogger<ScopedStreamProcessor> logger)
-            : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, eventWaiter, logger)
+            : base(tenantId, streamProcessorId, sourceStreamDefinition, initialState, processor, eventsFromStreamsFetcher, eventsFetcherPolicy, eventWatcher, logger)
         {
             _streamProcessorStates = streamProcessorStates;
             _timeToRetryGetter = timeToRetryGetter;

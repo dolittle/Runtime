@@ -21,9 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
         readonly ILoggerManager _loggerManager;
-        readonly IWaitForEventInStream _eventWaiter;
-        readonly INotifyOfStreamEvents _streamNotifier;
-        readonly INotifyOfPublicStreamEvents _publicStreamNotifier;
+        readonly IStreamEventWatcher _streamWatcher;
         readonly TenantId _tenant;
 
         /// <summary>
@@ -33,27 +31,21 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="eventWaiter">The <see cref="IWaitForEventInStream" />.</param>
-        /// <param name="streamNotifier">The <see cref="INotifyOfStreamEvents" />.</param>
-        /// <param name="publicStreamNotifier">The <see cref="INotifyOfPublicStreamEvents" />.</param>
+        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         public CreateScopedStreamProcessors(
             IEventFetchers eventFetchers,
             IResilientStreamProcessorStateRepository streamProcessorStates,
             IExecutionContextManager executionContextManager,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
-            IWaitForEventInStream eventWaiter,
-            INotifyOfStreamEvents streamNotifier,
-            INotifyOfPublicStreamEvents publicStreamNotifier,
+            IStreamEventWatcher streamWatcher,
             ILoggerManager loggerManager)
         {
             _eventFetchers = eventFetchers;
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcherPolicy = eventsFetcherPolicy;
-            _eventWaiter = eventWaiter;
             _tenant = executionContextManager.Current.Tenant;
-            _streamNotifier = streamNotifier;
-            _publicStreamNotifier = publicStreamNotifier;
+            _streamWatcher = streamWatcher;
             _loggerManager = loggerManager;
         }
 
@@ -103,7 +95,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 eventsFromStreamsFetcher,
                 new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy, _loggerManager.CreateLogger<Partitioned.FailingPartitions>()),
                 _eventsFetcherPolicy,
-                _eventWaiter,
+                _streamWatcher,
                 new Partitioned.TimeToRetryForPartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<Partitioned.ScopedStreamProcessor>());
         }
@@ -133,7 +125,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 _streamProcessorStates,
                 eventsFromStreamsFetcher,
                 _eventsFetcherPolicy,
-                _eventWaiter,
+                _streamWatcher,
                 new TimeToRetryForUnpartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<ScopedStreamProcessor>());
         }
@@ -141,8 +133,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
         {
             if (position == StreamPosition.Start) return;
-            if (streamDefinition.Public) _publicStreamNotifier.NotifyForEvent(streamDefinition.StreamId, position - 1);
-            else _streamNotifier.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
+            if (streamDefinition.Public) _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
+            else _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
         }
     }
 }

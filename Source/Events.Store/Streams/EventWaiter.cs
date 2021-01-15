@@ -50,8 +50,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (IsAlreadyNotifiedOfPosition(position)) return;
             var tcs = GetOrAddTaskCompletionSourceLocking(position);
-
-            // Additional check in case of race condition with Notify
             if (IsAlreadyNotifiedOfPosition(position))
             {
                 _taskCompletionSources.Remove(position);
@@ -72,7 +70,10 @@ namespace Dolittle.Runtime.Events.Store.Streams
             {
                 lock (_notifiedLock)
                 {
-                    if (NeverNotifiedOrNotNotifiedOfPosition(position)) _lastNotified = position;
+                    if (NeverNotifiedOrNotNotifiedOfPosition(position))
+                    {
+                        _lastNotified = position;
+                    }
                 }
             }
 
@@ -83,12 +84,15 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             lock (_readWriteLock)
             {
-                // have to use ToArray() here as the enumeration changes because they should be removed
-                // at the same time in the Wait().
-                foreach (var kvp in _taskCompletionSources.ToArray())
+                var keys = _taskCompletionSources.Keys.ToArray();
+                foreach (var storedPosition in keys)
                 {
-                    if (kvp.Key.Value <= position) kvp.Value.TrySetResult(true);
-                    if (kvp.Key.Value == position) break;
+                    if (storedPosition.Value <= position)
+                    {
+                        _taskCompletionSources[storedPosition].TrySetResult(true);
+                    }
+
+                    if (storedPosition == position) break;
                 }
             }
         }

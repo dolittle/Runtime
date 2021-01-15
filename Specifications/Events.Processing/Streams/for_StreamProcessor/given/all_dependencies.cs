@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given
                     Mock.Of<IEventProcessor>(),
                     Mock.Of<ICanFetchEventsFromStream>(),
                     Mock.Of<IAsyncPolicyFor<ICanFetchEventsFromStream>>(),
-                    Mock.Of<IWaitForEventInStream>(),
+                    Mock.Of<IStreamEventWatcher>(),
                     Mock.Of<ILogger>()).Object));
             stream_processor = new StreamProcessor(
                 stream_processor_id,

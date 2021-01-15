@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
         protected static Mock<IStreamProcessors> stream_processors;
         protected static Mock<IEventProcessor> event_processor;
         protected static ScopedStreamProcessor stream_processor;
-        protected static Mock<IWaitForEventInStream> event_waiter;
+        protected static Mock<IStreamEventWatcher> event_waiter;
 
         Establish context = () =>
         {
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
             event_processor.SetupGet(_ => _.Scope).Returns(scope_id);
             stream_processors = new Mock<IStreamProcessors>();
 
-            event_waiter = new Mock<IWaitForEventInStream>();
+            event_waiter = new Mock<IStreamEventWatcher>();
             event_waiter.Setup(_ => _.WaitForEvent(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
             stream_processor = new ScopedStreamProcessor(
                 tenant_id,
