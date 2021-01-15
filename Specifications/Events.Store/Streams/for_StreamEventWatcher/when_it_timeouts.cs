@@ -20,7 +20,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamEventWatcher
         static CancellationTokenSource tokenSource;
         static CancellationToken token;
         static Task result;
-        static Exception exception;
 
         Establish context = () =>
         {
@@ -36,11 +35,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamEventWatcher
         Because of = () =>
         {
             result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, timeout, token);
-            exception = Catch.Exception(() => result.Wait());
+            result.Wait();
         };
 
-        It should_have_timed_out = () => result.IsCanceled.ShouldBeTrue();
-        It should_have_thrown_an_exception = () => exception.InnerException.ShouldBeOfExactType<TaskCanceledException>();
+        It should_have_timed_out = () => result.IsCompleted.ShouldBeTrue();
         Cleanup clean = () =>
         {
             tokenSource.Cancel();
