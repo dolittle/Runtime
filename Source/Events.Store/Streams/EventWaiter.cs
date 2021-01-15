@@ -47,11 +47,11 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
         public async Task Wait(StreamPosition position, CancellationToken token)
         {
-            if (IsAlreadyNotified(position)) return;
+            if (IsAlreadyNotifiedOfPosition(position)) return;
             var tcs = GetOrAddTaskCompletionSourceLocking(position);
 
             // Additional check in case of race condition with Notify
-            if (IsAlreadyNotified(position))
+            if (IsAlreadyNotifiedOfPosition(position))
             {
                 _taskCompletionSources.Remove(position);
                 return;
@@ -67,11 +67,11 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         public void Notify(StreamPosition position)
         {
-            if (_lastNotified == null || _lastNotified < position.Value)
+            if (NeverNotifiedOrNotNotifiedOfPosition(position))
             {
                 lock (_notifiedLock)
                 {
-                    if (!IsAlreadyNotified(position)) _lastNotified = position;
+                    if (NeverNotifiedOrNotNotifiedOfPosition(position)) _lastNotified = position;
                 }
             }
 
@@ -107,7 +107,10 @@ namespace Dolittle.Runtime.Events.Store.Streams
             return tcs;
         }
 
-        bool IsAlreadyNotified(StreamPosition position)
+        bool NeverNotifiedOrNotNotifiedOfPosition(StreamPosition position)
+            => _lastNotified == null || _lastNotified.Value < position.Value;
+
+        bool IsAlreadyNotifiedOfPosition(StreamPosition position)
             => _lastNotified != null && _lastNotified.Value >= position.Value;
     }
 }
