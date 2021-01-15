@@ -37,7 +37,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamEventWatcher
         {
             result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, timeout, token);
             exception = Catch.Exception(() => result.Wait());
-            System.Console.WriteLine(exception.InnerException);
         };
 
         It should_have_timed_out = () => result.IsCanceled.ShouldBeTrue();
