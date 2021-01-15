@@ -58,8 +58,14 @@ namespace Dolittle.Runtime.Events.Store.Streams
                 return;
             }
 
-            await tcs.Task.WaitAsync(token).ConfigureAwait(false);
-            _taskCompletionSources.Remove(position);
+            try
+            {
+                await tcs.Task.WaitAsync(token).ConfigureAwait(false);
+                _taskCompletionSources.Remove(position);
+            }
+            catch (TaskCanceledException)
+            {
+            }
         }
 
         /// <summary>
