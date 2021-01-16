@@ -1,0 +1,73 @@
+name: Release
+
+env:
+  PRERELEASE_BRANCHES: alpha,beta,rc,turbo # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      should-publish: ${{ steps.context.outputs.should-publish }}
+      next-version: ${{ steps.increment-version.outputs.next-version }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Establish context
+      id: context
+      uses: dolittle/establish-context-action@v2
+      with:
+        prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
+    - name: Increment version
+      id: increment-version
+      uses: dolittle/increment-version-action@v2
+      with:
+        version: ${{ steps.context.outputs.current-version }}
+        release-type: ${{ steps.context.outputs.release-type }}
+    - name: Create GitHub Release
+      uses: dolittle/github-release-action@v2
+      with:
+        version: ${{ steps.increment-version.outputs.next-version }}
+  
+  release-runtime-production-image:
+    name: Release Runtime Production Image
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+    - uses: actions/checkout@v2
+    - uses: docker/setup-buildx-action@v1
+    - uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Push Production Image to Docker Hub
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        context: .
+        file: ./Docker/Production/Dockerfile
+        tags: dolittle/runtime:${{ needs.setup.outputs.next-version }},dolittle/runtime:latest
+  
+  release-runtime-development-image:
+    name: Release Runtime Development Image
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+    - uses: actions/checkout@v2
+    - uses: docker/setup-buildx-action@v1
+    - uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+    - name: Push Development Image to Docker Hub
+      uses: docker/build-push-action@v2
+      with:
+        push: true
+        context: .
+        file: ./Docker/Development/Dockerfile
+        tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development,dolittle/runtime:latest-development
