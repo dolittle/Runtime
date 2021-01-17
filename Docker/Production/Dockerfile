@@ -7,7 +7,7 @@ COPY Source ./Source/
 RUN rm -rf Source/ManagementUI
 
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS dotnet-build
+FROM  mcr.microsoft.com/dotnet/sdk:5.0-buster-slim AS dotnet-build
 ARG CONFIGURATION=Release
 WORKDIR /app
 
@@ -36,7 +36,7 @@ RUN dotnet publish -c ${CONFIGURATION} -o out
 # RUN yarn build
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim
 ARG CONFIGURATION=Release
 
 RUN echo Configuration = $CONFIGURATION
