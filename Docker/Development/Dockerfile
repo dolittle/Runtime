@@ -16,6 +16,8 @@ RUN dotnet publish -c ${CONFIGURATION} -o out
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim
 ARG CONFIGURATION=Release
 
+RUN apt-get update && apt-get install -y libc-dev
+
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
 COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle

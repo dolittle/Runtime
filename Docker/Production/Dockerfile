@@ -48,6 +48,8 @@ RUN if [ "$CONFIGURATION" = "Debug" ] ; then apt-get update && \
 
 RUN if [ "$CONFIGURATION" = "debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
 
+RUN apt-get update && apt-get install -y libc-dev
+
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
 COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
