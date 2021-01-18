@@ -20,7 +20,6 @@ namespace Dolittle.Runtime.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-            services.AddGrpcWeb(_ => _.GrpcWebEnabled = true);
 
             services.AddCors(_ => _.AddPolicy("AllowAll", builder =>
             {
