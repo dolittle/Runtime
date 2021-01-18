@@ -11,6 +11,7 @@ jobs:
   setup:
     name: Setup
     runs-on: ubuntu-latest
+
     outputs:
       should-publish: ${{ steps.context.outputs.should-publish }}
       next-version: ${{ steps.increment-version.outputs.next-version }}
