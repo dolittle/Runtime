@@ -23,12 +23,14 @@ jobs:
         prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
     - name: Increment version
       id: increment-version
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
       uses: dolittle/increment-version-action@v2
       with:
         version: ${{ steps.context.outputs.current-version }}
         release-type: ${{ steps.context.outputs.release-type }}
     - name: Create GitHub Release
       uses: dolittle/github-release-action@v2
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
       with:
         version: ${{ steps.increment-version.outputs.next-version }}
   
