@@ -145,6 +145,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             aggregateRootVersion,
                             cancel).ConfigureAwait(false);
 
+                        foreach (var @event in committedEvents)
+                        {
+                            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, @event.EventLogSequenceNumber.Value);
+                        }
+
                         return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
                     },
                     cancellationToken: cancellationToken).ConfigureAwait(false);
