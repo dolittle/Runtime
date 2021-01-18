@@ -21,6 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         readonly IStreams _streams;
         readonly IWriteEventsToStreamCollection _eventsToStreamsWriter;
         readonly IEventConverter _eventConverter;
+        readonly IStreamEventWatcher _streamWatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -29,9 +30,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// <param name="streams">The <see cref="IStreams" />.</param>
         /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreamCollection" />.</param>
         /// <param name="eventConverter">THe <see cref="IEventConverter" />.</param>
+        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public EventsToPublicStreamsWriter(IStreams streams, IWriteEventsToStreamCollection eventsToStreamsWriter, IEventConverter eventConverter, ILogger logger)
+        public EventsToPublicStreamsWriter(IStreams streams, IWriteEventsToStreamCollection eventsToStreamsWriter, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger logger)
         {
+            _streamWatcher = streamWatcher;
             _streams = streams;
             _eventsToStreamsWriter = eventsToStreamsWriter;
             _eventConverter = eventConverter;
@@ -42,11 +45,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         public async Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken)
         {
             _logger.Trace("Writing Event: {EventLogSequenceNumber} to Public Stream: {Stream}", @event.EventLogSequenceNumber, streamId);
-            await _eventsToStreamsWriter.Write(
+            var writtenStreamPosition = await _eventsToStreamsWriter.Write(
                 await _streams.GetPublic(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,
                 streamPosition => _eventConverter.ToStoreStreamEvent(@event, streamPosition, partitionId),
                 cancellationToken).ConfigureAwait(false);
+            _streamWatcher.NotifyForEvent(streamId, writtenStreamPosition);
         }
 
         /// <inheritdoc/>
