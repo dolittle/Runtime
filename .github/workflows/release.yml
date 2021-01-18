@@ -52,7 +52,7 @@ jobs:
         push: true
         context: .
         file: ./Docker/Production/Dockerfile
-        tags: dolittle/runtime:${{ needs.setup.outputs.next-version }},dolittle/runtime:latest
+        tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}
   
   release-runtime-development-image:
     name: Release Runtime Development Image
@@ -72,4 +72,4 @@ jobs:
         push: true
         context: .
         file: ./Docker/Development/Dockerfile
-        tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development,dolittle/runtime:latest-development
+        tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development
