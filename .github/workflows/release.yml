@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: alpha,beta,rc # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: alpha,beta,rc,turbo # Comma separated list of prerelease branch names. 'alpha,rc, ...'
 
 on:
   pull_request:
