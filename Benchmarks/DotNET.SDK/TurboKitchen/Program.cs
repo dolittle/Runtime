@@ -23,21 +23,46 @@ namespace Kitchen
 
             Console.WriteLine("Starting client");
 
-            foreach (var tenant in GetTenants())
+            Task.Run(() => DoLoop(client));
+            // DoOnce(client);
+            client.Start().Wait();
+        }
+
+        static async Task DoLoop(Client client)
+        {
+            await Task.Delay(TimeSpan.FromSeconds(10)).ConfigureAwait(false);
+            var i = 0;
+            while (true)
             {
-                for (var i = 0; i < 200; i++)
+                foreach (var tenant in GetTenants())
                 {
+                    Console.WriteLine($"Committing event {i} to tenant {tenant}");
                     var taco = new DishPrepared($"Taco {i} med lefse till {tenant}", "Mrs. Turbo Taco, with love");
-                    client.EventStore
+                    await client.EventStore
                         .ForTenant(tenant)
                         .Commit(eventsBuilder =>
                             eventsBuilder
                                 .CreateEvent(taco)
-                                .FromEventSource("79354376-c7c4-4a0b-89f1-87092c6b2706"));
+                                .FromEventSource("79354376-c7c4-4a0b-89f1-87092c6b2706")).ConfigureAwait(false);
                 }
+                i++;
+                await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
             }
-
-            client.Start().Wait();
+        }
+        static async Task DoOnce(Client client)
+        {
+            var i = 0;
+            foreach (var tenant in GetTenants())
+            {
+                Console.WriteLine($"Committing event {i} to tenant {tenant}");
+                var taco = new DishPrepared($"Taco {i} med lefse till {tenant}", "Mrs. Turbo Taco, with love");
+                await client.EventStore
+                    .ForTenant(tenant)
+                    .Commit(eventsBuilder =>
+                        eventsBuilder
+                            .CreateEvent(taco)
+                            .FromEventSource("79354376-c7c4-4a0b-89f1-87092c6b2706")).ConfigureAwait(false);
+            }
         }
 
         static void CreateEventHandlers(EventHandlersBuilder builder, int amount)
