@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Events.Store
                 var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId.To<EventSourceId>(), new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
                 var uncommittedEvents = new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
                 var committedEvents = await _eventStoreFactory().CommitEvents(uncommittedEvents, context.CancellationToken).ConfigureAwait(false);
-                _logger.Debug("Events were successfully committed");
+                _logger.Trace("Events were successfully committed");
                 response.Events.AddRange(committedEvents.ToProtobuf());
             }
             catch (Exception ex)
@@ -81,7 +81,7 @@ namespace Dolittle.Runtime.Events.Store
                     request.Events.ExpectedAggregateRootVersion,
                     new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
                 var committedEventsResult = await _eventStoreFactory().CommitAggregateEvents(uncommittedAggregateEvents, context.CancellationToken).ConfigureAwait(false);
-                _logger.Debug("Aggregate Events were successfully committed");
+                _logger.Trace("Aggregate Events were successfully committed");
                 response.Events = committedEventsResult.ToProtobuf();
             }
             catch (Exception ex)
@@ -105,7 +105,7 @@ namespace Dolittle.Runtime.Events.Store
             try
             {
                 var committedEventsResult = await _eventStoreFactory().FetchForAggregate(eventSource, aggregate, context.CancellationToken).ConfigureAwait(false);
-                _logger.Debug("Successfully fetched events for aggregate");
+                _logger.Trace("Successfully fetched events for aggregate");
                 response.Events = committedEventsResult.ToProtobuf();
             }
             catch (Exception ex)

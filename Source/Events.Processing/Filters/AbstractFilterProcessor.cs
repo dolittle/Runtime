@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.Trace(
                 "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}'",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.Trace(
                 "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
@@ -91,14 +91,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.Trace(
                 "{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
                 result.Succeeded);
             if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug(
+                _logger.Trace(
                     "{LogMessagePrefix} writing event '{EventTypeId}' to stream '{TargetStream}' in partition '{PartitionId}'",
                     _logMessagePrefix,
                     @event.Type.Id.Value,

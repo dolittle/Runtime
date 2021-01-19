@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.Trace(
                 "Filter event that occurred @ {Occurred} to public events stream '{TargetStream}'",
                 @event.Occurred,
                 Definition.TargetStream);
@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.Trace(
                 "Filter event that occurred @ {Occurred} to public events stream '{TargetStream}' again for the {RetryCount}. time because: {FailureReason}",
                 @event.Occurred,
                 Definition.TargetStream,

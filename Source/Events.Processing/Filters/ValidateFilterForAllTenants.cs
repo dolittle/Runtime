@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var result = new Dictionary<TenantId, FilterValidationResult>();
             await _onAllTenants.PerformAsync(async tenantId =>
                 {
-                    _logger.Debug("Validating Filter for Tenant '{Tenant}'", tenantId);
+                    _logger.Trace("Validating Filter for Tenant '{Tenant}'", tenantId);
                     var filterProcessor = getFilterProcessor();
                     var filterId = filterProcessor.Definition.TargetStream;
                     _logger.Trace("Trying to get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
@@ -62,7 +62,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     }
                     else
                     {
-                        _logger.Debug("Could not get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
+                        _logger.Trace("Could not get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
                         result.Add(tenantId, new FilterValidationResult());
                     }
                 }).ConfigureAwait(false);

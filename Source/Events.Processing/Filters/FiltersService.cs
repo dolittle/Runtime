@@ -394,7 +394,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
             {
-                _logger.Debug("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream, filterDefinition.SourceStream);
+                _logger.Trace("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream, filterDefinition.SourceStream);
                 try
                 {
                     return (_streamProcessors.TryRegister(
@@ -426,7 +426,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.Debug("Validating Filter '{Filter}'", filterDefinition.TargetStream);
+            _logger.Trace("Validating Filter '{Filter}'", filterDefinition.TargetStream);
             var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
 
             if (filterValidationResults.Any(_ => !_.Value.Succeeded))
@@ -437,7 +437,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
 
             var filteredStreamDefinition = new StreamDefinition(filterDefinition);
-            _logger.Debug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId);
+            _logger.Trace("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId);
             await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
         }
 

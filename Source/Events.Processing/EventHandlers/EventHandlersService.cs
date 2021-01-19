@@ -292,7 +292,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
             {
-                _logger.Debug("Registering stream processor for Filter '{Filter}' on Event Log", eventHandlerId);
+                _logger.Trace("Registering stream processor for Filter '{Filter}' on Event Log", eventHandlerId);
                 try
                 {
                     return (_streamProcessors.TryRegister(
@@ -324,7 +324,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             Func<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken)
             {
-                _logger.Debug("Registering stream processor for Event Processor '{EventProcessor}' on Stream '{SourceStream}'", eventHandlerId, sourceStreamDefinition.StreamId);
+                _logger.Trace("Registering stream processor for Event Processor '{EventProcessor}' on Stream '{SourceStream}'", eventHandlerId, sourceStreamDefinition.StreamId);
                 try
                 {
                     return (_streamProcessors.TryRegister(
@@ -356,7 +356,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.Debug("Validating Filter '{Filter}'", filterDefinition.TargetStream);
+            _logger.Trace("Validating Filter '{Filter}'", filterDefinition.TargetStream);
             var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
 
             if (filterValidationResults.Any(_ => !_.Value.Succeeded))
@@ -367,7 +367,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
 
             var filteredStreamDefinition = new StreamDefinition(filterDefinition);
-            _logger.Debug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId);
+            _logger.Trace("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId);
             await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
         }
 
