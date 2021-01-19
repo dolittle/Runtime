@@ -8,8 +8,6 @@ An Aggregate is [Domain-driven design](https://en.wikipedia.org/wiki/Domain-driv
 
 ## Example
 
-<!-- an aggregate tutorial would be so much better, maybe just scrap this part? -->
-
 For example, in the domain of a restaurant, a `Kitchen` could be an aggregate, where it has domain objects like `Chefs`, `Inventory` and `Menu` and an operation `PrepareDish`.
 
 The kitchen would make sure that:
