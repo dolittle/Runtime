@@ -2,90 +2,190 @@
 title: Event Store
 description: Introduction to the Event Store
 keywords: Overview, Events, Event Store, Event Sourcing
-author: smithmx
-weight: 80
+weight: 20
 aliases:
     - /runtime/runtime/events/event_store
 ---
+An Event Store is a database optimized for storing [Events]({{< ref "events" >}}) in an [Event Sourced]({{< ref "event_sourcing" >}}) system. The [Runtime]({{< ref "overview" >}}) manages the connections and structure of the stored data. All [Streams]({{< ref "streams" >}}), [Event Handlers & Filters]({{< ref "event_handlers_and_filters" >}}), [Aggregates]({{< ref "aggregates" >}}) and [Event Horizon Subscriptions]({{< ref "event_horizon#subscription" >}}) are being kept track inside the event store.
 
-# Event Store
+Events saved to the event store **cannot be changed** or **deleted**. It acts as the record of all events that have happened in the system from the beginning of time. 
 
-An Event Store is the mechanism by which a stream of events are persisted to durable storage.  It is the storage mechanism for an Event Sourced system (see Event Sourcing).
+Each [Tenant]({{< ref "tenants" >}}) has their own event store database, which is configured in [`resources.json`]({{< ref "docs/reference/runtime/configuration#resourcesjson" >}}).
 
-## Basics
+## Scope
 
-There are two fundamental concepts for the Event Store:
+Events that came over the [Event Horizon]({{< ref "event_horizon" >}}) need to be put into a scoped collection so they won't be mixed with the other events from the system.
 
-1. A **Commit** which is a series of Events for a particular *Event Source* that is persisted as an atomic unit.
-2. A **Stream** which is a series of Commits linked to a particular *Event Source*.  
+Scoped collections work the same way as other collections, except you can't have [Public Streams]({{< ref "streams#public-stream" >}}) or [Aggregates]({{< ref "aggregates" >}}).
 
-{{% alert color="warning" %}}
-An Event Source is any Entity that can generate events that are persisted in a stream in the Event Store.  In DDD terms, these are most often identified as Aggregate Roots although Polices and other Event Processors can also generate Events.
-{{% /alert %}}
+<!-- The default alert shortcode wouldn't work properly so I copied the alert HTML here -->
+<div class="alert alert-info" role="alert">
+    <h4 class="alert-heading">Default scope</h4>
+    Technically all collections are scoped, with the default scopeID being <code>00000000-0000-0000-0000-000000000000</code>.
+    This is left out of the naming to make the event store more readable. When we talk about scoped concepts, we always refer to non-default scopes.
+</div>
 
-A *Commit* is most closely associated with the concept of a *Command* and a *Command Handler* which form a *Transaction*.  A transaction operates against a single Event Source (Aggregate).  There is no explicit concept of a **Unit of Work** whereby multiple Event Streams are generated for multiple Event Sources, or where Events for multiple event sources are persisted in a single commit.  A Commit is a series of one or more events that belong to a single Event Source that are persisted in an atomic manner i.e. all events are persisted successfully or none of them are.  By focusing on the commit as the atomic unit for persistence, we avoid the need for distributed transactions or two-phase commits and enable a wider variety or storage engines for our Event Store.
+## Structure of the Event Store
 
-A *Stream* is the sequence of Commits (and therefore of all the Events that make up these commits) that have been applied against the Event Source (e.g Aggregate Root).  By reapplying each commit and therefore each event within that commit in order, we can rehydrate an Event Source and return it to its current state.  The fact that streams are persisted against a particular Event Source allows for a basic sharding along the Event Source Id, giving greater options for scaling and performance.
+{{< tabs name="collections" >}}
+{{% tab name="MongoDB" %}}
+This is the structure of the event store implemented in [MongoDB](https://www.mongodb.com/). It includes the following collections in the default [Scope]({{< ref "#scope" >}}):
 
-## “Metadata” 
+- `event-log`
+- `aggregates`
+- `stream-processor-states`
+- `stream-definitions`
+- `stream-<streamID>`
+- `public-stream-<streamID>`
 
-In addition to the event itself, metadata associated with the Commit and with the Event is also persisted.  
-
-### Event Metadata
-
-The event metadata consists of 
-
-### Event Id.  
-A unique guid for the event.
-### Versioned Event Source.  
-Identifies which Event Source (guid as the Id and the Artifact Id which identifies the type) and which version the Event Source is.  An Event Source is versioned individually, where each commit represents the Major Version and each event in the Commit is the minor Version.
-The first commit for an Event Source is number 1.  The first event in a commit is numbered 0.
-The Event Version is instrumental in supporting **optimistic concurrency**.  
-### Correlation Id
-A unique identifier (guid) that allows tracing of a single transaction through the system.  The correlation id identifies which transaction resulted in this commit.
-### Artifact
-A unique identifier for the type of the Event.  As events are long living and can evolve, they are separated from any particular system type.  An artifact identifies the concept of this event separated from any particular code representation (e.g. class).
-### Original Context 
-The original context contains information about the Application, Bounded Context, Tenant and Environment in which the Event was generated.  Events can be broadcast from one bounded context to another, though only one bounded context (identified by the Original Context) can own an Event.
-### Occurrred
-The timestamp indicating when the event occurred - when it was persisted - in UTC.
-
-### Commit Metadata
-
-In addition, the Commit contains an Event Store assigned, globally increasing number indicating the order in which commits were committed to the Event Store (cutting across all Event Sources).  This **Commit Sequence Number** is important in allowing *Event Processors* to track which events they have processed and to “catch up” when they re-start.
-
-{{% alert %}}
-Event Processors track the last version of the event that they processed in the form of the **CommittedEventVersion**.  This offset into the Event Stream is persisted.  
-The CommittedEventVersion is like the EventSourceVersion mentioned above but with the CommitSequenceNumber appended in the form:
-{Commit Sequence Number}.{Event Source Commit Number}.{ Event Sequence Number }
-{{% /alert %}}
+For scoped collections:
+- Scoped collections have a `x-scopeID-` prefix in their names
+- There is a [`subscription-states`]({{< ref "#subscription-states" >}}) collection for tracking [Subscriptions]({{< ref "event_horizon#subscription" >}})
 
 
-## Event Persistence
+Following JSON structure examples have each property's [BSON type](https://docs.mongodb.com/manual/reference/bson-types/) as the value.
 
-Events are serialized for persistence.  As an Event will have numerous code-representations over its lifetime, the Event is separated from its particular code representation and persisted as a combination of the Artifact (conceptual identification of the Event), the Generation (a number indicating which version of the Event it is) and a Property Bag that is a generic persistence mechanism for DTO like structures like the Event.  Events are intended to be serialized for persistence and communication, therefore they should be designed with this in mind (see Domain Events). You should regard the serialised version of an event as the canonical expression of it. Any run-time representation will be a reflection of this canonical version, subject to the idiosyncrasies of the particular current runtime.
+### `event-log`
 
-## Querying the Event Store
+The Event Log includes all the [Events]({{< ref "events" >}}) committed to the event store in chronological order. All [streams]({{< ref "streams" >}}) are derived from the event log.
 
-Event Stores are not general purpose data storage engines.  As such they require and provide only rudimentary querying capabilities.
+[Aggregate]({{< ref "aggregates" >}}) events have `"wasAppliedByAggregate":  true` set and events coming over the [Event Horizon]({{< ref "event_horizon" >}}) have `"FromEventHorizon": true"` set.
 
-### Rehydrating an Event Source
+This is the structure of a committed event:
+```json
+{
+    // this it the events EventLogSequenceNumber,
+    // which identifies the event uniquely within the event log
+    "_id": "decimal",
+    "Content": "object",
+    // Aggregate metadata
+    "Aggregate": {
+        "wasAppliedByAggregate": "bool",
+        // AggregateRootId
+        "TypeId": "UUID",
+        // AggregateRoot Version
+        "TypeGeneration": "long",
+        "Version": "decimal"
+    },
+    // EventHorizon metadata
+    "EventHorizon": {
+        "FromEventHorizon": "bool",
+        "ExternalEventLogSequenceNumber": "decimal",
+        "Received": "date",
+        "Concent": "UUID"
+    },
+    // the committing microservices metadata
+    "ExecutionContext": {
+        // 
+        "Correlation": "UUID",
+        "Microservice": "UUID",
+        "Tenant": "UUID",
+        "Version": "object",
+        "Environment": "string",
+    },
+    // the events metadata
+    "Metadata": {
+        "Occurred": "date",
+        "EventSource": "UUID",
+        // EventTypeId and Generation
+        "TypeId": "UUID",
+        "TypeGeneration": "long",
+        "Public": "bool"
+    }
+}
+```
 
-The most common requirement to query an Event Store is to re-populate an Event Source or Aggregate Root.  This simply involves retrieving all the commits for this Event Source (identified by the Event Source Id) and re-applying them.  For performance optimisation reasons, this can be extended to include a commit version such that you only retrieve commits from a specific version number.  This is relevant when a snapshot is available that aggregates all previous events up to the specific version and you only have to apply that and subsequent commits.  When the Event Source is stateless (i.e. it does not need to keep any state to maintain its invariants) we bypass the loading of commits completely and just set the version directly.
+### `aggregates`
 
-### Catching up an Event Processor
+This collection keeps track of all instances of [Aggregates]({{< ref "aggregates#aggregates-in-dolittle" >}}) registered with the Runtime.
 
-An event processor operates at the Event rather than the Commit level, which only exists on the write-side of the event-store.  When an event processor is instantiated it checks if there have been any events of the type that it handles since the last one it handled (in the case of a new event processor this would typically be since the beginning of time).  As an optimisation the Event Store can be asked to provide all instance of a particular event type since a particular **Committed Event Version**.
+```json
+{
+    "EventSource": "UUID",
+    // the AggregateRootId
+    "AggregateType": "UUID",
+    "Version": "decimal"
+}
+```
 
-### Catching up Event Horizons
+### `stream`
 
-Similar to Event Processors, Event Horizons have to catch up since the last version they processed.  An Event Horizon operates on Commits rather than a single event type (though it splits the commit and passes it to the appropriate Barrier).  Therefore it is possible to ask the Event Store for all Commits (across Event Sources) that have occurred since a particular version.
+A [Stream]({{< ref "streams" >}}) contains all the events filtered into it. It's structure is the same as the [`event-log`]({{< ref "#event-log" >}}), with the extra `Partition` property used for [partitions]({{< ref "streams#partitions" >}})
 
-## Snapshots
+The streams `StreamId` is added to the collections name, eg. a stream with the id of `323bcdb2-5bbd-4f13-a7c3-b19bc2cc2452` would be in a collection called `stream-323bcdb2-5bbd-4f13-a7c3-b19bc2cc2452`.
 
-[to be added]
+```json
+{
+    // same as an Event in the "event-log" + Partition
+    "Partition": "UUID",
+}
+```
+
+### `public-stream`
+
+The same as a [`stream`]({{< ref "#stream" >}}), except only for [Public Stream]({{< ref "streams#public-vs-private-streams" >}}) with the `public` prefix in collection name. Public streams can only exist on the default [scope]({{< ref "#scope" >}}).
+
+### `stream-definitions`
+
+This collection contains all [Filters]({{< ref "event_handlers_and_filters#filters" >}}) registered with the Runtime.
+
+Filters defined by an [Event Handler]({{< ref "event_handlers_and_filters#event-handlers" >}}) have a type of `EventTypeId`, while other filters have a type of `Remote`.
+
+```json
+{
+    // id of the Stream the Filter creates
+    "_id": "UUID",
+    "Partitioned": "bool",
+    "Public": "bool",
+    "Filter": {
+        "Type": "string",
+        "Types": [
+            // EventTypeIds to filter into the stream
+        ]
+    }
+}
+```
+
+### `stream-processor-states`
+
+This collection keeps track of all [Stream Processors]({{< ref "streams#stream-processor" >}}) and their state. Partitioned streams will have a `FailingPartitions` property for tracking the fail information per partition.
+
+```json
+{
+    "SourceStream": "UUID",
+    "EventProcessor": "UUID",
+    "Position": "decimal",
+    "LastSuccesfullyProcessed": "date",
+    // failure tracking information
+    "RetryTime": "date",
+    "FailureReason": "string",
+    "ProcessingAttempts": "int",
+    "IsFailing": "bool
+}
+```
 
 
-## Event Migration
+#### `subscription-states`
 
-[to be added]
+This collection keeps track of [Event Horizon Subscriptions]({{< ref "event_horizon#subscription" >}}) in a very similar way to [`stream-processor-states`]({{< ref "#stream-processor-states" >}}).
+```json
+{
+    // producers microservice, tenant and stream info
+    "Microservice": "UUID",
+    "Tenant": "UUID",
+    "Stream": "UUID",
+    "Partition": "UUID",
+    "Position": "decimal",
+    "LastSuccesfullyProcessed": "date",
+    "RetryTime": "date",
+    "FailureReason": "string",
+    "ProcessingAttempts": "int",
+    "IsFailing": "bool
+}
+```
+
+{{% /tab %}}
+{{< /tabs >}}
+
+## Commit vs Publish
+We use the word `Commit` rather than `Publish` when talking about saving events to the event store. We want to emphasize that it's the event store that is the source of truth in the system. The act of calling [filters/event handlers]({{< ref "event_handlers_and_filters" >}}) comes _after_ the event has been committed to the event store. We also don't publish to any specific [stream]({{< ref "streams" >}}), event handler or [microservice]({{< ref "overview#microservice" >}}). After the event has been committed, it's ready to be picked up by any processor that listens to that type of event.
