@@ -4,7 +4,7 @@
 
 [![codecov](https://codecov.io/gh/dolittle/runtime/branch/master/graph/badge.svg)](https://codecov.io/gh/dolittle/runtime)
 
-[![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest)](https://hub.docker.com/r/dolittle/runtime)
+[![Docker](https://img.shields.io/docker/v/dolittle/runtime?sort=semver)](https://hub.docker.com/r/dolittle/runtime)
 
 
 Dolittle is a decentralized, distributed, event-driven microservice platform built to harness the power of events.
@@ -19,7 +19,7 @@ The runtime is the backend of our system and manages connections from the SDKs a
 
 | Platform | Version   |
 | ------- | ------- | ------ |
-| Docker | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest)](https://hub.docker.com/r/dolittle/runtime)
+| Docker | [![Docker](https://img.shields.io/docker/v/dolittle/runtime?sort=semver)](https://hub.docker.com/r/dolittle/runtime)
 
 # Developing
 

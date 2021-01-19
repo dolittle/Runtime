@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [5.3.0] - 2021-01-19
 ### Fixed
-- Significantly reduced CPU usage by stopping stream processors from polling MongoDB every .25s. Instead the processors will get notified when an event is available to be fetched. Has a 1-minute timeout in case of problems.
+- Significantly reduced CPU usage by decreasing stream processors MongoDB polling.. Instead the processors will get notified when an event is available to be fetched. Has a 1-minute timeout in case of problems.
 
 ## [5.2.0] - 2020-12-02
 ### Added

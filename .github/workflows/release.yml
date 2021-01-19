@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       should-publish: ${{ steps.context.outputs.should-publish }}
+      release-type: ${{ steps.context.outputs.release-type }}
       next-version: ${{ steps.increment-version.outputs.next-version }}
     steps:
     - uses: actions/checkout@v2
@@ -53,6 +54,14 @@ jobs:
         context: .
         file: ./Docker/Production/Dockerfile
         tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}
+    - name: Push Latest Tag Of Production Image to Docker Hub
+      uses: docker/build-push-action@v2
+      if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
+      with:
+        push: true
+        context: .
+        file: ./Docker/Production/Dockerfile
+        tags: dolittle/runtime:latest
   
   release-runtime-development-image:
     name: Release Runtime Development Image
@@ -73,3 +82,11 @@ jobs:
         context: .
         file: ./Docker/Development/Dockerfile
         tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development
+    - name: Push Latest Tag Of Development Image to Docker Hub
+      uses: docker/build-push-action@v2
+      if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
+      with:
+        push: true
+        context: .
+        file: ./Docker/Development/Dockerfile
+        tags: dolittle/runtime:latest-development
