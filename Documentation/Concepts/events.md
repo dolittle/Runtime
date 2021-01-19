@@ -107,34 +107,3 @@ GUIDs also solve the problem of having duplicate names, it's not hard to imagine
 {{% /pageinfo %}}
 
 As the code changes, the structures and contents of your events are also bound to change at some point. In most scenarios, you will see that you need to add more information to events. These iterations on the same event type are called _generations_. Whenever you add or change a property in an event, the generation should be incremented to reflect that it's a new version of the event. This way the filters and handlers can handle different generations of an event.
-
-<!--
-For example, imagine an older generation of an event type didn't have a property. You can have a separate handler for that particular generation that handles the missing property.
-```csharp
-// C# like pseudo-code
-[EventType("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 1)]
-DishPrepared {
-    Dish string;
-}
-
-// Generation 2
-[EventType("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 2)]
-DishPrepared {
-    Dish string;
-    Chef string;
-}
-
-// handlers generations separately
-[Handle("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 1)]
-Handle(DishPrepared @event) {
-    // handle the missing property
-}
-
-[Handle("1844473f-d714-4327-8b7f-5b3c2bdfc26a", 2)]
-Handle(DishPrepared @event) { ... }
-```
-
-{{< alert title="Production ready" color="info" >}}
-For making development easier, you shouldn't worry about incrementing the generation until you're in production.
-{{< /alert >}}
--->
