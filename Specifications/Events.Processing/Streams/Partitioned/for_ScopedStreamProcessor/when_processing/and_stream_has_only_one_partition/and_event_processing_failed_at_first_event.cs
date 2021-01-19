@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
@@ -24,7 +25,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
             events_fetcher
                 .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(event_with_partition));
+                .Returns(Task.FromResult<Try<StreamEvent>>(event_with_partition));
             events_fetcher
                 .Setup(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()))
                 .Throws(new Exception());

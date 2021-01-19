@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Execution;
 using Dolittle.Logging;
 using Dolittle.Resilience;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Tenancy;
 
@@ -20,6 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
         readonly ILoggerManager _loggerManager;
+        readonly IStreamEventWatcher _streamWatcher;
         readonly TenantId _tenant;
 
         /// <summary>
@@ -29,19 +31,22 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
+        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
         public CreateScopedStreamProcessors(
             IEventFetchers eventFetchers,
             IResilientStreamProcessorStateRepository streamProcessorStates,
             IExecutionContextManager executionContextManager,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+            IStreamEventWatcher streamWatcher,
             ILoggerManager loggerManager)
         {
             _eventFetchers = eventFetchers;
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcherPolicy = eventsFetcherPolicy;
-            _loggerManager = loggerManager;
             _tenant = executionContextManager.Current.Tenant;
+            _streamWatcher = streamWatcher;
+            _loggerManager = loggerManager;
         }
 
         /// <inheritdoc />
@@ -54,17 +59,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             if (streamDefinition.Partitioned)
             {
                 var eventFetcher = await _eventFetchers.GetPartitionedFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-                return await CreatePartitionedScopedStreamProcessor(streamProcessorId, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
+                return await CreatePartitionedScopedStreamProcessor(streamProcessorId, streamDefinition, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 var eventFetcher = await _eventFetchers.GetFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-                return await CreateUnpartitionedScopedStreamProcessor(streamProcessorId, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
+                return await CreateUnpartitionedScopedStreamProcessor(streamProcessorId, streamDefinition, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
             }
         }
 
         async Task<Partitioned.ScopedStreamProcessor> CreatePartitionedScopedStreamProcessor(
             IStreamProcessorId streamProcessorId,
+            IStreamDefinition streamDefinition,
             IEventProcessor eventProcessor,
             ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
             CancellationToken cancellationToken)
@@ -77,21 +83,26 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
 
             if (!tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedPartitionedStreamProcessorState(streamProcessorId);
+            NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
 
             return new Partitioned.ScopedStreamProcessor(
                 _tenant,
                 streamProcessorId,
+                streamDefinition,
                 tryGetStreamProcessorState.Result as Partitioned.StreamProcessorState,
                 eventProcessor,
                 _streamProcessorStates,
                 eventsFromStreamsFetcher,
                 new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy, _loggerManager.CreateLogger<Partitioned.FailingPartitions>()),
                 _eventsFetcherPolicy,
+                _streamWatcher,
+                new Partitioned.TimeToRetryForPartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<Partitioned.ScopedStreamProcessor>());
         }
 
         async Task<ScopedStreamProcessor> CreateUnpartitionedScopedStreamProcessor(
             IStreamProcessorId streamProcessorId,
+            IStreamDefinition streamDefinition,
             IEventProcessor eventProcessor,
             ICanFetchEventsFromStream eventsFromStreamsFetcher,
             CancellationToken cancellationToken)
@@ -104,15 +115,26 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
 
             if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
+            NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
             return new ScopedStreamProcessor(
                 _tenant,
                 streamProcessorId,
+                streamDefinition,
                 tryGetStreamProcessorState.Result as StreamProcessorState,
                 eventProcessor,
                 _streamProcessorStates,
                 eventsFromStreamsFetcher,
                 _eventsFetcherPolicy,
+                _streamWatcher,
+                new TimeToRetryForUnpartitionedStreamProcessor(),
                 _loggerManager.CreateLogger<ScopedStreamProcessor>());
+        }
+
+        void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
+        {
+            if (position == StreamPosition.Start) return;
+            if (streamDefinition.Public) _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
+            else _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
         }
     }
 }

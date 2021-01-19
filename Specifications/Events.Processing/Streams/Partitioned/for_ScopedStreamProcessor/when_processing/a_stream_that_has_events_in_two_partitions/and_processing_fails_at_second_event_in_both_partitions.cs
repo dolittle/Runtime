@@ -37,16 +37,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
             events_fetcher
                 .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(first_event));
+                .Returns(Task.FromResult<Try<StreamEvent>>(first_event));
             events_fetcher
                 .Setup(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(second_event));
+                .Returns(Task.FromResult<Try<StreamEvent>>(second_event));
             events_fetcher
                 .Setup(_ => _.Fetch(2, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(third_event));
+                .Returns(Task.FromResult<Try<StreamEvent>>(third_event));
             events_fetcher
                 .Setup(_ => _.Fetch(3, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(fourth_event));
+                .Returns(Task.FromResult<Try<StreamEvent>>(fourth_event));
             events_fetcher
                 .Setup(_ => _.FetchInPartition(first_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<Try<StreamEvent>>(third_event));

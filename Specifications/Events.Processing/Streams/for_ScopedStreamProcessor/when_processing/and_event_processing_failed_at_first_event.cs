@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
@@ -33,7 +34,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.w
                                 await Task.Delay(50).ConfigureAwait(false);
                                 cancellation_token_source.Cancel();
                             });
-                        return Task.FromResult(event_with_partition);
+                        return Task.FromResult<Try<StreamEvent>>(event_with_partition);
                     });
         };
 

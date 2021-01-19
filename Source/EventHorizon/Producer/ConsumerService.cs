@@ -38,6 +38,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         readonly EventHorizonConsentsConfiguration _eventHorizonConsents;
         readonly ITenants _tenants;
         readonly FactoryFor<IEventFetchers> _getEventFetchers;
+        readonly FactoryFor<IStreamEventWatcher> _getStreamWatcher;
         readonly IReverseCallDispatchers _dispatchers;
         readonly ILogger _logger;
 
@@ -51,6 +52,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="eventHorizonConsents">The <see cref="EventHorizonConsentsConfiguration" />.</param>
         /// <param name="tenants">The <see cref="ITenants"/> system.</param>
         /// <param name="getEventFetchers">The <see cref="FactoryFor{T}" /> <see cref="IEventFetchers" />.</param>
+        /// <param name="getStreamWatcher">The <see cref="FactoryFor{T}" /> <see cref="IStreamEventWatcher" />.</param>
         /// <param name="dispatchers">The <see cref="IReverseCallDispatchers" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConsumerService(
@@ -59,6 +61,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             EventHorizonConsentsConfiguration eventHorizonConsents,
             ITenants tenants,
             FactoryFor<IEventFetchers> getEventFetchers,
+            FactoryFor<IStreamEventWatcher> getStreamWatcher,
             IReverseCallDispatchers dispatchers,
             ILogger<ConsumerService> logger)
         {
@@ -67,6 +70,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _eventHorizonConsents = eventHorizonConsents;
             _tenants = tenants;
             _getEventFetchers = getEventFetchers;
+            _getStreamWatcher = getStreamWatcher;
             _dispatchers = dispatchers;
             _logger = logger;
         }
@@ -264,6 +268,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                     ScopeId.Default,
                     new StreamDefinition(new PublicFilterDefinition(StreamId.EventLog, publicStream)),
                     cancellationToken).ConfigureAwait(false);
+                var eventWaiter = _getStreamWatcher();
                 while (!cancellationToken.IsCancellationRequested && !_disposed)
                 {
                     try
@@ -271,7 +276,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         var tryGetStreamEvent = await publicEvents.FetchInPartition(partition, streamPosition, cancellationToken).ConfigureAwait(false);
                         if (!tryGetStreamEvent.Success)
                         {
-                            await Task.Delay(250).ConfigureAwait(false);
+                            await eventWaiter.WaitForEvent(publicStream, streamPosition, TimeSpan.FromMinutes(1), cancellationToken).ConfigureAwait(false);
                             continue;
                         }
 

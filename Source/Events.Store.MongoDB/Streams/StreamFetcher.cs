@@ -53,16 +53,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Store.Streams.StreamEvent> Fetch(
+        public async Task<Try<Store.Streams.StreamEvent>> Fetch(
             StreamPosition streamPosition,
             CancellationToken cancellationToken)
         {
             try
             {
-                return await _stream.Find(
+                var @event = await _stream.Find(
                     _filter.Eq(_sequenceNumberExpression, streamPosition.Value))
                     .Project(_eventToStreamEvent)
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
+                return (@event != default, @event);
             }
             catch (MongoWaitQueueFullException ex)
             {

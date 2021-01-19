@@ -15,6 +15,7 @@
     <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
     <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
     <PackageReference Include="Dolittle.Tenancy" Version="$(FundamentalsVersion)" />
+    <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,6 +12,7 @@ using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -27,6 +28,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         readonly IEventCommitter _eventCommitter;
         readonly IEventConverter _eventConverter;
         readonly IAggregateRoots _aggregateRoots;
+        readonly IStreamEventWatcher _streamWatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -37,6 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="eventCommitter">The <see cref="IEventCommitter" />.</param>
         /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
+        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
         public EventStore(
             IExecutionContextManager executionContextManager,
@@ -44,6 +47,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             IEventCommitter eventCommitter,
             IEventConverter eventConverter,
             IAggregateRoots aggregateRoots,
+            IStreamEventWatcher streamWatcher,
             ILogger logger)
         {
             _executionContextManager = executionContextManager;
@@ -51,6 +55,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             _eventCommitter = eventCommitter;
             _eventConverter = eventConverter;
             _aggregateRoots = aggregateRoots;
+            _streamWatcher = streamWatcher;
             _logger = logger;
         }
 
@@ -80,6 +85,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                                 cancel).ConfigureAwait(false);
                             committedEvents.Add(committedEvent);
                             eventLogSequenceNumber++;
+                        }
+
+                        foreach (var @event in committedEvents)
+                        {
+                            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, @event.EventLogSequenceNumber.Value);
                         }
 
                         return new CommittedEvents(committedEvents);
@@ -134,6 +144,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                             events.ExpectedAggregateRootVersion,
                             aggregateRootVersion,
                             cancel).ConfigureAwait(false);
+
+                        foreach (var @event in committedEvents)
+                        {
+                            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, @event.EventLogSequenceNumber.Value);
+                        }
 
                         return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
                     },
