@@ -53,7 +53,3 @@ The event handler registration fails if your event handler suddenly stops handli
 ## Multi-tenancy
 
 When registering processors they are registered for every tenant in the Runtime, resulting in every tenant having their own copy of the [Stream Processor]({{< ref "streams#multi-tenancy" >}}).
-
-{{< alert title="Performance" color="warning">}}
-There are performance considerations related to having too many stream processors. Read more in [Stream Processors & Multi-tenancy]({{< ref "streams#multi-tenancy" >}}).
-{{< /alert >}}

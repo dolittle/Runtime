@@ -76,16 +76,12 @@ When the processing of an event is completed it returns a processing result back
 
 ### Multi-tenancy
 
-When registering [processors]({{< ref "event_handlers_and_filters.md" >}}) they are registered for every tenant in the Runtime, resulting in every tenant having their own copy of the stream processor. This is important to keep in mind when thinking about the performance of the Runtime.
-
-{{< alert title="Resource usage" color="warning">}}
-Stream processors can become increasingly resource-heavy if there are too many of them (>1000).
+When registering [processors]({{< ref "event_handlers_and_filters.md" >}}) they are registered for every tenant in the Runtime, resulting in every tenant having their own copy of the stream processor.
 
 Formula for calculating the total number of stream processors created:
 ```
 (((2 x event handlers) + filters) x tenants)  + event horizon subscriptions = stream processors
 ```
-{{< /alert >}}
 
 Let's provide an example:
 
