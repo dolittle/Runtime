@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Logging\Logging.csproj" />
+    <ProjectReference Include="../../Source/Logging/Logging.csproj" />
   </ItemGroup>
 
 </Project>

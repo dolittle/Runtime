@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Reflection\Reflection.csproj" />
+    <ProjectReference Include="../../Source/Reflection/Reflection.csproj" />
   </ItemGroup>
 </Project>

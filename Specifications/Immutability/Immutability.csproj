@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Immutability\Immutability.csproj" />
+    <ProjectReference Include="../../Source/Immutability/Immutability.csproj" />
   </ItemGroup>
 </Project>

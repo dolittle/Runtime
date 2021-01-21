@@ -7,6 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\ResourceTypes.Configuration\ResourceTypes.Configuration.csproj" />
+    <ProjectReference Include="../../Source/ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
   </ItemGroup>
 </Project>

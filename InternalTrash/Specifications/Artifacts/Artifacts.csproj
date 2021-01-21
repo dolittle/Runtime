@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Artifacts\Artifacts.csproj" />
+    <ProjectReference Include="../../Source/Artifacts/Artifacts.csproj" />
   </ItemGroup>
 
 </Project>
