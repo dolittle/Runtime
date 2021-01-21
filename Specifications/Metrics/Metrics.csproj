@@ -7,12 +7,8 @@
   <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\Metrics\Metrics.csproj" />
+    <ProjectReference Include="../../Source/Metrics/Metrics.csproj" />
+    <ProjectReference Include="../../Source/Types.Testing/Types.Testing.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Dolittle.Types.Testing" Version="$(FundamentalsVersion)"/>
-  </ItemGroup>
-
 
 </Project>

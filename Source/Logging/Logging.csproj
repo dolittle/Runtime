@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Logging</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
+    <PackageReference Include="System.Reactive" Version="$(SystemReactiveVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Collections/Collections.csproj" />
+    <ProjectReference Include="../Lifecycle/Lifecycle.csproj" />
+    <ProjectReference Include="../Reflection/Reflection.csproj" />
+    <ProjectReference Include="../Strings/Strings.csproj" />
+  </ItemGroup>
+ 
+</Project>

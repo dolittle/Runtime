@@ -3,8 +3,8 @@
 
 using System;
 using System.Globalization;
-using Dolittle.Execution;
-using Dolittle.Security;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Security;
 
 namespace Dolittle.Runtime.Events.Processing
 {

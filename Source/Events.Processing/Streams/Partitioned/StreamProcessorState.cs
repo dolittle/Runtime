@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Concepts;
+using Dolittle.Runtime.Concepts;
 using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned

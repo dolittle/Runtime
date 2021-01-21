@@ -7,22 +7,22 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Services.Clients" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Nito.AsyncEx" Version="5.0.0" />
+        <PackageReference Include="Nito.AsyncEx" Version="$(NitoAsyncVersion)" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
-        <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
-        <ProjectReference Include="..\Microservices\Microservices.csproj" />
-        <ProjectReference Include="..\Services\Services.csproj" />
-        <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
-        <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
+        <ProjectReference Include="../Applications.Configuration/Applications.Configuration.csproj" />
+        <ProjectReference Include="../Concepts/Concepts.csproj" />
+        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+        <ProjectReference Include="../Resilience/Resilience.csproj" />
+        <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
+        <ProjectReference Include="../Microservices/Microservices.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
+        <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
+        <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 </Project>

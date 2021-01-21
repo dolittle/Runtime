@@ -6,19 +6,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.ApplicationModel;
-using Dolittle.Execution;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
-using Dolittle.Protobuf;
-using Dolittle.Resilience;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Services.Clients;
+using Dolittle.Runtime.Services.Clients;
 using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer

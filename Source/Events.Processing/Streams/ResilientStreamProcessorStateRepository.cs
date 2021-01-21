@@ -3,8 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Lifecycle;
-using Dolittle.Resilience;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Async;
 
 namespace Dolittle.Runtime.Events.Processing.Streams

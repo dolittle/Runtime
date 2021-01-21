@@ -3,9 +3,9 @@
 
 using System;
 using System.Globalization;
-using Dolittle.Execution;
+using Dolittle.Runtime.Execution;
 using Dolittle.Protobuf;
-using Dolittle.Security;
+using Dolittle.Runtime.Security;
 
 namespace Dolittle.Runtime.EventHorizon
 {

@@ -7,7 +7,7 @@
   <Import Project="../../specs.props"></Import>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Source\EventHorizon\EventHorizon.csproj" />
+    <ProjectReference Include="../../Source/EventHorizon/EventHorizon.csproj" />
   </ItemGroup>
 
 </Project>

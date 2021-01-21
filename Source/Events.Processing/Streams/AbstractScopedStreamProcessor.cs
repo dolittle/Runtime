@@ -5,11 +5,11 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
-using Dolittle.Resilience;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {

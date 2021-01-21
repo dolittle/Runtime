@@ -7,12 +7,12 @@
     <Import Project="../../specs.props"/>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Security" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)"  />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Source\Events.Store\Events.Store.csproj" />
+        <ProjectReference Include="../../Source/Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../../Source/Security/Security.csproj" />
     </ItemGroup>
 
 </Project>

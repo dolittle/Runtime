@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
-using Dolittle.Logging;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Tenancy;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {

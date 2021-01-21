@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Collections;
-using Dolittle.DependencyInversion;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
+using Dolittle.Runtime.Collections;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Types;
+using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {

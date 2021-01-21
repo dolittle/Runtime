@@ -4,7 +4,7 @@
 using System;
 using System.Globalization;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Security;
+using Dolittle.Runtime.Security;
 using Claim = Dolittle.Security.Claim;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB

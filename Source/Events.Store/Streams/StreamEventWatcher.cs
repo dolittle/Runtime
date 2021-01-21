@@ -5,8 +5,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Logging;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {

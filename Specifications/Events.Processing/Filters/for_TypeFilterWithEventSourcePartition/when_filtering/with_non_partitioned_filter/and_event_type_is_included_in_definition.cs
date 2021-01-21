@@ -3,8 +3,8 @@
 
 using System;
 using System.Linq;
-using Dolittle.Artifacts;
-using Dolittle.Logging;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Machine.Specifications;
 

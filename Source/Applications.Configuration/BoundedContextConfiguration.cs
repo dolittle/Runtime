@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Configuration;
-using Dolittle.ResourceTypes;
+using Dolittle.Runtime.Configuration;
+using Dolittle.Runtime.ResourceTypes;
 
-namespace Dolittle.ApplicationModel.Configuration
+namespace Dolittle.Runtime.ApplicationModel.Configuration
 {
     /// <summary>
     /// Represents the definition of a <see cref="Microservice"/> for configuration.

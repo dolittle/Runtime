@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;

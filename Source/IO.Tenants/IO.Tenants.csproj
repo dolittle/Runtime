@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.IO.Tenants</AssemblyName>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="../Execution/Execution.csproj" />
+    <ProjectReference Include="../Configuration/Configuration.csproj" />
+    <ProjectReference Include="../IO/IO.csproj" />
+    <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
+    <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
+  </ItemGroup>    
+</Project>

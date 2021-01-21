@@ -2,11 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Dolittle.Booting;
-using Dolittle.Execution;
-using Dolittle.ResourceTypes.Configuration;
+using Dolittle.Runtime.Booting;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.ResourceTypes.Configuration;
 
-namespace Dolittle.ApplicationModel.Configuration
+namespace Dolittle.Runtime.ApplicationModel.Configuration
 {
     /// <summary>
     /// Performs the boot procedures for the application configuration.

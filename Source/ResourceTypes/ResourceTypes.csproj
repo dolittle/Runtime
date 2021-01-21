@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <RootNamespace>Dolittle.Runtime.ResourceTypes</RootNamespace>
+    <AssemblyName>Dolittle.Runtime.ResourceTypes</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Concepts/Concepts.csproj" />
+    <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+  </ItemGroup>
+
+</Project>

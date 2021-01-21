@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading;
-using Dolittle.Logging;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Processing;
 using Machine.Specifications;
 

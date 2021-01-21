@@ -3,9 +3,9 @@
 
 using System.Collections.Concurrent;
 using System.Threading;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
-using Dolittle.Resilience;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;

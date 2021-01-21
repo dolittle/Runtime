@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.ApplicationModel.Configuration
+namespace Dolittle.Runtime.ApplicationModel.Configuration
 {
     /// <summary>
     /// Represents the configuration for the <see cref="Microservice"/> core.

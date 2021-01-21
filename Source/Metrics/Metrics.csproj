@@ -4,12 +4,14 @@
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Metrics</AssemblyName>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="prometheus-net" Version="$(PrometheusVersion)" />
+  </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Configuration" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Types" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="prometheus-net" Version="3.3.0" />
+    <ProjectReference Include="../Booting/Booting.csproj" />
+    <ProjectReference Include="../Configuration/Configuration.csproj" />
+    <ProjectReference Include="../Types/Types.csproj" />
   </ItemGroup>
 
 </Project>

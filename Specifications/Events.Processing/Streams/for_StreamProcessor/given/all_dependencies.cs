@@ -4,10 +4,10 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
-using Dolittle.Logging;
-using Dolittle.Resilience;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Tenancy;

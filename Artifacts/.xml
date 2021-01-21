@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Dolittle.Runtime.Microservices</name>
+    </assembly>
+    <members>
+        <member name="T:Dolittle.Runtime.Microservices.ICanBindMicroserviceServices">
+            <summary>
+            Defines a system that can bind a gRPC service for interaction purpose.
+            </summary>
+        </member>
+        <member name="T:Dolittle.Runtime.Microservices.MicroserviceAddress">
+            <summary>
+            Represents the address of a <see cref="T:Dolittle.Runtime.ApplicationModel.Microservice" />.
+            </summary>
+        </member>
+        <member name="P:Dolittle.Runtime.Microservices.MicroserviceAddress.Host">
+            <summary>
+            Gets or sets the target host for the subscription.
+            </summary>
+        </member>
+        <member name="P:Dolittle.Runtime.Microservices.MicroserviceAddress.Port">
+            <summary>
+            Gets or sets the target port for the subscription.
+            </summary>
+        </member>
+        <member name="T:Dolittle.Runtime.Microservices.MicroserviceHost">
+            <summary>
+            Represents the host of a <see cref="T:Dolittle.Runtime.ApplicationModel.Microservice" />.
+            </summary>
+        </member>
+        <member name="M:Dolittle.Runtime.Microservices.MicroserviceHost.op_Implicit(System.String)~Dolittle.Runtime.Microservices.MicroserviceHost">
+            <summary>
+            Implicitly convert from <see cref="T:System.String" /> to <see cref="T:Dolittle.Runtime.Microservices.MicroserviceHost" />.
+            </summary>
+            <param name="host">The host of a microservice.</param>
+        </member>
+        <member name="T:Dolittle.Runtime.Microservices.MicroservicePort">
+            <summary>
+            Represents the port of a <see cref="T:Dolittle.Runtime.ApplicationModel.Microservice" />.
+            </summary>
+        </member>
+        <member name="M:Dolittle.Runtime.Microservices.MicroservicePort.op_Implicit(System.Int32)~Dolittle.Runtime.Microservices.MicroservicePort">
+            <summary>
+            Implicitly convert from <see cref="T:System.Int32" /> to <see cref="T:Dolittle.Runtime.Microservices.MicroservicePort" />.
+            </summary>
+            <param name="port">The port of a microservice.</param>
+        </member>
+        <member name="T:Dolittle.Runtime.Microservices.MicroservicesConfiguration">
+            <summary>
+            Represents the configuration for microservices.
+            </summary>
+        </member>
+        <member name="F:Dolittle.Runtime.Microservices.MicroservicesConfiguration.ConfigurationName">
+            <summary>
+            The name of the <see cref="T:Dolittle.Runtime.Configuration.IConfigurationObject" />.
+            </summary>
+        </member>
+        <member name="M:Dolittle.Runtime.Microservices.MicroservicesConfiguration.#ctor(System.Collections.Generic.IDictionary{Dolittle.Runtime.ApplicationModel.Microservice,Dolittle.Runtime.Microservices.MicroserviceAddress})">
+            <summary>
+            Initializes a new instance of the <see cref="T:Dolittle.Runtime.Microservices.MicroservicesConfiguration"/> class.
+            </summary>
+            <param name="configuration">Dictionary for <see cref="T:Dolittle.Runtime.ApplicationModel.Microservice"/> with <see cref="T:Dolittle.Runtime.Microservices.MicroserviceAddress"/>.</param>
+        </member>
+        <member name="T:Dolittle.Runtime.Microservices.MicroserviceServiceType">
+            <summary>
+            Represents a <see cref="T:Dolittle.Runtime.Services.IRepresentServiceType">host type</see> that is for interaction communication.
+            </summary>
+            <remarks>
+            Interaction is considered the channel in which a representation of processes interacting.
+            </remarks>
+        </member>
+        <member name="P:Dolittle.Runtime.Microservices.MicroserviceServiceType.Identifier">
+            <inheritdoc/>
+        </member>
+        <member name="P:Dolittle.Runtime.Microservices.MicroserviceServiceType.BindingInterface">
+            <inheritdoc/>
+        </member>
+        <member name="P:Dolittle.Runtime.Microservices.MicroserviceServiceType.Visibility">
+            <inheritdoc/>
+        </member>
+    </members>
+</doc>

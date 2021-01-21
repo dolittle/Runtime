@@ -6,11 +6,18 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Management/Management.csproj"/>
+    <ProjectReference Include="../Booting/Booting.csproj"/>
+    <ProjectReference Include="../Concepts/Concepts.csproj"/>
+    <ProjectReference Include="../Configuration/Configuration.csproj"/>
+    <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj"/>
+    <ProjectReference Include="../Protobuf/Protobuf.csproj"/>
+    <ProjectReference Include="../Types/Types.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="Google.Protobuf" Version="$(ProtobufVersion)" />
+    <PackageReference Include="Grpc" Version="$(GrpcVersion)" />
   </ItemGroup>
 </Project>

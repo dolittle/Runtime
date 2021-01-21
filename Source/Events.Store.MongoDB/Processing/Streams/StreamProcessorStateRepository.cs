@@ -4,7 +4,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Async;
 using Dolittle.Runtime.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;

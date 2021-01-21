@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Reflection;
-using Dolittle.DependencyInversion;
+using Dolittle.Runtime.DependencyInversion;
 using Prometheus;
 
 namespace Dolittle.Runtime.Metrics

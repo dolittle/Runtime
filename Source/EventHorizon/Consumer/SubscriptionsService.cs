@@ -3,16 +3,16 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.ApplicationModel;
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
-using Dolittle.Protobuf;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Tenancy;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Tenancy;
 using Grpc.Core;
 using static Dolittle.Runtime.EventHorizon.Contracts.Subscriptions;
 

@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Execution</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.Security.Claims" Version="$(SystemSecurityVersion)" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Concepts/Concepts.csproj" />
+    <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Security/Security.csproj" />
+    <ProjectReference Include="../Versioning/Versioning.csproj" />
+  </ItemGroup>
+</Project>

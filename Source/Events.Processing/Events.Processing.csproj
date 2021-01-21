@@ -7,21 +7,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.DependencyInversion" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Services.Clients" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.2" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Async\Async.csproj" />
-        <ProjectReference Include="..\Applications.Configuration\Applications.Configuration.csproj" />
-        <ProjectReference Include="..\Services\Services.csproj" />
-        <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
-        <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
+        <ProjectReference Include="../Async/Async.csproj" />
+        <ProjectReference Include="../Applications.Configuration/Applications.Configuration.csproj" />
+        <ProjectReference Include="../Concepts/Concepts.csproj" />
+        <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+        <ProjectReference Include="../Resilience/Resilience.csproj" />
+        <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+        <ProjectReference Include="../Services/Services.csproj" />
+        <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
+        <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 </Project>

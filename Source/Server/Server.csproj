@@ -9,26 +9,16 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../../Source/AggregatedPackage/Runtime.csproj" />
-        <ProjectReference Include="..\Services\Services.csproj" />
+        <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Configuration.Files" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.DependencyInversion.Booting" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.DependencyInversion.Autofac" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Resilience" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Hosting.Microsoft" Version="$(FundamentalsVersion)" />
-        <PackageReference Include="Dolittle.Logging.Microsoft" Version="$(FundamentalsVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-        <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.2" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="3.1.2" />
-        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
-        <PackageReference Include="Grpc.AspNetCore" Version="2.34.0" />
-        <PackageReference Include="Grpc.AspNetCore.Web" Version="2.34.0" />
+        <PackageReference Include="Microsoft.Extensions.Hosting" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsVersion)" />
+        <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcAspNetCoreVersion)" />
+        <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcAspNetCoreVersion)" />
     </ItemGroup>
 
 </Project>

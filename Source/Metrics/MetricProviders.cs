@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Types;
+using Dolittle.Runtime.Types;
 using Prometheus;
 
 namespace Dolittle.Runtime.Metrics

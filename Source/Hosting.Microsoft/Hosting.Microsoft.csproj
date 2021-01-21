@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Hosting.Microsoft</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsVersion)" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Booting/Booting.csproj" />
+    <ProjectReference Include="../DependencyInversion.Autofac/DependencyInversion.Autofac.csproj" />
+    <ProjectReference Include="../DependencyInversion.Booting/DependencyInversion.Booting.csproj" />
+    <ProjectReference Include="../Logging.Microsoft/Logging.Microsoft.csproj" />
+  </ItemGroup>
+ 
+</Project>

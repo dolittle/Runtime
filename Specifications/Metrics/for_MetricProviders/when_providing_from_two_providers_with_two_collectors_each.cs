@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Types.Testing;
+using Dolittle.Runtime.Types.Testing;
 using Machine.Specifications;
 using Moq;
 using Prometheus;

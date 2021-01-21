@@ -3,7 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Async;
 
 namespace Dolittle.Runtime.Events.Store.Streams.Filters
