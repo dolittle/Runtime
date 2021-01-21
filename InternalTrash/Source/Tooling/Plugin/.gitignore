@@ -1,5 +1,0 @@
-Distribution
-node_modules
-package-lock.json
-yarn.lock
-dolittle-tooling.plugin.runtime*.tgz
