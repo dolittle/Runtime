@@ -6,5 +6,6 @@ Packages
 Documentation
 Build
 Artifacts
+Benchmark
 .vscode
 **/node_modules
