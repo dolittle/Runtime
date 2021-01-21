@@ -3,7 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Services.Contracts;
+using Dolittle.Services.Contracts;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments

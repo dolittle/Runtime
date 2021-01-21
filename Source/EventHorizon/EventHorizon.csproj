@@ -13,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../Applications.Configuration/Applications.Configuration.csproj" />
         <ProjectReference Include="../Concepts/Concepts.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
@@ -23,6 +24,5 @@
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
-        <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 </Project>

@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Services;
-using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.EventHorizon
 {

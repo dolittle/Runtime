@@ -4,7 +4,6 @@
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.EventHorizon
 {

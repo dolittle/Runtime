@@ -4,8 +4,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Protobuf;
+using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
+using Contracts = Dolittle.Services.Contracts;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting.and_connection_is_established
 {

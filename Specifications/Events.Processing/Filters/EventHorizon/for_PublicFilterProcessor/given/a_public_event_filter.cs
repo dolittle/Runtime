@@ -3,10 +3,10 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Services;
 using Machine.Specifications;
 using Moq;

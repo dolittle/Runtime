@@ -10,20 +10,21 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.ApplicationModel.Configuration;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
-using Dolittle.Runtime.Tenancy;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Tenancy;
 using Grpc.Core;
 using static Dolittle.Runtime.EventHorizon.Contracts.Consumer;
+using EventHorizonContracts = Dolittle.Runtime.EventHorizon.Contracts;
+using ProtobufContracts = Dolittle.Protobuf.Contracts;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
 {
@@ -307,7 +308,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             }
         }
 
-        Contracts.SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
+        EventHorizonContracts.SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
         {
             try
             {
@@ -316,23 +317,23 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 {
                     var message = $"There are no consents configured for Producer Tenant {producerTenant}";
                     _logger.Debug(message);
-                    return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message,  } };
+                    return new EventHorizonContracts.SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message,  } };
                 }
 
                 if (!TryGetConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition, out var consentId))
                 {
                     var message = $"There are no consent configured for Partition {partition} in Public Stream {publicStream} in Tenant {producerTenant} to Consumer Tenant {consumerTenant} in Microservice {consumerMicroservice}";
                     _logger.Debug(message);
-                    return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message } };
+                    return new EventHorizonContracts.SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message } };
                 }
 
-                return new Contracts.SubscriptionResponse { ConsentId = consentId.ToProtobuf() };
+                return new EventHorizonContracts.SubscriptionResponse { ConsentId = consentId.ToProtobuf() };
             }
             catch (Exception ex)
             {
                 const string message = "Error ocurred while creating subscription response";
                 _logger.Warning(ex, message);
-                return new Contracts.SubscriptionResponse { Failure = new Protobuf.Contracts.Failure { Id = FailureId.Other.ToProtobuf(), Reason = message } };
+                return new EventHorizonContracts.SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = FailureId.Other.ToProtobuf(), Reason = message } };
             }
         }
 

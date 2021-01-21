@@ -13,6 +13,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../Async/Async.csproj" />
         <ProjectReference Include="../Applications.Configuration/Applications.Configuration.csproj" />
         <ProjectReference Include="../Concepts/Concepts.csproj" />

@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.WellKnownTypes;
+using ArtifactsContracts = Dolittle.Artifacts.Contracts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -27,7 +28,7 @@ namespace Dolittle.Runtime.Events.Store
                         Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
                         EventSourceId = @event.EventSource.ToProtobuf(),
                         ExecutionContext = @event.ExecutionContext.ToProtobuf(),
-                        Type = new Artifacts.Contracts.Artifact
+                        Type = new ArtifactsContracts.Artifact
                         {
                             Id = @event.Type.Id.ToProtobuf(),
                             Generation = @event.Type.Generation

@@ -4,8 +4,9 @@
 using System;
 using System.Globalization;
 using Dolittle.Runtime.Execution;
-using Dolittle.Protobuf;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Security;
+using ExecutionContracts = Dolittle.Execution.Contracts;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
 {
@@ -21,6 +22,6 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
                 Claims.Empty,
                 CultureInfo.InvariantCulture);
 
-        public static Execution.Contracts.ExecutionContext create_protobuf() => create().ToProtobuf();
+        public static ExecutionContracts.ExecutionContext create_protobuf() => create().ToProtobuf();
     }
 }

@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {

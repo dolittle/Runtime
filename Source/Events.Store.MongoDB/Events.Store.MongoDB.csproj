@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../EventHorizon/EventHorizon.csproj" />
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
@@ -19,4 +20,3 @@
         <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
     </ItemGroup>
 </Project>
-

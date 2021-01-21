@@ -3,8 +3,8 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Security;
 using Machine.Specifications;
 

@@ -3,12 +3,12 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Logging;
-using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {

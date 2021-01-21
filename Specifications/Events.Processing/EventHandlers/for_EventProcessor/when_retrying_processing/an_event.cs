@@ -5,9 +5,9 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Logging;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.when_retrying_processing

@@ -3,8 +3,8 @@
 
 using System;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Events.Store.EventHorizon;
+using Dolittle.Runtime.Execution;
 
 namespace Dolittle.Runtime.Events.Store
 {

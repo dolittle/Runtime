@@ -4,8 +4,8 @@
 using System;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Logging;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.when_filtering.with_non_partitioned_filter

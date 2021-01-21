@@ -3,17 +3,18 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Protobuf;
-using Dolittle.Runtime.Services.Contracts;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Services.Contracts;
 using Google.Protobuf.WellKnownTypes;
 using Machine.Specifications;
+using ExecutionContracts = Dolittle.Execution.Contracts;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments
 {
     public class and_receiving_correct_connect_arguments : given.a_dispatcher
     {
         static bool result;
-        static Execution.Contracts.ExecutionContext execution_context;
+        static ExecutionContracts.ExecutionContext execution_context;
         static MyConnectArguments arguments;
 
         Establish context = () =>

@@ -4,9 +4,9 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Protobuf;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilterProcessor.when_filtering_public_event

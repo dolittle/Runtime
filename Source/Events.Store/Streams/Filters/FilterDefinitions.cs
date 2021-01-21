@@ -3,8 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Logging;
 
 namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {

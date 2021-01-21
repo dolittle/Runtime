@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Types;
 using Dolittle.Runtime.Types.Testing;
 using Machine.Specifications;

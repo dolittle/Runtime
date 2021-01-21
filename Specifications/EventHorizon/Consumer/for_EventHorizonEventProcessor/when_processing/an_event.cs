@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading;
-using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Logging;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_EventHorizonEventProcessor.when_processing

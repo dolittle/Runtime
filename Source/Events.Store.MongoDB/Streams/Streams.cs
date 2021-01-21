@@ -3,9 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Logging;
-using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams

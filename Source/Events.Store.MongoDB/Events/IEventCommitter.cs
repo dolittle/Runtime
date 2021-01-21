@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="transaction">The <see cref="IClientSessionHandle" />.</param>
         /// <param name="sequenceNumber">The expected next <see cref="EventLogSequenceNumber"/> of the event log.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset"/> when the event occurred.</param>
-        /// <param name="executionContext">The <see cref="Dolittle.Execution.ExecutionContext" />.</param>
+        /// <param name="executionContext">The <see cref="Execution.ExecutionContext" />.</param>
         /// <param name="event">The <see cref="UncommittedEvent"/> to commit.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="CommittedEvent" />.</returns>
@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="version">The expected next <see cref="EventLogSequenceNumber"/> of the event log.</param>
         /// <param name="occurred">The <see cref="DateTimeOffset"/> when the event occurred.</param>
         /// <param name="eventSource">The <see cref="EventSourceId"/> the event was applied to.</param>
-        /// <param name="executionContext">The <see cref="Dolittle.Execution.ExecutionContext" />.</param>
+        /// <param name="executionContext">The <see cref="Execution.ExecutionContext" />.</param>
         /// <param name="event">The <see cref="UncommittedEvent"/> to commit.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="CommittedAggregateEvent" />.</returns>

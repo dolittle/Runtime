@@ -4,8 +4,8 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Collections;
 using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Events.Processing.Streams;
 
 namespace Dolittle.Runtime.Events.Processing

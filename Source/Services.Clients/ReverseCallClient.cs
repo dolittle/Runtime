@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Services.Contracts;
+using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;

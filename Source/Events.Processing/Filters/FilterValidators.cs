@@ -8,9 +8,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Logging;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
