@@ -3,9 +3,9 @@
 
 using System.Collections.ObjectModel;
 using System.Linq;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
-using Dolittle.Services;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Heads
 {

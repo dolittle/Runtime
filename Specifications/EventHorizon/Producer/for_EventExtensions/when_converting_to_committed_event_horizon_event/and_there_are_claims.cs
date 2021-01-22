@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Artifacts;
-using Dolittle.Protobuf;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Security;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Security;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.Producer.for_EventExtensions.when_converting_to_committed_event_horizon_event

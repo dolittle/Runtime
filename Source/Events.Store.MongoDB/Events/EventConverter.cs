@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams;
 using mongoDB = Dolittle.Runtime.Events.Store.MongoDB.Events;
 using runtime = Dolittle.Runtime.Events.Store;

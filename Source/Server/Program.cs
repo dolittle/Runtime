@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using Dolittle.Hosting.Microsoft;
+using Dolittle.Runtime.Hosting.Microsoft;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;

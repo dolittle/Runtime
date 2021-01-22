@@ -3,9 +3,10 @@
 
 using System;
 using System.Globalization;
-using Dolittle.Execution;
-using Dolittle.Protobuf;
-using Dolittle.Security;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Security;
+using ExecutionContracts = Dolittle.Execution.Contracts;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -31,6 +32,6 @@ namespace Dolittle.Runtime.EventHorizon
                 claims,
                 CultureInfo.InvariantCulture);
 
-        public static Execution.Contracts.ExecutionContext create_protobuf() => create().ToProtobuf();
+        public static ExecutionContracts.ExecutionContext create_protobuf() => create().ToProtobuf();
     }
 }

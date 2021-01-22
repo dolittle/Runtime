@@ -1,6 +1,29 @@
 <Project>
     <PropertyGroup>
-        <ContractsVersion>5.*</ContractsVersion>
-        <FundamentalsVersion>5.*</FundamentalsVersion>
+        <AutofacVersion>5.0.0</AutofacVersion>
+        <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
+        <ContractsVersion>5.1.19</ContractsVersion>
+        <CoverletVersion>2.9.0</CoverletVersion>
+        <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
+        <GrpcVersion>2.23.0</GrpcVersion>
+        <GrpcAspNetCoreVersion>2.34.0</GrpcAspNetCoreVersion>
+        <MachineSpecificationsRunnerVersion>2.9.0</MachineSpecificationsRunnerVersion>
+        <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
+        <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
+        <MicrosoftDotNetVersion>3.1.2</MicrosoftDotNetVersion>
+        <MicrosoftDotNetTestVersion>16.4.0</MicrosoftDotNetTestVersion>
+        <MicrosoftExtensionsVersion>3.1.2</MicrosoftExtensionsVersion>
+        <MongoDBDriverVersion>2.10.1</MongoDBDriverVersion>
+        <MoqVersion>4.13.*</MoqVersion>
+        <NewtonsoftVersion>12.0.3</NewtonsoftVersion>
+        <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
+        <ProtobufVersion>3.11.2</ProtobufVersion>
+        <PollyVersion>7.2.0</PollyVersion>
+        <PrometheusVersion>3.3.0</PrometheusVersion>
+        <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
+        <SystemReactiveVersion>4.4.1</SystemReactiveVersion>
+        <SystemRuntimeVersion>4.3.0</SystemRuntimeVersion>
+        <SystemDynamicVersion>4.3.0</SystemDynamicVersion>
+        <SystemReflectionVersion>4.3.0</SystemReflectionVersion>
     </PropertyGroup>
 </Project>

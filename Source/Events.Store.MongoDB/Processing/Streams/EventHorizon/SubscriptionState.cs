@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.ApplicationModel;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionState"/> class.
         /// </summary>
-        /// <param name="producerMicroserviceId">The producer <see cref="ApplicationModel.Microservice" />.</param>
+        /// <param name="producerMicroserviceId">The producer <see cref="Microservice" />.</param>
         /// <param name="producerTenantId">The producer <see cref="TenantId" />.</param>
         /// <param name="streamId">The public <see cref="Store.Streams.StreamId" /> to subscribe to.</param>
         /// <param name="partitionId">The <see cref="Store.Streams.PartitionId" /> in the stream to subscribe to.</param>
@@ -52,12 +52,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         }
 
         /// <summary>
-        /// Gets or sets the producer <see cref="ApplicationModel.Microservice" />.
+        /// Gets or sets the producer <see cref="Microservice" />.
         /// </summary>
         public Guid Microservice { get; set; }
 
         /// <summary>
-        /// Gets or sets the producer <see cref="Dolittle.Tenancy.TenantId" />.
+        /// Gets or sets the producer <see cref="TenantId" />.
         /// </summary>
         public Guid Tenant { get; set; }
 

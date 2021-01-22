@@ -4,11 +4,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
 using Dolittle.Runtime.Async;
 using Dolittle.Runtime.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
+using Dolittle.Runtime.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams

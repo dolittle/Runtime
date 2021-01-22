@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Async;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;

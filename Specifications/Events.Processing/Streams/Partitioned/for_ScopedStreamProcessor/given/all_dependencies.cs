@@ -3,12 +3,12 @@
 
 using System;
 using System.Threading;
-using Dolittle.Logging;
-using Dolittle.Resilience;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Resilience;
 using Machine.Specifications;
 using Moq;
 

@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Time.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Time/Time.csproj" />
+    <ProjectReference Include="../../Source/Services.Clients/Services.Clients.csproj" />
+    <ProjectReference Include="../../Source/Types.Testing/Types.Testing.csproj" />  </ItemGroup>
+
+
+</Project>

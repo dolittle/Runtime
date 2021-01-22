@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Security.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Security/Security.csproj" />
+    <ProjectReference Include="../../Source/Concepts/Concepts.csproj" />
+  </ItemGroup>
+
+
+</Project>

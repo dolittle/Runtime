@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.DependencyInversion;
-using Dolittle.Logging;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Tenancy;
-using Dolittle.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {

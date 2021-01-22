@@ -4,8 +4,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Dolittle.Configuration;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.EventHorizon
 {

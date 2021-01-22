@@ -3,8 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Artifacts;
-using Dolittle.Logging;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates

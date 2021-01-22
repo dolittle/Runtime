@@ -7,21 +7,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.ApplicationModel" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Protobuf" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.ResourceTypes" Version="$(FundamentalsVersion)" />
     <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
     <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Dolittle.Tenancy" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Nito.AsyncEx.Tasks" Version="5.0.0" />
+    <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Async\Async.csproj" />
-    <ProjectReference Include="..\Services\Services.csproj" />
-    <ProjectReference Include="..\Tenancy\Tenancy.csproj" />
+    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Async/Async.csproj" />
+    <ProjectReference Include="../Concepts/Concepts.csproj" />
+    <ProjectReference Include="../Execution/Execution.csproj" />
+    <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+    <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
+    <ProjectReference Include="../Services/Services.csproj" />
+    <ProjectReference Include="../Tenancy/Tenancy.csproj" />
   </ItemGroup>
 
 </Project>

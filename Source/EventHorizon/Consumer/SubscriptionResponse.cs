@@ -1,8 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store.EventHorizon;
+using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {

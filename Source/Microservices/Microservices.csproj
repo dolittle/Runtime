@@ -6,10 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.ApplicationModel" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Concepts" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Configuration" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)" />
+    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Concepts/Concepts.csproj" />
+    <ProjectReference Include="../Configuration/Configuration.csproj" />
+    <ProjectReference Include="../Services/Services.csproj" />
   </ItemGroup>
 
 </Project>

@@ -5,11 +5,11 @@ using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Artifacts;
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
-using Dolittle.Logging;
-using Dolittle.Protobuf;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Contracts.EventStore;
 

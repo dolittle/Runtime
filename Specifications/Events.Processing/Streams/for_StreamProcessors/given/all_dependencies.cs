@@ -1,9 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
-using Dolittle.Logging;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Moq;

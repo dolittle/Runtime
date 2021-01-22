@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <RootNamespace>Dolittle.Runtime.Configuration</RootNamespace>
+    <AssemblyName>Dolittle.Runtime.Configuration</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Booting/Booting.csproj" />
+    <ProjectReference Include="../Collections/Collections.csproj" />
+    <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+    <ProjectReference Include="../Immutability/Immutability.csproj" />
+    <ProjectReference Include="../Reflection/Reflection.csproj" />
+    <ProjectReference Include="../Types/Types.csproj" />
+  </ItemGroup>
+
+</Project>

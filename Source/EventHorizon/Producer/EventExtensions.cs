@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Security;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Security;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
 {

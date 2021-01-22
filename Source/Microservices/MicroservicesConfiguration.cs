@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using Dolittle.ApplicationModel;
-using Dolittle.Configuration;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.Microservices
 {

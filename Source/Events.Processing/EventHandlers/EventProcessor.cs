@@ -3,12 +3,12 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
-using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Services;
+using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {

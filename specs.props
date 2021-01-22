@@ -7,10 +7,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Coverlet.MsBuild" Version="2.9.0" />
-        <PackageReference Include="Dolittle.Common.Specs" Version="2.*"/>
-        <PackageReference Include="Dolittle.Types.Testing" Version="$(FundamentalsVersion)"/>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
-        <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="2.9.0" />
+        <ProjectRefence Include="Source/Types.Testing/Types.Testing.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Coverlet.MsBuild" Version="$(CoverletVersion)" />
+        <PackageReference Include="Dolittle.Common.Specs" Version="$(DolittleCommonSpecsVersion)"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftDotNetTestVersion)" />
+        <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="$(MachineSpecificationsRunnerVersion)" />
     </ItemGroup>
 </Project>

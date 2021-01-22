@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Artifacts;
-using Dolittle.Execution;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Execution;
 
 namespace Dolittle.Runtime.Events.Store
 {

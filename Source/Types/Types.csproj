@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Types</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Assemblies/Assemblies.csproj" />
+    <ProjectReference Include="../Collections/Collections.csproj" />
+    <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+    <ProjectReference Include="../Reflection/Reflection.csproj" />
+    <ProjectReference Include="../Scheduling/Scheduling.csproj" />
+  </ItemGroup>
+</Project>

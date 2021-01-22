@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.ObjectModel;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.ApplicationModel;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_initializing

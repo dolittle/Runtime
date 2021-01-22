@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Concepts.Serialization.Protobuf.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Time/Time.csproj" />
+    <ProjectReference Include="../../Source/Serialization.Protobuf/Serialization.Protobuf.csproj" />
+    <ProjectReference Include="../../Source/Concepts.Serialization.Protobuf/Concepts.Serialization.Protobuf.csproj" />
+  </ItemGroup>
+</Project>

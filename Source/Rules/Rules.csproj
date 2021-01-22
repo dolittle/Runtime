@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props"/>
+
+    <PropertyGroup>
+        <RootNamespace>Dolittle.Runtime.Rules</RootNamespace>
+        <AssemblyName>Dolittle.Runtime.Rules</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Concepts/Concepts.csproj" />
+        <ProjectReference Include="../Collections/Collections.csproj" />
+    </ItemGroup>
+</Project>
