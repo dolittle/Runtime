@@ -2,10 +2,10 @@
     <PropertyGroup>
         <AutofacVersion>5.0.0</AutofacVersion>
         <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
-        <ContractsVersion>5.2.0-updategrpc.2</ContractsVersion>
+        <ContractsVersion>5.2.0</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
-        <GrpcVersion>2.34.1</GrpcVersion>
+        <GrpcVersion>2.35.0</GrpcVersion>
         <GrpcAspNetCoreVersion>2.34.0</GrpcAspNetCoreVersion>
         <MachineSpecificationsRunnerVersion>2.9.0</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
@@ -17,7 +17,7 @@
         <MoqVersion>4.13.*</MoqVersion>
         <NewtonsoftVersion>12.0.3</NewtonsoftVersion>
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
-        <ProtobufVersion>3.11.2</ProtobufVersion>
+        <ProtobufVersion>3.14.0</ProtobufVersion>
         <PollyVersion>7.2.0</PollyVersion>
         <PrometheusVersion>3.3.0</PrometheusVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
