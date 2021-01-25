@@ -1,10 +1,10 @@
 <h1 align="center"><img src="Documentation/dolittle_negativ_horisontal_RGB.svg" alt="Dolittle"></h1>
 
 <h4 align="center">
-    <a href="https:/dolittle.io">Documentation</a> |
+    <a href="https://dolittle.io">Documentation</a> |
     <a href="https://dolittle.io/docs/tutorials/getting_started/">Tutorial</a> |
-    <a href="https:/github.com/dolittle/DotNet.SDK">C# SDK</a> |
-    <a href="https:/github.com/dolittle/JavaScript.SDK">JavaScript SDK</a>
+    <a href="https://github.com/dolittle/DotNet.SDK">C# SDK</a> |
+    <a href="https://github.com/dolittle/JavaScript.SDK">JavaScript SDK</a>
 </h4>
 
 ---
