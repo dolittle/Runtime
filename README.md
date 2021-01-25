@@ -1,11 +1,18 @@
-# Runtime
+<h1 align="center"><img src="Documentation/dolittle_negativ_horisontal_RGB.svg" alt="Dolittle"></h1>
 
-![CI/CD](https://github.com/dolittle/Runtime/workflows/.NET%20Docker%20Image%20CI/CD/badge.svg)
+<h4 align="center">
+    <a href="https:/dolittle.io">Documentation</a> |
+    <a href="https://dolittle.io/docs/tutorials/getting_started/">Tutorial</a> |
+    <a href="https:/github.com/dolittle/DotNet.SDK">C# SDK</a> |
+    <a href="https:/github.com/dolittle/JavaScript.SDK">JavaScript SDK</a>
+</h4>
 
+---
 
-[![Docker](https://img.shields.io/docker/v/dolittle/runtime?label=dolittle%2Fruntime&logo=docker&sort=semver)](https://hub.docker.com/r/dolittle/runtime)
-
-[![codecov](https://codecov.io/gh/dolittle/runtime/branch/master/graph/badge.svg)](https://codecov.io/gh/dolittle/runtime)
+<p align="center">
+    <a href="https://hub.docker.com/r/dolittle/runtime"><img src="https://img.shields.io/docker/v/dolittle/runtime?label=dolittle%2Fruntime&logo=docker&sort=semver" alt="Latest Docker image"></a>
+    <a href="https://github.com/dolittle/Runtime/actions?query=workflow%3ARuntime"><img src="https://github.com/dolittle/Runtime/workflows/.NET%20Docker%20Image%20CI/CD/badge.svg" alt="Build status"></a>
+</p>
 
 
 Dolittle is a decentralized, distributed, event-driven microservice platform built to harness the power of events.
@@ -14,7 +21,7 @@ The Runtime is the backend of our system and manages connections from the SDKs a
 
 # Get Started
 - Try our [tutorial](https://dolittle.io/docs/tutorials/)
-- See our [documentation](https://dolittle.io)
+- Check out our [documentation](https://dolittle.io)
 
 ## Packages
 
