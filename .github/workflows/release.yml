@@ -35,7 +35,28 @@ jobs:
       with:
         version: ${{ steps.increment-version.outputs.next-version }}
         body: ${{ steps.context.outputs.pr-body }}
-  
+    - name: Prepend to Changelog
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      uses: dolittle/add-to-changelog-action@v1
+      with:
+        version: ${{ steps.increment-version.outputs.next-version }}
+        body: ${{ steps.context.outputs.pr-body }}
+        pr-url: ${{ steps.context.outputs.pr-url }}
+        changelog-path: CHANGELOG.md
+    - name: Commit changelog
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      run: |
+        git config --local user.email "build@dolittle.com"
+        git config --local user.name "dolittle-build"
+        git add CHANGELOG.md
+        git commit -m "Add version ${{ steps.increment-version.outputs.next-version }} to changelog"
+    - name: Push changes
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: 'master'
+
   release-runtime-production-image:
     name: Release Runtime Production Image
     needs: setup
@@ -63,7 +84,7 @@ jobs:
         context: .
         file: ./Docker/Production/Dockerfile
         tags: dolittle/runtime:latest
-  
+
   release-runtime-development-image:
     name: Release Runtime Development Image
     needs: setup
