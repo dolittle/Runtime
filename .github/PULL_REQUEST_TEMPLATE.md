@@ -1,7 +1,6 @@
-
 ## Summary
 
-Summary of the PR here.
+Summary of the PR here. The GitHub release description is created from this comment so keep it nice and descriptive.
 
 ### Added
 
