@@ -29,33 +29,23 @@ jobs:
       with:
         version: ${{ steps.context.outputs.current-version }}
         release-type: ${{ steps.context.outputs.release-type }}
+    - name: Prepend to Changelog
+      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      uses: dolittle/add-to-changelog-action@v2
+      with:
+        version: ${{ steps.increment-version.outputs.next-version }}
+        body: ${{ steps.context.outputs.pr-body }}
+        pr-url: ${{ steps.context.outputs.pr-url }}
+        changelog-path: CHANGELOG.md
+        user-email: build@dolittle.com
+        user-name: dolittle-build
     - name: Create GitHub Release
       uses: dolittle/github-release-action@v2
       if: ${{ steps.context.outputs.should-publish == 'true' }}
       with:
         version: ${{ steps.increment-version.outputs.next-version }}
         body: ${{ steps.context.outputs.pr-body }}
-    - name: Prepend to Changelog
-      if: ${{ steps.context.outputs.should-publish == 'true' }}
-      uses: dolittle/add-to-changelog-action@v1
-      with:
-        version: ${{ steps.increment-version.outputs.next-version }}
-        body: ${{ steps.context.outputs.pr-body }}
-        pr-url: ${{ steps.context.outputs.pr-url }}
-        changelog-path: CHANGELOG.md
-    - name: Commit changelog
-      if: ${{ steps.context.outputs.should-publish == 'true' }}
-      run: |
-        git config --local user.email "build@dolittle.com"
-        git config --local user.name "dolittle-build"
-        git add CHANGELOG.md
-        git commit -m "Add version ${{ steps.increment-version.outputs.next-version }} to changelog"
-    - name: Push changes
-      if: ${{ steps.context.outputs.should-publish == 'true' }}
-      uses: ad-m/github-push-action@master
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        branch: 'master'
+    
 
   release-runtime-production-image:
     name: Release Runtime Production Image
