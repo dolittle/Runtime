@@ -2,6 +2,8 @@
 
 Summary of the PR here. The GitHub release description is created from this comment so keep it nice and descriptive.
 
+Remember to remove sections that you don't need or use.
+
 ### Added
 
 - Describe the added features
