@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Execution
     /// </summary>
     public record ExecutionContext(
         Microservice Microservice,
-        TenantId TenantId,
+        TenantId Tenant,
         Version Version,
         Environment Environment,
         CorrelationId CorrellationId,
