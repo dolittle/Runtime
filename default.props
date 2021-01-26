@@ -6,6 +6,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <!-- <PackageReference Include="Dolittle.Common" Version="3.*" PrivateAssets="All"/> -->
+        <!-- <PackageReference Include="Dolittle.Common" Version="2.*" PrivateAssets="All"/> -->
     </ItemGroup>
 </Project>
