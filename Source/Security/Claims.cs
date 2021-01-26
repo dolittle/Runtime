@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Concepts;
+using Dolittle.Runtime.Async;
 
 namespace Dolittle.Runtime.Security
 {
@@ -17,9 +17,9 @@ namespace Dolittle.Runtime.Security
         /// <summary>
         /// Gets the empty representation of <see cref="Claims"/>.
         /// </summary>
-        public static readonly Claims Empty = new Claims(Array.Empty<Claim>());
+        public static readonly Claims Empty = new(Array.Empty<Claim>());
 
-        readonly List<Claim> _claims = new List<Claim>();
+        readonly List<Claim> _claims = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Claims"/> class.
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Security
                 return true;
             }
 
-            return object.Equals(leftHandSide, null) ? false : leftHandSide.Equals(rightHandSide);
+            return Equals(leftHandSide, null) ? false : leftHandSide.Equals(rightHandSide);
         }
 
         /// <summary>
@@ -52,10 +52,7 @@ namespace Dolittle.Runtime.Security
         /// <param name="leftHandSide">Left hand side <see cref="Claim"/>.</param>
         /// <param name="rightHandSide">Right hand side <see cref="Claim"/>.</param>
         /// <returns>true if not equals, false otherwise.</returns>
-        public static bool operator !=(Claims leftHandSide, Claims rightHandSide)
-        {
-            return !(leftHandSide == rightHandSide);
-        }
+        public static bool operator !=(Claims leftHandSide, Claims rightHandSide) => !(leftHandSide == rightHandSide);
 
         /// <inheritdoc/>
         public bool Equals(Claims other)
@@ -78,10 +75,7 @@ namespace Dolittle.Runtime.Security
         }
 
         /// <inheritdoc/>
-        public override bool Equals(object other)
-        {
-            return Equals(other as Claims);
-        }
+        public override bool Equals(object other) => Equals(other as Claims);
 
         /// <inheritdoc/>
         public override int GetHashCode()
@@ -94,18 +88,12 @@ namespace Dolittle.Runtime.Security
         /// Gets an enumerator to iterate over the claims.
         /// </summary>
         /// <returns><see cref="IEnumerator{T}"/> of <see cref="Claim"/>.</returns>
-        public IEnumerator<Claim> GetEnumerator()
-        {
-            return _claims.GetEnumerator();
-        }
+        public IEnumerator<Claim> GetEnumerator() => _claims.GetEnumerator();
 
         /// <summary>
         /// Gets an enumerator to iterate over the claims.
         /// </summary>
         /// <returns><see cref="IEnumerator"/> of <see cref="Claim"/>.</returns>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _claims.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _claims.GetEnumerator();
     }
 }
