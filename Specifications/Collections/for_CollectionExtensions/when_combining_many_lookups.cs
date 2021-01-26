@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Collections.for_CollectionExtensions
 
         Because of = () => result = lookups.Combine();
 
-        It should_have_all_values = () => result.Count().ShouldEqual(5);
+        It should_have_all_values = () => result.Count.ShouldEqual(5);
 
         It should_map_first_value = () => result["1"].ShouldContainOnly(1, 1);
 

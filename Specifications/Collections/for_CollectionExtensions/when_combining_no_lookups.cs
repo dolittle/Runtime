@@ -17,6 +17,6 @@ namespace Dolittle.Runtime.Collections.for_CollectionExtensions
 
         Because of = () => result = lookups.Combine();
 
-        It should_be_empty = () => result.Count().ShouldEqual(0);
+        It should_be_empty = () => result.Count.ShouldEqual(0);
     }
 }

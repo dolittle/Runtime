@@ -2,10 +2,10 @@
     <Import Project="versions.props"/>
     
     <PropertyGroup>
-        <TargetFramework>netstandard2.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Dolittle.Common" Version="2.*" PrivateAssets="All"/>
+        <!-- <PackageReference Include="Dolittle.Common" Version="3.*" PrivateAssets="All"/> -->
     </ItemGroup>
 </Project>

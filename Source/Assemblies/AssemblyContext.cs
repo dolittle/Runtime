@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Assemblies
 
             DependencyContext = DependencyContext.Load(assembly);
 
-            var codeBaseUri = new Uri(assembly.CodeBase);
+            var codeBaseUri = new Uri(assembly.Location);
             var basePath = Path.GetDirectoryName(codeBaseUri.LocalPath);
 
             _assemblyResolver = new CompositeAssemblyResolver(new ICompilationAssemblyResolver[]

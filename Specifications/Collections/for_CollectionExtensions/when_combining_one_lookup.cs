@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Collections.for_CollectionExtensions
 
         Because of = () => result = lookups.Combine();
 
-        It should_have_two_values = () => result.Count().ShouldEqual(2);
+        It should_have_two_values = () => result.Count.ShouldEqual(2);
 
         It should_map_first_value = () => result["1"].ShouldContainOnly(1);
 
