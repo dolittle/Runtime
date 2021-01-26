@@ -32,6 +32,6 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="claims"><see cref="IEnumerable{T}"/> of <see cref="ClaimContracts"/> to convert from.</param>
         /// <returns>Converted <see cref="Claims"/>.</returns>
         public static Claims ToClaims(this IEnumerable<ClaimContracts> claims) =>
-            new Claims(claims.Select(_ => new Claim(_.Key, _.Value, _.ValueType)));
+            new(claims.Select(_ => new Claim(_.Key, _.Value, _.ValueType)));
     }
 }

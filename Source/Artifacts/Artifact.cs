@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Artifacts
     /// <summary>
     /// Represents the concept of an artifact.
     /// </summary>
-    public record Artifact(ArtifactId id, ArtifactGeneration Generation)
+    public record Artifact(ArtifactId Id, ArtifactGeneration Generation)
     {
         /// <summary>
         /// Create a new <see cref="Artifact"/> as the first generation.

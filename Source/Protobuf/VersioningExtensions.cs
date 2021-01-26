@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="version"><see cref="Version"/> to convert from.</param>
         /// <returns>Converted <see cref="VersionContract"/>.</returns>
         public static VersionContract ToProtobuf(this Version version) =>
-            new VersionContract
+            new()
                 {
                     Major = version.Major,
                     Minor = version.Minor,
@@ -32,6 +32,6 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="version"><see cref="VersionContract"/> to convert from.</param>
         /// <returns>Converted <see cref="Version"/>.</returns>
         public static Version ToVersion(this VersionContract version) =>
-            new Version(version.Major, version.Minor, version.Patch, version.Build, version.PreReleaseString);
+            new(version.Major, version.Minor, version.Patch, version.Build, version.PreReleaseString);
     }
 }

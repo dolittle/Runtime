@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Execution
         TenantId Tenant,
         Version Version,
         Environment Environment,
-        CorrelationId CorrellationId,
+        CorrelationId CorrelationId,
         Claims Claims,
         CultureInfo CultureInfo);
 }

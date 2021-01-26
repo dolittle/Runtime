@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="artifact"><see cref="Artifact"/> to convert from.</param>
         /// <returns>Converted <see cref="ArtifactContract"/>.</returns>
         public static ArtifactContract ToProtobuf(this Artifact artifact) =>
-            new ArtifactContract { Id = artifact.Id.ToProtobuf(), Generation = artifact.Generation.Value };
+            new() { Id = artifact.Id.Value.ToProtobuf(), Generation = artifact.Generation.Value };
 
         /// <summary>
         /// Convert a <see cref="ArtifactContract"/> to <see cref="Artifact"/>.
@@ -25,6 +25,6 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="artifact"><see cref="ArtifactContract"/> to convert from.</param>
         /// <returns>Converted <see cref="Artifact"/>.</returns>
         public static Artifact ToArtifact(this ArtifactContract artifact) =>
-            new Artifact(artifact.Id.To<ArtifactId>(), artifact.Generation);
+            new(artifact.Id.ToGuid(), artifact.Generation);
     }
 }

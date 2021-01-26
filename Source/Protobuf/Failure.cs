@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Concepts;
 using FailureContract = Dolittle.Protobuf.Contracts.Failure;
 
 namespace Dolittle.Runtime.Protobuf
@@ -9,7 +8,7 @@ namespace Dolittle.Runtime.Protobuf
     /// <summary>
     /// Represents a failure.
     /// </summary>
-    public class Failure : Value<Failure>
+    public record Failure
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Failure"/> class.
@@ -35,12 +34,12 @@ namespace Dolittle.Runtime.Protobuf
         /// <summary>
         /// Gets the <see cref="FailureId" />.
         /// </summary>
-        public FailureId Id { get; }
+        public FailureId Id { get; init; }
 
         /// <summary>
         /// Gets the <see cref="FailureReason" />.
         /// </summary>
-        public FailureReason Reason { get; }
+        public FailureReason Reason { get; init; }
 
         /// <summary>
         /// Implicitly convert <see cref="Failure" /> to <see cref="FailureContract" />.
@@ -48,7 +47,7 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="failure"><see cref="Failure" /> to convert.</param>
         public static implicit operator FailureContract(Failure failure) =>
             failure != null ?
-                new FailureContract { Id = failure.Id.ToProtobuf(), Reason = failure.Reason }
+                new FailureContract { Id = failure.Id.Value.ToProtobuf(), Reason = failure.Reason }
                 : null;
 
         /// <summary>
