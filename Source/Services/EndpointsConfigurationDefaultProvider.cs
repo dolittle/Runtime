@@ -14,23 +14,23 @@ namespace Dolittle.Runtime.Services
         /// <summary>
         /// Accesses the static configurations for providing default <see cref="EndpointConfiguration"/> for different <see cref="ServiceType">service types</see>.
         /// </summary>
-        public static readonly Dictionary<EndpointVisibility, EndpointConfiguration> Configurations = new Dictionary<EndpointVisibility, EndpointConfiguration>();
+        public static readonly Dictionary<EndpointVisibility, EndpointConfiguration> Configurations = new();
 
         /// <summary>
         /// The default public port.
         /// </summary>
-        public static int DefaultPublicPort = 50052;
+        public const int DefaultPublicPort = 50052;
 
         /// <summary>
         /// The default private port.
         /// </summary>
-        public static int DefaultPrivatePort = 50053;
+        public const int DefaultPrivatePort = 50053;
 
         /// <inheritdoc/>
         public EndpointsConfiguration Provide()
         {
-            Configurations[EndpointVisibility.Public] = new EndpointConfiguration(DefaultPublicPort);
-            Configurations[EndpointVisibility.Private] = new EndpointConfiguration(DefaultPrivatePort);
+            Configurations[EndpointVisibility.Public] = new EndpointConfiguration() { Port = DefaultPublicPort };
+            Configurations[EndpointVisibility.Private] = new EndpointConfiguration() { Port = DefaultPrivatePort };
             return new EndpointsConfiguration(Configurations);
         }
     }

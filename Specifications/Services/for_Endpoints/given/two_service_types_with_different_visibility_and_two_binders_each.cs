@@ -38,9 +38,6 @@ namespace Dolittle.Runtime.Services.for_Endpoints.given
         protected static ServiceType second_identifier;
         protected static Type first_binding_interface;
         protected static Type second_binding_interface;
-        protected static EndpointConfiguration public_configuration;
-        protected static EndpointConfiguration private_configuration;
-        protected static EndpointsConfiguration endpoints_configuration;
 
         protected static Service first_service_type_first_binder_first_service;
         protected static Service first_service_type_first_binder_second_service;
@@ -51,6 +48,12 @@ namespace Dolittle.Runtime.Services.for_Endpoints.given
         protected static Service second_service_type_second_binder_first_service;
         protected static Service second_service_type_second_binder_second_service;
 
+        protected static EndpointsConfiguration CreateEndpointsConfiguration(EndpointConfiguration publicConfiguration, EndpointConfiguration privateConfiguration)
+            => new(new Dictionary<EndpointVisibility, EndpointConfiguration>
+                {
+                    { EndpointVisibility.Public, publicConfiguration },
+                    { EndpointVisibility.Private, privateConfiguration }
+                });
         Establish context = () =>
         {
             container = new Mock<IContainer>();
@@ -64,15 +67,6 @@ namespace Dolittle.Runtime.Services.for_Endpoints.given
             first_identifier = first_service_type_identifier;
             first_binding_interface = typeof(ICanBindFirstServiceType);
             second_binding_interface = typeof(ICanBindSecondServiceType);
-
-            public_configuration = new EndpointConfiguration();
-            private_configuration = new EndpointConfiguration();
-
-            endpoints_configuration = new EndpointsConfiguration(new Dictionary<EndpointVisibility, EndpointConfiguration>
-                {
-                    { EndpointVisibility.Public, public_configuration },
-                    { EndpointVisibility.Private, private_configuration }
-                });
 
             first_binder_first_type = new FirstServiceTypeFirstBinder();
             second_binder_first_type = new FirstServiceTypeSecondBinder();

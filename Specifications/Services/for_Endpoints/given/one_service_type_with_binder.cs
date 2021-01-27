@@ -31,8 +31,13 @@ namespace Dolittle.Runtime.Services.for_Endpoints.given
 
         protected static ServiceType identifier;
         protected static Type binding_interface;
-        protected static EndpointConfiguration configuration;
-        protected static EndpointsConfiguration endpoints_configuration;
+
+        protected static EndpointsConfiguration CreateEndpointsConfiguration(EndpointConfiguration endpoint)
+            => new(new Dictionary<EndpointVisibility, EndpointConfiguration>
+                {
+                    { EndpointVisibility.Public, endpoint }
+                });
+
 
         Establish context = () =>
         {
@@ -46,12 +51,6 @@ namespace Dolittle.Runtime.Services.for_Endpoints.given
 
             identifier = service_type_identifier;
             binding_interface = typeof(ICanBindMyServiceType);
-            configuration = new EndpointConfiguration();
-
-            endpoints_configuration = new EndpointsConfiguration(new Dictionary<EndpointVisibility, EndpointConfiguration>
-                {
-                    { EndpointVisibility.Public, configuration }
-                });
 
             binder = new Mock<ICanBindMyServiceType>();
             var binderType = binder.Object.GetType();

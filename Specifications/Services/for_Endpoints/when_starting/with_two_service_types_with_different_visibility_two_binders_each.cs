@@ -7,11 +7,14 @@ namespace Dolittle.Runtime.Services.for_Endpoints.when_starting
 {
     public class with_two_service_types_with_different_visibility_two_binders_each : given.two_service_types_with_different_visibility_and_two_binders_each
     {
+        static EndpointConfiguration public_configuration = new();
+        static EndpointConfiguration private_configuration = new();
         static Endpoints endpoints;
 
         Establish context = () =>
         {
-            public_configuration.Enabled = true;
+            public_configuration = public_configuration with { Enabled = true };
+            var endpoints_configuration = CreateEndpointsConfiguration(public_configuration, private_configuration);
             endpoints = new Endpoints(service_types, endpoints_configuration, type_finder.Object, container.Object, bound_services.Object, logger);
         };
 
