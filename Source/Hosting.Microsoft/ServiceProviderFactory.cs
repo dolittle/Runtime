@@ -8,9 +8,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.DependencyInversion.Autofac;
-using Microsoft.Extension.Logging;
-using Microsoft.Extension.Logging.Microsoft;
-using Dolittle.Runtime.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -60,27 +57,17 @@ namespace Dolittle.Runtime.Hosting.Microsoft
         public IServiceProvider CreateServiceProvider(ContainerBuilder containerBuilder)
         {
             var serviceProvider = _autofacFactory.CreateServiceProvider(containerBuilder);
-
-            var logMessageWriterCreators = new List<ILogMessageWriterCreator>();
-
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            if (loggerFactory != null) logMessageWriterCreators.Add(new LogMessageWriterCreator(loggerFactory));
-
             try
             {
                 var container = serviceProvider.GetService(typeof(IContainer)) as IContainer;
                 DependencyInversion.Booting.Boot.ContainerReady(container);
                 BootStages.ContainerReady(container);
 
-                var logMessageWriterCreatorProviders = container.Get<IInstancesOf<ICanProvideLogMessageWriterCreators>>();
-                logMessageWriterCreators.AddRange(logMessageWriterCreatorProviders.SelectMany(_ => _.Provide()));
-
                 var bootProcedures = container.Get<IBootProcedures>();
                 bootProcedures.Perform();
             }
             finally
             {
-                Logging.Internal.LoggerManager.Instance.AddLogMessageWriterCreators(logMessageWriterCreators.ToArray());
             }
 
             return serviceProvider;
