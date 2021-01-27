@@ -33,7 +33,6 @@ namespace Dolittle.Runtime.Booting
             _initialFixedStages = new ICanPerformPartOfBootStage[]
             {
                 new Basics(),
-                new Stages.Logging(),
                 new InitialSystem(),
                 new Discovery(),
                 new PostDiscovery(DiscoverBootStages)
@@ -69,11 +68,8 @@ namespace Dolittle.Runtime.Booting
             while (_stages.Count > 0)
             {
                 var stage = _stages.Dequeue();
-                if (aggregatedAssociations.ContainsKey(WellKnownAssociations.LoggerManager))
-                {
-                    var loggerManager = aggregatedAssociations[WellKnownAssociations.LoggerManager] as ILoggerManager;
-                    _logger = loggerManager.CreateLogger<BootStages>();
-                }
+                
+                _logger = new LoggerFactory().CreateLogger("Booting");
 
                 var interfaces = stage.GetType().GetInterfaces();
 

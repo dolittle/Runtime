@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Couldn't start {type} host", type);
+                _logger.LogError(ex, "Couldn't start {type} host", type);
             }
         }
 

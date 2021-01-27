@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 .Handle<Exception>(
                     _ =>
                     {
-                        _logger.Error(_, "Could not persist stream processor state to the event store, will retry in one second.");
+                        _logger.LogError(_, "Could not persist stream processor state to the event store, will retry in one second.");
                         return true;
                     })
                 .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(1));
