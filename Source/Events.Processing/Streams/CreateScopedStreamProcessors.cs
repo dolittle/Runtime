@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IEventFetchers _eventFetchers;
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly IStreamEventWatcher _streamWatcher;
         readonly TenantId _tenant;
 
@@ -32,21 +32,21 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         public CreateScopedStreamProcessors(
             IEventFetchers eventFetchers,
             IResilientStreamProcessorStateRepository streamProcessorStates,
             IExecutionContextManager executionContextManager,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
             IStreamEventWatcher streamWatcher,
-            ILoggerManager loggerManager)
+            ILoggerFactory loggerFactory)
         {
             _eventFetchers = eventFetchers;
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcherPolicy = eventsFetcherPolicy;
             _tenant = executionContextManager.Current.Tenant;
             _streamWatcher = streamWatcher;
-            _loggerManager = loggerManager;
+            _loggerFactory = loggerFactory;
         }
 
         /// <inheritdoc />
@@ -93,11 +93,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 eventProcessor,
                 _streamProcessorStates,
                 eventsFromStreamsFetcher,
-                new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy, _loggerManager.CreateLogger<Partitioned.FailingPartitions>()),
+                new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy, _loggerFactory.CreateLogger<Partitioned.FailingPartitions>()),
                 _eventsFetcherPolicy,
                 _streamWatcher,
                 new Partitioned.TimeToRetryForPartitionedStreamProcessor(),
-                _loggerManager.CreateLogger<Partitioned.ScopedStreamProcessor>());
+                _loggerFactory.CreateLogger<Partitioned.ScopedStreamProcessor>());
         }
 
         async Task<ScopedStreamProcessor> CreateUnpartitionedScopedStreamProcessor(
@@ -127,7 +127,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 _eventsFetcherPolicy,
                 _streamWatcher,
                 new TimeToRetryForUnpartitionedStreamProcessor(),
-                _loggerManager.CreateLogger<ScopedStreamProcessor>());
+                _loggerFactory.CreateLogger<ScopedStreamProcessor>());
         }
 
         void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)

@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly FactoryFor<IWriteEventsToPublicStreams> _getEventsToPublicStreamsWriter;
         readonly IStreamDefinitions _streamDefinitions;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
 
         /// <summary>
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="streamDefinitions">The <see cref="IFilterDefinitions" />.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
         /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager"/>.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public FiltersService(
             IHostApplicationLifetime hostApplicationLifetime,
             IStreamProcessors streamProcessors,
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IStreamDefinitions streamDefinitions,
             FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
             FactoryFor<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
-            ILoggerManager loggerManager)
+            ILoggerFactory loggerFactory)
         {
             _hostApplicationLifetime = hostApplicationLifetime;
             _streamProcessors = streamProcessors;
@@ -74,8 +74,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _streamDefinitions = streamDefinitions;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _getEventsToPublicStreamsWriter = getEventsToPublicStreamsWriter;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<FiltersService>();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<FiltersService>();
         }
 
         /// <inheritdoc/>
@@ -123,7 +123,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     filterDefinition,
                     dispatcher,
                     _getEventsToStreamsWriter(),
-                    _loggerManager.CreateLogger<FilterProcessor>()),
+                    _loggerFactory.CreateLogger<FilterProcessor>()),
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -173,7 +173,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     filterDefinition,
                     dispatcher,
                     _getEventsToStreamsWriter(),
-                    _loggerManager.CreateLogger<Partitioned.FilterProcessor>()),
+                    _loggerFactory.CreateLogger<Partitioned.FilterProcessor>()),
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -222,7 +222,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     filterDefinition,
                     dispatcher,
                     _getEventsToPublicStreamsWriter(),
-                    _loggerManager.CreateLogger<PublicFilterProcessor>()),
+                    _loggerFactory.CreateLogger<PublicFilterProcessor>()),
                 cancellationToken).ConfigureAwait(false);
         }
 

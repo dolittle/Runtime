@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new ConcurrentDictionary<SubscriptionId, Subscription>();
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly ILogger<Subscriptions> _logger;
 
         /// <summary>
@@ -29,13 +29,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// </summary>
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
-        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy, ILoggerManager loggerManager)
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
+        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy, ILoggerFactory loggerFactory)
         {
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcherPolicy = eventsFetcherPolicy;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<Subscriptions>();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<Subscriptions>();
         }
 
         /// <inheritdoc/>
@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _streamProcessorStates,
                 () => Unregister(subscriptionId),
                 _eventsFetcherPolicy,
-                _loggerManager,
+                _loggerFactory,
                 cancellationToken);
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
             {

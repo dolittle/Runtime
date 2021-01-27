@@ -29,7 +29,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
         /// <param name="scheduler"><see cref="IScheduler"/> for scheduling work.</param>
         /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
-        /// <param name="loggerManager"><see cref="ILoggerManager"/> for creating loggers.</param>
         /// <param name="bindings">Additional bindings.</param>
         /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
         /// <returns>Configured <see cref="IContainer"/> and <see cref="IBindingCollection"/>.</returns>
@@ -38,13 +37,12 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             ITypeFinder typeFinder,
             IScheduler scheduler,
             IFileSystem fileSystem,
-            ILoggerManager loggerManager,
             IEnumerable<Binding> bindings = null,
             BootContainer bootContainer = null)
         {
-            var logger = loggerManager.CreateLogger(typeof(Boot));
+            var logger = new LoggerFactory().CreateLogger(typeof(Boot));
             logger.LogTrace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerManager);
+            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem);
             if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
             _container = bootContainer;
 
@@ -77,7 +75,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
         /// <param name="scheduler"><see cref="IScheduler"/> for scheduling work.</param>
         /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
-        /// <param name="loggerManager"><see cref="ILoggerManager"/> for creating loggers.</param>
         /// <param name="containerType"><see cref="Type"/>Container type.</param>
         /// <param name="bindings">Additional bindings.</param>
         /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
@@ -87,14 +84,13 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             ITypeFinder typeFinder,
             IScheduler scheduler,
             IFileSystem fileSystem,
-            ILoggerManager loggerManager,
             Type containerType,
             IEnumerable<Binding> bindings = null,
             BootContainer bootContainer = null)
         {
-            var logger = loggerManager.CreateLogger(typeof(Boot));
+            var logger = new LoggerFactory().CreateLogger(typeof(Boot));
             logger.LogTrace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerManager);
+            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem);
 
             if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
             _container = bootContainer;
@@ -128,8 +124,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             IAssemblies assemblies,
             ITypeFinder typeFinder,
             IScheduler scheduler,
-            IFileSystem fileSystem,
-            ILoggerManager loggerManager)
+            IFileSystem fileSystem)
         {
             return new BindingCollection(new[]
             {
@@ -137,7 +132,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
                 Bind(typeof(ITypeFinder), typeFinder),
                 Bind(typeof(IScheduler), scheduler),
                 Bind(typeof(IFileSystem), fileSystem),
-                Bind(typeof(ILoggerManager), loggerManager),
                 Bind(typeof(GetContainer), (GetContainer)(() => _container))
             });
         }

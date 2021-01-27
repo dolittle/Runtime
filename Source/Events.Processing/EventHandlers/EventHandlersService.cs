@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         readonly IStreamDefinitions _streamDefinitions;
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
         readonly IHostApplicationLifetime _hostApplicationLifetime;
 
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
         /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager"/>.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public EventHandlersService(
             IHostApplicationLifetime hostApplicationLifetime,
             IValidateFilterForAllTenants filterForAllTenants,
@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IStreamDefinitions streamDefinitions,
             IReverseCallDispatchers reverseCallDispatchers,
             IExecutionContextManager executionContextManager,
-            ILoggerManager loggerManager)
+            ILoggerFactory loggerFactory)
         {
             _filterForAllTenants = filterForAllTenants;
             _streamProcessors = streamProcessors;
@@ -69,8 +69,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _streamDefinitions = streamDefinitions;
             _reverseCallDispatchers = reverseCallDispatchers;
             _executionContextManager = executionContextManager;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<EventHandlersService>();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<EventHandlersService>();
             _hostApplicationLifetime = hostApplicationLifetime;
         }
 
@@ -140,7 +140,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     scopeId,
                     filterDefinition,
                     _getEventsToStreamsWriter(),
-                    _loggerManager.CreateLogger<TypeFilterWithEventSourcePartition>());
+                    _loggerFactory.CreateLogger<TypeFilterWithEventSourcePartition>());
             var tryRegisterFilterStreamProcessor = TryRegisterFilterStreamProcessor<TypeFilterWithEventSourcePartitionDefinition>(
                 scopeId,
                 eventHandlerId,
@@ -178,7 +178,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     scopeId,
                     eventHandlerId,
                     dispatcher,
-                    _loggerManager.CreateLogger<EventProcessor>()),
+                    _loggerFactory.CreateLogger<EventProcessor>()),
                 cancellationToken);
 
             if (!tryRegisterEventProcessorStreamProcessor.Success)
