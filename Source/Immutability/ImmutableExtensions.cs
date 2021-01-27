@@ -14,6 +14,8 @@ namespace Dolittle.Runtime.Immutability
     /// </summary>
     public static class ImmutableExtensions
     {
+        const BindingFlags _publicInstancePropertyFlag = BindingFlags.Public | BindingFlags.Instance;
+
         /// <summary>
         /// Check if a type is immutable by virtue of it having public properties or fields that can be written to.
         /// </summary>
@@ -54,15 +56,10 @@ namespace Dolittle.Runtime.Immutability
         /// <param name="type"><see cref="Type"/> to get from.</param>
         /// <returns>Writeable <see cref="PropertyInfo">properties</see>.</returns>
         public static PropertyInfo[] GetWriteableProperties(this Type type)
-        {
-            var isExternalInitType = typeof(System.Runtime.CompilerServices.IsExternalInit);
-
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
+            => type.GetProperties(_publicInstancePropertyFlag)
                 .Where(_ => _.CanWrite)
-                .Where(_ => !_.SetMethod.ReturnParameter.GetRequiredCustomModifiers().Contains(isExternalInitType))
+                .Where(_ => !IsInitSetter(_))
                 .ToArray();
-            
-        }
 
         /// <summary>
         /// Get the writeable fields - if any - on a specific type.
@@ -70,9 +67,14 @@ namespace Dolittle.Runtime.Immutability
         /// <param name="type"><see cref="Type"/> to get from.</param>
         /// <returns>Writeable <see cref="FieldInfo">fields</see>.</returns>
         public static FieldInfo[] GetWriteableFields(this Type type)
-        {
-            return type.GetFields(BindingFlags.Public | BindingFlags.Instance)
-                           .Where(_ => (_.Attributes & FieldAttributes.InitOnly) == 0).ToArray();
-        }
+            => type
+                .GetFields(_publicInstancePropertyFlag)
+                .Where(_ => (_.Attributes & FieldAttributes.InitOnly) == 0)
+                .ToArray();
+        
+        static bool IsInitSetter(PropertyInfo property)
+            => property.SetMethod.ReturnParameter
+                .GetRequiredCustomModifiers()
+                .Contains(typeof(System.Runtime.CompilerServices.IsExternalInit));
     }
 }
