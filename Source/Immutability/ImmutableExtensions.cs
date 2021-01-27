@@ -2,8 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 
 namespace Dolittle.Runtime.Immutability
 {
@@ -46,13 +48,20 @@ namespace Dolittle.Runtime.Immutability
 
         /// <summary>
         /// Get the writeable properties - if any - on a specific type.
+        /// For init-only properties:
+        /// https://www.meziantou.net/csharp9-init-only-properties-are-not-read-only.htm
         /// </summary>
         /// <param name="type"><see cref="Type"/> to get from.</param>
         /// <returns>Writeable <see cref="PropertyInfo">properties</see>.</returns>
         public static PropertyInfo[] GetWriteableProperties(this Type type)
         {
+            var isExternalInitType = typeof(System.Runtime.CompilerServices.IsExternalInit);
+
             return type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                        .Where(_ => _.CanWrite).ToArray();
+                .Where(_ => _.CanWrite)
+                .Where(_ => !_.SetMethod.ReturnParameter.GetRequiredCustomModifiers().Contains(isExternalInitType))
+                .ToArray();
+            
         }
 
         /// <summary>
