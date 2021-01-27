@@ -331,7 +331,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             return exception != default;
         }
 
-        bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress) =>
-            _microservicesConfiguration.TryGetValue(producerMicroservice, out microserviceAddress);
+        bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
+        {
+            var result = _microservicesConfiguration.TryGetValue(producerMicroservice, out var microserviceAddressConfig);
+            microserviceAddress = microserviceAddressConfig;
+            return result;
+        }
     }
 }

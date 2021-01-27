@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Security.AccessControl;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
@@ -5,6 +7,7 @@ using System.Linq;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.ResourceTypes.Configuration;
+using Dolittle.Runtime.ResourceTypes;
 
 namespace Dolittle.Runtime.Applications.Configuration
 {
@@ -41,10 +44,12 @@ namespace Dolittle.Runtime.Applications.Configuration
         {
             var environment = _executionContextManager.Current.Environment;
 
-            _resourceConfiguration.ConfigureResourceTypes(
-                _boundedContextConfiguration.Resources.ToDictionary(
-                    kvp => kvp.Key,
-                    kvp => environment == Environment.Production ? kvp.Value.Production : kvp.Value.Development));
+            var resourceTypes = new Dictionary<ResourceType, ResourceTypeImplementation>();
+            foreach (var (resourceType, resourceImplementation) in _boundedContextConfiguration.Resources)
+            {
+                resourceTypes.Add(resourceType, environment == Environment.Production? resourceImplementation.Production : resourceImplementation.Development);
+            }
+            _resourceConfiguration.ConfigureResourceTypes(resourceTypes);
         }
     }
 }
