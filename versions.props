@@ -10,9 +10,9 @@
         <MachineSpecificationsRunnerVersion>2.9.0</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
-        <MicrosoftDotNetVersion>3.1.2</MicrosoftDotNetVersion>
+        <MicrosoftDotNetVersion>3.1.6</MicrosoftDotNetVersion>
         <MicrosoftDotNetTestVersion>16.4.0</MicrosoftDotNetTestVersion>
-        <MicrosoftExtensionsVersion>3.1.2</MicrosoftExtensionsVersion>
+        <MicrosoftExtensionsVersion>5.0.0</MicrosoftExtensionsVersion>
         <MongoDBDriverVersion>2.10.1</MongoDBDriverVersion>
         <MoqVersion>4.13.*</MoqVersion>
         <NewtonsoftVersion>12.0.3</NewtonsoftVersion>
@@ -24,6 +24,6 @@
         <SystemReactiveVersion>4.4.1</SystemReactiveVersion>
         <SystemRuntimeVersion>4.3.0</SystemRuntimeVersion>
         <SystemDynamicVersion>4.3.0</SystemDynamicVersion>
-        <SystemReflectionVersion>4.3.0</SystemReflectionVersion>
+        <SystemReflectionVersion>4.7.0</SystemReflectionVersion>
     </PropertyGroup>
 </Project>
