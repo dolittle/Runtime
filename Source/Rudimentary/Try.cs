@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Async
+namespace Dolittle.Runtime.Rudimentary
 {
     /// <summary>
     /// Represents something.

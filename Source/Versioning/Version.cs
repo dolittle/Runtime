@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Versioning
     /// <summary>
     /// Represents a version number adhering to the SemVer 2.0 standard.
     /// </summary>
-    public record Version(int Major, int Minor, int Patch, int Build, string PreReleaseString = default)
+    public record Version(int Major, int Minor, int Patch, int Build, string PreReleaseString = "")
     {
         /// <summary>
         /// Gets a <see cref="Version" /> that is not set.

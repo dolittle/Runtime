@@ -8,16 +8,7 @@ namespace Dolittle.Runtime.Microservices
     /// <summary>
     /// Represents the address of a <see cref="Microservice" />.
     /// </summary>
-    public class MicroserviceAddress
-    {
-        /// <summary>
-        /// Gets or sets the target host for the subscription.
-        /// </summary>
-        public MicroserviceHost Host { get; set; }
-
-        /// <summary>
-        /// Gets or sets the target port for the subscription.
-        /// </summary>
-        public MicroservicePort Port { get; set; }
-    }
+    /// <param name="Host">The host of a microservice.</param>
+    /// <param name="Port">The host of a microservice.</param>
+    public record MicroserviceAddress(MicroserviceHost Host, MicroservicePort Port);
 }

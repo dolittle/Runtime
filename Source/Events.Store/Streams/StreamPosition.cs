@@ -1,14 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Concepts;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// An unsigned long used to identify the position of a stream.
     /// </summary>
-    public class StreamPosition : ConceptAs<ulong>
+    public record StreamPosition(ulong Value) : ConceptAs<ulong>(Value)
     {
         /// <summary>
         /// Represents the initial value of the <see cref="StreamPosition">position</see>.
@@ -16,16 +16,10 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public static StreamPosition Start = 0;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StreamPosition"/> class.
-        /// </summary>
-        /// <param name="position">Value representing the <see cref="StreamPosition"/>.</param>
-        public StreamPosition(ulong position) => Value = position;
-
-        /// <summary>
         /// Implicitly convert from <see cref="ulong" /> to <see cref="StreamPosition" />.
         /// </summary>
         /// <param name="position">Position number as <see cref="ulong"/>.</param>
-        public static implicit operator StreamPosition(ulong position) => new StreamPosition(position);
+        public static implicit operator StreamPosition(ulong position) => new(position);
 
         /// <summary>
         /// Increments the <see cref="StreamPosition" />.

@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Async/Async.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
     <ProjectReference Include="../Lifecycle/Lifecycle.csproj" />
     <ProjectReference Include="../Types/Types.csproj" />
   </ItemGroup>

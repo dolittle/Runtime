@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dolittle.Runtime.Async
+namespace Dolittle.Runtime.Rudimentary
 {
     /// <summary>
     /// Provides useful methods for dealing with HashCodes.

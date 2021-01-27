@@ -318,7 +318,7 @@ namespace Dolittle.Runtime.Services
                         var callContext = _getResponseContex(response);
                         if (callContext?.CallId != null)
                         {
-                            var callId = callContext.CallId.To<ReverseCallId>();
+                            ReverseCallId callId = callContext.CallId.ToGuid();
                             if (_calls.TryRemove(callId, out var completionSource))
                             {
                                 completionSource.SetResult(response);

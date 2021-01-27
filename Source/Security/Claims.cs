@@ -5,7 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Security
 {

@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../Concepts/Concepts.csproj" />
         <ProjectReference Include="../Collections/Collections.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
     </ItemGroup>
 </Project>

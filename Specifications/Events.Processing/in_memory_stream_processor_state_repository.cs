@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Events.Processing.Streams;
 

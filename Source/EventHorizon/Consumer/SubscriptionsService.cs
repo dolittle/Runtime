@@ -54,11 +54,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var consumerTenant = _executionContextManager.Current.Tenant;
             var subscriptionId = new SubscriptionId(
                 consumerTenant,
-                subscriptionRequest.MicroserviceId.To<Microservice>(),
-                subscriptionRequest.TenantId.To<TenantId>(),
-                subscriptionRequest.ScopeId.To<ScopeId>(),
-                subscriptionRequest.StreamId.To<StreamId>(),
-                subscriptionRequest.PartitionId.To<PartitionId>());
+                subscriptionRequest.MicroserviceId.ToGuid(),
+                subscriptionRequest.TenantId.ToGuid(),
+                subscriptionRequest.ScopeId.ToGuid(),
+                subscriptionRequest.StreamId.ToGuid(),
+                subscriptionRequest.PartitionId.ToGuid());
             try
             {
                 _logger.Information("Incoming event horizon subscription request from head to runtime. {SubscriptionId}", subscriptionId);

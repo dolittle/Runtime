@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Logging;
 using Dolittle.Runtime.Resilience;

@@ -11,7 +11,6 @@
     <ProjectReference Include="../Execution/Execution.csproj" />
     <ProjectReference Include="../Types/Types.csproj" />
     <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj" />
-    <ProjectReference Include="../Concepts.Serialization.Json/Concepts.Serialization.Json.csproj" />
   </ItemGroup>
 
 </Project>

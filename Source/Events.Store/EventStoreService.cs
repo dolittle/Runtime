@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.Events.Store
             try
             {
                 _logger.Debug("{eventsCount} Events received for committing", request.Events.Count);
-                var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId.To<EventSourceId>(), new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
+                var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId.ToGuid(), new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
                 var uncommittedEvents = new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
                 var committedEvents = await _eventStoreFactory().CommitEvents(uncommittedEvents, context.CancellationToken).ConfigureAwait(false);
                 _logger.Debug("Events were successfully committed");
@@ -71,9 +71,9 @@ namespace Dolittle.Runtime.Events.Store
             try
             {
                 _logger.Debug("{eventsCount} Aggregate Events received for committing", request.Events.Events.Count);
-                var eventSourceId = request.Events.EventSourceId.To<EventSourceId>();
-                var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.Artifact.Id.To<ArtifactId>(), _.Artifact.Generation), _.Public, _.Content));
-                var aggregateRoot = new Artifact(request.Events.AggregateRootId.To<ArtifactId>(), ArtifactGeneration.First);
+                EventSourceId eventSourceId = request.Events.EventSourceId.ToGuid();
+                var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
+                var aggregateRoot = new Artifact(request.Events.AggregateRootId.ToGuid (), ArtifactGeneration.First);
 
                 var uncommittedAggregateEvents = new UncommittedAggregateEvents(
                     eventSourceId,
@@ -98,8 +98,8 @@ namespace Dolittle.Runtime.Events.Store
         {
             _logger.Debug("Fetch for Aggregate");
             _executionContextManager.CurrentFor(request.CallContext.ExecutionContext);
-            var aggregate = request.Aggregate.AggregateRootId.To<ArtifactId>();
-            var eventSource = request.Aggregate.EventSourceId.To<EventSourceId>();
+            ArtifactId aggregate = request.Aggregate.AggregateRootId.ToGuid();
+            EventSourceId eventSource = request.Aggregate.EventSourceId.ToGuid();
 
             var response = new Contracts.FetchForAggregateResponse();
             try

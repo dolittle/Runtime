@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer
@@ -27,6 +28,15 @@ namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer
 
         Because of = () => result = serializer.FromJson<Complex>(json_representation);
 
-        It should_deserialize_the_json_to_the_an_equal_instance = () => result.ShouldEqual(original);
+        It should_deserialize_the_json_to_the_an_equal_instance = () =>
+        {
+            result.Concept.ShouldEqual(original.Concept);
+            result.Immutable.ShouldEqual(result.Immutable);
+            result.Primitive.ShouldEqual(original.Primitive);
+            result.Content.Keys.ShouldContainOnly(original.Content.Keys);
+            (result.Content.Count == original.Content.Count
+                        && result.Content.Keys.All(key => original.Content.ContainsKey(key)
+                                                                && result.Content[key].Equals(Convert.ChangeType(original.Content[key], result.Content[key].GetType())))).ShouldBeTrue();
+        };
     }
 }

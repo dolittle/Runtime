@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Rudimentary</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="../Reflection/Reflection.csproj" />
+  </ItemGroup>
+</Project>

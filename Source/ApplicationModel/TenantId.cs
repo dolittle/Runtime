@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.ApplicationModel
 {
     /// <summary>
     /// Represents the concept of a tenant.
     /// </summary>
-    public record TenantId(Guid Value)
+    public record TenantId(Guid Value) : ConceptAs<Guid>(Value)
     {
         /// <summary>
         /// Gets the definition of an unknown tenant.
@@ -29,6 +30,6 @@ namespace Dolittle.Runtime.ApplicationModel
         /// Implicitly convert from <see cref="Guid"/> to <see cref="TenantId"/>.
         /// </summary>
         /// <param name="tenantId"><see cref="Guid"/> representation of a tenant identifier.</param>
-        public static implicit operator TenantId(Guid tenantId) => new (tenantId);
+        public static implicit operator TenantId(Guid tenantId) => new(tenantId);
     }
 }

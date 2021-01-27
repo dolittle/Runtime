@@ -8,7 +8,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
@@ -114,12 +114,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             var sourceStream = StreamId.EventLog;
             _logger.Trace("Received Source Stream '{SourceStream}'", sourceStream);
-            var eventHandlerId = arguments.EventHandlerId.To<EventProcessorId>();
+            EventProcessorId eventHandlerId = arguments.EventHandlerId.ToGuid();
             _logger.Trace("Received Event Handler '{EventHandler}'", eventHandlerId);
             StreamId targetStream = eventHandlerId.Value;
-            var scopeId = arguments.ScopeId.To<ScopeId>();
+            ScopeId scopeId = arguments.ScopeId.ToGuid();
             _logger.Trace("Received Scope '{Scope}'", scopeId);
-            var types = arguments.Types_.Select(_ => _.Id.To<ArtifactId>());
+            var types = arguments.Types_.Select(_ => new ArtifactId(_.Id.ToGuid()));
             _logger.Trace("Received Types: [{Types}]'", string.Join(", ", types.Select(_ => $"'{_}'")));
             var partitioned = arguments.Partitioned;
             _logger.Trace("Event Handler '{EventHandler}' {PartitionedString}", eventHandlerId, partitioned ? "is partitioned" : "is not partitioned");

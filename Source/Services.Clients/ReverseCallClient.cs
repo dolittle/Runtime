@@ -282,7 +282,7 @@ namespace Dolittle.Runtime.Services.Clients
             try
             {
                 var requestContext = _getRequestContext(request);
-                var callId = requestContext.CallId.To<ReverseCallId>();
+                ReverseCallId callId = requestContext.CallId.ToGuid();
                 TResponse response;
                 try
                 {

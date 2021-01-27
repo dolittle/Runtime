@@ -83,7 +83,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
 
             return response switch
                 {
-                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.To<PartitionId>()),
+                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.ToGuid()),
                     _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
                 };
         }

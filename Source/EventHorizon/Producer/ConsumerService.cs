@@ -8,7 +8,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.ApplicationModel.Configuration;
+using Dolittle.Runtime.Applications.Configuration;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store;
@@ -127,9 +127,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
             var consumerMicroservice = _executionContextManager.Current.Microservice;
             var consumerTenant = _executionContextManager.Current.Tenant;
-            var producerTenant = arguments.TenantId.To<TenantId>();
-            var publicStream = arguments.StreamId.To<StreamId>();
-            var partition = arguments.PartitionId.To<PartitionId>();
+            TenantId producerTenant = arguments.TenantId.ToGuid();
+            StreamId publicStream = arguments.StreamId.ToGuid();
+            PartitionId partition = arguments.PartitionId.ToGuid();
             var streamPosition = arguments.StreamPosition;
 
             _logger.Debug(

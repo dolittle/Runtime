@@ -207,7 +207,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             }
 
             _logger.Trace("Subscription response for subscription {SubscriptionId} was successful", subscriptionId);
-            return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.To<ConsentId>());
+            return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.ToGuid());
         }
 
         void StartProcessingEventHorizon(

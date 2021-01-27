@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 
             stream_processor_state_repository
                 .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new Async.Try<IStreamProcessorState>(true, stream_processor_state)));
+                .Returns(Task.FromResult(new Try<IStreamProcessorState>(true, stream_processor_state)));
 
             stream_processor_state_repository
                 .Setup(_ => _.Persist(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<IStreamProcessorState>(), Moq.It.IsAny<CancellationToken>()))

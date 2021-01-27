@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Tenancy/Tenancy.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
   </ItemGroup>
 
 </Project>

@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Artifacts
 {
     /// <summary>
     /// Represents the concept of a type of <see cref="Artifact"/>.
     /// </summary>
-    public record ArtifactType(Guid Value)
+    public record ArtifactType(Guid Value) : ConceptAs<Guid>(Value)
     {
         /// <summary>
         /// Implicitly converts from a <see cref="Guid"/> to an <see cref="ArtifactType"/>.

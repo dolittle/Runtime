@@ -2,12 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Rudimentary;
+
 namespace Dolittle.Runtime.ApplicationModel
 {
     /// <summary>
     /// Represents the concept of an application.
     /// </summary>
-    public record Application(Guid Value)
+    public record Application(Guid Value) : ConceptAs<Guid>(Value)
     {
         /// <summary>
         /// Represents the identifier for a not set application.
@@ -24,7 +26,12 @@ namespace Dolittle.Runtime.ApplicationModel
         /// Create a new <see cref="Application"/>identifier.
         /// </summary>
         /// <returns><see cref="Application"/>.</returns>
-        public static Application New() => new(Guid.NewGuid());
+        public static Application New() => Guid.NewGuid();
 
+        public static void Stuff()
+        {
+            var concept = New();
+            Guid x = concept;
+        }
     }
 }

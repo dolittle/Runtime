@@ -1,12 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Rudimentary;
+
 namespace Dolittle.Runtime.Protobuf
 {
     /// <summary>
     /// Represents the reason for failure.
     /// </summary>
-    public record FailureReason(string Value)
+    public record FailureReason(string Value) : ConceptAs<string>(Value)
     {
         /// <summary>
         /// Implicitly converts <see cref="string" /> to <see cref="FailureReason" />.

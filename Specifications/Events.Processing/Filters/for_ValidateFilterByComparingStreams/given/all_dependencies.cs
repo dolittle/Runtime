@@ -76,7 +76,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_filtered_stream.Count + num_events_to_create;
             for (int i = events_in_filtered_stream.Count; i < end; i++)
             {
-                events_in_filtered_stream.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, target_stream, partition == default ? new PartitionId { Value = Guid.Empty } : partition, true));
+                events_in_filtered_stream.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, target_stream, partition == default ? new PartitionId(Guid.Empty) : partition, true));
             }
         }
 
@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_filtered_stream.Count + 1;
             for (int i = events_in_filtered_stream.Count; i < end; i++)
             {
-                events_in_filtered_stream.Add(new StreamEvent(@event, (uint)i, target_stream, partition == default ? new PartitionId { Value = Guid.Empty } : partition, true));
+                events_in_filtered_stream.Add(new StreamEvent(@event, (uint)i, target_stream, partition == default ? new PartitionId(Guid.Empty) : partition, true));
             }
         }
     }

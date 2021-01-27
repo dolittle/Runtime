@@ -1,12 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Rudimentary;
+
 namespace Dolittle.Runtime.ResourceTypes
 {
     /// <summary>
     /// Represents the type of a resource in the system.
     /// </summary>
-    public record ResourceType(string Value)
+    public record ResourceType(string Value) : ConceptAs<string>(Value)
     {
         /// <summary>
         /// Implicitly converts from a <see cref="string"/> to an <see cref="ResourceType"/>.

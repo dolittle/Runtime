@@ -2,13 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Protobuf
 {
     /// <summary>
     /// Represents the failure id.
     /// </summary>
-    public record FailureId(Guid Value)
+    public record FailureId(Guid Value) : ConceptAs<Guid>(Value)
     {
         /// <summary>
         /// Gets the <see cref="FailureId" /> that represents an undocumented error type.

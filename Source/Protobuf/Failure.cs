@@ -8,38 +8,17 @@ namespace Dolittle.Runtime.Protobuf
     /// <summary>
     /// Represents a failure.
     /// </summary>
-    public record Failure
+    public record Failure(FailureId Id, FailureReason Reason)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Failure"/> class.
-        /// </summary>
-        /// <param name="id"><see cref="FailureId" />.</param>
-        /// <param name="reason"><see cref="FailureReason" />.</param>
-        public Failure(FailureId id, FailureReason reason)
-        {
-            Id = id ?? Failures.Unknown;
-            Reason = reason;
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Failure"/> class.
         /// </summary>
         /// <param name="reason"><see cref="FailureReason" />.</param>
         public Failure(FailureReason reason)
+            : this(Failures.Unknown, reason)
         {
-            Id = Failures.Unknown;
-            Reason = reason;
         }
-
-        /// <summary>
-        /// Gets the <see cref="FailureId" />.
-        /// </summary>
-        public FailureId Id { get; init; }
-
-        /// <summary>
-        /// Gets the <see cref="FailureReason" />.
-        /// </summary>
-        public FailureReason Reason { get; init; }
 
         /// <summary>
         /// Implicitly convert <see cref="Failure" /> to <see cref="FailureContract" />.

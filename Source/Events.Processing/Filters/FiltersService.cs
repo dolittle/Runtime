@@ -7,7 +7,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
@@ -108,12 +108,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger.Trace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
-            var filterId = arguments.FilterId.To<StreamId>();
-            var scopeId = arguments.ScopeId.To<ScopeId>();
+            StreamId filterId = arguments.FilterId.ToGuid();
+            ScopeId scopeId = arguments.ScopeId.ToGuid();
             var sourceStreamId = StreamId.EventLog;
             if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
-            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, partitioned: false);
+            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, false);
             await RegisterFilter(
                 dispatcher,
                 scopeId,
@@ -157,12 +157,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger.Trace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
-            var filterId = arguments.FilterId.To<StreamId>();
-            var scopeId = arguments.ScopeId.To<ScopeId>();
+            StreamId filterId = arguments.FilterId.ToGuid();
+            ScopeId scopeId = arguments.ScopeId.ToGuid();
             var sourceStreamId = StreamId.EventLog;
             if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
 
-            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, partitioned: true);
+            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, true);
 
             await RegisterFilter(
                 dispatcher,
@@ -207,7 +207,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger.Trace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
-            var filterId = arguments.FilterId.To<StreamId>();
+            StreamId filterId = arguments.FilterId.ToGuid();
             var scopeId = ScopeId.Default;
             var sourceStreamId = StreamId.EventLog;
 

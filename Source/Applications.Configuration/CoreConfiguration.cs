@@ -8,16 +8,5 @@ namespace Dolittle.Runtime.Applications.Configuration
     /// <summary>
     /// Represents the configuration for the <see cref="Microservice"/> core.
     /// </summary>
-    public class CoreConfiguration
-    {
-        /// <summary>
-        /// Gets or sets the core programming language used.
-        /// </summary>
-        public string Language { get; set; }
-
-        /// <summary>
-        /// Gets or sets the entrypoint of the <see cref="Microservice"/>.
-        /// </summary>
-        public string EntryPoint { get; set; }
-    }
+    public record CoreConfiguration(string Language, string EntryPoint);
 }
