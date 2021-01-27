@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Reflection;
 using Grpc.Core;
 using Grpc.Core.Interceptors;

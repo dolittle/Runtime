@@ -9,7 +9,7 @@ using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.DependencyInversion.Conventions;
 using Dolittle.Runtime.IO;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 

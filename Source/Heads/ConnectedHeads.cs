@@ -4,7 +4,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Heads

@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Immutability;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration

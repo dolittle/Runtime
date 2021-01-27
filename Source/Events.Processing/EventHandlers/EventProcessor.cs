@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 

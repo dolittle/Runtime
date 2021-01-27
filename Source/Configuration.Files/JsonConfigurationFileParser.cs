@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Serialization.Json;
 using Dolittle.Runtime.Types;
 

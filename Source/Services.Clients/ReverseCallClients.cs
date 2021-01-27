@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;

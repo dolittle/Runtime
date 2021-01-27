@@ -5,7 +5,7 @@ using System;
 using System.Reflection;
 using Dolittle.Runtime.Assemblies.Configuration;
 using Dolittle.Runtime.Assemblies.Rules;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 
 namespace Dolittle.Runtime.Assemblies.Bootstrap
 {

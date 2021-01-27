@@ -3,7 +3,7 @@
 
 using System.Reflection;
 using Dolittle.Runtime.Assemblies;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Scheduling;
 
 namespace Dolittle.Runtime.Types

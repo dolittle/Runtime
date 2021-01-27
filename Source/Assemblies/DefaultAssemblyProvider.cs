@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dolittle.Runtime.Assemblies

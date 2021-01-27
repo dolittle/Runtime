@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Security;
 using Dolittle.Runtime.Versioning;
 

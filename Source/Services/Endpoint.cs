@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using grpc = Grpc.Core;
 
 namespace Dolittle.Runtime.Services

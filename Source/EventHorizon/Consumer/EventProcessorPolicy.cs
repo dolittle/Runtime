@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Resilience;
 using Polly;
 

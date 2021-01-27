@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting

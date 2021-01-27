@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 
 namespace Dolittle.Runtime.DependencyInversion.Booting
 {

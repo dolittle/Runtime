@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 
 namespace Dolittle.Runtime.Types
 {

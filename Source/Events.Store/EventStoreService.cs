@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Contracts.EventStore;

@@ -17,7 +17,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Tenancy;

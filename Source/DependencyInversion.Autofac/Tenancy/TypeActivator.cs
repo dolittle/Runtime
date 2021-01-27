@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using Autofac;
 using Autofac.Core.Resolving;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 
 namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
 {

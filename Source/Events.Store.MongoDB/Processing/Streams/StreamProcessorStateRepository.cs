@@ -8,7 +8,7 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams

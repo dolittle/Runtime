@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;

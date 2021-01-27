@@ -14,7 +14,7 @@ using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extension.Logging;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Resilience;
