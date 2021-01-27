@@ -3,7 +3,7 @@
 
 using System.Threading;
 using Dolittle.Runtime.Events.Processing;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_EventHorizonEventProcessor.when_processing

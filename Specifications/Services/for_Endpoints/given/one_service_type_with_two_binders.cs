@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.DependencyInversion;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 using Dolittle.Runtime.Types.Testing;
 using Machine.Specifications;

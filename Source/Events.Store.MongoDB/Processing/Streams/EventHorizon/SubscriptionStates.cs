@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             IMongoCollection<MongoDB.Processing.Streams.EventHorizon.SubscriptionState> subscriptionStates,
             CancellationToken cancellationToken)
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", subscriptionStates.CollectionNamespace.CollectionName);
+            _logger.LogTrace("Creating indexes for {CollectionName}' collection in Event Store", subscriptionStates.CollectionNamespace.CollectionName);
             await subscriptionStates.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>(
                     Builders<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>.IndexKeys

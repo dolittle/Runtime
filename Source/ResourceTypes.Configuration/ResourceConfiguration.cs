@@ -7,7 +7,7 @@ using System.Linq;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.ResourceTypes.Configuration
@@ -31,11 +31,11 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ResourceConfiguration(ITypeFinder typeFinder, IContainer container, ILogger logger)
         {
-            logger.Debug("ResourceConfiguration() - ctor");
+            logger.LogDebug("ResourceConfiguration() - ctor");
 
             _typeFinder = typeFinder;
             var resourceTypeRepresentationTypes = _typeFinder.FindMultiple<IRepresentAResourceType>();
-            resourceTypeRepresentationTypes.ForEach(_ => logger.Trace("Discovered resource type representation : '{resourceTypeRepresentationType}'", _.AssemblyQualifiedName));
+            resourceTypeRepresentationTypes.ForEach(_ => logger.LogTrace("Discovered resource type representation : '{resourceTypeRepresentationType}'", _.AssemblyQualifiedName));
 
             _resourceTypeRepresentations = resourceTypeRepresentationTypes.Select(_ => container.Get(_) as IRepresentAResourceType);
             ThrowIfMultipleResourcesWithSameTypeAndImplementation(_resourceTypeRepresentations);
@@ -48,13 +48,13 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
         /// <inheritdoc/>
         public Type GetImplementationFor(Type service)
         {
-            _logger.Debug("Get implementation for {service}", service.AssemblyQualifiedName);
+            _logger.LogDebug("Get implementation for {service}", service.AssemblyQualifiedName);
             var resourceTypesRepresentationsWithService = _resourceTypeRepresentations.Where(_ => _.Bindings.ContainsKey(service));
 
-            resourceTypesRepresentationsWithService.ForEach(_ => _logger.Trace("Resource type with service binding : {serviceBinding}", _.ImplementationName));
+            resourceTypesRepresentationsWithService.ForEach(_ => _logger.LogTrace("Resource type with service binding : {serviceBinding}", _.ImplementationName));
 
-            _logger.Trace("Current resources : {numResources}", _resources.Count);
-            _resources.ForEach(_ => _logger.Trace("Resource : {resourceType} - {resourceImplementation}", _.Key, _.Value));
+            _logger.LogTrace("Current resources : {numResources}", _resources.Count);
+            _resources.ForEach(_ => _logger.LogTrace("Resource : {resourceType} - {resourceImplementation}", _.Key, _.Value));
 
             var results = resourceTypesRepresentationsWithService.Where(_ =>
             {
@@ -73,10 +73,10 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
         /// <inheritdoc/>
         public void ConfigureResourceTypes(IDictionary<ResourceType, ResourceTypeImplementation> resourceTypeToImplementationMap)
         {
-            _logger.Debug("Resource Types Configured : {resourceTypeToImplementationMap}", resourceTypeToImplementationMap);
+            _logger.LogDebug("Resource Types Configured : {resourceTypeToImplementationMap}", resourceTypeToImplementationMap);
             resourceTypeToImplementationMap.ForEach(_ =>
             {
-                _logger.Trace("Adding resource type '{resourceType}' with implementation {resourceImplementation}", _.Key, _.Value);
+                _logger.LogTrace("Adding resource type '{resourceType}' with implementation {resourceImplementation}", _.Key, _.Value);
                 _resources[_.Key] = _.Value;
             });
             IsConfigured = true;

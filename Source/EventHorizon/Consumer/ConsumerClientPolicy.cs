@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Polly;
 
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             Polly.Policy
             .Handle<Exception>(_ =>
                 {
-                    _logger.Debug(_, "Unable to subscribe to event horizon");
+                    _logger.LogDebug(_, "Unable to subscribe to event horizon");
                     return true;
                 })
                 .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));

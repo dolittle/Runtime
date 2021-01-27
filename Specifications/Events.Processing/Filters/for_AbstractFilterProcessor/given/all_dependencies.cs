@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 

@@ -4,7 +4,7 @@
 using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.DependencyInversion;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 

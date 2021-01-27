@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 
         void CreateCollectionsAndIndexesForAggregates()
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", CollectionName);
+            _logger.LogTrace("Creating indexes for {CollectionName}' collection in Event Store", CollectionName);
             Aggregates.Indexes.CreateOne(new CreateIndexModel<AggregateRoot>(
                 Builders<AggregateRoot>.IndexKeys
                     .Ascending(_ => _.EventSource)

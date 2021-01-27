@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Execution;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;

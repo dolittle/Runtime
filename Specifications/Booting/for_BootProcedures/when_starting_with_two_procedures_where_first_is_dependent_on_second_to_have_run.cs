@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;

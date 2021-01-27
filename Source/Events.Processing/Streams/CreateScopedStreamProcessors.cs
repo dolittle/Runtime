@@ -7,7 +7,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.Events.Processing.Streams

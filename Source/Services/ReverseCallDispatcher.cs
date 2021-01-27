@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
@@ -129,14 +129,14 @@ namespace Dolittle.Runtime.Services
                     var callContext = _getArgumentsContext(arguments);
                     if (callContext?.PingInterval == null)
                     {
-                        _logger.Warning("Received arguments, but ping interval was not set");
+                        _logger.LogWarning("Received arguments, but ping interval was not set");
                         return false;
                     }
 
                     var interval = callContext.PingInterval.ToTimeSpan();
                     if (interval.TotalMilliseconds <= 0)
                     {
-                        _logger.Warning("Received arguments, but ping interval is less than or equal to zero milliseconds");
+                        _logger.LogWarning("Received arguments, but ping interval is less than or equal to zero milliseconds");
                         return false;
                     }
 
@@ -150,12 +150,12 @@ namespace Dolittle.Runtime.Services
                     }
                     else
                     {
-                        _logger.Warning("Received arguments, but call execution context was not set.");
+                        _logger.LogWarning("Received arguments, but call execution context was not set.");
                     }
                 }
                 else
                 {
-                    _logger.Warning("Received initial message from client, but arguments was not set.");
+                    _logger.LogWarning("Received initial message from client, but arguments was not set.");
                 }
             }
 
@@ -220,7 +220,7 @@ namespace Dolittle.Runtime.Services
 
                     var message = new TServerMessage();
                     _setMessageRequest(message, request);
-                    _logger.Trace("Writing request with CallId: {CallId}", callId);
+                    _logger.LogTrace("Writing request with CallId: {CallId}", callId);
                     await _serverStream.WriteAsync(message).ConfigureAwait(false);
                 }
                 finally
@@ -270,7 +270,7 @@ namespace Dolittle.Runtime.Services
                     await Task.Delay(_pingInterval).ConfigureAwait(false);
                     if (cancellationToken.IsCancellationRequested)
                     {
-                        _logger.Debug("Stopping pinging");
+                        _logger.LogDebug("Stopping pinging");
                         return;
                     }
 
@@ -279,7 +279,7 @@ namespace Dolittle.Runtime.Services
                     {
                         var message = new TServerMessage();
                         _setPing(message, new Ping());
-                        _logger.Trace("Writing ping");
+                        _logger.LogTrace("Writing ping");
                         await _serverStream.WriteAsync(message).ConfigureAwait(false);
                     }
                     finally
@@ -292,7 +292,7 @@ namespace Dolittle.Runtime.Services
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(ex, "An error occurred while pinging");
+                    _logger.LogWarning(ex, "An error occurred while pinging");
                 }
             }
         }
@@ -310,11 +310,11 @@ namespace Dolittle.Runtime.Services
                     var response = _getMessageResponse(_clientStream.Current);
                     if (pong != null)
                     {
-                        _logger.Trace("Received pong");
+                        _logger.LogTrace("Received pong");
                     }
                     else if (response != null)
                     {
-                        _logger.Trace("Received response");
+                        _logger.LogTrace("Received response");
                         var callContext = _getResponseContex(response);
                         if (callContext?.CallId != null)
                         {
@@ -325,17 +325,17 @@ namespace Dolittle.Runtime.Services
                             }
                             else
                             {
-                                _logger.Warning("Could not find the call id from the received response from the client. The message will be ignored.");
+                                _logger.LogWarning("Could not find the call id from the received response from the client. The message will be ignored.");
                             }
                         }
                         else
                         {
-                            _logger.Warning("Received response from reverse call client, but the call context was not set.");
+                            _logger.LogWarning("Received response from reverse call client, but the call context was not set.");
                         }
                     }
                     else
                     {
-                        _logger.Warning("Received message from reverse call client, but it did not contain a response.");
+                        _logger.LogWarning("Received message from reverse call client, but it did not contain a response.");
                     }
 
                     jointCts.CancelAfter(_pingInterval.Multiply(3));
@@ -345,7 +345,7 @@ namespace Dolittle.Runtime.Services
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(ex, "An error occurred during handling of client messages");
+                    _logger.LogWarning(ex, "An error occurred during handling of client messages");
                 }
             }
             finally
@@ -353,7 +353,7 @@ namespace Dolittle.Runtime.Services
                 _completed = true;
                 if (jointCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Debug("Ping timed out");
+                    _logger.LogDebug("Ping timed out");
                 }
 
                 foreach ((_, var completionSource) in _calls)

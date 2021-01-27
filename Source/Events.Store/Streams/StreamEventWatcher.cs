@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
 
         async Task WaitForWaiter(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, bool isPublic, CancellationToken token)
         {
-            _logger.Trace("Start waiting for event coming in at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
+            _logger.LogTrace("Start waiting for event coming in at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
             var waiterId = new EventWaiterId(scope, stream);
 
             using var timeoutSource = new CancellationTokenSource(timeout);
@@ -73,13 +73,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
             }
             catch (TaskCanceledException)
             {
-                _logger.Trace("Waiting timedout for {Position} with WaiterId {WaiterId}", position, waiter.Id);
+                _logger.LogTrace("Waiting timedout for {Position} with WaiterId {WaiterId}", position, waiter.Id);
             }
         }
 
         void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position, bool isPublic)
         {
-            _logger.Trace("Notifying that an event has been written at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
+            _logger.LogTrace("Notifying that an event has been written at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
             var waiterId = new EventWaiterId(scope, stream);
 
             var waiter = isPublic

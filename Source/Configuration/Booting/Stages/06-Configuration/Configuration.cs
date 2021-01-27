@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Immutability;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration
@@ -31,12 +31,12 @@ namespace Dolittle.Runtime.Configuration
             var configurationObjectTypes = typeFinder.FindMultiple<IConfigurationObject>();
             configurationObjectTypes.ForEach(_ =>
             {
-                logger.Trace("Bind configuration object '{configurationObjectName} - {configurationObjectType}'", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName);
+                logger.LogTrace("Bind configuration object '{configurationObjectName} - {configurationObjectType}'", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName);
                 _.ShouldBeImmutable();
                 builder.Bindings.Bind(_).To(() =>
                 {
                     var instance = configurationObjectProviders.Provide(_);
-                    logger.Trace("Providing configuration object '{configurationObjectName} - {configurationTypeName}' - {configurationObjectHash}", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName, instance.GetHashCode());
+                    logger.LogTrace("Providing configuration object '{configurationObjectName} - {configurationTypeName}' - {configurationObjectHash}", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName, instance.GetHashCode());
                     return instance;
                 });
             });

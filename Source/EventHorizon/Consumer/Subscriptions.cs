@@ -7,7 +7,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             subscription = default;
             if (_subscriptions.ContainsKey(subscriptionId))
             {
-                _logger.Warning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
+                _logger.LogWarning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
                 return false;
             }
 
@@ -74,18 +74,18 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 cancellationToken);
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
             {
-                _logger.Warning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
+                _logger.LogWarning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
                 subscription = default;
                 return false;
             }
 
-            _logger.Trace("Subscription: '{SubscriptionId}' registered", subscriptionId);
+            _logger.LogTrace("Subscription: '{SubscriptionId}' registered", subscriptionId);
             return true;
         }
 
         void Unregister(SubscriptionId id)
         {
-            _logger.Debug("Unregistering Subscription: {subscriptionId}", id);
+            _logger.LogDebug("Unregistering Subscription: {subscriptionId}", id);
             _subscriptions.TryRemove(id, out var _);
         }
     }

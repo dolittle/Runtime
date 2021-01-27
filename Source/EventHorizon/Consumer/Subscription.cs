@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.EventHorizon
@@ -125,7 +125,7 @@ namespace Dolittle.Runtime.EventHorizon
             {
                 if (!_cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(ex, "Subscription: {SubscriptionId} failed", _identifier);
+                    _logger.LogWarning(ex, "Subscription: {SubscriptionId} failed", _identifier);
                 }
             }
             finally

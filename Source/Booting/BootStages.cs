@@ -8,7 +8,7 @@ using System.Reflection;
 using Dolittle.Runtime.Booting.Stages;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Reflection;
 using Dolittle.Runtime.Types;
 
@@ -84,7 +84,7 @@ namespace Dolittle.Runtime.Booting
                 if (isBefore) suffix = " (before)";
                 if (isAfter) suffix = " (after)";
 
-                _logger?.Debug($"<********* BOOTSTAGE : {stage.BootStage}{suffix} *********>");
+                _logger?.LogDebug($"<********* BOOTSTAGE : {stage.BootStage}{suffix} *********>");
 
                 var performer = interfaces.SingleOrDefault(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanPerformPartOfBootStage<>));
                 var settingsType = performer.GetGenericArguments()[0];

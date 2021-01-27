@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 using Dolittle.Runtime.DependencyInversion;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Serialization.Json;
 using Dolittle.Runtime.Types;
 
@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Configuration.Files
         /// <inheritdoc/>
         public object Parse(Type type, string filename, string content)
         {
-            _logger.Trace("Parsing '{filename}' into '{configurationObjectName} - {configurationObjectType}'", filename, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
+            _logger.LogTrace("Parsing '{filename}' into '{configurationObjectName} - {configurationObjectType}'", filename, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
             return _serializer.FromJson(type, content, _serializationOptions);
         }
     }

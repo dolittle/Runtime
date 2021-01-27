@@ -6,7 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
@@ -47,12 +47,12 @@ namespace Dolittle.Runtime.DependencyInversion.Conventions
         /// <inheritdoc/>
         public IBindingCollection DiscoverAndSetupBindings()
         {
-            _logger.Trace("Discover and setup bindings");
+            _logger.LogTrace("Discover and setup bindings");
             var bindingCollections = new ConcurrentBag<IBindingCollection>();
 
             var allTypes = _typeFinder.All;
 
-            _logger.Trace("Find all binding conventions");
+            _logger.LogTrace("Find all binding conventions");
             var conventionTypes = _typeFinder.FindMultiple<IBindingConvention>();
 
             _scheduler.PerformForEach(conventionTypes, conventionType => HandleConvention(conventionType, allTypes, bindingCollections));
@@ -65,7 +65,7 @@ namespace Dolittle.Runtime.DependencyInversion.Conventions
             IEnumerable<Type> allTypes,
             ConcurrentBag<IBindingCollection> bindingCollections)
         {
-            _logger.Trace("Handle convention type {conventionType}", conventionType.AssemblyQualifiedName);
+            _logger.LogTrace("Handle convention type {conventionType}", conventionType.AssemblyQualifiedName);
 
             var convention = _bootContainer.Get(conventionType) as IBindingConvention;
             var servicesToResolve = allTypes.Where(service => convention.CanResolve(service));

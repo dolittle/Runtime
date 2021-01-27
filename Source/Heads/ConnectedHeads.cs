@@ -4,7 +4,7 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Heads
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Heads
                 var head = All.SingleOrDefault(_ => _.HeadId == headId);
                 if (head != null)
                 {
-                    _logger.Debug("Disconnecting head '{HeadId}'", headId);
+                    _logger.LogDebug("Disconnecting head '{HeadId}'", headId);
                     All.Remove(head);
                 }
             }

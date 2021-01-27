@@ -7,7 +7,7 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration
@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Configuration
             _providers = _typeFinder.FindMultiple<ICanProvideConfigurationObjects>()
                 .Select(_ =>
                 {
-                    _logger.Trace("Configuration Object provider : {configurationObjectProviderType}", _.AssemblyQualifiedName);
+                    _logger.LogTrace("Configuration Object provider : {configurationObjectProviderType}", _.AssemblyQualifiedName);
                     return _container.Get(_) as ICanProvideConfigurationObjects;
                 }).ToArray();
         }
@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Configuration
         /// <inheritdoc/>
         public object Provide(Type type)
         {
-            _logger.Trace("Try to provide '{configurationObjectName} - {configurationObjectType}'", type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
+            _logger.LogTrace("Try to provide '{configurationObjectName} - {configurationObjectType}'", type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
             var provider = GetProvidersFor(type).SingleOrDefault();
             if (provider == null)
             {
@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Configuration
                 throw new MissingProviderForConfigurationObject(type);
             }
 
-            _logger.Trace("Provide '{configurationObjectName} - {configurationObjectType}' using {configurationObjectProviderType}", type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName, provider.GetType().AssemblyQualifiedName);
+            _logger.LogTrace("Provide '{configurationObjectName} - {configurationObjectType}' using {configurationObjectProviderType}", type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName, provider.GetType().AssemblyQualifiedName);
             return provider.Provide(type);
         }
 
@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.Configuration
         {
             var providers = _providers.Where(_ =>
             {
-                _logger.Trace("Ask '{configurationObjectProviderType}' if it can provide the configuration type '{configurationObjectName} - {configurationObjectTypeName}'", _.GetType().AssemblyQualifiedName, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
+                _logger.LogTrace("Ask '{configurationObjectProviderType}' if it can provide the configuration type '{configurationObjectName} - {configurationObjectTypeName}'", _.GetType().AssemblyQualifiedName, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
                 return _.CanProvide(type);
             });
             ThrowIfMultipleProvidersCanProvide(type, providers);

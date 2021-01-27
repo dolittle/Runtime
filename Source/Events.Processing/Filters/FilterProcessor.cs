@@ -7,7 +7,7 @@ using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            _logger.Debug("Filter event that occurred @ {Occurred}", @event.Occurred);
+            _logger.LogDebug("Filter event that occurred @ {Occurred}", @event.Occurred);
 
             var request = new FilterEventRequest
                 {
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.LogDebug(
                 "Filter event that occurred @ {Occurred} again for the {RetryCount}. time because: {FailureReason}",
                 @event.Occurred,
                 retryCount,

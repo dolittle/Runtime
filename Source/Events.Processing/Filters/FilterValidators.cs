@@ -10,7 +10,7 @@ using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -44,11 +44,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public Task<FilterValidationResult> Validate<TDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.Trace("Finding validator for filter '{TargetStream}'", filter.Definition.TargetStream);
+            _logger.LogTrace("Finding validator for filter '{TargetStream}'", filter.Definition.TargetStream);
 
             if (TryGetValidatorFor<TDefinition>(out var validator))
             {
-                _logger.Trace("Validating filter '{TargetStream}'", filter.Definition.TargetStream);
+                _logger.LogTrace("Validating filter '{TargetStream}'", filter.Definition.TargetStream);
                 return validator.Validate(persistedDefinition, filter, cancellationToken);
             }
 
@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
                 {
-                    _logger.Trace("Filter definition type {FilterType} can be validated by validator type {ValidatorType}", filterDefinitionType, validatorType);
+                    _logger.LogTrace("Filter definition type {FilterType} can be validated by validator type {ValidatorType}", filterDefinitionType, validatorType);
                     _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
                 }
             });
@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (implementations.Count() > 1)
                 {
-                    _logger.Warning(
+                    _logger.LogWarning(
                         "There are multiple validators that can validate filter definition of type {FilterDefinitionType}:\n{ImplementationTypes}\nUsing the first validator.",
                         filterDefinitionType,
                         string.Join("\n", implementations.Select(_ => _.ToString())));

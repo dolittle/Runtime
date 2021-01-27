@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services
 {
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public void Register(ServiceType type, IEnumerable<Service> services)
         {
-            services.ForEach(service => _logger.Trace("Registering bound service '{serviceName}'", service.Descriptor?.Name ?? "unknown"));
+            services.ForEach(service => _logger.LogTrace("Registering bound service '{serviceName}'", service.Descriptor?.Name ?? "unknown"));
 
             if (!_servicesPerServiceType.ContainsKey(type)) _servicesPerServiceType[type] = new List<Service>();
             _servicesPerServiceType[type].AddRange(services);

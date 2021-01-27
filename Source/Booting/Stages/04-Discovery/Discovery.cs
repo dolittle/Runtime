@@ -6,7 +6,7 @@ using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Assemblies.Rules;
 using Dolittle.Runtime.Collections;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
@@ -28,18 +28,18 @@ namespace Dolittle.Runtime.Booting.Stages
             var logger = loggerManager.CreateLogger<Discovery>();
             var scheduler = builder.GetAssociation(WellKnownAssociations.Scheduler) as IScheduler;
 
-            logger.Debug("  Discovery");
+            logger.LogDebug("  Discovery");
             var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
             {
                 if (settings.IncludeAssembliesStartWith?.Count() > 0)
                 {
-                    settings.IncludeAssembliesStartWith.ForEach(name => logger.Trace("Including assemblies starting with '{name}'", name));
+                    settings.IncludeAssembliesStartWith.ForEach(name => logger.LogTrace("Including assemblies starting with '{name}'", name));
                     _.ExceptAssembliesStartingWith(settings.IncludeAssembliesStartWith.ToArray());
                 }
             });
-            logger.Debug("  Set up type system for discovery");
+            logger.LogDebug("  Set up type system for discovery");
             var typeFinder = Types.Bootstrap.Boot.Start(assemblies, scheduler, logger, entryAssembly);
-            logger.Debug("  Type system ready");
+            logger.LogDebug("  Type system ready");
 
             builder.Bindings.Bind<IAssemblies>().To(assemblies);
             builder.Bindings.Bind<ITypeFinder>().To(typeFinder);

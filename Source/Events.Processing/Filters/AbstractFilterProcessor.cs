@@ -7,7 +7,7 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.LogDebug(
                 "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}'",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.LogDebug(
                 "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
@@ -91,14 +91,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.LogDebug(
                 "{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
                 result.Succeeded);
             if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug(
+                _logger.LogDebug(
                     "{LogMessagePrefix} writing event '{EventTypeId}' to stream '{TargetStream}' in partition '{PartitionId}'",
                     _logMessagePrefix,
                     @event.Type.Id.Value,

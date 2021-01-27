@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.IO;
-using Microsoft.Extension.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting.Stages
 
             if (settings.ContainerType != null)
             {
-                logger.Trace("Starting DependencyInversion with predefined container type '{containerType}'", settings.ContainerType.AssemblyQualifiedName);
+                logger.LogTrace("Starting DependencyInversion with predefined container type '{containerType}'", settings.ContainerType.AssemblyQualifiedName);
                 resultingBindings = Boot.Start(assemblies, typeFinder, scheduler, fileSystem, loggerManager, settings.ContainerType, bindings, builder.Container as BootContainer);
             }
             else
@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting.Stages
                 var bootResult = Boot.Start(assemblies, typeFinder, scheduler, fileSystem, loggerManager, bindings, builder.Container as BootContainer);
                 resultingBindings = bootResult.Bindings;
                 builder.UseContainer(bootResult.Container);
-                logger.Trace("Using container of type '{containerType}'", builder.Container.GetType().AssemblyQualifiedName);
+                logger.LogTrace("Using container of type '{containerType}'", builder.Container.GetType().AssemblyQualifiedName);
             }
 
             builder.Associate(WellKnownAssociations.Bindings, resultingBindings);
