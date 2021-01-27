@@ -13,10 +13,10 @@ RUN dotnet restore
 RUN dotnet publish -c ${CONFIGURATION} -o out
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:5.0
 ARG CONFIGURATION=Release
 
-# RUN apt-get update && apt-get install -y libc-dev
+RUN apt-get update && apt-get install -y libc-dev
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./

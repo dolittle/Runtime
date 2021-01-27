@@ -36,7 +36,7 @@ RUN dotnet publish -c ${CONFIGURATION} -o out
 # RUN yarn build
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:5.0
 ARG CONFIGURATION=Release
 
 RUN echo Configuration = $CONFIGURATION
@@ -47,7 +47,7 @@ RUN if [ "$CONFIGURATION" = "Debug" ] ; then apt-get update && \
     ; fi
 
 RUN if [ "$CONFIGURATION" = "debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
-# RUN apt-get update && apt-get install -y libc-dev
+RUN apt-get update && apt-get install -y libc-dev
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
