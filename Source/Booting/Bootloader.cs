@@ -44,9 +44,9 @@ namespace Dolittle.Runtime.Booting
             var result = new BootStages().Perform(_boot);
             return new BootloaderResult(
                 result.Container,
-                result.GetAssociation(WellKnownAssociations.TypeFinder) as ITypeFinder,
-                result.GetAssociation(WellKnownAssociations.Assemblies) as IAssemblies,
-                result.GetAssociation(WellKnownAssociations.Bindings) as IBindingCollection,
+                result.GetAssociation<ITypeFinder>(WellKnownAssociations.TypeFinder),
+                result.GetAssociation<IAssemblies>(WellKnownAssociations.Assemblies),
+                result.GetAssociation<IBindingCollection>(WellKnownAssociations.Bindings),
                 result.BootStageResults);
         }
     }

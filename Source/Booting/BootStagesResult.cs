@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.DependencyInversion;
 
@@ -49,5 +50,14 @@ namespace Dolittle.Runtime.Booting
             if (_associations.ContainsKey(key)) return _associations[key];
             throw new MissingAssociation(key);
         }
+        /// <summary>
+        /// Get association by key.
+        /// </summary>
+        /// <param name="key">Key for the association.</param>
+        /// <typeparam name="T">The <see cref="Type" if the association.></typeparam>
+        /// <returns>Instance associated.</returns>
+        public T GetAssociation<T>(string key)
+            where T : class
+            => GetAssociation(key) as T;
     }
 }

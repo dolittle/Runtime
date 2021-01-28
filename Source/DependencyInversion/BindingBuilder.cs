@@ -32,93 +32,65 @@ namespace Dolittle.Runtime.DependencyInversion
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To<T>()
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.Type(typeof(T)),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(Type type)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.Type(type),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(object constant)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.Constant(constant),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(Func<object> callback)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.Callback(callback),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(Func<Type> callback)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.TypeCallback(callback),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(Func<BindingContext, object> callback)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.CallbackWithBindingContext(callback),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(Func<BindingContext, Type> callback)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.TypeCallbackWithBindingContext(callback),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public Binding Build()
         {
             Binding = ScopeBuilder.Build();
             return Binding;
+        }
+
+        protected IBindingScopeBuilder SetBinding(Binding binding)
+        {
+            Binding = binding;
+            ScopeBuilder = new BindingScopeBuilder(Binding);
+            return ScopeBuilder;
         }
     }
 }

@@ -62,7 +62,7 @@ namespace Dolittle.Runtime.Hosting.Microsoft
 
             try
             {
-                var container = serviceProvider.GetService(typeof(IContainer)) as IContainer;
+                var container = serviceProvider.GetService<IContainer>();
                 DependencyInversion.Booting.Boot.ContainerReady(container);
                 BootStages.ContainerReady(container);
 

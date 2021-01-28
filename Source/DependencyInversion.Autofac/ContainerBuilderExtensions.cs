@@ -30,7 +30,6 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         public static void AddDolittle(this ContainerBuilder containerBuilder, IAssemblies assemblies, IBindingCollection bindings)
         {
             var allAssemblies = assemblies.GetAll().ToArray();
-            // isn't LoggerModule the only module we have and it's not in these assemblies?
             containerBuilder.RegisterAssemblyModules(allAssemblies);
 
             var selfBindingRegistrationSource = new SelfBindingRegistrationSource(type =>
