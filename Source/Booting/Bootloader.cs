@@ -20,15 +20,12 @@ namespace Dolittle.Runtime.Booting
         /// Initializes a new instance of the <see cref="Bootloader"/> class.
         /// </summary>
         /// <param name="boot"><see cref="Boot"/> to use.</param>
-        public Bootloader(Boot boot)
-        {
-            _boot = boot;
-        }
+        public Bootloader(Boot boot) => _boot = boot;
 
         /// <summary>
         /// Configure boot.
         /// </summary>
-        /// <param name="builderDelegate">Builder delegete.</param>
+        /// <param name="builderDelegate">Builder delegate.</param>
         /// <returns><see cref="Bootloader"/> for booting.</returns>
         public static Bootloader Configure(Action<IBootBuilder> builderDelegate)
         {
@@ -44,8 +41,7 @@ namespace Dolittle.Runtime.Booting
         /// <returns><see cref="BootloaderResult">Result</see> from booting.</returns>
         public BootloaderResult Start()
         {
-            var bootStages = new BootStages();
-            var result = bootStages.Perform(_boot);
+            var result = new BootStages().Perform(_boot);
             return new BootloaderResult(
                 result.Container,
                 result.GetAssociation(WellKnownAssociations.TypeFinder) as ITypeFinder,

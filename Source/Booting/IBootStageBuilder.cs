@@ -46,6 +46,14 @@ namespace Dolittle.Runtime.Booting
         object GetAssociation(string key);
 
         /// <summary>
+        /// Get association by key.
+        /// </summary>
+        /// <param name="key">Key for the association.</param>
+        /// <typeparam name="T">The <see cref="Type" /> of the association.</typeparam>
+        /// <returns>Instance associated.</returns>
+        T GetAssociation<T>(string key) where T : class;
+
+        /// <summary>
         /// Build the <see cref="BootStage"/> and return the <see cref="BootStageResult">result</see>.
         /// </summary>
         /// <returns>Resulting <see cref="BootStageResult"/>.</returns>

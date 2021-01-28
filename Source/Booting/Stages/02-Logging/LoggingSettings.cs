@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dolittle.Runtime.Booting.Stages
 {
@@ -20,9 +21,6 @@ namespace Dolittle.Runtime.Booting.Stages
         /// Gets a value indicating whether logging should be disabled.
         /// If true all instance of <see cref="ILogger"/> will not write any logs.
         /// </summary>
-        public ILoggerFactory LoggerFactory { get; internal set; } = Microsoft.Extensions.Logging.LoggerFactory.Create(logging =>
-        {
-            logging.ClearProviders();
-        });
+        public ILoggerFactory LoggerFactory { get; internal set; } = new NullLoggerFactory();
     }
 }

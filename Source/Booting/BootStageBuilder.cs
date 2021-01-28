@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Booting
     public class BootStageBuilder : IBootStageBuilder
     {
         readonly Dictionary<string, object> _initialAssociations;
-        readonly Dictionary<string, object> _associations = new Dictionary<string, object>();
+        readonly Dictionary<string, object> _associations = new();
         IContainer _container;
 
         /// <summary>
@@ -42,10 +42,7 @@ namespace Dolittle.Runtime.Booting
         }
 
         /// <inheritdoc/>
-        public void Associate(string key, object value)
-        {
-            _associations[key] = value;
-        }
+        public void Associate(string key, object value) => _associations[key] = value;
 
         /// <inheritdoc/>
         public object GetAssociation(string key)
@@ -57,17 +54,13 @@ namespace Dolittle.Runtime.Booting
         }
 
         /// <inheritdoc/>
-        public BootStageResult Build()
-        {
-            var result = new BootStageResult(_container, Bindings.Build(), _associations);
-            return result;
-        }
+        public T GetAssociation<T>(string key) where T : class => GetAssociation(key) as T;
 
         /// <inheritdoc/>
-        public void UseContainer(IContainer container)
-        {
-            _container = container;
-        }
+        public BootStageResult Build() => new(_container, Bindings.Build(), _associations);
+
+        /// <inheritdoc/>
+        public void UseContainer(IContainer container) => _container = container;
 
         void ThrowIfContainerIsNotSet()
         {

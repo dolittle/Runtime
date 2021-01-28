@@ -23,10 +23,10 @@ namespace Dolittle.Runtime.Booting.Stages
         /// <inheritdoc/>
         public void Perform(DiscoverySettings settings, IBootStageBuilder builder)
         {
-            var entryAssembly = builder.GetAssociation(WellKnownAssociations.EntryAssembly) as Assembly;
-            var loggerFactory = builder.GetAssociation(WellKnownAssociations.LoggerFactory) as ILoggerFactory;
+            var entryAssembly = builder.GetAssociation<Assembly>(WellKnownAssociations.EntryAssembly);
+            var loggerFactory = builder.GetAssociation<ILoggerFactory>(WellKnownAssociations.LoggerFactory);
             var logger = loggerFactory.CreateLogger<Discovery>();
-            var scheduler = builder.GetAssociation(WellKnownAssociations.Scheduler) as IScheduler;
+            var scheduler = builder.GetAssociation<IScheduler>(WellKnownAssociations.Scheduler);
 
             logger.LogDebug("  Discovery");
             var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
