@@ -32,13 +32,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
             var allAssemblies = assemblies.GetAll().ToArray();
             containerBuilder.RegisterAssemblyModules(allAssemblies);
 
-            var selfBindingRegistrationSource = new SelfBindingRegistrationSource(type =>
-                (!type.Namespace.StartsWith("Microsoft", StringComparison.InvariantCulture) &&
-                !type.Namespace.StartsWith("System", StringComparison.InvariantCulture)) ||
-                type.Namespace.StartsWith("Microsoft.Extensions.Logging", StringComparison.InvariantCulture))
-            {
-                RegistrationConfiguration = HandleLifeCycleFor
-            };
+            var selfBindingRegistrationSource = CreateSelfBindingRegistrationSource();
 
             containerBuilder.AddBindingsPerTenantRegistrationSource();
 
@@ -47,6 +41,16 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
             DiscoverAndRegisterRegistrationSources(containerBuilder, allAssemblies);
             RegisterUpBindingsIntoContainerBuilder(bindings, containerBuilder);
         }
+
+        static SelfBindingRegistrationSource CreateSelfBindingRegistrationSource()
+            => new(
+                type =>
+                    (!type.Namespace.StartsWith("Microsoft", StringComparison.InvariantCulture) &&
+                    !type.Namespace.StartsWith("System", StringComparison.InvariantCulture)) ||
+                    type.Namespace.StartsWith("Microsoft.Extensions.Logging", StringComparison.InvariantCulture))
+            {
+                RegistrationConfiguration = HandleLifeCycleFor
+            };
 
         static void RegisterWellKnownModules(ContainerBuilder containerBuilder)
         {
