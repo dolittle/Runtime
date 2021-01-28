@@ -32,11 +32,9 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
             var allAssemblies = assemblies.GetAll().ToArray();
             containerBuilder.RegisterAssemblyModules(allAssemblies);
 
-            var selfBindingRegistrationSource = CreateSelfBindingRegistrationSource();
-
             containerBuilder.AddBindingsPerTenantRegistrationSource();
 
-            RegisterWellKnownSources(containerBuilder, selfBindingRegistrationSource);
+            RegisterWellKnownSources(containerBuilder);
             RegisterWellKnownModules(containerBuilder);
             DiscoverAndRegisterRegistrationSources(containerBuilder, allAssemblies);
             RegisterUpBindingsIntoContainerBuilder(bindings, containerBuilder);
@@ -57,9 +55,9 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
             containerBuilder.RegisterModule(new LoggerModule());
         }
 
-        static void RegisterWellKnownSources(ContainerBuilder containerBuilder, SelfBindingRegistrationSource selfBindingRegistrationSource)
+        static void RegisterWellKnownSources(ContainerBuilder containerBuilder)
         {
-            containerBuilder.RegisterSource(selfBindingRegistrationSource);
+            containerBuilder.RegisterSource(CreateSelfBindingRegistrationSource());
             containerBuilder.RegisterSource(new FactoryForRegistrationSource());
             containerBuilder.RegisterSource(new OpenGenericCallbackRegistrationSource());
             containerBuilder.RegisterSource(new OpenGenericTypeCallbackRegistrationSource());
