@@ -14,10 +14,7 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         /// Initializes a new instance of the <see cref="TypeCallbackWithBindingContext"/> class.
         /// </summary>
         /// <param name="target">The callback target.</param>
-        public TypeCallbackWithBindingContext(Func<BindingContext, System.Type> target)
-        {
-            Target = target;
-        }
+        public TypeCallbackWithBindingContext(Func<BindingContext, System.Type> target) => Target = target;
 
         /// <summary>
         /// Gets the target.
@@ -25,9 +22,6 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         public Func<BindingContext, System.Type> Target { get; }
 
         /// <inheritdoc/>
-        public System.Type GetTargetType()
-        {
-            return Target.Method.ReturnType;
-        }
+        public System.Type GetTargetType() => Target.Method.ReturnType;
     }
 }
