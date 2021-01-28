@@ -39,15 +39,31 @@ namespace Dolittle.Runtime.Hosting.Microsoft
         {
             ApplyLoggerFactoryWorkarounds(services);
 
+            // https://stackoverflow.com/questions/32459670/resolving-instances-with-asp-net-core-di-from-within-configureservices/32461714#32461714
             var builder = _autofacFactory.CreateBuilder(services);
+            var serviceProvider = services.BuildServiceProvider();
 
             var bootResult = Bootloader.Configure(_ =>
             {
+                _.WithLoggingFactory(serviceProvider.GetRequiredService<ILoggerFactory>());
+                // these calls basically set a new setter to some properties through extension methods
                 if (_context.HostingEnvironment.IsDevelopment()) _.Development();
                 _.SkipBootprocedures();
                 _.UseContainer<ServiceProviderContainer>();
+                // Start() calls for the BootStages.Perform() that really starts the binding stuff
             }).Start();
+            // define logging
+            // define the container
+            // discover types
+                // also check for the attributes, singleton/singletonpertenant
+                // we have our own "I" convention and lifecycle stuff too
+            // bootprocedures
+            // if we just want to use autofac and get rid of our custom stuff, we only need to change lifeycle stuff like 
+            // singletonpertenant
+            // prob easiest is to just setup booting imperatively
+            //1. 
 
+            // now with all the built bindings, passes it to cointainerbuilderextensions
             builder.AddDolittle(bootResult.Assemblies, bootResult.Bindings);
 
             return builder;
@@ -57,6 +73,7 @@ namespace Dolittle.Runtime.Hosting.Microsoft
         public IServiceProvider CreateServiceProvider(ContainerBuilder containerBuilder)
         {
             var serviceProvider = _autofacFactory.CreateServiceProvider(containerBuilder);
+
             try
             {
                 var container = serviceProvider.GetService(typeof(IContainer)) as IContainer;

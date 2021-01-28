@@ -35,10 +35,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         }
 
         /// <inheritdoc/>
-        public T Get<T>()
-        {
-            return (T)Get(typeof(T));
-        }
+        public T Get<T>() => (T)Get(typeof(T));
 
         /// <inheritdoc/>
         public object Get(Type type)
@@ -61,21 +58,19 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// Method that gets called when <see cref="IContainer"/> is ready.
         /// </summary>
         /// <param name="container"><see cref="IContainer"/> instance.</param>
-        internal static void ContainerReady(IContainer container)
-        {
-            _container = container;
-        }
+        internal static void ContainerReady(IContainer container) => _container = container;
 
-        object InstantiateBinding(IActivationStrategy strategy, Type type) => strategy switch
-        {
-            Strategies.Constant constant => constant.Target,
-            Strategies.Callback callback => callback.Target(),
-            Strategies.CallbackWithBindingContext callback => callback.Target(new BindingContext(type)),
-            Strategies.Type typeConstant => Get(typeConstant.Target),
-            Strategies.TypeCallback typeCallback => Get(typeCallback.Target()),
-            Strategies.TypeCallbackWithBindingContext typeCallback => Get(typeCallback.Target(new BindingContext(type))),
-            _ => null
-        };
+        object InstantiateBinding(IActivationStrategy strategy, Type type)
+            => strategy switch
+                {
+                    Strategies.Constant constant => constant.Target,
+                    Strategies.Callback callback => callback.Target(),
+                    Strategies.CallbackWithBindingContext callback => callback.Target(new BindingContext(type)),
+                    Strategies.Type typeConstant => Get(typeConstant.Target),
+                    Strategies.TypeCallback typeCallback => Get(typeCallback.Target()),
+                    Strategies.TypeCallbackWithBindingContext typeCallback => Get(typeCallback.Target(new BindingContext(type))),
+                    _ => null
+                };
 
         object Create(Type type)
         {

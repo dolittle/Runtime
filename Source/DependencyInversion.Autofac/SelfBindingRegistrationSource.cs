@@ -95,9 +95,12 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
                 }
             }
 
+            // static factory method to crefate a registrationbuilder
             var builder = RegistrationBuilder.ForType(ts.ServiceType);
+            // modify the registrationbuilder with the configuration stuff, like hanlding Singleton instances
             RegistrationConfiguration?.Invoke(builder);
             var registration = builder.CreateRegistration();
+            // add it to the loggermodule Preparing thingy
             LoggerModule.ResolveUntypedLoggersFor(registration);
             return new[] { registration };
         }

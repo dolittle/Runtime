@@ -95,6 +95,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 "{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
+                partitionId,
                 result.Succeeded);
             if (result.Succeeded && result.IsIncluded)
             {

@@ -30,15 +30,18 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         public static void AddDolittle(this ContainerBuilder containerBuilder, IAssemblies assemblies, IBindingCollection bindings)
         {
             var allAssemblies = assemblies.GetAll().ToArray();
+            // isn't LoggerModule the only module we have and it's not in these assemblies?
             containerBuilder.RegisterAssemblyModules(allAssemblies);
 
             var selfBindingRegistrationSource = new SelfBindingRegistrationSource(type =>
-                !type.Namespace.StartsWith("Microsoft", StringComparison.InvariantCulture) &&
-                !type.Namespace.StartsWith("System", StringComparison.InvariantCulture))
+                (!type.Namespace.StartsWith("Microsoft", StringComparison.InvariantCulture) &&
+                !type.Namespace.StartsWith("System", StringComparison.InvariantCulture)) ||
+                type.Namespace.StartsWith("Microsoft.Extensions.Logging", StringComparison.InvariantCulture))
             {
                 RegistrationConfiguration = HandleLifeCycleFor
             };
 
+            // from dependencyinversion.autofac.tenancy
             containerBuilder.AddBindingsPerTenantRegistrationSource();
 
             containerBuilder.RegisterSource(selfBindingRegistrationSource);
@@ -54,6 +57,8 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         static void HandleLifeCycleFor(IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle> builder)
         {
             var service = builder.RegistrationData.Services.First();
+            // if the service is a TypedService and it has the Singleton attribute,
+            // tell the builder to only register it as a single isntance
             if (service is TypedService)
             {
                 var typedService = service as TypedService;

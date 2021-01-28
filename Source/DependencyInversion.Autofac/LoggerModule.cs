@@ -5,6 +5,7 @@ using System.Linq;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
+using Dolittle.Runtime.Reflection;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.DependencyInversion.Autofac
@@ -29,6 +30,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
 
         static void OnComponentPreparing(object sender, PreparingEventArgs e)
         {
+            // resolve the untyped loggers
             e.Parameters = e.Parameters.Append(
                 new ResolvedParameter(
                     (p, _) => p.ParameterType == typeof(ILogger),

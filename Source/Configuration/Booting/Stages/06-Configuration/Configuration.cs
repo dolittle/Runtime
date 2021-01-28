@@ -22,7 +22,8 @@ namespace Dolittle.Runtime.Configuration
         public void Perform(NoSettings settings, IBootStageBuilder builder)
         {
             var typeFinder = builder.GetAssociation(WellKnownAssociations.TypeFinder) as ITypeFinder;
-            var logger = new LoggerFactory().CreateLogger<Configuration>();
+            var loggerFactory = builder.GetAssociation(WellKnownAssociations.LoggerFactory) as ILoggerFactory;
+            var logger = loggerFactory.CreateLogger<Configuration>();
 
             var configurationObjectProviders = new ConfigurationObjectProviders(typeFinder, builder.Container, logger);
             builder.Bindings.Bind<IConfigurationObjectProviders>().To(configurationObjectProviders);

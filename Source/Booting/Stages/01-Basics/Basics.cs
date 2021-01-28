@@ -17,11 +17,14 @@ namespace Dolittle.Runtime.Booting.Stages
         /// <inheritdoc/>
         public void Perform(BasicsSettings settings, IBootStageBuilder builder)
         {
+            // get this isnt set at first to get the real dead entryassembly for something
             var entryAssembly = settings.EntryAssembly ?? Assembly.GetEntryAssembly();
             var environment = settings.Environment ?? Environment.Production;
 
+            // add theses into the aggregatedAssociations in BootStages
             builder.Associate(WellKnownAssociations.EntryAssembly, entryAssembly);
             builder.Associate(WellKnownAssociations.Environment, environment);
+            // bind Environment type to the one given from settings
             builder.Bindings.Bind<Environment>().To(environment);
         }
     }

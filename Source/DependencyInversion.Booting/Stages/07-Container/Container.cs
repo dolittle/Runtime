@@ -22,7 +22,8 @@ namespace Dolittle.Runtime.DependencyInversion.Booting.Stages
         public void Perform(ContainerSettings settings, IBootStageBuilder builder)
         {
             IBindingCollection resultingBindings;
-            var logger = new LoggerFactory().CreateLogger<Container>();
+            var loggerFactory = builder.GetAssociation(WellKnownAssociations.LoggerFactory) as ILoggerFactory;
+            var logger = loggerFactory.CreateLogger<Container>();
             var typeFinder = builder.GetAssociation(WellKnownAssociations.TypeFinder) as ITypeFinder;
             var scheduler = builder.GetAssociation(WellKnownAssociations.Scheduler) as IScheduler;
 
@@ -34,11 +35,11 @@ namespace Dolittle.Runtime.DependencyInversion.Booting.Stages
             if (settings.ContainerType != null)
             {
                 logger.LogTrace("Starting DependencyInversion with predefined container type '{containerType}'", settings.ContainerType.AssemblyQualifiedName);
-                resultingBindings = Boot.Start(assemblies, typeFinder, scheduler, fileSystem, settings.ContainerType, bindings, builder.Container as BootContainer);
+                resultingBindings = Boot.Start(assemblies, typeFinder, scheduler, fileSystem, loggerFactory, settings.ContainerType, bindings, builder.Container as BootContainer);
             }
             else
             {
-                var bootResult = Boot.Start(assemblies, typeFinder, scheduler, fileSystem, bindings, builder.Container as BootContainer);
+                var bootResult = Boot.Start(assemblies, typeFinder, scheduler, fileSystem, loggerFactory, bindings, builder.Container as BootContainer);
                 resultingBindings = bootResult.Bindings;
                 builder.UseContainer(bootResult.Container);
                 logger.LogTrace("Using container of type '{containerType}'", builder.Container.GetType().AssemblyQualifiedName);

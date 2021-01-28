@@ -24,7 +24,8 @@ namespace Dolittle.Runtime.Booting.Stages
         public void Perform(DiscoverySettings settings, IBootStageBuilder builder)
         {
             var entryAssembly = builder.GetAssociation(WellKnownAssociations.EntryAssembly) as Assembly;
-            var logger = new LoggerFactory().CreateLogger("Booting");
+            var loggerFactory = builder.GetAssociation(WellKnownAssociations.LoggerFactory) as ILoggerFactory;
+            var logger = loggerFactory.CreateLogger<Discovery>();
             var scheduler = builder.GetAssociation(WellKnownAssociations.Scheduler) as IScheduler;
 
             logger.LogDebug("  Discovery");
