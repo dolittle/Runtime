@@ -20,9 +20,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// </summary>
         /// <param name="registration">The <see cref="IComponentRegistration"/> to attach to.</param>
         internal static void ResolveUntypedLoggersFor(IComponentRegistration registration)
-        {
-            registration.Preparing += OnComponentPreparing;
-        }
+            => registration.Preparing += OnComponentPreparing;
 
         /// <inheritdoc/>
         protected override void AttachToComponentRegistration(IComponentRegistryBuilder componentRegistry, IComponentRegistration registration)
@@ -30,7 +28,6 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
 
         static void OnComponentPreparing(object sender, PreparingEventArgs e)
         {
-            // resolve the untyped loggers
             e.Parameters = e.Parameters.Append(
                 new ResolvedParameter(
                     (p, _) => p.ParameterType == typeof(ILogger),

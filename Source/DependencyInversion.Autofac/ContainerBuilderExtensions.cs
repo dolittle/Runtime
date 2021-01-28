@@ -40,24 +40,30 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
                 RegistrationConfiguration = HandleLifeCycleFor
             };
 
-            // from dependencyinversion.autofac.tenancy
             containerBuilder.AddBindingsPerTenantRegistrationSource();
 
+            RegisterWellKnownSources(containerBuilder, selfBindingRegistrationSource);
+            RegisterWellKnownModules(containerBuilder);
+            DiscoverAndRegisterRegistrationSources(containerBuilder, allAssemblies);
+            RegisterUpBindingsIntoContainerBuilder(bindings, containerBuilder);
+        }
+
+        static void RegisterWellKnownModules(ContainerBuilder containerBuilder)
+        {
+            containerBuilder.RegisterModule(new LoggerModule());
+        }
+
+        static void RegisterWellKnownSources(ContainerBuilder containerBuilder, SelfBindingRegistrationSource selfBindingRegistrationSource)
+        {
             containerBuilder.RegisterSource(selfBindingRegistrationSource);
             containerBuilder.RegisterSource(new FactoryForRegistrationSource());
             containerBuilder.RegisterSource(new OpenGenericCallbackRegistrationSource());
             containerBuilder.RegisterSource(new OpenGenericTypeCallbackRegistrationSource());
-            containerBuilder.RegisterModule(new LoggerModule());
-            DiscoverAndRegisterRegistrationSources(containerBuilder, allAssemblies);
-
-            RegisterUpBindingsIntoContainerBuilder(bindings, containerBuilder);
         }
 
         static void HandleLifeCycleFor(IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle> builder)
         {
             var service = builder.RegistrationData.Services.First();
-            // if the service is a TypedService and it has the Singleton attribute,
-            // tell the builder to only register it as a single isntance
             if (service is TypedService)
             {
                 var typedService = service as TypedService;

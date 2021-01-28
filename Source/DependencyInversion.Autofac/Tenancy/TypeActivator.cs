@@ -21,9 +21,8 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
         /// </summary>
         /// <param name="containerBuilder"><see cref="ContainerBuilder"/> instance.</param>
         public TypeActivator(ContainerBuilder containerBuilder)
-        {
-            containerBuilder.RegisterBuildCallback(c => _container = c as global::Autofac.IContainer);
-        }
+            => containerBuilder
+                .RegisterBuildCallback(c => _container = c as global::Autofac.IContainer);
 
         /// <inheritdoc/>
         public object CreateInstanceFor(IComponentContext context, Type service, Type type)

@@ -27,14 +27,12 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         public static object ResolveUnregistered(this IComponentContext context, Type serviceType, IEnumerable<Parameter> parameters)
         {
             var scope = context.Resolve<ILifetimeScope>();
-            using (var innerScope = scope.BeginLifetimeScope(b => b.RegisterType(serviceType)))
-            {
-                var typedService = new TypedService(serviceType);
-                innerScope.ComponentRegistry.TryGetRegistration(typedService, out IComponentRegistration reg);
+            using var innerScope = scope.BeginLifetimeScope(b => b.RegisterType(serviceType));
+            var typedService = new TypedService(serviceType);
+            innerScope.ComponentRegistry.TryGetRegistration(typedService, out IComponentRegistration reg);
 
-                var request = new ResolveRequest(typedService, reg, parameters);
-                return context.ResolveComponent(request);
-            }
+            var request = new ResolveRequest(typedService, reg, parameters);
+            return context.ResolveComponent(request);
         }
 
         /// <summary>
@@ -44,9 +42,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// <param name="serviceType"><see cref="Type"/> to resolve.</param>
         /// <returns>Resolved service.</returns>
         public static object ResolveUnregistered(this IComponentContext context, Type serviceType)
-        {
-            return ResolveUnregistered(context, serviceType, Enumerable.Empty<Parameter>());
-        }
+            => ResolveUnregistered(context, serviceType, Enumerable.Empty<Parameter>());
 
         /// <summary>
         /// Resolves an unregistered service.
@@ -56,9 +52,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// <param name="parameters">Params of <see cref="Parameter"/>.</param>
         /// <returns>Resolved service.</returns>
         public static object ResolveUnregistered(this IComponentContext context, Type serviceType, params Parameter[] parameters)
-        {
-            return ResolveUnregistered(context, serviceType, (IEnumerable<Parameter>)parameters);
-        }
+            => ResolveUnregistered(context, serviceType, (IEnumerable<Parameter>)parameters);
 
         /// <summary>
         /// Resolves an unregistered service.
@@ -67,9 +61,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// <typeparam name="TService"><see cref="Type"/> to resolve.</typeparam>
         /// <returns>Resolved service.</returns>
         public static TService ResolveUnregistered<TService>(this IComponentContext context)
-        {
-            return (TService)ResolveUnregistered(context, typeof(TService), Enumerable.Empty<Parameter>());
-        }
+            => (TService)ResolveUnregistered(context, typeof(TService), Enumerable.Empty<Parameter>());
 
         /// <summary>
         /// Resolves an unregistered service.
@@ -79,8 +71,6 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// <typeparam name="TService"><see cref="Type"/> to resolve.</typeparam>
         /// <returns>Resolved service.</returns>
         public static TService ResolveUnregistered<TService>(this IComponentContext context, params Parameter[] parameters)
-        {
-            return (TService)ResolveUnregistered(context, typeof(TService), (IEnumerable<Parameter>)parameters);
-        }
+            => (TService)ResolveUnregistered(context, typeof(TService), (IEnumerable<Parameter>)parameters);
     }
 }
