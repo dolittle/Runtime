@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public SubscriptionStates(DatabaseConnection connection, ILogger<SubscriptionStates> logger)
+        public SubscriptionStates(DatabaseConnection connection, ILogger logger)
             : base(connection)
         {
             _logger = logger;

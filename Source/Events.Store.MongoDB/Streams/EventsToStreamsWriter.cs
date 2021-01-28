@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger<EventsToStreamsWriter> logger)
+        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger logger)
         {
             _streams = streams;
             _eventConverter = eventConverter;

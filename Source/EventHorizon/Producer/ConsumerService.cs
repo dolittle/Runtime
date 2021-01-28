@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             FactoryFor<IEventFetchers> getEventFetchers,
             FactoryFor<IStreamEventWatcher> getStreamWatcher,
             IReverseCallDispatchers dispatchers,
-            ILogger<ConsumerService> logger)
+            ILogger logger)
         {
             _thisMicroservice = boundedContextConfiguration.BoundedContext;
             _executionContextManager = executionContextManager;

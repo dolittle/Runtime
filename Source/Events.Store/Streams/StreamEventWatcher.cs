@@ -18,13 +18,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
     {
         readonly ConcurrentDictionary<EventWaiterId, EventWaiter> _waiters = new ConcurrentDictionary<EventWaiterId, EventWaiter>();
         readonly ConcurrentDictionary<EventWaiterId, EventWaiter> _publicWaiters = new ConcurrentDictionary<EventWaiterId, EventWaiter>();
-        readonly ILogger<StreamEventWatcher> _logger;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamEventWatcher"/> class.
         /// </summary>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public StreamEventWatcher(ILogger<StreamEventWatcher> logger)
+        public StreamEventWatcher(ILogger logger)
         {
             _logger = logger;
         }

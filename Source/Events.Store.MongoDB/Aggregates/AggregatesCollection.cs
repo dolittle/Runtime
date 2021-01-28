@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public AggregatesCollection(DatabaseConnection connection, ILogger<AggregatesCollection> logger)
+        public AggregatesCollection(DatabaseConnection connection, ILogger logger)
             : base(connection)
         {
             _logger = logger;

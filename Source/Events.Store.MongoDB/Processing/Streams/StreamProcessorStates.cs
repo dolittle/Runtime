@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         const string StreamProcessorStateCollectionName = "stream-processor-states";
 
-        readonly ILogger<StreamProcessorStates> _logger;
+        readonly ILogger _logger;
         readonly IMongoCollection<MongoDB.Processing.Streams.AbstractStreamProcessorState> _streamProcessorStates;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public StreamProcessorStates(DatabaseConnection connection, ILogger<StreamProcessorStates> logger)
+        public StreamProcessorStates(DatabaseConnection connection, ILogger logger)
             : base(connection)
         {
             _logger = logger;

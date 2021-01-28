@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             FactoryFor<IConsumerClient> getConsumerClient,
             IExecutionContextManager executionContextManager,
             ITenants tenants,
-            ILogger<SubscriptionsService> logger)
+            ILogger logger)
         {
             _getConsumerClient = getConsumerClient;
             _executionContextManager = executionContextManager;

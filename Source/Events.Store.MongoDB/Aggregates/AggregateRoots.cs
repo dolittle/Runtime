@@ -17,14 +17,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
         readonly UpdateDefinitionBuilder<AggregateRoot> _update = Builders<AggregateRoot>.Update;
         readonly IAggregatesCollection _aggregates;
-        readonly ILogger<AggregateRoots> _logger;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateRoots"/> class.
         /// </summary>
         /// <param name="aggregates">The <see cref="IAggregatesCollection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public AggregateRoots(IAggregatesCollection aggregates, ILogger<AggregateRoots> logger)
+        public AggregateRoots(IAggregatesCollection aggregates, ILogger logger)
         {
             _aggregates = aggregates;
             _logger = logger;

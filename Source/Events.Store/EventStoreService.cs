@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store
         public EventStoreService(
             FactoryFor<IEventStore> eventStoreFactory,
             IExecutionContextManager executionContextManager,
-            ILogger<EventStoreService> logger)
+            ILogger logger)
         {
             _eventStoreFactory = eventStoreFactory;
             _executionContextManager = executionContextManager;

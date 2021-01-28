@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public Streams(DatabaseConnection connection, ILogger<Streams> logger)
+        public Streams(DatabaseConnection connection, ILogger logger)
             : base(connection)
         {
             _logger = logger;
