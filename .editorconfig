@@ -21,7 +21,6 @@ indent_size = 2
 dotnet_analyzer_diagnostic.severity = warning
 file_header_template = Copyright (c) Dolittle. All rights reserved.\nLicensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 #### .NET Conventions ####
 dotnet_sort_system_directives_first = true:error
 
@@ -93,11 +92,12 @@ csharp_style_implicit_object_creation_when_type_is_apparent = true:warning
 # curly bois
 csharp_prefer_braces = when_multiline:error
 
-# allow for => in methods, operators, local functions and constructors
+# allow both => and regular blocks {}
 csharp_style_expression_bodied_methods = true:none
 csharp_style_expression_bodied_operators = true:none
 csharp_style_expression_bodied_constructors = true:none
 csharp_style_expression_bodied_local_functions = true:none
+csharp_style_expression_bodied_accessors = true:none
 
 # allow both local and anonymous functions
 csharp_style_pattern_local_over_anonymous_function = false:none
@@ -109,6 +109,9 @@ csharp_style_unused_value_expression_statement_preference = false:none
 csharp_style_prefer_pattern_matching = false:none
 
 csharp_using_directive_placement = outside_namespace:error
+
+
+csharp_style_prefer_range_operator = false:none
 
 # CSharp formatting rules:
 # dont want these bombing the build logs, will still show up in the IDE
