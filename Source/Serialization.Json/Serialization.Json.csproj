@@ -13,7 +13,6 @@
     <ProjectReference Include="../Reflection/Reflection.csproj" />
     <ProjectReference Include="../Assemblies/Assemblies.csproj" />
     <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
-    <ProjectReference Include="../Strings/Strings.csproj" />
     <ProjectReference Include="../Types/Types.csproj" />
   </ItemGroup>
 

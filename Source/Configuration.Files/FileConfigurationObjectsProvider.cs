@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.IO;
 
 namespace Dolittle.Runtime.Configuration.Files
 {
@@ -25,7 +24,6 @@ namespace Dolittle.Runtime.Configuration.Files
         /// </summary>
         public const string BaseFolder = ".dolittle";
 
-        readonly IFileSystem _fileSystem;
         readonly IConfigurationFileParsers _parsers;
 
         readonly string[] _searchPaths = new[]
@@ -41,11 +39,9 @@ namespace Dolittle.Runtime.Configuration.Files
         /// <summary>
         /// Initializes a new instance of the <see cref="FileConfigurationObjectsProvider"/> class.
         /// </summary>
-        /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
         /// <param name="parsers"><see cref="IConfigurationFileParsers"/> for parsing.</param>
-        public FileConfigurationObjectsProvider(IFileSystem fileSystem, IConfigurationFileParsers parsers)
+        public FileConfigurationObjectsProvider(IConfigurationFileParsers parsers)
         {
-            _fileSystem = fileSystem;
             _parsers = parsers;
         }
 
@@ -56,7 +52,7 @@ namespace Dolittle.Runtime.Configuration.Files
             _searchPaths.ForEach(_ =>
             {
                 var filename = GetFilenameFor(type, _);
-                if (_fileSystem.Exists(filename)) foundPaths.Add(filename);
+                if (File.Exists(filename)) foundPaths.Add(filename);
             });
             if (foundPaths.Count > 1) throw new MultipleFilesAvailableOfSameType(type, foundPaths);
             return foundPaths.Count > 0;
@@ -69,9 +65,9 @@ namespace Dolittle.Runtime.Configuration.Files
             _searchPaths.ForEach(_ =>
             {
                 var filename = GetFilenameFor(type, _);
-                if (_fileSystem.Exists(filename))
+                if (File.Exists(filename))
                 {
-                    var content = _fileSystem.ReadAllText(filename);
+                    var content = File.ReadAllText(filename);
                     instance = _parsers.Parse(type, filename, content);
                 }
             });
@@ -82,7 +78,7 @@ namespace Dolittle.Runtime.Configuration.Files
 
         string GetFilenameFor(Type type, string basePath)
         {
-            return Path.Combine(_fileSystem.GetCurrentDirectory(), basePath, $"{type.GetFriendlyConfigurationName()}.json");
+            return Path.Combine(Directory.GetCurrentDirectory(), basePath, $"{type.GetFriendlyConfigurationName()}.json");
         }
     }
 }
