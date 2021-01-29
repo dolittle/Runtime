@@ -15,10 +15,12 @@ charset = utf-8
 indent_size = 2
 
 [*.{cs,vb}]
-# dotnet_analyzer_diagnostic.category-style.severity = warning
+# we're putting the :severity options on everything where it can be put as it's bugged on net5
+# check https://github.com/dotnet/roslyn/issues/50785#issuecomment-768606882
 # default to all on warning
 dotnet_analyzer_diagnostic.severity = warning
 file_header_template = Copyright (c) Dolittle. All rights reserved.\nLicensed under the MIT license. See LICENSE file in the project root for full license information.
+
 
 #### .NET Conventions ####
 dotnet_sort_system_directives_first = true:error
@@ -113,46 +115,3 @@ csharp_using_directive_placement = outside_namespace:error
 dotnet_diagnostic.IDE0055.severity = suggestion
 # prefere brace indentation when creating objects etc
 csharp_indent_braces = true
-
-# new lines
-# guess this is the name for allowing {} after a 'switch'
-# https://github.com/dotnet/roslyn/issues/39557
-# csharp_new_line_before_object_collection_array_initalizers = none:none
-# csharp_new_line_before_else = true:error
-# csharp_new_line_before_catch = true:error
-# csharp_new_line_before_finally = true:error
-# csharp_new_line_before_members_in_object_initializers = true:none
-# csharp_new_line_before_members_in_anonymous_types = true:none
-# csharp_new_line_between_query_expression_clauses = true:warning
-# identation
-# csharp_indent_case_contents = true:error
-# csharp_indent_switch_labels = true:error
-# csharp_indent_labels = no_change:none
-# csharp_indent_block_contents = true:error
-
-
-# csharp_indent_case_contents_when_block = true:error
-# spacing
-# csharp_space_after_keywords_in_control_flow_statements = true:error
-# csharp_space_before_colon_in_inheritance_clause = true:error
-# csharp_space_after_colon_in_inheritance_clause = true:error
-# csharp_space_around_binary_operators = before_and_after:error
-# csharp_space_between_method_declaration_parameter_list_parentheses = true:error
-# csharp_space_between_method_declaration_empty_parameter_list_parentheses = false:error
-# csharp_space_between_method_declaration_name_and_open_parenthesis = false:error
-# csharp_space_between_method_call_parameter_list_parentheses = true:error
-# csharp_space_between_method_call_empty_parameter_list_parentheses = false:error
-# csharp_space_between_method_call_name_and_opening_parenthesis = false:error
-# csharp_space_after_comma = true:error
-# csharp_space_before_comma = false:error
-# csharp_space_after_dot = false:error
-# csharp_space_before_dot = false:error
-# csharp_space_after_semicolon_in_for_statement = true:error
-# csharp_space_before_semicolon_in_for_statement = false:error
-# csharp_space_around_declaration_statements = false:error
-# csharp_space_before_open_square_brackets = false:error
-# csharp_space_between_empty_square_brackets = false:error
-# csharp_space_between_square_brackets = false:error
-# wrapping
-# csharp_preserve_single_line_statements = false:error
-# csharp_preserve_single_line_blocks = true:none
