@@ -5,7 +5,7 @@ using System.Globalization;
 
 #pragma warning disable CA1308
 
-namespace Dolittle.Runtime.Strings
+namespace Dolittle.Runtime.Serialization.Json
 {
     /// <summary>
     /// Provides a set of extension methods to <see cref="string"/>.

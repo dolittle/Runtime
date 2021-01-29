@@ -12,7 +12,6 @@ using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Reflection;
-using Dolittle.Runtime.Strings;
 using Dolittle.Runtime.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;

@@ -7,7 +7,6 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Reflection;
-using Dolittle.Runtime.Strings;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 

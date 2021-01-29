@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
-using Dolittle.Runtime.Strings;
 using Newtonsoft.Json;
 
 #pragma warning disable DL0008
