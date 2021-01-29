@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <summary>
         /// Represents the all stream <see cref="StreamId"/>.
         /// </summary>
-        public static StreamId EventLog = Guid.Empty;
+        public static readonly StreamId EventLog = Guid.Empty;
 
         /// <summary>
         /// Gets a value indicating whether a <see cref="StreamId" /> is writeable for a user-defined filter.

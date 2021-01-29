@@ -20,8 +20,7 @@ namespace Dolittle.Runtime.Assemblies
             var path = string.Empty;
             if (library is CompilationLibrary compilationLibrary) path = compilationLibrary.ResolveReferencePaths().FirstOrDefault() ?? string.Empty;
 
-            if (string.IsNullOrEmpty(path) ||
-                !File.Exists(path)) return true;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path)) return true;
 
             // Borrowed from : http://stackoverflow.com/questions/8593264/determining-if-a-dll-is-a-valid-clr-dll-by-reading-the-pe-directly-64bit-issue
             using (var fs = new FileStream(library.Path, FileMode.Open, FileAccess.Read))
@@ -49,7 +48,7 @@ namespace Dolittle.Runtime.Assemblies
                         var posEndOfHeader = fs.Position;
                         var magic = reader.ReadUInt16();
 
-                        int off = 0x60; // Offset to data directories for 32Bit PE images, See section 3.4 of the PE format specification.
+                        var off = 0x60; // Offset to data directories for 32Bit PE images, See section 3.4 of the PE format specification.
 
                         // 0x20b == PE32+ (64Bit), 0x10b == PE32 (32Bit)
                         if (magic == 0x20b)

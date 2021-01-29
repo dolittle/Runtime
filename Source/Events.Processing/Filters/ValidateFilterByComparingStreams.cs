@@ -34,11 +34,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IEventFetchers eventFetchers,
             IStreamProcessorStateRepository streamProcessorStates,
             ILogger logger)
-            {
-                _eventFetchers = eventFetchers;
-                _streamProcessorStates = streamProcessorStates;
-                _logger = logger;
-            }
+        {
+            _eventFetchers = eventFetchers;
+            _streamProcessorStates = streamProcessorStates;
+            _logger = logger;
+        }
 
         /// <inheritdoc/>
         public async Task<FilterValidationResult> Validate<TFilterDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TFilterDefinition> filter, CancellationToken cancellationToken)

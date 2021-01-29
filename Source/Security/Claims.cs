@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.Security
             var thisClaims = _claims.OrderBy(_ => _.Name).ThenBy(_ => _.ValueType).ThenBy(_ => _.Value).ToArray();
             var otherClaims = other.OrderBy(_ => _.Name).ThenBy(_ => _.ValueType).ThenBy(_ => _.Value).ToArray();
 
-            for (int i = 0; i < thisClaims.Length; i++)
+            for (var i = 0; i < thisClaims.Length; i++)
             {
                 if (!object.Equals(thisClaims[i], otherClaims[i]))
                 {

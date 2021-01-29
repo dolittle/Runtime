@@ -58,9 +58,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         {
             var failingPartition = new FailingPartitionState(failedPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
             var failingPartitions = new Dictionary<PartitionId, FailingPartitionState>(oldState.FailingPartitions)
-                {
-                    [partition] = failingPartition
-                };
+            {
+                [partition] = failingPartition
+            };
             var newState = new StreamProcessorState(failedPosition + 1, failingPartitions, oldState.LastSuccessfullyProcessed);
             await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
             return newState;

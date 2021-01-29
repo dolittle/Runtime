@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public void Dispose()
         {
-            foreach ((var type, var endpoint) in _endpoints) endpoint.Dispose();
+            foreach ((_, var endpoint) in _endpoints) endpoint.Dispose();
         }
 
         /// <inheritdoc/>
