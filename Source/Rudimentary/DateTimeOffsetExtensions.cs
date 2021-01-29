@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Time
+namespace Dolittle.Runtime.Rudimentary
 {
     /// <summary>
     /// Extensions for DateTime.
@@ -34,6 +34,7 @@ namespace Dolittle.Runtime.Time
         /// <param name="leftHandSide"><see cref="DateTimeOffset"/> to check equality for.</param>
         /// <param name="rightHandSide"><see cref="DateTimeOffset"/> to check equality with.</param>
         /// <returns>true if equal, false if not.</returns>
-        public static bool LossyEquals(this DateTimeOffset leftHandSide, DateTime rightHandSide) => LossyEquals(leftHandSide, new DateTimeOffset(rightHandSide.ToUniversalTime()));
+        public static bool LossyEquals(this DateTimeOffset leftHandSide, DateTime rightHandSide)
+            => LossyEquals(leftHandSide, new DateTimeOffset(rightHandSide.ToUniversalTime()));
     }
 }
