@@ -4,7 +4,7 @@
 using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
@@ -41,9 +41,9 @@ namespace Dolittle.Runtime.Booting
         public const string Environment = "Environment";
 
         /// <summary>
-        /// The <see cref="ILoggerManager"/>.
+        /// The <see cref="ILoggerFactory"/>.
         /// </summary>
-        public const string LoggerManager = "LoggerManager";
+        public const string LoggerFactory = "LoggerFactory";
 
         /// <summary>
         /// Current <see cref="IBindingCollection">bindings</see>.

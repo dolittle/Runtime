@@ -7,7 +7,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new ConcurrentDictionary<SubscriptionId, Subscription>();
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly ILogger<Subscriptions> _logger;
 
         /// <summary>
@@ -29,13 +29,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// </summary>
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
-        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy, ILoggerManager loggerManager)
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
+        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy, ILoggerFactory loggerFactory)
         {
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcherPolicy = eventsFetcherPolicy;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<Subscriptions>();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<Subscriptions>();
         }
 
         /// <inheritdoc/>
@@ -58,7 +58,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             subscription = default;
             if (_subscriptions.ContainsKey(subscriptionId))
             {
-                _logger.Warning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
+                _logger.LogWarning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
                 return false;
             }
 
@@ -70,22 +70,22 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _streamProcessorStates,
                 () => Unregister(subscriptionId),
                 _eventsFetcherPolicy,
-                _loggerManager,
+                _loggerFactory,
                 cancellationToken);
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
             {
-                _logger.Warning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
+                _logger.LogWarning("Subscription: '{SubscriptionId}' already registered", subscriptionId);
                 subscription = default;
                 return false;
             }
 
-            _logger.Trace("Subscription: '{SubscriptionId}' registered", subscriptionId);
+            _logger.LogTrace("Subscription: '{SubscriptionId}' registered", subscriptionId);
             return true;
         }
 
         void Unregister(SubscriptionId id)
         {
-            _logger.Debug("Unregistering Subscription: {subscriptionId}", id);
+            _logger.LogDebug("Unregistering Subscription: {subscriptionId}", id);
             _subscriptions.TryRemove(id, out var _);
         }
     }

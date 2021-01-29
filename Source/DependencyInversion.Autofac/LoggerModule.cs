@@ -5,7 +5,8 @@ using System.Linq;
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
-using Dolittle.Runtime.Logging;
+using Dolittle.Runtime.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.DependencyInversion.Autofac
 {
@@ -19,9 +20,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// </summary>
         /// <param name="registration">The <see cref="IComponentRegistration"/> to attach to.</param>
         internal static void ResolveUntypedLoggersFor(IComponentRegistration registration)
-        {
-            registration.Preparing += OnComponentPreparing;
-        }
+            => registration.Preparing += OnComponentPreparing;
 
         /// <inheritdoc/>
         protected override void AttachToComponentRegistration(IComponentRegistryBuilder componentRegistry, IComponentRegistration registration)

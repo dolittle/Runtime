@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
@@ -139,19 +139,19 @@ namespace Dolittle.Runtime.Services.Clients
                     var response = _getConnectResponse(_serverToClient.Current);
                     if (response != null)
                     {
-                        _logger.Trace("Received connect response");
+                        _logger.LogTrace("Received connect response");
                         ConnectResponse = response;
                         _connectionEstablished = true;
                         return true;
                     }
                     else
                     {
-                        _logger.Warning("Did not receive connect response. Server message did not contain the connect response");
+                        _logger.LogWarning("Did not receive connect response. Server message did not contain the connect response");
                     }
                 }
                 else
                 {
-                    _logger.Warning("Did not receive connect response. Server stream was empty");
+                    _logger.LogWarning("Did not receive connect response. Server stream was empty");
                 }
 
                 await _clientToServer.CompleteAsync().ConfigureAwait(false);
@@ -161,11 +161,11 @@ namespace Dolittle.Runtime.Services.Clients
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Debug("Reverse Call Client was cancelled by client while connecting");
+                    _logger.LogDebug("Reverse Call Client was cancelled by client while connecting");
                 }
                 else
                 {
-                    _logger.Warning("Reverse Call Client was cancelled by server while connecting");
+                    _logger.LogWarning("Reverse Call Client was cancelled by server while connecting");
                 }
 
                 return false;
@@ -194,7 +194,7 @@ namespace Dolittle.Runtime.Services.Clients
                     var request = _getMessageRequest(message);
                     if (ping != null)
                     {
-                        _logger.Trace("Received ping");
+                        _logger.LogTrace("Received ping");
                         await WritePong(cancellationToken).ConfigureAwait(false);
                     }
                     else if (request != null)
@@ -203,7 +203,7 @@ namespace Dolittle.Runtime.Services.Clients
                     }
                     else
                     {
-                        _logger.Warning("Received message from Reverse Call Dispatcher, but it was not a request or a ping");
+                        _logger.LogWarning("Received message from Reverse Call Dispatcher, but it was not a request or a ping");
                     }
 
                     linkedCts.CancelAfter(_pingInterval.Multiply(3));
@@ -213,13 +213,13 @@ namespace Dolittle.Runtime.Services.Clients
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Debug("Reverse Call Client was cancelled by client while handling requests");
+                    _logger.LogDebug("Reverse Call Client was cancelled by client while handling requests");
                     return;
                 }
 
                 if (!linkedCts.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning("Reverse Call Client was cancelled by server while handling requests");
+                    _logger.LogWarning("Reverse Call Client was cancelled by server while handling requests");
                     return;
                 }
 
@@ -258,14 +258,14 @@ namespace Dolittle.Runtime.Services.Clients
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Debug("Reverse Call Client was cancelled before it could respond with pong");
+                    _logger.LogDebug("Reverse Call Client was cancelled before it could respond with pong");
                     return;
                 }
 
                 var message = new TClientMessage();
                 _setPong(message, new Pong());
 
-                _logger.Trace("Writing pong");
+                _logger.LogTrace("Writing pong");
                 await _clientToServer.WriteAsync(message).ConfigureAwait(false);
             }
             finally
@@ -286,13 +286,13 @@ namespace Dolittle.Runtime.Services.Clients
                 TResponse response;
                 try
                 {
-                    _logger.Trace("Handling request with call '{CallId}'", callId);
+                    _logger.LogTrace("Handling request with call '{CallId}'", callId);
                     _executionContextManager.CurrentFor(requestContext.ExecutionContext);
                     response = await callback(request, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warning(ex, "An error occurred while invoking request handler callback for request '{CallId}'", callId);
+                    _logger.LogWarning(ex, "An error occurred while invoking request handler callback for request '{CallId}'", callId);
                     return;
                 }
 
@@ -303,7 +303,7 @@ namespace Dolittle.Runtime.Services.Clients
                 }
                 catch (Exception ex)
                 {
-                    _logger.Warning(ex, "Error occurred while writing response for request '{CallId}'", callId);
+                    _logger.LogWarning(ex, "Error occurred while writing response for request '{CallId}'", callId);
                 }
                 finally
                 {
@@ -312,7 +312,7 @@ namespace Dolittle.Runtime.Services.Clients
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "An error occurred while handling received request");
+                _logger.LogWarning(ex, "An error occurred while handling received request");
             }
         }
 
@@ -324,11 +324,11 @@ namespace Dolittle.Runtime.Services.Clients
             _setMessageResponse(message, response);
             if (!cancellationToken.IsCancellationRequested)
             {
-                _logger.Trace("Writing response for request '{CallId}'", callId);
+                _logger.LogTrace("Writing response for request '{CallId}'", callId);
                 return _clientToServer.WriteAsync(message);
             }
 
-            _logger.Debug("Reverse Call Client was cancelled before response could be written for request '{CallId}'", callId);
+            _logger.LogDebug("Reverse Call Client was cancelled before response could be written for request '{CallId}'", callId);
             return Task.CompletedTask;
         }
 

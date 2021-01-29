@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Machine.Specifications;
 using Moq;

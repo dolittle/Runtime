@@ -17,10 +17,7 @@ namespace Dolittle.Runtime.Booting.Stages
         /// Initializes a new instance of the <see cref="PostDiscovery"/> class.
         /// </summary>
         /// <param name="callback"><see cref="Action{T}">Callback</see> to call with <see cref="ITypeFinder"/>.</param>
-        public PostDiscovery(Action<ITypeFinder> callback)
-        {
-            _callback = callback;
-        }
+        public PostDiscovery(Action<ITypeFinder> callback) => _callback = callback;
 
         /// <inheritdoc/>
         public BootStage BootStage => BootStage.Discovery;

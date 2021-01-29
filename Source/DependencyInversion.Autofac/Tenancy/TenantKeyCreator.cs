@@ -21,9 +21,8 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
         /// </summary>
         /// <param name="containerBuilder"><see cref="ContainerBuilder"/> used for building the container.</param>
         public TenantKeyCreator(ContainerBuilder containerBuilder)
-        {
-            containerBuilder.RegisterBuildCallback(c => _executionContextManager = c.Resolve<IExecutionContextManager>());
-        }
+            => containerBuilder
+                .RegisterBuildCallback(c => _executionContextManager = c.Resolve<IExecutionContextManager>());
 
         /// <inheritdoc/>
         public string GetKeyFor(Binding binding, Type service)

@@ -9,7 +9,7 @@ using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.DependencyInversion.Conventions;
 using Dolittle.Runtime.IO;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
@@ -29,7 +29,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
         /// <param name="scheduler"><see cref="IScheduler"/> for scheduling work.</param>
         /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
-        /// <param name="loggerManager"><see cref="ILoggerManager"/> for creating loggers.</param>
         /// <param name="bindings">Additional bindings.</param>
         /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
         /// <returns>Configured <see cref="IContainer"/> and <see cref="IBindingCollection"/>.</returns>
@@ -38,13 +37,13 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             ITypeFinder typeFinder,
             IScheduler scheduler,
             IFileSystem fileSystem,
-            ILoggerManager loggerManager,
+            ILoggerFactory loggerFactory,
             IEnumerable<Binding> bindings = null,
             BootContainer bootContainer = null)
         {
-            var logger = loggerManager.CreateLogger(typeof(Boot));
-            logger.Trace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerManager);
+            var logger = loggerFactory.CreateLogger(typeof(Boot));
+            logger.LogTrace("DependencyInversion start");
+            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerFactory);
             if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
             _container = bootContainer;
 
@@ -53,7 +52,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             if (bindings != null) otherBindings.AddRange(bindings);
             otherBindings.Add(Bind(typeof(IContainer), () => _container, false));
 
-            logger.Trace("Discover and Build bindings");
+            logger.LogTrace("Discover and Build bindings");
             var bindingCollection = DiscoverAndBuildBuildBindings(
                 bootContainer,
                 typeFinder,
@@ -62,11 +61,11 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
                 initialBindings,
                 otherBindings);
 
-            logger.Trace("Discover container");
+            logger.LogTrace("Discover container");
             _container = DiscoverAndConfigureContainer(bootContainer, assemblies, typeFinder, bindingCollection);
             BootContainer.ContainerReady(_container);
 
-            logger.Trace("Return boot result");
+            logger.LogTrace("Return boot result");
             return new BootResult(_container, bindingCollection);
         }
 
@@ -77,7 +76,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
         /// <param name="scheduler"><see cref="IScheduler"/> for scheduling work.</param>
         /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
-        /// <param name="loggerManager"><see cref="ILoggerManager"/> for creating loggers.</param>
         /// <param name="containerType"><see cref="Type"/>Container type.</param>
         /// <param name="bindings">Additional bindings.</param>
         /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
@@ -87,14 +85,14 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             ITypeFinder typeFinder,
             IScheduler scheduler,
             IFileSystem fileSystem,
-            ILoggerManager loggerManager,
+            ILoggerFactory loggerFactory,
             Type containerType,
             IEnumerable<Binding> bindings = null,
             BootContainer bootContainer = null)
         {
-            var logger = loggerManager.CreateLogger(typeof(Boot));
-            logger.Trace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerManager);
+            var logger = loggerFactory.CreateLogger(typeof(Boot));
+            logger.LogTrace("DependencyInversion start");
+            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerFactory);
 
             if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
             _container = bootContainer;
@@ -104,7 +102,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             if (bindings != null) otherBindings.AddRange(bindings);
             otherBindings.Add(Bind(typeof(IContainer), containerType, true));
 
-            logger.Trace("Discover and Build bindings");
+            logger.LogTrace("Discover and Build bindings");
             return DiscoverAndBuildBuildBindings(
                 bootContainer,
                 typeFinder,
@@ -129,7 +127,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             ITypeFinder typeFinder,
             IScheduler scheduler,
             IFileSystem fileSystem,
-            ILoggerManager loggerManager)
+            ILoggerFactory loggerFactory)
         {
             return new BindingCollection(new[]
             {
@@ -137,7 +135,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
                 Bind(typeof(ITypeFinder), typeFinder),
                 Bind(typeof(IScheduler), scheduler),
                 Bind(typeof(IFileSystem), fileSystem),
-                Bind(typeof(ILoggerManager), loggerManager),
+                Bind(typeof(ILoggerFactory), loggerFactory),
                 Bind(typeof(GetContainer), (GetContainer)(() => _container))
             });
         }
@@ -150,15 +148,15 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             IBindingCollection initialBindings,
             IEnumerable<Binding> bindings)
         {
-            logger.Trace("Discover bindings");
+            logger.LogTrace("Discover bindings");
             var discoveredBindings = DiscoverBindings(bootContainer, typeFinder, scheduler, logger);
 
-            logger.Trace("Create a new binding collection");
+            logger.LogTrace("Create a new binding collection");
             var bindingCollection = new BindingCollection(initialBindings, discoveredBindings, bindings);
 
             foreach (var binding in bindingCollection)
             {
-                logger.Trace("Discovered Binding : {bindingServiceName} - {bindingStrategyTypeName}", binding.Service.AssemblyQualifiedName, binding.Strategy.GetType().Name);
+                logger.LogTrace("Discovered Binding : {bindingServiceName} - {bindingStrategyTypeName}", binding.Service.AssemblyQualifiedName, binding.Strategy.GetType().Name);
             }
 
             var asmBindings = bindingCollection.Where(_ => _.Service == typeof(IAssemblies)).ToArray();
@@ -172,16 +170,16 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             IScheduler scheduler,
             ILogger logger)
         {
-            logger.Trace("Discover Bindings");
+            logger.LogTrace("Discover Bindings");
             var bindingConventionManager = new BindingConventionManager(bootContainer, typeFinder, scheduler, logger);
 
-            logger.Trace("Discover and setup bindings");
+            logger.LogTrace("Discover and setup bindings");
             var bindingsFromConventions = bindingConventionManager.DiscoverAndSetupBindings();
 
-            logger.Trace("Discover binding providers and get bindings");
+            logger.LogTrace("Discover binding providers and get bindings");
             var bindingsFromProviders = DiscoverBindingProvidersAndGetBindings(bootContainer, typeFinder, scheduler);
 
-            logger.Trace("Compose bindings in new collection");
+            logger.LogTrace("Compose bindings in new collection");
             return new BindingCollection(bindingsFromProviders, bindingsFromConventions);
         }
 

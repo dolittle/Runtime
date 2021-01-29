@@ -8,9 +8,6 @@ using Autofac;
 using Autofac.Extensions.DependencyInjection;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.DependencyInversion.Autofac;
-using Dolittle.Runtime.Logging;
-using Dolittle.Runtime.Logging.Microsoft;
-using Dolittle.Runtime.Types;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,15 +39,17 @@ namespace Dolittle.Runtime.Hosting.Microsoft
         {
             ApplyLoggerFactoryWorkarounds(services);
 
+            // https://stackoverflow.com/questions/32459670/resolving-instances-with-asp-net-core-di-from-within-configureservices/32461714#32461714
             var builder = _autofacFactory.CreateBuilder(services);
+            var serviceProvider = services.BuildServiceProvider();
 
             var bootResult = Bootloader.Configure(_ =>
             {
                 if (_context.HostingEnvironment.IsDevelopment()) _.Development();
                 _.SkipBootprocedures();
+                _.WithLoggingFactory(serviceProvider.GetRequiredService<ILoggerFactory>());
                 _.UseContainer<ServiceProviderContainer>();
             }).Start();
-
             builder.AddDolittle(bootResult.Assemblies, bootResult.Bindings);
 
             return builder;
@@ -61,32 +60,23 @@ namespace Dolittle.Runtime.Hosting.Microsoft
         {
             var serviceProvider = _autofacFactory.CreateServiceProvider(containerBuilder);
 
-            var logMessageWriterCreators = new List<ILogMessageWriterCreator>();
-
-            var loggerFactory = serviceProvider.GetService<ILoggerFactory>();
-            if (loggerFactory != null) logMessageWriterCreators.Add(new LogMessageWriterCreator(loggerFactory));
-
             try
             {
-                var container = serviceProvider.GetService(typeof(IContainer)) as IContainer;
+                var container = serviceProvider.GetService<IContainer>();
                 DependencyInversion.Booting.Boot.ContainerReady(container);
                 BootStages.ContainerReady(container);
-
-                var logMessageWriterCreatorProviders = container.Get<IInstancesOf<ICanProvideLogMessageWriterCreators>>();
-                logMessageWriterCreators.AddRange(logMessageWriterCreatorProviders.SelectMany(_ => _.Provide()));
 
                 var bootProcedures = container.Get<IBootProcedures>();
                 bootProcedures.Perform();
             }
             finally
             {
-                Logging.Internal.LoggerManager.Instance.AddLogMessageWriterCreators(logMessageWriterCreators.ToArray());
             }
 
             return serviceProvider;
         }
 
-        void ApplyLoggerFactoryWorkarounds(IServiceCollection services)
+        static void ApplyLoggerFactoryWorkarounds(IServiceCollection services)
         {
             /* Microsoft seems to always bind the ILoggerFactory to their own implementation of LoggerFactory. There is two problems with this:
              * 1) Autofac is not able to pick the best constructor of that type.

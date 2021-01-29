@@ -8,7 +8,7 @@ using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.LogDebug(
                 "Filter event that occurred @ {Occurred} to public events stream '{TargetStream}'",
                 @event.Occurred,
                 Definition.TargetStream);
@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
+            _logger.LogDebug(
                 "Filter event that occurred @ {Occurred} to public events stream '{TargetStream}' again for the {RetryCount}. time because: {FailureReason}",
                 @event.Occurred,
                 Definition.TargetStream,
