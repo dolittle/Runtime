@@ -14,9 +14,6 @@ namespace Dolittle.Runtime.Specifications
         /// <typeparam name="T">Type of the instance that the rule is to be evaluated against.</typeparam>
         /// <param name="rule">The rule being extended.</param>
         /// <returns>A Not{T} rule">.</returns>
-        public static Specification<T> Not<T>(Specification<T> rule)
-        {
-            return new Negative<T>(rule);
-        }
+        public static Specification<T> Not<T>(Specification<T> rule) => new Negative<T>(rule);
     }
 }

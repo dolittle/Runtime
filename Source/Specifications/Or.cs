@@ -18,8 +18,6 @@ namespace Dolittle.Runtime.Specifications
         /// <param name="leftHandSide">The <see cref="Specification{T}"/> for the left hand side.</param>
         /// <param name="rightHandSide">The <see cref="Specification{T}"/> for the right hand side.</param>
         internal Or(Specification<T> leftHandSide, Specification<T> rightHandSide)
-        {
-            Predicate = leftHandSide.Compose(rightHandSide, Expression.Or).Predicate;
-        }
+            => Predicate = leftHandSide.Compose(rightHandSide, Expression.Or).Predicate;
     }
 }

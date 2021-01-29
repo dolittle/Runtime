@@ -8,7 +8,7 @@ using System.Linq.Expressions;
 namespace Dolittle.Runtime.Specifications
 {
     /// <summary>
-    /// Base class for expressing a complex rule in code.  Utilising the Specification pattern.
+    /// Base class for expressing a complex rule in code. Utilizing the Specification pattern.
     /// </summary>
     /// <typeparam name="T">Type that the rule applies to.</typeparam>
     /// <remarks>
@@ -48,19 +48,13 @@ namespace Dolittle.Runtime.Specifications
         /// </summary>
         /// <param name="instance">The instance to evaluation the rule against.</param>
         /// <returns>true if the rule is satisfied, false if the rule is broken.</returns>
-        public bool IsSatisfiedBy(T instance)
-        {
-            return EvalCompiled(instance);
-        }
+        public bool IsSatisfiedBy(T instance) => EvalCompiled(instance);
 
         /// <summary>
         /// Evaluates the rule against each instance of an <see cref="IQueryable{T}"/>.
         /// </summary>
         /// <param name="candidates">The <see cref="IQueryable{T}"/> that will have the rule evaluated against each of its instances.</param>
         /// <returns>An <see cref="IQueryable{T}"/> containing only instances that satisfy the rule.</returns>
-        public IQueryable<T> SatisfyingElementsFrom(IQueryable<T> candidates)
-        {
-            return candidates.Where(EvalExpression);
-        }
+        public IQueryable<T> SatisfyingElementsFrom(IQueryable<T> candidates) => candidates.Where(EvalExpression);
     }
 }
