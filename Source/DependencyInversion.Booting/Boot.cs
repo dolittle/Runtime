@@ -120,7 +120,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             {
                 Bind(typeof(IAssemblies), assemblies),
                 Bind(typeof(ITypeFinder), typeFinder),
->>>>>>> 42d72c42f40338c39b66bd114921293352655e2a
                 Bind(typeof(ILoggerFactory), loggerFactory),
                 Bind(typeof(GetContainer), (GetContainer)(() => _container))
             });
