@@ -12,10 +12,7 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         /// Initializes a new instance of the <see cref="Constant"/> class.
         /// </summary>
         /// <param name="target">Target constant.</param>
-        public Constant(object target)
-        {
-            Target = target;
-        }
+        public Constant(object target) => Target = target;
 
         /// <summary>
         /// Gets the constant target.
@@ -23,9 +20,6 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         public object Target { get; }
 
         /// <inheritdoc/>
-        public System.Type GetTargetType()
-        {
-            return Target.GetType();
-        }
+        public System.Type GetTargetType() => Target.GetType();
     }
 }

@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting
@@ -42,22 +42,22 @@ namespace Dolittle.Runtime.Booting
         /// <inheritdoc/>
         public void Perform()
         {
-            _logger.Trace("Bootstrapper start all procedures");
+            _logger.LogTrace("Bootstrapper start all procedures");
             _executionContextManager.System(BootProceduresCorrelationId);
             var queue = new Queue<ICanPerformBootProcedure>(_procedures);
 
-            _logger.Debug("Starting to perform {numberOfBootProcedures} boot procedures", queue.Count);
+            _logger.LogDebug("Starting to perform {numberOfBootProcedures} boot procedures", queue.Count);
             while (queue.Count > 0)
             {
                 var procedure = queue.Dequeue();
                 if (procedure.CanPerform())
                 {
-                    _logger.Debug("Performing boot procedure called '{procedureType}'", procedure.GetType().AssemblyQualifiedName);
+                    _logger.LogDebug("Performing boot procedure called '{procedureType}'", procedure.GetType().AssemblyQualifiedName);
                     procedure.Perform();
                 }
                 else
                 {
-                    _logger.Debug("Re-enqueuing boot procedure called '{procedureType}'", procedure.GetType().AssemblyQualifiedName);
+                    _logger.LogDebug("Re-enqueuing boot procedure called '{procedureType}'", procedure.GetType().AssemblyQualifiedName);
                     queue.Enqueue(procedure);
                 }
             }

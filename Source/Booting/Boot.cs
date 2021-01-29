@@ -19,9 +19,7 @@ namespace Dolittle.Runtime.Booting
         /// </summary>
         /// <param name="settings"><see cref="IEnumerable{T}"/> of <see cref="IRepresentSettingsForBootStage"/>.</param>
         public Boot(IEnumerable<IRepresentSettingsForBootStage> settings)
-        {
-            _settings = settings.ToDictionary(_ => _.GetType(), _ => _);
-        }
+            => _settings = settings.ToDictionary(_ => _.GetType(), _ => _);
 
         /// <summary>
         /// Get settings with a specific type.

@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.Streams.Filters
 {
@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
     public class FilterDefinitions : IFilterDefinitions
     {
         readonly IStreamDefinitionRepository _streamDefinitions;
-        readonly ILogger<FilterDefinitions> _logger;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterDefinitions"/> class.
@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public FilterDefinitions(
             IStreamDefinitionRepository streamDefinitions,
-            ILogger<FilterDefinitions> logger)
+            ILogger logger)
         {
             _streamDefinitions = streamDefinitions;
             _logger = logger;

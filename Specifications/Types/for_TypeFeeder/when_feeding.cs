@@ -4,7 +4,7 @@
 using System;
 using System.Reflection;
 using Dolittle.Runtime.Assemblies;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Scheduling;
 using Machine.Specifications;
 using Moq;

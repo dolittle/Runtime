@@ -5,7 +5,7 @@ using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Security;
 using Dolittle.Runtime.Versioning;
 
@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.Execution
         /// <returns>An <see cref="ExecutionContext"/> instance.</returns>
         public static ExecutionContext SetInitialExecutionContext(ILogger logger)
         {
-            logger.Trace("Setting initial execution context");
+            logger.LogTrace("Setting initial execution context");
             if (_initialExecutionContextSet) throw new InitialExecutionContextHasAlreadyBeenSet();
 
             _initialExecutionContextSet = true;
@@ -146,7 +146,7 @@ namespace Dolittle.Runtime.Execution
             int lineNumber,
             string member)
         {
-            _logger.Trace("Setting execution context ({context}) - from: ({filePath}, {lineNumber}, {member}) ", context, filePath, lineNumber, member);
+            _logger.LogTrace("Setting execution context ({context}) - from: ({filePath}, {lineNumber}, {member}) ", context, filePath, lineNumber, member);
             Current = context;
             return context;
         }

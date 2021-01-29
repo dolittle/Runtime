@@ -14,10 +14,7 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         /// Initializes a new instance of the <see cref="Callback"/> class.
         /// </summary>
         /// <param name="target">The callback target.</param>
-        public Callback(Func<object> target)
-        {
-            Target = target;
-        }
+        public Callback(Func<object> target) => Target = target;
 
         /// <summary>
         /// Gets the target.
@@ -25,9 +22,6 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         public Func<object> Target { get; }
 
         /// <inheritdoc/>
-        public System.Type GetTargetType()
-        {
-            return Target.GetType();
-        }
+        public System.Type GetTargetType() => Target.GetType();
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Events.Contracts.EventStore;
@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store
         public EventStoreService(
             FactoryFor<IEventStore> eventStoreFactory,
             IExecutionContextManager executionContextManager,
-            ILogger<EventStoreService> logger)
+            ILogger logger)
         {
             _eventStoreFactory = eventStoreFactory;
             _executionContextManager = executionContextManager;
@@ -47,16 +47,16 @@ namespace Dolittle.Runtime.Events.Store
             var response = new Contracts.CommitEventsResponse();
             try
             {
-                _logger.Debug("{eventsCount} Events received for committing", request.Events.Count);
+                _logger.LogDebug("{eventsCount} Events received for committing", request.Events.Count);
                 var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId.ToGuid(), new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
                 var uncommittedEvents = new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
                 var committedEvents = await _eventStoreFactory().CommitEvents(uncommittedEvents, context.CancellationToken).ConfigureAwait(false);
-                _logger.Debug("Events were successfully committed");
+                _logger.LogDebug("Events were successfully committed");
                 response.Events.AddRange(committedEvents.ToProtobuf());
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "Error committing events");
+                _logger.LogWarning(ex, "Error committing events");
                 response.Failure = GetFailureFromException(ex);
             }
 
@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.Events.Store
             var response = new Contracts.CommitAggregateEventsResponse();
             try
             {
-                _logger.Debug("{eventsCount} Aggregate Events received for committing", request.Events.Events.Count);
+                _logger.LogDebug("{eventsCount} Aggregate Events received for committing", request.Events.Events.Count);
                 EventSourceId eventSourceId = request.Events.EventSourceId.ToGuid();
                 var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
                 var aggregateRoot = new Artifact(request.Events.AggregateRootId.ToGuid (), ArtifactGeneration.First);
@@ -81,12 +81,12 @@ namespace Dolittle.Runtime.Events.Store
                     request.Events.ExpectedAggregateRootVersion,
                     new ReadOnlyCollection<UncommittedEvent>(events.ToList()));
                 var committedEventsResult = await _eventStoreFactory().CommitAggregateEvents(uncommittedAggregateEvents, context.CancellationToken).ConfigureAwait(false);
-                _logger.Debug("Aggregate Events were successfully committed");
+                _logger.LogDebug("Aggregate Events were successfully committed");
                 response.Events = committedEventsResult.ToProtobuf();
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "Error committing aggregate events");
+                _logger.LogWarning(ex, "Error committing aggregate events");
                 response.Failure = GetFailureFromException(ex);
             }
 
@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <inheritdoc/>
         public override async Task<Contracts.FetchForAggregateResponse> FetchForAggregate(Contracts.FetchForAggregateRequest request, ServerCallContext context)
         {
-            _logger.Debug("Fetch for Aggregate");
+            _logger.LogDebug("Fetch for Aggregate");
             _executionContextManager.CurrentFor(request.CallContext.ExecutionContext);
             ArtifactId aggregate = request.Aggregate.AggregateRootId.ToGuid();
             EventSourceId eventSource = request.Aggregate.EventSourceId.ToGuid();
@@ -105,12 +105,12 @@ namespace Dolittle.Runtime.Events.Store
             try
             {
                 var committedEventsResult = await _eventStoreFactory().FetchForAggregate(eventSource, aggregate, context.CancellationToken).ConfigureAwait(false);
-                _logger.Debug("Successfully fetched events for aggregate");
+                _logger.LogDebug("Successfully fetched events for aggregate");
                 response.Events = committedEventsResult.ToProtobuf();
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "Error fetching events from aggregate");
+                _logger.LogWarning(ex, "Error fetching events from aggregate");
                 response.Failure = GetFailureFromException(ex);
             }
 

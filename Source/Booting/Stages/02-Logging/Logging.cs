@@ -1,10 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Linq;
+using System.Collections;
+using System.Reflection;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
-using Dolittle.Runtime.Logging.Internal;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Booting.Stages
 {
@@ -19,26 +21,29 @@ namespace Dolittle.Runtime.Booting.Stages
         /// <inheritdoc/>
         public void Perform(LoggingSettings settings, IBootStageBuilder builder)
         {
-            var loggerManager = settings.DisableLogging ? NullLoggerManager.Instance : LoggerManager.Instance;
+            var loggerFactory = settings.LoggerFactory;
 
-            if (settings.LogMessageWriterCreators != null)
-            {
-                loggerManager.AddLogMessageWriterCreators(settings.LogMessageWriterCreators.ToArray());
-            }
+            builder.Associate(WellKnownAssociations.LoggerFactory, loggerFactory);
+            builder.Bindings.Bind<ILoggerFactory>().To(loggerFactory);
+            builder.Bindings.Bind(typeof(ILogger<>)).To(context => {
 
-            builder.Associate(WellKnownAssociations.LoggerManager, loggerManager);
-            builder.Bindings.Bind<ILoggerManager>().To(loggerManager);
-            builder.Bindings.Bind(typeof(ILogger<>)).To(context => loggerManager.CreateLogger(context.Service.GetGenericArguments()[0]));
-            builder.Bindings.Bind<ILogger>().To(() => loggerManager.CreateLogger<UnknownLogMessageSource>());
+                var createLoggerMethodNonGeneric = GetType().GetMethod(nameof(CreateLogger),BindingFlags.Static | BindingFlags.NonPublic);
+                var createLoggerMethod = createLoggerMethodNonGeneric.MakeGenericMethod(context.Service.GetGenericArguments()[0]);
+                var logger = createLoggerMethod.Invoke(this, new object[] { loggerFactory });
+                return logger;
+            });
+            builder.Bindings.Bind<ILogger>().To(() => loggerFactory.CreateLogger("UnknownMessageSource"));
 
-            var logger = loggerManager.CreateLogger<Logging>();
-            logger.Debug("<********* BOOTSTAGE : Logging *********>");
+            var logger = loggerFactory.CreateLogger<Logging>();
+            logger.LogDebug("<********* BOOTSTAGE : Logging *********>");
 
-            var executionContextLogger = loggerManager.CreateLogger<ExecutionContextManager>();
+            var executionContextLogger = loggerFactory.CreateLogger<ExecutionContextManager>();
 
             ExecutionContextManager.SetInitialExecutionContext(executionContextLogger);
 
             builder.Bindings.Bind<IExecutionContextManager>().To(new ExecutionContextManager(executionContextLogger));
         }
+
+        static ILogger<T> CreateLogger<T>(ILoggerFactory factory) => new Logger<T>(factory);
     }
 }

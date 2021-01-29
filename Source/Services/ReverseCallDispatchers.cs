@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;
@@ -16,17 +16,17 @@ namespace Dolittle.Runtime.Services
     public class ReverseCallDispatchers : IReverseCallDispatchers
     {
         readonly IExecutionContextManager _executionContextManager;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReverseCallDispatchers"/> class.
         /// </summary>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager"/> to use for creating instances of <see cref="ILogger"/>.</param>
-        public ReverseCallDispatchers(IExecutionContextManager executionContextManager, ILoggerManager loggerManager)
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for creating instances of <see cref="ILogger"/>.</param>
+        public ReverseCallDispatchers(IExecutionContextManager executionContextManager, ILoggerFactory loggerFactory)
         {
             _executionContextManager = executionContextManager;
-            _loggerManager = loggerManager;
+            _loggerFactory = loggerFactory;
         }
 
         /// <inheritdoc/>
@@ -63,6 +63,6 @@ namespace Dolittle.Runtime.Services
                 setPing,
                 getPong,
                 _executionContextManager,
-                _loggerManager.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
+                _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
     }
 }

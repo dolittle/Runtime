@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dolittle.Runtime.Assemblies
@@ -24,13 +24,13 @@ namespace Dolittle.Runtime.Assemblies
             if (entryAssembly == null) entryAssembly = Assembly.GetEntryAssembly();
             var dependencyModel = DependencyContext.Load(entryAssembly);
 
-            logger.Trace("Dependency model has {runtimeLibrariesCount} libraries", dependencyModel.RuntimeLibraries.Count);
+            logger.LogTrace("Dependency model has {runtimeLibrariesCount} libraries", dependencyModel.RuntimeLibraries.Count);
             Libraries = dependencyModel.RuntimeLibraries.Cast<RuntimeLibrary>().Where(_ => _.RuntimeAssemblyGroups.Count > 0).ToArray();
-            logger.Trace("Dependency model has {librariesCount} libraries belonging to an assembly group", Libraries.Count());
+            logger.LogTrace("Dependency model has {librariesCount} libraries belonging to an assembly group", Libraries.Count());
 
             foreach (var library in Libraries)
             {
-                logger.Trace("Providing '{libraryName}, {libraryVersion}'", library.Name, library.Version);
+                logger.LogTrace("Providing '{libraryName}, {libraryVersion}'", library.Name, library.Version);
             }
         }
 

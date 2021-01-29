@@ -17,28 +17,21 @@ namespace Dolittle.Runtime.DependencyInversion
         /// Initializes a new instance of the <see cref="BindingScopeBuilder"/> class.
         /// </summary>
         /// <param name="binding"><see cref="Binding"/> to build for.</param>
-        public BindingScopeBuilder(Binding binding)
-        {
-            _binding = binding;
-        }
+        public BindingScopeBuilder(Binding binding) => _binding = binding;
 
         /// <inheritdoc/>
         public void Singleton()
-        {
-            _binding = new Binding(
-                _binding.Service,
-                _binding.Strategy,
-                new Scopes.Singleton());
-        }
+            =>  _binding = new Binding(
+                    _binding.Service,
+                    _binding.Strategy,
+                    new Scopes.Singleton());
 
         /// <inheritdoc/>
         public void SingletonPerTenant()
-        {
-            _binding = new Binding(
+            => _binding = new Binding(
                 _binding.Service,
                 _binding.Strategy,
                 new Scopes.SingletonPerTenant());
-        }
 
         /// <inheritdoc/>
         public Binding Build()

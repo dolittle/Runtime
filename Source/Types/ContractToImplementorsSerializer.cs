@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Types
 {
@@ -87,16 +87,16 @@ namespace Dolittle.Runtime.Types
                     }
                     else
                     {
-                        _logger.Debug("No implementations of '{contract}'", keyValue[0]);
+                        _logger.LogDebug("No implementations of '{contract}'", keyValue[0]);
                     }
                 }
                 else
                 {
-                    _logger.Debug("Can't find contract type '{contract}' - {line}", keyValue[0], line);
+                    _logger.LogDebug("Can't find contract type '{contract}' - {line}", keyValue[0], line);
                 }
             });
 
-            _logger.Trace("Using {contractsCount} contracts mapped to {implementorsCount} implementors in total", contractsCount, implementorsCount);
+            _logger.LogTrace("Using {contractsCount} contracts mapped to {implementorsCount} implementors in total", contractsCount, implementorsCount);
 
             return map;
         }

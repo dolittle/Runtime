@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
     /// </summary>
     public class OpenGenericCallbackRegistrationSource : IRegistrationSource
     {
-        static readonly IDictionary<Type, Func<IServiceWithType, object>> _callbackByService = new Dictionary<Type, Func<IServiceWithType, object>>();
+        static readonly Dictionary<Type, Func<IServiceWithType, object>> _callbackByService = new();
 
         /// <inheritdoc/>
         public bool IsAdapterForIndividualComponents => false;
@@ -52,6 +52,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// Add a binding between a <see cref="Type"/> and a <see cref="Func{T, TResult}"/> for resolving from a <see cref="IServiceWithType"/>.
         /// </summary>
         /// <param name="typeCallbackAndServicePair"><see cref="KeyValuePair{TKey, TValue}"/> for the type and resolver.</param>
-        internal static void AddService(KeyValuePair<Type, Func<IServiceWithType, object>> typeCallbackAndServicePair) => _callbackByService.Add(typeCallbackAndServicePair);
+        internal static void AddService(KeyValuePair<Type, Func<IServiceWithType, object>> typeCallbackAndServicePair)
+            => _callbackByService.Add(typeCallbackAndServicePair.Key, typeCallbackAndServicePair.Value);
     }
 }

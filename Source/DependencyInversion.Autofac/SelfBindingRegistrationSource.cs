@@ -108,9 +108,6 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// <returns>
         /// A <see cref="string"/> that represents the current <see cref="object"/>.
         /// </returns>
-        public override string ToString()
-        {
-            return "SelfBindingRegistrationSource";
-        }
+        public override string ToString() => nameof(SelfBindingRegistrationSource);
     }
 }

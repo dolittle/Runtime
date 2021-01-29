@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
@@ -17,14 +17,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
         readonly UpdateDefinitionBuilder<AggregateRoot> _update = Builders<AggregateRoot>.Update;
         readonly IAggregatesCollection _aggregates;
-        readonly ILogger<AggregateRoots> _logger;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateRoots"/> class.
         /// </summary>
         /// <param name="aggregates">The <see cref="IAggregatesCollection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public AggregateRoots(IAggregatesCollection aggregates, ILogger<AggregateRoots> logger)
+        public AggregateRoots(IAggregatesCollection aggregates, ILogger logger)
         {
             _aggregates = aggregates;
             _logger = logger;
@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             AggregateRootVersion nextVersion,
             CancellationToken cancellationToken)
         {
-            _logger.Trace("Incrementing version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
+            _logger.LogTrace("Incrementing version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
             ThrowIfNextVersionIsNotGreaterThanExpectedVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
 
             if (expectedVersion == AggregateRootVersion.Initial)
@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             ArtifactId aggregateRoot,
             CancellationToken cancellationToken)
         {
-            _logger.Trace("Fetching version version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
+            _logger.LogTrace("Fetching version version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
             var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
                 & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
             var aggregateDocuments = await _aggregates.Aggregates.Find(

@@ -12,10 +12,7 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         /// Initializes a new instance of the <see cref="Type"/> class.
         /// </summary>
         /// <param name="type"><see cref="Type"/> representing the target.</param>
-        public Type(System.Type type)
-        {
-            Target = type;
-        }
+        public Type(System.Type type) => Target = type;
 
         /// <summary>
         /// Gets the <see cref="Type"/> target.
@@ -23,9 +20,6 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         public System.Type Target { get; }
 
         /// <inheritdoc/>
-        public System.Type GetTargetType()
-        {
-            return Target;
-        }
+        public System.Type GetTargetType() => Target;
     }
 }

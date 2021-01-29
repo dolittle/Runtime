@@ -14,15 +14,9 @@ namespace Dolittle.Runtime.Booting
         event Action<IBindingCollection> _subscribers = (_) => { };
 
         /// <inheritdoc/>
-        public void Notify(IBindingCollection bindings)
-        {
-            _subscribers(bindings);
-        }
+        public void Notify(IBindingCollection bindings) => _subscribers(bindings);
 
         /// <inheritdoc/>
-        public void SubscribeTo(Action<IBindingCollection> subscriber)
-        {
-            _subscribers += subscriber;
-        }
+        public void SubscribeTo(Action<IBindingCollection> subscriber) => _subscribers += subscriber;
     }
 }

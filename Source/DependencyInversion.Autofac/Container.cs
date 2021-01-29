@@ -17,21 +17,12 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         /// Initializes a new instance of the <see cref="Container"/> class.
         /// </summary>
         /// <param name="container"><see cref="global::Autofac.IContainer"/> instance.</param>
-        public Container(global::Autofac.IContainer container)
-        {
-            _container = container;
-        }
+        public Container(global::Autofac.IContainer container) => _container = container;
 
         /// <inheritdoc/>
-        public T Get<T>()
-        {
-            return _container.Resolve<T>();
-        }
+        public T Get<T>() => _container.Resolve<T>();
 
         /// <inheritdoc/>
-        public object Get(Type type)
-        {
-            return _container.Resolve(type);
-        }
+        public object Get(Type type) => _container.Resolve(type);
     }
 }

@@ -59,10 +59,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
         {
             public static IContainer Container = null;
 
-            public static TType Activate<TType>()
-            {
-                return Container.Get<TType>();
-            }
+            public static TType Activate<TType>() => Container.Get<TType>();
         }
     }
 }

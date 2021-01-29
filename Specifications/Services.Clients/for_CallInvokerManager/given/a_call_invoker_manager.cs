@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 

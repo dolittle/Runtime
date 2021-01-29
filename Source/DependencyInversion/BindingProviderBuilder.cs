@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.DependencyInversion
     /// </summary>
     public class BindingProviderBuilder : IBindingProviderBuilder
     {
-        readonly List<BindingBuilder> _bindings = new List<BindingBuilder>();
+        readonly List<BindingBuilder> _bindings = new();
 
         /// <inheritdoc/>
         public IBindingBuilder<T> Bind<T>()
@@ -34,8 +34,6 @@ namespace Dolittle.Runtime.DependencyInversion
 
         /// <inheritdoc/>
         public IBindingCollection Build()
-        {
-            return new BindingCollection(_bindings.Select(_ => _.Build()));
-        }
+            => new BindingCollection(_bindings.Select(_ => _.Build()));
     }
 }

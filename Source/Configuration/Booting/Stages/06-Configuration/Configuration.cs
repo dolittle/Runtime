@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Immutability;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Configuration
@@ -22,8 +22,8 @@ namespace Dolittle.Runtime.Configuration
         public void Perform(NoSettings settings, IBootStageBuilder builder)
         {
             var typeFinder = builder.GetAssociation(WellKnownAssociations.TypeFinder) as ITypeFinder;
-            var loggerManager = builder.GetAssociation(WellKnownAssociations.LoggerManager) as ILoggerManager;
-            var logger = loggerManager.CreateLogger<Configuration>();
+            var loggerFactory = builder.GetAssociation(WellKnownAssociations.LoggerFactory) as ILoggerFactory;
+            var logger = loggerFactory.CreateLogger<Configuration>();
 
             var configurationObjectProviders = new ConfigurationObjectProviders(typeFinder, builder.Container, logger);
             builder.Bindings.Bind<IConfigurationObjectProviders>().To(configurationObjectProviders);
@@ -31,12 +31,12 @@ namespace Dolittle.Runtime.Configuration
             var configurationObjectTypes = typeFinder.FindMultiple<IConfigurationObject>();
             configurationObjectTypes.ForEach(_ =>
             {
-                logger.Trace("Bind configuration object '{configurationObjectName} - {configurationObjectType}'", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName);
+                logger.LogTrace("Bind configuration object '{configurationObjectName} - {configurationObjectType}'", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName);
                 _.ShouldBeImmutable();
                 builder.Bindings.Bind(_).To(() =>
                 {
                     var instance = configurationObjectProviders.Provide(_);
-                    logger.Trace("Providing configuration object '{configurationObjectName} - {configurationTypeName}' - {configurationObjectHash}", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName, instance.GetHashCode());
+                    logger.LogTrace("Providing configuration object '{configurationObjectName} - {configurationTypeName}' - {configurationObjectHash}", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName, instance.GetHashCode());
                     return instance;
                 });
             });
