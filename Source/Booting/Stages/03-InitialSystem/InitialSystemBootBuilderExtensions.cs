@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Time;
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting.Stages
 {
     /// <summary>
     /// Extensions for building <see cref="InitialSystemSettings"/>.
