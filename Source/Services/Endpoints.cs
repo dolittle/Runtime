@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Collections;
@@ -58,7 +59,8 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public void Dispose()
         {
-            foreach ((var type, var endpoint) in _endpoints) endpoint.Dispose();
+            foreach ((_, var endpoint) in _endpoints) endpoint.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         /// <inheritdoc/>

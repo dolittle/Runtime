@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 
@@ -24,7 +23,7 @@ namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager.given
                 { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", 1) },
                 { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", 1) }
             });
-            manager = new CallInvokerManager(known_clients.Object, configuration, metadata_providers.Object, Mock.Of<ILogger>());
+            manager = new CallInvokerManager(known_clients.Object, configuration, metadata_providers.Object);
         };
     }
 }

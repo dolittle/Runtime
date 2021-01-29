@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <summary>
         /// Gets or sets the MongoDB servers.
         /// </summary>
-        public IEnumerable<string> Servers { get; set; }
+        public IEnumerable<string> Servers { get; set; }
 
         /// <summary>
         /// Gets or sets the database name.

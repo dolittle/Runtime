@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.ApplicationModel
         /// <summary>
         /// Represents the identifier for a not set application.
         /// </summary>
-        public static Application NotSet = Guid.Parse("4fe9492c-1d19-4e6b-be72-03208789906e");
+        public static readonly Application NotSet = Guid.Parse("4fe9492c-1d19-4e6b-be72-03208789906e");
 
         /// <summary>
         /// Implicitly converts from a <see cref="Guid"/> to a <see cref="Application"/>.
@@ -27,11 +27,5 @@ namespace Dolittle.Runtime.ApplicationModel
         /// </summary>
         /// <returns><see cref="Application"/>.</returns>
         public static Application New() => Guid.NewGuid();
-
-        public static void Stuff()
-        {
-            var concept = New();
-            Guid x = concept;
-        }
     }
 }

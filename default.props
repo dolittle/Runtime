@@ -3,9 +3,6 @@
     
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
     </PropertyGroup>
-
-    <ItemGroup>
-        <!-- <PackageReference Include="Dolittle.Common" Version="2.*" PrivateAssets="All"/> -->
-    </ItemGroup>
 </Project>

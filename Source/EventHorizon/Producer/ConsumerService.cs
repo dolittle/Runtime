@@ -117,9 +117,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 _logger.LogWarning(message);
                 await dispatcher.Reject(
                     new SubscriptionResponse
-                        {
-                            Failure = new Failure(SubscriptionFailures.MissingSubscriptionArguments, message)
-                        }, context.CancellationToken).ConfigureAwait(false);
+                    {
+                        Failure = new Failure(SubscriptionFailures.MissingSubscriptionArguments, message)
+                    },
+                    context.CancellationToken).ConfigureAwait(false);
                 return;
             }
 

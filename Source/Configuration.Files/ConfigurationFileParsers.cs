@@ -14,7 +14,6 @@ namespace Dolittle.Runtime.Configuration.Files
     /// </summary>
     public class ConfigurationFileParsers : IConfigurationFileParsers
     {
-        readonly ITypeFinder _typeFinder;
         readonly IEnumerable<ICanParseConfigurationFile> _parsers;
 
         /// <summary>
@@ -24,7 +23,6 @@ namespace Dolittle.Runtime.Configuration.Files
         /// <param name="container"><see cerf="IContainer"/> used to get instances.</param>
         public ConfigurationFileParsers(ITypeFinder typeFinder, IContainer container)
         {
-            _typeFinder = typeFinder;
             _parsers = typeFinder
                         .FindMultiple<ICanParseConfigurationFile>()
                         .Select(_ => container.Get(_) as ICanParseConfigurationFile);

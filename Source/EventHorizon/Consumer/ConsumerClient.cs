@@ -245,7 +245,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             ConsentId consentId,
             SubscriptionId subscriptionId,
             IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
-            {
+        {
             _logger.LogInformation("Successfully connected event horizon with {subscriptionId}. Waiting for events to process", subscriptionId);
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();
             var eventsFetcher = new EventsFromEventHorizonFetcher(queue);

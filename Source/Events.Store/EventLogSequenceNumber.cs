@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// The initial sequence number of the Event Store before any Events are committed.
         /// </summary>
-        public static EventLogSequenceNumber Initial = 0;
+        public static readonly EventLogSequenceNumber Initial = 0;
 
         /// <summary>
         /// Implicitly convert a <see cref="ulong"/> to an <see cref="EventLogSequenceNumber"/>.

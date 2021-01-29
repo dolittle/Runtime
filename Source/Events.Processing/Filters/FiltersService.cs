@@ -393,31 +393,31 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
+        {
+            _logger.LogDebug("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream, filterDefinition.SourceStream);
+            try
             {
-                _logger.LogDebug("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream, filterDefinition.SourceStream);
-                try
-                {
-                    return (_streamProcessors.TryRegister(
-                        scopeId,
-                        filterDefinition.TargetStream.Value,
-                        new EventLogStreamDefinition(),
-                        () => getFilterProcessor(),
-                        cancellationToken,
-                        out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
-                }
-                catch (Exception ex)
-                {
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        _logger.LogWarning(
-                            ex,
-                            "Error occurred while trying to register stream processor for Filter '{Filter}'",
-                            filterDefinition.TargetStream);
-                    }
-
-                    return ex;
-                }
+                return (_streamProcessors.TryRegister(
+                    scopeId,
+                    filterDefinition.TargetStream.Value,
+                    new EventLogStreamDefinition(),
+                    () => getFilterProcessor(),
+                    cancellationToken,
+                    out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
             }
+            catch (Exception ex)
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Error occurred while trying to register stream processor for Filter '{Filter}'",
+                        filterDefinition.TargetStream);
+                }
+
+                return ex;
+            }
+        }
 
         async Task ValidateFilter<TFilterDefinition>(
             ScopeId scopeId,

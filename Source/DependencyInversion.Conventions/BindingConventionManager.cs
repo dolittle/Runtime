@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.DependencyInversion.Conventions
     public class BindingConventionManager : IBindingConventionManager
     {
         readonly ITypeFinder _typeFinder;
-        readonly List<Type> _conventions;
         readonly ILogger _logger;
         readonly IContainer _bootContainer;
 
@@ -35,7 +34,6 @@ namespace Dolittle.Runtime.DependencyInversion.Conventions
             ILogger logger)
         {
             _typeFinder = typeFinder;
-            _conventions = new List<Type>();
             _logger = logger;
             _bootContainer = bootContainer;
         }

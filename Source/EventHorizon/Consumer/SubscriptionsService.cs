@@ -25,25 +25,21 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     {
         readonly FactoryFor<IConsumerClient> _getConsumerClient;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ITenants _tenants;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
         /// </summary>
         /// <param name="getConsumerClient">The <see cref="FactoryFor{T}" /><see cref="IConsumerClient" />.</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
-        /// <param name="tenants">The <see cref="ITenants"/> system.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public SubscriptionsService(
             FactoryFor<IConsumerClient> getConsumerClient,
             IExecutionContextManager executionContextManager,
-            ITenants tenants,
             ILogger logger)
         {
             _getConsumerClient = getConsumerClient;
             _executionContextManager = executionContextManager;
-            _tenants = tenants;
             _logger = logger;
         }
 

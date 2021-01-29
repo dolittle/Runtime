@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 
@@ -15,7 +14,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
             stream_processor_state_repository.Object,
             event_processor.Object,
             events_fetcher.Object,
-            events_fetcher_policy,
-            Mock.Of<ILogger<FailingPartitions>>());
+            events_fetcher_policy);
     }
 }

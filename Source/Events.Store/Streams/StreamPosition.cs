@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <summary>
         /// Represents the initial value of the <see cref="StreamPosition">position</see>.
         /// </summary>
-        public static StreamPosition Start = 0;
+        public static readonly StreamPosition Start = 0;
 
         /// <summary>
         /// Implicitly convert from <see cref="ulong" /> to <see cref="StreamPosition" />.

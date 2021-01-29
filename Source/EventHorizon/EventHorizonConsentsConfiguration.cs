@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.EventHorizon
             => TryGetValue(producerTenant, out var consents) switch
             {
                 true => consents,
-                false => Enumerable.Empty<EventHorizonConsent>()
+                false => Enumerable.Empty<EventHorizonConsent>(),
             };
     }
 }

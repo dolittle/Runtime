@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Reflection
 
         static void AddPropertyToDictionary<T>(PropertyInfo property, object source, Dictionary<string, T> dictionary)
         {
-            object value = property.GetValue(source);
+            var value = property.GetValue(source);
             if (IsOfType<T>(value))
                 dictionary.Add(property.Name, (T)value);
         }

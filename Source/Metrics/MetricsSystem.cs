@@ -49,6 +49,7 @@ namespace Dolittle.Runtime.Metrics
         {
             _server?.Stop();
             _server = null;
+            GC.SuppressFinalize(this);
         }
 
         /// <inheritdoc/>
