@@ -27,7 +27,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
         /// <param name="scheduler"><see cref="IScheduler"/> for scheduling work.</param>
-        /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
         /// <param name="bindings">Additional bindings.</param>
         /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
         /// <returns>Configured <see cref="IContainer"/> and <see cref="IBindingCollection"/>.</returns>
