@@ -7,7 +7,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
-    <ProjectReference Include="../Scheduling/Scheduling.csproj" />
     <ProjectReference Include="../Types/Types.csproj" />
     <ProjectReference Include="../Reflection/Reflection.csproj" />   
   </ItemGroup>

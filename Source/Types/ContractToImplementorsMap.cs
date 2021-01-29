@@ -6,8 +6,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
+using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Reflection;
-using Dolittle.Runtime.Scheduling;
 
 namespace Dolittle.Runtime.Types
 {
@@ -16,21 +17,12 @@ namespace Dolittle.Runtime.Types
     /// </summary>
     public class ContractToImplementorsMap : IContractToImplementorsMap
     {
-        readonly IScheduler _scheduler;
-        readonly ConcurrentDictionary<Type, ConcurrentBag<Type>> _contractsAndImplementors = new ConcurrentDictionary<Type, ConcurrentBag<Type>>();
-        readonly ConcurrentDictionary<Type, Type> _allTypes = new ConcurrentDictionary<Type, Type>();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ContractToImplementorsMap"/> class.
-        /// </summary>
-        /// <param name="scheduler"><see cref="IScheduler"/> used for scheduling work.</param>
-        public ContractToImplementorsMap(IScheduler scheduler)
-        {
-            _scheduler = scheduler;
-        }
+        readonly ConcurrentDictionary<Type, ConcurrentBag<Type>> _contractsAndImplementors = new();
+        readonly ConcurrentDictionary<Type, Type> _allTypes = new();
 
         /// <inheritdoc/>
-        public IDictionary<Type, IEnumerable<Type>> ContractsAndImplementors => _contractsAndImplementors.ToDictionary(_ => _.Key, _ => _.Value.AsEnumerable());
+        public IDictionary<Type, IEnumerable<Type>> ContractsAndImplementors
+            => _contractsAndImplementors.ToDictionary(_ => _.Key, _ => _.Value.AsEnumerable());
 
         /// <inheritdoc/>
         public IEnumerable<Type> All => _allTypes.Keys;
@@ -43,34 +35,24 @@ namespace Dolittle.Runtime.Types
         }
 
         /// <inheritdoc/>
-        public IEnumerable<Type> GetImplementorsFor<T>()
-        {
-            return GetImplementorsFor(typeof(T));
-        }
+        public IEnumerable<Type> GetImplementorsFor<T>() => GetImplementorsFor(typeof(T));
 
         /// <inheritdoc/>
-        public IEnumerable<Type> GetImplementorsFor(Type contract)
-        {
-            return GetImplementingTypesFor(contract);
-        }
+        public IEnumerable<Type> GetImplementorsFor(Type contract) => GetImplementingTypesFor(contract);
 
-        void AddTypesToAllTypes(IEnumerable<Type> types)
-        {
-            foreach (var type in types) _allTypes[type] = type;
-        }
+        void AddTypesToAllTypes(IEnumerable<Type> types) => types.ForEach(type => _allTypes[type] = type);
 
         void MapTypes(IEnumerable<Type> types)
-        {
-            var implementors = types.Where(IsImplementation);
-            _scheduler.PerformForEach(implementors, implementor =>
-            {
-                foreach (var contract in implementor.AllBaseAndImplementingTypes())
+            => Parallel.ForEach(types.Where(IsImplementation).ToArray(), AddTypeMappingsFor);
+
+        void AddTypeMappingsFor(Type implementor)
+            => implementor
+                .AllBaseAndImplementingTypes()
+                .ForEach(contract =>
                 {
                     var implementingTypes = GetImplementingTypesFor(contract);
                     if (!implementingTypes.Contains(implementor)) implementingTypes.Add(implementor);
-                }
-            });
-        }
+                });
 
         bool IsImplementation(Type type)
         {
@@ -79,8 +61,6 @@ namespace Dolittle.Runtime.Types
         }
 
         ConcurrentBag<Type> GetImplementingTypesFor(Type contract)
-        {
-            return _contractsAndImplementors.GetOrAdd(contract, _ => new ConcurrentBag<Type>());
-        }
+            => _contractsAndImplementors.GetOrAdd(contract, _ => new ConcurrentBag<Type>());
     }
 }

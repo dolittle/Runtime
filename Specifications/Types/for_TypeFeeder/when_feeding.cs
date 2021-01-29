@@ -5,7 +5,6 @@ using System;
 using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Scheduling;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -43,7 +42,7 @@ namespace Dolittle.Runtime.Types.for_TypeFeeder
             contract_to_implementors_map_mock = new Mock<IContractToImplementorsMap>();
             contract_to_implementors_map_mock.SetupGet(c => c.All).Returns(types);
 
-            type_feeder = new TypeFeeder(new SyncScheduler(), Mock.Of<ILogger>());
+            type_feeder = new TypeFeeder(Mock.Of<ILogger>());
         };
 
         Because of = () => type_feeder.Feed(assemblies_mock.Object, contract_to_implementors_map_mock.Object);

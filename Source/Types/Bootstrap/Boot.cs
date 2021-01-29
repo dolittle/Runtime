@@ -4,7 +4,6 @@
 using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Scheduling;
 
 namespace Dolittle.Runtime.Types.Bootstrap
 {
@@ -17,20 +16,18 @@ namespace Dolittle.Runtime.Types.Bootstrap
         /// Initialize systems needed for the type system and discovery mechanisms to work.
         /// </summary>
         /// <param name="assemblies"><see cref="IAssemblies"/> that will be used.</param>
-        /// <param name="scheduler"><see cref="IScheduler"/> to use for scheduling work.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         /// <param name="entryAssembly"><see cref="Assembly"/> to use as entry assembly - null indicates it will ask for the entry assembly.</param>
         /// <returns><see cref="ITypeFinder"/> that can be used.</returns>
-        public static ITypeFinder Start(IAssemblies assemblies, IScheduler scheduler, ILogger logger, Assembly entryAssembly = null)
+        public static ITypeFinder Start(IAssemblies assemblies, ILogger logger, Assembly entryAssembly = null)
         {
-            if (entryAssembly == null) entryAssembly = Assembly.GetEntryAssembly();
+            if (entryAssembly is null) entryAssembly = Assembly.GetEntryAssembly();
 
-            IContractToImplementorsMap contractToImplementorsMap;
+            var contractToImplementorsMap = new ContractToImplementorsMap();
 
-            contractToImplementorsMap = new ContractToImplementorsMap(scheduler);
             contractToImplementorsMap.Feed(entryAssembly.GetTypes());
 
-            var typeFeeder = new TypeFeeder(scheduler, logger);
+            var typeFeeder = new TypeFeeder(logger);
             typeFeeder.Feed(assemblies, contractToImplementorsMap);
 
             return new TypeFinder(contractToImplementorsMap);

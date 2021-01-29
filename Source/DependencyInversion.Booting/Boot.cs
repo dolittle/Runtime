@@ -5,12 +5,12 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.DependencyInversion.Conventions;
 using Dolittle.Runtime.IO;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.DependencyInversion.Booting
@@ -27,7 +27,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// </summary>
         /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
-        /// <param name="scheduler"><see cref="IScheduler"/> for scheduling work.</param>
         /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
         /// <param name="bindings">Additional bindings.</param>
         /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
@@ -35,7 +34,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         public static BootResult Start(
             IAssemblies assemblies,
             ITypeFinder typeFinder,
-            IScheduler scheduler,
             IFileSystem fileSystem,
             ILoggerFactory loggerFactory,
             IEnumerable<Binding> bindings = null,
@@ -43,7 +41,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         {
             var logger = loggerFactory.CreateLogger(typeof(Boot));
             logger.LogTrace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerFactory);
+            var initialBindings = GetBootBindings(assemblies, typeFinder, fileSystem, loggerFactory);
             if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
             _container = bootContainer;
 
@@ -56,7 +54,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             var bindingCollection = DiscoverAndBuildBuildBindings(
                 bootContainer,
                 typeFinder,
-                scheduler,
                 logger,
                 initialBindings,
                 otherBindings);
@@ -74,7 +71,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         /// </summary>
         /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
-        /// <param name="scheduler"><see cref="IScheduler"/> for scheduling work.</param>
         /// <param name="fileSystem"><see cref="IFileSystem"/> to use.</param>
         /// <param name="containerType"><see cref="Type"/>Container type.</param>
         /// <param name="bindings">Additional bindings.</param>
@@ -83,7 +79,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         public static IBindingCollection Start(
             IAssemblies assemblies,
             ITypeFinder typeFinder,
-            IScheduler scheduler,
             IFileSystem fileSystem,
             ILoggerFactory loggerFactory,
             Type containerType,
@@ -92,7 +87,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         {
             var logger = loggerFactory.CreateLogger(typeof(Boot));
             logger.LogTrace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, scheduler, fileSystem, loggerFactory);
+            var initialBindings = GetBootBindings(assemblies, typeFinder, fileSystem, loggerFactory);
 
             if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
             _container = bootContainer;
@@ -106,7 +101,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             return DiscoverAndBuildBuildBindings(
                 bootContainer,
                 typeFinder,
-                scheduler,
                 logger,
                 initialBindings,
                 otherBindings);
@@ -125,7 +119,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         static IBindingCollection GetBootBindings(
             IAssemblies assemblies,
             ITypeFinder typeFinder,
-            IScheduler scheduler,
             IFileSystem fileSystem,
             ILoggerFactory loggerFactory)
         {
@@ -133,7 +126,6 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
             {
                 Bind(typeof(IAssemblies), assemblies),
                 Bind(typeof(ITypeFinder), typeFinder),
-                Bind(typeof(IScheduler), scheduler),
                 Bind(typeof(IFileSystem), fileSystem),
                 Bind(typeof(ILoggerFactory), loggerFactory),
                 Bind(typeof(GetContainer), (GetContainer)(() => _container))
@@ -143,13 +135,12 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         static IBindingCollection DiscoverAndBuildBuildBindings(
             IContainer bootContainer,
             ITypeFinder typeFinder,
-            IScheduler scheduler,
             ILogger logger,
             IBindingCollection initialBindings,
             IEnumerable<Binding> bindings)
         {
             logger.LogTrace("Discover bindings");
-            var discoveredBindings = DiscoverBindings(bootContainer, typeFinder, scheduler, logger);
+            var discoveredBindings = DiscoverBindings(bootContainer, typeFinder, logger);
 
             logger.LogTrace("Create a new binding collection");
             var bindingCollection = new BindingCollection(initialBindings, discoveredBindings, bindings);
@@ -167,17 +158,16 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         static IBindingCollection DiscoverBindings(
             IContainer bootContainer,
             ITypeFinder typeFinder,
-            IScheduler scheduler,
             ILogger logger)
         {
             logger.LogTrace("Discover Bindings");
-            var bindingConventionManager = new BindingConventionManager(bootContainer, typeFinder, scheduler, logger);
+            var bindingConventionManager = new BindingConventionManager(bootContainer, typeFinder, logger);
 
             logger.LogTrace("Discover and setup bindings");
             var bindingsFromConventions = bindingConventionManager.DiscoverAndSetupBindings();
 
             logger.LogTrace("Discover binding providers and get bindings");
-            var bindingsFromProviders = DiscoverBindingProvidersAndGetBindings(bootContainer, typeFinder, scheduler);
+            var bindingsFromProviders = DiscoverBindingProvidersAndGetBindings(bootContainer, typeFinder);
 
             logger.LogTrace("Compose bindings in new collection");
             return new BindingCollection(bindingsFromProviders, bindingsFromConventions);
@@ -209,19 +199,14 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
 
         static IBindingCollection DiscoverBindingProvidersAndGetBindings(
             IContainer bootContainer,
-            ITypeFinder typeFinder,
-            IScheduler scheduler)
+            ITypeFinder typeFinder)
         {
             var bindingProviders = typeFinder.FindMultiple<ICanProvideBindings>();
             var bindingCollections = new ConcurrentBag<IBindingCollection>();
 
-            scheduler.PerformForEach(bindingProviders, bindingProviderType =>
-            {
-                var bindingProvider = bootContainer.Get(bindingProviderType) as ICanProvideBindings;
-                var bindingProviderBuilder = new BindingProviderBuilder();
-                bindingProvider.Provide(bindingProviderBuilder);
-                bindingCollections.Add(bindingProviderBuilder.Build());
-            });
+            Parallel.ForEach(
+                bindingProviders,
+                bindingProviderType => ProvideBindingsFromProvider(bindingProviderType, bootContainer, bindingCollections));
 
             var bindingCollection = new BindingCollection(bindingCollections.ToArray());
             return bindingCollection;
@@ -240,6 +225,14 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
 
             var container = containerProvider.Provide(assemblies, bindingCollection);
             return container;
+        }
+
+        static void ProvideBindingsFromProvider(Type bindingProviderType, IContainer bootContainer, ConcurrentBag<IBindingCollection> bindingCollections)
+        {   
+            var bindingProvider = bootContainer.Get(bindingProviderType) as ICanProvideBindings;
+            var bindingProviderBuilder = new BindingProviderBuilder();
+            bindingProvider.Provide(bindingProviderBuilder);
+            bindingCollections.Add(bindingProviderBuilder.Build());
         }
 
         static void ThrowIfMissingContainerProvider(Type containerProvider)

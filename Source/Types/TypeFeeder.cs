@@ -2,9 +2,9 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Reflection;
+using System.Threading.Tasks;
 using Dolittle.Runtime.Assemblies;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Scheduling;
 
 namespace Dolittle.Runtime.Types
 {
@@ -13,36 +13,31 @@ namespace Dolittle.Runtime.Types
     /// </summary>
     public class TypeFeeder : ITypeFeeder
     {
-        readonly IScheduler _scheduler;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFeeder"/> class.
         /// </summary>
-        /// <param name="scheduler"><see cref="IScheduler"/> to use for scheduling work.</param>
         /// <param name="logger"><see cref="ILogger"/> used for logging.</param>
-        public TypeFeeder(IScheduler scheduler, ILogger logger)
-        {
-            _scheduler = scheduler;
-            _logger = logger;
-        }
+        public TypeFeeder(ILogger logger) => _logger = logger;
 
         /// <inheritdoc/>
         public void Feed(IAssemblies assemblies, IContractToImplementorsMap map)
+            => Parallel.ForEach(
+                assemblies.GetAll(),
+                assembly => FeedWithTypesFromAssembly(assembly, map));
+
+        void FeedWithTypesFromAssembly(Assembly assembly, IContractToImplementorsMap map)
         {
-            _scheduler.PerformForEach(assemblies.GetAll(), assembly =>
+            try
             {
-                try
-                {
-                    var types = assembly.GetTypes();
-                    map.Feed(types);
-                }
-                catch (ReflectionTypeLoadException ex)
-                {
-                    foreach (var loaderException in ex.LoaderExceptions)
-                        _logger.LogError("TypeFeed failure for assembly {assemblyName} : {loaderExceptionSource} {loaderExceptionMessage}", assembly.FullName, loaderException.Source, loaderException.Message);
-                }
-            });
+                map.Feed(assembly.GetTypes());
+            }
+            catch (ReflectionTypeLoadException ex)
+            {
+                foreach (var loaderException in ex.LoaderExceptions)
+                    _logger.LogError("TypeFeed failure for assembly {AssemblyName} : {LoaderExceptionSource} {LoaderExceptionMessage}", assembly.FullName, loaderException.Source, loaderException.Message);
+            }
         }
     }
 }

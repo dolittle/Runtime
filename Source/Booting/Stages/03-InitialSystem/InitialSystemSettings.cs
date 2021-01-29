@@ -3,7 +3,6 @@
 
 using System.ComponentModel;
 using Dolittle.Runtime.IO;
-using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Time;
 
 namespace Dolittle.Runtime.Booting.Stages
@@ -17,11 +16,6 @@ namespace Dolittle.Runtime.Booting.Stages
         /// Gets the <see cref="IFileSystem"/> to use.
         /// </summary>
         public IFileSystem FileSystem { get; internal set; }
-
-        /// <summary>
-        /// Gets the <see cref="IScheduler"/> to use.
-        /// </summary>
-        public IScheduler Scheduler { get; internal set; }
 
         /// <summary>
         /// Gets the <see cref="ISystemClock"/> to use.
