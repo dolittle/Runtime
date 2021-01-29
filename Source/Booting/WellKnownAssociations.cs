@@ -5,7 +5,6 @@ using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting
@@ -19,11 +18,6 @@ namespace Dolittle.Runtime.Booting
         /// The entry <see cref="Assembly"/> defined.
         /// </summary>
         public const string EntryAssembly = "EntryAssembly";
-
-        /// <summary>
-        /// The <see cref="IScheduler">scheduler</see> to be used.
-        /// </summary>
-        public const string Scheduler = "Scheduler";
 
         /// <summary>
         /// The <see cref="IAssemblies">assemblies</see> available.

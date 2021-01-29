@@ -7,7 +7,6 @@ using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.Assemblies.Rules;
 using Dolittle.Runtime.Collections;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Scheduling;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Booting.Stages
@@ -26,7 +25,6 @@ namespace Dolittle.Runtime.Booting.Stages
             var entryAssembly = builder.GetAssociation<Assembly>(WellKnownAssociations.EntryAssembly);
             var loggerFactory = builder.GetAssociation<ILoggerFactory>(WellKnownAssociations.LoggerFactory);
             var logger = loggerFactory.CreateLogger<Discovery>();
-            var scheduler = builder.GetAssociation<IScheduler>(WellKnownAssociations.Scheduler);
 
             logger.LogDebug("  Discovery");
             var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
@@ -38,7 +36,7 @@ namespace Dolittle.Runtime.Booting.Stages
                 }
             });
             logger.LogDebug("  Set up type system for discovery");
-            var typeFinder = Types.Bootstrap.Boot.Start(assemblies, scheduler, logger, entryAssembly);
+            var typeFinder = Types.Bootstrap.Boot.Start(assemblies, logger, entryAssembly);
             logger.LogDebug("  Type system ready");
 
             builder.Bindings.Bind<IAssemblies>().To(assemblies);

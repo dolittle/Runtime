@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Time
+namespace Dolittle.Runtime.Rudimentary
 {
     /// <summary>
     /// Extensions for DateTime.
@@ -16,7 +16,8 @@ namespace Dolittle.Runtime.Time
         /// <param name="leftHandSide"><see cref="DateTime"/> to check equality for.</param>
         /// <param name="rightHandSide"><see cref="DateTimeOffset"/> to check equality with.</param>
         /// <returns>true if equal, false if not.</returns>
-        public static bool LossyEquals(this DateTime leftHandSide, DateTimeOffset rightHandSide) => rightHandSide.LossyEquals(leftHandSide);
+        public static bool LossyEquals(this DateTime leftHandSide, DateTimeOffset rightHandSide)
+            => rightHandSide.LossyEquals(leftHandSide);
 
         /// <summary>
         /// Performs a lossy equals algorithm.
@@ -24,7 +25,8 @@ namespace Dolittle.Runtime.Time
         /// <param name="leftHandSide"><see cref="DateTime"/> to check equality for.</param>
         /// <param name="rightHandSide"><see cref="DateTime"/> to check equality with.</param>
         /// <returns>true if equal, false if not.</returns>
-        public static bool LossyEquals(this DateTime leftHandSide, DateTime rightHandSide) => new DateTimeOffset(leftHandSide.ToUniversalTime()).LossyEquals(rightHandSide.ToUniversalTime());
+        public static bool LossyEquals(this DateTime leftHandSide, DateTime rightHandSide)
+            => new DateTimeOffset(leftHandSide.ToUniversalTime()).LossyEquals(rightHandSide.ToUniversalTime());
 
         /// <summary>
         /// Converts the date to Unix Time in Milliseconds.
@@ -32,9 +34,9 @@ namespace Dolittle.Runtime.Time
         /// <param name="dateTime"><see cref="DateTime"/> to convert.</param>
         /// <returns>Time in uniq time milliseconds (Epoch).</returns>
         public static long ToUnixTimeMilliseconds(this DateTime dateTime)
-        {
-            return new DateTimeOffset(dateTime.ToUniversalTime(), TimeSpan.Zero).ToUniversalTime().ToUnixTimeMilliseconds();
-        }
+            => new DateTimeOffset(dateTime.ToUniversalTime(), TimeSpan.Zero)
+                .ToUniversalTime()
+                .ToUnixTimeMilliseconds();
 
         /// <summary>
         /// Converts the unix milliseconds to a DateTime.
@@ -42,9 +44,7 @@ namespace Dolittle.Runtime.Time
         /// <param name="milliseconds">The epoch time in milliseconds.</param>
         /// <returns>Converted <see cref="DateTime"/>.</returns>
         public static DateTime ToDateTime(this long milliseconds)
-        {
-            return DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).ToUniversalTime().UtcDateTime;
-        }
+            => DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).ToUniversalTime().UtcDateTime;
 
         /// <summary>
         /// Converts the unix milliseconds to a DateTime.
@@ -52,8 +52,6 @@ namespace Dolittle.Runtime.Time
         /// <param name="milliseconds">The epoch time in milliseconds.</param>
         /// <returns>Converted <see cref="DateTimeOffset"/>.</returns>
         public static DateTimeOffset ToDateTimeOffset(this long milliseconds)
-        {
-            return DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).ToUniversalTime();
-        }
+            => DateTimeOffset.FromUnixTimeMilliseconds(milliseconds).ToUniversalTime();
     }
 }

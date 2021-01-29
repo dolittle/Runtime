@@ -34,7 +34,6 @@ namespace Dolittle.Runtime.Booting
             {
                 new Basics(),
                 new Logging(),
-                new InitialSystem(),
                 new Discovery(),
                 new PostDiscovery(DiscoverBootStages)
             };
