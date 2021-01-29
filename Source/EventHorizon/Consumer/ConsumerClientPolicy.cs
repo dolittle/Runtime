@@ -19,10 +19,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Initializes a new instance of the <see cref="ConsumerClientPolicy"/> class.
         /// </summary>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public ConsumerClientPolicy(ILogger<ConsumerClientPolicy> logger)
-        {
-            _logger = logger;
-        }
+        public ConsumerClientPolicy(ILogger<ConsumerClientPolicy> logger) => _logger = logger;
 
         /// <inheritdoc/>
         public Type Type => typeof(ConsumerClient);

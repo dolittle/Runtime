@@ -59,19 +59,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.LogTrace("Retrying processing of Event from Event Horizon");
+            _logger.RetryProcessEvent(_subscriptionId);
             return Process(@event, cancellationToken);
         }
 
         async Task<IProcessingResult> Process(CommittedEvent @event, CancellationToken cancellationToken)
         {
-            _logger.LogTrace(
-                "Processing Event {EventType} from Event Horizon in Scope {Scope} from Microservice {ProducerMicroservice} and Tenant {ProducerTenant}",
-                @event.Type.Id,
-                Scope,
-                _subscriptionId.ProducerMicroserviceId,
-                _subscriptionId.ProducerTenantId);
-
+            _logger.ProcessEvent(@event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
             await _policy.Execute(
                 cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),
                 cancellationToken).ConfigureAwait(false);

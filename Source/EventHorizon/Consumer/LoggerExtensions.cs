@@ -3,6 +3,8 @@
 
 using System;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
@@ -10,13 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     internal static class LoggerExtensions
-    {
-        static readonly Action<ILogger, SubscriptionId, Exception> _alreadySubscribedTo = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Debug,
-                new EventId(935150893, nameof(AlreadySubscribedTo)),
-                "Already subscribed to subscription {SubscriptionId}");
-        
+    {   
         static readonly Action<ILogger, Guid, Exception> _noMicroserviceConfigurationFor = LoggerMessage
             .Define<Guid>(
                 LogLevel.Warning,
@@ -75,9 +71,54 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 LogLevel.Warning,
                 new EventId(829474082, nameof(ErrorWhileHandlingEventFromSubscription)),
                 "An error occurred while handling event horizon event coming from subscription {Subscription}");
-        
-        internal static void AlreadySubscribedTo(this ILogger logger, SubscriptionId subscriptionId)
-            => _alreadySubscribedTo(logger, subscriptionId, null);
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _retryProcessEvent = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Trace,
+                new EventId(315586919, nameof(RetryProcessEvent)),
+                "Retrying processing of event from Event Horizon for {Subscription}");
+
+        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Exception> _processEvent = LoggerMessage
+            .Define<Guid, Guid, Guid, Guid>(
+                LogLevel.Trace,
+                new EventId(1329962982, nameof(ProcessEvent)),
+                "Processing Event {EventType} from Event Horizon in Scope {Scope} from Microservice {ProducerMicroservice} and Tenant {ProducerTenant}");
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _failedStartingSubscription = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Warning,
+                new EventId(227530761, nameof(FailedStartingSubscription)),
+                "Subscription: {SubscriptionId} failed");
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _subscriptionAlreadyRegistered = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Warning,
+                new EventId(34552119, nameof(SubscriptionAlreadyRegistered)),
+                "Subscription: '{SubscriptionId}' already registered");
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _successfullyRegisteredSubscription = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Trace,
+                new EventId(92493948, nameof(SuccessfullyRegisteredSubscription)),
+                "Subscription: '{SubscriptionId}' successfully registered");
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _unregisteringSubscription = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Debug,
+                new EventId(908025101, nameof(UnregisteringSubscription)),
+                "Unregistering Subscription: {SubscriptionId}");
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _incomingSubscripton = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Information,
+                new EventId(409082696, nameof(IncomingSubscripton)),
+                "Incoming event horizon subscription request from head to runtime. {SubscriptionId}");
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _errorWhileSubscribing = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Warning,
+                new EventId(1317844869, nameof(ErrorWhileSubscribing)),
+                "An error occurred while trying to handling event horizon subscription: {Subscription}");
 
         internal static void NoMicroserviceConfigurationFor(this ILogger logger, Microservice producerMicroservice)
             => _noMicroserviceConfigurationFor(logger, producerMicroservice, null);
@@ -107,6 +148,30 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         internal static void ErrorWhileHandlingEventFromSubscription(this ILogger logger, Exception exception, SubscriptionId subscription)
             => _errorWhileHandlingEventFromSubscription(logger, subscription, exception);
+
+        internal static void RetryProcessEvent(this ILogger logger, SubscriptionId subscription)
+            => _retryProcessEvent(logger, subscription, null);
+
+        internal static void ProcessEvent(this ILogger logger, ArtifactId eventTypeId, ScopeId scope, Microservice producerMicroservice, TenantId producerTenant)
+            => _processEvent(logger, eventTypeId, scope, producerMicroservice, producerTenant, null);
+
+        internal static void FailedStartingSubscription(this ILogger logger, Exception exception, SubscriptionId subscription)
+            => _failedStartingSubscription(logger, subscription, exception);
+
+        internal static void SubscriptionAlreadyRegistered(this ILogger logger, SubscriptionId subscription)
+            => _subscriptionAlreadyRegistered(logger, subscription, null);
+
+        internal static void SuccessfullyRegisteredSubscription(this ILogger logger, SubscriptionId subscription)
+            => _successfullyRegisteredSubscription(logger, subscription, null);
+        
+        internal static void UnregisteringSubscription(this ILogger logger, SubscriptionId subscription)
+            => _unregisteringSubscription(logger, subscription, null);
+
+        internal static void IncomingSubscripton(this ILogger logger, SubscriptionId subscription)
+            => _incomingSubscripton(logger, subscription, null);
+
+        internal static void ErrorWhileSubscribing(this ILogger logger, Exception exception, SubscriptionId subscription)
+            => _errorWhileSubscribing(logger, subscription, exception);
 
     }
 }

@@ -102,11 +102,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             if (_subscriptions.TryGetConsentFor(subscriptionId, out var consentId))
             {
-                _logger.AlreadySubscribedTo(subscriptionId);
+                _logger.SubscriptionAlreadyRegistered(subscriptionId);
                 return new SuccessfulSubscriptionResponse(consentId);
             }
 
-            _logger.LogTrace("Getting microservice address");
             if (!TryGetMicroserviceAddress(subscriptionId.ProducerMicroserviceId, out var microserviceAddress))
             {
                 _logger.NoMicroserviceConfigurationFor(subscriptionId.ProducerMicroserviceId);

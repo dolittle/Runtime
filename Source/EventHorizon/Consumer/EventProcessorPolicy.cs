@@ -20,10 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Initializes a new instance of the <see cref="EventProcessorPolicy"/> class.
         /// </summary>
         /// <param name="logger">The <see cref="ILogger"/> to use for logging.</param>
-        public EventProcessorPolicy(ILogger<EventProcessor> logger)
-        {
-            _logger = logger;
-        }
+        public EventProcessorPolicy(ILogger<EventProcessor> logger) => _logger = logger;
 
         /// <inheritdoc/>
         public Type Type => typeof(EventProcessor);
