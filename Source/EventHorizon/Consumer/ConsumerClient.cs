@@ -102,16 +102,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             if (_subscriptions.TryGetConsentFor(subscriptionId, out var consentId))
             {
-                _logger.LogTrace("Already subscribed to subscription {SubscriptionId}", subscriptionId);
+                _logger.AlreadySubscribedTo(subscriptionId);
                 return new SuccessfulSubscriptionResponse(consentId);
             }
 
             _logger.LogTrace("Getting microservice address");
             if (!TryGetMicroserviceAddress(subscriptionId.ProducerMicroserviceId, out var microserviceAddress))
             {
-                var message = $"There is no microservice configuration for the producer microservice {subscriptionId.ProducerMicroserviceId}.";
-                _logger.LogWarning(message);
-                return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.MissingMicroserviceConfiguration, message));
+                _logger.NoMicroserviceConfigurationFor(subscriptionId.ProducerMicroserviceId);
+                return new FailedSubscriptionResponse(new Failure(
+                    SubscriptionFailures.MissingMicroserviceConfiguration,
+                    $"No microservice configuration for producer mircorservice {subscriptionId.ProducerMicroserviceId}"));
             }
 
             return await _policy.Execute(
@@ -169,13 +170,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             MicroserviceAddress microserviceAddress,
             CancellationToken cancellationToken)
         {
-            _logger.LogDebug(
-                "Tenant '{ConsumerTenantId}' is subscribing to events from tenant '{ProducerTenantId}' in microservice '{ProducerMicroserviceId}' on address '{Host}:{Port}'",
+            _logger.TenantSubscribedTo(
                 subscriptionId.ConsumerTenantId,
                 subscriptionId.ProducerTenantId,
                 subscriptionId.ProducerMicroserviceId,
-                microserviceAddress.Host,
-                microserviceAddress.Port);
+                microserviceAddress);
             var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(subscriptionId, cancellationToken).ConfigureAwait(false);
 
             var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
@@ -193,20 +192,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             if (!receivedResponse)
             {
-                _logger.LogWarning("Reverse call client did not receive a subscription response while subscribing {Subscription}", subscriptionId);
-                return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.DidNotReceiveSubscriptionResponse, "Reverse call client did not receive a subscription response"));
+                _logger.DidNotReceiveSubscriptionResponse(subscriptionId);
+                return new FailedSubscriptionResponse(new Failure(SubscriptionFailures.DidNotReceiveSubscriptionResponse, "Did not receive a subscription response when subscribing"));
             }
 
             if (subscriptionResponse.Failure != null)
             {
-                _logger.LogWarning(
-                    "Failed subscribing with subscription {SubscriptionId}. {Reason}",
-                    subscriptionId,
-                    subscriptionResponse.Failure.Reason);
+                _logger.FailedSubscring(subscriptionId, subscriptionResponse.Failure.Reason);
                 return new FailedSubscriptionResponse(subscriptionResponse.Failure);
             }
 
-            _logger.LogTrace("Subscription response for subscription {SubscriptionId} was successful", subscriptionId);
+            _logger.SuccessfulSubscring(subscriptionId);
             return new SuccessfulSubscriptionResponse(subscriptionResponse.ConsentId.ToGuid());
         }
 
@@ -225,7 +221,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogDebug(ex, "Reconnecting to event horizon with subscription {subscriptionId}", subscriptionId);
+                        _logger.ReconnectingEventHorizon(ex, subscriptionId);
                         await _policy.Execute(
                             async _ =>
                             {
@@ -246,7 +242,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             SubscriptionId subscriptionId,
             IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
             {
-            _logger.LogInformation("Successfully connected event horizon with {subscriptionId}. Waiting for events to process", subscriptionId);
+            _logger.ConnectedEventHorizon(subscriptionId);
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();
             var eventsFetcher = new EventsFromEventHorizonFetcher(queue);
 
@@ -276,7 +272,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             catch (Exception ex)
             {
                 linkedTokenSource.Cancel();
-                _logger.LogWarning(ex, "Error occurred while initializing Subscription: {subscriptionId}", subscriptionId);
+                _logger.ErrorInitializingSubscription(ex, subscriptionId);
                 return;
             }
 
@@ -285,7 +281,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             if (TryGetException(tasks, out var exception))
             {
                 linkedTokenSource.Cancel();
-                _logger.LogWarning(exception, "Error occurred while processing Subscription: {subscriptionId}", subscriptionId);
+                _logger.ErrorWhileProcessingSubscription(exception, subscriptionId);
             }
 
             await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -312,15 +308,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "An error occurred while handling event horizon event coming from subscription {Subscription}", subscriptionId);
+                _logger.ErrorWhileHandlingEventFromSubscription(ex, subscriptionId);
                 return new ConsumerResponse
-                    {
-                        Failure = new Failure(FailureId.Other, $"An error occurred while handling event horizon event coming from subscription {subscriptionId}. {ex.Message}")
-                    };
+                {
+                    Failure = new Failure(FailureId.Other, $"An error occurred while handling event horizon event coming from subscription {subscriptionId}. {ex.Message}")
+                };
             }
         }
 
-        bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
+        static bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
         {
             exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
             if (exception != default)
