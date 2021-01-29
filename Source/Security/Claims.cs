@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Security
                 return true;
             }
 
-            return Equals(leftHandSide, null) ? false : leftHandSide.Equals(rightHandSide);
+            return !Equals(leftHandSide, null) && leftHandSide.Equals(rightHandSide);
         }
 
         /// <summary>

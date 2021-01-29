@@ -55,12 +55,10 @@ namespace Dolittle.Runtime.Serialization.Protobuf
         {
 #pragma warning disable CA5351 // Using unsafe crypto - we're not doing this for security, but providing a predictable hash
             // https://stackoverflow.com/questions/19985273/get-16-bit-hash-of-a-string-in-c-sharp
-            using (var hasher = MD5.Create())
-            {
-                var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(Property.Name));
-                return BitConverter.ToInt16(data, 0);
-            }
+            using var hasher = MD5.Create();
+            var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(Property.Name));
+            return BitConverter.ToInt16(data, 0);
 #pragma warning restore CA5351
-        }
+            }
     }
 }

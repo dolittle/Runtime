@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Collections
             {
                 unchecked
                 {
-                    int hash = 17;
+                    var hash = 17;
                     foreach (var item in enumerable)
                     {
                         hash = (hash * 23) + ((item != null) ? item.GetHashCode() : 0);
@@ -62,7 +62,7 @@ namespace Dolittle.Runtime.Collections
             if (firstArray.Length != secondArray.Length)
                 return false;
 
-            for (int i = 0; i < firstArray.Length; i++)
+            for (var i = 0; i < firstArray.Length; i++)
             {
                 if (!object.Equals(firstArray[i], secondArray[i]))
                 {

@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Rudimentary
         {
             unchecked
             {
-                int hash = 17;
+                var hash = 17;
                 foreach (var item in enumerable)
                 {
                     hash = (hash * 23) + (item?.GetHashCode() ?? 0);

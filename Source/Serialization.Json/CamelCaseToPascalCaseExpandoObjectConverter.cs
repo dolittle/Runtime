@@ -92,7 +92,7 @@ namespace Dolittle.Runtime.Serialization.Json
                     case JsonToken.Comment:
                         break;
                     default:
-                        object v = ReadValue(reader);
+                        var v = ReadValue(reader);
 
                         list.Add(v);
                         break;

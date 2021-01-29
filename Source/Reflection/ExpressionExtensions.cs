@@ -16,13 +16,13 @@ namespace Dolittle.Runtime.Reflection
         /// <summary>
         /// A Func to extract a member expression from an Expression.
         /// </summary>
-        public static Func<Expression, MemberExpression> Unwrap = (Func<Expression, MemberExpression>)(toUnwrap =>
+        public static readonly Func<Expression, MemberExpression> Unwrap = toUnwrap =>
         {
             if (toUnwrap is UnaryExpression unwrap)
                 return unwrap.Operand as MemberExpression;
 
             return toUnwrap as MemberExpression;
-        });
+        };
 
         /// <summary>
         /// Get <see cref="MethodInfo">MethodInfo</see> from an <see cref="Expression">expression</see> - if any.

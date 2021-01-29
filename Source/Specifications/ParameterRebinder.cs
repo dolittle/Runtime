@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Specifications
         /// <inheritdoc/>
         protected override Expression VisitParameter(ParameterExpression parameterExpression)
         {
-            if (map.TryGetValue(parameterExpression, out ParameterExpression replacement))
+            if (map.TryGetValue(parameterExpression, out var replacement))
                 parameterExpression = replacement;
             return base.VisitParameter(parameterExpression);
         }

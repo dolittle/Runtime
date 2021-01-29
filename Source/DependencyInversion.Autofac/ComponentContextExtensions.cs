@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
             var scope = context.Resolve<ILifetimeScope>();
             using var innerScope = scope.BeginLifetimeScope(b => b.RegisterType(serviceType));
             var typedService = new TypedService(serviceType);
-            innerScope.ComponentRegistry.TryGetRegistration(typedService, out IComponentRegistration reg);
+            innerScope.ComponentRegistry.TryGetRegistration(typedService, out var reg);
 
             var request = new ResolveRequest(typedService, reg, parameters);
             return context.ResolveComponent(request);

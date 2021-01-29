@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Collections
         {
             return lookups
                 .SelectMany(l => l)
-                .SelectMany(l => l.Select(value => new { l.Key, Value = value }))
+                .SelectMany(l => l.Select(value => (l.Key, Value: value)))
                 .ToLookup(x => x.Key, x => x.Value);
         }
     }
