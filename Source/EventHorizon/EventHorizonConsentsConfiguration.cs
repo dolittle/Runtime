@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.EventHorizon
         public IEnumerable<EventHorizonConsent> GetConsentConfigurationsFor(TenantId producerTenant)
             => TryGetValue(producerTenant, out var consents) switch
             {
-                true => consents.Cast<EventHorizonConsent>(),
+                true => consents.Select(_ => (EventHorizonConsent)_),
                 false => Enumerable.Empty<EventHorizonConsent>(),
             };
     }

@@ -257,8 +257,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             if (filterId.IsNonWriteable)
             {
-                _logger.LogWarning("Filter: '{Filter}' is an invalid Stream Id", filterId);
-                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId}' is an invalid Stream Id");
+                _logger.LogWarning("Filter: '{Filter}' is an invalid Stream Id", filterId.Value);
+                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId.Value}' is an invalid Stream Id");
                 await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                 return true;
             }
@@ -277,13 +277,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             where TConnectRequest : class
             where TResponse : class
         {
-            _logger.LogTrace("Received Source Stream '{SourceStream}'", filterDefinition.SourceStream);
-            _logger.LogTrace("Received Filter '{Filter}'", filterDefinition.TargetStream);
-            _logger.LogTrace("Received Scope '{Scope}'", scopeId);
+            _logger.LogTrace("Received Source Stream '{SourceStream}'", filterDefinition.SourceStream.Value);
+            _logger.LogTrace("Received Filter '{Filter}'", filterDefinition.TargetStream.Value);
+            _logger.LogTrace("Received Scope '{Scope}'", scopeId.Value);
             using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(externalCancellationToken);
             var cancellationToken = linkedTokenSource.Token;
 
-            _logger.LogDebug("Connecting Filter '{Filter}'", filterDefinition.TargetStream);
+            _logger.LogDebug("Connecting Filter '{Filter}'", filterDefinition.TargetStream.Value);
 
             var tryRegisterFilter = TryRegisterStreamProcessor(scopeId, filterDefinition, getFilterProcessor, cancellationToken);
             if (!tryRegisterFilter.Success)
@@ -292,12 +292,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (tryRegisterFilter.HasException)
                 {
                     var exception = tryRegisterFilter.Exception;
-                    _logger.LogWarning(exception, "An error occurred while registering Filter '{Filter}'", filterDefinition.TargetStream);
+                    _logger.LogWarning(exception, "An error occurred while registering Filter '{Filter}'", filterDefinition.TargetStream.Value);
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to register Filter '{Filter}'. Filter already registered", filterDefinition.TargetStream);
+                    _logger.LogWarning("Failed to register Filter '{Filter}'. Filter already registered", filterDefinition.TargetStream.Value);
                     var failure = new Failure(
                         FiltersFailures.FailedToRegisterFilter,
                         $"Failed to register Filter '{filterDefinition.TargetStream}'. Filter already registered.");
@@ -320,12 +320,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (tryStartFilter.HasException)
                 {
                     var exception = tryStartFilter.Exception;
-                    _logger.LogWarning(exception, "An error occurred while starting Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream, scopeId);
+                    _logger.LogWarning(exception, "An error occurred while starting Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream.Value, scopeId.Value);
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    _logger.LogWarning("Could not start Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream, scopeId);
+                    _logger.LogWarning("Could not start Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream.Value, scopeId.Value);
                     return;
                 }
             }
@@ -336,7 +336,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 await Task.WhenAny(tasks).ConfigureAwait(false);
                 if (TryGetException(tasks, out var ex))
                 {
-                    _logger.LogWarning(ex, "An error occurred while running Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream, scopeId);
+                    _logger.LogWarning(ex, "An error occurred while running Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream.Value, scopeId.Value);
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     ExceptionDispatchInfo.Capture(ex).Throw();
                 }
@@ -345,7 +345,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 linkedTokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                _logger.LogDebug("Filter '{Filter}' in Scope '{Scope}' stopped", filterDefinition.TargetStream, scopeId);
+                _logger.LogDebug("Filter '{Filter}' in Scope '{Scope}' stopped", filterDefinition.TargetStream.Value, scopeId.Value);
             }
         }
 
@@ -380,7 +380,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _logger.LogWarning(
                         ex,
                         "Error occurred while trying to start Filter '{Filter}'",
-                        filterDefinition.TargetStream);
+                        filterDefinition.TargetStream.Value);
                 }
 
                 return ex;
@@ -394,7 +394,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.LogDebug("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream, filterDefinition.SourceStream);
+            _logger.LogDebug("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream.Value, filterDefinition.SourceStream.Value);
             try
             {
                 return (_streamProcessors.TryRegister(
@@ -412,7 +412,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _logger.LogWarning(
                         ex,
                         "Error occurred while trying to register stream processor for Filter '{Filter}'",
-                        filterDefinition.TargetStream);
+                        filterDefinition.TargetStream.Value);
                 }
 
                 return ex;
@@ -426,18 +426,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.LogDebug("Validating Filter '{Filter}'", filterDefinition.TargetStream);
+            _logger.LogDebug("Validating Filter '{Filter}'", filterDefinition.TargetStream.Value);
             var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
 
             if (filterValidationResults.Any(_ => !_.Value.Succeeded))
             {
                 var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
-                _logger.LogWarning("Failed to register Filter '{Filter}'. Filter validation failed. {Reason}", filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+                _logger.LogWarning("Failed to register Filter '{Filter}'. Filter validation failed. {Reason}", filterDefinition.TargetStream.Value, firstFailedValidation.FailureReason.Value);
                 throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
             }
 
             var filteredStreamDefinition = new StreamDefinition(filterDefinition);
-            _logger.LogDebug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId);
+            _logger.LogDebug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId.Value);
             await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
         }
 
