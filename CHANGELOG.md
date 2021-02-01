@@ -1,3 +1,38 @@
+# [5.3.4-cleanup.0] - 2021-2-1 [PR: #482](https://github.com/dolittle/Runtime/pull/482)
+## Summary
+
+Remove unnecessary dependencies and rework some of the old fundamental parts of the code.
+
+### Added
+- `.editorconfig` for enforcing our rules and styles
+
+### Changed
+
+- Change to .NET 5
+- Change old value type classes to be `record`s to utilize the cool new C# 9 `record` type
+
+### Fixed
+
+- Fixed a bug in a logging while filtering events
+- Added calls to `GC.SuppressFinalize()` in Dispose() methods as per [CA1816](https://docs.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1816)
+- Many "constant" properties we're missing `readonly` keyword
+- Fixed many `using` statements to the new simpler form
+- Uses `var`s whenever possible now
+- Start using `new` statements
+
+### Removed
+
+- Remove Concepts and Value types - replace with records
+- Remove Serialisation of Concepts
+- Our custom logging wrapper around Microsofts own.
+- Removed Validation as it was unused
+- Remove custom Scheduler abstraction - the Runtime will always run in a multi-core, multi-threaded linux environment so we don't need to apply abstractions to performing scheduling tasks.
+- Remove abstraction around time
+- Remove InitialSystems bootstage
+- Remove dependency to Dolittle.Common and use `.editorconfig` instead
+- `ILogger`s from many classes where it wasn't being used
+
+
 ## [5.3.3] - 2021-01-25
 ### Fixed
 - Updated the dependencies related to Grpc (v2.35.0) and protobuf.
