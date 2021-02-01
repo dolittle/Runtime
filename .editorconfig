@@ -78,6 +78,9 @@ dotnet_diagnostic.CA1805.severity = none
 dotnet_diagnostic.IDE0083.severity = none
 # CA1309: Use ordinal StringComparison
 dotnet_diagnostic.CA1309.severity = none
+# CA1000: Do not declare static members on generic types
+dotnet_diagnostic.CA1000.severity = none
+
 
 #### C# Coding Conventions ####
 
@@ -117,6 +120,6 @@ csharp_style_prefer_range_operator = false:none
 
 # CSharp formatting rules:
 # dont want these bombing the build logs, will still show up in the IDE
-dotnet_diagnostic.IDE0055.severity = suggestion
+dotnet_diagnostic.IDE0055.severity = none
 # prefere brace indentation when creating objects etc
-csharp_indent_braces = true
+csharp_indent_braces = false
