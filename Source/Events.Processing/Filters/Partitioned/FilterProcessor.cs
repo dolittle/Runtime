@@ -44,8 +44,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Filter event that occurred @ {Occurred}", @event.Occurred);
-
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),
@@ -58,12 +56,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.LogDebug(
-                "Filter event that occurred @ {Occurred} again for the {RetryCount}. time because: {FailureReason}",
-                @event.Occurred,
-                retryCount,
-                failureReason);
-
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),

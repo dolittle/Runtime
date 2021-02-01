@@ -44,11 +44,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public Task<FilterValidationResult> Validate<TDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.LogTrace("Finding validator for filter '{TargetStream}'", filter.Definition.TargetStream);
+            _logger.FindingFilterValidator(filter.Identifier);
 
             if (TryGetValidatorFor<TDefinition>(out var validator))
             {
-                _logger.LogTrace("Validating filter '{TargetStream}'", filter.Definition.TargetStream);
+                _logger.ValidatingFilter(filter.Identifier);
                 return validator.Validate(persistedDefinition, filter, cancellationToken);
             }
 
@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (TryGetValidatorTypeFor(filterDefinitionType, out var validatorType))
                 {
-                    _logger.LogTrace("Filter definition type {FilterType} can be validated by validator type {ValidatorType}", filterDefinitionType, validatorType);
+                    _logger.FoundValidatorForFilter(filterDefinitionType, validatorType);
                     _filterDefinitionToValidatorMap.TryAdd(filterDefinitionType, validatorType);
                 }
             });
@@ -74,10 +74,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (implementations.Count() > 1)
                 {
-                    _logger.LogWarning(
-                        "There are multiple validators that can validate filter definition of type {FilterDefinitionType}:\n{ImplementationTypes}\nUsing the first validator.",
+                    _logger.MultipleValidatorsForFilter(
                         filterDefinitionType,
-                        string.Join("\n", implementations.Select(_ => _.ToString())));
+                        implementations);
                 }
 
                 validatorType = implementations.First();
