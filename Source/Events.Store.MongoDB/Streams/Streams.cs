@@ -65,9 +65,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         static string CollectionNameForPublicStream(StreamId streamId) => $"public-stream-{streamId.Value}";
 
-        static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-{EventLogCollectionName.Value}";
+        static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope.Value}-{EventLogCollectionName}";
 
-        static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope}-{StreamDefinitionCollectionName.Value}";
+        static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope.Value}-{StreamDefinitionCollectionName}";
 
         static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-{scope.Value}-stream-{stream.Value}";
 
