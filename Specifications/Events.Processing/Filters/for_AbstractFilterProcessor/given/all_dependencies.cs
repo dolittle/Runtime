@@ -24,6 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
         {
             committed_event = committed_events.single();
 
+            scope_id = Guid.NewGuid();
             event_processor_id = Guid.NewGuid();
             stream_id = Guid.NewGuid();
             events_to_streams_writer = new Mock<IWriteEventsToStreams>();
