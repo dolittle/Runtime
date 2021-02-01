@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public Task<IMongoCollection<AbstractStreamProcessorState>> Get(ScopeId scopeId, CancellationToken token) =>
             scopeId == ScopeId.Default ? Task.FromResult(_streamProcessorStates) : GetScopedStreamProcessorStateCollection(scopeId, token);
 
-        static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{scope}-{StreamProcessorStateCollectionName}";
+        static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{scope.Value}-{StreamProcessorStateCollectionName}";
 
         async Task<IMongoCollection<AbstractStreamProcessorState>> GetScopedStreamProcessorStateCollection(
             ScopeId scope,

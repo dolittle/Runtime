@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             return collection;
         }
 
-        static string CollectionNameForScopedSubscriptionStates(ScopeId scope) => $"x-{scope}-subscription-states";
+        static string CollectionNameForScopedSubscriptionStates(ScopeId scope) => $"x-{scope.Value}-subscription-states";
 
         async Task CreateCollectionsAndIndexesForSubscriptionStatesAsync(
             IMongoCollection<MongoDB.Processing.Streams.EventHorizon.SubscriptionState> subscriptionStates,
