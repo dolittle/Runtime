@@ -15,6 +15,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     public record StreamProcessorId(ScopeId ScopeId, EventProcessorId EventProcessorId, StreamId SourceStreamId) : IStreamProcessorId
     {
         /// <inheritdoc />
-        public override string ToString() => $"Scope: {ScopeId} Event Processor Id: {EventProcessorId} Source Stream: {SourceStreamId}";
+        public override string ToString() => $"Scope: {ScopeId.Value} Event Processor Id: {EventProcessorId.Value} Source Stream: {SourceStreamId.Value}";
     }
 }
