@@ -103,7 +103,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     "{LogMessagePrefix} writing event '{EventTypeId}' to stream '{TargetStream}' in partition '{PartitionId}'",
                     _logMessagePrefix,
                     @event.Type.Id.Value,
-                    Definition.TargetStream,
+                    Definition.TargetStream.Value,
                     partitionId.Value);
                 return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
             }
