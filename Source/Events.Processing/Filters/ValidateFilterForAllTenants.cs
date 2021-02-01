@@ -49,20 +49,20 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var result = new Dictionary<TenantId, FilterValidationResult>();
             await _onAllTenants.PerformAsync(async tenantId =>
                 {
-                    _logger.LogDebug("Validating Filter for Tenant '{Tenant}'", tenantId);
+                    _logger.LogDebug("Validating Filter for Tenant '{Tenant}'", tenantId.Value);
                     var filterProcessor = getFilterProcessor();
                     var filterId = filterProcessor.Definition.TargetStream;
-                    _logger.LogTrace("Trying to get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
+                    _logger.LogTrace("Trying to get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId.Value, tenantId.Value);
                     var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filterProcessor.Scope, filterId, cancellationToken).ConfigureAwait(false);
                     if (tryGetFilterDefinition.Success)
                     {
-                        _logger.LogTrace("Validating Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
+                        _logger.LogTrace("Validating Filter '{Filter}' for Tenant '{Tenant}'", filterId.Value, tenantId.Value);
                         var validationResult = await _filterValidators.Validate(tryGetFilterDefinition.Result, filterProcessor, cancellationToken).ConfigureAwait(false);
                         result.Add(tenantId, validationResult);
                     }
                     else
                     {
-                        _logger.LogDebug("Could not get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
+                        _logger.LogDebug("Could not get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId.Value, tenantId.Value);
                         result.Add(tenantId, new FilterValidationResult());
                     }
                 }).ConfigureAwait(false);

@@ -44,11 +44,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public Task<FilterValidationResult> Validate<TDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.LogTrace("Finding validator for filter '{TargetStream}'", filter.Definition.TargetStream);
+            _logger.LogTrace("Finding validator for filter '{TargetStream}'", filter.Definition.TargetStream.Value);
 
             if (TryGetValidatorFor<TDefinition>(out var validator))
             {
-                _logger.LogTrace("Validating filter '{TargetStream}'", filter.Definition.TargetStream);
+                _logger.LogTrace("Validating filter '{TargetStream}'", filter.Definition.TargetStream.Value);
                 return validator.Validate(persistedDefinition, filter, cancellationToken);
             }
 
