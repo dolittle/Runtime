@@ -32,8 +32,8 @@ namespace Dolittle.Runtime.Services
         where TRequest : class
         where TResponse : class
     {
-        readonly SemaphoreSlim _writeSemaphore = new SemaphoreSlim(1);
-        readonly ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>>();
+        readonly SemaphoreSlim _writeSemaphore = new(1);
+        readonly ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new();
         readonly IAsyncStreamReader<TClientMessage> _clientStream;
         readonly IServerStreamWriter<TServerMessage> _serverStream;
         readonly ServerCallContext _context;
@@ -49,8 +49,8 @@ namespace Dolittle.Runtime.Services
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
-        readonly object _receiveArgumentsLock = new object();
-        readonly object _respondLock = new object();
+        readonly object _receiveArgumentsLock = new();
+        readonly object _respondLock = new();
         TimeSpan _pingInterval = TimeSpan.FromSeconds(5);
         bool _completed;
         bool _disposed;

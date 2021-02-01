@@ -28,6 +28,5 @@ namespace Dolittle.Runtime.Rudimentary
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCodeHelper.Generate(typeof(TValue), Value);
-        
     }
 }

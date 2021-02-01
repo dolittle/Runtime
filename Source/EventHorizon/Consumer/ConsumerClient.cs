@@ -36,7 +36,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
         readonly IAsyncPolicyFor<EventProcessor> _eventProcessorPolicy;
-        readonly IExecutionContextManager _executionContextManager;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly CancellationToken _cancellationToken;
         readonly IReverseCallClients _reverseCallClients;
@@ -53,7 +52,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ConsumerClient" />.</param>
         /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
         /// <param name="reverseCallClients"><see cref="IReverseCallClients"/>.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
@@ -64,7 +62,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IWriteEventHorizonEvents eventHorizonEventsWriter,
             IAsyncPolicyFor<ConsumerClient> policy,
             IAsyncPolicyFor<EventProcessor> eventProcessorPolicy,
-            IExecutionContextManager executionContextManager,
             IReverseCallClients reverseCallClients,
             ILogger logger)
         {
@@ -75,7 +72,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _eventHorizonEventsWriter = eventHorizonEventsWriter;
             _policy = policy;
             _eventProcessorPolicy = eventProcessorPolicy;
-            _executionContextManager = executionContextManager;
             _logger = logger;
             _cancellationTokenSource = new CancellationTokenSource();
             _cancellationToken = _cancellationTokenSource.Token;

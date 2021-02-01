@@ -8,6 +8,7 @@ using System.Globalization;
 using Newtonsoft.Json;
 
 #pragma warning disable DL0008
+#pragma warning disable CA2201
 
 namespace Dolittle.Runtime.Serialization.Json
 {

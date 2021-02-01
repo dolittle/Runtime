@@ -11,12 +11,12 @@ namespace Dolittle.Runtime.Booting
     /// </summary>
     public class NewBindingsNotificationHub : ICanNotifyForNewBindings
     {
-        event Action<IBindingCollection> _subscribers = (_) => { };
+        event Action<IBindingCollection> Subscribers = (_) => { };
 
         /// <inheritdoc/>
-        public void Notify(IBindingCollection bindings) => _subscribers(bindings);
+        public void Notify(IBindingCollection bindings) => Subscribers(bindings);
 
         /// <inheritdoc/>
-        public void SubscribeTo(Action<IBindingCollection> subscriber) => _subscribers += subscriber;
+        public void SubscribeTo(Action<IBindingCollection> subscriber) => Subscribers += subscriber;
     }
 }
