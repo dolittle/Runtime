@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             Definition = filterDefinition;
             _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
-            _logMessagePrefix = $"Filter Processor '{Identifier}' in scope '{Scope}' with source stream '{Definition.SourceStream}'";
+            _logMessagePrefix = $"Filter Processor '{Identifier.Value}' in scope '{Scope.Value}' with source stream '{Definition.SourceStream.Value}'";
         }
 
         /// <inheritdoc/>
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}'",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
-                partitionId);
+                partitionId.Value);
             var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
 
             await HandleResult(result, @event, partitionId, cancellationToken).ConfigureAwait(false);
@@ -95,7 +95,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 "{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
                 _logMessagePrefix,
                 @event.Type.Id.Value,
-                partitionId,
+                partitionId.Value,
                 result.Succeeded);
             if (result.Succeeded && result.IsIncluded)
             {
@@ -104,7 +104,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     _logMessagePrefix,
                     @event.Type.Id.Value,
                     Definition.TargetStream,
-                    partitionId);
+                    partitionId.Value);
                 return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
             }
 
