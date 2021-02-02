@@ -258,7 +258,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             if (filterId.IsNonWriteable)
             {
                 _logger.FilterIsInvalid(filterId);
-                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId}' is an invalid Stream Id");
+                var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId.Value}' is an invalid Stream Id");
                 await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                 return true;
             }
