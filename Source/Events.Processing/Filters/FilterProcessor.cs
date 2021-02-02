@@ -7,7 +7,7 @@ using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 
@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
     {
         readonly IReverseCallDispatcher<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
@@ -38,14 +37,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             : base(scope, definition, eventsToStreamsWriter, logger)
         {
             _dispatcher = dispatcher;
-            _logger = logger;
         }
 
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            _logger.Debug("Filter event that occurred @ {Occurred}", @event.Occurred);
-
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),
@@ -58,12 +54,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
-                "Filter event that occurred @ {Occurred} again for the {RetryCount}. time because: {FailureReason}",
-                @event.Occurred,
-                retryCount,
-                failureReason);
-
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),

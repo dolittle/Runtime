@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Source/Concepts/Concepts.csproj" />
     <ProjectReference Include="../../Source/Serialization.Json/Serialization.Json.csproj" />
   </ItemGroup>
 </Project>

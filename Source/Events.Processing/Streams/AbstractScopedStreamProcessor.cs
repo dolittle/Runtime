@@ -6,9 +6,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -232,7 +232,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    Logger.Warning(ex, "{StreamProcessorId} for tenant {TenantId} failed", Identifier, _tenantId);
+                    Logger.LogWarning(ex, "{StreamProcessorId} for tenant {TenantId} failed", Identifier, _tenantId);
                 }
             }
         }

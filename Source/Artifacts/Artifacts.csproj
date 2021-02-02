@@ -4,8 +4,7 @@
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Artifacts</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="../Concepts/Concepts.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
   </ItemGroup>
 </Project>

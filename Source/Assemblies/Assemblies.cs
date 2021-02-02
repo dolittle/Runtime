@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Assemblies
         }
 
         /// <inheritdoc/>
-        public Assembly EntryAssembly { get; }
+        public Assembly EntryAssembly { get; }
 
         /// <inheritdoc/>
         public IEnumerable<Assembly> GetAll()

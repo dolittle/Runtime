@@ -22,50 +22,30 @@ namespace Dolittle.Runtime.DependencyInversion
 
         /// <inheritdoc/>
         IBindingScopeBuilder IBindingBuilder<T>.To<TTarget>()
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.Type(typeof(TTarget)),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(T constant)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.Constant(constant),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(Func<T> callback)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.Callback<T>(callback),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
 
         /// <inheritdoc/>
         public IBindingScopeBuilder To(Func<BindingContext, T> callback)
-        {
-            Binding = new Binding(
+            => SetBinding(new Binding(
                 Binding.Service,
                 new Strategies.CallbackWithBindingContext<T>(callback),
-                Binding.Scope);
-
-            ScopeBuilder = new BindingScopeBuilder(Binding);
-            return ScopeBuilder;
-        }
+                Binding.Scope));
     }
 }

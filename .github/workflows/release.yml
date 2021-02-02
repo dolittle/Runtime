@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: alpha,beta,rc,turbo # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: alpha,beta,rc,turbo,cleanup # Comma separated list of prerelease branch names. 'alpha,rc, ...'
 
 on:
   pull_request:
@@ -30,7 +30,7 @@ jobs:
         version: ${{ steps.context.outputs.current-version }}
         release-type: ${{ steps.context.outputs.release-type }}
     - name: Prepend to Changelog
-      if: ${{ steps.context.outputs.should-publish == 'true' }}
+      if: ${{ steps.context.outputs.should-publish == 'true' && steps.context.outputs.release-type != 'prerelease' }}
       uses: dolittle/add-to-changelog-action@v2
       with:
         version: ${{ steps.increment-version.outputs.next-version }}

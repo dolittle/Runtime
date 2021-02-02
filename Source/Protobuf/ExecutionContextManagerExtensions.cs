@@ -19,9 +19,9 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="executionContext"><see cref="ExecutionContextContract"/> to set current.</param>
         public static void CurrentFor(this IExecutionContextManager executionContextManager, ExecutionContextContract executionContext)
         {
-            var microservice = executionContext.MicroserviceId.To<Microservice>();
-            var tenant = executionContext.TenantId.To<TenantId>();
-            var correlationId = executionContext.CorrelationId.To<CorrelationId>();
+            var microservice = executionContext.MicroserviceId.ToGuid();
+            var tenant = executionContext.TenantId.ToGuid();
+            var correlationId = executionContext.CorrelationId.ToGuid();
             var claims = executionContext.Claims.ToClaims();
 
             executionContextManager.CurrentFor(

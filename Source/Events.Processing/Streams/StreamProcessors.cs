@@ -9,7 +9,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly IPerformActionOnAllTenants _onAllTenants;
         readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
 
         /// <summary>
@@ -33,19 +33,19 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
         /// <param name="getScopedStreamProcessorsCreator">The <see cref="FactoryFor{T}" /> <see cref="ICreateScopedStreamProcessors" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         public StreamProcessors(
             IPerformActionOnAllTenants onAllTenants,
             FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
             IExecutionContextManager executionContextManager,
-            ILoggerManager loggerManager)
+            ILoggerFactory loggerFactory)
         {
             _onAllTenants = onAllTenants;
             _getScopedStreamProcessorsCreator = getScopedStreamProcessorsCreator;
             _streamProcessors = new ConcurrentDictionary<StreamProcessorId, StreamProcessor>();
             _executionContextManager = executionContextManager;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<StreamProcessors>();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<StreamProcessors>();
         }
 
         /// <inheritdoc />
@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
             if (_streamProcessors.ContainsKey(streamProcessorId))
             {
-                _logger.Warning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
+                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
                 return false;
             }
 
@@ -73,22 +73,22 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 () => Unregister(streamProcessorId),
                 _getScopedStreamProcessorsCreator,
                 _executionContextManager,
-                _loggerManager.CreateLogger<StreamProcessor>(),
+                _loggerFactory.CreateLogger<StreamProcessor>(),
                 cancellationToken);
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
-                _logger.Warning("Stream Processor with Id: '{StreamProcessorId}' already registered", streamProcessorId);
+                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
                 streamProcessor = default;
                 return false;
             }
 
-            _logger.Trace("Stream Processor with Id: '{StreamProcessorId}' registered", streamProcessorId);
+            _logger.StreamProcessorSuccessfullyRegistered(streamProcessorId);
             return true;
         }
 
         void Unregister(StreamProcessorId id)
         {
-            _logger.Debug("Unregistering Stream Processor: {streamProcessorId}", id);
+            _logger.StreamProcessorUnregistered(id);
             _streamProcessors.TryRemove(id, out var _);
         }
     }

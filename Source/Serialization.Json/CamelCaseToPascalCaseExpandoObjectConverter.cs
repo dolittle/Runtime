@@ -5,10 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Globalization;
-using Dolittle.Runtime.Strings;
 using Newtonsoft.Json;
 
 #pragma warning disable DL0008
+#pragma warning disable CA2201
 
 namespace Dolittle.Runtime.Serialization.Json
 {
@@ -93,7 +93,7 @@ namespace Dolittle.Runtime.Serialization.Json
                     case JsonToken.Comment:
                         break;
                     default:
-                        object v = ReadValue(reader);
+                        var v = ReadValue(reader);
 
                         list.Add(v);
                         break;

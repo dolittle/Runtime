@@ -1,12 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
 namespace Dolittle.Runtime.Services
@@ -58,13 +59,14 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public void Dispose()
         {
-            foreach ((var type, var endpoint) in _endpoints) endpoint.Dispose();
+            foreach ((_, var endpoint) in _endpoints) endpoint.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         /// <inheritdoc/>
         public void Start()
         {
-            _logger.Debug("Starting all endpoints");
+            _logger.LogDebug("Starting all endpoints");
 
             var servicesByVisibility = new Dictionary<EndpointVisibility, List<Service>>();
 
@@ -73,7 +75,7 @@ namespace Dolittle.Runtime.Services
                 var configuration = _configuration[type];
                 if (configuration.Enabled)
                 {
-                    _logger.Debug("Preparing endpoint for {type} visibility - running on port {port}", type, configuration.Port);
+                    _logger.LogDebug("Preparing endpoint for {type} visibility - running on port {port}", type, configuration.Port);
                     var endpoint = GetEndpointFor(type);
 
                     serviceTypeRepresenters.ForEach(representer =>
@@ -87,7 +89,7 @@ namespace Dolittle.Runtime.Services
                 }
                 else
                 {
-                    _logger.Debug("{type} endpoint is disabled", type);
+                    _logger.LogDebug("{type} endpoint is disabled", type);
                 }
             }
 
@@ -116,12 +118,12 @@ namespace Dolittle.Runtime.Services
             var binders = _typeFinder.FindMultiple(representer.BindingInterface);
             binders.ForEach(_ =>
             {
-                _logger.Debug("Bind services from {implementation}", _.AssemblyQualifiedName);
+                _logger.LogDebug("Bind services from {implementation}", _.AssemblyQualifiedName);
 
                 var binder = _container.Get(_) as ICanBindServices;
 
                 var boundServices = binder.BindServices();
-                boundServices.ForEach(service => _logger.Trace("Service : {serviceName}", service.Descriptor?.FullName ?? "Unknown"));
+                boundServices.ForEach(service => _logger.LogTrace("Service : {serviceName}", service.Descriptor?.FullName ?? "Unknown"));
 
                 services.AddRange(boundServices);
             });

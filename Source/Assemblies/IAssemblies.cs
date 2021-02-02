@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Assemblies
         /// <summary>
         /// Gets the <see cref="Assembly">assembly</see> that represents the entry assembly.
         /// </summary>
-        Assembly EntryAssembly { get; }
+        Assembly EntryAssembly { get; }
 
         /// <summary>
         /// Gets all assemblies for current application.

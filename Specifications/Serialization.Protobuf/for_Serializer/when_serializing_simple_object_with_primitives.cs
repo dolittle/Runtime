@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Time;
 using Machine.Specifications;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Serialization.Protobuf.for_Serializer
 {

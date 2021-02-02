@@ -10,7 +10,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Logging;
 using Machine.Specifications;
 using Moq;
 
@@ -41,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             filter_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
             stream_processor_states = new Mock<IStreamProcessorStateRepository>();
             events_fetchers = new Mock<IEventFetchers>();
-            validator = new ValidateFilterByComparingStreams(events_fetchers.Object, stream_processor_states.Object, Mock.Of<ILogger>());
+            validator = new ValidateFilterByComparingStreams(events_fetchers.Object, stream_processor_states.Object);
             events_from_event_log_fetcher = new Mock<ICanFetchRangeOfEventsFromStream>();
             events_from_filtered_stream_fetcher = new Mock<ICanFetchRangeOfEventsFromStream>();
             events_in_event_log = new List<StreamEvent>();
@@ -76,7 +75,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_filtered_stream.Count + num_events_to_create;
             for (int i = events_in_filtered_stream.Count; i < end; i++)
             {
-                events_in_filtered_stream.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, target_stream, partition == default ? new PartitionId { Value = Guid.Empty } : partition, true));
+                events_in_filtered_stream.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, target_stream, partition == default ? new PartitionId(Guid.Empty) : partition, true));
             }
         }
 
@@ -94,7 +93,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_filtered_stream.Count + 1;
             for (int i = events_in_filtered_stream.Count; i < end; i++)
             {
-                events_in_filtered_stream.Add(new StreamEvent(@event, (uint)i, target_stream, partition == default ? new PartitionId { Value = Guid.Empty } : partition, true));
+                events_in_filtered_stream.Add(new StreamEvent(@event, (uint)i, target_stream, partition == default ? new PartitionId(Guid.Empty) : partition, true));
             }
         }
     }

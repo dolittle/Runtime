@@ -1,8 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration;
 
@@ -13,7 +15,7 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
     /// </summary>
     [Name("resources")]
     public class ResourceConfigurationsByTenant :
-        ReadOnlyDictionary<TenantId, ReadOnlyDictionary<ResourceType, dynamic>>,
+        ReadOnlyDictionary<Guid, ReadOnlyDictionary<string, dynamic>>,
         IConfigurationObject
     {
         /// <summary>
@@ -21,7 +23,7 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
         /// </summary>
         /// <param name="dictionary">The configuration to initialize with.</param>
         public ResourceConfigurationsByTenant(
-            IDictionary<TenantId, ReadOnlyDictionary<ResourceType, dynamic>> dictionary)
+            IDictionary<Guid, ReadOnlyDictionary<string, dynamic>> dictionary)
             : base(dictionary)
         {
         }

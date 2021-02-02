@@ -20,9 +20,8 @@ namespace Dolittle.Runtime.Specifications
         /// <param name="merge">Expression for merging the two rules.</param>
         /// <returns>The composed <see cref="Specification{T}"/>.</returns>
         public static Specification<T> Compose<T>(this Specification<T> lhs, Specification<T> rhs, Func<Expression, Expression, Expression> merge)
-        {
-            return new CompositeRule<T>(lhs, rhs, merge);
-        }
+            => new CompositeRule<T>(lhs, rhs, merge);
+        
 
         /// <summary>
         /// Combines two rules in to an "And" rule.
@@ -32,9 +31,7 @@ namespace Dolittle.Runtime.Specifications
         /// <param name="rhs">The second rule to be merged into the first.</param>
         /// <returns>An And{T} rule">.</returns>
         public static Specification<T> And<T>(this Specification<T> lhs, Specification<T> rhs)
-        {
-            return new And<T>(lhs, rhs);
-        }
+            => new And<T>(lhs, rhs);
 
         /// <summary>
         /// Combines two rules in to an "And" rul, where the second rule is negated.
@@ -44,9 +41,7 @@ namespace Dolittle.Runtime.Specifications
         /// <param name="rhs">The second rule to be merged into the first.</param>
         /// <returns>An And{T} rule">.</returns>
         public static Specification<T> AndNot<T>(this Specification<T> lhs, Specification<T> rhs)
-        {
-            return new And<T>(lhs, Is.Not(rhs));
-        }
+            => new And<T>(lhs, Is.Not(rhs));
 
         /// <summary>
         /// Combines two rules in to an "Or" rule.
@@ -56,9 +51,7 @@ namespace Dolittle.Runtime.Specifications
         /// <param name="rhs">The second rule to be merged into the first.</param>
         /// <returns>An Or{T} rule">.</returns>
         public static Specification<T> Or<T>(this Specification<T> lhs, Specification<T> rhs)
-        {
-            return new Or<T>(lhs, rhs);
-        }
+            => new Or<T>(lhs, rhs);
 
         /// <summary>
         /// Combines two rules into an Or, where the second rule is negated.
@@ -68,8 +61,6 @@ namespace Dolittle.Runtime.Specifications
         /// <param name="lhs">The second rule to be merged into the first.</param>
         /// <returns>An And{T} rule">.</returns>
         public static Specification<T> OrNot<T>(this Specification<T> rhs, Specification<T> lhs)
-        {
-            return new Or<T>(rhs, Is.Not(lhs));
-        }
+            => new Or<T>(rhs, Is.Not(lhs));
     }
 }

@@ -4,7 +4,7 @@
 namespace Dolittle.Runtime.DependencyInversion
 {
     /// <summary>
-    /// A delegate representing the capabilitiy of getting the <see cref="IContainer"/> instance.
+    /// A delegate representing the capability of getting the <see cref="IContainer"/> instance.
     /// </summary>
     /// <returns>The <see cref="IContainer"/> instance.</returns>
     public delegate IContainer GetContainer();

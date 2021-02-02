@@ -8,11 +8,13 @@ namespace Dolittle.Runtime.Services.for_Endpoints.when_starting
 {
     public class with_one_service_type_and_two_binders : given.one_service_type_with_two_binders
     {
+        static EndpointConfiguration configuration = new();
         static Endpoints endpoints;
 
         Establish context = () =>
         {
-            configuration.Enabled = true;
+            configuration = configuration with { Enabled = true };
+            var endpoints_configuration = CreateEndpointsConfiguration(configuration);
             endpoints = new Endpoints(service_types, endpoints_configuration, type_finder.Object, container.Object, bound_services.Object, logger);
         };
 

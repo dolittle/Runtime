@@ -2,14 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Concepts;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Protobuf
 {
     /// <summary>
     /// Represents the failure id.
     /// </summary>
-    public class FailureId : ConceptAs<Guid>
+    public record FailureId(Guid Value) : ConceptAs<Guid>(Value)
     {
         /// <summary>
         /// Gets the <see cref="FailureId" /> that represents an undocumented error type.
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Protobuf
         /// Implicitly converts the <see cref="Guid" /> to <see cref="FailureId" />.
         /// </summary>
         /// <param name="id"><see cref="Guid" /> to convert.</param>
-        public static implicit operator FailureId(Guid id) => new FailureId { Value = id };
+        public static implicit operator FailureId(Guid id) => new(id);
 
         /// <summary>
         /// Create a <see cref="FailureId" /> from a<see cref="string" /> representing a <see cref="Guid" /> .

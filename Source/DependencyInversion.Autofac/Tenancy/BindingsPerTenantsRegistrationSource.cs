@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
     /// </summary>
     public class BindingsPerTenantsRegistrationSource : IRegistrationSource
     {
-        static readonly List<Binding> _bindings = new List<Binding>();
+        static readonly List<Binding> _bindings = new();
         readonly InstancesPerTenant _instancesPerTenant;
 
         /// <summary>
@@ -26,9 +26,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
         /// </summary>
         /// <param name="instancesPerTenant">The <see cref="InstancesPerTenant"/>.</param>
         public BindingsPerTenantsRegistrationSource(InstancesPerTenant instancesPerTenant)
-        {
-            _instancesPerTenant = instancesPerTenant;
-        }
+            => _instancesPerTenant = instancesPerTenant;
 
         /// <inheritdoc/>
         public bool IsAdapterForIndividualComponents => false;
@@ -37,10 +35,7 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
         /// Add a <see cref="Binding"/> for the registration source to use.
         /// </summary>
         /// <param name="binding"><see cref="Binding"/> to add.</param>
-        public static void AddBinding(Binding binding)
-        {
-            _bindings.Add(binding);
-        }
+        public static void AddBinding(Binding binding) => _bindings.Add(binding);
 
         /// <inheritdoc/>
         public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
@@ -48,8 +43,8 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
             if (!(service is IServiceWithType serviceWithType)) return Enumerable.Empty<IComponentRegistration>();
 
             if (serviceWithType.ServiceType.HasAttribute<SingletonPerTenantAttribute>() &&
-                (!HasService(serviceWithType.ServiceType) &&
-                !IsGenericAndHasGenericService(serviceWithType.ServiceType)))
+                !HasService(serviceWithType.ServiceType) &&
+                !IsGenericAndHasGenericService(serviceWithType.ServiceType))
             {
                 AddBinding(new Binding(serviceWithType.ServiceType, new Strategies.Type(serviceWithType.ServiceType), new Scopes.Transient()));
             }
@@ -79,17 +74,13 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
             return new[] { registration };
         }
 
-        bool HasService(Type service)
-        {
-            return _bindings.Any(_ => _.Service == service);
-        }
+        static bool HasService(Type service) => _bindings.Any(_ => _.Service == service);
 
-        bool IsGenericAndHasGenericService(Type service)
-        {
-            return service.IsGenericType && _bindings.Any(_ => _.Service == service.GetGenericTypeDefinition());
-        }
+        static bool IsGenericAndHasGenericService(Type service)
+            => service.IsGenericType
+                && _bindings.Any(_ => _.Service == service.GetGenericTypeDefinition());
 
-        Binding GetBindingFor(Type service)
+        static Binding GetBindingFor(Type service)
         {
             var binding = _bindings.SingleOrDefault(_ => _.Service == service);
             if (binding == null && service.IsGenericType) binding = _bindings.Single(_ => _.Service == service.GetGenericTypeDefinition());

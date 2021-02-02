@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
         /// <param name="logger">An <see cref="ILogger"/>.</param>
-        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger<EventsToStreamsWriter> logger)
+        public EventsToStreamsWriter(IStreams streams, IEventConverter eventConverter, IStreamEventWatcher streamWatcher, ILogger logger)
         {
             _streams = streams;
             _eventConverter = eventConverter;
@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken)
         {
-            _logger.Trace("Writing Event: {EventLogSequenceNumber} to Stream: {Stream} in Scope: {Scope}", @event.EventLogSequenceNumber, stream, scope);
+            _logger.WritingEventToStream(@event.EventLogSequenceNumber, stream, scope);
             var writtenStreamPosition = await Write(
                 await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamFilter,

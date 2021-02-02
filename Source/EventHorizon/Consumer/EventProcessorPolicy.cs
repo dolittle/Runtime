@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Polly;
 
@@ -20,10 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Initializes a new instance of the <see cref="EventProcessorPolicy"/> class.
         /// </summary>
         /// <param name="logger">The <see cref="ILogger"/> to use for logging.</param>
-        public EventProcessorPolicy(ILogger<EventProcessor> logger)
-        {
-            _logger = logger;
-        }
+        public EventProcessorPolicy(ILogger<EventProcessor> logger) => _logger = logger;
 
         /// <inheritdoc/>
         public Type Type => typeof(EventProcessor);
@@ -34,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 .Handle<EventStoreUnavailable>(
                     _ =>
                     {
-                        _logger.Debug(_, "Event Store is unavailable");
+                        _logger.LogDebug(_, "Event Store is unavailable");
                         return true;
                     })
                 .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));

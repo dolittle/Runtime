@@ -1,5 +1,5 @@
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS dotnet-build
+FROM  mcr.microsoft.com/dotnet/sdk:5.0-alpine AS dotnet-build
 ARG CONFIGURATION=Release
 
 COPY default.props /app/
@@ -13,8 +13,10 @@ RUN dotnet restore
 RUN dotnet publish -c ${CONFIGURATION} -o out
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
+FROM mcr.microsoft.com/dotnet/aspnet:5.0
 ARG CONFIGURATION=Release
+
+RUN apt-get update && apt-get install -y libc-dev
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./

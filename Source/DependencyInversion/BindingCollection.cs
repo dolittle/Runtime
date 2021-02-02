@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.DependencyInversion
     /// </summary>
     public class BindingCollection : IBindingCollection
     {
-        readonly List<Binding> _bindings = new List<Binding>();
+        readonly List<Binding> _bindings = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="BindingCollection"/> class.
@@ -31,26 +31,16 @@ namespace Dolittle.Runtime.DependencyInversion
 
         /// <inheritdoc/>
         public bool HasBindingFor<T>()
-        {
-            return _bindings.Any(binding => binding.Service.Equals(typeof(T)));
-        }
+            => _bindings.Any(binding => binding.Service.Equals(typeof(T)));
 
         /// <inheritdoc/>
         public bool HasBindingFor(Type type)
-        {
-            return _bindings.Any(binding => binding.Service.Equals(type));
-        }
+            => _bindings.Any(binding => binding.Service.Equals(type));
 
         /// <inheritdoc/>
-        public IEnumerator<Binding> GetEnumerator()
-        {
-            return _bindings.GetEnumerator();
-        }
+        public IEnumerator<Binding> GetEnumerator() => _bindings.GetEnumerator();
 
         /// <inheritdoc/>
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _bindings.GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => _bindings.GetEnumerator();
     }
 }

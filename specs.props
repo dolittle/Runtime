@@ -2,7 +2,7 @@
     <Import Project="versions.props"/>
     
     <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
+        <TargetFramework>net5.0</TargetFramework>
         <IsTestProject>true</IsTestProject>
     </PropertyGroup>
 
@@ -11,8 +11,11 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Coverlet.MsBuild" Version="$(CoverletVersion)" />
-        <PackageReference Include="Dolittle.Common.Specs" Version="$(DolittleCommonSpecsVersion)"/>
+        <!-- <PackageReference Include="Dolittle.Common.Specs" Version="$(DolittleCommonSpecsVersion)"/> -->
+
+        <PackageReference Include="Machine.Specifications" Version="1.0.0" />
+        <PackageReference Include="Machine.Specifications.Should" Version="1.0.0" />
+        <PackageReference Include="moq" Version="4.13.*" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftDotNetTestVersion)" />
         <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="$(MachineSpecificationsRunnerVersion)" />
     </ItemGroup>

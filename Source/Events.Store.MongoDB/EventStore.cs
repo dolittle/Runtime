@@ -12,7 +12,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -22,14 +22,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     /// </summary>
     public class EventStore : IEventStore
     {
-        readonly FilterDefinitionBuilder<MongoDB.Events.Event> _eventFilter = Builders<MongoDB.Events.Event>.Filter;
+        readonly FilterDefinitionBuilder<Events.Event> _eventFilter = Builders<Events.Event>.Filter;
         readonly IExecutionContextManager _executionContextManager;
         readonly IStreams _streams;
         readonly IEventCommitter _eventCommitter;
         readonly IEventConverter _eventConverter;
         readonly IAggregateRoots _aggregateRoots;
         readonly IStreamEventWatcher _streamWatcher;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventStore"/> class.
@@ -47,8 +46,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             IEventCommitter eventCommitter,
             IEventConverter eventConverter,
             IAggregateRoots aggregateRoots,
-            IStreamEventWatcher streamWatcher,
-            ILogger logger)
+            IStreamEventWatcher streamWatcher)
         {
             _executionContextManager = executionContextManager;
             _streams = streams;
@@ -56,7 +54,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             _eventConverter = eventConverter;
             _aggregateRoots = aggregateRoots;
             _streamWatcher = streamWatcher;
-            _logger = logger;
         }
 
         /// <inheritdoc/>

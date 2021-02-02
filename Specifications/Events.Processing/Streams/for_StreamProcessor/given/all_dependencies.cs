@@ -9,7 +9,7 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given
             scoped_stream_processors_creator
                 .Setup(_ => _.Create(Moq.It.IsAny<IStreamDefinition>(), Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<IEventProcessor>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new Mock<AbstractScopedStreamProcessor>(
-                    new TenantId { Value = Guid.NewGuid() },
+                    new TenantId(Guid.NewGuid()),
                     Mock.Of<IStreamProcessorId>(),
                     Mock.Of<IStreamDefinition>(),
                     Mock.Of<IStreamProcessorState>(),

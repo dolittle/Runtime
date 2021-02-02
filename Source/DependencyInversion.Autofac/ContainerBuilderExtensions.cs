@@ -32,23 +32,35 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac
             var allAssemblies = assemblies.GetAll().ToArray();
             containerBuilder.RegisterAssemblyModules(allAssemblies);
 
-            var selfBindingRegistrationSource = new SelfBindingRegistrationSource(type =>
-                !type.Namespace.StartsWith("Microsoft", StringComparison.InvariantCulture) &&
-                !type.Namespace.StartsWith("System", StringComparison.InvariantCulture))
+            containerBuilder.AddBindingsPerTenantRegistrationSource();
+
+            RegisterWellKnownSources(containerBuilder);
+            RegisterWellKnownModules(containerBuilder);
+            DiscoverAndRegisterRegistrationSources(containerBuilder, allAssemblies);
+            RegisterUpBindingsIntoContainerBuilder(bindings, containerBuilder);
+        }
+
+        static SelfBindingRegistrationSource CreateSelfBindingRegistrationSource()
+            => new(
+                type =>
+                    (!type.Namespace.StartsWith("Microsoft", StringComparison.InvariantCulture) &&
+                    !type.Namespace.StartsWith("System", StringComparison.InvariantCulture)) ||
+                    type.Namespace.StartsWith("Microsoft.Extensions.Logging", StringComparison.InvariantCulture))
             {
                 RegistrationConfiguration = HandleLifeCycleFor
             };
 
-            containerBuilder.AddBindingsPerTenantRegistrationSource();
+        static void RegisterWellKnownModules(ContainerBuilder containerBuilder)
+        {
+            containerBuilder.RegisterModule(new LoggerModule());
+        }
 
-            containerBuilder.RegisterSource(selfBindingRegistrationSource);
+        static void RegisterWellKnownSources(ContainerBuilder containerBuilder)
+        {
+            containerBuilder.RegisterSource(CreateSelfBindingRegistrationSource());
             containerBuilder.RegisterSource(new FactoryForRegistrationSource());
             containerBuilder.RegisterSource(new OpenGenericCallbackRegistrationSource());
             containerBuilder.RegisterSource(new OpenGenericTypeCallbackRegistrationSource());
-            containerBuilder.RegisterModule(new LoggerModule());
-            DiscoverAndRegisterRegistrationSources(containerBuilder, allAssemblies);
-
-            RegisterUpBindingsIntoContainerBuilder(bindings, containerBuilder);
         }
 
         static void HandleLifeCycleFor(IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle> builder)

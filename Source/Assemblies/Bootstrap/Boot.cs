@@ -5,7 +5,7 @@ using System;
 using System.Reflection;
 using Dolittle.Runtime.Assemblies.Configuration;
 using Dolittle.Runtime.Assemblies.Rules;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Assemblies.Bootstrap
 {
@@ -47,8 +47,7 @@ namespace Dolittle.Runtime.Assemblies.Bootstrap
             var assemblyProvider = new AssemblyProvider(
                 new ICanProvideAssemblies[] { defaultAssemblyProvider ?? new DefaultAssemblyProvider(logger, entryAssembly) },
                 assemblyFilters,
-                new AssemblyUtility(),
-                logger);
+                new AssemblyUtility());
 
             var assemblies = new Assemblies(entryAssembly, assemblyProvider);
             return assemblies;

@@ -39,6 +39,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters.for_TypePartitio
         It should_not_be_public = () => result.Public.ShouldBeFalse();
         It should_have_the_event_log_as_source_stream = () => result.SourceStream.ShouldEqual(StreamId.EventLog);
         It should_have_the_correct_target_stream = () => result.TargetStream.Value.ShouldEqual(stream_id);
-        It should_have_the_correct_types = () => (result as TypeFilterWithEventSourcePartitionDefinition).Types.ShouldContainOnly(types.Select(_ => new ArtifactId { Value = _ }));
+        It should_have_the_correct_types = () => (result as TypeFilterWithEventSourcePartitionDefinition).Types.ShouldContainOnly(types.Select(_ => new ArtifactId(_)));
     }
 }

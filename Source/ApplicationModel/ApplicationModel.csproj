@@ -3,8 +3,7 @@
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.ApplicationModel</AssemblyName>
   </PropertyGroup>
-
   <ItemGroup>
-    <ProjectReference Include="../Concepts/Concepts.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
   </ItemGroup>
 </Project>

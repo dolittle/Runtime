@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Services.Clients
         /// </summary>
         /// <param name="type"><see cref="Type"/> of <see cref="ClientBase">client</see>.</param>
         public UnknownClientType(Type type)
-            : base($"The client type '{type.AssemblyQualifiedName}' is not known. Make sure an implementation of '{typeof(IKnowAboutClients).Name}' return a definition of it.")
+            : base($"The client type '{type.AssemblyQualifiedName}' is not known. Make sure an implementation of '{nameof(IKnowAboutClients)}' return a definition of it.")
         {
         }
     }

@@ -12,12 +12,7 @@
     <ItemGroup>
         <ProjectReference Include="../Collections/Collections.csproj" />
         <ProjectReference Include="../Execution/Execution.csproj" />
-        <ProjectReference Include="../IO/IO.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
-        <ProjectReference Include="../Logging/Logging.csproj" />
-        <ProjectReference Include="../Logging.Microsoft/Logging.Microsoft.csproj" />
-        <ProjectReference Include="../Scheduling/Scheduling.csproj" />
-        <ProjectReference Include="../Time/Time.csproj" />
         <ProjectReference Include="../Types/Types.csproj" />
     </ItemGroup>
 </Project>

@@ -11,12 +11,9 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         /// <summary>
         /// Gets the null target.
         /// </summary>
-        public object Target => null;
+        public static object Target => null;
 
         /// <inheritdoc/>
-        public System.Type GetTargetType()
-        {
-            return typeof(object);
-        }
+        public System.Type GetTargetType() => typeof(object);
     }
 }

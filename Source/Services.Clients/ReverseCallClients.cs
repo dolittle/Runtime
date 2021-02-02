@@ -3,7 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;
@@ -16,18 +16,18 @@ namespace Dolittle.Runtime.Services.Clients
     public class ReverseCallClients : IReverseCallClients
     {
         readonly IExecutionContextManager _executionContextManager;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly TimeSpan _defaultPingInterval = TimeSpan.FromSeconds(5);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReverseCallClients"/> class.
         /// </summary>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
-        public ReverseCallClients(IExecutionContextManager executionContextManager, ILoggerManager loggerManager)
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
+        public ReverseCallClients(IExecutionContextManager executionContextManager, ILoggerFactory loggerFactory)
         {
             _executionContextManager = executionContextManager;
-            _loggerManager = loggerManager;
+            _loggerFactory = loggerFactory;
         }
 
         /// <inheritdoc/>
@@ -62,6 +62,6 @@ namespace Dolittle.Runtime.Services.Clients
                     setPong,
                     pingInterval == default ? _defaultPingInterval : pingInterval,
                     _executionContextManager,
-                    _loggerManager.CreateLogger<ReverseCallClient<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
+                    _loggerFactory.CreateLogger<ReverseCallClient<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
     }
 }

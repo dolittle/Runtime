@@ -20,13 +20,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
         public static AbstractFilterDefinition ToStoreRepresentation(this IFilterDefinition filterDefinition)
         {
             return filterDefinition switch
-                {
-                    TypeFilterWithEventSourcePartitionDefinition definition =>
-                        new TypePartitionFilterDefinition(definition.Types.Select(_ => _.Value)),
-                    PublicFilterDefinition _ => new RemoteFilterDefinition(),
-                    FilterDefinition _ => new RemoteFilterDefinition(),
-                    _ => throw new UnsupportedFilterDefinitionType(filterDefinition)
-                };
+            {
+                TypeFilterWithEventSourcePartitionDefinition definition =>
+                    new TypePartitionFilterDefinition(definition.Types.Select(_ => _.Value)),
+                PublicFilterDefinition => new RemoteFilterDefinition(),
+                FilterDefinition => new RemoteFilterDefinition(),
+                _ => throw new UnsupportedFilterDefinitionType(filterDefinition)
+            };
         }
     }
 }

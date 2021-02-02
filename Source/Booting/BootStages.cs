@@ -8,7 +8,7 @@ using System.Reflection;
 using Dolittle.Runtime.Booting.Stages;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Reflection;
 using Dolittle.Runtime.Types;
 
@@ -33,8 +33,7 @@ namespace Dolittle.Runtime.Booting
             _initialFixedStages = new ICanPerformPartOfBootStage[]
             {
                 new Basics(),
-                new Stages.Logging(),
-                new InitialSystem(),
+                new Logging(),
                 new Discovery(),
                 new PostDiscovery(DiscoverBootStages)
             };
@@ -45,10 +44,7 @@ namespace Dolittle.Runtime.Booting
         /// Method that gets called when <see cref="IContainer"/> is ready.
         /// </summary>
         /// <param name="container"><see cref="IContainer"/> instance.</param>
-        public static void ContainerReady(IContainer container)
-        {
-            _container = container;
-        }
+        public static void ContainerReady(IContainer container) => _container = container;
 
         /// <inheritdoc/>
         public BootStagesResult Perform(Boot boot)
@@ -69,14 +65,11 @@ namespace Dolittle.Runtime.Booting
             while (_stages.Count > 0)
             {
                 var stage = _stages.Dequeue();
-                if (aggregatedAssociations.ContainsKey(WellKnownAssociations.LoggerManager))
-                {
-                    var loggerManager = aggregatedAssociations[WellKnownAssociations.LoggerManager] as ILoggerManager;
-                    _logger = loggerManager.CreateLogger<BootStages>();
-                }
+                
+                SetupLoggerIfAssociated(aggregatedAssociations);
 
                 var interfaces = stage.GetType().GetInterfaces();
-
+                
                 var isBefore = interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanRunBeforeBootStage<>));
                 var isAfter = interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanRunAfterBootStage<>));
 
@@ -84,7 +77,7 @@ namespace Dolittle.Runtime.Booting
                 if (isBefore) suffix = " (before)";
                 if (isAfter) suffix = " (after)";
 
-                _logger?.Debug($"<********* BOOTSTAGE : {stage.BootStage}{suffix} *********>");
+                _logger?.LogDebug($"<********* BOOTSTAGE : {stage.BootStage}{suffix} *********>");
 
                 var performer = interfaces.SingleOrDefault(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanPerformPartOfBootStage<>));
                 var settingsType = performer.GetGenericArguments()[0];
@@ -101,12 +94,20 @@ namespace Dolittle.Runtime.Booting
 
                 newBindingsNotificationHub.Notify(result.Bindings);
                 bindingCollection = aggregatedAssociations[WellKnownAssociations.Bindings] as IBindingCollection;
-
                 bindingCollection = new BindingCollection(bindingCollection, result.Bindings);
                 _container = result.Container;
             }
 
             return new BootStagesResult(_container, aggregatedAssociations, results);
+        }
+
+        void SetupLoggerIfAssociated(Dictionary<string, object> aggregatedAssociations)
+        {
+            if (aggregatedAssociations.ContainsKey(WellKnownAssociations.LoggerFactory))
+            {
+                var loggerFactory = aggregatedAssociations[WellKnownAssociations.LoggerFactory] as ILoggerFactory;
+                _logger = loggerFactory.CreateLogger<BootStages>();
+            }
         }
 
         void DiscoverBootStages(ITypeFinder typeFinder)
@@ -137,7 +138,7 @@ namespace Dolittle.Runtime.Booting
             ThrowIfMissingBootStage(bootStagePerformers);
         }
 
-        void ThrowIfMissingDefaultConstructorForBootStagePerformer(Type type)
+        static void ThrowIfMissingDefaultConstructorForBootStagePerformer(Type type)
         {
             if (!type.HasDefaultConstructor()) throw new MissingDefaultConstructorForBootStagePerformer(type);
         }
@@ -164,10 +165,10 @@ namespace Dolittle.Runtime.Booting
             });
         }
 
-        bool HasInterface(ICanPerformPartOfBootStage performer, Type interfaceType)
-        {
-            var interfaces = performer.GetType().GetInterfaces();
-            return interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == interfaceType);
-        }
+        static bool HasInterface(ICanPerformPartOfBootStage performer, Type interfaceType)
+            => performer
+                .GetType()
+                .GetInterfaces()
+                .Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == interfaceType);
     }
 }

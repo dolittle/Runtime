@@ -7,9 +7,9 @@
 
   <ItemGroup>
     <ProjectReference Include="../Artifacts/Artifacts.csproj"/>
-    <ProjectReference Include="../Concepts/Concepts.csproj"/>
     <ProjectReference Include="../Execution/Execution.csproj"/>
     <ProjectReference Include="../Security/Security.csproj"/>
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>
   </ItemGroup>
 
   <ItemGroup>

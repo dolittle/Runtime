@@ -8,5 +8,7 @@ namespace Dolittle.Runtime.Immutability.for_ImmutableExtensions
         public int property_with_getter { get; }
 
         public int property_with_setter { get; set; }
+
+        public int property_with_init_setter { get; init; }
     }
 }

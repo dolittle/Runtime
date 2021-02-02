@@ -14,7 +14,6 @@
     <ProjectReference Include="../Booting/Booting.csproj" />
     <ProjectReference Include="../DependencyInversion.Autofac/DependencyInversion.Autofac.csproj" />
     <ProjectReference Include="../DependencyInversion.Booting/DependencyInversion.Booting.csproj" />
-    <ProjectReference Include="../Logging.Microsoft/Logging.Microsoft.csproj" />
   </ItemGroup>
  
 </Project>

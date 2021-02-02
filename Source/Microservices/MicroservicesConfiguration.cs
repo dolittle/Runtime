@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.ApplicationModel;
@@ -13,7 +14,7 @@ namespace Dolittle.Runtime.Microservices
     /// </summary>
     [Name(ConfigurationName)]
     public class MicroservicesConfiguration :
-        ReadOnlyDictionary<Microservice, MicroserviceAddress>,
+        ReadOnlyDictionary<Guid, MicroserviceAddressConfiguration>,
         IConfigurationObject
     {
         /// <summary>
@@ -25,7 +26,7 @@ namespace Dolittle.Runtime.Microservices
         /// Initializes a new instance of the <see cref="MicroservicesConfiguration"/> class.
         /// </summary>
         /// <param name="configuration">Dictionary for <see cref="Microservice"/> with <see cref="MicroserviceAddress"/>.</param>
-        public MicroservicesConfiguration(IDictionary<Microservice, MicroserviceAddress> configuration)
+        public MicroservicesConfiguration(IDictionary<Guid, MicroserviceAddressConfiguration> configuration)
             : base(configuration)
         {
         }

@@ -9,7 +9,7 @@ using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
@@ -46,8 +46,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken)
         {
-            _logger.Trace(
-                "Writing Event Horizon Event: {EventLogSequenceNumber} from Tenant: {Tenant} in Microservice {Microservice} to Scope: {Scope}",
+            _logger.WritingEventHorizonEvent(
                 @event.EventLogSequenceNumber,
                 @event.ExecutionContext.Tenant,
                 @event.ExecutionContext.Microservice,

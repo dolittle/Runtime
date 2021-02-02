@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Reflection;
 using Grpc.Core;
 using Grpc.Core.Interceptors;
@@ -20,7 +20,6 @@ namespace Dolittle.Runtime.Services.Clients
         readonly IKnownClients _knownClients;
         readonly ClientEndpointsConfiguration _configuration;
         readonly IMetadataProviders _metadataProviders;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CallInvokerManager"/> class.
@@ -28,17 +27,14 @@ namespace Dolittle.Runtime.Services.Clients
         /// <param name="knownClients">All the <see cref="IKnownClients"/>.</param>
         /// <param name="configuration"><see cref="ClientEndpointsConfiguration">Configuration</see>.</param>
         /// <param name="metadataProviders"><see cref="IMetadataProviders"/> for providing metadata to calls.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public CallInvokerManager(
             IKnownClients knownClients,
             ClientEndpointsConfiguration configuration,
-            IMetadataProviders metadataProviders,
-            ILogger logger)
+            IMetadataProviders metadataProviders)
         {
             _knownClients = knownClients;
             _configuration = configuration;
             _metadataProviders = metadataProviders;
-            _logger = logger;
         }
 
         /// <inheritdoc/>

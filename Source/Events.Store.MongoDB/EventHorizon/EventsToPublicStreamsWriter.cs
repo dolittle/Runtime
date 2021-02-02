@@ -7,7 +7,7 @@ using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, StreamId streamId, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Trace("Writing Event: {EventLogSequenceNumber} to Public Stream: {Stream}", @event.EventLogSequenceNumber, streamId);
+            _logger.WritingEventToPublisStream( @event.EventLogSequenceNumber, streamId);
             var writtenStreamPosition = await _eventsToStreamsWriter.Write(
                 await _streams.GetPublic(streamId, cancellationToken).ConfigureAwait(false),
                 _filter,

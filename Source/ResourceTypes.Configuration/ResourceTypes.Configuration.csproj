@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../Concepts/Concepts.csproj" />
     <ProjectReference Include="../Collections/Collections.csproj" />
     <ProjectReference Include="../Configuration/Configuration.csproj" />
     <ProjectReference Include="../Execution/Execution.csproj" />

@@ -8,7 +8,5 @@
 
   <ItemGroup>
     <ProjectReference Include="../../Source/Serialization.Protobuf/Serialization.Protobuf.csproj" />
-
-    <ProjectReference Include="../../Source/Time/Time.csproj" />
   </ItemGroup>
 </Project>

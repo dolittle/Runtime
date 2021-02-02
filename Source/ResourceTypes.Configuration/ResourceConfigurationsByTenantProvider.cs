@@ -48,15 +48,12 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
 
         /// <inheritdoc/>
         public T ConfigurationFor<T>(TenantId tenantId, ResourceType resourceType)
-        {
-            return (T)ConfigurationFor(typeof(T), tenantId, resourceType);
-        }
+            => (T)ConfigurationFor(typeof(T), tenantId, resourceType);
 
         dynamic GetResourceConfiguration(TenantId tenantId, ResourceType resourceType)
         {
-            ThrowIfMissingResourceConfigurationForTenant(tenantId);
+            ThrowIfMissingConfigurationForResourceTypeForTenant(tenantId, resourceType);
             var configurationByResourceType = _configuration[tenantId];
-            ThrowIfMissingConfigurationForResourceTypeForTenant(tenantId, resourceType, configurationByResourceType);
 
             return configurationByResourceType[resourceType];
         }
@@ -82,8 +79,9 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
             if (!_configuration.ContainsKey(tenantId)) throw new MissingResourceConfigurationForTenant(tenantId);
         }
 
-        void ThrowIfMissingConfigurationForResourceTypeForTenant(TenantId tenantId, ResourceType resourceType, IDictionary<ResourceType, object> configurationByResourceType)
+        void ThrowIfMissingConfigurationForResourceTypeForTenant(TenantId tenantId, ResourceType resourceType)
         {
+            if (!_configuration.TryGetValue(tenantId, out var configurationByResourceType)) throw new MissingResourceConfigurationForTenant(tenantId);
             if (!configurationByResourceType.ContainsKey(resourceType)) throw new MissingResourceConfigurationForResourceTypeForTenant(tenantId, resourceType);
         }
     }

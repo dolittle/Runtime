@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 
@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     {
         readonly IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse> _dispatcher;
         readonly ILogger _logger;
-        readonly string _logMessagePrefix;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventProcessor"/> class.
@@ -38,7 +37,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             Identifier = id;
             _dispatcher = dispatcher;
             _logger = logger;
-            _logMessagePrefix = $"Event Processor '{Identifier}'";
         }
 
         /// <inheritdoc />
@@ -50,29 +48,19 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc />
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
-                "{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}'",
-                _logMessagePrefix,
-                @event.Type.Id.Value,
-                partitionId.Value);
+            _logger.EventProcessorIsProcessing(Identifier, @event.Type.Id, partitionId);
 
             var request = new HandleEventRequest
-                {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
-                };
+            {
+                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+            };
             return Process(request, cancellationToken);
         }
 
         /// <inheritdoc/>
         public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
-                "{LogMessagePrefix} is processing event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
-                _logMessagePrefix,
-                @event.Type.Id.Value,
-                partitionId.Value,
-                retryCount,
-                failureReason);
+            _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
             var request = new HandleEventRequest
                 {
                     Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },

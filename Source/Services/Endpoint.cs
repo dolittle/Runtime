@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Collections;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using grpc = Grpc.Core;
 
 namespace Dolittle.Runtime.Services
@@ -66,11 +66,11 @@ namespace Dolittle.Runtime.Services
                 _server
                     .Ports
                     .ForEach(_ =>
-                        _logger.Information("Starting {endpointVisibility} host on {host}" + (_.Port > 0 ? " for port {port}" : string.Empty), type, _.Host, _.Port));
+                        _logger.StartingHost(type, _.Host, _.Port));
 
                 services.ForEach(_ =>
                 {
-                    _logger.Debug("Exposing service '{serviceName}'", _.Descriptor.FullName);
+                    _logger.ExposingService(_.Descriptor.FullName);
                     _server.Services.Add(_.ServerDefinition);
                 });
 
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Services
             }
             catch (Exception ex)
             {
-                _logger.Error(ex, "Couldn't start {type} host", type);
+                _logger.CouldNotStartHost(ex, type);
             }
         }
 

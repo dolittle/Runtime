@@ -22,10 +22,10 @@ namespace Dolittle.Runtime.Protobuf
         {
             var message = new ExecutionContextContract
                 {
-                    MicroserviceId = executionContext.Microservice.ToProtobuf(),
-                    TenantId = executionContext.Tenant.ToProtobuf(),
-                    CorrelationId = executionContext.CorrelationId.ToProtobuf(),
-                    Environment = executionContext.Environment,
+                    MicroserviceId = executionContext.Microservice.Value.ToProtobuf(),
+                    TenantId = executionContext.Tenant.Value.ToProtobuf(),
+                    CorrelationId = executionContext.CorrelationId.Value.ToProtobuf(),
+                    Environment = executionContext.Environment.Value,
                     Version = executionContext.Version.ToProtobuf()
                 };
             message.Claims.AddRange(executionContext.Claims.ToProtobuf());
@@ -39,12 +39,12 @@ namespace Dolittle.Runtime.Protobuf
         /// <param name="executionContext"><see cref="ExecutionContextContract"/> to convert from.</param>
         /// <returns>Converted <see cref="ExecutionContext"/>.</returns>
         public static ExecutionContext ToExecutionContext(this ExecutionContextContract executionContext) =>
-            new ExecutionContext(
-                executionContext.MicroserviceId.To<Microservice>(),
-                executionContext.TenantId.To<TenantId>(),
+            new(
+                executionContext.MicroserviceId.ToGuid(),
+                executionContext.TenantId.ToGuid(),
                 executionContext.Version.ToVersion(),
                 executionContext.Environment,
-                executionContext.CorrelationId.To<CorrelationId>(),
+                executionContext.CorrelationId.ToGuid(),
                 executionContext.Claims.ToClaims(),
                 CultureInfo.InvariantCulture);
     }

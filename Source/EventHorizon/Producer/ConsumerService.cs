@@ -8,7 +8,7 @@ using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.ApplicationModel.Configuration;
+using Dolittle.Runtime.Applications.Configuration;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store;
@@ -17,7 +17,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Tenancy;
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             FactoryFor<IEventFetchers> getEventFetchers,
             FactoryFor<IStreamEventWatcher> getStreamWatcher,
             IReverseCallDispatchers dispatchers,
-            ILogger<ConsumerService> logger)
+            ILogger logger)
         {
             _thisMicroservice = boundedContextConfiguration.BoundedContext;
             _executionContextManager = executionContextManager;
@@ -114,12 +114,13 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             if (!await dispatcher.ReceiveArguments(context.CancellationToken).ConfigureAwait(false))
             {
                 const string message = "Event Horizon subscription arguments were not received";
-                _logger.Warning(message);
+                _logger.LogWarning(message);
                 await dispatcher.Reject(
                     new SubscriptionResponse
-                        {
-                            Failure = new Failure(SubscriptionFailures.MissingSubscriptionArguments, message)
-                        }, context.CancellationToken).ConfigureAwait(false);
+                    {
+                        Failure = new Failure(SubscriptionFailures.MissingSubscriptionArguments, message)
+                    },
+                    context.CancellationToken).ConfigureAwait(false);
                 return;
             }
 
@@ -127,13 +128,12 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
             var consumerMicroservice = _executionContextManager.Current.Microservice;
             var consumerTenant = _executionContextManager.Current.Tenant;
-            var producerTenant = arguments.TenantId.To<TenantId>();
-            var publicStream = arguments.StreamId.To<StreamId>();
-            var partition = arguments.PartitionId.To<PartitionId>();
+            TenantId producerTenant = arguments.TenantId.ToGuid();
+            StreamId publicStream = arguments.StreamId.ToGuid();
+            PartitionId partition = arguments.PartitionId.ToGuid();
             var streamPosition = arguments.StreamPosition;
 
-            _logger.Debug(
-                "Incomming Event Horizon subscription from microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' to tenant '{ProducerTenant}' starting at position '{StreamPosition}' in partition '{Partition}' in stream '{PublicStream}'",
+            _logger.IncomingEventHorizonSubscription(
                 consumerMicroservice,
                 consumerTenant,
                 producerTenant,
@@ -148,8 +148,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 return;
             }
 
-            _logger.Information(
-                "Microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' successfully subscribed to tenant '{ProducerTenant}' starting at position '{StreamPosition}' in partition '{Partition}' in stream '{PublicStream}'",
+            _logger.SuccessfullySubscribed(
                 consumerMicroservice,
                 consumerTenant,
                 producerTenant,
@@ -177,13 +176,11 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 if (!jointCts.IsCancellationRequested) jointCts.Cancel();
                 if (TryGetException(tasks, out var ex))
                 {
-                    _logger.Warning(
+                    _logger.ErrorOccurredInEventHorizon(
                         ex,
-                        "An error occurred Event Horizon for Microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}'",
                         consumerMicroservice,
                         consumerTenant,
                         producerTenant,
-                        streamPosition,
                         partition,
                         publicStream);
                     await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -193,9 +190,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 await Task.WhenAll(tasks).ConfigureAwait(false);
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(
+                    _logger.ErrorOccurredInEventHorizon(
                         ex,
-                        "Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}' failed",
                         consumerMicroservice,
                         consumerTenant,
                         producerTenant,
@@ -203,8 +199,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         publicStream);
                 }
 
-                _logger.Warning(
-                    "Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}' stopped",
+                _logger.EventHorizonStopped(
                     consumerMicroservice,
                     consumerTenant,
                     producerTenant,
@@ -216,9 +211,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 if (!jointCts.IsCancellationRequested) jointCts.Cancel();
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(
+                    _logger.ErrorOccurredInEventHorizon(
                         ex,
-                        "Error occurred in Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}'",
                         consumerMicroservice,
                         consumerTenant,
                         producerTenant,
@@ -230,8 +224,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             }
             finally
             {
-                _logger.Debug(
-                    "Disconnecting Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}'",
+                _logger.EventHorizonDisconnecting(
                     consumerMicroservice,
                     consumerTenant,
                     producerTenant,
@@ -287,7 +280,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                             cancellationToken).ConfigureAwait(false);
                         if (response.Failure != null)
                         {
-                            _logger.Warning(
+                            _logger.LogWarning(
                                 "An error occurred while handling request. FailureId: {FailureId} Reason: {Reason}",
                                 response.Failure.Id,
                                 response.Failure.Reason);
@@ -304,7 +297,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             }
             catch (Exception ex)
             {
-                _logger.Warning(ex, "An error ocurred while writing events to event horizon");
+                _logger.LogWarning(ex, "An error ocurred while writing events to event horizon");
             }
         }
 
@@ -312,18 +305,18 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         {
             try
             {
-                _logger.Trace("Checking whether Producer Tenant {ProducerTenant} exists", producerTenant);
+                _logger.LogTrace("Checking whether Producer Tenant {ProducerTenant} exists", producerTenant);
                 if (!ProducerTenantExists(producerTenant))
                 {
                     var message = $"There are no consents configured for Producer Tenant {producerTenant}";
-                    _logger.Debug(message);
+                    _logger.LogDebug(message);
                     return new EventHorizonContracts.SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message,  } };
                 }
 
                 if (!TryGetConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition, out var consentId))
                 {
                     var message = $"There are no consent configured for Partition {partition} in Public Stream {publicStream} in Tenant {producerTenant} to Consumer Tenant {consumerTenant} in Microservice {consumerMicroservice}";
-                    _logger.Debug(message);
+                    _logger.LogDebug(message);
                     return new EventHorizonContracts.SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message } };
                 }
 
@@ -332,7 +325,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             catch (Exception ex)
             {
                 const string message = "Error ocurred while creating subscription response";
-                _logger.Warning(ex, message);
+                _logger.LogWarning(ex, message);
                 return new EventHorizonContracts.SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = FailureId.Other.ToProtobuf(), Reason = message } };
             }
         }
@@ -340,7 +333,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         bool TryGetConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out ConsentId consentId)
         {
             consentId = null;
-            _logger.Trace(
+            _logger.LogTrace(
                 "Checking consents configured for Partition: {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}",
                 partition,
                 publicStream,
@@ -354,7 +347,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
             if (consentsForSubscription.Length == 0)
             {
-                _logger.Debug(
+                _logger.LogDebug(
                     "There are no consent configured for partition '{Partition}' in public stream '{PublicStream}' in tenant '{ProducerTenant}' to consumer tenant '{ConsumerTenant}' in microservice '{ConsumerMicroservice}'",
                     partition,
                     publicStream,
@@ -366,7 +359,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 
             if (consentsForSubscription.Length > 1)
             {
-                _logger.Warning(
+                _logger.LogWarning(
                     "There are multiple consents configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}",
                     partition,
                     publicStream,

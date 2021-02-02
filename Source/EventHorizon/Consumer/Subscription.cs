@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.EventHorizon
@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.EventHorizon
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly EventsFromEventHorizonFetcher _eventsFetcher;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-        readonly ILoggerManager _loggerManager;
+        readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
         readonly CancellationToken _cancellationToken;
         readonly CancellationTokenRegistration _unregisterTokenRegistration;
@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="loggerManager">The <see cref="ILoggerManager" />.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public Subscription(
             ConsentId consentId,
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.EventHorizon
             IResilientStreamProcessorStateRepository streamProcessorStates,
             Action unregister,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
-            ILoggerManager loggerManager,
+            ILoggerFactory loggerFactory,
             CancellationToken cancellationToken)
         {
             _identifier = subscriptionId;
@@ -64,8 +64,8 @@ namespace Dolittle.Runtime.EventHorizon
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcher = eventsFetcher;
             _eventsFetcherPolicy = eventsFetcherPolicy;
-            _loggerManager = loggerManager;
-            _logger = loggerManager.CreateLogger<StreamProcessor>();
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<StreamProcessor>();
             _cancellationToken = cancellationToken;
             _unregisterTokenRegistration = _cancellationToken.Register(_unregister);
 
@@ -103,7 +103,7 @@ namespace Dolittle.Runtime.EventHorizon
                 _eventsFetcherPolicy,
                 _eventsFetcher,
                 new TimeToRetryForUnpartitionedStreamProcessor(),
-                _loggerManager.CreateLogger<ScopedStreamProcessor>());
+                _loggerFactory.CreateLogger<ScopedStreamProcessor>());
             _initialized = true;
         }
 
@@ -125,7 +125,7 @@ namespace Dolittle.Runtime.EventHorizon
             {
                 if (!_cancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(ex, "Subscription: {SubscriptionId} failed", _identifier);
+                    _logger.FailedStartingSubscription(ex, _identifier);
                 }
             }
             finally

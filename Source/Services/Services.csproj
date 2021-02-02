@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../Booting/Booting.csproj"/>
-    <ProjectReference Include="../Concepts/Concepts.csproj"/>
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj"/>
     <ProjectReference Include="../Configuration/Configuration.csproj"/>
     <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj"/>
     <ProjectReference Include="../Protobuf/Protobuf.csproj"/>

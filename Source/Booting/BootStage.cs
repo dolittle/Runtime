@@ -29,22 +29,13 @@ namespace Dolittle.Runtime.Booting
         Logging,
 
         /// <summary>
-        /// Initial system stage - fixed.
-        /// </summary>
-        /// <remarks>
-        /// This stage is defined by the system and can't be swapped out. It also does not support
-        /// any <see cref="ICanRunBeforeBootStage{T}"/> or <see cref="ICanRunAfterBootStage{T}"/>.
-        /// </remarks>
-        InitialSystem,
-
-        /// <summary>
         /// Discovery stage - fixed.
         /// </summary>
         /// <remarks>
         /// This stage is defined by the system and can't be swapped out. It also does not support
         /// any <see cref="ICanRunBeforeBootStage{T}"/> or <see cref="ICanRunAfterBootStage{T}"/>.
         /// </remarks>
-        Discovery,
+        Discovery = 4,
 
         /// <summary>
         /// Prepare boot - after this stage there should be a <see cref="IContainer"/> available -

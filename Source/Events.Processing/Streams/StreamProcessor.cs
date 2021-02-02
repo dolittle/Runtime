@@ -10,7 +10,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <returns>A <see cref="Task" />that represents the asynchronous operation.</returns>
         public async Task Initialize()
         {
-            _logger.Debug("Initializing StreamProcessor with Id: {StreamProcessorId}", _identifier);
+            _logger.InitializingStreamProcessor(_identifier);
             _externalCancellationToken.ThrowIfCancellationRequested();
             if (_initialized) throw new StreamProcessorAlreadyInitialized(_identifier);
             await _onAllTenants.PerformAsync(async tenant =>
@@ -100,7 +100,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         public async Task Start()
         {
-            _logger.Debug("Starting StreamProcessor with Id: {StreamProcessorId}", _identifier);
+            _logger.StartingStreamProcessor(_identifier);
             if (!_initialized) throw new StreamProcessorNotInitialized(_identifier);
             if (_started) throw new StreamProcessorAlreadyProcessingStream(_identifier);
             _started = true;
@@ -112,7 +112,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 await Task.WhenAny(tasks).ConfigureAwait(false);
                 if (TryGetException(tasks, out var ex))
                 {
-                    _logger.Warning(ex, "Scoped Stream Processor with Id: {streamProcessorId} failed", _identifier);
+                    _logger.ScopedStreamProcessorFailed(ex, _identifier);
                 }
 
                 _internalCancellationTokenSource.Cancel();
@@ -157,7 +157,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
                 })).ToList();
 
-        bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
+        static bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
         {
             exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
             if (exception != default)

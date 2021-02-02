@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -22,23 +22,19 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly IEventFetchers _eventFetchers;
         readonly IStreamProcessorStateRepository _streamProcessorStates;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidateFilterByComparingStreams"/> class.
         /// </summary>
         /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
-        /// <param name="logger">The <see cref="ILogger "/>.</param>
         public ValidateFilterByComparingStreams(
             IEventFetchers eventFetchers,
-            IStreamProcessorStateRepository streamProcessorStates,
-            ILogger logger)
-            {
-                _eventFetchers = eventFetchers;
-                _streamProcessorStates = streamProcessorStates;
-                _logger = logger;
-            }
+            IStreamProcessorStateRepository streamProcessorStates)
+        {
+            _eventFetchers = eventFetchers;
+            _streamProcessorStates = streamProcessorStates;
+        }
 
         /// <inheritdoc/>
         public async Task<FilterValidationResult> Validate<TFilterDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TFilterDefinition> filter, CancellationToken cancellationToken)

@@ -9,7 +9,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Tenancy;
 using Grpc.Core;
@@ -25,25 +25,21 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     {
         readonly FactoryFor<IConsumerClient> _getConsumerClient;
         readonly IExecutionContextManager _executionContextManager;
-        readonly ITenants _tenants;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
         /// </summary>
         /// <param name="getConsumerClient">The <see cref="FactoryFor{T}" /><see cref="IConsumerClient" />.</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
-        /// <param name="tenants">The <see cref="ITenants"/> system.</param>
+        /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="ExecutionContext"/>.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public SubscriptionsService(
             FactoryFor<IConsumerClient> getConsumerClient,
             IExecutionContextManager executionContextManager,
-            ITenants tenants,
-            ILogger<SubscriptionsService> logger)
+            ILogger logger)
         {
             _getConsumerClient = getConsumerClient;
             _executionContextManager = executionContextManager;
-            _tenants = tenants;
             _logger = logger;
         }
 
@@ -54,14 +50,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var consumerTenant = _executionContextManager.Current.Tenant;
             var subscriptionId = new SubscriptionId(
                 consumerTenant,
-                subscriptionRequest.MicroserviceId.To<Microservice>(),
-                subscriptionRequest.TenantId.To<TenantId>(),
-                subscriptionRequest.ScopeId.To<ScopeId>(),
-                subscriptionRequest.StreamId.To<StreamId>(),
-                subscriptionRequest.PartitionId.To<PartitionId>());
+                subscriptionRequest.MicroserviceId.ToGuid(),
+                subscriptionRequest.TenantId.ToGuid(),
+                subscriptionRequest.ScopeId.ToGuid(),
+                subscriptionRequest.StreamId.ToGuid(),
+                subscriptionRequest.PartitionId.ToGuid());
             try
             {
-                _logger.Information("Incoming event horizon subscription request from head to runtime. {SubscriptionId}", subscriptionId);
+                _logger.IncomingSubscripton(subscriptionId);
                 var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscriptionId).ConfigureAwait(false);
 
                 return subscriptionResponse switch
@@ -78,7 +74,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.Warning(ex, "An error occurred while trying to handling event horizon subscription: {Subscription}", subscriptionId);
+                    _logger.ErrorWhileSubscribing(ex, subscriptionId);
                 }
 
                 return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };

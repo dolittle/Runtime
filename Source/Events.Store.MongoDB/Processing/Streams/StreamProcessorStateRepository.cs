@@ -4,11 +4,11 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" />.</returns>
         public async Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId id, CancellationToken cancellationToken)
         {
-            _logger.Trace("Trying to get Stream Processor State for {StreamProcessorId}", id);
+            _logger.GettingStreamProcessorState(id);
             try
             {
                 if (id is SubscriptionId subscriptionId)
@@ -93,7 +93,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
         public async Task Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
         {
-            _logger.Trace("Persisting Stream Processor State for {StreamProcessorId}", id);
+            _logger.PersistingStreamProcessorState(id);
             try
             {
                 if (id is SubscriptionId subscriptionId)

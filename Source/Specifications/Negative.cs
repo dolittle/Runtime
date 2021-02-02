@@ -18,8 +18,6 @@ namespace Dolittle.Runtime.Specifications
         /// </summary>
         /// <param name="specification">The <see cref="Specification{T}"/> to negate.</param>
         internal Negative(Specification<T> specification)
-        {
-            Predicate = Expression.Lambda<Func<T, bool>>(Expression.Not(specification.Predicate.Body), specification.Predicate.Parameters);
-        }
+            => Predicate = Expression.Lambda<Func<T, bool>>(Expression.Not(specification.Predicate.Body), specification.Predicate.Parameters);
     }
 }

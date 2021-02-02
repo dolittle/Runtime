@@ -17,10 +17,7 @@ namespace Dolittle.Runtime.Hosting.Microsoft
         /// Initializes a new instance of the <see cref="ServiceProviderContainer"/> class.
         /// </summary>
         /// <param name="serviceProvider">The <cee cref="IServiceProvider"/> to use for getting instances of types.</param>
-        public ServiceProviderContainer(IServiceProvider serviceProvider)
-        {
-            _serviceProvider = serviceProvider;
-        }
+        public ServiceProviderContainer(IServiceProvider serviceProvider) => _serviceProvider = serviceProvider;
 
         /// <inheritdoc/>
         public T Get<T>() => (T)_serviceProvider.GetService(typeof(T));

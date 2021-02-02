@@ -13,12 +13,10 @@ namespace Dolittle.Runtime.Specifications
     /// <remarks>Based on http://bloggingabout.net/blogs/dries/archive/2011/09/29/specification-pattern-continued.aspx.</remarks>
     internal class ParameterRebinder : ExpressionVisitor
     {
-        readonly Dictionary<ParameterExpression, ParameterExpression> map;
+        readonly Dictionary<ParameterExpression, ParameterExpression> _map;
 
         ParameterRebinder(Dictionary<ParameterExpression, ParameterExpression> map)
-        {
-            this.map = map ?? new Dictionary<ParameterExpression, ParameterExpression>();
-        }
+            => _map = map ?? new Dictionary<ParameterExpression, ParameterExpression>();
 
         /// <summary>
         /// Replace expression by visitation with an expression.
@@ -27,15 +25,12 @@ namespace Dolittle.Runtime.Specifications
         /// <param name="expression"><see cref="Expression"/> to visit with.</param>
         /// <returns>A new <see cref="Expression"/>.</returns>
         public static Expression ReplaceParameters(Dictionary<ParameterExpression, ParameterExpression> map, Expression expression)
-        {
-            return new ParameterRebinder(map).Visit(expression);
-        }
+            => new ParameterRebinder(map).Visit(expression);
 
         /// <inheritdoc/>
         protected override Expression VisitParameter(ParameterExpression parameterExpression)
         {
-            if (map.TryGetValue(parameterExpression, out ParameterExpression replacement))
-                parameterExpression = replacement;
+            if (_map.TryGetValue(parameterExpression, out var replacement)) parameterExpression = replacement;
             return base.VisitParameter(parameterExpression);
         }
     }

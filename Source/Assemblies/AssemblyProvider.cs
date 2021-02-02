@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyModel;
 
 namespace Dolittle.Runtime.Assemblies
@@ -24,7 +24,6 @@ namespace Dolittle.Runtime.Assemblies
         readonly IAssemblyUtility _assemblyUtility;
         readonly Dictionary<string, Library> _libraries = new Dictionary<string, Library>();
         readonly List<Assembly> _assemblies = new List<Assembly>();
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssemblyProvider"/> class.
@@ -36,13 +35,11 @@ namespace Dolittle.Runtime.Assemblies
         public AssemblyProvider(
             IEnumerable<ICanProvideAssemblies> assemblyProviders,
             IAssemblyFilters assemblyFilters,
-            IAssemblyUtility assemblyUtility,
-            ILogger logger)
+            IAssemblyUtility assemblyUtility)
         {
             _assemblyProviders = assemblyProviders;
             _assemblyFilters = assemblyFilters;
             _assemblyUtility = assemblyUtility;
-            _logger = logger;
 
             Populate();
         }

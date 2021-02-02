@@ -12,7 +12,6 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
 {
     public class and_handle_is_called_multiple_times : given.a_reverse_call_client
     {
-        static MyConnectResponse connect_response;
         static bool connection_established;
         static Execution.ExecutionContext execution_context;
 

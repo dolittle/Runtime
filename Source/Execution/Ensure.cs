@@ -32,8 +32,7 @@ namespace Dolittle.Runtime.Execution
         [DebuggerStepThrough]
         public static void NullableIsNotNull<T>(string parameterName, T argument)
         {
-            if (ReferenceEquals(argument, null))
-                ThrowException(parameterName);
+            if (argument is null) ThrowException(parameterName);
         }
 
         /// <summary>
@@ -62,7 +61,7 @@ namespace Dolittle.Runtime.Execution
         [DebuggerStepThrough]
         public static void NullableArgumentPropertyIsNotNull<T>(string parameterName, string propertyPath, T argumentProperty)
         {
-            if (ReferenceEquals(argumentProperty, null))
+            if (argumentProperty is null)
             {
                 ThrowException(parameterName, propertyPath);
             }

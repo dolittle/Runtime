@@ -50,11 +50,9 @@ namespace Dolittle.Runtime.Configuration.Files
             var resourceName = _entryAssembly.GetManifestResourceNames().SingleOrDefault(_ => _.EndsWith(filename, StringComparison.InvariantCultureIgnoreCase));
             if (resourceName != null)
             {
-                using (var reader = new StreamReader(_entryAssembly.GetManifestResourceStream(resourceName)))
-                {
-                    var content = reader.ReadToEnd();
-                    return _parsers.Parse(type, resourceName, content);
-                }
+                using var reader = new StreamReader(_entryAssembly.GetManifestResourceStream(resourceName));
+                var content = reader.ReadToEnd();
+                return _parsers.Parse(type, resourceName, content);
             }
 
             throw new UnableToProvideConfigurationObject<ManifestResourceStreamConfigurationObjectsProvider>(type);

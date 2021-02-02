@@ -12,7 +12,6 @@ using System.Reflection;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Reflection;
-using Dolittle.Runtime.Strings;
 using Dolittle.Runtime.Types;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -63,68 +62,60 @@ namespace Dolittle.Runtime.Serialization.Json
         public object FromJson(Type type, string json, ISerializationOptions options = null)
         {
             var serializer = CreateSerializerForDeserialization(options);
-            using (var textReader = new StringReader(json))
-            using (var reader = new JsonTextReader(textReader))
-            {
-                object instance;
+            using var textReader = new StringReader(json);
+            using var reader = new JsonTextReader(textReader);
+            object instance;
 
-                if (type.HasDefaultConstructor())
+            if (type.HasDefaultConstructor())
                 {
-                    try
+                try
                     {
-                        var value = serializer.Deserialize(reader, type);
-                        if (value == null || value.GetType() != type)
+                    var value = serializer.Deserialize(reader, type);
+                    if (value == null || value.GetType() != type)
                         {
-                            var converter = serializer.Converters.SingleOrDefault(c => c.CanConvert(type) && c.CanRead);
-                            if (converter != null) return converter.ReadJson(reader, type, null, serializer);
+                        var converter = serializer.Converters.SingleOrDefault(c => c.CanConvert(type) && c.CanRead);
+                        if (converter != null) return converter.ReadJson(reader, type, null, serializer);
                         }
-                        else
+                    else
                         {
-                            return value;
+                        return value;
                         }
                     }
-                    catch { }
+                catch { }
                 }
 
-                if (type.GetTypeInfo().IsValueType ||
-                    type.HasInterface<IEnumerable>())
+            if (type.GetTypeInfo().IsValueType ||
+                type.HasInterface<IEnumerable>())
                 {
-                    instance = serializer.Deserialize(reader, type);
+                instance = serializer.Deserialize(reader, type);
                 }
-                else
+            else
                 {
-                    instance = CreateInstanceOf(type, json, out IEnumerable<string> propertiesMatched);
+                instance = CreateInstanceOf(type, json, out var propertiesMatched);
 
-                    DeserializeRemaindingProperties(type, serializer, reader, instance, propertiesMatched);
+                DeserializeRemaindingProperties(type, serializer, reader, instance, propertiesMatched);
                 }
 
-                return instance;
+            return instance;
             }
-        }
 
         /// <inheritdoc/>
         public void FromJson(object instance, string json, ISerializationOptions options = null)
         {
             var serializer = CreateSerializerForDeserialization(options);
-            using (var textReader = new StringReader(json))
-            {
-                using (var reader = new JsonTextReader(textReader))
-                {
-                    serializer.Populate(reader, instance);
-                }
-            }
+            using var textReader = new StringReader(json);
+            using var reader = new JsonTextReader(textReader);
+            serializer.Populate(reader, instance);
         }
 
         /// <inheritdoc/>
         public string ToJson(object instance, ISerializationOptions options = null)
         {
-            using (var stringWriter = new StringWriter())
-            {
-                var serializer = CreateSerializerForSerialization(options);
-                serializer.Serialize(stringWriter, instance);
-                var serialized = stringWriter.ToString();
-                return serialized;
-            }
+            using var stringWriter = new StringWriter();
+            var serializer = CreateSerializerForSerialization(options);
+            serializer.Serialize(stringWriter, instance);
+            var serialized = stringWriter.ToString();
+            return serialized;
         }
 
         /// <inheritdoc/>
@@ -168,62 +159,54 @@ namespace Dolittle.Runtime.Serialization.Json
 
         bool DoesPropertiesMatchConstructor(Type type, string json)
         {
-            using (var reader = new JsonTextReader(new StringReader(json)))
-            {
-                var hash = JObject.Load(reader);
-                var constructor = type.GetNonDefaultConstructor();
-                var parameters = constructor.GetParameters();
-                var properties = hash.Properties();
-                var matchingParameters = parameters.Where(cp => properties.Select(p => p.Name.ToCamelCase()).Contains(cp.Name.ToCamelCase()));
-                return matchingParameters.Count() == parameters.Length;
-            }
+            using var reader = new JsonTextReader(new StringReader(json));
+            var hash = JObject.Load(reader);
+            var constructor = type.GetNonDefaultConstructor();
+            var parameters = constructor.GetParameters();
+            var properties = hash.Properties();
+            var matchingParameters = parameters.Where(cp => properties.Select(p => p.Name.ToCamelCase()).Contains(cp.Name.ToCamelCase()));
+            return matchingParameters.Count() == parameters.Length;
         }
 
         object CreateInstanceByPropertiesMatchingConstructor(Type type, string json, out IEnumerable<string> propertiesMatched)
         {
-            using (var reader = new JsonTextReader(new StringReader(json)))
+            using var reader = new JsonTextReader(new StringReader(json));
+            var propertiesFound = new List<string>();
+            var hash = JObject.Load(reader);
+            var properties = hash.Properties();
+
+            var constructor = type.GetNonDefaultConstructor();
+
+            var parameters = constructor.GetParameters();
+            var parameterInstances = new List<object>();
+
+            var toObjectMethod = typeof(JToken).GetTypeInfo().GetMethod("ToObject", new Type[] { typeof(JsonSerializer) });
+            var serializer = CreateSerializerForDeserialization(SerializationOptions.CamelCase);
+
+            foreach (var parameter in parameters)
             {
-                var propertiesFound = new List<string>();
-                var hash = JObject.Load(reader);
-                var properties = hash.Properties();
+                var property = properties.Single(p => p.Name.ToCamelCase() == parameter.Name.ToCamelCase());
+                propertiesFound.Add(property.Name);
 
-                var constructor = type.GetNonDefaultConstructor();
-
-                var parameters = constructor.GetParameters();
-                var parameterInstances = new List<object>();
-
-                var toObjectMethod = typeof(JToken).GetTypeInfo().GetMethod("ToObject", new Type[] { typeof(JsonSerializer) });
-                var serializer = CreateSerializerForDeserialization(SerializationOptions.CamelCase);
-
-                foreach (var parameter in parameters)
+                object parameterInstance = null;
+                if (parameter.ParameterType == typeof(object))
                 {
-                    var property = properties.Single(p => p.Name.ToCamelCase() == parameter.Name.ToCamelCase());
-                    propertiesFound.Add(property.Name);
-
-                    object parameterInstance = null;
-                    if (parameter.ParameterType == typeof(object))
-                    {
-                        using (var stringReader = new StringReader(property.Value.ToString()))
-                        {
-                            using (var jsonTextReader = new JsonTextReader(stringReader))
-                            {
-                                parameterInstance = serializer.Deserialize(jsonTextReader, typeof(ExpandoObject));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        var genericToObjectMethod = toObjectMethod.MakeGenericMethod(parameter.ParameterType);
-                        parameterInstance = genericToObjectMethod.Invoke(property.Value, new[] { serializer });
-                    }
-
-                    parameterInstances.Add(parameterInstance);
+                    using var stringReader = new StringReader(property.Value.ToString());
+                    using var jsonTextReader = new JsonTextReader(stringReader);
+                    parameterInstance = serializer.Deserialize(jsonTextReader, typeof(ExpandoObject));
+                }
+                else
+                {
+                    var genericToObjectMethod = toObjectMethod.MakeGenericMethod(parameter.ParameterType);
+                    parameterInstance = genericToObjectMethod.Invoke(property.Value, new[] { serializer });
                 }
 
-                propertiesMatched = propertiesFound;
-                return constructor.Invoke(parameterInstances.ToArray());
+                parameterInstances.Add(parameterInstance);
             }
-        }
+
+            propertiesMatched = propertiesFound;
+            return constructor.Invoke(parameterInstances.ToArray());
+            }
 
         void DeserializeRemaindingProperties(Type type, JsonSerializer serializer, JsonTextReader reader, object instance, IEnumerable<string> propertiesMatched)
         {

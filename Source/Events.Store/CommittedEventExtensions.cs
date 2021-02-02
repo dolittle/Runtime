@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store
         public static Contracts.CommittedEvent ToProtobuf(this CommittedEvent @event) =>
             @event is CommittedExternalEvent externalEvent ?
                 externalEvent.ToProtobuf()
-                : new Contracts.CommittedEvent
+                : new()
                     {
                         EventLogSequenceNumber = @event.EventLogSequenceNumber,
                         Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
@@ -43,12 +43,12 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="event"><see cref="Contracts.CommittedEvent"/> to convert from.</param>
         /// <returns>Converted <see cref="CommittedEvent"/>.</returns>
         public static CommittedEvent ToCommittedEvent(this Contracts.CommittedEvent @event) =>
-            new CommittedEvent(
+            new(
                 @event.EventLogSequenceNumber,
                 @event.Occurred.ToDateTimeOffset(),
-                @event.EventSourceId.To<EventSourceId>(),
+                @event.EventSourceId.ToGuid(),
                 @event.ExecutionContext.ToExecutionContext(),
-                new Artifact(@event.Type.Id.To<ArtifactId>(), @event.Type.Generation),
+                new Artifact(@event.Type.Id.ToGuid(), @event.Type.Generation),
                 @event.Public,
                 @event.Content);
     }

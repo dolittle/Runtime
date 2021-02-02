@@ -14,8 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../Async/Async.csproj" />
-    <ProjectReference Include="../Concepts/Concepts.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
     <ProjectReference Include="../Execution/Execution.csproj" />
     <ProjectReference Include="../Protobuf/Protobuf.csproj" />
     <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />

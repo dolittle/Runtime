@@ -13,14 +13,10 @@ namespace Dolittle.Runtime.Booting
     /// </summary>
     public class BootBuilder : IBootBuilder
     {
-        readonly Dictionary<Type, IRepresentSettingsForBootStage> _settings = new Dictionary<Type, IRepresentSettingsForBootStage>();
+        readonly Dictionary<Type, IRepresentSettingsForBootStage> _settings = new();
 
         /// <inheritdoc/>
-        public Boot Build()
-        {
-            var boot = new Boot(_settings.Values);
-            return boot;
-        }
+        public Boot Build() => new(_settings.Values);
 
         /// <inheritdoc/>
         public void Set<TTarget>(Expression<Func<TTarget, object>> propertyExpression, object value)
