@@ -49,12 +49,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 new EventId(255775676, nameof(FindingFilterValidator)),
                 "Finding validator for filter {Filter}");
 
-        static readonly Action<ILogger, Guid, Exception> _validatingFilter = LoggerMessage
-            .Define<Guid>(
-                LogLevel.Trace,
-                new EventId(1404193471, nameof(ValidatingFilter)),
-                "Validating filter {Filter}");
-
         static readonly Action<ILogger, Type, Type, Exception> _foundValidatorForFilter = LoggerMessage
             .Define<Type, Type>(
                 LogLevel.Trace,
@@ -133,12 +127,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 new EventId(1295926017, nameof(StartingFilter)),
                 "Starting Filter: {Filter}");
 
-        static readonly Action<ILogger, Guid, string, Exception> _filterValidationFailed = LoggerMessage
-            .Define<Guid, string>(
-                LogLevel.Warning,
-                new EventId(409191304, nameof(FilterValidationFailed)),
-                "Failed to register Filter: {Filter}. Filter validation failed because of: {Reason}");
-
         static readonly Action<ILogger, string, Exception> _filterConnectionRequestedFor = LoggerMessage
             .Define<string>(
                 LogLevel.Debug,
@@ -157,11 +145,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 new EventId(262022487, nameof(ErrorWhileRegisteringStreamProcessorForFilter)),
                 "Error occurred while trying to register stream processor for Filter {Filter} on Source Stream {SourceStream}");
 
-        static readonly Action<ILogger, Guid, Exception> _persistingStreamDefinition = LoggerMessage
-            .Define<Guid>(
-                LogLevel.Debug,
-                new EventId(421949468, nameof(PersistingStreamDefinition)),
-                "Persisting definition for Stream: {Stream}");
 
         static readonly Action<ILogger, Guid, Guid, Exception> _tryGetFilterDefinition = LoggerMessage
             .Define<Guid, Guid>(
@@ -189,12 +172,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         internal static void FindingFilterValidator(this ILogger logger, EventProcessorId filter)
             => _findingFilterValidator(logger, filter, null);
-
-        internal static void ValidatingFilter(this ILogger logger, EventProcessorId filter)
-            => _validatingFilter(logger, filter, null);
-
-        internal static void ValidatingFilter(this ILogger logger, StreamId filter)
-            => _validatingFilter(logger, filter, null);
 
         internal static void FoundValidatorForFilter(this ILogger logger, Type filterType, Type validatorType)
             => _foundValidatorForFilter(logger, filterType, validatorType, null);
@@ -234,12 +211,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         internal static void StartingFilter(this ILogger logger, StreamId filterId)
             => _startingFilter(logger, filterId, null);
-        
-        internal static void FilterValidationFailed(this ILogger logger, StreamId filterId, FailedFilterValidationReason reason)
-            => _filterValidationFailed(logger, filterId, reason, null);
-
-        internal static void PersistingStreamDefinition(this ILogger logger, StreamId filterId)
-            => _persistingStreamDefinition(logger, filterId, null);
 
         internal static void FilterConnectionRequestedFor(this ILogger logger, string filterType)
             => _filterConnectionRequestedFor(logger, filterType, null);

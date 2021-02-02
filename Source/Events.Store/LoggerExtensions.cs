@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store
         static readonly Action<ILogger, string, int, Exception> _eventsReceivedForCommitting = LoggerMessage
             .Define<string, int>(
                 LogLevel.Debug,
-                new EventId(2059664795, nameof(_eventsReceivedForCommitting)),
+                new EventId(2059664795, nameof(EventsReceivedForCommitting)),
                 "{NumEvents} {EventType}events received for committing");
 
         internal static void EventsReceivedForCommitting(this ILogger logger, bool isAggregateEvents, int numEvents)
