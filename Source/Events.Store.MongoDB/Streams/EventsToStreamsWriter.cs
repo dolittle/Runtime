@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ScopeId scope, StreamId stream, PartitionId partition, CancellationToken cancellationToken)
         {
-            _logger.LogTrace("Writing Event: {EventLogSequenceNumber} to Stream: {Stream} in Scope: {Scope}", @event.EventLogSequenceNumber, stream, scope);
+            _logger.WritingEventToStream(@event.EventLogSequenceNumber, stream, scope);
             var writtenStreamPosition = await Write(
                 await _streams.Get(scope, stream, cancellationToken).ConfigureAwait(false),
                 _streamFilter,

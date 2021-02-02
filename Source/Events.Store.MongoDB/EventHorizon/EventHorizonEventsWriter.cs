@@ -46,8 +46,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
         /// <inheritdoc/>
         public async Task Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken)
         {
-            _logger.LogTrace(
-                "Writing Event Horizon Event: {EventLogSequenceNumber} from Tenant: {Tenant} in Microservice {Microservice} to Scope: {Scope}",
+            _logger.WritingEventHorizonEvent(
                 @event.EventLogSequenceNumber,
                 @event.ExecutionContext.Tenant,
                 @event.ExecutionContext.Microservice,

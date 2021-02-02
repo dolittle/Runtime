@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         void CreateCollectionsAndIndexesForStreamProcessorStates()
         {
-            _logger.LogTrace("Creating indexes for {CollectionName}' collection in Event Store", StreamProcessorStateCollectionName);
+            _logger.CreatingIndexesFor(StreamProcessorStateCollectionName);
             _streamProcessorStates.Indexes.CreateOne(
                 new CreateIndexModel<AbstractStreamProcessorState>(
                     Builders<AbstractStreamProcessorState>.IndexKeys
@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             IMongoCollection<AbstractStreamProcessorState> streamProcessorStates,
             CancellationToken cancellationToken)
         {
-            _logger.LogTrace("Creating indexes for {CollectionName}' collection in Event Store", streamProcessorStates.CollectionNamespace.CollectionName);
+            _logger.CreatingIndexesFor(streamProcessorStates.CollectionNamespace.CollectionName);
             await streamProcessorStates.Indexes.CreateOneAsync(
                 new CreateIndexModel<AbstractStreamProcessorState>(
                     Builders<AbstractStreamProcessorState>.IndexKeys
