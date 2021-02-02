@@ -50,19 +50,17 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             await _onAllTenants.PerformAsync(async tenantId =>
                 {
                     var filterProcessor = getFilterProcessor();
-                    _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenantId);
-                    var filterId = filterProcessor.Definition.TargetStream;
                     _logger.TryGetFilterDefinition(filterProcessor.Identifier, tenantId);
-                    var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filterProcessor.Scope, filterId, cancellationToken).ConfigureAwait(false);
+                    var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filterProcessor.Scope, filterProcessor.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
                     if (tryGetFilterDefinition.Success)
                     {
-                        _logger.LogTrace("Validating Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
+                        _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenantId);
                         var validationResult = await _filterValidators.Validate(tryGetFilterDefinition.Result, filterProcessor, cancellationToken).ConfigureAwait(false);
                         result.Add(tenantId, validationResult);
                     }
                     else
                     {
-                        _logger.LogDebug("Could not get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
+                        _logger.NoPersistedFilterDefinition(filterProcessor.Identifier, tenantId);
                         result.Add(tenantId, new FilterValidationResult());
                     }
                 }).ConfigureAwait(false);

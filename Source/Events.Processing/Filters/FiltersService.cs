@@ -404,11 +404,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning(
-                        ex,
-                        "Error occurred while trying to register stream processor for Filter '{Filter}'",
-                        filterDefinition.TargetStream);
-                    _logger.ErrorWhileRegisteringStreamProcessorForFilter(ex, filterDefinition.TargetStream, filterDefitinion.SourceStream);
+                    _logger.ErrorWhileRegisteringStreamProcessorForFilter(ex, filterDefinition.TargetStream, filterDefinition.SourceStream);
                 }
 
                 return ex;

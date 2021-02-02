@@ -72,11 +72,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 new EventId(1631987633, nameof(ValidatingFilterForTenant)),
                 "Validating filter {Filter} for Tenant {Tenant}");
         
-        static readonly Action<ILogger, ExecutionContext, Exception> _settingExecutionContext = LoggerMessage
-            .Define<ExecutionContext>(
-                LogLevel.Trace,
-                new EventId(41545433, nameof(SettingExecutionContext)),
-                "Setting execution context\n{ExecutionContext}");
 
         static readonly Action<ILogger, Guid, Exception> _filterIsInvalid = LoggerMessage
             .Define<Guid>(
@@ -174,6 +169,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 new EventId(1923819068, nameof(TryGetFilterDefinition)),
                 "Trying to get find the persisted definition of filter {Filter} for tenant {Tenant}");
 
+        static readonly Action<ILogger, Guid, Guid, Exception> _noPersistedFilterDefinition = LoggerMessage
+            .Define<Guid, Guid>(
+                LogLevel.Debug,
+                new EventId(236207818, nameof(NoPersistedFilterDefinition)),
+                "Could not get definition of filter {Filter} for tenant {Tenant}");
+
         internal static void FilteringEvent(this ILogger logger, EventProcessorId filter, ScopeId scope, ArtifactId eventType, PartitionId partition)
             => _filteringEvent(logger, filter, scope, eventType, partition, null);
 
@@ -203,9 +204,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         internal static void ValidatingFilterForTenant(this ILogger logger, EventProcessorId filter, TenantId tenant)
             => _validatingFilterForTenant(logger, filter, tenant, null);
-
-        internal static void SettingExecutionContext(this ILogger logger, ExecutionContext context)
-            => _settingExecutionContext(logger, context, null);
 
         internal static void FilterIsInvalid(this ILogger logger, StreamId filterId)
             => _filterIsInvalid(logger, filterId, null);
@@ -254,5 +252,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         internal static void TryGetFilterDefinition(this ILogger logger, EventProcessorId filter, TenantId tenant)
             => _tryGetFilterDefinition(logger, filter, tenant, null);
+
+        internal static void NoPersistedFilterDefinition(this ILogger logger, EventProcessorId filter, TenantId tenant)
+            => _noPersistedFilterDefinition(logger, filter, tenant, null);
    }
 }

@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
     public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
     {
         readonly IReverseCallDispatcher<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
@@ -38,7 +37,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
             : base(scope, definition, eventsToStreamsWriter, logger)
         {
             _dispatcher = dispatcher;
-            _logger = logger;
         }
 
         /// <inheritdoc/>
