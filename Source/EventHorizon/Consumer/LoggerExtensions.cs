@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             .Define<Guid, Guid, Guid, Guid>(
                 LogLevel.Trace,
                 new EventId(1329962982, nameof(ProcessEvent)),
-                "Processing event: {EventType} from event horizon in scope: {Scope} from microservice: {ProducerMicroservice} and tenant: {ProducerTenant}");
+                "Processing event type: {EventType} from event horizon in scope: {Scope} from microservice: {ProducerMicroservice} and tenant: {ProducerTenant}");
 
         static readonly Action<ILogger, SubscriptionId, Exception> _failedStartingSubscription = LoggerMessage
             .Define<SubscriptionId>(

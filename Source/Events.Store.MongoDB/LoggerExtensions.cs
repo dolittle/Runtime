@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         static readonly Action<ILogger, string, Exception> _creatingIndexesFor = LoggerMessage
             .Define<string>(
-                LogLevel.Debug,
+                LogLevel.Trace,
                 new EventId(1224270053, nameof(CreatingIndexesFor)),
                 "Creating indexes for the {CollectionName} collection in MongoDB Event Store");
 

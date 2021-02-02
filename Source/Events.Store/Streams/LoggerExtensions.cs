@@ -12,19 +12,19 @@ namespace Dolittle.Runtime.Events.Store.Streams
             .Define<ulong, string, Guid, Guid>(
                 LogLevel.Trace,
                 new EventId(2059664795, nameof(WaitForEvent)),
-                "Start waiting for event coming in at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}");
+                "Start waiting for event coming in at position: {Position} in {IsPublic}stream: {StreamId} in scope: {Scope}");
 
         static readonly Action<ILogger, ulong, string, Guid, Guid, Exception> _waiterNotifyForEvent = LoggerMessage
             .Define<ulong, string, Guid, Guid>(
                 LogLevel.Trace,
                 new EventId(255784820, nameof(WaiterNotifyForEvent)),
-                "Notifying that an event has been written at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}");
+                "Notifying that an event has been written at position: {Position} in {IsPublic}stream: {StreamId} in scope: {Scope}");
 
         static readonly Action<ILogger, ulong, EventWaiterId, Exception> _waitingTimedOut = LoggerMessage
             .Define<ulong, EventWaiterId>(
                 LogLevel.Trace,
                 new EventId(188707764, nameof(WaitingTimedOut)),
-                "Waiting timedout for position {Position} for {WaiterId}");
+                "Waiting timedout for position: {Position} for: {WaiterId}");
 
         internal static void WaitForEvent(this ILogger logger, StreamPosition position, bool isPublicStream, StreamId stream, ScopeId scope)
             => _waitForEvent(logger, position, isPublicStream ? "public " : string.Empty, stream, scope, null);

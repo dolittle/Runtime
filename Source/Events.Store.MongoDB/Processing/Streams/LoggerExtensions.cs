@@ -13,13 +13,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             .Define<IStreamProcessorId>(
                 LogLevel.Trace,
                 new EventId(36480958, nameof(GettingStreamProcessorState)),
-                "Trying to get stream processor state for {StreamProcessorId}");
+                "Trying to get stream processor state for: {StreamProcessorId}");
 
         static readonly Action<ILogger, IStreamProcessorId, Exception> _persistingStreamProcessorState = LoggerMessage
             .Define<IStreamProcessorId>(
                 LogLevel.Trace,
                 new EventId(1242042674, nameof(PersistingStreamProcessorState)),
-                "Persisting stream processor state for {StreamProcessorId}");
+                "Persisting stream processor state for: {StreamProcessorId}");
 
         internal static void GettingStreamProcessorState(this ILogger logger, IStreamProcessorId streamProcessor)
             => _gettingStreamProcessorState(logger, streamProcessor, null);
