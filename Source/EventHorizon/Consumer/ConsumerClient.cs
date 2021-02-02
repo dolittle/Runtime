@@ -107,7 +107,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _logger.NoMicroserviceConfigurationFor(subscriptionId.ProducerMicroserviceId);
                 return new FailedSubscriptionResponse(new Failure(
                     SubscriptionFailures.MissingMicroserviceConfiguration,
-                    $"No microservice configuration for producer mircorservice {subscriptionId.ProducerMicroserviceId}"));
+                    $"No microservice configuration for producer mircoservice {subscriptionId.ProducerMicroserviceId}"));
             }
 
             return await _policy.Execute(

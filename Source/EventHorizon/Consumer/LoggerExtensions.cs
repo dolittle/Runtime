@@ -172,6 +172,5 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         internal static void ErrorWhileSubscribing(this ILogger logger, Exception exception, SubscriptionId subscription)
             => _errorWhileSubscribing(logger, subscription, exception);
-
     }
 }

@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     var filterProcessor = getFilterProcessor();
                     _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenantId);
                     var filterId = filterProcessor.Definition.TargetStream;
-                    _logger.LogTrace("Trying to get definition of Filter '{Filter}' for Tenant '{Tenant}'", filterId, tenantId);
+                    _logger.TryGetFilterDefinition(filterProcessor.Identifier, tenantId);
                     var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filterProcessor.Scope, filterId, cancellationToken).ConfigureAwait(false);
                     if (tryGetFilterDefinition.Success)
                     {
