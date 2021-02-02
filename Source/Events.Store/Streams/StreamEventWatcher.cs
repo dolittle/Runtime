@@ -54,11 +54,11 @@ namespace Dolittle.Runtime.Events.Store.Streams
             => WaitForWaiter(ScopeId.Default, stream, position, timeout, true, token);
 
         static EventWaiter CreateNewWaiter(EventWaiterId id)
-            => new EventWaiter(id.Scope, id.Stream);
+            => new(id.Scope, id.Stream);
 
         async Task WaitForWaiter(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, bool isPublic, CancellationToken token)
         {
-            _logger.LogTrace("Start waiting for event coming in at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
+            _logger.WaitForEvent(position, isPublic, stream, scope);
             var waiterId = new EventWaiterId(scope, stream);
 
             using var timeoutSource = new CancellationTokenSource(timeout);
@@ -73,13 +73,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
             }
             catch (TaskCanceledException)
             {
-                _logger.LogTrace("Waiting timedout for {Position} with WaiterId {WaiterId}", position, waiter.Id);
+                _logger.WaitingTimedOut(position, waiter.Id);
             }
         }
 
         void NotifyForEvent(ScopeId scope, StreamId stream, StreamPosition position, bool isPublic)
         {
-            _logger.LogTrace("Notifying that an event has been written at position {Position} in {IsPublic}stream {StreamId} in scope {Scope}", position, isPublic ? "public " : string.Empty, stream, scope);
+            _logger.WaiterNotifyForEvent(position, isPublic, stream, scope);
             var waiterId = new EventWaiterId(scope, stream);
 
             var waiter = isPublic
