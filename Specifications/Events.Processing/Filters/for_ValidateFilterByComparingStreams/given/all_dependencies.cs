@@ -10,7 +10,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
-using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 
@@ -41,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             filter_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
             stream_processor_states = new Mock<IStreamProcessorStateRepository>();
             events_fetchers = new Mock<IEventFetchers>();
-            validator = new ValidateFilterByComparingStreams(events_fetchers.Object, stream_processor_states.Object, Mock.Of<ILogger>());
+            validator = new ValidateFilterByComparingStreams(events_fetchers.Object, stream_processor_states.Object);
             events_from_event_log_fetcher = new Mock<ICanFetchRangeOfEventsFromStream>();
             events_from_filtered_stream_fetcher = new Mock<ICanFetchRangeOfEventsFromStream>();
             events_in_event_log = new List<StreamEvent>();

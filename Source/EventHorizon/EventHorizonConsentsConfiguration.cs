@@ -15,14 +15,14 @@ namespace Dolittle.Runtime.EventHorizon
     /// </summary>
     [Name("event-horizon-consents")]
     public class EventHorizonConsentsConfiguration :
-        ReadOnlyDictionary<Guid, IEnumerable<EventHorizonConsent>>,
+        ReadOnlyDictionary<Guid, IEnumerable<EventHorizonConsentConfiguration>>,
         IConfigurationObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHorizonConsentsConfiguration"/> class.
         /// </summary>
         /// <param name="configuration">Dictionary for <see cref="TenantId"/> with <see cref="IEnumerable{T}" /> of <see cref="EventHorizonConsent"/>.</param>
-        public EventHorizonConsentsConfiguration(IDictionary<Guid, IEnumerable<EventHorizonConsent>> configuration)
+        public EventHorizonConsentsConfiguration(IDictionary<Guid, IEnumerable<EventHorizonConsentConfiguration>> configuration)
             : base(configuration)
         {
         }
@@ -35,8 +35,8 @@ namespace Dolittle.Runtime.EventHorizon
         public IEnumerable<EventHorizonConsent> GetConsentConfigurationsFor(TenantId producerTenant)
             => TryGetValue(producerTenant, out var consents) switch
             {
-                true => consents,
-                false => Enumerable.Empty<EventHorizonConsent>()
+                true => consents.Cast<EventHorizonConsent>(),
+                false => Enumerable.Empty<EventHorizonConsent>(),
             };
     }
 }

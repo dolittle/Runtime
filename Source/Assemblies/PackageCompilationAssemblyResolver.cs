@@ -41,9 +41,9 @@ namespace Dolittle.Runtime.Assemblies
 
             foreach (var directory in _nugetPackageDirectories)
             {
-                if (TryResolvePackagePath(library, directory, out string packagePath))
+                if (TryResolvePackagePath(library, directory, out var packagePath))
                 {
-                    if (TryResolveFromPackagePath(library, packagePath, out IEnumerable<string> fullPathsFromPackage))
+                    if (TryResolveFromPackagePath(library, packagePath, out var fullPathsFromPackage))
                     {
                         if (fullPathsFromPackage.Any())
                         {
@@ -106,7 +106,7 @@ namespace Dolittle.Runtime.Assemblies
 
             foreach (var assembly in library.Assemblies)
             {
-                if (!TryResolveAssemblyFile(basePath, assembly, out string fullName))
+                if (!TryResolveAssemblyFile(basePath, assembly, out var fullName))
                 {
                     results = null;
                     return false;

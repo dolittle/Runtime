@@ -57,11 +57,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
             var request = new FilterEventRequest
-                {
-                    Event = @event.ToProtobuf(),
-                    ScopeId = Scope.ToProtobuf(),
-                    RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
-                };
+            {
+                Event = @event.ToProtobuf(),
+                ScopeId = Scope.ToProtobuf(),
+                RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+            };
 
             return Filter(request, cancellationToken);
         }
@@ -70,10 +70,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         {
             var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
             return response switch
-                {
-                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.ToGuid()),
-                    _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
-                };
+            {
+                { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.ToGuid()),
+                _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
+            };
         }
     }
 }

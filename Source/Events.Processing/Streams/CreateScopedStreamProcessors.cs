@@ -93,7 +93,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 eventProcessor,
                 _streamProcessorStates,
                 eventsFromStreamsFetcher,
-                new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy, _loggerFactory.CreateLogger<Partitioned.FailingPartitions>()),
+                new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy),
                 _eventsFetcherPolicy,
                 _streamWatcher,
                 new Partitioned.TimeToRetryForPartitionedStreamProcessor(),

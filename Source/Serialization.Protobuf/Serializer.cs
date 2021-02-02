@@ -80,52 +80,46 @@ namespace Dolittle.Runtime.Serialization.Protobuf
         /// <inheritdoc/>
         public T FromProtobuf<T>(byte[] bytes, bool includesLength = false)
         {
-            using (var memoryStream = new MemoryStream(bytes))
-            {
-                return FromProtobuf<T>(memoryStream, includesLength);
+            using var memoryStream = new MemoryStream(bytes);
+            return FromProtobuf<T>(memoryStream, includesLength);
             }
-        }
 
         /// <inheritdoc/>
         public void ToProtobuf<T>(T instance, Stream stream, bool includeLength = false)
         {
-            using (var outputStream = new CodedOutputStream(stream))
-            {
-                var messageDescription = _messageDescriptions.GetFor<T>();
+            using var outputStream = new CodedOutputStream(stream);
+            var messageDescription = _messageDescriptions.GetFor<T>();
 
-                if (includeLength)
+            if (includeLength)
                 {
-                    var length = GetLengthOf(instance, messageDescription);
-                    outputStream.WriteLength(length);
+                var length = GetLengthOf(instance, messageDescription);
+                outputStream.WriteLength(length);
                 }
 
-                messageDescription.Properties.ForEach(property =>
-                {
-                    var type = property.Property.PropertyType;
-                    var number = property.Number;
-                    var value = property.Property.GetValue(instance);
+            messageDescription.Properties.ForEach(property =>
+            {
+                var type = property.Property.PropertyType;
+                var number = property.Number;
+                var value = property.Property.GetValue(instance);
 
-                    if (_valueConverters.CanConvert(type))
+                if (_valueConverters.CanConvert(type))
                     {
-                        var converter = _valueConverters.GetConverterFor(type);
-                        type = converter.SerializedAs(type);
-                        value = converter.ConvertTo(value);
+                    var converter = _valueConverters.GetConverterFor(type);
+                    type = converter.SerializedAs(type);
+                    value = converter.ConvertTo(value);
                     }
 
-                    WriteValue(outputStream, type, number, value);
-                });
-                outputStream.Flush();
+                WriteValue(outputStream, type, number, value);
+            });
+            outputStream.Flush();
             }
-        }
 
         /// <inheritdoc/>
         public byte[] ToProtobuf<T>(T instance, bool includeLength = false)
         {
-            using (var stream = new MemoryStream())
-            {
-                ToProtobuf(instance, stream, includeLength);
-                return stream.ToArray();
-            }
+            using var stream = new MemoryStream();
+            ToProtobuf(instance, stream, includeLength);
+            return stream.ToArray();
         }
 
         object ReadValue(CodedInputStream inputStream, object value, Type type, Type targetType, IValueConverter converter)

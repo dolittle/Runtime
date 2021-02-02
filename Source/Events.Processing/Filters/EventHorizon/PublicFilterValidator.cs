@@ -17,19 +17,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
     public class PublicFilterValidator : ICanValidateFilterFor<PublicFilterDefinition>
     {
         readonly IValidateFilterByComparingStreams _byComparingStreams;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicFilterValidator"/> class.
         /// </summary>
         /// <param name="byComparingStreams">The <see cref="IValidateFilterByComparingStreams" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public PublicFilterValidator(
-            IValidateFilterByComparingStreams byComparingStreams,
-            ILogger logger)
+        public PublicFilterValidator(IValidateFilterByComparingStreams byComparingStreams)
         {
             _byComparingStreams = byComparingStreams;
-            _logger = logger;
         }
 
         /// <inheritdoc/>

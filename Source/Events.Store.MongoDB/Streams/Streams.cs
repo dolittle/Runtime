@@ -61,15 +61,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public Task<IMongoCollection<MongoDB.Events.Event>> GetEventLog(ScopeId scopeId, CancellationToken token) =>
             scopeId == ScopeId.Default ? Task.FromResult(DefaultEventLog) : GetScopedEventLog(scopeId, token);
 
-        static string CollectionNameForStream(StreamId streamId) => $"stream-{streamId}";
+        static string CollectionNameForStream(StreamId streamId) => $"stream-{streamId.Value}";
 
-        static string CollectionNameForPublicStream(StreamId streamId) => $"public-stream-{streamId}";
+        static string CollectionNameForPublicStream(StreamId streamId) => $"public-stream-{streamId.Value}";
 
-        static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-{EventLogCollectionName}";
+        static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope.Value}-{EventLogCollectionName}";
 
-        static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope}-{StreamDefinitionCollectionName}";
+        static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope.Value}-{StreamDefinitionCollectionName}";
 
-        static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-{scope}-stream-{stream}";
+        static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-{scope.Value}-stream-{stream.Value}";
 
         Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken) =>
             scope == ScopeId.Default ? GetStreamCollection(stream, cancellationToken) : GetScopedStreamCollection(scope, stream, cancellationToken);

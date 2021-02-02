@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Specifications
             Specification<T> rightHandSide,
             Func<Expression, Expression, Expression> merge)
         {
-            var map = leftHandSide.Predicate.Parameters.Select((f, i) => new { f, s = rightHandSide.Predicate.Parameters[i] }).ToDictionary(p => p.s, p => p.f);
+            var map = leftHandSide.Predicate.Parameters.Select((f, i) => (f, s: rightHandSide.Predicate.Parameters[i])).ToDictionary(p => p.s, p => p.f);
             var secondBody = ParameterRebinder.ReplaceParameters(map, rightHandSide.Predicate.Body);
             Predicate = Expression.Lambda<Func<T, bool>>(merge(leftHandSide.Predicate.Body, secondBody), leftHandSide.Predicate.Parameters);
         }

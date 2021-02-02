@@ -13,16 +13,16 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Gets the <see cref="FailureId" /> that represents the 'NoFilterRegistrationReceived' failure type.
         /// </summary>
-        public static FailureId NoFilterRegistrationReceived = FailureId.Create("d6060ba0-39bd-4815-8b0e-6b43b5f87bc5");
+        public static readonly FailureId NoFilterRegistrationReceived = FailureId.Create("d6060ba0-39bd-4815-8b0e-6b43b5f87bc5");
 
         /// <summary>
         /// Gets the <see cref="FailureId" /> that represents the 'CannotRegisterFilterOnNonWriteableStream' failure type.
         /// </summary>
-        public static FailureId CannotRegisterFilterOnNonWriteableStream = FailureId.Create("2cdb6143-4f3d-49cb-bd58-68fd1376dab1");
+        public static readonly FailureId CannotRegisterFilterOnNonWriteableStream = FailureId.Create("2cdb6143-4f3d-49cb-bd58-68fd1376dab1");
 
         /// <summary>
         /// Gets the <see cref="FailureId" /> that represents the 'FailedToRegisterFilter' failure type.
         /// </summary>
-        public static FailureId FailedToRegisterFilter = FailureId.Create("f0480899-8aed-4191-b339-5121f4d9f2e2");
+        public static readonly FailureId FailedToRegisterFilter = FailureId.Create("f0480899-8aed-4191-b339-5121f4d9f2e2");
     }
 }

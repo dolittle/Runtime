@@ -1,8 +1,8 @@
-using System.Collections.Generic;
-using System.Security.AccessControl;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Security.AccessControl;
 using System.Linq;
 using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.Execution;

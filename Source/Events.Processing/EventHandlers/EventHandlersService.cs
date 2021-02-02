@@ -113,27 +113,27 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _executionContextManager.CurrentFor(executionContext);
 
             var sourceStream = StreamId.EventLog;
-            _logger.LogTrace("Received Source Stream '{SourceStream}'", sourceStream);
+            _logger.LogTrace("Received Source Stream '{SourceStream}'", sourceStream.Value);
             EventProcessorId eventHandlerId = arguments.EventHandlerId.ToGuid();
-            _logger.LogTrace("Received Event Handler '{EventHandler}'", eventHandlerId);
+            _logger.LogTrace("Received Event Handler '{EventHandler}'", eventHandlerId.Value);
             StreamId targetStream = eventHandlerId.Value;
             ScopeId scopeId = arguments.ScopeId.ToGuid();
-            _logger.LogTrace("Received Scope '{Scope}'", scopeId);
+            _logger.LogTrace("Received Scope '{Scope}'", scopeId.Value);
             var types = arguments.Types_.Select(_ => new ArtifactId(_.Id.ToGuid()));
-            _logger.LogTrace("Received Types: [{Types}]'", string.Join(", ", types.Select(_ => $"'{_}'")));
+            _logger.LogTrace("Received Types: [{Types}]'", string.Join(", ", types.Select(_ => $"'{_.Value}'")));
             var partitioned = arguments.Partitioned;
-            _logger.LogTrace("Event Handler '{EventHandler}' {PartitionedString}", eventHandlerId, partitioned ? "is partitioned" : "is not partitioned");
+            _logger.LogTrace("Event Handler '{EventHandler}' {PartitionedString}", eventHandlerId.Value, partitioned ? "is partitioned" : "is not partitioned");
             if (targetStream.IsNonWriteable)
             {
-                _logger.LogWarning("Cannot register Event Handler '{EventHandler}' because it is an invalid Stream Id", eventHandlerId);
+                _logger.LogWarning("Cannot register Event Handler '{EventHandler}' because it is an invalid Stream Id", eventHandlerId.Value);
                 var failure = new Failure(
                     EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
-                    $"Cannot register Event Handler: '{eventHandlerId}' because it is an invalid Stream Id");
+                    $"Cannot register Event Handler: '{eventHandlerId.Value}' because it is an invalid Stream Id");
                 await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                 return;
             }
 
-            _logger.LogDebug("Connecting Event Handler '{EventHandlerId}'", eventHandlerId);
+            _logger.LogDebug("Connecting Event Handler '{EventHandlerId}'", eventHandlerId.Value);
             var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(sourceStream, targetStream, types, partitioned);
 
             Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor = () => new TypeFilterWithEventSourcePartition(
@@ -152,15 +152,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 if (tryRegisterFilterStreamProcessor.HasException)
                 {
                     var exception = tryRegisterFilterStreamProcessor.Exception;
-                    _logger.LogWarning(exception, "An error occurred while registering Event Handler '{EventHandlerId}'", eventHandlerId);
+                    _logger.LogWarning(exception, "An error occurred while registering Event Handler '{EventHandlerId}'", eventHandlerId.Value);
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    _logger.LogDebug("Failed to register Event Handler '{EventHandlerId}'. Filter already registered", eventHandlerId);
+                    _logger.LogDebug("Failed to register Event Handler '{EventHandlerId}'. Filter already registered", eventHandlerId.Value);
                     var failure = new Failure(
                         FiltersFailures.FailedToRegisterFilter,
-                        $"Failed to register Event Handler: {eventHandlerId}. Filter already registered.");
+                        $"Failed to register Event Handler: {eventHandlerId.Value}. Filter already registered.");
                     await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                     return;
                 }
@@ -186,15 +186,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 if (tryRegisterEventProcessorStreamProcessor.HasException)
                 {
                     var exception = tryRegisterEventProcessorStreamProcessor.Exception;
-                    _logger.LogWarning(exception, "An error occurred while registering Event Handler' {EventHandlerId}", eventHandlerId);
+                    _logger.LogWarning(exception, "An error occurred while registering Event Handler' {EventHandlerId}", eventHandlerId.Value);
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to register Event Handler: {eventHandlerId}. Event Processor already registered on Source Stream '{SourceStreamId}'", eventHandlerId, eventHandlerId);
+                    _logger.LogWarning("Failed to register Event Handler: {eventHandlerId}. Event Processor already registered on Source Stream '{SourceStreamId}'", eventHandlerId.Value, eventHandlerId.Value);
                     var failure = new Failure(
                         FiltersFailures.FailedToRegisterFilter,
-                        $"Failed to register Event Handler: {eventHandlerId}. Event Processor already registered on Source Stream: '{eventHandlerId}'");
+                        $"Failed to register Event Handler: {eventHandlerId}. Event Processor already registered on Source Stream: '{eventHandlerId.Value}'");
                     await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                     return;
                 }
@@ -216,12 +216,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 if (tryStartEventHandler.HasException)
                 {
                     var exception = tryStartEventHandler.Exception;
-                    _logger.LogDebug(exception, "An error occurred while starting Event Handler '{EventHandlerId}' in Scope {ScopeId}", eventHandlerId, scopeId);
+                    _logger.LogDebug(exception, "An error occurred while starting Event Handler '{EventHandlerId}' in Scope {ScopeId}", eventHandlerId.Value, scopeId.Value);
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    _logger.LogWarning("Could not start Event Handler '{EventHandlerId}' in Scope: {ScopeId}", eventHandlerId, scopeId);
+                    _logger.LogWarning("Could not start Event Handler '{EventHandlerId}' in Scope: {ScopeId}", eventHandlerId.Value, scopeId.Value);
                     return;
                 }
             }
@@ -233,7 +233,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
                 if (TryGetException(tasks, out var ex))
                 {
-                    _logger.LogWarning(ex, "An error occurred while running Event Handler '{EventHandlerId}' in Scope: '{ScopeId}'", eventHandlerId, scopeId);
+                    _logger.LogWarning(ex, "An error occurred while running Event Handler '{EventHandlerId}' in Scope: '{ScopeId}'", eventHandlerId.Value, scopeId.Value);
                     ExceptionDispatchInfo.Capture(ex).Throw();
                 }
             }
@@ -241,7 +241,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             {
                 cts.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                _logger.LogDebug("Event Handler: '{EventHandler}' in Scope: '{ScopeId}' disconnected", eventHandlerId, scopeId);
+                _logger.LogDebug("Event Handler: '{EventHandler}' in Scope: '{ScopeId}' disconnected", eventHandlerId.Value, scopeId.Value);
             }
         }
 
@@ -258,7 +258,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             where TResponse : class
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.LogDebug("Starting Event Handler '{EventHandlerId}'", filterDefinition.TargetStream);
+            _logger.LogDebug("Starting Event Handler '{EventHandlerId}'", filterDefinition.TargetStream.Value);
             try
             {
                 var runningDispatcher = dispatcher.Accept(new EventHandlerRegistrationResponse(), cancellationToken);
@@ -278,7 +278,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     _logger.LogWarning(
                         ex,
                         "Error occurred while trying to start Event Handler '{EventHandlerId}'",
-                        filterDefinition.TargetStream);
+                        filterDefinition.TargetStream.Value);
                 }
 
                 return ex;
@@ -291,31 +291,31 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor,
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
+        {
+            _logger.LogDebug("Registering stream processor for Filter '{Filter}' on Event Log", eventHandlerId.Value);
+            try
             {
-                _logger.LogDebug("Registering stream processor for Filter '{Filter}' on Event Log", eventHandlerId);
-                try
-                {
-                    return (_streamProcessors.TryRegister(
-                        scopeId,
-                        eventHandlerId,
-                        new EventLogStreamDefinition(),
-                        getFilterProcessor,
-                        cancellationToken,
-                        out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
-                }
-                catch (Exception ex)
-                {
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        _logger.LogWarning(
-                            ex,
-                            "Error occurred while trying to register stream processor for Filter '{Filter}'",
-                            eventHandlerId);
-                    }
-
-                    return ex;
-                }
+                return (_streamProcessors.TryRegister(
+                    scopeId,
+                    eventHandlerId,
+                    new EventLogStreamDefinition(),
+                    getFilterProcessor,
+                    cancellationToken,
+                    out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
             }
+            catch (Exception ex)
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Error occurred while trying to register stream processor for Filter '{Filter}'",
+                        eventHandlerId.Value);
+                }
+
+                return ex;
+            }
+        }
 
         Try<StreamProcessor> TryRegisterEventProcessorStreamProcessor(
             ScopeId scopeId,
@@ -323,31 +323,31 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IStreamDefinition sourceStreamDefinition,
             Func<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Registering stream processor for Event Processor '{EventProcessor}' on Stream '{SourceStream}'", eventHandlerId.Value, sourceStreamDefinition.StreamId.Value);
+            try
             {
-                _logger.LogDebug("Registering stream processor for Event Processor '{EventProcessor}' on Stream '{SourceStream}'", eventHandlerId, sourceStreamDefinition.StreamId);
-                try
-                {
-                    return (_streamProcessors.TryRegister(
-                        scopeId,
-                        eventHandlerId,
-                        sourceStreamDefinition,
-                        getEventProcessor,
-                        cancellationToken,
-                        out var outputtedEventProcessorStreamProcessor), outputtedEventProcessorStreamProcessor);
-                }
-                catch (Exception ex)
-                {
-                    if (!cancellationToken.IsCancellationRequested)
-                    {
-                        _logger.LogWarning(
-                            ex,
-                            "Error occurred while trying to register stream processor for Event Processor '{EventProcessor}'",
-                            eventHandlerId);
-                    }
-
-                    return ex;
-                }
+                return (_streamProcessors.TryRegister(
+                    scopeId,
+                    eventHandlerId,
+                    sourceStreamDefinition,
+                    getEventProcessor,
+                    cancellationToken,
+                    out var outputtedEventProcessorStreamProcessor), outputtedEventProcessorStreamProcessor);
             }
+            catch (Exception ex)
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    _logger.LogWarning(
+                        ex,
+                        "Error occurred while trying to register stream processor for Event Processor '{EventProcessor}'",
+                        eventHandlerId.Value);
+                }
+
+                return ex;
+            }
+        }
 
         async Task ValidateFilter<TFilterDefinition>(
             ScopeId scopeId,
@@ -356,18 +356,18 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.LogDebug("Validating Filter '{Filter}'", filterDefinition.TargetStream);
+            _logger.LogDebug("Validating Filter '{Filter}'", filterDefinition.TargetStream.Value);
             var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
 
             if (filterValidationResults.Any(_ => !_.Value.Succeeded))
             {
                 var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
-                _logger.LogWarning("Filter validation failed. {Reason}", filterDefinition.TargetStream, firstFailedValidation.FailureReason);
+                _logger.LogWarning("Filter validation failed. {Reason}", filterDefinition.TargetStream.Value, firstFailedValidation.FailureReason.Value);
                 throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
             }
 
             var filteredStreamDefinition = new StreamDefinition(filterDefinition);
-            _logger.LogDebug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId);
+            _logger.LogDebug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId.Value);
             await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
         }
 

@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Serialization.Json
         /// <inheritdoc/>
         protected override JsonDictionaryContract CreateDictionaryContract(Type objectType)
         {
-            JsonDictionaryContract contract = base.CreateDictionaryContract(objectType);
+            var contract = base.CreateDictionaryContract(objectType);
 
             contract.DictionaryKeyResolver = propertyName => propertyName;
 

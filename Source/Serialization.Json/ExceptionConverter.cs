@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using Newtonsoft.Json;
 
+#pragma warning disable CA2201
 namespace Dolittle.Runtime.Serialization.Json
 {
     /// <summary>
@@ -13,16 +14,10 @@ namespace Dolittle.Runtime.Serialization.Json
     public class ExceptionConverter : JsonConverter
     {
         /// <inheritdoc/>
-        public override bool CanConvert(Type objectType)
-        {
-            return typeof(Exception).GetTypeInfo().IsAssignableFrom(objectType);
-        }
+        public override bool CanConvert(Type objectType) => typeof(Exception).GetTypeInfo().IsAssignableFrom(objectType);
 
         /// <inheritdoc/>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-        {
-            return new Exception();
-        }
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) => new Exception(); 
 
         /// <inheritdoc/>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

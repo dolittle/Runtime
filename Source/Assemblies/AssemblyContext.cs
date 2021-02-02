@@ -122,6 +122,7 @@ namespace Dolittle.Runtime.Assemblies
         public void Dispose()
         {
             AssemblyLoadContext.Resolving -= OnResolving;
+            GC.SuppressFinalize(this);
         }
 
         Assembly OnResolving(AssemblyLoadContext context, AssemblyName name)

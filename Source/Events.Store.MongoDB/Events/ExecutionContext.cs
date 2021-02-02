@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the <see cref="CorrelationId"/>.
         /// </summary>
-        public Guid Correlation { get; set; }
+        public Guid Correlation { get; set; }
 
         /// <summary>
         /// Gets or sets the producer <see cref="Microservice"/>.

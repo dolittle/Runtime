@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             Identifier = id;
             _dispatcher = dispatcher;
             _logger = logger;
-            _logMessagePrefix = $"Event Processor '{Identifier}'";
+            _logMessagePrefix = $"Event Processor '{Identifier.Value}'";
         }
 
         /// <inheritdoc />

@@ -43,8 +43,8 @@ namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
             if (!(service is IServiceWithType serviceWithType)) return Enumerable.Empty<IComponentRegistration>();
 
             if (serviceWithType.ServiceType.HasAttribute<SingletonPerTenantAttribute>() &&
-                (!HasService(serviceWithType.ServiceType) &&
-                !IsGenericAndHasGenericService(serviceWithType.ServiceType)))
+                !HasService(serviceWithType.ServiceType) &&
+                !IsGenericAndHasGenericService(serviceWithType.ServiceType))
             {
                 AddBinding(new Binding(serviceWithType.ServiceType, new Strategies.Type(serviceWithType.ServiceType), new Scopes.Transient()));
             }

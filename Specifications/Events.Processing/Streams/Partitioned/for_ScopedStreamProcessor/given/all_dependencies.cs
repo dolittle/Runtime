@@ -48,8 +48,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 stream_processor_state_repository,
                 event_processor.Object,
                 events_fetcher.Object,
-                events_fetcher_policy,
-                Mock.Of<ILogger<FailingPartitions>>());
+                events_fetcher_policy);
             event_waiter = new Mock<IStreamEventWatcher>();
             event_waiter.Setup(_ => _.WaitForEvent(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
             stream_processor = new ScopedStreamProcessor(

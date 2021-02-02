@@ -45,10 +45,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         {
             if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, Guid.Empty));
             var request = new FilterEventRequest
-                {
-                    Event = @event.ToProtobuf(),
-                    ScopeId = Scope.ToProtobuf()
-                };
+            {
+                Event = @event.ToProtobuf(),
+                ScopeId = Scope.ToProtobuf()
+            };
 
             return Filter(request, cancellationToken);
         }
