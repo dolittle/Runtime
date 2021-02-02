@@ -22,10 +22,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Initializes a new instance of the <see cref="EventsFromEventHorizonFetcher"/> class.
         /// </summary>
         /// <param name="events">The <see cref="AsyncProducerConsumerQueue{TResponse}" />.</param>
-        public EventsFromEventHorizonFetcher(AsyncProducerConsumerQueue<StreamEvent> events)
-        {
-            _events = events;
-        }
+        public EventsFromEventHorizonFetcher(AsyncProducerConsumerQueue<StreamEvent> events) => _events = events;
 
         /// <inheritdoc/>
         public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
@@ -45,15 +42,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc/>
-        public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000);
+        public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000, token);
 
         /// <inheritdoc/>
-        public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000);
+        public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
 
         /// <inheritdoc/>
-        public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000);
+        public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
 
         /// <inheritdoc/>
-        public Task WaitForEvent(StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000);
+        public Task WaitForEvent(StreamId stream, StreamPosition position, CancellationToken token) => Task.Delay(60 * 1000, token);
     }
 }

@@ -125,7 +125,7 @@ namespace Dolittle.Runtime.EventHorizon
             {
                 if (!_cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning(ex, "Subscription: {SubscriptionId} failed", _identifier);
+                    _logger.FailedStartingSubscription(ex, _identifier);
                 }
             }
             finally

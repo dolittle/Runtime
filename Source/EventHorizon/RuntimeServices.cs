@@ -19,10 +19,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
         /// </summary>
         /// <param name="subscriptions">The <see cref="SubscriptionsService" />.</param>
-        public RuntimeServices(SubscriptionsService subscriptions)
-        {
-            _subscriptions = subscriptions;
-        }
+        public RuntimeServices(SubscriptionsService subscriptions) => _subscriptions = subscriptions;
 
         /// <inheritdoc/>
         public ServiceAspect Aspect => "EventHorizon";

@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
     public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
     {
         readonly IReverseCallDispatcher<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse> _dispatcher;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
@@ -38,14 +37,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
             : base(scope, definition, eventsToStreamsWriter, logger)
         {
             _dispatcher = dispatcher;
-            _logger = logger;
         }
 
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Filter event that occurred @ {Occurred}", @event.Occurred);
-
             var request = new FilterEventRequest
                 {
                     Event = @event.ToProtobuf(),
@@ -58,12 +54,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.LogDebug(
-                "Filter event that occurred @ {Occurred} again for the {RetryCount}. time because: {FailureReason}",
-                @event.Occurred,
-                retryCount,
-                failureReason);
-
             var request = new FilterEventRequest
             {
                 Event = @event.ToProtobuf(),

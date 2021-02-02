@@ -18,5 +18,10 @@ namespace Dolittle.Runtime.Execution
         Environment Environment,
         CorrelationId CorrelationId,
         Claims Claims,
-        CultureInfo CultureInfo);
+        CultureInfo CultureInfo)
+    {
+        /// <inheritdoc/>
+        public override string ToString() => $"Microservice: {Microservice.Value} Tenant: {Tenant.Value} Version: {Version} Environment: {Environment.Value} Correlation: {CorrelationId.Value} Claims: {Claims} CultureInfo: {CultureInfo}";
+
+    }
 }

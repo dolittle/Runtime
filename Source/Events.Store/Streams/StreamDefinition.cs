@@ -20,6 +20,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public bool Partitioned => FilterDefinition.Partitioned;
 
         /// <inheritdoc/>
-        public override string ToString() => $"Stream Id: {StreamId} Partitioned: {Partitioned} Public: {Public}";
+        public override string ToString() => $"Stream Id: {StreamId.Value} Partitioned: {Partitioned} Public: {Public}";
     }
 }

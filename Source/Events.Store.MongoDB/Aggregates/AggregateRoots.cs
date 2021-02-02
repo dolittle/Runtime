@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             AggregateRootVersion nextVersion,
             CancellationToken cancellationToken)
         {
-            _logger.LogTrace("Incrementing version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
+            _logger.IncrementingVersionForAggregate(aggregateRoot, eventSource);
             ThrowIfNextVersionIsNotGreaterThanExpectedVersion(eventSource, aggregateRoot, expectedVersion, nextVersion);
 
             if (expectedVersion == AggregateRootVersion.Initial)
@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
             ArtifactId aggregateRoot,
             CancellationToken cancellationToken)
         {
-            _logger.LogTrace("Fetching version version for Aggregate: {AggregateRoot} and Event Source Id: {EventSourceId}", aggregateRoot, eventSource);
+            _logger.FetchingVersionFor(aggregateRoot, eventSource);
             var eqFilter = _filter.Eq(_ => _.EventSource, eventSource.Value)
                 & _filter.Eq(_ => _.AggregateType, aggregateRoot.Value);
             var aggregateDocuments = await _aggregates.Aggregates.Find(

@@ -45,9 +45,9 @@ namespace Dolittle.Runtime.Services.Clients
         readonly Action<TClientMessage, TResponse> _setMessageResponse;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
-        readonly SemaphoreSlim _writeResponseSemaphore = new SemaphoreSlim(1);
-        readonly object _connectLock = new object();
-        readonly object _handleLock = new object();
+        readonly SemaphoreSlim _writeResponseSemaphore = new (1);
+        readonly object _connectLock = new ();
+        readonly object _handleLock = new ();
         IClientStreamWriter<TClientMessage> _clientToServer;
         IAsyncStreamReader<TServerMessage> _serverToClient;
         bool _connecting;
@@ -287,12 +287,13 @@ namespace Dolittle.Runtime.Services.Clients
                 try
                 {
                     _logger.LogTrace("Handling request with call '{CallId}'", callId);
+                    _logger.HandleRequest(callId);
                     _executionContextManager.CurrentFor(requestContext.ExecutionContext);
                     response = await callback(request, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "An error occurred while invoking request handler callback for request '{CallId}'", callId);
+                    _logger.ErrorWhileInvokingCallback(ex, callId);
                     return;
                 }
 
@@ -303,7 +304,7 @@ namespace Dolittle.Runtime.Services.Clients
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "Error occurred while writing response for request '{CallId}'", callId);
+                    _logger.ErrorWhileWritingResponse(ex, callId);
                 }
                 finally
                 {
@@ -324,11 +325,11 @@ namespace Dolittle.Runtime.Services.Clients
             _setMessageResponse(message, response);
             if (!cancellationToken.IsCancellationRequested)
             {
-                _logger.LogTrace("Writing response for request '{CallId}'", callId);
+                _logger.WritingResponse(callId);
                 return _clientToServer.WriteAsync(message);
             }
 
-            _logger.LogDebug("Reverse Call Client was cancelled before response could be written for request '{CallId}'", callId);
+            _logger.ClientCancelled(callId);
             return Task.CompletedTask;
         }
 

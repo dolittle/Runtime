@@ -84,7 +84,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            _logger.LogDebug("Connecting Unpartitioned Filter");
+            _logger.FilterConnectionRequestedFor("Unpartitioned");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
             var cancellationToken = cts.Token;
             var dispatcher = _reverseCallDispatchers.GetFor<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
@@ -105,7 +105,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var arguments = dispatcher.Arguments;
             var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
-            _logger.LogTrace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
+            _logger.SettingExecutionContext(executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
             StreamId filterId = arguments.FilterId.ToGuid();
@@ -133,7 +133,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            _logger.LogDebug("Connecting Partitioned Filter");
+            _logger.FilterConnectionRequestedFor("Partitioned");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
             var cancellationToken = cts.Token;
             var dispatcher = _reverseCallDispatchers.GetFor<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
@@ -154,7 +154,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var arguments = dispatcher.Arguments;
             var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
-            _logger.LogTrace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
+            _logger.SettingExecutionContext(executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
             StreamId filterId = arguments.FilterId.ToGuid();
@@ -183,7 +183,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             IServerStreamWriter<FilterRuntimeToClientMessage> clientStream,
             ServerCallContext context)
         {
-            _logger.LogDebug("Connecting Public Filter");
+            _logger.FilterConnectionRequestedFor("Public");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
             var cancellationToken = cts.Token;
             var dispatcher = _reverseCallDispatchers.GetFor<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
@@ -204,7 +204,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             var arguments = dispatcher.Arguments;
             var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
-            _logger.LogTrace("Setting execution context{NewLine}{ExecutionContext}", System.Environment.NewLine, executionContext);
+            _logger.SettingExecutionContext(executionContext);
             _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
 
             StreamId filterId = arguments.FilterId.ToGuid();
@@ -257,7 +257,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             if (filterId.IsNonWriteable)
             {
-                _logger.LogWarning("Filter: '{Filter}' is an invalid Stream Id", filterId.Value);
+                _logger.FilterIsInvalid(filterId);
                 var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId.Value}' is an invalid Stream Id");
                 await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                 return true;
@@ -277,13 +277,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             where TConnectRequest : class
             where TResponse : class
         {
-            _logger.LogTrace("Received Source Stream '{SourceStream}'", filterDefinition.SourceStream.Value);
-            _logger.LogTrace("Received Filter '{Filter}'", filterDefinition.TargetStream.Value);
-            _logger.LogTrace("Received Scope '{Scope}'", scopeId.Value);
+            _logger.ReceivedFilter(filterDefinition.SourceStream, filterDefinition.TargetStream, scopeId);
             using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(externalCancellationToken);
             var cancellationToken = linkedTokenSource.Token;
 
-            _logger.LogDebug("Connecting Filter '{Filter}'", filterDefinition.TargetStream.Value);
+            _logger.ConnectingFilter(filterDefinition.TargetStream);
 
             var tryRegisterFilter = TryRegisterStreamProcessor(scopeId, filterDefinition, getFilterProcessor, cancellationToken);
             if (!tryRegisterFilter.Success)
@@ -292,12 +290,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (tryRegisterFilter.HasException)
                 {
                     var exception = tryRegisterFilter.Exception;
-                    _logger.LogWarning(exception, "An error occurred while registering Filter '{Filter}'", filterDefinition.TargetStream.Value);
+                    _logger.ErrorWhileRegisteringFilter(exception, filterDefinition.TargetStream);
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    _logger.LogWarning("Failed to register Filter '{Filter}'. Filter already registered", filterDefinition.TargetStream.Value);
+                    _logger.FilterAlreadyRegistered(filterDefinition.TargetStream);
                     var failure = new Failure(
                         FiltersFailures.FailedToRegisterFilter,
                         $"Failed to register Filter '{filterDefinition.TargetStream}'. Filter already registered.");
@@ -320,12 +318,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 if (tryStartFilter.HasException)
                 {
                     var exception = tryStartFilter.Exception;
-                    _logger.LogWarning(exception, "An error occurred while starting Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream.Value, scopeId.Value);
+                    _logger.ErrorWhileStartingFilter(exception, filterDefinition.TargetStream, scopeId);
                     ExceptionDispatchInfo.Capture(exception).Throw();
                 }
                 else
                 {
-                    _logger.LogWarning("Could not start Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream.Value, scopeId.Value);
+                    _logger.CouldNotStartFilter(filterDefinition.TargetStream, scopeId);
                     return;
                 }
             }
@@ -336,7 +334,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 await Task.WhenAny(tasks).ConfigureAwait(false);
                 if (TryGetException(tasks, out var ex))
                 {
-                    _logger.LogWarning(ex, "An error occurred while running Filter '{Filter}' in Scope '{Scope}'", filterDefinition.TargetStream.Value, scopeId.Value);
+                    _logger.ErrorWhileRunningFilter(ex, filterDefinition.TargetStream, scopeId);
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     ExceptionDispatchInfo.Capture(ex).Throw();
                 }
@@ -345,7 +343,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 linkedTokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                _logger.LogDebug("Filter '{Filter}' in Scope '{Scope}' stopped", filterDefinition.TargetStream.Value, scopeId.Value);
+                _logger.FilterStopped(filterDefinition.TargetStream, scopeId);
             }
         }
 
@@ -361,7 +359,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             where TResponse : class
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.LogDebug("Starting Filter '{Filter}'", filterDefinition.TargetStream);
+            _logger.StartingFilter(filterDefinition.TargetStream);
             try
             {
                 var runningDispatcher = dispatcher.Accept(new FilterRegistrationResponse(), cancellationToken);
@@ -377,10 +375,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning(
-                        ex,
-                        "Error occurred while trying to start Filter '{Filter}'",
-                        filterDefinition.TargetStream.Value);
+                    _logger.ErrorWhileStartingFilter(ex, filterDefinition.TargetStream, scopeId);
                 }
 
                 return ex;
@@ -394,7 +389,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.LogDebug("Registering stream processor for Filter '{Filter}' on Source Stream {SourceStream}", filterDefinition.TargetStream.Value, filterDefinition.SourceStream.Value);
+            _logger.RegisteringStreamProcessorForFilter(filterDefinition.TargetStream, filterDefinition.SourceStream);
             try
             {
                 return (_streamProcessors.TryRegister(
@@ -409,10 +404,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning(
-                        ex,
-                        "Error occurred while trying to register stream processor for Filter '{Filter}'",
-                        filterDefinition.TargetStream.Value);
+                    _logger.ErrorWhileRegisteringStreamProcessorForFilter(ex, filterDefinition.TargetStream, filterDefinition.SourceStream);
                 }
 
                 return ex;
@@ -426,18 +418,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            _logger.LogDebug("Validating Filter '{Filter}'", filterDefinition.TargetStream.Value);
+            _logger.ValidatingFilter(filterDefinition.TargetStream);
             var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
 
             if (filterValidationResults.Any(_ => !_.Value.Succeeded))
             {
                 var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
-                _logger.LogWarning("Failed to register Filter '{Filter}'. Filter validation failed. {Reason}", filterDefinition.TargetStream.Value, firstFailedValidation.FailureReason.Value);
+                _logger.FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
             }
 
             var filteredStreamDefinition = new StreamDefinition(filterDefinition);
-            _logger.LogDebug("Persisting definition for Stream '{Stream}'", filteredStreamDefinition.StreamId.Value);
+            _logger.PersistingStreamDefinition(filteredStreamDefinition.StreamId);
             await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
         }
 

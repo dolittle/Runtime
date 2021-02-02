@@ -221,6 +221,7 @@ namespace Dolittle.Runtime.Services
                     var message = new TServerMessage();
                     _setMessageRequest(message, request);
                     _logger.LogTrace("Writing request with CallId: {CallId}", callId);
+                    _logger.WritingRequest(callId);
                     await _serverStream.WriteAsync(message).ConfigureAwait(false);
                 }
                 finally

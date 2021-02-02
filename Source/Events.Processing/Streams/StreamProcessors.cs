@@ -61,7 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
             if (_streamProcessors.ContainsKey(streamProcessorId))
             {
-                _logger.LogWarning("Stream Processor with Id: '{streamProcessorId}' already registered", streamProcessorId);
+                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
                 return false;
             }
 
@@ -77,18 +77,18 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 cancellationToken);
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
-                _logger.LogWarning("Stream Processor with Id: '{StreamProcessorId}' already registered", streamProcessorId);
+                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
                 streamProcessor = default;
                 return false;
             }
 
-            _logger.LogTrace("Stream Processor with Id: '{StreamProcessorId}' registered", streamProcessorId);
+            _logger.StreamProcessorSuccessfullyRegistered(streamProcessorId);
             return true;
         }
 
         void Unregister(StreamProcessorId id)
         {
-            _logger.LogDebug("Unregistering Stream Processor: {streamProcessorId}", id);
+            _logger.StreamProcessorUnregistered(id);
             _streamProcessors.TryRemove(id, out var _);
         }
     }

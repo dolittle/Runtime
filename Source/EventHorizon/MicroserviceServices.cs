@@ -20,10 +20,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// Initializes a new instance of the <see cref="MicroserviceServices"/> class.
         /// </summary>
         /// <param name="consumerService">The <see cref="ConsumerService" />.</param>
-        public MicroserviceServices(ConsumerService consumerService)
-        {
-            _consumerService = consumerService;
-        }
+        public MicroserviceServices(ConsumerService consumerService) => _consumerService = consumerService;
 
         /// <inheritdoc/>
         public ServiceAspect Aspect => "EventHorizon";

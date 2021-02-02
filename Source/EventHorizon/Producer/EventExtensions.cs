@@ -32,10 +32,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="event">The <see cref="StreamEvent" />.</param>
         /// <returns>The <see cref="Contracts.EventHorizonEvent" />.</returns>
         public static Contracts.EventHorizonEvent ToEventHorizonEvent(this StreamEvent @event) =>
-            new Contracts.EventHorizonEvent
-            {
-                Event = @event.Event.ToCommittedEventHorizonEvent(),
-                StreamSequenceNumber = @event.Position
-            };
+            new()
+                {
+                    Event = @event.Event.ToCommittedEventHorizonEvent(),
+                    StreamSequenceNumber = @event.Position
+                };
     }
 }

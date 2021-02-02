@@ -133,8 +133,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             PartitionId partition = arguments.PartitionId.ToGuid();
             var streamPosition = arguments.StreamPosition;
 
-            _logger.LogDebug(
-                "Incomming Event Horizon subscription from microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' to tenant '{ProducerTenant}' starting at position '{StreamPosition}' in partition '{Partition}' in stream '{PublicStream}'",
+            _logger.IncomingEventHorizonSubscription(
                 consumerMicroservice,
                 consumerTenant,
                 producerTenant,
@@ -149,8 +148,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 return;
             }
 
-            _logger.LogInformation(
-                "Microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' successfully subscribed to tenant '{ProducerTenant}' starting at position '{StreamPosition}' in partition '{Partition}' in stream '{PublicStream}'",
+            _logger.SuccessfullySubscribed(
                 consumerMicroservice,
                 consumerTenant,
                 producerTenant,
@@ -178,13 +176,11 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 if (!jointCts.IsCancellationRequested) jointCts.Cancel();
                 if (TryGetException(tasks, out var ex))
                 {
-                    _logger.LogWarning(
+                    _logger.ErrorOccurredInEventHorizon(
                         ex,
-                        "An error occurred Event Horizon for Microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}'",
                         consumerMicroservice,
                         consumerTenant,
                         producerTenant,
-                        streamPosition,
                         partition,
                         publicStream);
                     await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -194,9 +190,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 await Task.WhenAll(tasks).ConfigureAwait(false);
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning(
+                    _logger.ErrorOccurredInEventHorizon(
                         ex,
-                        "Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}' failed",
                         consumerMicroservice,
                         consumerTenant,
                         producerTenant,
@@ -204,8 +199,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         publicStream);
                 }
 
-                _logger.LogWarning(
-                    "Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}' stopped",
+                _logger.EventHorizonStopped(
                     consumerMicroservice,
                     consumerTenant,
                     producerTenant,
@@ -217,9 +211,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 if (!jointCts.IsCancellationRequested) jointCts.Cancel();
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.LogWarning(
+                    _logger.ErrorOccurredInEventHorizon(
                         ex,
-                        "Error occurred in Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}'",
                         consumerMicroservice,
                         consumerTenant,
                         producerTenant,
@@ -231,8 +224,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             }
             finally
             {
-                _logger.LogDebug(
-                    "Disconnecting Event Horizon for microservice '{ConsumerMicroservice}' and tenant '{ConsumerTenant}' with producer tenant '{ProducerTenant}' in partition '{Partition}' in stream '{PublicStream}'",
+                _logger.EventHorizonDisconnecting(
                     consumerMicroservice,
                     consumerTenant,
                     producerTenant,

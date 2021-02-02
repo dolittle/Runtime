@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Versioning
     /// <summary>
     /// Represents a version number adhering to the SemVer 2.0 standard.
     /// </summary>
-    public record Version(int Major, int Minor, int Patch, int Build, string PreReleaseString = "")
+    public record Version(int Major, int Minor, int Patch, int Build = 0, string PreReleaseString = "")
     {
         /// <summary>
         /// Gets a <see cref="Version" /> that is not set.
@@ -17,5 +17,13 @@ namespace Dolittle.Runtime.Versioning
         /// Gets a value indicating whether or not the software is a prerelease.
         /// </summary>
         public bool IsPreRelease => !string.IsNullOrEmpty(PreReleaseString);
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var result = $"{Major}.${Minor}.${Patch}.${Build}";
+            if (IsPreRelease) result += $"-{PreReleaseString}.{Build}";
+            return result;
+        }
     }
 }
