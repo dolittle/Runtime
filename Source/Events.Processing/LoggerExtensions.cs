@@ -24,19 +24,19 @@ namespace Dolittle.Runtime.Events.Processing
             .Define<Guid>(
                 LogLevel.Trace,
                 new EventId(1404193471, nameof(ValidatingFilter)),
-                "Validating filter {Filter}");
+                "Validating filter: {Filter}");
 
         static readonly Action<ILogger, Guid, string, Exception> _filterValidationFailed = LoggerMessage
             .Define<Guid, string>(
                 LogLevel.Warning,
                 new EventId(409191304, nameof(FilterValidationFailed)),
-                "Failed to register Filter: {Filter}. Filter validation failed because of: {Reason}");
+                "Failed to register filter: {Filter}. Filter validation failed because of: {Reason}");
 
         static readonly Action<ILogger, Guid, Exception> _persistingStreamDefinition = LoggerMessage
             .Define<Guid>(
                 LogLevel.Debug,
                 new EventId(421949468, nameof(PersistingStreamDefinition)),
-                "Persisting definition for Stream: {Stream}");
+                "Persisting definition for stream: {Stream}");
 
         internal static void SettingExecutionContext(this ILogger logger, ExecutionContext context)
             => _settingExecutionContext(logger, context, null);
