@@ -12,6 +12,7 @@ namespace Dolittle.Runtime.Rudimentary.given
         protected static StringConcept same_value_as_second_string;
         protected static StringConcept string_is_empty;
         protected static StringConcept string_is_null;
+        protected static StringConcept string_value_is_null;
         protected static IntConcept value_as_an_int;
         protected static LongConcept value_as_a_long;
         protected static InheritingFromLongConcept value_as_a_long_inherited;
@@ -23,7 +24,8 @@ namespace Dolittle.Runtime.Rudimentary.given
             second_string = "second";
             same_value_as_second_string = "second";
             string_is_empty = string.Empty;
-            string_is_null = new StringConcept(null);
+            string_is_null = null;
+            string_value_is_null = new StringConcept(null);
 
             value_as_a_long = 1;
             value_as_an_int = 1;

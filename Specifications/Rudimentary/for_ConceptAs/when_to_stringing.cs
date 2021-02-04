@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Rudimentary.for_ConceptAs
         {
             result = first_string.ToString();
             result_of_empty_string = string_is_empty.ToString();
-            result_of_null_string = string_is_null.ToString();
+            result_of_null_string = string_value_is_null.ToString();
         };
 
         It should_give_a_string = () => result.ShouldNotBeEmpty();
