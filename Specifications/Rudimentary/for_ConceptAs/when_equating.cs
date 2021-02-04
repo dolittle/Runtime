@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.Rudimentary.for_ConceptAs
             result_of_inequality_operator = first_string != second_string;
             result_of_inequality_operator_on_same_value = second_string != same_value_as_second_string;
 
+
             result_of_equality_on_two_different_concept_types_based_on_same_underlying_type_with_same_values
                 = value_as_a_long.Equals(value_as_an_int);
         };

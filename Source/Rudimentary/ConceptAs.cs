@@ -21,10 +21,10 @@ namespace Dolittle.Runtime.Rudimentary
         /// Implicitly convert from <see cref="ConceptAs{TValue}"/> to type of the <see cref="ConceptAs{TValue}"/>.
         /// </summary>
         /// <param name="value">The converted value.</param>
-        public static implicit operator TValue(ConceptAs<TValue> value) =>  value.Value;
+        public static implicit operator TValue(ConceptAs<TValue> value) =>  value == null ? default : value.Value;
 
         /// <inheritdoc/>
-        public override string ToString() => Value.ToString();
+        public override string ToString() => Value == null ? default(TValue).ToString() : Value.ToString();
 
         /// <inheritdoc/>
         public override int GetHashCode() => HashCodeHelper.Generate(typeof(TValue), Value);
