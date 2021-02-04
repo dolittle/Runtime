@@ -1,3 +1,14 @@
+# [5.3.5] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/497)
+## Summary
+
+Fixes a bug with our new `ConceptAs` type, that when trying to fetch nonexistent aggregate events, we would get a NullPointerException due to the implicit operator  from `ConceptAs` not checking first for `null`.
+
+### Fixed
+
+- Fix the implicit conversion on `ConceptAs` to check first if it's `null`
+- Fix the `ToString()` on `ConceptAs` to check first if it's `null`
+- Fix the `AggregateRootVersion` when converting `CommittedAggregateEvents` to their Protobuf representation when it was `null`
+
 # [5.3.4] - 2021-2-2 [PR: #487](https://github.com/dolittle/Runtime/pull/487)
 ## Summary
 
