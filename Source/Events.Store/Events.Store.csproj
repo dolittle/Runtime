@@ -7,13 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
-    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
     <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Artifacts/Artifacts.csproj" />
     <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
     <ProjectReference Include="../Execution/Execution.csproj" />
     <ProjectReference Include="../Protobuf/Protobuf.csproj" />
