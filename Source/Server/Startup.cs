@@ -1,6 +1,8 @@
+using Microsoft.VisualBasic.CompilerServices;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,7 +22,6 @@ namespace Dolittle.Runtime.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-
             services.AddCors(_ => _.AddPolicy("AllowAll", builder =>
             {
                 builder.AllowAnyOrigin()
@@ -28,6 +29,10 @@ namespace Dolittle.Runtime.Server
                         .AllowAnyHeader()
                         .WithExposedHeaders("Grpc-Status", "Grpc-Message");
             }));
+
+            services.AddControllers();
+            services.AddMvc();
+            services.AddSwaggerGen();
         }
 
         /// <summary>
@@ -40,14 +45,23 @@ namespace Dolittle.Runtime.Server
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseSwagger();
+                app.UseSwaggerUI(c =>
+                {
+                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Runtime API v1");
+                });
             }
 
-            app.UseRouting();
 
             app.UseStaticFiles();
 
             app.UseGrpcWeb();
             app.UseCors();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
