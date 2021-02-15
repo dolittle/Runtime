@@ -5,13 +5,11 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Services;
-using Dolittle.Runtime.Events.Store.Services.Restful;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Dolittle.Runtime.Server.Controllers
+namespace Dolittle.Runtime.Events.Store.Services.WebAPI
 {
     [Route("api/events")]
     [ApiController]

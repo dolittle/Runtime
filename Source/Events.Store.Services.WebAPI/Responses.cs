@@ -5,12 +5,12 @@ using System;
 using System.Linq;
 using Dolittle.Runtime.Protobuf;
 
-namespace Dolittle.Runtime.Events.Store.Services.Restful
+namespace Dolittle.Runtime.Events.Store.Services.WebAPI
 {
     public record FailureResponse(Guid Id, string Reason)
     {
         public static FailureResponse From(Failure failure)
-            => new (failure.Id, failure.Reason);
+            => new(failure.Id, failure.Reason);
     }
     public record JsonResponseCommittedEvent(
         ulong EventLogSequenceNumber,
@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Restful
     )
     {
         public static JsonResponseCommittedEvent From(CommittedEvent @event)
-            => new (
+            => new(
                 @event.EventLogSequenceNumber,
                 @event.Occurred,
                 @event.EventSource,
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Restful
     )
     {
         public static JsonResponseCommittedAggregateEvent From(CommittedAggregateEvent @event)
-            => new (
+            => new(
                 @event.EventLogSequenceNumber,
                 @event.Occurred,
                 ExecutionContext.From(@event.ExecutionContext),
@@ -55,13 +55,13 @@ namespace Dolittle.Runtime.Events.Store.Services.Restful
     public record JsonResponseCommittedAggregateEvents(Guid EventSourceId, Guid AggregateRoot, ulong AggregateRootVersion, JsonResponseCommittedAggregateEvent[] Events)
     {
         public static JsonResponseCommittedAggregateEvents From(CommittedAggregateEvents events)
-            => new (
+            => new(
                 events.EventSource,
                 events.AggregateRoot,
                 events.AsEnumerable().LastOrDefault()?.AggregateRootVersion ?? 0,
                 events.ToArray().Select(_ => JsonResponseCommittedAggregateEvent.From(_)).ToArray());
         public static JsonResponseCommittedAggregateEvents From(EventSourceId eventSource, Artifacts.ArtifactId aggregateRoot)
-            => new (
+            => new(
                 eventSource,
                 aggregateRoot,
                 0,
@@ -71,22 +71,22 @@ namespace Dolittle.Runtime.Events.Store.Services.Restful
     public record CommitResponse(JsonResponseCommittedEvent[] Events, FailureResponse Failure)
     {
         public static CommitResponse From(CommittedEvents events)
-            => new (events.Select(_ => JsonResponseCommittedEvent.From(_)).ToArray(), null);
+            => new(events.Select(_ => JsonResponseCommittedEvent.From(_)).ToArray(), null);
         public static CommitResponse From(Failure failure)
-            => new (Array.Empty<JsonResponseCommittedEvent>(), FailureResponse.From(failure));
+            => new(Array.Empty<JsonResponseCommittedEvent>(), FailureResponse.From(failure));
     }
     public record CommitForAggregateResponse(JsonResponseCommittedAggregateEvents Events, FailureResponse Failure)
     {
         public static CommitForAggregateResponse From(CommittedAggregateEvents events)
-            => new (JsonResponseCommittedAggregateEvents.From(events), null);
+            => new(JsonResponseCommittedAggregateEvents.From(events), null);
         public static CommitForAggregateResponse From(Failure failure, EventSourceId eventSource, Artifacts.ArtifactId aggregateRoot)
-            => new (JsonResponseCommittedAggregateEvents.From(eventSource, aggregateRoot), FailureResponse.From(failure));
+            => new(JsonResponseCommittedAggregateEvents.From(eventSource, aggregateRoot), FailureResponse.From(failure));
     }
     public record FetchForAggregateResponse(JsonResponseCommittedAggregateEvents Events, FailureResponse Failure)
     {
         public static FetchForAggregateResponse From(CommittedAggregateEvents events)
-            => new (JsonResponseCommittedAggregateEvents.From(events), null);
+            => new(JsonResponseCommittedAggregateEvents.From(events), null);
         public static FetchForAggregateResponse From(Failure failure, EventSourceId eventSource, Artifacts.ArtifactId aggregateRoot)
-            => new (JsonResponseCommittedAggregateEvents.From(eventSource, aggregateRoot), FailureResponse.From(failure));
+            => new(JsonResponseCommittedAggregateEvents.From(eventSource, aggregateRoot), FailureResponse.From(failure));
     }
 }
