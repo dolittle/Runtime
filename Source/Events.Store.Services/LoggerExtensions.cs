@@ -4,7 +4,7 @@
 using System;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store.Services
 {
     internal static class LoggerExtensions
     {

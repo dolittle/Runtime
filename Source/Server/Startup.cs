@@ -20,7 +20,6 @@ namespace Dolittle.Runtime.Server
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGrpc();
-
             services.AddCors(_ => _.AddPolicy("AllowAll", builder =>
             {
                 builder.AllowAnyOrigin()
@@ -28,6 +27,10 @@ namespace Dolittle.Runtime.Server
                         .AllowAnyHeader()
                         .WithExposedHeaders("Grpc-Status", "Grpc-Message");
             }));
+
+            services.AddControllers();
+            services.AddMvc();
+            services.AddSwaggerGen();
         }
 
         /// <summary>
@@ -41,13 +44,21 @@ namespace Dolittle.Runtime.Server
             {
                 app.UseDeveloperExceptionPage();
             }
-
-            app.UseRouting();
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Runtime API v1");
+            });
 
             app.UseStaticFiles();
 
             app.UseGrpcWeb();
             app.UseCors();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

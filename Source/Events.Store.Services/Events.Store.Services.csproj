@@ -2,12 +2,13 @@
   <Import Project="../../default.props"/>
 
   <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Events.Store</AssemblyName>
-    <RootNamespace>Dolittle.Runtime.Events.Store</RootNamespace>
+    <AssemblyName>Dolittle.Runtime.Events.Store.Services</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Events.Store.Services</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nito.AsyncEx.Tasks" Version="$(NitoAsyncVersion)" />
+    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+    <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
   </ItemGroup>
 
   <ItemGroup>
@@ -15,6 +16,7 @@
     <ProjectReference Include="../Artifacts/Artifacts.csproj" />
     <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
     <ProjectReference Include="../Execution/Execution.csproj" />
+    <ProjectReference Include="../Events.Store/Events.Store.csproj" />
     <ProjectReference Include="../Protobuf/Protobuf.csproj" />
     <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
     <ProjectReference Include="../Services/Services.csproj" />

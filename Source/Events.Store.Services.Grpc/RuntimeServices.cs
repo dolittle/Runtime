@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store.Services.Grpc
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
@@ -12,15 +12,15 @@ namespace Dolittle.Runtime.Events.Store
     /// </summary>
     public class RuntimeServices : ICanBindRuntimeServices
     {
-        readonly EventStoreService _eventStoreService;
+        readonly EventStoreGrpcService _eventStoreGrpcService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
         /// </summary>
         /// <param name="eventStoreService">The <see cref="EventStoreService"/>.</param>
-        public RuntimeServices(EventStoreService eventStoreService)
+        public RuntimeServices(EventStoreGrpcService eventStoreService)
         {
-            _eventStoreService = eventStoreService;
+            _eventStoreGrpcService = eventStoreService;
         }
 
         /// <inheritdoc/>
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_eventStoreService, Contracts.EventStore.BindService(_eventStoreService), Contracts.EventStore.Descriptor)
+                new Service(_eventStoreGrpcService, Contracts.EventStore.BindService(_eventStoreGrpcService), Contracts.EventStore.Descriptor)
             };
     }
 }
