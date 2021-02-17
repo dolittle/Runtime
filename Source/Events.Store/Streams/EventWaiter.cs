@@ -17,8 +17,8 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// </remarks>
     public class EventWaiter
     {
-        readonly object _notifiedLock = new object();
-        readonly object _readWriteLock = new object();
+        readonly object _notifiedLock = new();
+        readonly object _readWriteLock = new();
         readonly SortedList<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
         StreamPosition _lastNotified;
 
@@ -52,12 +52,18 @@ namespace Dolittle.Runtime.Events.Store.Streams
             var tcs = GetOrAddTaskCompletionSourceLocking(position);
             if (IsAlreadyNotifiedOfPosition(position))
             {
-                _taskCompletionSources.Remove(position);
+                lock(_readWriteLock)
+                {
+                    _taskCompletionSources.Remove(position);
+                }
                 return;
             }
 
             await tcs.Task.WaitAsync(token).ConfigureAwait(false);
-            _taskCompletionSources.Remove(position);
+            lock(_readWriteLock)
+            {
+                _taskCompletionSources.Remove(position);
+            }
         }
 
         /// <summary>
@@ -87,12 +93,12 @@ namespace Dolittle.Runtime.Events.Store.Streams
                 var keys = _taskCompletionSources.Keys.ToArray();
                 foreach (var storedPosition in keys)
                 {
-                    if (storedPosition.Value <= position)
+                    if (storedPosition.Value <= position.Value)
                     {
                         _taskCompletionSources[storedPosition].TrySetResult(true);
                     }
 
-                    if (storedPosition == position) break;
+                    if (storedPosition.Value == position.Value) break;
                 }
             }
         }
