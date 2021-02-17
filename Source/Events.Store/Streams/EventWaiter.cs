@@ -49,21 +49,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public async Task Wait(StreamPosition position, CancellationToken token)
         {
             if (IsAlreadyNotifiedOfPosition(position)) return;
-            var tcs = GetOrAddTaskCompletionSourceLocking(position);
-            if (IsAlreadyNotifiedOfPosition(position))
+            TaskCompletionSource<bool> tcs;
+            lock(_notifiedLock)
             {
-                lock(_readWriteLock)
-                {
-                    _taskCompletionSources.Remove(position);
-                }
-                return;
+                if (IsAlreadyNotifiedOfPosition(position)) return;
+                tcs = GetOrAddTaskCompletionSourceLocking(position);
             }
-
             await tcs.Task.WaitAsync(token).ConfigureAwait(false);
-            lock(_readWriteLock)
-            {
-                _taskCompletionSources.Remove(position);
-            }
         }
 
         /// <summary>
@@ -81,9 +73,8 @@ namespace Dolittle.Runtime.Events.Store.Streams
                         _lastNotified = position;
                     }
                 }
+                RemoveAllAtAndBelowLocking(position);
             }
-
-            RemoveAllAtAndBelowLocking(position);
         }
 
         void RemoveAllAtAndBelowLocking(StreamPosition position)
@@ -96,6 +87,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
                     if (storedPosition.Value <= position.Value)
                     {
                         _taskCompletionSources[storedPosition].TrySetResult(true);
+                        _taskCompletionSources.Remove(storedPosition);
                     }
 
                     if (storedPosition.Value == position.Value) break;
