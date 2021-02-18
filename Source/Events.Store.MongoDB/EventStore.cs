@@ -60,96 +60,122 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken)
         {
             ThrowIfNoEventsToCommit(events);
-            try
+            return await DoCommit<CommittedEvents, CommittedEvent>(async (transaction, cancel) =>
             {
-                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                return await session.WithTransactionAsync(
-                    async (transaction, cancel) =>
-                    {
-                        var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
-                            transaction,
-                            _eventFilter.Empty,
-                            cancellationToken: cancel).ConfigureAwait(false);
-                        var committedEvents = new List<CommittedEvent>();
-                        foreach (var @event in events)
-                        {
-                            var committedEvent = await _eventCommitter.CommitEvent(
-                                transaction,
-                                eventLogSequenceNumber,
-                                DateTimeOffset.UtcNow,
-                                _executionContextManager.Current,
-                                @event,
-                                cancel).ConfigureAwait(false);
-                            committedEvents.Add(committedEvent);
-                            eventLogSequenceNumber++;
-                        }
-
-                        foreach (var @event in committedEvents)
-                        {
-                            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, @event.EventLogSequenceNumber.Value);
-                        }
-
-                        return new CommittedEvents(committedEvents);
-                    },
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
+                var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
+                    transaction,
+                    _eventFilter.Empty,
+                    cancellationToken: cancel).ConfigureAwait(false);
+                var committedEvents = new List<CommittedEvent>();
+                foreach (var @event in events)
+                {
+                    var committedEvent = await _eventCommitter.CommitEvent(
+                        transaction,
+                        eventLogSequenceNumber,
+                        DateTimeOffset.UtcNow,
+                        _executionContextManager.Current,
+                        @event,
+                        cancel).ConfigureAwait(false);
+                    committedEvents.Add(committedEvent);
+                    eventLogSequenceNumber++;
+                }
+                return new CommittedEvents(committedEvents);
+            }, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
         public async Task<CommittedAggregateEvents> CommitAggregateEvents(UncommittedAggregateEvents events, CancellationToken cancellationToken)
         {
             ThrowIfNoEventsToCommit(events);
+            return await DoCommit<CommittedAggregateEvents, CommittedAggregateEvent>(async (transaction, cancel) =>
+            {
+                var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
+                    transaction,
+                    _eventFilter.Empty,
+                    cancellationToken: cancel).ConfigureAwait(false);
+                var aggregateRootVersion = events.ExpectedAggregateRootVersion.Value;
+
+                var committedEvents = new List<CommittedAggregateEvent>();
+
+                foreach (var @event in events)
+                {
+                    var committedEvent = await _eventCommitter.CommitAggregateEvent(
+                        transaction,
+                        events.AggregateRoot,
+                        aggregateRootVersion,
+                        eventLogSequenceNumber,
+                        DateTimeOffset.UtcNow,
+                        events.EventSource,
+                        _executionContextManager.Current,
+                        @event,
+                        cancel).ConfigureAwait(false);
+                    committedEvents.Add(committedEvent);
+                    eventLogSequenceNumber++;
+                    aggregateRootVersion++;
+                }
+
+                await _aggregateRoots.IncrementVersionFor(
+                    transaction,
+                    events.EventSource,
+                    events.AggregateRoot.Id,
+                    events.ExpectedAggregateRootVersion,
+                    aggregateRootVersion,
+                    cancel).ConfigureAwait(false);
+
+                return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
+            }, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
+        public Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken)
+            => DoInSession<CommittedAggregateEvents, CommittedAggregateEvent>(async (transaction, cancel) =>
+                {
+                    var version = await _aggregateRoots.FetchVersionFor(
+                    transaction,
+                    eventSource,
+                    aggregateRoot,
+                    cancel).ConfigureAwait(false);
+                    if (version > AggregateRootVersion.Initial)
+                    {
+                        var filter = _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
+                            & _eventFilter.Eq(_ => _.Metadata.EventSource, eventSource.Value)
+                            & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
+                            & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
+
+                        var events = await _streams.DefaultEventLog
+                            .Find(transaction, filter)
+                            .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
+                            .ToListAsync(cancel).ConfigureAwait(false);
+
+                        var aggregateEvents = events
+                            .Select(_ => _eventConverter.ToRuntimeStreamEvent(_))
+                            .Select(_ => _.Event)
+                            .Cast<CommittedAggregateEvent>()
+                            .ToList();
+
+                        return new CommittedAggregateEvents(
+                            eventSource,
+                            aggregateRoot,
+                            aggregateEvents);
+                    }
+                    else
+                    {
+                        return new CommittedAggregateEvents(
+                            eventSource,
+                            aggregateRoot,
+                            Array.Empty<CommittedAggregateEvent>());
+                    }
+                }, cancellationToken);
+
+        async Task<TCommittedEvents> DoInSession<TCommittedEvents, TEvent>(Func<IClientSessionHandle, CancellationToken, Task<TCommittedEvents>> doTask, CancellationToken cancellationToken)
+            where TCommittedEvents : CommittedEventSequence<TEvent>
+            where TEvent : CommittedEvent
+        {
             try
             {
                 using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                return await session.WithTransactionAsync(
-                    async (transaction, cancel) =>
-                    {
-                        var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
-                            transaction,
-                            _eventFilter.Empty,
-                            cancellationToken: cancel).ConfigureAwait(false);
-                        var aggregateRootVersion = events.ExpectedAggregateRootVersion.Value;
-
-                        var committedEvents = new List<CommittedAggregateEvent>();
-
-                        foreach (var @event in events)
-                        {
-                            var committedEvent = await _eventCommitter.CommitAggregateEvent(
-                                transaction,
-                                events.AggregateRoot,
-                                aggregateRootVersion,
-                                eventLogSequenceNumber,
-                                DateTimeOffset.UtcNow,
-                                events.EventSource,
-                                _executionContextManager.Current,
-                                @event,
-                                cancel).ConfigureAwait(false);
-                            committedEvents.Add(committedEvent);
-                            eventLogSequenceNumber++;
-                            aggregateRootVersion++;
-                        }
-
-                        await _aggregateRoots.IncrementVersionFor(
-                            transaction,
-                            events.EventSource,
-                            events.AggregateRoot.Id,
-                            events.ExpectedAggregateRootVersion,
-                            aggregateRootVersion,
-                            cancel).ConfigureAwait(false);
-
-                        foreach (var @event in committedEvents)
-                        {
-                            _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, @event.EventLogSequenceNumber.Value);
-                        }
-
-                        return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
-                    },
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
+                var committedEvents = await session.WithTransactionAsync(doTask, cancellationToken: cancellationToken).ConfigureAwait(false);
+                return committedEvents;
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -157,57 +183,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             }
         }
 
-        /// <inheritdoc/>
-        public async Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken)
+        async Task<TCommittedEvents> DoCommit<TCommittedEvents, TEvent>(Func<IClientSessionHandle, CancellationToken, Task<TCommittedEvents>> doTask, CancellationToken cancellationToken)
+            where TCommittedEvents : CommittedEventSequence<TEvent>
+            where TEvent : CommittedEvent
         {
-            try
-            {
-                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                return await session.WithTransactionAsync(
-                    async (transaction, cancel) =>
-                    {
-                        var version = await _aggregateRoots.FetchVersionFor(
-                        transaction,
-                        eventSource,
-                        aggregateRoot,
-                        cancel).ConfigureAwait(false);
-                        if (version > AggregateRootVersion.Initial)
-                        {
-                            var filter = _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
-                                & _eventFilter.Eq(_ => _.Metadata.EventSource, eventSource.Value)
-                                & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
-                                & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
-
-                            var events = await _streams.DefaultEventLog
-                                .Find(transaction, filter)
-                                .Sort(Builders<MongoDB.Events.Event>.Sort.Ascending(_ => _.Aggregate.Version))
-                                .ToListAsync(cancel).ConfigureAwait(false);
-
-                            var aggregateEvents = events
-                                .Select(_ => _eventConverter.ToRuntimeStreamEvent(_))
-                                .Select(_ => _.Event)
-                                .Cast<CommittedAggregateEvent>()
-                                .ToList();
-
-                            return new CommittedAggregateEvents(
-                                eventSource,
-                                aggregateRoot,
-                                aggregateEvents);
-                        }
-                        else
-                        {
-                            return new CommittedAggregateEvents(
-                                eventSource,
-                                aggregateRoot,
-                                Array.Empty<CommittedAggregateEvent>());
-                        }
-                    },
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
+            var committedEvents = await DoInSession<TCommittedEvents, TEvent>(doTask, cancellationToken).ConfigureAwait(false);
+            if (committedEvents.HasEvents) _streamWatcher.NotifyForEvent(ScopeId.Default, StreamId.EventLog, committedEvents.Max(_ => _.EventLogSequenceNumber.Value));
+            return committedEvents;
         }
 
         void ThrowIfNoEventsToCommit(UncommittedEvents events)

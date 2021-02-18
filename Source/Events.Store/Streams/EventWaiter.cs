@@ -17,8 +17,8 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// </remarks>
     public class EventWaiter
     {
-        readonly object _notifiedLock = new object();
-        readonly object _readWriteLock = new object();
+        readonly object _notifiedLock = new();
+        readonly object _readWriteLock = new();
         readonly SortedList<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
         StreamPosition _lastNotified;
 
@@ -49,15 +49,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public async Task Wait(StreamPosition position, CancellationToken token)
         {
             if (IsAlreadyNotifiedOfPosition(position)) return;
-            var tcs = GetOrAddTaskCompletionSourceLocking(position);
-            if (IsAlreadyNotifiedOfPosition(position))
+            TaskCompletionSource<bool> tcs;
+            lock(_notifiedLock)
             {
-                _taskCompletionSources.Remove(position);
-                return;
+                if (IsAlreadyNotifiedOfPosition(position)) return;
+                tcs = GetOrAddTaskCompletionSourceLocking(position);
             }
-
             await tcs.Task.WaitAsync(token).ConfigureAwait(false);
-            _taskCompletionSources.Remove(position);
         }
 
         /// <summary>
@@ -75,9 +73,8 @@ namespace Dolittle.Runtime.Events.Store.Streams
                         _lastNotified = position;
                     }
                 }
+                RemoveAllAtAndBelowLocking(position);
             }
-
-            RemoveAllAtAndBelowLocking(position);
         }
 
         void RemoveAllAtAndBelowLocking(StreamPosition position)
@@ -87,12 +84,13 @@ namespace Dolittle.Runtime.Events.Store.Streams
                 var keys = _taskCompletionSources.Keys.ToArray();
                 foreach (var storedPosition in keys)
                 {
-                    if (storedPosition.Value <= position)
+                    if (storedPosition.Value <= position.Value)
                     {
                         _taskCompletionSources[storedPosition].TrySetResult(true);
+                        _taskCompletionSources.Remove(storedPosition);
                     }
 
-                    if (storedPosition == position) break;
+                    if (storedPosition.Value == position.Value) break;
                 }
             }
         }
