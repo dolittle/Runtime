@@ -66,14 +66,16 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (NeverNotifiedOrNotNotifiedOfPosition(position))
             {
+                var shouldUpdate = false;
                 lock (_notifiedLock)
                 {
                     if (NeverNotifiedOrNotNotifiedOfPosition(position))
                     {
                         _lastNotified = position;
+                        shouldUpdate = true;
                     }
                 }
-                RemoveAllAtAndBelowLocking(position);
+                if (shouldUpdate) RemoveAllAtAndBelowLocking(position);
             }
         }
 
@@ -89,8 +91,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
                         _taskCompletionSources[storedPosition].TrySetResult(true);
                         _taskCompletionSources.Remove(storedPosition);
                     }
-
-                    if (storedPosition.Value == position.Value) break;
+                    else break;
                 }
             }
         }
@@ -103,7 +104,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
                 {
                     if (!_taskCompletionSources.TryGetValue(position, out tcs))
                     {
-                        tcs = new TaskCompletionSource<bool>();
+                        tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                         _taskCompletionSources.Add(position, tcs);
                     }
                 }
