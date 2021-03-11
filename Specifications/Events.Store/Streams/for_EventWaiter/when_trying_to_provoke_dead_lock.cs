@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter
         Because of = () =>
         {
             // while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(50);
-            token_source.CancelAfter(TimeSpan.FromSeconds(5));
+            token_source.CancelAfter(TimeSpan.FromSeconds(3));
             try
             {
                 dead_lock().Wait();
@@ -30,9 +30,10 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter
             catch (Exception)
             {
             }
+            
         };
 
-        It should_have_cancelled_dead_lock = () => token_source.IsCancellationRequested.ShouldBeTrue();
+        It should_not_be_a_dead_lock = () => token_source.IsCancellationRequested.ShouldBeFalse();
 
         Cleanup clean = () =>
         {
@@ -42,35 +43,18 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter
 
         static async Task dead_lock()
         {
-            Console.WriteLine("Waiting for 0");
             var first_wait = event_waiter.Wait(0, token).ConfigureAwait(false);
-            _ = Task.Run(async () =>
+            _ = Task.Run(() =>
             {
-                await Task.Delay(100).ConfigureAwait(false);
-                await notify_async(0).ConfigureAwait(false);
+                event_waiter.Notify(0);
             });
             await first_wait;
-            Console.WriteLine("Waiting for 1");
             var second_wait = event_waiter.Wait(1, token);
-            _ = Task.Run(async () =>
+            _ = Task.Run(() =>
             {
-                await Task.Delay(100).ConfigureAwait(false);
-                await notify_async(1).ConfigureAwait(false);
+                event_waiter.Notify(1);
             });
             second_wait.Wait();        
-        }
-        
-        static Task notify_async(StreamPosition pos)
-        {
-            var tsc = new TaskCompletionSource<bool>();
-            Task.Run(() => 
-            {
-                Console.WriteLine($"Notifying for {pos.Value}");
-                event_waiter.Notify(pos);
-                Console.WriteLine($"Setting tsc for {pos.Value}");
-                tsc.SetResult(true);
-            });
-            return tsc.Task;
         }
     }
 }
