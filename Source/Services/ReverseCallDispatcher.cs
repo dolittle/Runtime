@@ -199,7 +199,7 @@ namespace Dolittle.Runtime.Services
         {
             ThrowIfCompletedCall();
 
-            var completionSource = new TaskCompletionSource<TResponse>();
+            var completionSource = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var callId = ReverseCallId.New();
             while (!_calls.TryAdd(callId, completionSource))
             {
