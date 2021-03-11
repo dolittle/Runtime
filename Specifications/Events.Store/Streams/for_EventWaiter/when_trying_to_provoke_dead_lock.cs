@@ -6,9 +6,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting_for_10ms
+namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter
 {
-    public class test : given.an_event_waiter
+    public class when_trying_to_provoke_dead_lock : given.an_event_waiter
     {
         static CancellationTokenSource token_source;
         static CancellationToken token;
