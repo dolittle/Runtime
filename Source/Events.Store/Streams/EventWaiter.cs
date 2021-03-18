@@ -17,8 +17,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// </remarks>
     public class EventWaiter
     {
-        readonly object _notifiedLock = new();
-        readonly object _readWriteLock = new();
+        readonly object _lock = new();
         readonly SortedList<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
         StreamPosition _lastNotified;
 
@@ -50,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (IsAlreadyNotifiedOfPosition(position)) return;
             TaskCompletionSource<bool> tcs;
-            lock(_notifiedLock)
+            lock(_lock)
             {
                 if (IsAlreadyNotifiedOfPosition(position)) return;
                 tcs = GetOrAddTaskCompletionSourceLocking(position);
@@ -67,7 +66,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
             if (NeverNotifiedOrNotNotifiedOfPosition(position))
             {
                 var shouldUpdate = false;
-                lock (_notifiedLock)
+                lock (_lock)
                 {
                     if (NeverNotifiedOrNotNotifiedOfPosition(position))
                     {
@@ -81,7 +80,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
 
         void RemoveAllAtAndBelowLocking(StreamPosition position)
         {
-            lock (_readWriteLock)
+            lock (_lock)
             {
                 var keys = _taskCompletionSources.Keys.ToArray();
                 foreach (var storedPosition in keys)
@@ -100,7 +99,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (!_taskCompletionSources.TryGetValue(position, out var tcs))
             {
-                lock (_readWriteLock)
+                lock (_lock)
                 {
                     if (!_taskCompletionSources.TryGetValue(position, out tcs))
                     {
