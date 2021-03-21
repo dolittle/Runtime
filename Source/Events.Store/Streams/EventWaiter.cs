@@ -17,8 +17,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// </remarks>
     public class EventWaiter
     {
-        readonly object _notifiedLock = new();
-        readonly object _readWriteLock = new();
+        readonly object _lock = new();
         readonly SortedList<StreamPosition, TaskCompletionSource<bool>> _taskCompletionSources;
         StreamPosition _lastNotified;
 
@@ -50,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (IsAlreadyNotifiedOfPosition(position)) return;
             TaskCompletionSource<bool> tcs;
-            lock(_notifiedLock)
+            lock(_lock)
             {
                 if (IsAlreadyNotifiedOfPosition(position)) return;
                 tcs = GetOrAddTaskCompletionSourceLocking(position);
@@ -66,20 +65,22 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (NeverNotifiedOrNotNotifiedOfPosition(position))
             {
-                lock (_notifiedLock)
+                var shouldUpdate = false;
+                lock (_lock)
                 {
                     if (NeverNotifiedOrNotNotifiedOfPosition(position))
                     {
                         _lastNotified = position;
+                        shouldUpdate = true;
                     }
                 }
-                RemoveAllAtAndBelowLocking(position);
+                if (shouldUpdate) RemoveAllAtAndBelowLocking(position);
             }
         }
 
         void RemoveAllAtAndBelowLocking(StreamPosition position)
         {
-            lock (_readWriteLock)
+            lock (_lock)
             {
                 var keys = _taskCompletionSources.Keys.ToArray();
                 foreach (var storedPosition in keys)
@@ -89,8 +90,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
                         _taskCompletionSources[storedPosition].TrySetResult(true);
                         _taskCompletionSources.Remove(storedPosition);
                     }
-
-                    if (storedPosition.Value == position.Value) break;
+                    else break;
                 }
             }
         }
@@ -99,11 +99,11 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (!_taskCompletionSources.TryGetValue(position, out var tcs))
             {
-                lock (_readWriteLock)
+                lock (_lock)
                 {
                     if (!_taskCompletionSources.TryGetValue(position, out tcs))
                     {
-                        tcs = new TaskCompletionSource<bool>();
+                        tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                         _taskCompletionSources.Add(position, tcs);
                     }
                 }

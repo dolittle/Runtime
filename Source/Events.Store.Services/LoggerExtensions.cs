@@ -8,13 +8,13 @@ namespace Dolittle.Runtime.Events.Store.Services
 {
     internal static class LoggerExtensions
     {
-        static readonly Action<ILogger, string, int, Exception> _eventsReceivedForCommitting = LoggerMessage
-            .Define<string, int>(
+        static readonly Action<ILogger, int, string, Exception> _eventsReceivedForCommitting = LoggerMessage
+            .Define<int, string>(
                 LogLevel.Debug,
                 new EventId(2059664795, nameof(EventsReceivedForCommitting)),
                 "{NumEvents} {EventType}events received for committing");
 
         internal static void EventsReceivedForCommitting(this ILogger logger, bool isAggregateEvents, int numEvents)
-            => _eventsReceivedForCommitting(logger, isAggregateEvents? "aggregate " : "", numEvents, null);
+            => _eventsReceivedForCommitting(logger, numEvents, isAggregateEvents? "aggregate " : "", null);
     }
 }
