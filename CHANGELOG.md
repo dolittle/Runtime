@@ -1,4 +1,4 @@
-# [5.4.2] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/500)
+# [5.4.2] - 2021-2-4 [PR: #500](https://github.com/dolittle/Runtime/pull/500)
 ## Summary
 
 We saw inconsistent issues while committing events in applications with event handlers that caused the runtime to deadlock when committing an event, never returning.
@@ -19,7 +19,7 @@ We have yet to be able to write tests that provoke this scenario. Until then we 
 
 - A wrongly formatted log message when committing events.
 
-# [5.4.1] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/499)
+# [5.4.1] - 2021-2-4 [PR: #499](https://github.com/dolittle/Runtime/pull/499)
 ## Summary
 
 A problem could occur when commiting multiple events because in regards to eventual consitency. This should likely solve that issue by notifying the event after the transaction has been committed.
@@ -28,7 +28,7 @@ A problem could occur when commiting multiple events because in regards to event
 
 - Notify event waiter outside of the transaction
 
-# [5.4.0] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/498)
+# [5.4.0] - 2021-2-4 [PR: #498](https://github.com/dolittle/Runtime/pull/498)
 ## Summary
 
 First rough take on getting a RESTful API around the EventStore. Staying true to the gRPC protobuf contracts
