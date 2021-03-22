@@ -1,3 +1,49 @@
+# [5.4.2] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/500)
+## Summary
+
+We saw inconsistent issues while committing events in applications with event handlers that caused the runtime to deadlock when committing an event, never returning.
+
+Inspired by this blog post https://devblogs.microsoft.com/premier-developer/the-danger-of-taskcompletionsourcet-class/ we have a theory that it might be because when a TaskCompletionSource is being waited for and SetResult is called on it then all the task's async continuations will be invoked synchronously which could lead to a deadlock scenario. If that's the case then this issue can be resolved by giving the TaskCompletionSource the TaskCreationOptions.RunContinuationsAsynchronously flag when created to force the continuations to be run asynchronously.
+
+We have yet to be able to write tests that provoke this scenario. Until then we can never know whether the issue has been resolved or not, or that that was the problem to begin with. I've added a single spec that failed when TaskCreationOptions.RunContinuationsAsynchronously was not given to the TaskCompletionSource and passes when it is. Thus IMO validating this fix
+
+### Changed
+
+- Made EventWaiter more robust
+- Added TaskCreationOptions.RunContinuationsAsynchronously to all manually created TaskCompletionSources
+
+### Added
+- A spec that tries provoke the dead-lock by calling Notify and Wait in different threads and call Notify (running in separate thread from the thread calling Wait) between two Wait-calls. In this scenario the continuation of the first Wait call would be started synchronously, running on the thread that called Notify, after the Notify called TrySetResult on the TaskCompletionSource that the Wait-call awaits. And since the "Notify-thread" has the readWrite lock we get a dead-lock when the next Wait-call tries to get this lock.
+
+### Fixed
+
+- A wrongly formatted log message when committing events.
+
+# [5.4.1] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/499)
+## Summary
+
+A problem could occur when commiting multiple events because in regards to eventual consitency. This should likely solve that issue by notifying the event after the transaction has been committed.
+
+### Fixed
+
+- Notify event waiter outside of the transaction
+
+# [5.4.0] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/498)
+## Summary
+
+First rough take on getting a RESTful API around the EventStore. Staying true to the gRPC protobuf contracts
+
+### Added
+
+- Rest endpoints around the event store in a controller
+- /api/event/commit - Commits events
+- /api/event/commitForAggregate - Commits aggregate events
+- /api/event/fetchForAggregate - Fetch events for aggregate
+
+### Changed
+
+- Added a layer between the gRPC EventStore service and the Event Store which is a service that is a singleton per tenant. The new EventStore controller is also using it
+
 # [5.3.5] - 2021-2-4 [PR: #497](https://github.com/dolittle/Runtime/pull/497)
 ## Summary
 
