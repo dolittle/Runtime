@@ -13,11 +13,11 @@ using Dolittle.Runtime.Services;
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IEventProcessor" />that processes the handling of an event.
+    /// Represents an implementation of <see cref="IEventProcessor" />that processes the projection from an event.
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
-        readonly IReverseCallDispatcher<ProjectionsClientToRuntimeMessage, ProjectionsRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> _dispatcher;
+        readonly IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> _dispatcher;
         readonly ILogger _logger;
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         public EventProcessor(
             ScopeId scope,
             EventProcessorId id,
-            IReverseCallDispatcher<ProjectionsClientToRuntimeMessage, ProjectionsRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
+            IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
             ILogger logger)
         {
             Scope = scope;
@@ -52,8 +52,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
             var request = new ProjectionRequest
             {
-                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                CurrentState = GetCurrentState(),
+                Event = CreateStreamEvent(@event, partitionId)
             };
+
             return Process(request, cancellationToken);
         }
 
@@ -63,7 +65,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
             var request = new ProjectionRequest
             {
-                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                CurrentState = GetCurrentState(),
+                Event = CreateStreamEvent(@event, partitionId),
                 RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
             };
             return Process(request, cancellationToken);
@@ -79,5 +82,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
             };
         }
+
+        ProjectionCurrentState GetCurrentState() => new() { Type = Contracts.ProjectionCurrentStateType.CreatedFromInitialState, State = string.Empty };
+
+        Contracts.StreamEvent CreateStreamEvent(CommittedEvent @event, PartitionId partitionId)
+            => new() { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() };
     }
 }

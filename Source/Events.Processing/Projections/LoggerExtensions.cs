@@ -2,8 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -16,160 +14,133 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     /// </summary>
     internal static class LoggerExtensions
     {
-        static readonly Action<ILogger, Guid, Guid, Guid, string, bool, Exception> _receivedEventHandler = LoggerMessage
-            .Define<Guid, Guid, Guid, string, bool>(
+        static readonly Action<ILogger, Guid, Guid, Exception> _receivedProjection = LoggerMessage
+            .Define<Guid, Guid>(
                 LogLevel.Trace,
-                new EventId(267299009, nameof(ReceivedEventHandler)),
-                "Received arguments for event handler {EventHandler} with source stream: {SourceStream} scope: {Scope} filtered on event types: {Types}\nPartitioned: {Partitioned}");
+                new EventId(281764920, nameof(ReceivedProjection)),
+                "Received arguments for projection {Projection} with scope: {Scope} ...");
 
         static readonly Action<ILogger, Guid, Exception> _eventHandlerIsInvalid = LoggerMessage
             .Define<Guid>(
                 LogLevel.Warning,
-                new EventId(1712395899, nameof(EventHandlerIsInvalid)),
-                "Cannot register event handler: {EventHandler} because it is an invalid stream identifier");
+                new EventId(1224334334, nameof(ProjectionIsInvalid)),
+                "Cannot register Projection: {Projection} because it is an invalid projection identifier");
 
-        static readonly Action<ILogger, Guid, Exception> _connectingEventHandler = LoggerMessage
+        static readonly Action<ILogger, Guid, Exception> _connectingProjection = LoggerMessage
             .Define<Guid>(
                 LogLevel.Debug,
-                new EventId(352998252, nameof(ConnectingEventHandler)),
-                "Connecting event handler: {EventHandlerId}");
+                new EventId(247861482, nameof(ConnectingProjection)),
+                "Connecting projection: {ProjectionId}");
 
-        static readonly Action<ILogger, Guid, Exception> _errorWhileRegisteringEventHandler = LoggerMessage
+        static readonly Action<ILogger, Guid, Exception> _errorWhileRegisteringProjection = LoggerMessage
             .Define<Guid>(
                 LogLevel.Warning,
-                new EventId(231722653, nameof(ErrorWhileRegisteringEventHandler)),
-                "An error occurred while registering event handler: {EventHandler}");
+                new EventId(57136794, nameof(ErrorWhileRegisteringProjection)),
+                "An error occurred while registering projection: {Projection}");
 
         static readonly Action<ILogger, Guid, Exception> _handlerAlreadyRegistered = LoggerMessage
             .Define<Guid>(
                 LogLevel.Warning,
-                new EventId(1850293039, nameof(EventHandlerAlreadyRegistered)),
-                "Failed to register event Handler: {EventHandler}. It is already registered");
+                new EventId(379156563, nameof(ProjectionAlreadyRegistered)),
+                "Failed to register projection: {Projection}. It is already registered");
 
-        static readonly Action<ILogger, Guid, Guid, Exception> _handlerAlreadyRegisteredOnSourceStream = LoggerMessage
+        static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileStartingProjection = LoggerMessage
             .Define<Guid, Guid>(
                 LogLevel.Warning,
-                new EventId(780701763, nameof(EventHandlerAlreadyRegisteredOnSourceStream)),
-                "Failed to register event handler: {EventHandler}. An event processor is already registered on source stream: {SourceStream}");
+                new EventId(1426452095, nameof(ErrorWhileStartingProjection)),
+                "An error occurred while starting projection: {Projection} in scope: {Scope}");
 
-        static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileStartingEventHandler = LoggerMessage
+        static readonly Action<ILogger, Guid, Guid, Exception> _couldNotStartProjection = LoggerMessage
             .Define<Guid, Guid>(
                 LogLevel.Warning,
-                new EventId(219875179, nameof(ErrorWhileStartingEventHandler)),
-                "An error occurred while starting event handler: {EventHandler} in scope: {Scope}");
+                new EventId(365915237, nameof(CouldNotStartProjection)),
+                "Could not start projection: {Projection} in scope: {Scope}");
 
-        static readonly Action<ILogger, Guid, Guid, Exception> _couldNotStartEventHandler = LoggerMessage
+        static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileRunningProjection = LoggerMessage
             .Define<Guid, Guid>(
                 LogLevel.Warning,
-                new EventId(860866540, nameof(CouldNotStartEventHandler)),
-                "Could not start event handler: {EventHandler} in scope: {Scope}");
-
-        static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileRunningEventHandler = LoggerMessage
-            .Define<Guid, Guid>(
-                LogLevel.Warning,
-                new EventId(331030466, nameof(ErrorWhileRunningEventHandler)),
-                "An error occurred while running event handler: {EventHandler} in scope: {Scope}");
+                new EventId(320592616, nameof(ErrorWhileRunningProjection)),
+                "An error occurred while running projection: {Projection} in scope: {Scope}");
 
         static readonly Action<ILogger, Guid, Guid, Exception> _eventHandlerDisconnected = LoggerMessage
             .Define<Guid, Guid>(
                 LogLevel.Debug,
-                new EventId(414482081, nameof(EventHandlerDisconnected)),
-                "Event handler: {EventHandler} in scope: {Scope} disconnected");
+                new EventId(397656028, nameof(ProjectionDisconnected)),
+                "Projection: {Projection} in scope: {Scope} disconnected");
 
-        static readonly Action<ILogger, Guid, Exception> _startingEventHandler = LoggerMessage
+        static readonly Action<ILogger, Guid, Exception> _startingProjection = LoggerMessage
             .Define<Guid>(
                 LogLevel.Debug,
-                new EventId(667717425, nameof(StartingEventHandler)),
-                "Starting event handler: {EventHandlerId}");
-
-        static readonly Action<ILogger, Guid, Exception> _registeringStreamProcessorForFilter = LoggerMessage
-            .Define<Guid>(
-                LogLevel.Debug,
-                new EventId(1337268627, nameof(RegisteringStreamProcessorForFilter)),
-                "Registering stream processor for filter {FilterId} on event log");
-
-        static readonly Action<ILogger, Guid, Exception> _errorWhileRegisteringStreamProcessorForFilter = LoggerMessage
-            .Define<Guid>(
-                LogLevel.Warning,
-                new EventId(197581492, nameof(ErrorWhileRegisteringStreamProcessorForFilter)),
-                "Error occurred while trying to register stream processor for filter {EventHandler}");
+                new EventId(91153857, nameof(StartingProjection)),
+                "Starting projection: {ProjectionId}");
 
         static readonly Action<ILogger, Guid, Guid, Exception> _registeringStreamProcessorForEventProcessor = LoggerMessage
             .Define<Guid, Guid>(
                 LogLevel.Debug,
-                new EventId(472572190, nameof(RegisteringStreamProcessorForEventProcessor)),
+                new EventId(75571170, nameof(RegisteringStreamProcessorForEventProcessor)),
                 "Registering stream processor for event processor: {EventProcessor} on source stream: {SourceStream}");
 
         static readonly Action<ILogger, Guid, Exception> _errorWhileRegisteringStreamProcessorForEventProcessor = LoggerMessage
             .Define<Guid>(
                 LogLevel.Warning,
-                new EventId(381357522, nameof(ErrorWhileRegisteringStreamProcessorForEventProcessor)),
+                new EventId(418293142, nameof(ErrorWhileRegisteringStreamProcessorForEventProcessor)),
                 "Error occurred while trying to register stream processor for Event Processor: {EventProcessor}");
 
         static readonly Action<ILogger, Guid, Guid, Guid, Exception> _eventProcessorIsProcessing = LoggerMessage
             .Define<Guid, Guid, Guid>(
                 LogLevel.Debug,
-                new EventId(265113086, nameof(EventProcessorIsProcessing)),
+                new EventId(176851418, nameof(EventProcessorIsProcessing)),
                 "Event processor: {EventProcessor} is processing event type: {EventTypeId} for partition: {PartitionId}");
 
         static readonly Action<ILogger, Guid, Guid, Guid, uint, string, Exception> _eventProcessorIsProcessingAgain = LoggerMessage
             .Define<Guid, Guid, Guid, uint, string>(
                 LogLevel.Debug,
-                new EventId(250914604, nameof(EventProcessorIsProcessingAgain)),
+                new EventId(828753281, nameof(EventProcessorIsProcessingAgain)),
                 "Event processor: {EventProcessor} is processing event type: {EventTypeId} for partition: {PartitionId} again for the {RetryCount} time, because of: {FailureReason}");
 
-        internal static void ReceivedEventHandler(this ILogger logger, StreamId sourceStream, EventProcessorId handler, ScopeId scope, IEnumerable<ArtifactId> types, bool partitioned)
-            => _receivedEventHandler(logger, sourceStream, handler, scope, string.Join(", ", types.Select(_ => $"'{_.Value}'")), partitioned, null);
+        internal static void ReceivedProjection(this ILogger logger, EventProcessorId projection, ScopeId scope)
+            => _receivedProjection(logger, projection, scope, null);
 
-        internal static void EventHandlerIsInvalid(this ILogger logger, EventProcessorId handler)
-            => _eventHandlerIsInvalid(logger, handler, null);
+        internal static void ProjectionIsInvalid(this ILogger logger, EventProcessorId projection)
+            => _eventHandlerIsInvalid(logger, projection, null);
 
-        internal static void ConnectingEventHandler(this ILogger logger, EventProcessorId handler)
-            => _connectingEventHandler(logger, handler, null);
+        internal static void ConnectingProjection(this ILogger logger, EventProcessorId projection)
+            => _connectingProjection(logger, projection, null);
 
-        internal static void ErrorWhileRegisteringEventHandler(this ILogger logger, Exception ex, EventProcessorId handlerId)
-            => _errorWhileRegisteringEventHandler(logger, handlerId, ex);
+        internal static void ErrorWhileRegisteringProjection(this ILogger logger, Exception ex, EventProcessorId projectionId)
+            => _errorWhileRegisteringProjection(logger, projectionId, ex);
 
-        internal static void EventHandlerAlreadyRegistered(this ILogger logger, EventProcessorId handlerId)
-            => _handlerAlreadyRegistered(logger, handlerId, null);
+        internal static void ProjectionAlreadyRegistered(this ILogger logger, EventProcessorId projectionId)
+            => _handlerAlreadyRegistered(logger, projectionId, null);
 
-        internal static void EventHandlerAlreadyRegisteredOnSourceStream(this ILogger logger, EventProcessorId handlerId)
-            => _handlerAlreadyRegisteredOnSourceStream(logger, handlerId, handlerId, null);
+        internal static void ErrorWhileStartingProjection(this ILogger logger, Exception ex, StreamId streamId, ScopeId scopeId)
+            => _errorWhileStartingProjection(logger, streamId, scopeId, ex);
 
-        internal static void ErrorWhileStartingEventHandler(this ILogger logger, Exception ex, StreamId streamId, ScopeId scopeId)
-            => _errorWhileStartingEventHandler(logger, streamId, scopeId, ex);
+        internal static void ErrorWhileStartingProjection(this ILogger logger, Exception ex, EventProcessorId projectionId, ScopeId scopeId)
+            => _errorWhileStartingProjection(logger, projectionId, scopeId, ex);
 
-        internal static void ErrorWhileStartingEventHandler(this ILogger logger, Exception ex, EventProcessorId handlerId, ScopeId scopeId)
-            => _errorWhileStartingEventHandler(logger, handlerId, scopeId, ex);
+        internal static void CouldNotStartProjection(this ILogger logger, EventProcessorId projectionId, ScopeId scopeId)
+            => _couldNotStartProjection(logger, projectionId, scopeId, null);
 
-        internal static void CouldNotStartEventHandler(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
-            => _couldNotStartEventHandler(logger, handlerId, scopeId, null);
+        internal static void ErrorWhileRunningProjection(this ILogger logger, Exception ex, EventProcessorId projectionId, ScopeId scopeId)
+            => _errorWhileRunningProjection(logger, projectionId, scopeId, ex);
 
-        internal static void ErrorWhileRunningEventHandler(this ILogger logger, Exception ex, EventProcessorId handlerId, ScopeId scopeId)
-            => _errorWhileRunningEventHandler(logger, handlerId, scopeId, ex);
+        internal static void ProjectionDisconnected(this ILogger logger, EventProcessorId projectionId, ScopeId scopeId)
+            => _eventHandlerDisconnected(logger, projectionId, scopeId, null);
 
-        internal static void EventHandlerDisconnected(this ILogger logger, EventProcessorId handlerId, ScopeId scopeId)
-            => _eventHandlerDisconnected(logger, handlerId, scopeId, null);
+        internal static void StartingProjection(this ILogger logger, EventProcessorId projectionId)
+            => _startingProjection(logger, projectionId, null);
 
-        internal static void StartingEventHandler(this ILogger logger, StreamId streamId)
-            => _startingEventHandler(logger, streamId, null);
+        internal static void RegisteringStreamProcessorForEventProcessor(this ILogger logger, EventProcessorId projectionId, StreamId sourceStream)
+            => _registeringStreamProcessorForEventProcessor(logger, projectionId, sourceStream, null);
 
-        internal static void RegisteringStreamProcessorForFilter(this ILogger logger, EventProcessorId handlerId)
-            => _registeringStreamProcessorForFilter(logger, handlerId, null);
+        internal static void ErrorWhileRegisteringStreamProcessorForEventProcessor(this ILogger logger, Exception ex, EventProcessorId projectionId)
+            => _errorWhileRegisteringStreamProcessorForEventProcessor(logger, projectionId, ex);
 
-        internal static void ErrorWhileRegisteringStreamProcessorForFilter(this ILogger logger, Exception ex, EventProcessorId handlerId)
-            => _errorWhileRegisteringStreamProcessorForFilter(logger, handlerId, ex);
+        internal static void EventProcessorIsProcessing(this ILogger logger, EventProcessorId projectionId, ArtifactId eventType, PartitionId partition)
+            => _eventProcessorIsProcessing(logger, projectionId, eventType, partition, null);
 
-        internal static void RegisteringStreamProcessorForEventProcessor(this ILogger logger, EventProcessorId handlerId, StreamId sourceStream)
-            => _registeringStreamProcessorForEventProcessor(logger, handlerId, sourceStream, null);
-
-        internal static void ErrorWhileRegisteringStreamProcessorForEventProcessor(this ILogger logger, Exception ex, EventProcessorId handlerId)
-            => _errorWhileRegisteringStreamProcessorForEventProcessor(logger, handlerId, ex);
-
-        internal static void EventProcessorIsProcessing(this ILogger logger, EventProcessorId handlerId, ArtifactId eventType, PartitionId partition)
-            => _eventProcessorIsProcessing(logger, handlerId, eventType, partition, null);
-
-        internal static void EventProcessorIsProcessingAgain(this ILogger logger, EventProcessorId handlerId, ArtifactId eventType, PartitionId partition, uint retryCount, string failureReason)
-            => _eventProcessorIsProcessingAgain(logger, handlerId, eventType, partition, retryCount, failureReason, null);
+        internal static void EventProcessorIsProcessingAgain(this ILogger logger, EventProcessorId projectionId, ArtifactId eventType, PartitionId partition, uint retryCount, string failureReason)
+            => _eventProcessorIsProcessingAgain(logger, projectionId, eventType, partition, retryCount, failureReason, null);
     }
 }
