@@ -24,6 +24,8 @@ using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
 using static Dolittle.Runtime.Events.Processing.Contracts.Filters;
+using Dolittle.Runtime.Events.Processing.Filters.Unpartitioned;
+using Dolittle.Runtime.Events.Processing.Filters.Partitioned;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -118,12 +120,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 dispatcher,
                 arguments.Scope,
                 filterDefinition,
-                () => new FilterProcessor(
+                () => new Unpartitioned.FilterProcessor(
                     arguments.Scope,
                     filterDefinition,
                     dispatcher,
                     _getEventsToStreamsWriter(),
-                    _loggerFactory.CreateLogger<FilterProcessor>()),
+                    _loggerFactory.CreateLogger<Unpartitioned.FilterProcessor>()),
                 cts.Token).ConfigureAwait(false);
         }
 
