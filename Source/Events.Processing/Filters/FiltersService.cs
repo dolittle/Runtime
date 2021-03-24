@@ -36,9 +36,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         readonly IStreamProcessors _streamProcessors;
         readonly IValidateFilterForAllTenants _filterForAllTenants;
         readonly IExecutionContextManager _executionContextManager;
-        readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly FactoryFor<IWriteEventsToPublicStreams> _getEventsToPublicStreamsWriter;
+        readonly IInitiateReverseCallServices _reverseCallServices;
+        readonly IUnpartitionedFiltersProtocol _unpartitionedFiltersProtocol;
+        readonly IPartitionedFiltersProtocol _partitionedFiltersProtocol;
+        readonly IPublicFiltersProtocol _publicFiltersProtocol;
         readonly IStreamDefinitions _streamDefinitions;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
@@ -50,30 +53,39 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
         /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager"/> for current <see cref="Execution.ExecutionContext"/>.</param>
-        /// <param name="reverseCallDispatchers">The <see cref="IReverseCallDispatchers"/> for working with reverse calls.</param>
         /// <param name="streamDefinitions">The <see cref="IFilterDefinitions" />.</param>
         /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToStreams" />.</param>
         /// <param name="getEventsToPublicStreamsWriter">The <see cref="FactoryFor{T}" /> for <see cref="IWriteEventsToPublicStreams" />.</param>
+        /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
+        /// <param name="unpartitionedFiltersProtocol">The <see cref="IUnpartitionedFiltersProtocol" />.</param>
+        /// <param name="partitionedFiltersProtocol">The <see cref="IPartitionedFiltersProtocol" />.</param>
+        /// <param name="publicFiltersProtocol">The <see cref="IPublicFiltersProtocol" />.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public FiltersService(
             IHostApplicationLifetime hostApplicationLifetime,
             IStreamProcessors streamProcessors,
             IValidateFilterForAllTenants filterForAllTenants,
             IExecutionContextManager executionContextManager,
-            IReverseCallDispatchers reverseCallDispatchers,
             IStreamDefinitions streamDefinitions,
             FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
             FactoryFor<IWriteEventsToPublicStreams> getEventsToPublicStreamsWriter,
+            IInitiateReverseCallServices reverseCallServices,
+            IUnpartitionedFiltersProtocol unpartitionedFiltersProtocol,
+            IPartitionedFiltersProtocol partitionedFiltersProtocol,
+            IPublicFiltersProtocol publicFiltersProtocol,
             ILoggerFactory loggerFactory)
         {
             _hostApplicationLifetime = hostApplicationLifetime;
             _streamProcessors = streamProcessors;
             _filterForAllTenants = filterForAllTenants;
             _executionContextManager = executionContextManager;
-            _reverseCallDispatchers = reverseCallDispatchers;
             _streamDefinitions = streamDefinitions;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _getEventsToPublicStreamsWriter = getEventsToPublicStreamsWriter;
+            _reverseCallServices = reverseCallServices;
+            _unpartitionedFiltersProtocol = unpartitionedFiltersProtocol;
+            _partitionedFiltersProtocol = partitionedFiltersProtocol;
+            _publicFiltersProtocol = publicFiltersProtocol;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<FiltersService>();
         }
@@ -86,45 +98,33 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             _logger.FilterConnectionRequestedFor("Unpartitioned");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-            var cancellationToken = cts.Token;
-            var dispatcher = _reverseCallDispatchers.GetFor<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse>(
+            var tryConnect = await _reverseCallServices.Connect(
                 runtimeStream,
                 clientStream,
                 context,
-                _ => _.RegistrationRequest,
-                (serverMessage, registrationResponse) => serverMessage.RegistrationResponse = registrationResponse,
-                (serverMessage, request) => serverMessage.FilterRequest = request,
-                _ => _.FilterResult,
-                _ => _.CallContext,
-                (request, context) => request.CallContext = context,
-                _ => _.CallContext,
-                (message, ping) => message.Ping = ping,
-                message => message.Pong);
+                _unpartitionedFiltersProtocol,
+                cts.Token).ConfigureAwait(false);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
+            if (!tryConnect.Success) return;
+            var (dispatcher, arguments) = tryConnect.Result;
 
-            var arguments = dispatcher.Arguments;
-            var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
-            _logger.SettingExecutionContext(executionContext);
-            _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
+            _logger.SettingExecutionContext(arguments.ExecutionContext);
+            _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-            StreamId filterId = arguments.FilterId.ToGuid();
-            ScopeId scopeId = arguments.ScopeId.ToGuid();
-            var sourceStreamId = StreamId.EventLog;
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
+            if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false)) return;
 
-            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, false);
+            var filterDefinition = new FilterDefinition(StreamId.EventLog, arguments.Filter.Value, false);
             await RegisterFilter(
                 dispatcher,
-                scopeId,
+                arguments.Scope,
                 filterDefinition,
                 () => new FilterProcessor(
-                    scopeId,
+                    arguments.Scope,
                     filterDefinition,
                     dispatcher,
                     _getEventsToStreamsWriter(),
                     _loggerFactory.CreateLogger<FilterProcessor>()),
-                cancellationToken).ConfigureAwait(false);
+                cts.Token).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -135,46 +135,33 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             _logger.FilterConnectionRequestedFor("Partitioned");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-            var cancellationToken = cts.Token;
-            var dispatcher = _reverseCallDispatchers.GetFor<PartitionedFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PartitionedFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
+            var tryConnect = await _reverseCallServices.Connect(
                 runtimeStream,
                 clientStream,
                 context,
-                _ => _.RegistrationRequest,
-                (serverMessage, registrationResponse) => serverMessage.RegistrationResponse = registrationResponse,
-                (serverMessage, request) => serverMessage.FilterRequest = request,
-                _ => _.FilterResult,
-                _ => _.CallContext,
-                (request, context) => request.CallContext = context,
-                _ => _.CallContext,
-                (message, ping) => message.Ping = ping,
-                message => message.Pong);
+                _partitionedFiltersProtocol,
+                cts.Token).ConfigureAwait(false);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
+            if (!tryConnect.Success) return;
+            var (dispatcher, arguments) = tryConnect.Result;
 
-            var arguments = dispatcher.Arguments;
-            var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
-            _logger.SettingExecutionContext(executionContext);
-            _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
+            _logger.SettingExecutionContext(arguments.ExecutionContext);
+            _executionContextManager.CurrentFor(arguments.ExecutionContext);
+            if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false)) return;
 
-            StreamId filterId = arguments.FilterId.ToGuid();
-            ScopeId scopeId = arguments.ScopeId.ToGuid();
-            var sourceStreamId = StreamId.EventLog;
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
-
-            var filterDefinition = new FilterDefinition(sourceStreamId, filterId, true);
+            var filterDefinition = new FilterDefinition(StreamId.EventLog, arguments.Filter.Value, true);
 
             await RegisterFilter(
                 dispatcher,
-                scopeId,
+                arguments.Scope,
                 filterDefinition,
                 () => new Partitioned.FilterProcessor(
-                    scopeId,
+                    arguments.Scope,
                     filterDefinition,
                     dispatcher,
                     _getEventsToStreamsWriter(),
                     _loggerFactory.CreateLogger<Partitioned.FilterProcessor>()),
-                cancellationToken).ConfigureAwait(false);
+                cts.Token).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -185,79 +172,46 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             _logger.FilterConnectionRequestedFor("Public");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-            var cancellationToken = cts.Token;
-            var dispatcher = _reverseCallDispatchers.GetFor<PublicFilterClientToRuntimeMessage, FilterRuntimeToClientMessage, PublicFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, PartitionedFilterResponse>(
+            var tryConnect = await _reverseCallServices.Connect(
                 runtimeStream,
                 clientStream,
                 context,
-                _ => _.RegistrationRequest,
-                (serverMessage, registrationResponse) => serverMessage.RegistrationResponse = registrationResponse,
-                (serverMessage, request) => serverMessage.FilterRequest = request,
-                _ => _.FilterResult,
-                _ => _.CallContext,
-                (request, context) => request.CallContext = context,
-                _ => _.CallContext,
-                (message, ping) => message.Ping = ping,
-                message => message.Pong);
+                _publicFiltersProtocol,
+                cts.Token).ConfigureAwait(false);
 
-            if (await RejectIfNotReceivedArguments(dispatcher, cancellationToken).ConfigureAwait(false)) return;
+            if (!tryConnect.Success) return;
+            var (dispatcher, arguments) = tryConnect.Result;
 
-            var arguments = dispatcher.Arguments;
-            var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
-            _logger.SettingExecutionContext(executionContext);
-            _executionContextManager.CurrentFor(arguments.CallContext.ExecutionContext);
+            _logger.SettingExecutionContext(arguments.ExecutionContext);
+            _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-            StreamId filterId = arguments.FilterId.ToGuid();
-            var scopeId = ScopeId.Default;
-            var sourceStreamId = StreamId.EventLog;
+            if (await RejectIfInvalidFilterId(dispatcher, arguments.Filter, cts.Token).ConfigureAwait(false)) return;
 
-            if (await RejectIfInvalidFilterId(dispatcher, filterId, cancellationToken).ConfigureAwait(false)) return;
-
-            var filterDefinition = new PublicFilterDefinition(sourceStreamId, filterId);
+            var filterDefinition = new PublicFilterDefinition(StreamId.EventLog, arguments.Filter.Value);
             await RegisterFilter(
                 dispatcher,
-                scopeId,
+                ScopeId.Default,
                 filterDefinition,
                 () => new PublicFilterProcessor(
                     filterDefinition,
                     dispatcher,
                     _getEventsToPublicStreamsWriter(),
                     _loggerFactory.CreateLogger<PublicFilterProcessor>()),
-                cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<bool> RejectIfNotReceivedArguments<TClientMessage, TConnectRequest, TResponse>(
-            IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
-            CancellationToken cancellationToken)
-            where TClientMessage : IMessage, new()
-            where TConnectRequest : class
-            where TResponse : class
-        {
-            _logger.LogTrace("Waiting for connection arguments...");
-            if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
-            {
-                const string message = "Connection arguments were not received";
-                _logger.LogWarning(message);
-                var failure = new Failure(FiltersFailures.NoFilterRegistrationReceived, message);
-                await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
-                return true;
-            }
-
-            _logger.LogTrace("Received connection arguments");
-            return false;
+                cts.Token).ConfigureAwait(false);
         }
 
         async Task<bool> RejectIfInvalidFilterId<TClientMessage, TConnectRequest, TResponse>(
             IReverseCallDispatcher<TClientMessage, FilterRuntimeToClientMessage, TConnectRequest, FilterRegistrationResponse, FilterEventRequest, TResponse> dispatcher,
-            StreamId filterId,
+            EventProcessorId filterId,
             CancellationToken cancellationToken)
             where TClientMessage : IMessage, new()
             where TConnectRequest : class
             where TResponse : class
         {
-            if (filterId.IsNonWriteable)
+            StreamId filterStream = filterId.Value;
+            if (filterStream.IsNonWriteable)
             {
-                _logger.FilterIsInvalid(filterId);
+                _logger.FilterIsInvalid(filterStream);
                 var failure = new Failure(FiltersFailures.CannotRegisterFilterOnNonWriteableStream, $"Filter Id: '{filterId.Value}' is an invalid Stream Id");
                 await WriteFailedRegistrationResponse(dispatcher, failure, cancellationToken).ConfigureAwait(false);
                 return true;
