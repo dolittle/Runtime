@@ -2,22 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned
 {
-    public record UnpartitionedFilterRegistrationArguments(ExecutionContext ExecutionContext, EventProcessorId Filter, ScopeId Scope);
-
-    /// <summary>
-    /// Defines the protocol for unpartitioned filters.
-    /// </summary>
-    public interface IUnpartitionedFiltersProtocol : IFiltersProtocol<FilterClientToRuntimeMessage, FilterRegistrationRequest, FilterResponse, UnpartitionedFilterRegistrationArguments>
-    {
-    }
-
     /// <summary>
     /// Represents an implementation of <see cref="IUnpartitionedFiltersProtocol" />.
     /// </summary>
