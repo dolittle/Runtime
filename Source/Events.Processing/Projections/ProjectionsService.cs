@@ -18,6 +18,8 @@ using Dolittle.Runtime.Services;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
 using static Dolittle.Runtime.Events.Processing.Contracts.Projections;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Projections.Store.State;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -30,6 +32,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         readonly IExecutionContextManager _executionContextManager;
         readonly IInitiateReverseCallServices _reverseCallServices;
         readonly IProjectionsProtocol _protocol;
+        readonly FactoryFor<IProjectionStates> _getProjectionStates;
+        readonly IProjectionKeys _projectionKeys;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
         readonly IHostApplicationLifetime _hostApplicationLifetime;
@@ -49,6 +53,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             IExecutionContextManager executionContextManager,
             IInitiateReverseCallServices reverseCallServices,
             IProjectionsProtocol protocol,
+            FactoryFor<IProjectionStates> getProjectionStates,
+            IProjectionKeys projectionKeys,
             ILoggerFactory loggerFactory)
         {
             _hostApplicationLifetime = hostApplicationLifetime;
@@ -56,6 +62,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _executionContextManager = executionContextManager;
             _reverseCallServices = reverseCallServices;
             _protocol = protocol;
+            _getProjectionStates = getProjectionStates;
+            _projectionKeys = projectionKeys;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<ProjectionsService>();
         }
@@ -78,17 +86,18 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             var (dispatcher, arguments) = tryConnect.Result;
             _logger.SettingExecutionContext(arguments.ExecutionContext);
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
-            _logger.ReceivedProjection(arguments.Projection, arguments.Scope);
+            _logger.ReceivedProjection(arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
 
-            _logger.LogDebug("Connecting Projection '{ProjectionId}'", arguments.Projection.Value);
+            _logger.LogDebug("Connecting Projection '{ProjectionId}'", arguments.ProjectionDefinition.Projection.Value);
 
             var tryRegisterEventProcessorStreamProcessor = TryRegisterEventProcessorStreamProcessor(
-                arguments.Scope,
-                arguments.Projection,
+                arguments.ProjectionDefinition.Scope,
+                arguments.ProjectionDefinition.Projection.Value,
                 () => new EventProcessor(
-                    arguments.Scope,
-                    arguments.Projection,
+                    arguments.ProjectionDefinition,
                     dispatcher,
+                    _getProjectionStates(),
+                    _projectionKeys,
                     _loggerFactory.CreateLogger<EventProcessor>()),
                 cts.Token);
 
@@ -101,10 +110,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 }
                 else
                 {
-                    _logger.ProjectionAlreadyRegistered(arguments.Projection);
+                    _logger.ProjectionAlreadyRegistered(arguments.ProjectionDefinition.Projection.Value);
                     var failure = new Failure(
                         ProjectionFailures.FailedToRegisterProjection,
-                        $"Failed to register Projection: {arguments.Projection.Value}. Event Processor already registered on Source Stream: '{arguments.Projection.Value}'");
+                        $"Failed to register Projection: {arguments.ProjectionDefinition.Projection.Value}. Event Processor already registered on Source Stream: '{arguments.ProjectionDefinition.Projection.Value}'");
                     await dispatcher.Reject(new ProjectionRegistrationResponse { Failure = failure }, cts.Token).ConfigureAwait(false);
                     return;
                 }
@@ -114,8 +123,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
             var tryStartEventHandler = await TryStartProjection(
                 dispatcher,
-                arguments.Scope,
-                arguments.Projection,
+                arguments.ProjectionDefinition.Scope,
+                arguments.ProjectionDefinition.Projection.Value,
                 eventProcessorStreamProcessor,
                 cts.Token).ConfigureAwait(false);
             if (!tryStartEventHandler.Success)
@@ -128,7 +137,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 }
                 else
                 {
-                    _logger.CouldNotStartProjection(arguments.Projection, arguments.Scope);
+                    _logger.CouldNotStartProjection(arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
                     return;
                 }
             }
@@ -140,7 +149,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
                 if (tasks.TryGetFirstInnerMostException(out var ex))
                 {
-                    _logger.ErrorWhileRunningProjection(ex, arguments.Projection, arguments.Scope);
+                    _logger.ErrorWhileRunningProjection(ex, arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
                     ExceptionDispatchInfo.Capture(ex).Throw();
                 }
             }
@@ -148,7 +157,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             {
                 cts.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                _logger.ProjectionDisconnected(arguments.Projection, arguments.Scope);
+                _logger.ProjectionDisconnected(arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
             }
         }
 
