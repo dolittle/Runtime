@@ -9,6 +9,9 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Projections.Store;
+using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.State;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -17,25 +20,37 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     /// </summary>
     public class EventProcessor : IEventProcessor
     {
+        readonly ProjectionDefinition _projectionDefinition;
+        readonly ProjectionState _inititalState;
         readonly IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> _dispatcher;
+        readonly IProjectionStates _projectionStates;
+        readonly IProjectionKeys _projectionKeys;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventProcessor"/> class.
         /// </summary>
-        /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="id">The <see cref="EventProcessorId" />.</param>
+        /// <param name="projectionDefinition">The <see cref="ProjectionDefinition" />.</param>
+        /// <param name="initialState">The initial <see cref="ProjectionState" />.</param>
         /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> dispatcher.</param>
+        /// <param name="projectionStates">The <see cref="IProjectionStates" />.</param>
+        /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
-            ScopeId scope,
-            EventProcessorId id,
+            ProjectionDefinition projectionDefinition,
+            ProjectionState inititalState,
             IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
+            IProjectionStates projectionStates,
+            IProjectionKeys projectionKeys,
             ILogger logger)
         {
-            Scope = scope;
-            Identifier = id;
+            Scope = projectionDefinition.Scope;
+            Identifier = projectionDefinition.Projection.Value;
+            _projectionDefinition = projectionDefinition;
+            _inititalState = inititalState;
+            _projectionStates = projectionStates;
             _dispatcher = dispatcher;
+            _projectionKeys = projectionKeys;
             _logger = logger;
         }
 
@@ -46,44 +61,86 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         public EventProcessorId Identifier { get; }
 
         /// <inheritdoc />
-        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
             _logger.EventProcessorIsProcessing(Identifier, @event.Type.Id, partitionId);
 
             var request = new ProjectionRequest
             {
-                CurrentState = GetCurrentState(),
                 Event = CreateStreamEvent(@event, partitionId)
             };
 
-            return Process(request, cancellationToken);
+            return await Process(@event, partitionId, request, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
-        public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+        public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
             _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
             var request = new ProjectionRequest
             {
-                CurrentState = GetCurrentState(),
                 Event = CreateStreamEvent(@event, partitionId),
                 RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
             };
-            return Process(request, cancellationToken);
+            return await Process(@event, partitionId, request, cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<IProcessingResult> Process(ProjectionRequest request, CancellationToken cancellationToken)
+        async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ProjectionRequest request, CancellationToken token)
         {
-            var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
-
-            return response switch
+            if (!_projectionKeys.TryGetFor(_projectionDefinition, @event, partitionId, out var projectionKey))
             {
-                { Failure: null } => new SuccessfulProcessing(),
-                _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
+                _logger.LogDebug("Could not get projection key for projection {Projection} in scope {Scope}", _projectionDefinition.Projection.Value, Scope.Value);
+                return new FailedProcessing("Could not get projection key");
+            }
+            request.CurrentState = await GetCurrentState(@projectionKey, token).ConfigureAwait(false);
+            var response = await _dispatcher.Call(request, token).ConfigureAwait(false);
+            return await (response switch
+            {
+                { Failure: null } => HandleResponse(projectionKey, response.NextState, token),
+                _ => Task.FromResult<IProcessingResult>(new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan()))
+            }).ConfigureAwait(false);
+        }
+
+        async Task<ProjectionCurrentState> GetCurrentState(ProjectionKey projectionKey, CancellationToken token)
+        {
+            var tryGetState = await _projectionStates.TryGet(_projectionDefinition.Projection, Scope, projectionKey, token).ConfigureAwait(false);
+            return tryGetState.Success switch
+            {
+                true => new ProjectionCurrentState { Type = ProjectionCurrentStateType.Persisted, State = tryGetState.Result },
+                false => new ProjectionCurrentState { Type = ProjectionCurrentStateType.CreatedFromInitialState, State = _inititalState },
             };
         }
 
-        ProjectionCurrentState GetCurrentState() => new() { Type = Contracts.ProjectionCurrentStateType.CreatedFromInitialState, State = string.Empty };
+        async Task<IProcessingResult> HandleResponse(ProjectionKey key, ProjectionNextState nextState, CancellationToken cancellationToken)
+        {
+            _logger.LogDebug("Handling successful projection response for projection {Projection} in scope {Scope}", _projectionDefinition.Projection.Value, Scope.Value);
+
+            var successfulUpdate = await (nextState.Type switch
+            {
+                ProjectionNextStateType.Replace => TryReplace(key, nextState.Value, cancellationToken),
+                ProjectionNextStateType.Delete => TryRemove(key, cancellationToken),
+                _ => Task.FromResult(false)
+            }).ConfigureAwait(false);
+
+            return successfulUpdate switch
+            {
+                true => new SuccessfulProcessing(),
+                false => new FailedProcessing("Failed to update state for projection")
+            };
+        }
+
+
+        async Task<bool> TryReplace(ProjectionKey key, ProjectionState newState, CancellationToken token)
+        {
+            _logger.LogTrace("Trying to replace state for projection {Projection} with key {Key} in scope {Scope}", _projectionDefinition.Projection.Value, key.Value, Scope.Value);
+            return await _projectionStates.TryReplace(_projectionDefinition.Projection, Scope, key, newState, token).ConfigureAwait(false);
+        }
+
+        async Task<bool> TryRemove(ProjectionKey key, CancellationToken token)
+        {
+            _logger.LogTrace("Trying to remove state for projection {Projection} with key {Key} in scope {Scope}", _projectionDefinition.Projection.Value, key.Value, Scope.Value);
+            return await _projectionStates.TryRemove(_projectionDefinition.Projection, Scope, key, token).ConfigureAwait(false);
+        }
 
         Contracts.StreamEvent CreateStreamEvent(CommittedEvent @event, PartitionId partitionId)
             => new() { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() };
