@@ -6,6 +6,9 @@ using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
+using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
+using RuntimeProjectEventKeySelectorType = Dolittle.Runtime.Projections.Store.Definition.ProjectEventKeySelectorType;
+using Dolittle.Runtime.Projections.Store.Definition;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -18,10 +21,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         public ProjectionRegistrationArguments ConvertConnectArguments(ProjectionRegistrationRequest arguments)
             => new(
                 arguments.CallContext.ExecutionContext.ToExecutionContext(),
-                arguments.ProjectionId.ToGuid(),
-                arguments.InitialState,
-                arguments.Events.Select(_ => new ProjectionEventSelector(_.EventType.ToArtifact(), (Store.Projections.ProjectEventKeySelectorType)_.KeySelector.Type, _.KeySelector.Expression)),
-                arguments.ScopeId.ToGuid());
+                new ProjectionDefinition(
+                    arguments.ProjectionId.ToGuid(),
+                    arguments.ScopeId.ToGuid(),
+                    arguments.Events.Select(_ => new RuntimeProjectionEventSelector(_.EventType.ToArtifact(), (RuntimeProjectEventKeySelectorType)_.KeySelector.Type, _.KeySelector.Expression)),
+                    arguments.InitialState
+                ));
 
         /// <inheritdoc/>
         public ProjectionRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)

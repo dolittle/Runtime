@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     public class EventProcessor : IEventProcessor
     {
         readonly ProjectionDefinition _projectionDefinition;
-        readonly ProjectionState _inititalState;
         readonly IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> _dispatcher;
         readonly IProjectionStates _projectionStates;
         readonly IProjectionKeys _projectionKeys;
@@ -31,14 +30,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// Initializes a new instance of the <see cref="EventProcessor"/> class.
         /// </summary>
         /// <param name="projectionDefinition">The <see cref="ProjectionDefinition" />.</param>
-        /// <param name="initialState">The initial <see cref="ProjectionState" />.</param>
         /// <param name="dispatcher"><see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> dispatcher.</param>
         /// <param name="projectionStates">The <see cref="IProjectionStates" />.</param>
         /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
             ProjectionDefinition projectionDefinition,
-            ProjectionState inititalState,
             IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
             IProjectionStates projectionStates,
             IProjectionKeys projectionKeys,
@@ -47,7 +44,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             Scope = projectionDefinition.Scope;
             Identifier = projectionDefinition.Projection.Value;
             _projectionDefinition = projectionDefinition;
-            _inititalState = inititalState;
             _projectionStates = projectionStates;
             _dispatcher = dispatcher;
             _projectionKeys = projectionKeys;
@@ -107,7 +103,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             return tryGetState.Success switch
             {
                 true => new ProjectionCurrentState { Type = ProjectionCurrentStateType.Persisted, State = tryGetState.Result },
-                false => new ProjectionCurrentState { Type = ProjectionCurrentStateType.CreatedFromInitialState, State = _inititalState },
+                false => new ProjectionCurrentState { Type = ProjectionCurrentStateType.CreatedFromInitialState, State = _projectionDefinition.InititalState },
             };
         }
 
