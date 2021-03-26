@@ -1,9 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
@@ -13,7 +11,6 @@ using Dolittle.Runtime.Serialization.Json;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
-
     /// <summary>
     /// Represents an implementation of <see cref="IProjectionKeys" />.
     /// </summary>
@@ -21,6 +18,11 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     public class ProjectionKeys : IProjectionKeys
     {
         readonly ISerializer _serializer;
+
+        /// <summary>
+        /// Initializes an instance of the <see cref="ProjectionKeys" /> class.
+        /// </summary>
+        /// <param name="serializer">The json serializer.</param>
         public ProjectionKeys(ISerializer serializer)
         {
             _serializer = serializer;
@@ -67,10 +69,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             key = null;
             if (type == ProjectEventKeySelectorType.Property)
             {
-                var eventContentMap = _serializer.GetKeyValuesFromJson(eventContent);
-                if (!eventContentMap.ContainsKey(keySelectorExpression)) return false;
+                var eventContentKeyValues = _serializer.GetKeyValuesFromJson(eventContent);
+                if (!eventContentKeyValues.ContainsKey(keySelectorExpression)) return false;
 
-                key = eventContentMap[keySelectorExpression].ToString(); // Todo: What to do about this?
+                key = eventContentKeyValues[keySelectorExpression].ToString(); // Todo: What to do about this?
                 return true;
             }
             return false;
