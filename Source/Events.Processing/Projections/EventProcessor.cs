@@ -88,6 +88,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 _logger.LogDebug("Could not get projection key for projection {Projection} in scope {Scope}", _projectionDefinition.Projection.Value, Scope.Value);
                 return new FailedProcessing("Could not get projection key");
             }
+            request.Key = projectionKey;
             request.CurrentState = await GetCurrentState(@projectionKey, token).ConfigureAwait(false);
             var response = await _dispatcher.Call(request, token).ConfigureAwait(false);
             return await (response switch
