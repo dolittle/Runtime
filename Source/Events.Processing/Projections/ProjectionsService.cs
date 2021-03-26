@@ -124,7 +124,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                     _logger.ProjectionAlreadyRegistered(arguments.ProjectionDefinition.Projection.Value);
                     var failure = new Failure(
                         ProjectionFailures.FailedToRegisterProjection,
-                        $"Failed to register Projection: {arguments.ProjectionDefinition.Projection.Value}. Event Processor already registered on Source Stream: '{arguments.ProjectionDefinition.Projection.Value}'");
+                        $"Failed to register Projection: {arguments.ProjectionDefinition.Projection.Value}. Event Processor already registered with the same id.");
                     await dispatcher.Reject(new ProjectionRegistrationResponse { Failure = failure }, cts.Token).ConfigureAwait(false);
                     return;
                 }
@@ -185,11 +185,11 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             foreach (var (tenant, result) in comparisonResults)
             {
                 _logger.LogDebug("Persisting projections for tenant {Tenant}", tenant.Value);
-                await _getProjectionDefinitions().TryPersist(projectionDefinition, token).ConfigureAwait(false);
+                if (!await _getProjectionDefinitions().TryPersist(projectionDefinition, token).ConfigureAwait(false)) throw new CouldNotPersistProjectionDefinition(projectionDefinition, tenant);
                 if (!result.Succeeded)
                 {
                     _logger.LogDebug("Resetting projections for tenant {Tenant} because: {Reason}", tenant.Value, result.FailureReason);
-                    await _getProjectionStates().TryDrop(projectionDefinition.Projection, projectionDefinition.Scope, token).ConfigureAwait(false);
+                    if (!await _getProjectionStates().TryDrop(projectionDefinition.Projection, projectionDefinition.Scope, token).ConfigureAwait(false)) throw new CouldNotResetProjectionStates(projectionDefinition, tenant);
                 }
             }
             _executionContextManager.CurrentFor(executionContext);
