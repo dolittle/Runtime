@@ -20,6 +20,7 @@ using Microsoft.Extensions.Hosting;
 using static Dolittle.Runtime.Events.Processing.Contracts.Projections;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Projections.Store.State;
+using Dolittle.Runtime.Projections.Store.Definition;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -32,7 +33,9 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         readonly IExecutionContextManager _executionContextManager;
         readonly IInitiateReverseCallServices _reverseCallServices;
         readonly IProjectionsProtocol _protocol;
+        readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
         readonly FactoryFor<IProjectionStates> _getProjectionStates;
+        readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
         readonly IProjectionKeys _projectionKeys;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
@@ -46,6 +49,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
         /// <param name="protocol">The <see cref="IProjectionsProtocol" />.</param>
+        /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants" />.</param>
+        /// <param name="getProjectionStates">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionStates" />.</param>
+        /// <param name="getProjectionDefinitions">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionDefinitions" />.</param>
+        /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public ProjectionsService(
             IHostApplicationLifetime hostApplicationLifetime,
@@ -53,7 +60,9 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             IExecutionContextManager executionContextManager,
             IInitiateReverseCallServices reverseCallServices,
             IProjectionsProtocol protocol,
+            ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
             FactoryFor<IProjectionStates> getProjectionStates,
+            FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
             IProjectionKeys projectionKeys,
             ILoggerFactory loggerFactory)
         {
@@ -62,7 +71,9 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _executionContextManager = executionContextManager;
             _reverseCallServices = reverseCallServices;
             _protocol = protocol;
+            _projectionDefinitionComparer = projectionDefinitionComparer;
             _getProjectionStates = getProjectionStates;
+            _getProjectionDefinitions = getProjectionDefinitions;
             _projectionKeys = projectionKeys;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<ProjectionsService>();
@@ -121,6 +132,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
             using var eventProcessorStreamProcessor = tryRegisterEventProcessorStreamProcessor.Result;
 
+            await ResetIfDefinitionChanged(arguments.ProjectionDefinition, cts.Token).ConfigureAwait(false);
+
             var tryStartEventHandler = await TryStartProjection(
                 dispatcher,
                 arguments.ProjectionDefinition.Scope,
@@ -159,6 +172,27 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 await Task.WhenAll(tasks).ConfigureAwait(false);
                 _logger.ProjectionDisconnected(arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
             }
+        }
+
+        async Task ResetIfDefinitionChanged(ProjectionDefinition projectionDefinition, CancellationToken token)
+        {
+            _logger.LogDebug(
+                "Comparing projection definition for projection {Projection} in scope {Scope}",
+                projectionDefinition.Projection.Value,
+                projectionDefinition.Scope.Value);
+            var comparisonResults = await _projectionDefinitionComparer.DiffersFromPersisted(projectionDefinition, token).ConfigureAwait(false);
+            var executionContext = _executionContextManager.Current;
+            foreach (var (tenant, result) in comparisonResults)
+            {
+                _logger.LogDebug("Persisting projections for tenant {Tenant}", tenant.Value);
+                await _getProjectionDefinitions().TryPersist(projectionDefinition, token).ConfigureAwait(false);
+                if (!result.Succeeded)
+                {
+                    _logger.LogDebug("Resetting projections for tenant {Tenant} because: {Reason}", tenant.Value, result.FailureReason);
+                    await _getProjectionStates().TryDrop(projectionDefinition.Projection, projectionDefinition.Scope, token).ConfigureAwait(false);
+                }
+            }
+            _executionContextManager.CurrentFor(executionContext);
         }
 
         async Task<Try<IEnumerable<Task>>> TryStartProjection(
