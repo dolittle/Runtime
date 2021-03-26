@@ -10,5 +10,12 @@ namespace Dolittle.Runtime.Projections.Store
     /// </summary>
     /// <param name="Value">The key as a string.</param>
     /// <typeparam name="string">The type of the concept.</typeparam>
-    public record ProjectionKey(string Value) : ConceptAs<string>(Value);
+    public record ProjectionKey(string Value) : ConceptAs<string>(Value)
+    {
+        /// <summary>
+        /// Implicit operator from string.
+        /// </summary>
+        /// <param name="key">The projection key.</param>
+        public static implicit operator ProjectionKey(string key) => new(key);
+    }
 }
