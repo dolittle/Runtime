@@ -61,12 +61,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         {
             _logger.EventProcessorIsProcessing(Identifier, @event.Type.Id, partitionId);
 
-            var request = new ProjectionRequest
-            {
-                Event = CreateStreamEvent(@event, partitionId)
-            };
-
-            return await Process(@event, partitionId, request, cancellationToken).ConfigureAwait(false);
+            return await Process(@event, partitionId, new(), cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/>
@@ -75,7 +70,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
             var request = new ProjectionRequest
             {
-                Event = CreateStreamEvent(@event, partitionId),
                 RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
             };
             return await Process(@event, partitionId, request, cancellationToken).ConfigureAwait(false);
@@ -88,8 +82,11 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 _logger.LogDebug("Could not get projection key for projection {Projection} in scope {Scope}", _projectionDefinition.Projection.Value, Scope.Value);
                 return new FailedProcessing("Could not get projection key");
             }
+
+            request.Event = CreateStreamEvent(@event, partitionId);
             request.Key = projectionKey;
             request.CurrentState = await GetCurrentState(@projectionKey, token).ConfigureAwait(false);
+
             var response = await _dispatcher.Call(request, token).ConfigureAwait(false);
             return await (response switch
             {
