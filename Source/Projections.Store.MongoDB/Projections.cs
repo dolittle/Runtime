@@ -82,8 +82,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
             _logger.CreatingIndexesFor(ProjectionDefinitionCollectionName);
             _projectionDefinitions.Indexes.CreateOne(new CreateIndexModel<Definition.ProjectionDefinition>(
                 Builders<Definition.ProjectionDefinition>.IndexKeys
-                    .Ascending(_ => _.Projection),
-                new CreateIndexOptions { Unique = true }));
+                    .Ascending(_ => _.Projection)));
         }
 
         async Task CreateCollectionsAndIndexesForProjectionsAsync(IMongoCollection<State.Projection> projections, CancellationToken cancellationToken)
@@ -92,8 +91,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
             await projections.Indexes.CreateOneAsync(
                 new CreateIndexModel<State.Projection>(
                     Builders<State.Projection>.IndexKeys
-                        .Ascending(_ => _.Key),
-                    new CreateIndexOptions { Unique = true }),
+                        .Ascending(_ => _.Key)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
@@ -103,8 +101,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
             await projectionDefinitions.Indexes.CreateOneAsync(
                 new CreateIndexModel<Definition.ProjectionDefinition>(
                     Builders<Definition.ProjectionDefinition>.IndexKeys
-                        .Ascending(_ => _.Projection),
-                    new CreateIndexOptions { Unique = true }),
+                        .Ascending(_ => _.Projection)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
     }
