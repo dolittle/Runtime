@@ -55,13 +55,9 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                     async collection => await collection
                                             .Find(CreateKeyFilter(key))
                                             .Project(_ => _.ContentRaw)
-                                            .SingleAsync(token),
+                                            .SingleOrDefaultAsync(token),
                     token).ConfigureAwait(false);
-                return new ProjectionState(projectionState);
-            }
-            catch (MongoWaitQueueFullException)
-            {
-                return false;
+                return string.IsNullOrEmpty(projectionState) ? false : new ProjectionState(projectionState);
             }
             catch (Exception ex)
             {
