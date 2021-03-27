@@ -21,6 +21,7 @@ using static Dolittle.Runtime.Events.Processing.Contracts.Projections;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -37,6 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         readonly FactoryFor<IProjectionStates> _getProjectionStates;
         readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
         readonly IProjectionKeys _projectionKeys;
+        readonly IPerformActionOnAllTenants _onAllTenants;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
         readonly IHostApplicationLifetime _hostApplicationLifetime;
@@ -64,6 +66,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             FactoryFor<IProjectionStates> getProjectionStates,
             FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
             IProjectionKeys projectionKeys,
+            IPerformActionOnAllTenants onAllTenants,
             ILoggerFactory loggerFactory)
         {
             _hostApplicationLifetime = hostApplicationLifetime;
@@ -75,6 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _getProjectionStates = getProjectionStates;
             _getProjectionDefinitions = getProjectionDefinitions;
             _projectionKeys = projectionKeys;
+            _onAllTenants = onAllTenants;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<ProjectionsService>();
         }
@@ -176,23 +180,32 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         async Task ResetIfDefinitionChanged(ProjectionDefinition projectionDefinition, CancellationToken token)
         {
-            _logger.LogDebug(
-                "Comparing projection definition for projection {Projection} in scope {Scope}",
-                projectionDefinition.Projection.Value,
-                projectionDefinition.Scope.Value);
-            var comparisonResults = await _projectionDefinitionComparer.DiffersFromPersisted(projectionDefinition, token).ConfigureAwait(false);
-            var executionContext = _executionContextManager.Current;
-            foreach (var (tenant, result) in comparisonResults)
+            try
             {
-                _logger.LogDebug("Persisting projections for tenant {Tenant}", tenant.Value);
-                if (!await _getProjectionDefinitions().TryPersist(projectionDefinition, token).ConfigureAwait(false)) throw new CouldNotPersistProjectionDefinition(projectionDefinition, tenant);
-                if (!result.Succeeded)
+                _logger.LogDebug(
+                    "Comparing projection definition for projection {Projection} in scope {Scope}",
+                    projectionDefinition.Projection.Value,
+                    projectionDefinition.Scope.Value);
+                var tenantsAndComparisonResult = await _projectionDefinitionComparer.DiffersFromPersisted(projectionDefinition, token).ConfigureAwait(false);
+
+                await _onAllTenants.PerformAsync(async tenant =>
                 {
-                    _logger.LogDebug("Resetting projections for tenant {Tenant} because: {Reason}", tenant.Value, result.FailureReason);
-                    if (!await _getProjectionStates().TryDrop(projectionDefinition.Projection, projectionDefinition.Scope, token).ConfigureAwait(false)) throw new CouldNotResetProjectionStates(projectionDefinition, tenant);
-                }
+                    if (!tenantsAndComparisonResult.TryGetValue(tenant, out var comparisonResult)) return;
+                    _logger.LogDebug("Persisting projections for tenant {Tenant}", tenant.Value);
+                    if (!await _getProjectionDefinitions().TryPersist(projectionDefinition, token).ConfigureAwait(false)) throw new CouldNotPersistProjectionDefinition(projectionDefinition, tenant);
+                    if (!comparisonResult.Succeeded)
+                    {
+                        _logger.LogDebug("Resetting projections for tenant {Tenant} because: {Reason}", tenant.Value, comparisonResult.FailureReason);
+                        if (!await _getProjectionStates().TryDrop(projectionDefinition.Projection, projectionDefinition.Scope, token).ConfigureAwait(false)) throw new CouldNotResetProjectionStates(projectionDefinition, tenant);
+                    }
+
+                });
             }
-            _executionContextManager.CurrentFor(executionContext);
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Error while checking definition");
+                throw;
+            }
         }
 
         async Task<Try<IEnumerable<Task>>> TryStartProjection(
