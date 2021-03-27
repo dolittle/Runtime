@@ -30,23 +30,23 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition
         {
             try
             {
-                await OnDefinitions(
+                return await OnDefinitions<Try<Store.Definition.ProjectionDefinition>>(
                     scope,
                     async collection =>
                     {
-                        var (initialState, eventSelectors) = await collection
+                        var findResult = await collection
                                             .Find(CreateIdFilter(projection))
                                             .Project(_ => Tuple.Create(_.InitialStateRaw, _.EventSelectors))
-                                            .SingleAsync().ConfigureAwait(false);
-
+                                            .SingleOrDefaultAsync(token).ConfigureAwait(false);
+                        if (findResult == null) return false;
+                        var (initialState, eventSelectors) = findResult;
                         return _definitionConverter.ToRuntime(projection, scope, eventSelectors, initialState);
                     },
                     token).ConfigureAwait(false);
-                return true;
             }
-            catch (MongoWaitQueueFullException)
+            catch (Exception ex)
             {
-                return false;
+                return ex;
             }
         }
         public async Task<bool> TryPersist(Store.Definition.ProjectionDefinition definition, CancellationToken token)
