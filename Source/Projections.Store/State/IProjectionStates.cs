@@ -9,7 +9,7 @@ using Dolittle.Runtime.Rudimentary;
 namespace Dolittle.Runtime.Projections.Store.State
 {
     /// <summary>
-    /// Defines a repository for <see cref="ProjectionState" />. 
+    /// Defines the repository for <see cref="ProjectionState" />. 
     /// </summary>
     public interface IProjectionStates
     {
