@@ -7,7 +7,6 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Serialization.Json;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -17,15 +16,15 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     [Singleton]
     public class ProjectionKeys : IProjectionKeys
     {
-        readonly ISerializer _serializer;
+        readonly IProjectionKeyPropertyExtractor _keyPropertyExtractor;
 
         /// <summary>
         /// Initializes an instance of the <see cref="ProjectionKeys" /> class.
         /// </summary>
-        /// <param name="serializer">The json serializer.</param>
-        public ProjectionKeys(ISerializer serializer)
+        /// <param name="keyPropertyExtractor">The projection key property extractor.</param>
+        public ProjectionKeys(IProjectionKeyPropertyExtractor keyPropertyExtractor)
         {
-            _serializer = serializer;
+            _keyPropertyExtractor = keyPropertyExtractor;
         }
 
         public bool TryGetFor(ProjectionDefinition projectionDefinition, CommittedEvent @event, PartitionId partition, out ProjectionKey key)
@@ -67,15 +66,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         bool PropertyIsKey(ProjectEventKeySelectorType type, string eventContent, KeySelectorExpression keySelectorExpression, out ProjectionKey key)
         {
             key = null;
-            if (type == ProjectEventKeySelectorType.Property)
-            {
-                var eventContentKeyValues = _serializer.GetKeyValuesFromJson(eventContent);
-                if (!eventContentKeyValues.ContainsKey(keySelectorExpression)) return false;
-
-                key = eventContentKeyValues[keySelectorExpression].ToString(); // Todo: What to do about this?
-                return true;
-            }
-            return false;
+            if (type != ProjectEventKeySelectorType.Property) return false;
+            return _keyPropertyExtractor.TryExtract(eventContent, keySelectorExpression, out key);
         }
     }
 }
