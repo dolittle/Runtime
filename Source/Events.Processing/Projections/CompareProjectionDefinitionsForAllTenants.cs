@@ -10,7 +10,6 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Tenancy;
-using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -22,36 +21,26 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     {
         readonly IPerformActionOnAllTenants _onTenants;
         readonly FactoryFor<IProjectionDefinitions> _getDefinitions;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes an instance of the <see cref="CompareProjectionDefinitionsForAllTenants" /> class.
         /// </summary>
         /// <param name="onTenants">The tool for performing an action on all tenants.</param>
         /// <param name="getDefinitions">The factory for getting projection definitions.</param>
-        /// <param name="logger">The logger.</param>
         public CompareProjectionDefinitionsForAllTenants(
             IPerformActionOnAllTenants onTenants,
-            FactoryFor<IProjectionDefinitions> getDefinitions,
-            ILogger logger)
+            FactoryFor<IProjectionDefinitions> getDefinitions)
         {
             _onTenants = onTenants;
             _getDefinitions = getDefinitions;
-            _logger = logger;
-
         }
 
         /// <inheritdoc/>
         public async Task<IDictionary<TenantId, ProjectionDefinitionComparisonResult>> DiffersFromPersisted(ProjectionDefinition definition, CancellationToken token)
         {
-            _logger.LogDebug("Comparing definitions for projection {Projection} in scope {Scope} for all tenants", definition.Projection.Value, definition.Scope.Value);
             var results = new Dictionary<TenantId, ProjectionDefinitionComparisonResult>();
             await _onTenants.PerformAsync(async tenant =>
             {
-                _logger.LogTrace(
-                    "Comparing definitions for projection {Projection} in scope {Scope} for tenant {Tenant}",
-                    definition.Projection.Value,
-                    definition.Scope.Value);
                 var definitions = _getDefinitions();
                 var tryGetDefinition = await definitions.TryGet(definition.Projection, definition.Scope, token).ConfigureAwait(false);
                 var comparisonResult = tryGetDefinition.Success switch
