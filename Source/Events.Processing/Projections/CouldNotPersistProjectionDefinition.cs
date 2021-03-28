@@ -12,6 +12,11 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     /// </summary>
     public class CouldNotPersistProjectionDefinition : Exception
     {
+        /// <summary>
+        /// Initializes an instance of the <see cref="CouldNotPersistProjectionDefinition" /> class.
+        /// </summary>
+        /// <param name="projectionDefinition">The projection definition.</param>
+        /// <param name="tenant">The tenant it could not persist for.</param>
         public CouldNotPersistProjectionDefinition(ProjectionDefinition projectionDefinition, TenantId tenant)
             : base($"Could not persist projection definition for projection {projectionDefinition.Projection.Value} in scope {projectionDefinition.Scope.Value} for tenant {tenant.Value}")
         {

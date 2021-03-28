@@ -99,15 +99,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 cts.Token).ConfigureAwait(false);
             if (!tryConnect.Success) return;
             var (dispatcher, arguments) = tryConnect.Result;
+            _logger.ReceivedProjection(arguments);
             _logger.SettingExecutionContext(arguments.ExecutionContext);
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
-            _logger.ReceivedProjection(arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
 
-            _logger.LogDebug("Connecting Projection '{ProjectionId}'", arguments.ProjectionDefinition.Projection.Value);
-
-            var tryRegisterEventProcessorStreamProcessor = TryRegisterEventProcessorStreamProcessor(
-                arguments.ProjectionDefinition.Scope,
-                arguments.ProjectionDefinition.Projection.Value,
+            var tryRegisterEventProcessorStreamProcessor = TryRegisterProjection(
+                arguments,
                 () => new EventProcessor(
                     arguments.ProjectionDefinition,
                     dispatcher,
@@ -125,7 +122,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 }
                 else
                 {
-                    _logger.ProjectionAlreadyRegistered(arguments.ProjectionDefinition.Projection.Value);
+                    _logger.ProjectionAlreadyRegistered(arguments);
                     var failure = new Failure(
                         ProjectionFailures.FailedToRegisterProjection,
                         $"Failed to register Projection: {arguments.ProjectionDefinition.Projection.Value}. Event Processor already registered with the same id.");
@@ -136,12 +133,9 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
             using var eventProcessorStreamProcessor = tryRegisterEventProcessorStreamProcessor.Result;
 
-            await ResetIfDefinitionChanged(arguments.ProjectionDefinition, cts.Token).ConfigureAwait(false);
-
             var tryStartEventHandler = await TryStartProjection(
                 dispatcher,
-                arguments.ProjectionDefinition.Scope,
-                arguments.ProjectionDefinition.Projection.Value,
+                arguments,
                 eventProcessorStreamProcessor,
                 cts.Token).ConfigureAwait(false);
             if (!tryStartEventHandler.Success)
@@ -154,7 +148,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 }
                 else
                 {
-                    _logger.CouldNotStartProjection(arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
+                    _logger.CouldNotStartProjection(arguments);
                     return;
                 }
             }
@@ -166,7 +160,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
                 if (tasks.TryGetFirstInnerMostException(out var ex))
                 {
-                    _logger.ErrorWhileRunningProjection(ex, arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
+                    _logger.ErrorWhileRunningProjection(ex, arguments);
                     ExceptionDispatchInfo.Capture(ex).Throw();
                 }
             }
@@ -174,51 +168,22 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             {
                 cts.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                _logger.ProjectionDisconnected(arguments.ProjectionDefinition.Projection.Value, arguments.ProjectionDefinition.Scope);
-            }
-        }
-
-        async Task ResetIfDefinitionChanged(ProjectionDefinition projectionDefinition, CancellationToken token)
-        {
-            try
-            {
-                _logger.LogDebug(
-                    "Comparing projection definition for projection {Projection} in scope {Scope}",
-                    projectionDefinition.Projection.Value,
-                    projectionDefinition.Scope.Value);
-                var tenantsAndComparisonResult = await _projectionDefinitionComparer.DiffersFromPersisted(projectionDefinition, token).ConfigureAwait(false);
-
-                await _onAllTenants.PerformAsync(async tenant =>
-                {
-                    if (!tenantsAndComparisonResult.TryGetValue(tenant, out var comparisonResult)) return;
-                    _logger.LogDebug("Persisting projections for tenant {Tenant}", tenant.Value);
-                    if (!await _getProjectionDefinitions().TryPersist(projectionDefinition, token).ConfigureAwait(false)) throw new CouldNotPersistProjectionDefinition(projectionDefinition, tenant);
-                    if (!comparisonResult.Succeeded)
-                    {
-                        _logger.LogDebug("Resetting projections for tenant {Tenant} because: {Reason}", tenant.Value, comparisonResult.FailureReason);
-                        if (!await _getProjectionStates().TryDrop(projectionDefinition.Projection, projectionDefinition.Scope, token).ConfigureAwait(false)) throw new CouldNotResetProjectionStates(projectionDefinition, tenant);
-                    }
-
-                });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Error while checking definition");
-                throw;
+                _logger.ProjectionDisconnected(arguments);
             }
         }
 
         async Task<Try<IEnumerable<Task>>> TryStartProjection(
             IReverseCallDispatcher<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse> dispatcher,
-            ScopeId scopeId,
-            EventProcessorId projectionId,
+            ProjectionRegistrationArguments arguments,
             StreamProcessor eventProcessorStreamProcessor,
             CancellationToken cancellationToken)
         {
-            _logger.StartingProjection(projectionId);
+            _logger.StartingProjection(arguments);
             try
             {
                 var runningDispatcher = dispatcher.Accept(new ProjectionRegistrationResponse(), cancellationToken);
+
+                await ResetIfDefinitionChanged(arguments, cancellationToken).ConfigureAwait(false);
                 await eventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
                 return new[] { eventProcessorStreamProcessor.Start(), runningDispatcher };
             }
@@ -226,25 +191,24 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.ErrorWhileStartingProjection(ex, projectionId, scopeId);
+                    _logger.ErrorWhileStartingProjection(ex, arguments);
                 }
 
                 return ex;
             }
         }
 
-        Try<StreamProcessor> TryRegisterEventProcessorStreamProcessor(
-            ScopeId scopeId,
-            EventProcessorId projectionId,
+        Try<StreamProcessor> TryRegisterProjection(
+            ProjectionRegistrationArguments arguments,
             Func<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken)
         {
-            _logger.RegisteringStreamProcessorForEventProcessor(projectionId, StreamId.EventLog);
+            _logger.RegisteringProjection(arguments);
             try
             {
                 return (_streamProcessors.TryRegister(
-                    scopeId,
-                    projectionId,
+                    arguments.ProjectionDefinition.Scope,
+                    arguments.ProjectionDefinition.Projection.Value,
                     new EventLogStreamDefinition(),
                     getEventProcessor,
                     cancellationToken,
@@ -254,11 +218,30 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             {
                 if (!cancellationToken.IsCancellationRequested)
                 {
-                    _logger.ErrorWhileRegisteringStreamProcessorForEventProcessor(ex, projectionId);
+                    _logger.ErrorWhileRegisteringProjection(ex, arguments);
                 }
 
                 return ex;
             }
+        }
+        async Task ResetIfDefinitionChanged(
+            ProjectionRegistrationArguments arguments,
+            CancellationToken token)
+        {
+            _logger.ComparingProjectionDefintion(arguments);
+            var tenantsAndComparisonResult = await _projectionDefinitionComparer.DiffersFromPersisted(arguments.ProjectionDefinition, token).ConfigureAwait(false);
+
+            await _onAllTenants.PerformAsync(async tenant =>
+            {
+                if (!tenantsAndComparisonResult.TryGetValue(tenant, out var comparisonResult)) return;
+                _logger.PersistingProjectionDefinition(arguments, tenant);
+                if (!await _getProjectionDefinitions().TryPersist(arguments.ProjectionDefinition, token).ConfigureAwait(false)) throw new CouldNotPersistProjectionDefinition(arguments.ProjectionDefinition, tenant);
+                if (!comparisonResult.Succeeded)
+                {
+                    _logger.ResetingProjections(arguments, tenant, comparisonResult.FailureReason);
+                    if (!await _getProjectionStates().TryDrop(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token).ConfigureAwait(false)) throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
+                }
+            });
         }
     }
 }
