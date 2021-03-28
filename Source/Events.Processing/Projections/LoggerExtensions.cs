@@ -4,6 +4,7 @@
 using System;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 
@@ -98,6 +99,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 new EventId(828753281, nameof(EventProcessorIsProcessingAgain)),
                 "Projection Event processor {EventProcessor} is processing event type {EventTypeId} for partition {PartitionId} again for the {RetryCount} time, because of {FailureReason}");
 
+        static readonly Action<ILogger, Guid, Guid, Exception> _couldNotGetProjectionKey = LoggerMessage
+            .Define<Guid, Guid>(
+                LogLevel.Debug,
+                new EventId(176305120, nameof(CouldNotGetProjectionKey)),
+                "Could not get projection key for projection {Projection} in scope {Scope}");
+
         internal static void ReceivedProjection(this ILogger logger, ProjectionRegistrationArguments arguments)
             => _receivedProjection(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, null);
 
@@ -139,5 +146,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         internal static void EventProcessorIsProcessingAgain(this ILogger logger, EventProcessorId projectionId, ArtifactId eventType, PartitionId partition, uint retryCount, string failureReason)
             => _eventProcessorIsProcessingAgain(logger, projectionId, eventType, partition, retryCount, failureReason, null);
+
+        internal static void CouldNotGetProjectionKey(this ILogger logger, EventProcessorId projectionId, ScopeId scope)
+            => _couldNotGetProjectionKey(logger, projectionId, scope, null);
     }
 }

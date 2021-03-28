@@ -79,7 +79,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         {
             if (!_projectionKeys.TryGetFor(_projectionDefinition, @event, partitionId, out var projectionKey))
             {
-                _logger.LogDebug("Could not get projection key for projection {Projection} in scope {Scope}", _projectionDefinition.Projection.Value, Scope.Value);
+                _logger.CouldNotGetProjectionKey(Identifier, Scope);
                 return new FailedProcessing("Could not get projection key");
             }
 
@@ -107,8 +107,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         async Task<IProcessingResult> HandleResponse(ProjectionKey key, ProjectionNextState nextState, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Handling successful projection response for projection {Projection} in scope {Scope}", _projectionDefinition.Projection.Value, Scope.Value);
-
             var successfulUpdate = await (nextState.Type switch
             {
                 ProjectionNextStateType.Replace => TryReplace(key, nextState.Value, cancellationToken),
@@ -125,16 +123,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
 
         async Task<bool> TryReplace(ProjectionKey key, ProjectionState newState, CancellationToken token)
-        {
-            _logger.LogTrace("Trying to replace state for projection {Projection} with key {Key} in scope {Scope}", _projectionDefinition.Projection.Value, key.Value, Scope.Value);
-            return await _projectionStates.TryReplace(_projectionDefinition.Projection, Scope, key, newState, token).ConfigureAwait(false);
-        }
+            => await _projectionStates.TryReplace(_projectionDefinition.Projection, Scope, key, newState, token).ConfigureAwait(false);
 
         async Task<bool> TryRemove(ProjectionKey key, CancellationToken token)
-        {
-            _logger.LogTrace("Trying to remove state for projection {Projection} with key {Key} in scope {Scope}", _projectionDefinition.Projection.Value, key.Value, Scope.Value);
-            return await _projectionStates.TryRemove(_projectionDefinition.Projection, Scope, key, token).ConfigureAwait(false);
-        }
+            => await _projectionStates.TryRemove(_projectionDefinition.Projection, Scope, key, token).ConfigureAwait(false);
 
         Contracts.StreamEvent CreateStreamEvent(CommittedEvent @event, PartitionId partitionId)
             => new() { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() };
