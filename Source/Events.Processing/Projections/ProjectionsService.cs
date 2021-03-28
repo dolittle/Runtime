@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
