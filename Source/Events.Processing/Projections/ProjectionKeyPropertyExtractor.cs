@@ -4,6 +4,7 @@
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Serialization.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -12,25 +13,15 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     /// </summary>
     public class ProjectionKeyPropertyExtractor : IProjectionKeyPropertyExtractor
     {
-        readonly ISerializer _serializer;
-
-        /// <summary>
-        /// Initializes an instance of the <see cref="ProjectionKeyPropertyExtractor" /> class.
-        /// </summary>
-        /// <param name="serializer">The json serializer.</param>
-        public ProjectionKeyPropertyExtractor(ISerializer serializer)
-        {
-            _serializer = serializer;
-        }
-
         /// <inheritdoc/>
         public bool TryExtract(string jsonString, KeySelectorExpression keySelectorExpression, out ProjectionKey key)
         {
             key = null;
-            var contentKeyValues = _serializer.GetKeyValuesFromJson(jsonString);
-            if (!contentKeyValues.ContainsKey(keySelectorExpression)) return false;
+            var jsonObject = JObject.Parse(jsonString);
+            var property = jsonObject.SelectToken(keySelectorExpression, false);
+            if (property == null) return false;
 
-            key = AsProjectionKey(contentKeyValues[keySelectorExpression]);
+            key = AsProjectionKey(property);
             return true;
         }
 
