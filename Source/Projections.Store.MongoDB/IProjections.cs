@@ -13,18 +13,17 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
     /// </summary>
     public interface IProjections : IProjectionsConnection
     {
-
         /// <summary>
-        /// Gets a non-public and non-event-log Stream.
+        /// Gets the projection states collection for a projection.
         /// </summary>
         /// <param name="scopeId">The <see cref="ScopeId" />.</param>
         /// <param name="projectionId">The <see cref="ProjectionId" />.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="IMongoCollection{TDocument}" /> with <see cref="State.Projection" />.</returns>
-        Task<IMongoCollection<State.Projection>> Get(ScopeId scopeId, ProjectionId projectionId, CancellationToken token);
+        Task<IMongoCollection<State.Projection>> GetStates(ScopeId scopeId, ProjectionId projectionId, CancellationToken token);
 
         /// <summary>
-        /// Gets a Stream Definition collection.
+        /// Gets the projection definitions collection for a scope.
         /// </summary>
         /// <param name="scopeId">The <see cref="ScopeId" />.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>

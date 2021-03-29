@@ -20,7 +20,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
         static TenantId tenant;
         static ProjectionDefinition definition;
         static IDictionary<TenantId, ProjectionDefinitionComparisonResult> result;
-        static ProjectionKey key;
 
         Establish context = () =>
         {
@@ -30,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
                 .create(
                     "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",
                     "5e1c13f3-4af4-4335-93ef-7612b67f0f67")
-                .with_selector(new ProjectionEventSelector(new Artifact(Guid.NewGuid(), 1), ProjectEventKeySelectorType.EventSourceId))
+                .with_selector(new ProjectionEventSelector(Guid.NewGuid(), ProjectEventKeySelectorType.EventSourceId))
                 .build();
 
             definitions

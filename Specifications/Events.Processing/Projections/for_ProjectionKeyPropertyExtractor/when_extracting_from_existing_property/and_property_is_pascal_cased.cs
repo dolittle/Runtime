@@ -8,7 +8,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.when_extracting_from_existing_property
 {
-    public class and_propertyand_property_is_pascal_cased_is_camel_cased : given.all_dependencies
+    public class and_property_is_pascal_cased : given.all_dependencies
     {
         static bool result;
         static ProjectionKey key;

@@ -14,7 +14,6 @@ namespace Dolittle.Runtime.Services
         /// <summary>
         /// Initiates the connection.
         /// </summary>
-        /// <param name="dispatcher">The reverse call dispatcher.</param>
         /// <param name="runtimeStream">The client to runtime stream.</param>
         /// <param name="clientStream">The runtime to client stream.</param>
         /// <param name="context">The server call context.</param>

@@ -30,10 +30,9 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         public bool TryGetFor(ProjectionDefinition projectionDefinition, CommittedEvent @event, PartitionId partition, out ProjectionKey key)
         {
             key = null;
-            var eventSelector = projectionDefinition.Events.FirstOrDefault(_ => _.EventType == @event.Type);
+            var eventSelector = projectionDefinition.Events.FirstOrDefault(_ => _.EventType == @event.Type.Id);
             if (eventSelector == null) return false;
-            if (TryGetKey(eventSelector, @event, partition, out key)) return true;
-            return false;
+            return TryGetKey(eventSelector, @event, partition, out key);
         }
 
         bool TryGetKey(ProjectionEventSelector eventSelector, CommittedEvent @event, PartitionId partition, out ProjectionKey key)

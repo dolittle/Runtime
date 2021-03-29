@@ -14,6 +14,5 @@ namespace Dolittle.Runtime.Projections.Store.Definition
     /// <param name="Scope">The scope id.</param>
     /// <param name="Events">The list of projection event selectors.</param>
     /// <param name="InitialState">The initital projection state.</param>
-    /// <returns></returns>
     public record ProjectionDefinition(ProjectionId Projection, ScopeId Scope, IEnumerable<ProjectionEventSelector> Events, ProjectionState InititalState);
 }

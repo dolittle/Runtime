@@ -4,7 +4,6 @@
 using System.Linq;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Artifacts;
 using MongoDB.Bson;
 using System.Collections.Generic;
 
@@ -25,7 +24,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition
                 projection,
                 scope,
                 eventSelectors.Select(_ => new Store.Definition.ProjectionEventSelector(
-                    new Artifact(_.EventType.Type, _.EventType.Generation),
+                    _.EventType,
                     _.EventKeySelectorType,
                     _.EventKeySelectorExpression)),
                 initialState);
@@ -39,7 +38,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition
                 {
                     EventKeySelectorType = _.KeySelectorType,
                     EventKeySelectorExpression = _.KeySelectorExpression,
-                    EventType = new EventType { Type = _.EventType.Id, Generation = _.EventType.Generation }
+                    EventType = _.EventType,
                 }).ToArray()
             };
     }

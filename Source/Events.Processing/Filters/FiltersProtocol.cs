@@ -10,21 +10,6 @@ using Google.Protobuf;
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
-    /// Defines the base protocol for filters
-    /// </summary>
-    /// <typeparam name="TFilterClientMessage"></typeparam>
-    /// <typeparam name="TFilterRegistrationRequest"></typeparam>
-    /// <typeparam name="TFilterResponse"></typeparam>
-    /// <typeparam name="TRuntimeRegistrationArguments"></typeparam>
-    public interface IFiltersProtocol<TFilterClientMessage, TFilterRegistrationRequest, TFilterResponse, TRuntimeRegistrationArguments> : IReverseCallServiceProtocol<TFilterClientMessage, FilterRuntimeToClientMessage, TFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, TFilterResponse, TRuntimeRegistrationArguments>
-        where TFilterClientMessage : IMessage, new()
-        where TFilterRegistrationRequest : class
-        where TFilterResponse : class
-        where TRuntimeRegistrationArguments : class
-    {
-    }
-
-    /// <summary>
     /// Represents a base implementation for <see cref="IFiltersProtocol{TFilterClientMessage, TFilterRegistrationRequest, TFilterResponse}" />.
     /// </summary>
     /// <typeparam name="TFilterClientMessage">Type of the messages that is sent from the client to the server.</typeparam>
@@ -36,7 +21,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         where TFilterResponse : class
         where TRuntimeRegistrationArguments : class
     {
-
         /// <inheritdoc/>
         public abstract TRuntimeRegistrationArguments ConvertConnectArguments(TFilterRegistrationRequest arguments);
 
@@ -74,5 +58,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public FilterRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
             => new() { Failure = new Dolittle.Protobuf.Contracts.Failure { Id = FiltersFailures.FailedToRegisterFilter.Value.ToProtobuf(), Reason = failureMessage } };
+
+        /// <inheritdoc/>
+        public ConnectArgumentsValidationResult ValidateConnectArguments(TRuntimeRegistrationArguments arguments)
+            => ConnectArgumentsValidationResult.Ok;
     }
 }

@@ -10,15 +10,29 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     public class ProjectionDefinitionComparisonResult
     {
         /// <summary>
+        /// Creates a successful <see cref="ProjectionDefinitionComparisonResult" />.
+        /// </summary>
+        /// <returns>The successful <see cref="ProjectionDefinitionComparisonResult" />.</returns>
+        public static ProjectionDefinitionComparisonResult Equal => new();
+
+        /// <summary>
+        /// Creates a failed <see cref="ProjectionDefinitionComparisonResult" />.
+        /// </summary>
+        /// <param name="reason">The reason why they're unequal.</param>
+        /// <returns>The failed <see cref="ProjectionDefinitionComparisonResult" />.</returns>
+        public static ProjectionDefinitionComparisonResult Unequal(FailedProjectionDefinitionComparisonReason reason)
+            => new(reason);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ProjectionDefinitionComparisonResult"/> class.
         /// </summary>
-        public ProjectionDefinitionComparisonResult() => Succeeded = true;
+        ProjectionDefinitionComparisonResult() => Succeeded = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProjectionDefinitionComparisonResult"/> class.
         /// </summary>
         /// <param name="reason">The <see cref="FailedProjectionDefinitionComparisonReason" />.</param>
-        public ProjectionDefinitionComparisonResult(FailedProjectionDefinitionComparisonReason reason) => FailureReason = reason;
+        ProjectionDefinitionComparisonResult(FailedProjectionDefinitionComparisonReason reason) => FailureReason = reason;
 
         /// <summary>
         /// Gets a value indicating whether the validation succeeded or not.

@@ -21,6 +21,7 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Tenancy;
+using Dolittle.Runtime.Projections.Store;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -36,6 +37,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
         readonly FactoryFor<IProjectionStates> _getProjectionStates;
         readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
+        readonly FactoryFor<IResilientStreamProcessorStateRepository> _getStreamProcessorStates;
         readonly IProjectionKeys _projectionKeys;
         readonly IPerformActionOnAllTenants _onAllTenants;
         readonly ILoggerFactory _loggerFactory;
@@ -53,6 +55,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants" />.</param>
         /// <param name="getProjectionStates">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionStates" />.</param>
         /// <param name="getProjectionDefinitions">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionDefinitions" />.</param>
+        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> for <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public ProjectionsService(
@@ -64,6 +67,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
             FactoryFor<IProjectionStates> getProjectionStates,
             FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
+            FactoryFor<IResilientStreamProcessorStateRepository> getStreamProcessorStates,
             IProjectionKeys projectionKeys,
             IPerformActionOnAllTenants onAllTenants,
             ILoggerFactory loggerFactory)
@@ -80,6 +84,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _onAllTenants = onAllTenants;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<ProjectionsService>();
+            _getStreamProcessorStates = getStreamProcessorStates;
         }
 
         /// <inheritdoc/>
@@ -223,24 +228,38 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 return ex;
             }
         }
-        async Task ResetIfDefinitionChanged(
-            ProjectionRegistrationArguments arguments,
-            CancellationToken token)
+        async Task ResetIfDefinitionChanged(ProjectionRegistrationArguments arguments, CancellationToken token)
         {
             _logger.ComparingProjectionDefintion(arguments);
             var tenantsAndComparisonResult = await _projectionDefinitionComparer.DiffersFromPersisted(arguments.ProjectionDefinition, token).ConfigureAwait(false);
 
             await _onAllTenants.PerformAsync(async tenant =>
             {
-                if (!tenantsAndComparisonResult.TryGetValue(tenant, out var comparisonResult)) return;
-                _logger.PersistingProjectionDefinition(arguments, tenant);
-                if (!await _getProjectionDefinitions().TryPersist(arguments.ProjectionDefinition, token).ConfigureAwait(false)) throw new CouldNotPersistProjectionDefinition(arguments.ProjectionDefinition, tenant);
+                var comparisonResult = tenantsAndComparisonResult[tenant];
+
                 if (!comparisonResult.Succeeded)
                 {
-                    _logger.ResetingProjections(arguments, tenant, comparisonResult.FailureReason);
-                    if (!await _getProjectionStates().TryDrop(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token).ConfigureAwait(false)) throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
+                    _logger.ResettingProjections(arguments, tenant, comparisonResult.FailureReason);
+                    await ResetStreamProcessorState(arguments.ProjectionDefinition, token).ConfigureAwait(false);
+                    if (!await _getProjectionStates().TryDrop(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token).ConfigureAwait(false))
+                    {
+                        throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
+                    }
                 }
-            });
+
+                _logger.PersistingProjectionDefinition(arguments, tenant);
+                if (!await _getProjectionDefinitions().TryPersist(arguments.ProjectionDefinition, token).ConfigureAwait(false))
+                {
+                    throw new CouldNotPersistProjectionDefinition(arguments.ProjectionDefinition, tenant);
+                }
+            }).ConfigureAwait(false);
+        }
+
+        Task ResetStreamProcessorState(ProjectionDefinition projection, CancellationToken token)
+        {
+            var processorId = new StreamProcessorId(projection.Scope, new EventProcessorId(projection.Projection), StreamId.EventLog);
+            var processorState = StreamProcessorState.New;
+            return _getStreamProcessorStates().Persist(processorId, processorState, token);
         }
     }
 }
