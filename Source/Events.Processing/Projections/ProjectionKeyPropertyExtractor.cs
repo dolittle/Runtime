@@ -3,7 +3,6 @@
 
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Serialization.Json;
 using Newtonsoft.Json.Linq;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
@@ -18,7 +17,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         {
             key = null;
             var jsonObject = JObject.Parse(jsonString);
-            var property = jsonObject.SelectToken(keySelectorExpression, false);
+            var property = jsonObject[keySelectorExpression.Value];
             if (property == null) return false;
 
             key = AsProjectionKey(property);
@@ -26,6 +25,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         }
 
         ProjectionKey AsProjectionKey(object key)
-            => key.ToString(); // TODO: This should perhaps be more sophisticated.
+            => key.ToString();
     }
 }
