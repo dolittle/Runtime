@@ -21,10 +21,16 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
     {
         readonly IProjections _projections;
 
+        /// <summary>
+        /// Initializes an instance of the <see cref="ProjectionStates" /> class.
+        /// </summary>
+        /// <param name="projections">The projections.</param>
         public ProjectionStates(IProjections projections)
         {
             _projections = projections;
         }
+
+        /// <inheritdoc/>
         public async Task<bool> TryDrop(ProjectionId projection, ScopeId scope, CancellationToken token)
         {
             try
@@ -45,6 +51,8 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                 return false;
             }
         }
+
+        /// <inheritdoc/>
         public async Task<Try<ProjectionState>> TryGet(ProjectionId projection, ScopeId scope, ProjectionKey key, CancellationToken token)
         {
             try
@@ -64,6 +72,8 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                 return ex;
             }
         }
+
+        /// <inheritdoc/>
         public async Task<bool> TryRemove(ProjectionId projection, ScopeId scope, ProjectionKey key, CancellationToken token)
         {
             try
@@ -85,6 +95,8 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                 return false;
             }
         }
+
+        /// <inheritdoc/>
         public async Task<bool> TryReplace(ProjectionId projection, ScopeId scope, ProjectionKey key, ProjectionState state, CancellationToken token)
         {
             try
@@ -118,6 +130,5 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
             => await callback(await _projections.GetStates(scope, projection, token).ConfigureAwait(false)).ConfigureAwait(false);
 
         FilterDefinition<Projection> CreateKeyFilter(ProjectionKey key) => Builders<Projection>.Filter.Eq(_ => _.Key, key.Value);
-
     }
 }
