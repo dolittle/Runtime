@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props"/>
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Projections.Store.MongoDB</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Projections.Store.MongoDB</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+        <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+        <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
+        <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
+        <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
+        <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
+    </ItemGroup>
+</Project>

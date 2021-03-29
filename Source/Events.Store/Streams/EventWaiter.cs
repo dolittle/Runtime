@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             if (IsAlreadyNotifiedOfPosition(position)) return;
             TaskCompletionSource<bool> tcs;
-            lock(_lock)
+            lock (_lock)
             {
                 if (IsAlreadyNotifiedOfPosition(position)) return;
                 tcs = GetOrAddTaskCompletionSourceLocking(position);
@@ -90,7 +90,10 @@ namespace Dolittle.Runtime.Events.Store.Streams
                         _taskCompletionSources[storedPosition].TrySetResult(true);
                         _taskCompletionSources.Remove(storedPosition);
                     }
-                    else break;
+                    else
+                    {
+                        break;
+                    }
                 }
             }
         }

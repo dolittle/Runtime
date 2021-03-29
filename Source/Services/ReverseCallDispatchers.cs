@@ -1,10 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
-using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;
 
@@ -34,15 +32,7 @@ namespace Dolittle.Runtime.Services
             IAsyncStreamReader<TClientMessage> clientStream,
             IServerStreamWriter<TServerMessage> serverStream,
             ServerCallContext context,
-            Func<TClientMessage, TConnectArguments> getConnectArguments,
-            Action<TServerMessage, TConnectResponse> setConnectResponse,
-            Action<TServerMessage, TRequest> setMessageRequest,
-            Func<TClientMessage, TResponse> getMessageResponse,
-            Func<TConnectArguments, ReverseCallArgumentsContext> getArgumentsContext,
-            Action<TRequest, ReverseCallRequestContext> setRequestContext,
-            Func<TResponse, ReverseCallResponseContext> getResponseContex,
-            Action<TServerMessage, Ping> setPing,
-            Func<TClientMessage, Pong> getPong)
+            IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter)
             where TClientMessage : IMessage, new()
             where TServerMessage : IMessage, new()
             where TConnectArguments : class
@@ -53,15 +43,7 @@ namespace Dolittle.Runtime.Services
                 clientStream,
                 serverStream,
                 context,
-                getConnectArguments,
-                setConnectResponse,
-                setMessageRequest,
-                getMessageResponse,
-                getArgumentsContext,
-                setRequestContext,
-                getResponseContex,
-                setPing,
-                getPong,
+                messageConverter,
                 _executionContextManager,
                 _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
     }

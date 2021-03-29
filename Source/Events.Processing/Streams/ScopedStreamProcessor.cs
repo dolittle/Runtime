@@ -77,7 +77,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected override async Task<IStreamProcessorState> OnFailedProcessingResult(FailedProcessing failedProcessing, StreamEvent processedEvent, IStreamProcessorState currentState)
         {
             var oldState = currentState as StreamProcessorState;
-            var newState = new StreamProcessorState(oldState.Position, failedProcessing.FailureReason, DateTimeOffset.MaxValue, oldState.ProcessingAttempts + 1, oldState.LastSuccessfullyProcessed, true);
+            var newState = new StreamProcessorState(
+                oldState.Position,
+                failedProcessing.FailureReason,
+                DateTimeOffset.MaxValue,
+                oldState.ProcessingAttempts + 1,
+                oldState.LastSuccessfullyProcessed,
+                true);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
         }

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
 {

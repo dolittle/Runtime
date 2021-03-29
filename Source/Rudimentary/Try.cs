@@ -10,7 +10,6 @@ namespace Dolittle.Runtime.Rudimentary
     /// </summary>
     /// <typeparam name="TResult">The result type.</typeparam>
     public class Try<TResult>
-        where TResult : class
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Try{TResult}"/> class.
@@ -71,34 +70,34 @@ namespace Dolittle.Runtime.Rudimentary
         /// </summary>
         /// <param name="result">The <typeparamref name="TResult">result</typeparamref> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>(TResult result) => new Try<TResult>(true, result);
+        public static implicit operator Try<TResult>(TResult result) => new(true, result);
 
         /// <summary>
         /// Implicitly convert <see cref="bool" /> to <see cref="Try{TResult}" />.
         /// </summary>
         /// <param name="success">The <see cref="bool" /> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>(bool success) => new Try<TResult>(success, null);
+        public static implicit operator Try<TResult>(bool success) => new(success, default);
 
         /// <summary>
         /// Implicitly convert <see cref="bool" /> to <see cref="Try{TResult}" />.
         /// </summary>
         /// <param name="exception">The <see cref="System.Exception" /> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>(Exception exception) => new Try<TResult>(false, null, exception);
+        public static implicit operator Try<TResult>(Exception exception) => new(false, default, exception);
 
         /// <summary>
         /// Implicitly convert <see cref="bool" /> and <typeparamref name="TResult" /> tuple to <see cref="Try{TResult}" />.
         /// </summary>
         /// <param name="try">The <see cref="bool" /> and <typeparamref name="TResult" /> tuple to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>((bool success, TResult result) @try) => new Try<TResult>(@try.success, @try.result);
+        public static implicit operator Try<TResult>((bool success, TResult result) @try) => new(@try.success, @try.result);
 
         /// <summary>
         /// Implicitly convert <see cref="bool" />, <typeparamref name="TResult" /> and <see cref="System.Exception" /> tuple to <see cref="Try{TResult}" />.
         /// </summary>
         /// <param name="try">The <see cref="bool" />, <typeparamref name="TResult" /> and <see cref="System.Exception" /> tuple to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>((bool success, TResult result, Exception exception) @try) => new Try<TResult>(@try.success, @try.result, @try.exception);
+        public static implicit operator Try<TResult>((bool success, TResult result, Exception exception) @try) => new(@try.success, @try.result, @try.exception);
     }
 }
