@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         static readonly Action<ILogger, Guid, Guid, Guid, Exception> _eventProcessorIsProcessing = LoggerMessage
             .Define<Guid, Guid, Guid>(
-                LogLevel.Debug,
+                LogLevel.Trace,
                 new EventId(176851418, nameof(EventProcessorIsProcessing)),
                 "Projection Event processor {EventProcessor} is processing event type {EventTypeId} for partition {PartitionId}");
 

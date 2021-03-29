@@ -12,6 +12,7 @@ using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
+using System.Linq;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -77,6 +78,11 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ProjectionRequest request, CancellationToken token)
         {
+            if (!_projectionDefinition.Events.Select(_ => _.EventType).Contains(@event.Type))
+            {
+                return new SuccessfulProcessing();
+            }
+
             if (!_projectionKeys.TryGetFor(_projectionDefinition, @event, partitionId, out var projectionKey))
             {
                 _logger.CouldNotGetProjectionKey(Identifier, Scope);
