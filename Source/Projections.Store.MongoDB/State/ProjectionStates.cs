@@ -115,7 +115,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
         }
 
         async Task<TResult> OnProjection<TResult>(ProjectionId projection, ScopeId scope, Func<IMongoCollection<Projection>, Task<TResult>> callback, CancellationToken token)
-            => await callback(await _projections.Get(scope, projection, token).ConfigureAwait(false)).ConfigureAwait(false);
+            => await callback(await _projections.GetStates(scope, projection, token).ConfigureAwait(false)).ConfigureAwait(false);
 
         FilterDefinition<Projection> CreateKeyFilter(ProjectionKey key) => Builders<Projection>.Filter.Eq(_ => _.Key, key.Value);
 

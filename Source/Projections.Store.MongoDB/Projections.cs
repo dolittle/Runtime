@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
         }
 
         /// <inheritdoc/>
-        public Task<IMongoCollection<State.Projection>> Get(ScopeId scopeId, ProjectionId projectionId, CancellationToken token)
+        public Task<IMongoCollection<State.Projection>> GetStates(ScopeId scopeId, ProjectionId projectionId, CancellationToken token)
         {
             return GetProjectionCollection(scopeId, projectionId, token);
         }
