@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys
 
         Establish context = () =>
         {
-            committed_event = committed_events.single("{\"property\": \"property\"}");
+            committed_event = committed_events.single("{\"property\": \"value\"}");
             partition = Guid.Parse("8fe25727-b922-4907-aeaa-06497b0ba80e");
             definition = given.projection_definition_builder.create()
                             .with_selector(new ProjectionEventSelector(committed_event.Type, ProjectEventKeySelectorType.Property, "property"))
@@ -29,6 +29,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys
         Because of = () => result = projection_keys.TryGetFor(definition, committed_event, partition, out key);
 
         It should_get_key = () => result.ShouldBeTrue();
-        It should_have_the_correct_key = () => key.Value.ShouldEqual("property");
+        It should_have_the_correct_key = () => key.Value.ShouldEqual("value");
     }
 }

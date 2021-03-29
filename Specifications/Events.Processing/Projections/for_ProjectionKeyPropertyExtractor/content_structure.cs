@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyProper
                 caseSensitive = nameof(caseSensitive),
                 a_string_property = nameof(a_string_property),
                 a_number_property = 41,
-                a_guid_property = Guid.Empty,
+                a_guid_property = Guid.Parse("e3cf4925-dbd4-4b66-9dbb-89f6d11fd538"),
                 inner_structure = new inner_structure()
             };
 

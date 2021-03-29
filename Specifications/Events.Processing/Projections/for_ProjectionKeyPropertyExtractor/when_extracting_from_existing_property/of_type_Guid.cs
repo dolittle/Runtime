@@ -22,6 +22,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyProper
         Because of = () => result = extractor.TryExtract(serializer.ToJson(json_object), nameof(json_object.a_guid_property), out key);
 
         It should_return_true = () => result.ShouldBeTrue();
-        It should_set_key_correct_value = () => key.Value.ShouldEqual(Guid.Empty.ToString());
+        It should_set_key_correct_value = () => key.Value.ShouldEqual(json_object.a_guid_property.ToString());
     }
 }
