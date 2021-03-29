@@ -20,13 +20,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
         static TenantId tenant;
         static ProjectionDefinition definition;
         static IDictionary<TenantId, ProjectionDefinitionComparisonResult> result;
-        static ProjectionKey key;
 
         Establish context = () =>
         {
             tenant = "8f670924-d7f5-45f3-8f75-922ca86cca8c";
             tenants.Setup(_ => _.All).Returns(new ObservableCollection<TenantId>(new[] { tenant }));
-            var event_type = new Artifact("fde86d09-1c24-40ae-afc9-d85100cabdd9", 1);
+            var event_type = "fde86d09-1c24-40ae-afc9-d85100cabdd9";
             definition = given.projection_definition_builder
                 .create(
                     "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",

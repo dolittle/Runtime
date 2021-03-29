@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-
 using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Projections.Store.Definition
@@ -11,19 +10,19 @@ namespace Dolittle.Runtime.Projections.Store.Definition
         /// <summary>
         /// Initializes an instance of the <see cref="ProjectionEventSelector" /> class.
         /// </summary>
-        /// <param name="eventType">The event type.</param>
+        /// <param name="eventType">The event type id.</param>
         /// <param name="keySelectorType">The key selector type.</param>
-        public ProjectionEventSelector(Artifact eventType, ProjectEventKeySelectorType keySelectorType)
+        public ProjectionEventSelector(ArtifactId eventType, ProjectEventKeySelectorType keySelectorType)
             : this(eventType, keySelectorType, "")
         { }
 
         /// <summary>
         /// Initializes an instance of the <see cref="ProjectionEventSelector" /> class.
         /// </summary>
-        /// <param name="eventType">The event type.</param>
+        /// <param name="eventType">The event type id.</param>
         /// <param name="keySelectorType">The key selector type.</param>
         /// <param name="keySelectorExpression">The key selector expression.</param>
-        public ProjectionEventSelector(Artifact eventType, ProjectEventKeySelectorType keySelectorType, KeySelectorExpression keySelectorExpression)
+        public ProjectionEventSelector(ArtifactId eventType, ProjectEventKeySelectorType keySelectorType, KeySelectorExpression keySelectorExpression)
         {
             EventType = eventType;
             KeySelectorType = keySelectorType;
@@ -33,7 +32,7 @@ namespace Dolittle.Runtime.Projections.Store.Definition
         /// <summary>
         /// Gets the event type.
         /// </summary>
-        public Artifact EventType { get; init; }
+        public ArtifactId EventType { get; init; }
 
         /// <summary>
         /// Gets the projection event key selector type.

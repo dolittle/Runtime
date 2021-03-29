@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 new ProjectionDefinition(
                     arguments.ProjectionId.ToGuid(),
                     arguments.ScopeId.ToGuid(),
-                    arguments.Events.Select(_ => new RuntimeProjectionEventSelector(_.EventType.ToArtifact(), (RuntimeProjectEventKeySelectorType)_.KeySelector.Type, _.KeySelector.Expression)),
+                    arguments.Events.Select(_ => new RuntimeProjectionEventSelector(_.EventType.Id.ToGuid(), (RuntimeProjectEventKeySelectorType)_.KeySelector.Type, _.KeySelector.Expression)),
                     arguments.InitialState
                 ));
 
@@ -72,7 +72,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// <inheritdoc/>
         public ConnectArgumentsValidationResult ValidateConnectArguments(ProjectionRegistrationArguments arguments)
         {
-            foreach (var eventType in arguments.ProjectionDefinition.Events.GroupBy(_ => _.EventType.Id))
+            foreach (var eventType in arguments.ProjectionDefinition.Events.GroupBy(_ => _.EventType))
             {
                 if (eventType.Count() > 1)
                 {

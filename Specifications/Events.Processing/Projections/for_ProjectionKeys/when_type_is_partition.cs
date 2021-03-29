@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys
             committed_event = committed_events.single();
             partition = Guid.Parse("8fe25727-b922-4907-aeaa-06497b0ba80e");
             definition = given.projection_definition_builder.create()
-                            .with_selector(new ProjectionEventSelector(committed_event.Type, ProjectEventKeySelectorType.PartitionId))
+                            .with_selector(new ProjectionEventSelector(committed_event.Type.Id, ProjectEventKeySelectorType.PartitionId))
                             .Build();
         };
         Because of = () => result = projection_keys.TryGetFor(definition, committed_event, partition, out key);

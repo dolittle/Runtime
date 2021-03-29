@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, ProjectionRequest request, CancellationToken token)
         {
-            if (!_projectionDefinition.Events.Select(_ => _.EventType).Contains(@event.Type))
+            if (!_projectionDefinition.Events.Select(_ => _.EventType).Contains(@event.Type.Id))
             {
                 return new SuccessfulProcessing();
             }

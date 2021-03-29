@@ -84,19 +84,19 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 var oldEvent = oldDefinition.Events.FirstOrDefault(_ => _.EventType == newEvent.EventType);
                 if (oldEvent == default)
                 {
-                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Id.Value} was not in previous projectiondefinition");
+                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} was not in previous projectiondefinition");
                     return false;
                 }
 
                 if (oldEvent.KeySelectorType != newEvent.KeySelectorType)
                 {
-                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Id.Value} does not have the same key selector type");
+                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector type");
                     return false;
                 }
 
                 if (oldEvent.KeySelectorExpression != newEvent.KeySelectorExpression)
                 {
-                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Id.Value} does not have the same key selector expressions");
+                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector expressions");
                     return false;
                 }
             }
