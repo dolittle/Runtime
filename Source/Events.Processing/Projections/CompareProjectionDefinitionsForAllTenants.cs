@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 var comparisonResult = tryGetDefinition.Success switch
                 {
                     true => CompareDefinitions(definition, tryGetDefinition),
-                    false => new ProjectionDefinitionComparisonResult()
+                    false => ProjectionDefinitionComparisonResult.Equal
                 };
                 results.Add(tenant, comparisonResult);
 
@@ -59,7 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         {
             if (CompareInitialState(newDefinition, oldDefinition, out var result)) return result;
             if (CompareEvents(newDefinition, oldDefinition, out result)) return result;
-            return new ProjectionDefinitionComparisonResult();
+            return ProjectionDefinitionComparisonResult.Equal;
         }
 
         bool CompareInitialState(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, out ProjectionDefinitionComparisonResult result)
@@ -67,7 +67,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             result = null;
             if (newDefinition.InititalState != oldDefinition.InititalState)
             {
-                result = new ProjectionDefinitionComparisonResult("The initial projection state is not the same as the persisted definition");
+                result = ProjectionDefinitionComparisonResult.Unequal("The initial projection state is not the same as the persisted definition");
                 return true;
             }
             return false;
@@ -84,12 +84,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
             if (newEventTypes.Count() != oldEventTypes.Count())
             {
-                result = new ProjectionDefinitionComparisonResult("The definitions does not have the same number of event types");
+                result = ProjectionDefinitionComparisonResult.Unequal("The definitions does not have the same number of event types");
                 return true;
             }
             if (!newEventTypes.All(_ => oldEventTypes.Contains(_)))
             {
-                result = new ProjectionDefinitionComparisonResult("The definitions does not have the same event types");
+                result = ProjectionDefinitionComparisonResult.Unequal("The definitions does not have the same event types");
                 return true;
             }
 
@@ -120,7 +120,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             result = null;
             if (newType != oldType)
             {
-                result = new ProjectionDefinitionComparisonResult("One or more key selector types does not match");
+                result = ProjectionDefinitionComparisonResult.Unequal("One or more key selector types does not match");
                 return true;
             }
             return false;
@@ -131,7 +131,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             result = null;
             if (newKeySelectorExpression != oldKeySelectorExpression)
             {
-                result = new ProjectionDefinitionComparisonResult("One or more key selector expressions does not match");
+                result = ProjectionDefinitionComparisonResult.Unequal("One or more key selector expressions does not match");
                 return true;
             }
             return false;
