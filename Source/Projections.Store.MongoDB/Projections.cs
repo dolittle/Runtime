@@ -18,22 +18,16 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
     {
         const string ProjectionDefinitionCollectionName = "projection-definitions";
 
-        readonly ILogger _logger;
         readonly IMongoCollection<Definition.ProjectionDefinition> _projectionDefinitions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Projections"/> class.
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public Projections(DatabaseConnection connection, ILogger logger)
+        public Projections(DatabaseConnection connection)
             : base(connection)
         {
-            _logger = logger;
-
             _projectionDefinitions = Database.GetCollection<Definition.ProjectionDefinition>(ProjectionDefinitionCollectionName);
-
-            CreateCollectionsAndIndexesForProjectionDefinitions();
         }
 
         /// <inheritdoc/>
@@ -48,7 +42,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
 
         static string CollectionNameForProjection(ProjectionId projectionId) => $"projection-{projectionId.Value}";
 
-        static string CollectionNameForScopedStream(ScopeId scope, ProjectionId projection) => $"x-{scope.Value}-projection-{projection.Value}";
+        static string CollectionNameForScopedProjection(ScopeId scope, ProjectionId projection) => $"x-{scope.Value}-projection-{projection.Value}";
 
         static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope.Value}-{ProjectionDefinitionCollectionName}";
 
@@ -57,52 +51,17 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
 
         async Task<IMongoCollection<State.Projection>> GetProjectionCollection(ProjectionId projection, CancellationToken cancellationToken)
         {
-            var collection = Database.GetCollection<State.Projection>(CollectionNameForProjection(projection));
-            await CreateCollectionsAndIndexesForProjectionsAsync(collection, cancellationToken).ConfigureAwait(false);
-            return collection;
+            return Database.GetCollection<State.Projection>(CollectionNameForProjection(projection));
         }
 
         async Task<IMongoCollection<State.Projection>> GetScopedProjectionCollection(ScopeId scope, ProjectionId projection, CancellationToken cancellationToken)
         {
-            var collection = Database.GetCollection<State.Projection>(CollectionNameForScopedStream(scope, projection));
-            await CreateCollectionsAndIndexesForProjectionsAsync(collection, cancellationToken).ConfigureAwait(false);
-            return collection;
+            return Database.GetCollection<State.Projection>(CollectionNameForScopedProjection(scope, projection));
         }
 
         async Task<IMongoCollection<Definition.ProjectionDefinition>> GetScopedProjectionDefinitions(ScopeId scope, CancellationToken cancellationToken)
         {
-            var collection = Database.GetCollection<Definition.ProjectionDefinition>(CollectionNameForScopedStreamDefinitions(scope));
-            await CreateCollectionsIndexesForProjectionDefinitionsAsync(collection, cancellationToken).ConfigureAwait(false);
-            return collection;
-        }
-
-
-        void CreateCollectionsAndIndexesForProjectionDefinitions()
-        {
-            _logger.CreatingIndexesFor(ProjectionDefinitionCollectionName);
-            _projectionDefinitions.Indexes.CreateOne(new CreateIndexModel<Definition.ProjectionDefinition>(
-                Builders<Definition.ProjectionDefinition>.IndexKeys
-                    .Ascending(_ => _.Projection)));
-        }
-
-        async Task CreateCollectionsAndIndexesForProjectionsAsync(IMongoCollection<State.Projection> projections, CancellationToken cancellationToken)
-        {
-            _logger.CreatingIndexesFor(projections.CollectionNamespace.CollectionName);
-            await projections.Indexes.CreateOneAsync(
-                new CreateIndexModel<State.Projection>(
-                    Builders<State.Projection>.IndexKeys
-                        .Ascending(_ => _.Key)),
-                cancellationToken: cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task CreateCollectionsIndexesForProjectionDefinitionsAsync(IMongoCollection<Definition.ProjectionDefinition> projectionDefinitions, CancellationToken cancellationToken)
-        {
-            _logger.CreatingIndexesFor(projectionDefinitions.CollectionNamespace.CollectionName);
-            await projectionDefinitions.Indexes.CreateOneAsync(
-                new CreateIndexModel<Definition.ProjectionDefinition>(
-                    Builders<Definition.ProjectionDefinition>.IndexKeys
-                        .Ascending(_ => _.Projection)),
-                cancellationToken: cancellationToken).ConfigureAwait(false);
+            return Database.GetCollection<Definition.ProjectionDefinition>(CollectionNameForScopedStreamDefinitions(scope));
         }
     }
 }
