@@ -69,11 +69,11 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 new EventId(802598225, nameof(PersistingProjectionDefinition)),
                 "Persisting definition of projection {Projection} in scope {Scope} for tenant {Tenant}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, string, Exception> _resetingProjections = LoggerMessage
+        static readonly Action<ILogger, Guid, Guid, Guid, string, Exception> _resettingProjections = LoggerMessage
             .Define<Guid, Guid, Guid, string>(
                 LogLevel.Debug,
-                new EventId(260459678, nameof(ResetingProjections)),
-                "Reseting projection {Projection} in scope {Scope} for tenant {Tenant} because: {Reason}");
+                new EventId(260459678, nameof(ResettingProjections)),
+                "Resetting projection {Projection} in scope {Scope} for tenant {Tenant} because: {Reason}");
 
         static readonly Action<ILogger, Guid, Guid, Exception> _errorWhileRunningProjection = LoggerMessage
             .Define<Guid, Guid>(
@@ -132,8 +132,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         internal static void PersistingProjectionDefinition(this ILogger logger, ProjectionRegistrationArguments arguments, TenantId tenant)
             => _persistingProjectionDefinition(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, tenant, null);
 
-        internal static void ResetingProjections(this ILogger logger, ProjectionRegistrationArguments arguments, TenantId tenant, FailedProjectionDefinitionComparisonReason reason)
-            => _resetingProjections(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, tenant, reason, null);
+        internal static void ResettingProjections(this ILogger logger, ProjectionRegistrationArguments arguments, TenantId tenant, FailedProjectionDefinitionComparisonReason reason)
+            => _resettingProjections(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, tenant, reason, null);
 
         internal static void ErrorWhileRunningProjection(this ILogger logger, Exception ex, ProjectionRegistrationArguments arguments)
             => _errorWhileRunningProjection(logger, arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, ex);
