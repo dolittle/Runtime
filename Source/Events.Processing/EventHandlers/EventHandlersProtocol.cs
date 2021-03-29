@@ -14,20 +14,6 @@ using Dolittle.Services.Contracts;
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
 
-    public record EventHandlerRegistrationArguments(
-        ExecutionContext ExecutionContext,
-        EventProcessorId EventHandler,
-        IEnumerable<ArtifactId> EventTypes,
-        bool Partitioned,
-        ScopeId Scope);
-
-    /// <summary>
-    /// Defines the protocol for event handlers.
-    /// </summary>
-    public interface IEventHandlersProtocol : IReverseCallServiceProtocol<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse, EventHandlerRegistrationArguments>
-    {
-    }
-
     /// <summary>
     /// Represents the <see cref="IEventHandlersProtocol" />.
     /// </summary>
@@ -81,5 +67,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <inheritdoc/>
         public void SetRequestContext(ReverseCallRequestContext context, HandleEventRequest request)
             => request.CallContext = context;
+
+        /// <inheritdoc/>
+        public ConnectArgumentsValidationResult ValidateConnectArguments(EventHandlerRegistrationArguments arguments)
+            => ConnectArgumentsValidationResult.Ok;
     }
 }

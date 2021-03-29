@@ -55,7 +55,15 @@ namespace Dolittle.Runtime.Services
             }
             _logger.LogTrace("Received connection arguments");
 
-            return (dispatcher, protocol.ConvertConnectArguments(dispatcher.Arguments));
+            var connectArguments = protocol.ConvertConnectArguments(dispatcher.Arguments);
+            var validationResult = protocol.ValidateConnectArguments(connectArguments);
+            if (!validationResult.Success)
+            {
+                _logger.LogTrace("Connection arguments were not valid");
+                return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
+            }
+
+            return (dispatcher, connectArguments);
         }
     }
 }

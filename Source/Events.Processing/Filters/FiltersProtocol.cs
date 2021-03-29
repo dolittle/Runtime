@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 
@@ -20,7 +21,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         where TFilterResponse : class
         where TRuntimeRegistrationArguments : class
     {
-
         /// <inheritdoc/>
         public abstract TRuntimeRegistrationArguments ConvertConnectArguments(TFilterRegistrationRequest arguments);
 
@@ -58,5 +58,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public FilterRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
             => new() { Failure = new Dolittle.Protobuf.Contracts.Failure { Id = FiltersFailures.FailedToRegisterFilter.Value.ToProtobuf(), Reason = failureMessage } };
+
+        /// <inheritdoc/>
+        public ConnectArgumentsValidationResult ValidateConnectArguments(TRuntimeRegistrationArguments arguments)
+            => ConnectArgumentsValidationResult.Ok;
     }
 }

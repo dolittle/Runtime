@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Services
     /// </summary>
     /// <typeparam name="TConnectArguments">Type of the arguments that are sent along with the initial Connect call.</typeparam>
     /// <typeparam name="TRuntimeConnectArguments">Type of the runtime representation of the connection arguments.</typeparam>
-    public interface IConvertConnectArguments<in TConnectArguments, out TRuntimeConnectArguments>
+    public interface IConvertConnectArguments<TConnectArguments, TRuntimeConnectArguments>
         where TConnectArguments : class
         where TRuntimeConnectArguments : class
     {

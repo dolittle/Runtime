@@ -5,6 +5,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Dolittle.Runtime.EventHorizon.Contracts;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
 {
@@ -66,5 +67,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <inheritdoc/>
         public void SetRequestContext(ReverseCallRequestContext context, ConsumerRequest request)
             => request.CallContext = context;
+
+        /// <inheritdoc/>
+        public ConnectArgumentsValidationResult ValidateConnectArguments(ConsumerSubscriptionArguments arguments)
+            => ConnectArgumentsValidationResult.Ok;
     }
 }

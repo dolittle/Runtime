@@ -9,6 +9,7 @@ using Dolittle.Services.Contracts;
 using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using RuntimeProjectEventKeySelectorType = Dolittle.Runtime.Projections.Store.Definition.ProjectEventKeySelectorType;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -67,5 +68,18 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// <inheritdoc/>
         public void SetRequestContext(ReverseCallRequestContext context, ProjectionRequest request)
             => request.CallContext = context;
+
+        /// <inheritdoc/>
+        public ConnectArgumentsValidationResult ValidateConnectArguments(ProjectionRegistrationArguments arguments)
+        {
+            foreach (var eventType in arguments.ProjectionDefinition.Events.GroupBy(_ => _.EventType.Id))
+            {
+                if (eventType.Count() > 1)
+                {
+                    return ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
+                }
+            }
+            return ConnectArgumentsValidationResult.Ok;
+        }
     }
 }
