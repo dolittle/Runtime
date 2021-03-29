@@ -3,27 +3,11 @@
 
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Services;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
-    /// <summary>
-    /// Defines the base protocol for filters
-    /// </summary>
-    /// <typeparam name="TFilterClientMessage"></typeparam>
-    /// <typeparam name="TFilterRegistrationRequest"></typeparam>
-    /// <typeparam name="TFilterResponse"></typeparam>
-    /// <typeparam name="TRuntimeRegistrationArguments"></typeparam>
-    public interface IFiltersProtocol<TFilterClientMessage, TFilterRegistrationRequest, TFilterResponse, TRuntimeRegistrationArguments> : IReverseCallServiceProtocol<TFilterClientMessage, FilterRuntimeToClientMessage, TFilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, TFilterResponse, TRuntimeRegistrationArguments>
-        where TFilterClientMessage : IMessage, new()
-        where TFilterRegistrationRequest : class
-        where TFilterResponse : class
-        where TRuntimeRegistrationArguments : class
-    {
-    }
-
     /// <summary>
     /// Represents a base implementation for <see cref="IFiltersProtocol{TFilterClientMessage, TFilterRegistrationRequest, TFilterResponse}" />.
     /// </summary>
