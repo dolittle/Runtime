@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
@@ -24,13 +25,13 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
         /// <summary>
         /// Initializes an instance of the <see cref="ProjectionStates" /> class.
         /// </summary>
-        /// <param name="projections">The projections.</param>
+        /// <param name="projections">The projections repository.</param>
         public ProjectionStates(IProjections projections)
         {
             _projections = projections;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc/>    
         public async Task<bool> TryDrop(ProjectionId projection, ScopeId scope, CancellationToken token)
         {
             try
@@ -66,6 +67,26 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                                             .SingleOrDefaultAsync(token),
                     token).ConfigureAwait(false);
                 return string.IsNullOrEmpty(projectionState) ? false : new ProjectionState(projectionState);
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Try<IEnumerable<ProjectionState>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token)
+        {
+            try
+            {
+                return await OnProjection(
+                    projection,
+                    scope,
+                    async collection => await collection
+                                            .Find(Builders<Projection>.Filter.Empty)
+                                            .Project(_ => new ProjectionState(_.ContentRaw))
+                                            .ToListAsync(token),
+                    token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
@@ -24,6 +25,15 @@ namespace Dolittle.Runtime.Projections.Store.State
         Task<Try<ProjectionState>> TryGet(ProjectionId projection, ScopeId scope, ProjectionKey key, CancellationToken token);
 
         /// <summary>
+        /// Try to get all <see cref="ProjectionState" />.
+        /// </summary>
+        /// <param name="projection">The projection id.</param>
+        /// <param name="scope">The scope id.</param>
+        /// <param name="token">The <see cref="CancellationToken" />.</param>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="ProjectionState" />.</returns>
+        Task<Try<IEnumerable<ProjectionState>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token);
+
+        /// <summary>
         /// Try to replace a specific <see cref="ProjectionState" />.
         /// </summary>
         /// <param name="projection">The projection id.</param>
@@ -43,7 +53,6 @@ namespace Dolittle.Runtime.Projections.Store.State
         /// <param name="token">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns value indicating whether the state was successfully removed.</returns>
         Task<bool> TryRemove(ProjectionId projection, ScopeId scope, ProjectionKey key, CancellationToken token);
-
 
         /// <summary>
         /// Try to drop the whole <see cref="ProjectionState" /> collection.
