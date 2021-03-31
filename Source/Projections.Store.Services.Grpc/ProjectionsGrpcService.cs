@@ -70,11 +70,18 @@ namespace Dolittle.Runtime.Projections.Store.Services.Grpc
         public static Events.Processing.Contracts.ProjectionCurrentState ToProtobuf(this ProjectionCurrentState state)
             => new()
             {
-                Type = (Events.Processing.Contracts.ProjectionCurrentStateType)state.Type,
+                Type = state.Type.ToProtobuf(),
                 State = state.State
             };
         public static IEnumerable<Events.Processing.Contracts.ProjectionCurrentState> ToProtobuf(this IEnumerable<ProjectionCurrentState> states)
             => states.Select(_ => _.ToProtobuf());
+
+        public static Events.Processing.Contracts.ProjectionCurrentStateType ToProtobuf(this ProjectionCurrentStateType type)
+            => type switch
+            {
+                ProjectionCurrentStateType.CreatedFromInitialState => Events.Processing.Contracts.ProjectionCurrentStateType.CreatedFromInitialState,
+                ProjectionCurrentStateType.Persisted => Events.Processing.Contracts.ProjectionCurrentStateType.Persisted
+            };
     }
 
 }
