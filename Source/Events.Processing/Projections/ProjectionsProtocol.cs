@@ -9,7 +9,6 @@ using Dolittle.Services.Contracts;
 using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using RuntimeProjectEventKeySelectorType = Dolittle.Runtime.Projections.Store.Definition.ProjectEventKeySelectorType;
 using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
@@ -25,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 new ProjectionDefinition(
                     arguments.ProjectionId.ToGuid(),
                     arguments.ScopeId.ToGuid(),
-                    arguments.Events.Select(_ => new RuntimeProjectionEventSelector(_.EventType.Id.ToGuid(), (RuntimeProjectEventKeySelectorType)_.KeySelector.Type, _.KeySelector.Expression)),
+                    arguments.Events.Select(_ => new RuntimeProjectionEventSelector(_.EventType.Id.ToGuid(), ToRuntime(_.KeySelector.Type), _.KeySelector.Expression)),
                     arguments.InitialState
                 ));
 
@@ -81,5 +80,13 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             }
             return ConnectArgumentsValidationResult.Ok;
         }
+
+        RuntimeProjectEventKeySelectorType ToRuntime(ProjectionEventKeySelectorType type)
+            => type switch
+            {
+                ProjectionEventKeySelectorType.EventSourceId => RuntimeProjectEventKeySelectorType.EventSourceId,
+                ProjectionEventKeySelectorType.PartitionId => RuntimeProjectEventKeySelectorType.PartitionId,
+                ProjectionEventKeySelectorType.Property => RuntimeProjectEventKeySelectorType.Property
+            };
     }
 }
