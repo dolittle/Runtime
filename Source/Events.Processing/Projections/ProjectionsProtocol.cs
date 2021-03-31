@@ -9,6 +9,7 @@ using Dolittle.Services.Contracts;
 using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using RuntimeProjectEventKeySelectorType = Dolittle.Runtime.Projections.Store.Definition.ProjectEventKeySelectorType;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {
