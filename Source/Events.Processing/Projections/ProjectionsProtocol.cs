@@ -87,7 +87,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             {
                 ProjectionEventKeySelectorType.EventSourceId => RuntimeProjectEventKeySelectorType.EventSourceId,
                 ProjectionEventKeySelectorType.PartitionId => RuntimeProjectEventKeySelectorType.PartitionId,
-                ProjectionEventKeySelectorType.Property => RuntimeProjectEventKeySelectorType.Property
+                ProjectionEventKeySelectorType.Property => RuntimeProjectEventKeySelectorType.Property,
+                _ => throw new UnknownProjectionKeySelectorType(type),
             };
     }
 }

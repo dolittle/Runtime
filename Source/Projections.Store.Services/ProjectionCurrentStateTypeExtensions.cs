@@ -19,7 +19,8 @@ namespace Dolittle.Runtime.Projections.Store.Services
             => type switch
             {
                 ProjectionCurrentStateType.CreatedFromInitialState => ContractsProjectionCurrentStateType.CreatedFromInitialState,
-                ProjectionCurrentStateType.Persisted => ContractsProjectionCurrentStateType.Persisted
+                ProjectionCurrentStateType.Persisted => ContractsProjectionCurrentStateType.Persisted,
+                _ => throw new UnknownProjectionCurrentStateType(type),
             };
     }
 }
