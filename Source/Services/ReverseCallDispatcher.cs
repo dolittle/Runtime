@@ -36,7 +36,6 @@ namespace Dolittle.Runtime.Services
         readonly ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new();
         readonly IAsyncStreamReader<TClientMessage> _clientStream;
         readonly IServerStreamWriter<TServerMessage> _serverStream;
-        readonly ServerCallContext _context;
         readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
@@ -56,21 +55,18 @@ namespace Dolittle.Runtime.Services
         /// </summary>
         /// <param name="clientStream">The <see cref="IAsyncStreamReader{TClientMessage}"/> to read client messages from.</param>
         /// <param name="serverStream">The <see cref="IServerStreamWriter{TServerMessage}"/> to write server messages to.</param>
-        /// <param name="context">The connection <see cref="ServerCallContext">context</see>.</param>
         /// <param name="messageConverter">The <see cref="IConvertReverseCallMessages{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
         /// <param name="logger">The <see cref="ILogger"/> to use.</param>
         public ReverseCallDispatcher(
             IAsyncStreamReader<TClientMessage> clientStream,
             IServerStreamWriter<TServerMessage> serverStream,
-            ServerCallContext context,
             IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             _clientStream = clientStream;
             _serverStream = serverStream;
-            _context = context;
             _messageConverter = messageConverter;
             _executionContextManager = executionContextManager;
             _logger = logger;
