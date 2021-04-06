@@ -1,8 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
@@ -64,24 +62,4 @@ namespace Dolittle.Runtime.Projections.Store.Services.Grpc
             return response;
         }
     }
-
-    public static class ProjectionCurrentStateExtensions
-    {
-        public static Events.Processing.Contracts.ProjectionCurrentState ToProtobuf(this ProjectionCurrentState state)
-            => new()
-            {
-                Type = state.Type.ToProtobuf(),
-                State = state.State
-            };
-        public static IEnumerable<Events.Processing.Contracts.ProjectionCurrentState> ToProtobuf(this IEnumerable<ProjectionCurrentState> states)
-            => states.Select(_ => _.ToProtobuf());
-
-        public static Events.Processing.Contracts.ProjectionCurrentStateType ToProtobuf(this ProjectionCurrentStateType type)
-            => type switch
-            {
-                ProjectionCurrentStateType.CreatedFromInitialState => Events.Processing.Contracts.ProjectionCurrentStateType.CreatedFromInitialState,
-                ProjectionCurrentStateType.Persisted => Events.Processing.Contracts.ProjectionCurrentStateType.Persisted
-            };
-    }
-
 }
