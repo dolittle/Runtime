@@ -26,7 +26,6 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
             dispatcher = new ReverseCallDispatcher<MyClientMessage, MyServerMessage, MyConnectArguments, MyConnectResponse, MyRequest, MyResponse>(
                 client_stream.Object,
                 server_stream.Object,
-                new CallContext(),
                 new protocol(),
                 execution_context_manager.Object,
                 Mock.Of<ILogger>());

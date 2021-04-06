@@ -42,7 +42,6 @@ namespace Dolittle.Runtime.Services
             => new ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
                 clientStream,
                 serverStream,
-                context,
                 messageConverter,
                 _executionContextManager,
                 _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
