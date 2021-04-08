@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Projections.Store.Services
                 _executionContextManager.CurrentFor(context);
                 _logger.GettingAllProjections(projection, scope);
                 var tryGetStates = await _getProjectionStates().TryGetAll(projection, scope, token).ConfigureAwait(false);
-                if (tryGetStates.Success) return new Try<IEnumerable<ProjectionCurrentState>>(true, tryGetStates.Result.Select(_ => new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, _)));
+                if (tryGetStates.Success) return new Try<IEnumerable<ProjectionCurrentState>>(true, tryGetStates.Result.Select(_ => new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, _.State, _.Key)));
                 if (tryGetStates.HasException) return tryGetStates.Exception;
                 return Array.Empty<ProjectionCurrentState>();
             }
@@ -75,9 +75,9 @@ namespace Dolittle.Runtime.Projections.Store.Services
                 _executionContextManager.CurrentFor(context);
                 _logger.GettingAllProjections(projection, scope);
                 var tryGetState = await _getProjectionStates().TryGet(projection, scope, key, token).ConfigureAwait(false);
-                if (tryGetState.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, tryGetState.Result);
+                if (tryGetState.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, tryGetState.Result, key);
                 if (tryGetState.HasException) return tryGetState.Exception;
-                return await GetInitialState(projection, scope, token).ConfigureAwait(false);
+                return await GetInitialState(projection, scope, key, token).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -86,10 +86,10 @@ namespace Dolittle.Runtime.Projections.Store.Services
             }
         }
 
-        async Task<Try<ProjectionCurrentState>> GetInitialState(ProjectionId projection, ScopeId scope, CancellationToken token)
+        async Task<Try<ProjectionCurrentState>> GetInitialState(ProjectionId projection, ScopeId scope, ProjectionKey key, CancellationToken token)
         {
             var tryGetDefinition = await _getProjectionDefinitions().TryGet(projection, scope, token).ConfigureAwait(false);
-            if (tryGetDefinition.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, tryGetDefinition.Result.InititalState);
+            if (tryGetDefinition.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, tryGetDefinition.Result.InititalState, key);
             if (tryGetDefinition.HasException) return tryGetDefinition.Exception;
             return new FailedToGetProjectionDefinition(projection, scope);
         }

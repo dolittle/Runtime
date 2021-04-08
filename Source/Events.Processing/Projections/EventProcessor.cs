@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using Dolittle.Runtime.Projections.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
@@ -90,7 +91,6 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             }
 
             request.Event = CreateStreamEvent(@event, partitionId);
-            request.Key = projectionKey;
             request.CurrentState = await GetCurrentState(@projectionKey, token).ConfigureAwait(false);
 
             var response = await _dispatcher.Call(request, token).ConfigureAwait(false);
@@ -106,8 +106,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             var tryGetState = await _projectionStates.TryGet(_projectionDefinition.Projection, Scope, projectionKey, token).ConfigureAwait(false);
             return tryGetState.Success switch
             {
-                true => new ProjectionCurrentState { Type = ProjectionCurrentStateType.Persisted, State = tryGetState.Result },
-                false => new ProjectionCurrentState { Type = ProjectionCurrentStateType.CreatedFromInitialState, State = _projectionDefinition.InititalState },
+                true => new ProjectionCurrentState { Type = ProjectionCurrentStateType.Persisted, State = tryGetState.Result, Key = projectionKey },
+                false => new ProjectionCurrentState { Type = ProjectionCurrentStateType.CreatedFromInitialState, State = _projectionDefinition.InititalState, Key = projectionKey },
             };
         }
 
