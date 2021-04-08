@@ -10,5 +10,5 @@ namespace Dolittle.Runtime.Projections.Store.Services
     /// </summary>
     /// <param name="Type">The type of the state.</param>
     /// <param name="State">The state.</param>
-    public record ProjectionCurrentState(ProjectionCurrentStateType Type, ProjectionState State);
+    public record ProjectionCurrentState(ProjectionCurrentStateType Type, ProjectionState State, ProjectionKey Key);
 }

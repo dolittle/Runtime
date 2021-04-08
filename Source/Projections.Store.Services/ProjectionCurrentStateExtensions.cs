@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using ContractsProjectionCurrentState = Dolittle.Runtime.Events.Processing.Contracts.ProjectionCurrentState;
+using ContractsProjectionCurrentState = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentState;
 
 namespace Dolittle.Runtime.Projections.Store.Services
 {
@@ -21,7 +21,8 @@ namespace Dolittle.Runtime.Projections.Store.Services
             => new()
             {
                 Type = state.Type.ToProtobuf(),
-                State = state.State
+                State = state.State,
+                Key = state.Key
             };
 
         /// <summary>

@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
                 .create(
                     "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",
                     "5e1c13f3-4af4-4335-93ef-7612b67f0f67")
-                .with_selector(new ProjectionEventSelector(event_type, ProjectEventKeySelectorType.EventSourceId))
+                .with_selector(ProjectionEventSelector.EventSourceId(event_type))
                 .build();
 
             definitions
@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
                 {
                     Events = new[]
                     {
-                        new ProjectionEventSelector(event_type, ProjectEventKeySelectorType.PartitionId)
+                        ProjectionEventSelector.PartitionId(event_type)
                     }
                 }));
         };

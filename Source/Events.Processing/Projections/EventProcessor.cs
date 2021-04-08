@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using Dolittle.Runtime.Projections.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
@@ -90,13 +91,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             }
 
             request.Event = CreateStreamEvent(@event, partitionId);
-            request.Key = projectionKey;
             request.CurrentState = await GetCurrentState(@projectionKey, token).ConfigureAwait(false);
 
             var response = await _dispatcher.Call(request, token).ConfigureAwait(false);
             return await (response switch
             {
-                { Failure: null } => HandleResponse(projectionKey, response.NextState, token),
+                { Failure: null } => HandleResponse(projectionKey, response, token),
                 _ => Task.FromResult<IProcessingResult>(new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan()))
             }).ConfigureAwait(false);
         }
@@ -106,17 +106,17 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             var tryGetState = await _projectionStates.TryGet(_projectionDefinition.Projection, Scope, projectionKey, token).ConfigureAwait(false);
             return tryGetState.Success switch
             {
-                true => new ProjectionCurrentState { Type = ProjectionCurrentStateType.Persisted, State = tryGetState.Result },
-                false => new ProjectionCurrentState { Type = ProjectionCurrentStateType.CreatedFromInitialState, State = _projectionDefinition.InititalState },
+                true => new ProjectionCurrentState { Type = ProjectionCurrentStateType.Persisted, State = tryGetState.Result, Key = projectionKey },
+                false => new ProjectionCurrentState { Type = ProjectionCurrentStateType.CreatedFromInitialState, State = _projectionDefinition.InititalState, Key = projectionKey },
             };
         }
 
-        async Task<IProcessingResult> HandleResponse(ProjectionKey key, ProjectionNextState nextState, CancellationToken cancellationToken)
+        async Task<IProcessingResult> HandleResponse(ProjectionKey key, ProjectionResponse response, CancellationToken cancellationToken)
         {
-            var successfulUpdate = await (nextState.Type switch
+            var successfulUpdate = await (response.ResponseCase switch
             {
-                ProjectionNextStateType.Replace => TryReplace(key, nextState.Value, cancellationToken),
-                ProjectionNextStateType.Delete => TryRemove(key, cancellationToken),
+                ProjectionResponse.ResponseOneofCase.Replace => TryReplace(key, response.Replace.State, cancellationToken),
+                ProjectionResponse.ResponseOneofCase.Delete => TryRemove(key, cancellationToken),
                 _ => Task.FromResult(false)
             }).ConfigureAwait(false);
 
