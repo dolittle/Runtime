@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             var response = await _dispatcher.Call(request, token).ConfigureAwait(false);
             return await (response switch
             {
-                { Failure: null } => HandleResponse(projectionKey, response.NextState, token),
+                { Failure: null } => HandleResponse(projectionKey, response, token),
                 _ => Task.FromResult<IProcessingResult>(new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan()))
             }).ConfigureAwait(false);
         }
@@ -111,12 +111,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             };
         }
 
-        async Task<IProcessingResult> HandleResponse(ProjectionKey key, ProjectionNextState nextState, CancellationToken cancellationToken)
+        async Task<IProcessingResult> HandleResponse(ProjectionKey key, ProjectionResponse response, CancellationToken cancellationToken)
         {
-            var successfulUpdate = await (nextState.Type switch
+            var successfulUpdate = await (response.ResponseCase switch
             {
-                ProjectionNextStateType.Replace => TryReplace(key, nextState.Value, cancellationToken),
-                ProjectionNextStateType.Delete => TryRemove(key, cancellationToken),
+                ProjectionResponse.ResponseOneofCase.Replace => TryReplace(key, response.Replace.State, cancellationToken),
+                ProjectionResponse.ResponseOneofCase.Delete => TryRemove(key, cancellationToken),
                 _ => Task.FromResult(false)
             }).ConfigureAwait(false);
 
