@@ -28,9 +28,38 @@ It's going to be a little tricky to get these read models right the first time a
 But don't worry, since they are purely computed values you are free to throw them away or recreate lost ones at any point in time without loosing any data.
 So feel free to experiment and iterate until you hit the sweet-spot.
 
+
+
+Joel:
+A read model is a model for holding data. It's essentially a [Data transfer object](https://en.wikipedia.org/wiki/Data_transfer_object) (DTO) specialized for reading. A read models doesn't modify data, only holds it. Read Models are used when you want to show data or build a view.
+
+
+The [Runtime]({{< ref "overview" >}}) stores the read models into a read model store
+
+
+
+
 ## Projections
 Once you've decided on the structure for a read model; you're halfway there.
 The next step is to populate the data structure with information from the event store.
 This is exactly and completely what projections are for.
 
+A Projection is a special type of [Event Handler]({{< ref "event_handlers_and_filters" >}}), that only deals with updating or deleting [Read Models]({{< ref "#read-model" >}}) based on [Events]({{< ref "events" >}}) that it handles. The read model instances are managed by the [Runtime]({{< ref "overview" >}}) in a read model store, where they are fetched from whenever needed. This is useful, for when you want to create views from events, but don't want to manually manage the read model database.
 
+
+This is a simplified structure of a projection:
+```csharp
+Projection {
+ProjectionId Guid
+Scope Guid
+ReadModel type
+EventTypes EventType[]
+}
+```
+
+
+For the whole structure of a projections as defined in protobuf, please check [Contracts](https://github.com/dolittle/Contracts/tree/master/Source/Runtime/Projections).
+
+
+
+A projection is composed of a [Filter]({{< ref "event_handlers_and_filters#filters" >}}) and a
