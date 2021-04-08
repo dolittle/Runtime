@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
                 .create(
                     "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",
                     "5e1c13f3-4af4-4335-93ef-7612b67f0f67")
-                .with_selector(new ProjectionEventSelector("fde86d09-1c24-40ae-afc9-d85100cabdd9", ProjectEventKeySelectorType.EventSourceId))
+                .with_selector(ProjectionEventSelector.EventSourceId("fde86d09-1c24-40ae-afc9-d85100cabdd9"))
                 .build();
 
             definitions
@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
                 {
                     Events = new[]
                     {
-                        new ProjectionEventSelector("d773ce48-409b-4352-b22b-8794053229a0", ProjectEventKeySelectorType.EventSourceId)
+                        ProjectionEventSelector.EventSourceId("d773ce48-409b-4352-b22b-8794053229a0")
                     }
                 }));
         };
