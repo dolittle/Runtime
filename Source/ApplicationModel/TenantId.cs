@@ -31,5 +31,11 @@ namespace Dolittle.Runtime.ApplicationModel
         /// </summary>
         /// <param name="tenantId"><see cref="Guid"/> representation of a tenant identifier.</param>
         public static implicit operator TenantId(Guid tenantId) => new(tenantId);
+
+        /// <summary>
+        /// Implicitly convert from <see cref="string"/> to <see cref="TenantId"/>.
+        /// </summary>
+        /// <param name="tenantId"><see cref="string"/> representation of a tenant identifier.</param>
+        public static implicit operator TenantId(string tenantId) => new(Guid.Parse(tenantId));
     }
 }

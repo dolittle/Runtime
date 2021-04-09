@@ -22,6 +22,7 @@
         <ProjectReference Include="../Services/Services.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+        <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
         <ProjectReference Include="../Tenancy/Tenancy.csproj" />
     </ItemGroup>
 </Project>

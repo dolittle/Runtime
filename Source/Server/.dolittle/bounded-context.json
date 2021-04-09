@@ -3,17 +3,17 @@
     "boundedContext": "f39b1f61-d360-4675-b859-53c05c87c0e6",
     "boundedContextName": "[UNSET]",
     "resources": {
-      "readModels": {
-        "production": "MongoDB",
-        "development": "MongoDB"
-      },
-      "eventStore": {
-        "production": "MongoDB",
-        "development": "MongoDB"
-      }
+        "projections": {
+            "production": "MongoDB",
+            "development": "MongoDB"
+        },
+        "eventStore": {
+            "production": "MongoDB",
+            "development": "MongoDB"
+        }
     },
-      "core": {
-      "language": "csharp"
+    "core": {
+        "language": "csharp"
     },
     "interaction": []
-  }
+}

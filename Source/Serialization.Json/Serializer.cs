@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Serialization.Json
 
         readonly IInstancesOf<ICanProvideConverters> _converterProviders;
 
-        readonly List<JsonConverter> _converters = new List<JsonConverter>();
+        readonly List<JsonConverter> _converters = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Serializer"/> class.
@@ -67,37 +67,37 @@ namespace Dolittle.Runtime.Serialization.Json
             object instance;
 
             if (type.HasDefaultConstructor())
-                {
+            {
                 try
-                    {
+                {
                     var value = serializer.Deserialize(reader, type);
                     if (value == null || value.GetType() != type)
-                        {
+                    {
                         var converter = serializer.Converters.SingleOrDefault(c => c.CanConvert(type) && c.CanRead);
                         if (converter != null) return converter.ReadJson(reader, type, null, serializer);
-                        }
-                    else
-                        {
-                        return value;
-                        }
                     }
-                catch { }
+                    else
+                    {
+                        return value;
+                    }
                 }
+                catch { }
+            }
 
             if (type.GetTypeInfo().IsValueType ||
                 type.HasInterface<IEnumerable>())
-                {
+            {
                 instance = serializer.Deserialize(reader, type);
-                }
+            }
             else
-                {
+            {
                 instance = CreateInstanceOf(type, json, out var propertiesMatched);
 
                 DeserializeRemaindingProperties(type, serializer, reader, instance, propertiesMatched);
-                }
+            }
 
             return instance;
-            }
+        }
 
         /// <inheritdoc/>
         public void FromJson(object instance, string json, ISerializationOptions options = null)
@@ -206,7 +206,7 @@ namespace Dolittle.Runtime.Serialization.Json
 
             propertiesMatched = propertiesFound;
             return constructor.Invoke(parameterInstances.ToArray());
-            }
+        }
 
         void DeserializeRemaindingProperties(Type type, JsonSerializer serializer, JsonTextReader reader, object instance, IEnumerable<string> propertiesMatched)
         {

@@ -9,22 +9,17 @@ namespace Dolittle.Runtime.Events.Processing
 {
     public static class committed_events
     {
-        public static CommittedEvent single() => new CommittedEvent(
-                EventLogSequenceNumber.Initial,
-                DateTimeOffset.UtcNow,
-                EventSourceId.New(),
-                execution_contexts.create(),
-                new Artifact(ArtifactId.New(), ArtifactGeneration.First),
-                false,
-                "{\"something\":42}");
+        public static CommittedEvent single() => single(EventLogSequenceNumber.Initial);
 
-        public static CommittedEvent single(uint event_log_sequence_number) => new CommittedEvent(
+        public static CommittedEvent single(EventLogSequenceNumber event_log_sequence_number) => single(event_log_sequence_number, "{\"something\":42}");
+        public static CommittedEvent single(string content) => single(EventLogSequenceNumber.Initial, content);
+        public static CommittedEvent single(EventLogSequenceNumber event_log_sequence_number, string content) => new(
                 event_log_sequence_number,
                 DateTimeOffset.UtcNow,
                 EventSourceId.New(),
                 execution_contexts.create(),
                 new Artifact(ArtifactId.New(), ArtifactGeneration.First),
                 false,
-                "{\"something\":42}");
+                content);
     }
 }

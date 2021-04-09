@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned
 {
     /// <summary>
     /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
@@ -43,10 +43,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
             var request = new FilterEventRequest
-                {
-                    Event = @event.ToProtobuf(),
-                    ScopeId = Scope.ToProtobuf()
-                };
+            {
+                Event = @event.ToProtobuf(),
+                ScopeId = Scope.ToProtobuf()
+            };
 
             return Filter(request, cancellationToken);
         }
@@ -55,11 +55,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
             var request = new FilterEventRequest
-                {
-                    Event = @event.ToProtobuf(),
-                    ScopeId = Scope.ToProtobuf(),
-                    RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
-                };
+            {
+                Event = @event.ToProtobuf(),
+                ScopeId = Scope.ToProtobuf(),
+                RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+            };
 
             return Filter(request, cancellationToken);
         }
@@ -68,10 +68,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
             return response switch
-                {
-                    { Failure: null } => new SuccessfulFiltering(response.IsIncluded),
-                    _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
-                };
+            {
+                { Failure: null } => new SuccessfulFiltering(response.IsIncluded),
+                _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
+            };
         }
     }
 }

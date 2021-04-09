@@ -21,5 +21,11 @@ namespace Dolittle.Runtime.Events.Store
         /// </summary>
         /// <param name="scopeId">ScopeId as <see cref="Guid"/>.</param>
         public static implicit operator ScopeId(Guid scopeId) => new(scopeId);
+
+        /// <summary>
+        /// Implicitly convert from a <see cref="string"/> to an <see cref="ScopeId"/>.
+        /// </summary>
+        /// <param name="scopeId">ScopeId as <see cref="string"/>.</param>
+        public static implicit operator ScopeId(string scopeId) => new(Guid.Parse(scopeId));
     }
 }

@@ -6,7 +6,13 @@
             ],
             "database": "event_store",
             "maxConnectionPoolSize": 1000
+        },
+        "projections": {
+            "servers": [
+                "localhost"
+            ],
+            "database": "projections",
+            "maxConnectionPoolSize": 1000
         }
     }
 }
-

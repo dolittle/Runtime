@@ -58,13 +58,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 LogLevel.Warning,
                 new EventId(342051795, nameof(MultipleValidatorsForFilter)),
                 "There are multiple validators that can validate filter definition of type: {FilterDefinitionType}:\n{ImplementationTypes}\nUsing the first validator");
-        
+
         static readonly Action<ILogger, Guid, Guid, Exception> _validatingFilterForTenant = LoggerMessage
             .Define<Guid, Guid>(
                 LogLevel.Debug,
                 new EventId(1631987633, nameof(ValidatingFilterForTenant)),
                 "Validating filter: {Filter} for tenant: {Tenant}");
-        
+
 
         static readonly Action<ILogger, Guid, Exception> _filterIsInvalid = LoggerMessage
             .Define<Guid>(
@@ -192,7 +192,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         internal static void ErrorWhileRegisteringFilter(this ILogger logger, Exception ex, StreamId filterId)
             => _errorWhileRegisteringFilter(logger, filterId, ex);
-        
+
         internal static void FilterAlreadyRegistered(this ILogger logger, StreamId filterId)
             => _filterAlreadyRegistered(logger, filterId, null);
 
@@ -225,5 +225,5 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         internal static void NoPersistedFilterDefinition(this ILogger logger, EventProcessorId filter, TenantId tenant)
             => _noPersistedFilterDefinition(logger, filter, tenant, null);
-   }
+    }
 }
