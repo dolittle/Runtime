@@ -1,3 +1,29 @@
+# [5.5.0] - 2021-4-9 [PR: #502](https://github.com/dolittle/Runtime/pull/502)
+## Summary
+
+Adds Projections, that are a special type of event handler dealing with read models. Each Projection deals with one read model and mutates it's properties. The read models are saved into the Runtime's projection store. Any changes to the Projection causes it to be fully replayed.
+
+### Added
+
+- Grpc service for getting projections
+- REST (WebAPI) service for getting projections
+- Grpc service for registering and processing projections
+- A MongoDB store for projections - stores the definitions in `projection-definitions` and the projections in `projection-projectionid` collections. It's defined in the `resources.json`:
+```json
+"projections": {
+    "servers": [
+        "localhost"
+    ],
+    "database": "projections",
+    "maxConnectionPoolSize": 1000
+}
+```
+
+### Changed
+
+- Adhere to latest protobuf contracts
+
+
 # [5.4.2] - 2021-2-4 [PR: #500](https://github.com/dolittle/Runtime/pull/500)
 ## Summary
 
