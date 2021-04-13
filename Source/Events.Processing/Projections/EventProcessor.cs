@@ -14,6 +14,8 @@ using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using System.Linq;
+using ProjectionCurrentState = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentState;
+using ProjectionCurrentStateType = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentStateType;
 
 namespace Dolittle.Runtime.Events.Processing.Projections
 {

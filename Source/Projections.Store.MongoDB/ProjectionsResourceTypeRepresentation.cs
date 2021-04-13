@@ -3,6 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
+using Dolittle.Runtime.Projections.Store.MongoDB.State;
+using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.ResourceTypes;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB
@@ -12,7 +16,9 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
     {
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
-            // { typeof(IProjections), typeof(EventStore) },
+            { typeof(IProjections), typeof(Projections) },
+            { typeof(IProjectionDefinitions), typeof(ProjectionDefinitions) },
+            { typeof(IProjectionStates), typeof(ProjectionStates) }
         };
 
         /// <inheritdoc/>

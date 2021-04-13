@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Projections.Store.State;
 using ContractsProjectionCurrentStateType = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentStateType;
 
 namespace Dolittle.Runtime.Projections.Store.Services

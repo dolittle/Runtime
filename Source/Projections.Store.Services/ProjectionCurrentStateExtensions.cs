@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.Projections.Store.State;
 using ContractsProjectionCurrentState = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentState;
 
 namespace Dolittle.Runtime.Projections.Store.Services

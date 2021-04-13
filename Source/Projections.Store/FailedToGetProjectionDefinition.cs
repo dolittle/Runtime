@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 
-namespace Dolittle.Runtime.Projections.Store.Services
+namespace Dolittle.Runtime.Projections.Store
 {
     /// <summary>
     /// Exception that gets thrown when a <see cref="ProjectionDefinition" /> could not be retrieved.
