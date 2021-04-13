@@ -3,10 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Events.Store.EventHorizon;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer
+namespace Dolittle.Runtime.Events.Store.EventHorizon
 {
     /// <summary>
     /// Defines a system that can write events from an event horizon.

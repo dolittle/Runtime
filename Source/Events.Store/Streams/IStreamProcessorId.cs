@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Defines the basis of a unique identifier of a Stream Processor.

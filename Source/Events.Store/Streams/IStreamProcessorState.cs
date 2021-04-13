@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Defines the basis for the state of a <see cref="AbstractScopedStreamProcessor" />.

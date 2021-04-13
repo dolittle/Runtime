@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Machine.Specifications;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating
 {

@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Store.Streams
 {
     /// <summary>
     /// Defines a system repository for <see cref="IStreamProcessorState" >stream processor states</see>.

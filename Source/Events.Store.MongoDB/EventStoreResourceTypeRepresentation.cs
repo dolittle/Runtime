@@ -3,8 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Runtime.EventHorizon.Consumer;
-using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
@@ -20,14 +19,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
             { typeof(IEventStore), typeof(EventStore) },
-            { typeof(IEventStoreConnection), typeof(EventStoreConnection) },
-            { typeof(IStreamProcessorStateRepository), typeof(StreamProcessorStateRepository) },
-            { typeof(IStreamDefinitionRepository), typeof(StreamDefinitionRepository) },
             { typeof(IEventFetchers), typeof(EventFetchers) },
+            { typeof(IStreamDefinitionRepository), typeof(StreamDefinitionRepository) },
+            { typeof(IStreamProcessorStateRepository), typeof(StreamProcessorStateRepository) },
             { typeof(IWriteEventsToStreams), typeof(EventsToStreamsWriter) },
-            { typeof(IWriteEventsToStreamCollection), typeof(EventsToStreamsWriter) },
             { typeof(IWriteEventHorizonEvents), typeof(EventHorizonEventsWriter) },
             { typeof(IWriteEventsToPublicStreams), typeof(EventsToPublicStreamsWriter) },
+            { typeof(IWriteEventsToStreamCollection), typeof(EventsToStreamsWriter) },
+            { typeof(IEventStoreConnection), typeof(EventStoreConnection) },
         };
 
         /// <inheritdoc/>
