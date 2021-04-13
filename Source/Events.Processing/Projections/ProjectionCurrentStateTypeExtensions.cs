@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Projections.Store.State;
 using ContractsProjectionCurrentStateType = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentStateType;
 
-namespace Dolittle.Runtime.Projections.Store.Services
+namespace Dolittle.Runtime.Events.Processing.Projections
 {
     /// <summary>
     /// Extensions for <see cref="ProjectionCurrentStateType"/>.

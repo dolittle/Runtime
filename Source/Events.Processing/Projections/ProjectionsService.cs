@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         readonly IInitiateReverseCallServices _reverseCallServices;
         readonly IProjectionsProtocol _protocol;
         readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
-        readonly FactoryFor<IProjectionStates> _getProjectionStates;
+        readonly FactoryFor<IProjectionStore> _getProjectionStore;
         readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
         readonly FactoryFor<IResilientStreamProcessorStateRepository> _getStreamProcessorStates;
         readonly IProjectionKeys _projectionKeys;
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
         /// <param name="protocol">The <see cref="IProjectionsProtocol" />.</param>
         /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants" />.</param>
-        /// <param name="getProjectionStates">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionStates" />.</param>
+        /// <param name="getProjectionStore">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionStates" />.</param>
         /// <param name="getProjectionDefinitions">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionDefinitions" />.</param>
         /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> for <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
@@ -65,7 +65,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             IInitiateReverseCallServices reverseCallServices,
             IProjectionsProtocol protocol,
             ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
-            FactoryFor<IProjectionStates> getProjectionStates,
+            FactoryFor<IProjectionStore> getProjectionStore,
             FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
             FactoryFor<IResilientStreamProcessorStateRepository> getStreamProcessorStates,
             IProjectionKeys projectionKeys,
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _reverseCallServices = reverseCallServices;
             _protocol = protocol;
             _projectionDefinitionComparer = projectionDefinitionComparer;
-            _getProjectionStates = getProjectionStates;
+            _getProjectionStore = getProjectionStore;
             _getProjectionDefinitions = getProjectionDefinitions;
             _projectionKeys = projectionKeys;
             _onAllTenants = onAllTenants;
@@ -111,9 +111,11 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 arguments,
                 () => new EventProcessor(
                     arguments.ProjectionDefinition,
-                    dispatcher,
-                    _getProjectionStates(),
+                    _getProjectionStore(),
                     _projectionKeys,
+                    new Projection(
+                        arguments.ProjectionDefinition,
+                        dispatcher),
                     _loggerFactory.CreateLogger<EventProcessor>()),
                 cts.Token);
 
@@ -241,7 +243,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 {
                     _logger.ResettingProjections(arguments, tenant, comparisonResult.FailureReason);
                     await ResetStreamProcessorState(arguments.ProjectionDefinition, token).ConfigureAwait(false);
-                    if (!await _getProjectionStates().TryDrop(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token).ConfigureAwait(false))
+                    if (!await _getProjectionStore().TryDrop(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token).ConfigureAwait(false))
                     {
                         throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
                     }

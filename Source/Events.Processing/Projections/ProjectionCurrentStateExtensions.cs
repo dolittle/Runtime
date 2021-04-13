@@ -6,7 +6,7 @@ using System.Linq;
 using Dolittle.Runtime.Projections.Store.State;
 using ContractsProjectionCurrentState = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentState;
 
-namespace Dolittle.Runtime.Projections.Store.Services
+namespace Dolittle.Runtime.Events.Processing.Projections
 {
     /// <summary>
     /// Extensions for <see cref="ProjectionCurrentState"/>.

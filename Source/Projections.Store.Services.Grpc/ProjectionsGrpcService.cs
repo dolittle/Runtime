@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Projections.Contracts.Projections;

@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Projections.Store.State;
 
-namespace Dolittle.Runtime.Projections.Store.Services
+namespace Dolittle.Runtime.Events.Processing.Projections
 {
     /// <summary>
     /// Exception that gets thrown when attempting to convert a <see cref="ProjectionCurrentStateType"/> that does not have a known protobuf representation.
