@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Projections.Store
                 if (tryGetState.HasException) return tryGetState.Exception;
 
                 var tryGetDefinition = await _projectionDefinitions.TryGet(projection, scope, token).ConfigureAwait(false);
-                if (tryGetState.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, tryGetDefinition.Result.InititalState, key);
+                if (tryGetDefinition.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, tryGetDefinition.Result.InititalState, key);
                 if (tryGetDefinition.HasException) return tryGetDefinition.Exception;
 
                 return new FailedToGetProjectionDefinition(projection, scope);

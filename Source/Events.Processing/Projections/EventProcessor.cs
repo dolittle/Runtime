@@ -84,7 +84,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         }
 
         bool ShouldProcessEvent(CommittedEvent @event)
-            => !_projectionDefinition.Events.Select(_ => _.EventType).Contains(@event.Type.Id);
+            => _projectionDefinition.Events.Select(_ => _.EventType).Contains(@event.Type.Id);
 
         async Task<Try<ProjectionCurrentState>> TryGetCurrentState(CommittedEvent @event, PartitionId partitionId, CancellationToken token)
         {
