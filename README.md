@@ -28,6 +28,7 @@ The Runtime is the backend of our system and manages connections from the SDKs a
 
 | Platform | Version |
 | ------- | ------- |
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/09834768d3034d2eae6aa322bd3d384b)](https://app.codacy.com/gh/dolittle/Runtime?utm_source=github.com&utm_medium=referral&utm_content=dolittle/Runtime&utm_campaign=Badge_Grade_Settings)
 | Docker | [![Docker](https://img.shields.io/docker/v/dolittle/runtime?label=dolittle%2Fruntime&logo=docker&sort=semver)](https://hub.docker.com/r/dolittle/runtime) |
 
 ## Building
