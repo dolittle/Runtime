@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnalyseParams>
-    <Output>AppCoverageReport.html</Output>
-    <ReportType>html</ReportType>
+    <Output>CoverageReport.xml</Output>
+    <ReportType>XML</ReportType>
     <Filters>
     <ExcludeFilters>
         <FilterEntry>
