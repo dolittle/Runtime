@@ -23,11 +23,15 @@ jobs:
         run: dotnet test --no-build --configuration Release
       - name: Create coverage report
         run: dotnet dotcover test --dcXML=coverage.xml
-      - name: Run codacy-coverage-reporter
-        uses: codacy/codacy-coverage-reporter-action@v0.2.1
-        with:
-          project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
-          coverage-reports: CoverageReport.xml
+      # - name: Run codacy-coverage-reporter
+      #   uses: codacy/codacy-coverage-reporter-action@v0.2.1
+      #   with:
+      #     project-token: ${{ secrets.CODACY_PROJECT_TOKEN }}
+      #     coverage-reports: CoverageReport.xml
+      - name: Report code coverage
+        env: # Or as an environment variable
+          CODACY_PROJECT_TOKEN: ${{ secrets.CODACY_PROJECT_TOKEN }}
+        run: bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r CoverageReport.xml
 
   build-prod-docker-image:
     name: Build Production Docker Image
