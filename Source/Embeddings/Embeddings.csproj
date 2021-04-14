@@ -6,8 +6,9 @@
     <RootNamespace>Dolittle.Runtime.Embeddings</RootNamespace>
   </PropertyGroup>
 
-
   <ItemGroup>
+    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Events.Store/Events.Store.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
   </ItemGroup>
-
 </Project>
