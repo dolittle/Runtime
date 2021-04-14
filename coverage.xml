@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnalyseParams>
+    <Output>AppCoverageReport.html</Output>
+    <ReportType>html</ReportType>
+    <Filters>
+    <ExcludeFilters>
+        <FilterEntry>
+        <ModuleMask>*.Specs</ModuleMask>
+        </FilterEntry>
+    </ExcludeFilters>
+    </Filters>
+    <Scope>
+        <ScopeEntry>Source/**/*.dll</ScopeEntry>
+    </Scope>
+</AnalyseParams>
+
