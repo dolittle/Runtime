@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <AnalyseParams>
     <Output>CoverageReport.xml</Output>
-    <ReportType>XML</ReportType>
+    <ReportType>DetailedXml</ReportType>
     <Filters>
     <ExcludeFilters>
         <FilterEntry>
