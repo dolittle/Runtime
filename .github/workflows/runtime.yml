@@ -22,7 +22,7 @@ jobs:
       - name: Test
         run: dotnet test --no-build --configuration Release
       - name: Create coverage report
-        run: dotnet dotcover test --no-build --dcXML=coverage.xml
+        run: dotnet dotcover test --dcXML=coverage.xml
       - name: Run codacy-coverage-reporter
         uses: codacy/codacy-coverage-reporter-action@v0.2.1
         with:
