@@ -348,13 +348,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger.RegisteringStreamProcessorForFilter(filterDefinition.TargetStream, filterDefinition.SourceStream);
             try
             {
-                return (_streamProcessors.TryRegister(
+                if (_streamProcessors.TryRegister(
                     scopeId,
                     filterDefinition.TargetStream.Value,
                     new EventLogStreamDefinition(),
                     () => getFilterProcessor(),
                     cancellationToken,
-                    out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
+                    out var outputtedFilterStreamProcessor))
+                {
+                    return outputtedFilterStreamProcessor;
+                }
+
+                return Try<StreamProcessor>.Failed();
             }
             catch (Exception ex)
             {

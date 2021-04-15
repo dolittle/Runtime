@@ -207,7 +207,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 do
                 {
-                    Try<StreamEvent> tryGetEvent = false;
+                    var tryGetEvent = Try<StreamEvent>.Failed();
                     while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested)
                     {
                         _currentState = await Catchup(_currentState, cancellationToken).ConfigureAwait(false);

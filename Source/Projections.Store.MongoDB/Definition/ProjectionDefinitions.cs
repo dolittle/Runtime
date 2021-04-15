@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition
                                             .Find(CreateIdFilter(projection))
                                             .Project(_ => Tuple.Create(_.InitialStateRaw, _.EventSelectors))
                                             .SingleOrDefaultAsync(token).ConfigureAwait(false);
-                        if (findResult == null) return false;
+                        if (findResult == null) return Try<Store.Definition.ProjectionDefinition>.Failed();
                         var (initialState, eventSelectors) = findResult;
                         return _definitionConverter.ToRuntime(projection, scope, eventSelectors, initialState);
                     },

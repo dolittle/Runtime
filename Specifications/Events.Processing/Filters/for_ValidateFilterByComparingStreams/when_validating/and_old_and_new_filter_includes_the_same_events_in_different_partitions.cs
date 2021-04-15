@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var @event = committed_events.single(0);
             stream_processor_states
                 .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<IStreamProcessorState>>((true, new StreamProcessorState(1, DateTimeOffset.UtcNow))));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(new StreamProcessorState(1, DateTimeOffset.UtcNow))));
             add_event_to_event_log(1);
             add_event_to_filtered_stream(1, Guid.NewGuid());
             filter_processor

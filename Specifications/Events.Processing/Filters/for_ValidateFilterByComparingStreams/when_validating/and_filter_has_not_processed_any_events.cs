@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
         {
             stream_processor_states
                 .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<IStreamProcessorState>>((true, StreamProcessorState.New)));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(StreamProcessorState.New)));
         };
 
         Because of = () => result = validator.Validate(filter_definition, filter_processor.Object, CancellationToken.None).GetAwaiter().GetResult();

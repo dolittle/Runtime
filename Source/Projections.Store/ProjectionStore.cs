@@ -72,9 +72,7 @@ namespace Dolittle.Runtime.Projections.Store
                 _logger.GettingAllProjections(projection, scope);
 
                 var tryGetStates = await _projectionStates.TryGetAll(projection, scope, token).ConfigureAwait(false);
-                if (tryGetStates.Success) return new Try<IEnumerable<ProjectionCurrentState>>(true, tryGetStates.Result.Select(_ => new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, _.State, _.Key)));
-                if (tryGetStates.HasException) return tryGetStates.Exception;
-                return Array.Empty<ProjectionCurrentState>();
+                return tryGetStates.Select(_ => _.Select(_ => new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, _.State, _.Key)));
             }
             catch (Exception ex)
             {

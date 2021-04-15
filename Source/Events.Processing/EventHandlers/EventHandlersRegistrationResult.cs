@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         public EventHandlersRegistrationResult(EventProcessorRegistrationResult eventProcessorRegistrationResult)
         {
             EventProcessorRegistrationResult = eventProcessorRegistrationResult;
-            TryRegisterFilter = false;
+            TryRegisterFilter = Try<FilterRegistrationResult>.Failed();
         }
 
         /// <summary>

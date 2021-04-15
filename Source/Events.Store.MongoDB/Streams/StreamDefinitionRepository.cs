@@ -56,8 +56,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 var streamDefinition = await streamDefinitions.Find(
                     Builders<StreamDefinition>.Filter.Eq(_ => _.StreamId, stream.Value))
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
-                if (streamDefinition != default) return new Try<IStreamDefinition>(true, streamDefinition.AsRuntimeRepresentation());
-                return new Try<IStreamDefinition>(false, null);
+                if (streamDefinition != default) return Try<IStreamDefinition>.Succeeded(streamDefinition.AsRuntimeRepresentation());
+                return Try<IStreamDefinition>.Failed();
             }
             catch (MongoWaitQueueFullException ex)
             {

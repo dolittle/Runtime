@@ -27,8 +27,8 @@ namespace Dolittle.Runtime.Events.Processing
 
         public Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
         {
-            if (states.ContainsKey(streamProcessorId as StreamProcessorId)) return Task.FromResult(new Try<IStreamProcessorState>(true, states[streamProcessorId as StreamProcessorId]));
-            else return Task.FromResult(new Try<IStreamProcessorState>(false, null));
+            if (states.ContainsKey(streamProcessorId as StreamProcessorId)) return Task.FromResult(Try<IStreamProcessorState>.Succeeded(states[streamProcessorId as StreamProcessorId]));
+            else return Task.FromResult(Try<IStreamProcessorState>.Failed());
         }
     }
 }

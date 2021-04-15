@@ -278,13 +278,18 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _logger.RegisteringStreamProcessorForFilter(eventHandlerId);
             try
             {
-                return (_streamProcessors.TryRegister(
+                if (_streamProcessors.TryRegister(
                     scopeId,
                     eventHandlerId,
                     new EventLogStreamDefinition(),
                     getFilterProcessor,
                     cancellationToken,
-                    out var outputtedFilterStreamProcessor), outputtedFilterStreamProcessor);
+                    out var outputtedFilterStreamProcessor))
+                {
+                    return outputtedFilterStreamProcessor;
+                }
+
+                return Try<StreamProcessor>.Failed();
             }
             catch (Exception ex)
             {
@@ -307,13 +312,18 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _logger.RegisteringStreamProcessorForEventProcessor(eventHandlerId, sourceStreamDefinition.StreamId);
             try
             {
-                return (_streamProcessors.TryRegister(
+                if (_streamProcessors.TryRegister(
                     scopeId,
                     eventHandlerId,
                     sourceStreamDefinition,
                     getEventProcessor,
                     cancellationToken,
-                    out var outputtedEventProcessorStreamProcessor), outputtedEventProcessorStreamProcessor);
+                    out var outputtedEventProcessorStreamProcessor))
+                {
+                    return outputtedEventProcessorStreamProcessor;
+                }
+
+                return Try<StreamProcessor>.Failed();
             }
             catch (Exception ex)
             {

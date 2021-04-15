@@ -212,13 +212,18 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _logger.RegisteringProjection(arguments);
             try
             {
-                return (_streamProcessors.TryRegister(
+                if (_streamProcessors.TryRegister(
                     arguments.ProjectionDefinition.Scope,
                     arguments.ProjectionDefinition.Projection.Value,
                     new EventLogStreamDefinition(),
                     getEventProcessor,
                     cancellationToken,
-                    out var outputtedEventProcessorStreamProcessor), outputtedEventProcessorStreamProcessor);
+                    out var outputtedEventProcessorStreamProcessor))
+                {
+                    return outputtedEventProcessorStreamProcessor;
+                }
+
+                return Try<StreamProcessor>.Failed();
             }
             catch (Exception ex)
             {
