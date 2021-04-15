@@ -7,6 +7,9 @@
         <FilterEntry>
         <ModuleMask>*.Specs</ModuleMask>
         </FilterEntry>
+        <FilterEntry>
+        <ModuleMask>*.for_*</ModuleMask>
+        </FilterEntry>
     </ExcludeFilters>
     </Filters>
     <Scope>
