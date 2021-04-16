@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -24,11 +25,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
             processors = new EmbeddingProcessors(tenants.Object, Mock.Of<ILogger>());
 
             var processor_a = new Mock<IEmbeddingProcessor>();
-            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(Task.Delay(Timeout.Infinite));
+            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(new TaskCompletionSource<Try>().Task);
 
             exception = new Exception();
             var processor_b = new Mock<IEmbeddingProcessor>();
-            processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromException(exception));
+            processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult<Try>(exception));
 
             factory = new Mock<EmbeddingProcessorFactory>();
             factory.Setup(_ => _(tenant_a)).Returns(processor_a.Object);

@@ -15,8 +15,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// Starts the embedding processing.
         /// </summary>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to signal the started processor to stop.</param>
-        /// <returns>A <see cref="Task"/> that is resolved when the processor completes or fails.</returns>
-        Task Start(CancellationToken cancellationToken);
+        /// <returns>A <see cref="Task"/> that, when resolved, returns a <see cref="Try" /> that indicates whether the processor completes or fails.</returns>
+        Task<Try> Start(CancellationToken cancellationToken);
 
         /// <summary>
         /// Tries to update embedding to match the projected state with the given state for a key.

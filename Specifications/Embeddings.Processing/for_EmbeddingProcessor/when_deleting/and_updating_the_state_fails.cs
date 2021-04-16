@@ -1,0 +1,41 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Rudimentary;
+using Machine.Specifications;
+using It = Machine.Specifications.It;
+
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting
+{
+    public class and_updating_the_state_fails : given.all_dependencies_and_a_key
+    {
+        static Task task;
+        static Exception exception;
+
+        Establish context = () =>
+        {
+            exception = new Exception();
+            task = embedding_processor.Start(CancellationToken.None);
+            embedding_store.Setup(_ => _.TryGet(embedding, key, CancellationToken.None)).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
+            transition_calculator.Setup(_ => _.TryDelete(current_state, CancellationToken.None)).Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
+            event_store.Setup(_ => _.CommitAggregateEvents(uncommitted_events, CancellationToken.None)).Returns(Task.FromResult(committed_events));
+            embedding_store.Setup(_ => _.TryRemove(embedding, key, CancellationToken.None)).Returns(Task.FromResult(Try.Failed(exception)));
+        };
+
+        static Try result;
+
+        Because of = () => result = embedding_processor.Delete(key, CancellationToken.None).GetAwaiter().GetResult();
+
+        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.Running);
+        It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, CancellationToken.None));
+        It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryDelete(current_state, CancellationToken.None));
+        It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(uncommitted_events, CancellationToken.None));
+        It should_remove_the_state = () => embedding_store.Verify(_ => _.TryRemove(embedding, key, CancellationToken.None));
+        It should_return_success = () => result.Success.ShouldBeTrue();
+    }
+}
