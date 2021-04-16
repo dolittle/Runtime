@@ -1,10 +1,10 @@
-﻿// Copyright (c) Dolittle. All rights reserved.
+// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Embeddings
+namespace Dolittle.Runtime.Embeddings.Store
 {
     /// <summary>
     /// Represents the unique identifier of an embedding.

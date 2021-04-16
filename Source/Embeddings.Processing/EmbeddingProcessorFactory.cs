@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.ApplicationModel;
 
-namespace Dolittle.Runtime.Embeddings
+namespace Dolittle.Runtime.Embeddings.Processing
 {
     /// <summary>
     /// A delegate represeting something that can create instances of <see cref="IEmbeddingProcessor"/> for a specific tenant.

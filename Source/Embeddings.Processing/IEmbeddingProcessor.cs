@@ -7,7 +7,7 @@ using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Embeddings
+namespace Dolittle.Runtime.Embeddings.Processing
 {
     public interface IEmbeddingProcessor
     {

@@ -4,10 +4,11 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Embeddings
+namespace Dolittle.Runtime.Embeddings.Processing
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEmbeddingProcessors"/>.

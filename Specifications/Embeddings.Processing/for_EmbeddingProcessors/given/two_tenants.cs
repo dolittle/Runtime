@@ -7,7 +7,7 @@ using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Embeddings.for_EmbeddingProcessors.given
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors.given
 {
     public class two_tenants
     {

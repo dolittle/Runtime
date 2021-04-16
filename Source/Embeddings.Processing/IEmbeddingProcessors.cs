@@ -4,8 +4,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Embeddings.Store;
 
-namespace Dolittle.Runtime.Embeddings
+namespace Dolittle.Runtime.Embeddings.Processing
 {
     /// <summary>
     /// Defines a system that manages all instances of <see cref="IEmbeddingProcessor"/>.

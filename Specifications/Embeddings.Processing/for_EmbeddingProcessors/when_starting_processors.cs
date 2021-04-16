@@ -4,12 +4,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Embeddings.Store;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.for_EmbeddingProcessors
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
 {
     public class when_starting_processors : given.two_tenants
     {

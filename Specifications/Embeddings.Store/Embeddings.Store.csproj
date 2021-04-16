@@ -11,9 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../../Source/ApplicationModel/ApplicationModel.csproj" />
-    <ProjectReference Include="../../Source/Embeddings/Embeddings.csproj" />
-    <ProjectReference Include="../../Source/Tenancy/Tenancy.csproj" />
+    <ProjectReference Include="../../Source/Embeddings.Store/Embeddings.Store.csproj" />
   </ItemGroup>
 
 </Project>
