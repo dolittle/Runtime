@@ -17,6 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
     {
         static EmbeddingProcessors processors;
         static Mock<EmbeddingProcessorFactory> factory;
+        static CancellationToken processor_a_cancellation_token;
         static EmbeddingId embedding;
 
         Establish context = () =>
@@ -24,7 +25,10 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
             processors = new EmbeddingProcessors(tenants.Object, Mock.Of<ILogger>());
 
             var processor_a = new Mock<IEmbeddingProcessor>();
-            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(new TaskCompletionSource<Try>().Task);
+            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns<CancellationToken>((cancellationToken) => {
+                processor_a_cancellation_token = cancellationToken;
+                return new TaskCompletionSource<Try>().Task;
+            });
 
             var processor_b = new Mock<IEmbeddingProcessor>();
             processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
@@ -40,5 +44,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
         Because of = () => completed = processors.StartEmbeddingProcessorForAllTenants(embedding, factory.Object, CancellationToken.None);
 
         It should_be_completed = () => completed.Status.ShouldEqual(TaskStatus.RanToCompletion);
+        It should_cancel_the_other_processor = () => processor_a_cancellation_token.IsCancellationRequested.ShouldBeTrue();
     }
 }

@@ -18,6 +18,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
         static EmbeddingProcessors processors;
         static Exception exception;
         static Mock<EmbeddingProcessorFactory> factory;
+        static CancellationToken processor_a_cancellation_token;
         static EmbeddingId embedding;
 
         Establish context = () =>
@@ -25,7 +26,10 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
             processors = new EmbeddingProcessors(tenants.Object, Mock.Of<ILogger>());
 
             var processor_a = new Mock<IEmbeddingProcessor>();
-            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(new TaskCompletionSource<Try>().Task);
+            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns<CancellationToken>((cancellationToken) => {
+                processor_a_cancellation_token = cancellationToken;
+                return new TaskCompletionSource<Try>().Task;
+            });
 
             exception = new Exception();
             var processor_b = new Mock<IEmbeddingProcessor>();
@@ -43,5 +47,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
 
         It should_have_failed = () => completed.Status.ShouldEqual(TaskStatus.Faulted);
         It should_return_the_thrown_exception = () => completed.Exception.ShouldBeTheSameAs(exception);
+        It should_cancel_the_other_processor = () => processor_a_cancellation_token.IsCancellationRequested.ShouldBeTrue();
     }
 }

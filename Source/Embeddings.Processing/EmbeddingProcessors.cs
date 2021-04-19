@@ -1,6 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
@@ -15,6 +18,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
     /// </summary>
     public class EmbeddingProcessors : IEmbeddingProcessors
     {
+        readonly ConcurrentDictionary<EmbeddingId, Dictionary<TenantId, IEmbeddingProcessor>> _processors = new();
         readonly ITenants _tenants;
         readonly ILogger _logger;
 
@@ -30,12 +34,36 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         /// <inheritdoc/>
-        public Task StartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken) => throw new System.NotImplementedException();
+        public async Task StartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken)
+        {
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            var processors = new Dictionary<TenantId, IEmbeddingProcessor>();
+            if (!_processors.TryAdd(embedding, processors))
+            {
+                throw new EmbeddingProcessorsAlreadyRegistered(embedding);
+            }
+            foreach (var tenant in _tenants.All)
+            {
+                processors.Add(tenant, factory(tenant));
+            }
+            var tasks = processors.Values.Select(_ => _.Start(tokenSource.Token)).ToList();
+            await Task.WhenAny(tasks).ConfigureAwait(false);
+            tokenSource.Cancel();
+            await Task.WhenAll(tasks).ConfigureAwait(false);
+        }
 
         /// <inheritdoc/>
-        public bool HasEmbeddingProcessors(EmbeddingId embedding) => throw new System.NotImplementedException();
+        public bool HasEmbeddingProcessors(EmbeddingId embedding) => _processors.ContainsKey(embedding);
 
         /// <inheritdoc/>
-        public bool TryGetEmbeddingProcessorFor(TenantId tenant, EmbeddingId embedding, out IEmbeddingProcessor processor) => throw new System.NotImplementedException();
+        public bool TryGetEmbeddingProcessorFor(TenantId tenant, EmbeddingId embedding, out IEmbeddingProcessor processor)
+        {
+            processor = null;
+            if (_processors.TryGetValue(embedding, out var processorsByTenant))
+            {
+                return processorsByTenant.TryGetValue(tenant, out processor);
+            }
+            return false;
+        }
     }
 }
