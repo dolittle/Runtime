@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
                 transition_calculator.Object);
             cancellation_token = CancellationToken.None;
 
-            state_updater.Setup(_ => _.TryUpdateAllFor(embedding, It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+            state_updater.Setup(_ => _.TryUpdateAll(It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
             event_waiter.Setup(_ => _.WaitForEvent(embedding.Value, It.IsAny<CancellationToken>())).Returns<ArtifactId, CancellationToken>((_, cancellationToken) => Task.Delay(Timeout.Infinite, cancellationToken));
         };
     }

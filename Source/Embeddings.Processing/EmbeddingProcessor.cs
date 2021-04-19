@@ -215,7 +215,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         Task<Try> EnsureAllStatesAreFresh()
-            => _stateUpdater.TryUpdateAllFor(_embedding, _cancellationToken);
+            => _stateUpdater.TryUpdateAll(_cancellationToken);
 
         bool HasStarted() => _started;
     }

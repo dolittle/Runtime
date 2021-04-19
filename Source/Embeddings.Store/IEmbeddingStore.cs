@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Embeddings.Store
     /// <summary>
     /// Defines a system that can knows about persisted embeddings in the embedding store.
     /// </summary>
-    public interface IEmbeddingStore : IFetchEmbeddingsStates, IWriteEmbeddingStates
+    public interface IEmbeddingStore : IFetchEmbeddingKeys, IFetchEmbeddingsStates, IWriteEmbeddingStates
     {
     }
 }

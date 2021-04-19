@@ -16,13 +16,13 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_sta
         Establish context = () =>
         {
             event_waiter.Setup(_ => _.WaitForEvent(embedding.Value, Moq.It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            state_updater.Setup(_ => _.TryUpdateAllFor(embedding, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed()));
+            state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed()));
         };
 
         Because of = () => result = embedding_processor.Start(cancellation_token);
 
         It should_return_a_failure = () => result.Result.Success.ShouldBeFalse();
-        It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAllFor(embedding, Moq.It.IsAny<CancellationToken>()), Times.Exactly(1));
+        It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>()), Times.Exactly(1));
         It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(embedding.Value, Moq.It.IsAny<CancellationToken>()), Times.Exactly(0));
     }
 }

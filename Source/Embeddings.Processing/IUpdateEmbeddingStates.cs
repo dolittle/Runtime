@@ -3,7 +3,6 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Embeddings.Processing
@@ -14,11 +13,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
     public interface IUpdateEmbeddingStates
     {
         /// <summary>
-        /// Try to update all the embedding states by projecting all aggregate root events for the given embedding.
+        /// Try to update all the embedding states by projecting all aggregate root events.
         /// </summary>
-        /// <param name="embedding">The <see cref="EmbeddingId"/> to update states for.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A<see cref="Task" /> that, when resolved, returns a<see cref= "Try" /> that indicates whether the operation was successful or not.</returns>
-        Task<Try> TryUpdateAllFor(EmbeddingId embedding, CancellationToken cancellationToken);
+        Task<Try> TryUpdateAll(CancellationToken cancellationToken);
     }
 }
