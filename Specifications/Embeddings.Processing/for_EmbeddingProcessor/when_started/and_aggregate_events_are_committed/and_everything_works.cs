@@ -12,14 +12,13 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_sta
 {
     public class and_everything_works : given.all_dependencies
     {
-        static CancellationToken cancellation_token;
         static int called_wait_num;
         static Task<Try> result;
         Establish context = () =>
         {
-            cancellation_token = CancellationToken.None;
+            called_wait_num = 0;
             event_waiter
-                .Setup(_ => _.WaitForEvent(embedding.Value, cancellation_token))
+                .Setup(_ => _.WaitForEvent(embedding.Value, Moq.It.IsAny<CancellationToken>()))
                 .Returns(() =>
                 {
                     return called_wait_num++ switch
@@ -28,14 +27,13 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_sta
                         _ => Task.Delay(Timeout.Infinite)
                     };
                 });
-            state_updater.Setup(_ => _.TryUpdateAllFor(embedding, cancellation_token)).Returns(Task.FromResult(Try.Succeeded()));
+            state_updater.Setup(_ => _.TryUpdateAllFor(embedding, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
         };
 
         Because of = () => result = embedding_processor.Start(cancellation_token);
 
-        It should_be_running = () => result.Status.ShouldEqual(TaskStatus.Running);
-        It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAllFor(embedding, CancellationToken.None), Times.Exactly(2));
-        It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(embedding.Value, CancellationToken.None), Times.Exactly(2));
-
+        It should_be_running = () => result.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+        It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAllFor(embedding, Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));
+        It should_wait_for_aggregate_events = () => event_waiter.Verify(_ => _.WaitForEvent(embedding.Value, Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));
     }
 }

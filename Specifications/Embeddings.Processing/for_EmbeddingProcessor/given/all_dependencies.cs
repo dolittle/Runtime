@@ -2,12 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.ObjectModel;
+using System.Threading;
+using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
 using Machine.Specifications;
 using Moq;
+using It = Moq.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
 {
@@ -20,6 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
         protected static Mock<IEmbeddingStore> embedding_store;
         protected static Mock<ICalculateStateTransistionEvents> transition_calculator;
         protected static EmbeddingProcessor embedding_processor;
+        protected static CancellationToken cancellation_token;
 
         Establish context = () =>
         {
@@ -36,6 +42,10 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
                 event_store.Object,
                 embedding_store.Object,
                 transition_calculator.Object);
+            cancellation_token = CancellationToken.None;
+
+            state_updater.Setup(_ => _.TryUpdateAllFor(embedding, It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+            event_waiter.Setup(_ => _.WaitForEvent(embedding.Value, It.IsAny<CancellationToken>())).Returns<ArtifactId, CancellationToken>((_, cancellationToken) => Task.Delay(Timeout.Infinite, cancellationToken));
         };
     }
 }

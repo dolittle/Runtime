@@ -21,22 +21,22 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
         Establish context = () =>
         {
             exception = new Exception();
-            task = embedding_processor.Start(CancellationToken.None);
-            embedding_store.Setup(_ => _.TryGet(embedding, key, CancellationToken.None)).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
-            transition_calculator.Setup(_ => _.TryConverge(current_state, desired_state, CancellationToken.None)).Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
-            event_store.Setup(_ => _.CommitAggregateEvents(uncommitted_events, CancellationToken.None)).Returns(Task.FromResult(committed_events));
-            embedding_store.Setup(_ => _.TryReplace(embedding, key, desired_state, CancellationToken.None)).Returns(Task.FromResult(Try.Failed(exception)));
+            task = embedding_processor.Start(cancellation_token);
+            embedding_store.Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
+            transition_calculator.Setup(_ => _.TryConverge(current_state, desired_state, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
+            event_store.Setup(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(committed_events));
+            embedding_store.Setup(_ => _.TryReplace(embedding, key, desired_state, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed(exception)));
         };
 
         static Try<ProjectionState> result;
 
-        Because of = () => result = embedding_processor.Update(key, desired_state, CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = embedding_processor.Update(key, desired_state, Moq.It.IsAny<CancellationToken>()).GetAwaiter().GetResult();
 
-        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.Running);
-        It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, CancellationToken.None));
-        It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryConverge(current_state, desired_state, CancellationToken.None));
-        It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(uncommitted_events, CancellationToken.None));
-        It should_store_the_updated_state = () => embedding_store.Verify(_ => _.TryReplace(embedding, key, desired_state, CancellationToken.None));
+        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+        It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
+        It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryConverge(current_state, desired_state, Moq.It.IsAny<CancellationToken>()));
+        It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>()));
+        It should_store_the_updated_state = () => embedding_store.Verify(_ => _.TryReplace(embedding, key, desired_state, Moq.It.IsAny<CancellationToken>()));
         It should_return_the_updated_state = () => result.Result.ShouldEqual(desired_state);
     }
 }

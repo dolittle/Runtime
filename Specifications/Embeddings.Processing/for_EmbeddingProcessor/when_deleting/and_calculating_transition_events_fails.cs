@@ -21,17 +21,17 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_del
         Establish context = () =>
         {
             exception = new Exception();
-            task = embedding_processor.Start(CancellationToken.None);
-            embedding_store.Setup(_ => _.TryGet(embedding, key, CancellationToken.None)).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
-            transition_calculator.Setup(_ => _.TryDelete(current_state, CancellationToken.None)).Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Failed(exception)));
+            task = embedding_processor.Start(cancellation_token);
+            embedding_store.Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
+            transition_calculator.Setup(_ => _.TryDelete(current_state, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Failed(exception)));
         };
 
         static Try result;
 
-        Because of = () => result = embedding_processor.Delete(key, CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = embedding_processor.Delete(key, cancellation_token).GetAwaiter().GetResult();
 
-        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.Running);
-        It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, CancellationToken.None));
+        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+        It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
         It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
     }
 }

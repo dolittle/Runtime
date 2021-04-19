@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
@@ -21,15 +20,15 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
         Establish context = () =>
         {
             exception = new Exception();
-            task = embedding_processor.Start(CancellationToken.None);
-            embedding_store.Setup(_ => _.TryGet(embedding, key, CancellationToken.None)).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
+            task = embedding_processor.Start(cancellation_token);
+            embedding_store.Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
         };
 
         static Try<ProjectionState> result;
 
-        Because of = () => result = embedding_processor.Update(key, desired_state, CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = embedding_processor.Update(key, desired_state, cancellation_token).GetAwaiter().GetResult();
 
-        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.Running);
+        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
         It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
     }
 }

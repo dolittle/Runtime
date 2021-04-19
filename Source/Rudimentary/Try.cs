@@ -37,6 +37,25 @@ namespace Dolittle.Runtime.Rudimentary
         public Exception Exception { get; }
 
         /// <summary>
+        /// Appends the result if the operation succeeded, or returns the original failure if the operation failed.
+        /// </summary>
+        /// <param name="result">The result to append.</param>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <returns>A new <see cref="Try{TSelectResult}"/> result that contains the appended result if the operation succeeded.</returns>
+        public Try<TResult> With<TResult>(TResult result)
+        {
+            if (Success)
+            {
+                return Try<TResult>.Succeeded(result);
+            }
+            else if (HasException)
+            {
+                return Try<TResult>.Failed(Exception);
+            }
+            return Try<TResult>.Failed();
+        }
+
+        /// <summary>
         /// Creates a new <see cref="Try"/> result indicating a successful operation.
         /// </summary>
         /// <returns>A new <see cref="Try"/> result.</returns>
