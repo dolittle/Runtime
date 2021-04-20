@@ -38,19 +38,62 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public async Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken)
         {
-            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            if (!TryRegisterAndCreateProcessors(embedding, factory, out var processors, out var error))
+            {
+                return error;
+            }
+
+            var tryStartProcessors = await TryStartAndWaitForAllProcessorsToFinish(processors.Select(_ => _.Value), cancellationToken).ConfigureAwait(false);
+            _processors.TryRemove(embedding, out var _);
+            return tryStartProcessors;
+        }
+
+        /// <inheritdoc/>
+        public bool HasEmbeddingProcessors(EmbeddingId embedding) => _processors.ContainsKey(embedding);
+
+        /// <inheritdoc/>
+        public bool TryGetEmbeddingProcessorFor(TenantId tenant, EmbeddingId embedding, out IEmbeddingProcessor processor)
+        {
+            processor = null;
+            if (_processors.TryGetValue(embedding, out var processorsByTenant))
+            {
+                return processorsByTenant.TryGetValue(tenant, out processor);
+            }
+            return false;
+        }
+
+        bool TryRegisterAndCreateProcessors(EmbeddingId embedding, EmbeddingProcessorFactory createProcessor, out Dictionary<TenantId, IEmbeddingProcessor> processors, out Exception error)
+        {
             try
             {
-                var processors = new Dictionary<TenantId, IEmbeddingProcessor>();
+                error = null;
+                processors = new Dictionary<TenantId, IEmbeddingProcessor>();
                 if (!_processors.TryAdd(embedding, processors))
                 {
-                    return new EmbeddingProcessorsAlreadyRegistered(embedding);
+                    processors = null;
+                    error = new EmbeddingProcessorsAlreadyRegistered(embedding);
+                    return false;
                 }
                 foreach (var tenant in _tenants.All)
                 {
-                    processors.Add(tenant, factory(tenant));
+                    processors.Add(tenant, createProcessor(tenant));
                 }
-                var tasks = processors.Values.Select(_ => _.Start(tokenSource.Token)).ToList();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                processors = null;
+                error = ex;
+                return false;
+            }
+        }
+
+        async Task<Try> TryStartAndWaitForAllProcessorsToFinish(IEnumerable<IEmbeddingProcessor> processors, CancellationToken cancellationToken)
+        {
+            using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            try
+            {
+                var tasks = processors.Select(_ => _.Start(tokenSource.Token)).ToList();
                 var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
                 tokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
@@ -66,22 +109,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 {
                     tokenSource.Cancel();
                 }
-                _processors.TryRemove(embedding, out var _);
             }
-        }
-
-        /// <inheritdoc/>
-        public bool HasEmbeddingProcessors(EmbeddingId embedding) => _processors.ContainsKey(embedding);
-
-        /// <inheritdoc/>
-        public bool TryGetEmbeddingProcessorFor(TenantId tenant, EmbeddingId embedding, out IEmbeddingProcessor processor)
-        {
-            processor = null;
-            if (_processors.TryGetValue(embedding, out var processorsByTenant))
-            {
-                return processorsByTenant.TryGetValue(tenant, out processor);
-            }
-            return false;
         }
     }
 }
