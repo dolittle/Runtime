@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging;
 
@@ -34,22 +36,38 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         /// <inheritdoc/>
-        public async Task StartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken)
+        public async Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken)
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-            var processors = new Dictionary<TenantId, IEmbeddingProcessor>();
-            if (!_processors.TryAdd(embedding, processors))
+            try
             {
-                throw new EmbeddingProcessorsAlreadyRegistered(embedding);
+                var processors = new Dictionary<TenantId, IEmbeddingProcessor>();
+                if (!_processors.TryAdd(embedding, processors))
+                {
+                    return new EmbeddingProcessorsAlreadyRegistered(embedding);
+                }
+                foreach (var tenant in _tenants.All)
+                {
+                    processors.Add(tenant, factory(tenant));
+                }
+                var tasks = processors.Values.Select(_ => _.Start(tokenSource.Token)).ToList();
+                var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
+                tokenSource.Cancel();
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+                return await finishedTask.ConfigureAwait(false);
             }
-            foreach (var tenant in _tenants.All)
+            catch (Exception ex)
             {
-                processors.Add(tenant, factory(tenant));
+                return ex;
             }
-            var tasks = processors.Values.Select(_ => _.Start(tokenSource.Token)).ToList();
-            await Task.WhenAny(tasks).ConfigureAwait(false);
-            tokenSource.Cancel();
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+            finally
+            {
+                if (!tokenSource.IsCancellationRequested)
+                {
+                    tokenSource.Cancel();
+                }
+                _processors.TryRemove(embedding, out var _);
+            }
         }
 
         /// <inheritdoc/>
