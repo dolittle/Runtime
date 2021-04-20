@@ -15,20 +15,37 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
 {
     public class when_starting_one_processor_that_is_cancelled : given.two_tenants_and_processors
     {
+        static CancellationTokenSource cts;
         static CancellationToken processor_a_cancellation_token;
+        static CancellationToken processor_b_cancellation_token;
         static EmbeddingId embedding;
 
         Establish context = () =>
         {
+            cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
             var processor_a = new Mock<IEmbeddingProcessor>();
-            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns<CancellationToken>((cancellationToken) =>
+            processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns<CancellationToken>(async (cancellationToken) =>
             {
                 processor_a_cancellation_token = cancellationToken;
-                return new TaskCompletionSource<Try>().Task;
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(10).ConfigureAwait(false);
+                }
+                return Try.Succeeded();
+
             });
 
             var processor_b = new Mock<IEmbeddingProcessor>();
-            processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromCanceled<Try>(CancellationToken.None));
+            processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns<CancellationToken>(async (cancellationToken) =>
+            {
+                processor_b_cancellation_token = cancellationToken;
+                while (!cancellationToken.IsCancellationRequested)
+                {
+                    await Task.Delay(10).ConfigureAwait(false);
+                }
+                return Try.Succeeded();
+
+            });
 
             factory.Setup(_ => _(tenant_a)).Returns(processor_a.Object);
             factory.Setup(_ => _(tenant_b)).Returns(processor_b.Object);
@@ -36,11 +53,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
             embedding = "801034ab-9963-48b8-b27b-d3abb01bae2a";
         };
 
-        static Task<Try> result;
-        Because of = () => result = processors.TryStartEmbeddingProcessorForAllTenants(embedding, factory.Object, CancellationToken.None);
+        static Try result;
+        Because of = () => result = processors.TryStartEmbeddingProcessorForAllTenants(embedding, factory.Object, cts.Token).GetAwaiter().GetResult();
 
-        It should_be_cancelled = () => result.Status.ShouldEqual(TaskStatus.Canceled);
-        It should_be_successful = () => result.Result.Success.ShouldBeTrue();
-        It should_cancel_the_other_processor = () => processor_a_cancellation_token.IsCancellationRequested.ShouldBeTrue();
+        It should_be_successful = () => result.Success.ShouldBeTrue();
+        It should_cancel_the__processor = () => processor_a_cancellation_token.IsCancellationRequested.ShouldBeTrue();
+        It should_cancel_the_other_processor = () => processor_b_cancellation_token.IsCancellationRequested.ShouldBeTrue();
     }
 }
