@@ -56,7 +56,10 @@ namespace Dolittle.Runtime.Events.Store.Streams
                     }
                 }).ConfigureAwait(false);
 
-            if (result != default) return Try<IStreamDefinition>.Failed();
+            if (result != default)
+            {
+                return Try<IStreamDefinition>.Failed();
+            }
             return Try<IStreamDefinition>.Succeeded(result);
         }
     }

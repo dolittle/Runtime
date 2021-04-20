@@ -59,10 +59,16 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
             _logger.EventProcessorIsProcessing(Identifier, @event.Type.Id, partitionId);
-            if (!ShouldProcessEvent(@event)) return new SuccessfulProcessing();
+            if (!ShouldProcessEvent(@event))
+            {
+                return new SuccessfulProcessing();
+            }
 
             var tryGetCurrentState = await TryGetCurrentState(@event, partitionId, cancellationToken).ConfigureAwait(false);
-            if (!tryGetCurrentState.Success) return new FailedProcessing(tryGetCurrentState.Exception.Message);
+            if (!tryGetCurrentState.Success)
+            {
+                return new FailedProcessing(tryGetCurrentState.Exception.Message);
+            }
 
             var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, cancellationToken).ConfigureAwait(false);
 
@@ -73,10 +79,17 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
             _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
-            if (!ShouldProcessEvent(@event)) return new SuccessfulProcessing();
+            if (!ShouldProcessEvent(@event))
+            {
+                return new SuccessfulProcessing();
+            }
+
 
             var tryGetCurrentState = await TryGetCurrentState(@event, partitionId, cancellationToken).ConfigureAwait(false);
-            if (!tryGetCurrentState.Success) return new FailedProcessing(tryGetCurrentState.Exception.Message);
+            if (!tryGetCurrentState.Success)
+            {
+                return new FailedProcessing(tryGetCurrentState.Exception.Message);
+            }
 
             var result = await _projection.Project(tryGetCurrentState.Result, @event, partitionId, failureReason, retryCount, cancellationToken).ConfigureAwait(false);
 

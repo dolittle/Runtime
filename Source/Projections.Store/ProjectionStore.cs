@@ -48,12 +48,24 @@ namespace Dolittle.Runtime.Projections.Store
                 _logger.GettingOneProjection(projection, scope, key);
 
                 var tryGetState = await _projectionStates.TryGet(projection, scope, key, token).ConfigureAwait(false);
-                if (tryGetState.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, tryGetState.Result, key);
-                if (tryGetState.HasException) return tryGetState.Exception;
+                if (tryGetState.Success)
+                {
+                    return new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, tryGetState.Result, key);
+                }
+                if (tryGetState.HasException)
+                {
+                    return tryGetState.Exception;
+                }
 
                 var tryGetDefinition = await _projectionDefinitions.TryGet(projection, scope, token).ConfigureAwait(false);
-                if (tryGetDefinition.Success) return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, tryGetDefinition.Result.InititalState, key);
-                if (tryGetDefinition.HasException) return tryGetDefinition.Exception;
+                if (tryGetDefinition.Success)
+                {
+                    return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, tryGetDefinition.Result.InititalState, key);
+                }
+                if (tryGetDefinition.HasException)
+                {
+                    return tryGetDefinition.Exception;
+                }
 
                 return new FailedToGetProjectionDefinition(projection, scope);
             }

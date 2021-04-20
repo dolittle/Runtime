@@ -8,11 +8,5 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     /// </summary>
     public class ProjectionDeleteResult : IProjectionResult
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProjectionDeleteResult"/> class.
-        /// </summary>
-        public ProjectionDeleteResult()
-        {
-        }
     }
 }

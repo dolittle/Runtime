@@ -11,14 +11,14 @@ namespace Dolittle.Runtime.Rudimentary
     /// <typeparam name="TResult">The result type.</typeparam>
     public class Try<TResult> : Try
     {
-        Try(TResult result) : base(true)
+        protected Try(TResult result) : base(true)
         {
             Result = result;
         }
 
-        Try() : base(false) {}
+        protected Try() : base(false) {}
 
-        Try(Exception exception) : base(exception) {}
+        protected Try(Exception exception) : base(exception) {}
 
         /// <summary>
         /// Gets the <typeparamref name="TResult">result</typeparamref>.
