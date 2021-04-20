@@ -180,6 +180,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             catch (TaskCanceledException)
             {
+                // An job has been scheduled
             }
         }
 
