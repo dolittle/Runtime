@@ -13,7 +13,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting
 {
-    public class and_everything_works : given.all_dependencies_and_a_key
+    public class and_calculating_transition_events_fails : given.all_dependencies_and_a_key
     {
         static Task task;
         static Exception exception;
