@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -20,7 +21,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="factory">A <see cref="EmbeddingProcessorFactory"/> to use for creating instances of <see cref="IEmbeddingProcessor"/> for each tenant.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to signal the started processors to stop.</param>
         /// <returns>A <see cref="Task"/> that is resolved when one or all of the started <see cref="IEmbeddingProcessor"/> complete or fail.</returns>
-        Task StartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken);
+        Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken);
 
         /// <summary>
         /// Checks if there are any instances of <see cref="IEmbeddingProcessor"/> running for the given embedding.
