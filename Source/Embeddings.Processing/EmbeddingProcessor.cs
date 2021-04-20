@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
@@ -125,14 +126,14 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             try
             {
-                await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
+                var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
+                await _embeddingStore.TryReplace(_embedding, key, committedEvents.Last().AggregateRootVersion+1, state, cancellationToken).ConfigureAwait(false);
+                return Try.Succeeded();
             }
             catch (Exception ex)
             {
                 return ex;
             }
-            await _embeddingStore.TryReplace(_embedding, key, state, cancellationToken).ConfigureAwait(false);
-            return Try.Succeeded();
         }
 
         async Task<Try> DoDelete(ProjectionKey key, CancellationToken cancellationToken)
@@ -154,14 +155,14 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             try
             {
-                await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
+                var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
+                await _embeddingStore.TryRemove(_embedding, key, committedEvents.Last().AggregateRootVersion+1, cancellationToken).ConfigureAwait(false);
+                return Try.Succeeded();
             }
             catch (Exception ex)
             {
                 return ex;
             }
-            await _embeddingStore.TryRemove(_embedding, key, cancellationToken).ConfigureAwait(false);
-            return Try.Succeeded();
         }
 
         async Task WaitForEventOrJob()
