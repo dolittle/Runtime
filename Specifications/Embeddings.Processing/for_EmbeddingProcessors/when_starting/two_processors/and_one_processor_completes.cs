@@ -44,5 +44,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors.when_st
 
         It should_be_successful = () => result.Success.ShouldBeTrue();
         It should_cancel_the_other_processor = () => processor_a_cancellation_token.IsCancellationRequested.ShouldBeTrue();
+        It should_have_unregistered_processors = () => processors.HasEmbeddingProcessors(embedding).ShouldBeFalse();
     }
 }
