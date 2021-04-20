@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
         {
             task.Status.ShouldNotEqual(TaskStatus.Canceled);
             task.Status.ShouldNotEqual(TaskStatus.Faulted);
-            return task.Status.ShouldNotEqual(TaskStatus.Faulted);
+            return task.Status.ShouldNotEqual(TaskStatus.RanToCompletion);
         }
     }
 }
