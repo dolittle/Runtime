@@ -14,7 +14,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
 {
-    public class when_starting_processors : given.two_tenants_and_processors
+    public class when_starting_two_processors : given.two_tenants_and_processors
     {
         static IEmbeddingProcessor processor_a;
         static IEmbeddingProcessor processor_b;
@@ -56,5 +56,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
         };
         It should_not_have_a_processor_for_another_tenant = () => processors.TryGetEmbeddingProcessorFor("621aca1c-eddf-4ed4-a2ca-512d9a49d746", embedding, out var _).ShouldBeFalse();
         It should_not_have_processors_for_another_embedding = () => processors.HasEmbeddingProcessors("f9bd3173-b7a8-4081-ab0d-61351e6a9cb5").ShouldBeFalse();
+        It should_still_be_running = () => result.ShouldStillBeRunning();
     }
 }

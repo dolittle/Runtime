@@ -11,22 +11,18 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors.when_starting.two_processors
 {
-    public class when_starting_one_processor_that_is_cancelled : given.two_tenants_and_processors
+    public class and_starting_them_again : given.two_tenants_and_processors
     {
-        static CancellationTokenSource cts;
-        static CancellationToken processor_a_cancellation_token;
-        static CancellationToken processor_b_cancellation_token;
         static EmbeddingId embedding;
+        static Task<Try> started_processors;
 
         Establish context = () =>
         {
-            cts = new CancellationTokenSource(TimeSpan.FromSeconds(1));
             var processor_a = new Mock<IEmbeddingProcessor>();
             processor_a.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns<CancellationToken>(async (cancellationToken) =>
             {
-                processor_a_cancellation_token = cancellationToken;
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(10).ConfigureAwait(false);
@@ -38,7 +34,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
             var processor_b = new Mock<IEmbeddingProcessor>();
             processor_b.Setup(_ => _.Start(Moq.It.IsAny<CancellationToken>())).Returns<CancellationToken>(async (cancellationToken) =>
             {
-                processor_b_cancellation_token = cancellationToken;
                 while (!cancellationToken.IsCancellationRequested)
                 {
                     await Task.Delay(10).ConfigureAwait(false);
@@ -51,13 +46,14 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
             factory.Setup(_ => _(tenant_b)).Returns(processor_b.Object);
 
             embedding = "801034ab-9963-48b8-b27b-d3abb01bae2a";
+            started_processors = processors.TryStartEmbeddingProcessorForAllTenants(embedding, factory.Object, CancellationToken.None);
         };
 
         static Try result;
-        Because of = () => result = processors.TryStartEmbeddingProcessorForAllTenants(embedding, factory.Object, cts.Token).GetAwaiter().GetResult();
+        Because of = () => result = processors.TryStartEmbeddingProcessorForAllTenants(embedding, factory.Object, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_be_successful = () => result.Success.ShouldBeTrue();
-        It should_cancel_the__processor = () => processor_a_cancellation_token.IsCancellationRequested.ShouldBeTrue();
-        It should_cancel_the_other_processor = () => processor_b_cancellation_token.IsCancellationRequested.ShouldBeTrue();
+        It should_not_be_successful = () => result.Success.ShouldBeFalse();
+        It should_fail_because_emmbedding_processors_already_registered = () => result.Exception.ShouldBeOfExactType<EmbeddingProcessorsAlreadyRegistered>();
+        It should_still_have_old_processors_not_be_cancelled = () => started_processors.ShouldStillBeRunning();
     }
 }
