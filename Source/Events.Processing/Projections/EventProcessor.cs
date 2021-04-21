@@ -129,7 +129,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             }
             else if (result is ProjectionFailedResult failed)
             {
-                return new FailedProcessing(failed.Reason);
+                return new FailedProcessing(failed.Exception.Message);
             }
 
             return new FailedProcessing($"Unknown projection result {result.GetType().Name}");

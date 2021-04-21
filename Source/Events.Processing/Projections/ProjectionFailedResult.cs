@@ -15,8 +15,8 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// </summary>
         /// <param name="exception">The <see cref="Exception"/> that caused the failure.</param>
         public ProjectionFailedResult(Exception exception)
-            : this(exception.Message)
         {
+            Exception = exception;
         }
 
         /// <summary>
@@ -24,10 +24,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         /// </summary>
         /// <param name="reason">The reason for the failure.</param>
         public ProjectionFailedResult(string reason)
+            : this(new ProjectionFailed(reason))
         {
-            Reason = reason;
         }
 
-        public string Reason { get; }
+        public Exception Exception { get; }
     }
 }
