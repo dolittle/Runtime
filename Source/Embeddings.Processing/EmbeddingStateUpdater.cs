@@ -104,7 +104,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
 
             return await TryProjectAll(currentState, unprocessedEvents, cancellationToken).ConfigureAwait(false);
-            // return await TryHandleProjectionResult(projectionResult, key, unprocessedEvents, cancellationToken).ConfigureAwait(false);
 
         }
 
@@ -165,5 +164,20 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 return ex;
             }
         }
+    }
+
+    /// <summary>
+    /// Defines a system that can project many events.
+    /// </summary>
+    public interface IProjectManyEvents
+    {
+        /// <summary>
+        /// Tries to project all the <see cref="CommittedAggregateEvents" />.
+        /// </summary>
+        /// <param name="currentState"></param>
+        /// <param name="events"></param>
+        /// <param name="cancellationToken"></param>
+        /// <returns></returns>
+        Task<Try<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, CommittedAggregateEvents events, CancellationToken cancellationToken);
     }
 }

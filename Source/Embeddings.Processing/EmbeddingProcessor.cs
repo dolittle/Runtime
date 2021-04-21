@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly IWaitForAggregateRootEvents _eventWaiter;
         readonly IEventStore _eventStore;
         readonly IEmbeddingStore _embeddingStore;
-        readonly ICalculateStateTransistionEvents _transitionCalculator;
+        readonly ICalculateStateTransitionEvents _transitionCalculator;
         CancellationToken _cancellationToken;
         CancellationTokenSource _waitForEvent;
         bool _started;
@@ -38,14 +38,14 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="eventWaiter">The <see cref="IWaitForAggregateRootEvents"/> to use for waiting on aggregate root events to be committed.</param>
         /// <param name="eventStore">The <see cref="IEventStore"/> to use for fetching and committing aggregate root events.</param>
         /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> to use for fetching, replacing and removing embedding states.</param>
-        /// <param name="transitionCalculator">The <see cref="ICalculateStateTransistionEvents"/> to use for calculating state transition events.</param>
+        /// <param name="transitionCalculator">The <see cref="ICalculateStateTransitionEvents"/> to use for calculating state transition events.</param>
         public EmbeddingProcessor(
             EmbeddingId embedding,
             IUpdateEmbeddingStates stateUpdater,
             IWaitForAggregateRootEvents eventWaiter,
             IEventStore eventStore,
             IEmbeddingStore embeddingStore,
-            ICalculateStateTransistionEvents transitionCalculator)
+            ICalculateStateTransitionEvents transitionCalculator)
         {
             _embedding = embedding;
             _stateUpdater = stateUpdater;
@@ -127,7 +127,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-                await _embeddingStore.TryReplace(_embedding, key, committedEvents.Last().AggregateRootVersion+1, state, cancellationToken).ConfigureAwait(false);
+                await _embeddingStore.TryReplace(_embedding, key, committedEvents.Last().AggregateRootVersion + 1, state, cancellationToken).ConfigureAwait(false);
                 return Try.Succeeded();
             }
             catch (Exception ex)
@@ -156,7 +156,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-                await _embeddingStore.TryRemove(_embedding, key, committedEvents.Last().AggregateRootVersion+1, cancellationToken).ConfigureAwait(false);
+                await _embeddingStore.TryRemove(_embedding, key, committedEvents.Last().AggregateRootVersion + 1, cancellationToken).ConfigureAwait(false);
                 return Try.Succeeded();
             }
             catch (Exception ex)

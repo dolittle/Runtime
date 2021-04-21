@@ -10,7 +10,10 @@ using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
-    public interface ICalculateStateTransistionEvents
+    /// <summary>
+    /// Defines a system that can calculate the events that needs to be committed in order to do a state transition from a current <see cref="EmbeddingCurrentState" /> to a desired <see cref="ProjectionState" />.
+    /// </summary>
+    public interface ICalculateStateTransitionEvents
     {
         /// <summary>
         /// Try to calculate the events necessary to transition from the current state to a desired state.

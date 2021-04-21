@@ -65,5 +65,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
         It should_project_the_second_event = () => projection.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), event_two, events_partition, cancellation_token));
         It should_project_the_third_event = () => projection.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), event_three, events_partition, cancellation_token));
         It should_store_the_final_state = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key, event_three.AggregateRootVersion + 1, result_after_three.State, cancellation_token));
+        It should_not_store_any_intermediate_states = () => embedding_store.VerifyNoOtherCalls();
     }
 }
