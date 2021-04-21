@@ -16,7 +16,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
 {
-    public class and_one_of_three_keys_fails : given.all_dependencies
+    public class and_two_of_three_keys_fails : given.all_dependencies
     {
         static Artifact aggregate_root_type;
         static Exception exception_a;
@@ -59,13 +59,13 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
             unprocessed_events_c = new CommittedAggregateEvents(event_source_c, aggregate_root_type.Id, new[] { event_c });
             result_c = new ProjectionReplaceResult("state-after-c");
 
-            embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new []{ projection_key_a, projection_key_b }));
+            embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key_a, projection_key_b, projection_key_c }));
 
             key_converter.Setup(_ => _.GetEventSourceIdFor(projection_key_a)).Returns(event_source_a);
             embedding_store.Setup(_ => _.TryGet(embedding, projection_key_a, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state_a));
             event_store.Setup(_ => _.FetchForAggregateAfter(event_source_a, embedding.Value, current_state_a.Version, cancellation_token)).Returns(Task.FromResult(unprocessed_events_a));
             projection.Setup(_ => _.Project(current_state_a, event_a, events_partition, cancellation_token)).Returns(Task.FromResult<IProjectionResult>(result_a));
-            embedding_store.Setup(_ => _.TryRemove(embedding, projection_key_a, event_a.AggregateRootVersion+1, cancellation_token)).Returns(Task.FromResult<Try>(exception_a));
+            embedding_store.Setup(_ => _.TryRemove(embedding, projection_key_a, event_a.AggregateRootVersion + 1, cancellation_token)).Returns(Task.FromResult<Try>(exception_a));
 
             key_converter.Setup(_ => _.GetEventSourceIdFor(projection_key_b)).Returns(event_source_b);
             embedding_store.Setup(_ => _.TryGet(embedding, projection_key_b, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(exception_b));
@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
             embedding_store.Setup(_ => _.TryGet(embedding, projection_key_c, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state_c));
             event_store.Setup(_ => _.FetchForAggregateAfter(event_source_c, embedding.Value, current_state_c.Version, cancellation_token)).Returns(Task.FromResult(unprocessed_events_c));
             projection.Setup(_ => _.Project(current_state_c, event_c, events_partition, cancellation_token)).Returns(Task.FromResult<IProjectionResult>(result_c));
-            embedding_store.Setup(_ => _.TryRemove(embedding, projection_key_c, event_c.AggregateRootVersion+1, cancellation_token)).Returns(Task.FromResult<Try>(true));
+            embedding_store.Setup(_ => _.TryReplace(embedding, projection_key_c, event_c.AggregateRootVersion + 1, result_c.State, cancellation_token)).Returns(Task.FromResult<Try>(true));
         };
 
         static Try result;
@@ -83,17 +83,14 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
         It should_fail = () => result.Success.ShouldBeFalse();
         It should_fail_with_the_first_error = () => result.Exception.ShouldBeTheSameAs(exception_a);
         It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
-        It should_ask_the_converter_for_event_source_id_a = () => key_converter.Verify(_ => _.GetEventSourceIdFor(projection_key_a));
         It should_get_the_last_state_from_the_embedding_store_for_a = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key_a, cancellation_token));
         It should_ask_the_event_store_for_new_events_for_a = () => event_store.Verify(_ => _.FetchForAggregateAfter(event_source_a, embedding.Value, current_state_a.Version, cancellation_token));
         It should_project_the_event_for_a = () => projection.Verify(_ => _.Project(current_state_a, event_a, events_partition, cancellation_token));
-        It should_delete_for_a = () => embedding_store.Verify(_ => _.TryRemove(embedding, projection_key_a, event_a.AggregateRootVersion+1, cancellation_token));
-        It should_ask_the_converter_for_event_source_id_b = () => key_converter.Verify(_ => _.GetEventSourceIdFor(projection_key_b));
+        It should_delete_for_a = () => embedding_store.Verify(_ => _.TryRemove(embedding, projection_key_a, event_a.AggregateRootVersion + 1, cancellation_token));
         It should_get_the_last_state_from_the_embedding_store_for_b = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key_b, cancellation_token));
-        It should_ask_the_converter_for_event_source_id_c = () => key_converter.Verify(_ => _.GetEventSourceIdFor(projection_key_c));
         It should_get_the_last_state_from_the_embedding_store_for_c = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key_c, cancellation_token));
         It should_ask_the_event_store_for_new_events_for_c = () => event_store.Verify(_ => _.FetchForAggregateAfter(event_source_c, embedding.Value, current_state_c.Version, cancellation_token));
         It should_project_the_event_for_c = () => projection.Verify(_ => _.Project(current_state_c, event_c, events_partition, cancellation_token));
-        It should_update_for_c = () => embedding_store.Verify(_ => _.TryRemove(embedding, projection_key_c, event_c.AggregateRootVersion+1, cancellation_token));
+        It should_update_for_c = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key_c, event_c.AggregateRootVersion + 1, result_c.State, cancellation_token));
     }
 }

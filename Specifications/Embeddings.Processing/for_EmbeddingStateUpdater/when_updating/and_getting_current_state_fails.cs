@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
             event_source = Guid.Parse("f05923c2-561d-4603-97bb-7fc17d808a8a");
             exception = new Exception();
 
-            embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new []{ projection_key }));
+            embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key }));
             key_converter.Setup(_ => _.GetEventSourceIdFor(projection_key)).Returns(event_source);
             embedding_store.Setup(_ => _.TryGet(embedding, projection_key, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(exception));
         };
@@ -36,7 +36,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
         It should_fail = () => result.Success.ShouldBeFalse();
         It should_fail_with_the_correct_error = () => result.Exception.ShouldBeTheSameAs(exception);
         It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
-        It should_ask_the_converter_for_the_event_source_id = () => key_converter.Verify(_ => _.GetEventSourceIdFor(projection_key));
         It should_get_the_last_state_from_the_embedding_store = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key, cancellation_token));
     }
 }

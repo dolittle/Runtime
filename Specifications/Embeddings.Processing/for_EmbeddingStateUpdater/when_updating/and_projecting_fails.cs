@@ -37,15 +37,15 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
             current_state = new EmbeddingCurrentState(3, ProjectionCurrentStateType.Persisted, "state-current", projection_key);
             event_one = new CommittedAggregateEvent(aggregate_root_type, 3, 10, DateTimeOffset.Now, event_source, execution_context, event_type, false, "event-one-content");
             event_two = new CommittedAggregateEvent(aggregate_root_type, 4, 11, DateTimeOffset.Now, event_source, execution_context, event_type, true, "event-two-content");
-            unprocessed_events = new CommittedAggregateEvents(event_source, aggregate_root_type.Id, new[] { event_one, event_two });
+            unprocessed_events = new CommittedAggregateEvents(event_source, aggregate_root_type.Id, new[] { event_one, event_two });
             result_after_one = new ProjectionReplaceResult("state-after-one");
             exception = new Exception();
             result_after_two = new ProjectionFailedResult(exception);
 
-            embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new []{ projection_key }));
+            embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key }));
             key_converter.Setup(_ => _.GetEventSourceIdFor(projection_key)).Returns(event_source);
             embedding_store.Setup(_ => _.TryGet(embedding, projection_key, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state));
-            embedding_store.Setup(_ => _.TryReplace(embedding, projection_key, event_one.AggregateRootVersion+1, result_after_one.State, cancellation_token)).Returns(Task.FromResult<Try>(true));
+            embedding_store.Setup(_ => _.TryReplace(embedding, projection_key, event_one.AggregateRootVersion + 1, result_after_one.State, cancellation_token)).Returns(Task.FromResult<Try>(true));
             event_store.Setup(_ => _.FetchForAggregateAfter(event_source, embedding.Value, current_state.Version, cancellation_token)).Returns(Task.FromResult(unprocessed_events));
             projection.Setup(_ => _.Project(current_state, event_one, events_partition, cancellation_token)).Returns(Task.FromResult<IProjectionResult>(result_after_one));
             projection.Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), event_two, events_partition, cancellation_token)).Returns(Task.FromResult<IProjectionResult>(result_after_two));
@@ -57,11 +57,10 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
         It should_fail = () => result.Success.ShouldBeFalse();
         It should_fail_with_the_correct_error = () => result.Exception.ShouldBeTheSameAs(exception);
         It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
-        It should_ask_the_converter_for_the_event_source_id = () => key_converter.Verify(_ => _.GetEventSourceIdFor(projection_key));
         It should_get_the_last_state_from_the_embedding_store = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key, cancellation_token));
         It should_ask_the_event_store_for_new_events = () => event_store.Verify(_ => _.FetchForAggregateAfter(event_source, embedding.Value, current_state.Version, cancellation_token));
         It should_project_the_first_event = () => projection.Verify(_ => _.Project(current_state, event_one, events_partition, cancellation_token));
         It should_project_the_second_event = () => projection.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), event_two, events_partition, cancellation_token));
-        It should_store_state_after_the_first_event = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key, event_one.AggregateRootVersion+1, result_after_one.State, cancellation_token));
+        It should_store_state_after_the_first_event = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key, event_one.AggregateRootVersion + 1, result_after_one.State, cancellation_token));
     }
 }

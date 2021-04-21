@@ -9,8 +9,11 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Projections.Store;
+using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Security;
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
 using Moq;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using Version = Dolittle.Runtime.Versioning.Version;
@@ -27,6 +30,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.given
         protected static Mock<IEventStore> event_store;
         protected static Mock<IEmbeddingStore> embedding_store;
         protected static Mock<IConvertProjectionKeysToEventSourceIds> key_converter;
+        protected static ProjectionState initial_state;
         protected static EmbeddingStateUpdater state_updater;
         protected static CancellationToken cancellation_token;
 
@@ -48,12 +52,15 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.given
             event_store = new Mock<IEventStore>();
             embedding_store = new Mock<IEmbeddingStore>();
             key_converter = new Mock<IConvertProjectionKeysToEventSourceIds>();
+            initial_state = "projection-initial-state";
             state_updater = new EmbeddingStateUpdater(
                 embedding,
                 projection.Object,
                 event_store.Object,
                 embedding_store.Object,
-                key_converter.Object);
+                key_converter.Object,
+                initial_state,
+                Mock.Of<ILogger>());
             cancellation_token = CancellationToken.None;
         };
     }
