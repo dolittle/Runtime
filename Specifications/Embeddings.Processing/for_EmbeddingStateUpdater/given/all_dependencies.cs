@@ -6,10 +6,8 @@ using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
-using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Security;
 using Machine.Specifications;
@@ -26,7 +24,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.given
         protected static PartitionId events_partition;
         protected static ExecutionContext execution_context;
         protected static Artifact event_type;
-        protected static Mock<IProjection> projection;
+        protected static Mock<IProjectManyEvents> project_many_events;
         protected static Mock<IEventStore> event_store;
         protected static Mock<IEmbeddingStore> embedding_store;
         protected static Mock<IConvertProjectionKeysToEventSourceIds> key_converter;
@@ -47,23 +45,19 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.given
                 Claims.Empty,
                 CultureInfo.InvariantCulture);
             event_type = new Artifact(Guid.Parse("c57caeef-ce47-46f5-ad2e-6133833b1846"), ArtifactGeneration.First);
-
-            projection = new Mock<IProjection>();
+            project_many_events = new Mock<IProjectManyEvents>();
             event_store = new Mock<IEventStore>();
             embedding_store = new Mock<IEmbeddingStore>();
             key_converter = new Mock<IConvertProjectionKeysToEventSourceIds>();
             initial_state = "projection-initial-state";
             state_updater = new EmbeddingStateUpdater(
                 embedding,
-                projection.Object,
                 event_store.Object,
                 embedding_store.Object,
                 key_converter.Object,
-                initial_state,
+                project_many_events.Object,
                 Mock.Of<ILogger>());
             cancellation_token = CancellationToken.None;
         };
     }
 }
-
-

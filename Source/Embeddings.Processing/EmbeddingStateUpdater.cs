@@ -6,11 +6,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
-using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Projections.Store;
 using Microsoft.Extensions.Logging;
 
@@ -22,38 +19,33 @@ namespace Dolittle.Runtime.Embeddings.Processing
     public class EmbeddingStateUpdater : IUpdateEmbeddingStates
     {
         readonly EmbeddingId _embedding;
-        readonly IProjection _projection;
         readonly IEventStore _eventStore;
         readonly IEmbeddingStore _embeddingStore;
         readonly IConvertProjectionKeysToEventSourceIds _keyToEventSourceConverter;
-        readonly ProjectionState _initialState;
+        readonly IProjectManyEvents _projectManyEvents;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EmbeddingStateUpdater"/> class.
         /// </summary>
         /// <param name="embedding">The <see cref="EmbeddingId"/> that identifies the embedding.</param>
-        /// <param name="projection">The <see cref="IProjection"/> that is used to update the state.</param>
         /// <param name="eventStore">The <see cref="IEventStore"/> that is used to fetch aggregate events.</param>
         /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> that is used to persist the states.</param>
         /// <param name="keyToEventSourceConverter">The <see cref="IConvertProjectionKeysToEventSourceIds"/> to use for converting projection keys to event source ids.</param>
-        /// <param name="initialState">The <see cref="ProjectionState"/> that is used to initialize newly created states.</param>
         /// <param name="logger">The <see cref="ILogger"/>.</param>
-        public EmbeddingStateUpdater(
+        public mbeEmbeddingStateUpdater(
             EmbeddingId embedding,
-            IProjection projection,
             IEventStore eventStore,
             IEmbeddingStore embeddingStore,
             IConvertProjectionKeysToEventSourceIds keyToEventSourceConverter,
-            ProjectionState initialState,
+            IProjectManyEvents projectManyEvents,
             ILogger logger)
         {
             _embedding = embedding;
-            _projection = projection;
             _eventStore = eventStore;
             _embeddingStore = embeddingStore;
             _keyToEventSourceConverter = keyToEventSourceConverter;
-            _initialState = initialState;
+            _projectManyEvents = projectManyEvents;
             _logger = logger;
         }
 
@@ -103,8 +95,20 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 return Try.Succeeded();
             }
 
-            return await TryProjectAll(currentState, unprocessedEvents, cancellationToken).ConfigureAwait(false);
+            var projectedState = await _projectManyEvents.TryProject(currentState, unprocessedEvents, cancellationToken).ConfigureAwait(false);
+            if (!projectedState.Success && !projectedState.IsPartialResult)
+            {
+                return Try.Failed(projectedState.Exception);
+            }
 
+            if (projectedState.Result.Type == EmbeddingCurrentStateType.Deleted)
+            {
+                return await _embeddingStore.TryRemove(_embedding, projectedState.Result.Key, projectedState.Result.Version, cancellationToken);
+            }
+            else
+            {
+                return await _embeddingStore.TryReplace(_embedding, projectedState.Result.Key, projectedState.Result.Version, projectedState.Result.State, cancellationToken);
+            }
         }
 
         async Task<Try<CommittedAggregateEvents>> TryGetUnprocessedEvents(ProjectionKey key, AggregateRootVersion aggregateRootVersion, CancellationToken cancellationToken)
@@ -118,66 +122,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             {
                 return ex;
             }
-
         }
-
-        async Task<Try> TryProjectAll(ProjectionCurrentState currentState, CommittedAggregateEvents events, CancellationToken cancellationToken)
-        {
-            try
-            {
-                var result = Try.Succeeded();
-                foreach (var @event in events)
-                {
-                    var projectionResult = await _projection.Project(currentState, @event, PartitionId.None, cancellationToken).ConfigureAwait(false);
-                    if (projectionResult is ProjectionFailedResult failedResult)
-                    {
-                        return failedResult.Exception;
-                    }
-                    else if (projectionResult is ProjectionReplaceResult replaceResult)
-                    {
-                        currentState = new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, replaceResult.State, currentState.Key);
-                        result = await _embeddingStore.TryReplace(
-                            _embedding,
-                            currentState.Key,
-                            @event.AggregateRootVersion.Value + 1,
-                            replaceResult.State,
-                            cancellationToken).ConfigureAwait(false);
-                    }
-                    else if (projectionResult is ProjectionDeleteResult deleteResult)
-                    {
-                        currentState = new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, _initialState, currentState.Key);
-                        result = await _embeddingStore.TryRemove(
-                            _embedding,
-                            currentState.Key,
-                            @event.AggregateRootVersion.Value + 1,
-                            cancellationToken).ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        return new UnknownProjectionResultType(projectionResult);
-                    }
-                }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return ex;
-            }
-        }
-    }
-
-    /// <summary>
-    /// Defines a system that can project many events.
-    /// </summary>
-    public interface IProjectManyEvents
-    {
-        /// <summary>
-        /// Tries to project all the <see cref="CommittedAggregateEvents" />.
-        /// </summary>
-        /// <param name="currentState"></param>
-        /// <param name="events"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        Task<Try<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, CommittedAggregateEvents events, CancellationToken cancellationToken);
     }
 }

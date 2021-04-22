@@ -9,7 +9,7 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_updating
 {
     public class and_getting_keys_fail : given.all_dependencies
     {
