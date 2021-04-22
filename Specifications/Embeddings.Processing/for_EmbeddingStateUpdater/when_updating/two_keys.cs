@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
             projection_key_b = "key-b";
             event_source_b = Guid.Parse("760a14d6-639d-4eba-9e7e-48675631bdd2");
             current_state_b = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "state-initial-b", projection_key_b);
-            unprocessed_event_b = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 1, 10, DateTimeOffset.Now, event_source_b, execution_context, event_type, false, "event-two-content");
+            unprocessed_event_b = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 0, 12, DateTimeOffset.Now, event_source_b, execution_context, event_type, false, "event-two-content");
             unprocessed_events_b = new CommittedAggregateEvents(event_source_b, embedding.Value, new[] { unprocessed_event_b });
             projection_result_b = new EmbeddingCurrentState(current_state_b.Version + 1, EmbeddingCurrentStateType.Persisted, current_state_b.State, current_state_b.Key);
 
@@ -95,7 +95,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
         It should_get_the_last_state_from_the_embedding_store_for_b = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key_b, cancellation_token));
         It should_ask_the_event_store_for_new_events_for_b = () => event_store.Verify(_ => _.FetchForAggregateAfter(event_source_b, embedding.Value, current_state_b.Version, cancellation_token));
         It should_project_the_events_for_b = () => project_many_events.Verify(_ => _.TryProject(current_state_b, unprocessed_events_b, cancellation_token));
-        It should_replace_for_b = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key_b, projection_result_a.Version, projection_result_a.State, cancellation_token));
+        It should_replace_for_b = () => embedding_store.Verify(_ => _.TryReplace(embedding, projection_key_b, projection_result_b.Version, projection_result_b.State, cancellation_token));
         It should_not_store_anything_else = () => embedding_store.VerifyNoOtherCalls();
     }
 }

@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> that is used to persist the states.</param>
         /// <param name="keyToEventSourceConverter">The <see cref="IConvertProjectionKeysToEventSourceIds"/> to use for converting projection keys to event source ids.</param>
         /// <param name="logger">The <see cref="ILogger"/>.</param>
-        public mbeEmbeddingStateUpdater(
+        public EmbeddingStateUpdater(
             EmbeddingId embedding,
             IEventStore eventStore,
             IEmbeddingStore embeddingStore,

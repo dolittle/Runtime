@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
             event_source = Guid.Parse("642ca1f2-c8e1-4e5c-a213-246ce95a8376");
             current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
             unprocessed_event = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 3, 10, DateTimeOffset.Now, event_source, execution_context, event_type, false, "event-one-content");
-            unprocessed_events = new CommittedAggregateEvents(event_source, embedding.Value, new[] { committed_event });
+            unprocessed_events = new CommittedAggregateEvents(event_source, embedding.Value, new[] { unprocessed_event });
             projection_result = new EmbeddingCurrentState(current_state.Version.Value + 3, EmbeddingCurrentStateType.Persisted, "state-updated", projection_key);
 
             embedding_store
