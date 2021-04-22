@@ -93,13 +93,13 @@ namespace Dolittle.Runtime.Rudimentary
         /// </summary>
         /// <param name="success">The <see cref="bool" /> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try(bool success) => new(success);
+        public static implicit operator Try(bool success) => success ? Succeeded() : Failed();
 
         /// <summary>
         /// Implicitly convert <see cref="bool" /> to <see cref="Try" />.
         /// </summary>
         /// <param name="exception">The <see cref="System.Exception" /> to convert.</param>
         /// <return><see cref="Try" />.</return>
-        public static implicit operator Try(Exception exception) => new(exception);
+        public static implicit operator Try(Exception exception) => Failed(exception);
     }
 }

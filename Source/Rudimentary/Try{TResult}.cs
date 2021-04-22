@@ -16,14 +16,14 @@ namespace Dolittle.Runtime.Rudimentary
             Result = result;
         }
 
-        protected Try() : base(false) {}
+        protected Try() : base(false) { }
 
-        protected Try(Exception exception) : base(exception) {}
+        protected Try(Exception exception) : base(exception) { }
 
         /// <summary>
         /// Gets the <typeparamref name="TResult">result</typeparamref>.
         /// </summary>
-        public TResult Result { get; }
+        public TResult Result { get; protected set; }
 
         /// <summary>
         /// Projects the successfull result if the operation succeeded, or returns the original failure if the operation failed.
@@ -90,13 +90,13 @@ namespace Dolittle.Runtime.Rudimentary
         /// </summary>
         /// <param name="result">The <typeparamref name="TResult">result</typeparamref> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>(TResult result) => new(result);
+        public static implicit operator Try<TResult>(TResult result) => Succeeded(result);
 
         /// <summary>
         /// Implicitly convert <see cref="bool" /> to <see cref="Try{TResult}" />.
         /// </summary>
         /// <param name="exception">The <see cref="Exception" /> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>(Exception exception) => new(exception);
+        public static implicit operator Try<TResult>(Exception exception) => Failed(exception);
     }
 }
