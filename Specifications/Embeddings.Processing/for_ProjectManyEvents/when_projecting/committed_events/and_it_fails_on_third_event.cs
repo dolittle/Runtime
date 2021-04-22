@@ -61,8 +61,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
 
         It should_fail = () => result.Success.ShouldBeFalse();
         It should_be_a_partial_success = () => result.IsPartialResult.ShouldBeTrue();
-        It should_fail_wih_the_correct_exception = () => result.Exception.ShouldBeTheSameAs(exception);
-        It should_return_the_second_result = () => result.Result.ShouldBeTheSameAs(result_after_two);
+        It should_fail_wih_the_correct_exception = () => result.Exception.ShouldEqual(exception);
+        It should_return_the_second_state = () => result.Result.State.ShouldEqual(result_after_two.State);
+        It should_return_a_persisted_result = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
+        It should_return_the_same_key = () => result.Result.Key.ShouldEqual(projection_key);
+        It should_return_the_correct_aggregate_root_version = () => result.Result.Version.Value.ShouldEqual(current_state.Version.Value + 2);
         It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token));
         It should_project_the_second_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_two.Content), cancellation_token));
         It should_project_the_third_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), cancellation_token));

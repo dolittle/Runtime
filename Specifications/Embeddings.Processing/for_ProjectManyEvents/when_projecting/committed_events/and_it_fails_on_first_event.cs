@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
 
         It should_fail = () => result.Success.ShouldBeFalse();
         It should_not_be_a_partial_success = () => result.IsPartialResult.ShouldBeFalse();
-        It should_fail_with_the_correct_error = () => result.Exception.ShouldBeTheSameAs(exception);
+        It should_fail_with_the_correct_error = () => result.Exception.ShouldEqual(exception);
         It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token));
         It should_only_project_the_first_event = () => embedding.VerifyNoOtherCalls();
     }

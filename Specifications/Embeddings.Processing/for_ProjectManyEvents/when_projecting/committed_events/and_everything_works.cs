@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
         static CommittedAggregateEvent event_three;
         static CommittedAggregateEvents unprocessed_events;
         static ProjectionReplaceResult result_after_one;
-        static ProjectionReplaceResult result_after_two;
+        static ProjectionDeleteResult result_after_two;
         static ProjectionReplaceResult result_after_three;
 
         Establish context = () =>
@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
             event_three = new CommittedAggregateEvent(aggregate_root_type, 5, 12, DateTimeOffset.Now, event_source, execution_context, event_type, false, "event-three-content");
             unprocessed_events = new CommittedAggregateEvents(event_source, aggregate_root_type.Id, new[] { event_one, event_two, event_three });
             result_after_one = new ProjectionReplaceResult("state-after-one");
-            result_after_two = new ProjectionReplaceResult("state-after-two");
+            result_after_two = new ProjectionDeleteResult();
             result_after_three = new ProjectionReplaceResult("state-after-three");
             embedding
                 .Setup(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token))
@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
                 .Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_two.Content), cancellation_token))
                 .Returns(Task.FromResult<IProjectionResult>(result_after_two));
             embedding
-                .Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), cancellation_token))
+                .Setup(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == initial_state), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), cancellation_token))
                 .Returns(Task.FromResult<IProjectionResult>(result_after_three));
         };
 
@@ -58,9 +58,13 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
         Because of = () => result = project_many_events.TryProject(current_state, unprocessed_events, cancellation_token).GetAwaiter().GetResult();
 
         It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_return_the_last_result = () => result.Result.ShouldBeTheSameAs(result_after_three);
+
+        It should_return_the_third_state = () => result.Result.State.ShouldEqual(result_after_three.State);
+        It should_return_a_persisted_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
+        It should_return_the_same_key = () => result.Result.Key.ShouldEqual(projection_key);
+        It should_return_the_correct_aggregate_root_version = () => result.Result.Version.Value.ShouldEqual(event_three.AggregateRootVersion.Value + 1);
         It should_project_the_first_event = () => embedding.Verify(_ => _.Project(current_state, Moq.It.Is<UncommittedEvent>(_ => _.Content == event_one.Content), cancellation_token));
         It should_project_the_second_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_one.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_two.Content), cancellation_token));
-        It should_project_the_third_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == result_after_two.State.Value), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), cancellation_token));
+        It should_project_the_third_event = () => embedding.Verify(_ => _.Project(Moq.It.Is<ProjectionCurrentState>(_ => _.State.Value == initial_state && _.Type == ProjectionCurrentStateType.CreatedFromInitialState), Moq.It.Is<UncommittedEvent>(_ => _.Content == event_three.Content), cancellation_token));
     }
 }

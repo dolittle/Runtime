@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
@@ -40,53 +41,53 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         /// <inheritdoc/>
         public Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, CommittedAggregateEvents events, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-            // try
-            // {
-            //     _logger.LogDebug("Trying to projection {NumEvents} events on embedding {Embedding} and key {Key}", events.Count, _embedding, currentState.Key);
-            //     foreach (var @event in events)
-            //     {
-            //         var projectionResult = await _projection.Project(currentState, @event, PartitionId.None, cancellationToken).ConfigureAwait(false);
-            //         if (!TryHandleProjectionResult(projectionResult, @event.AggregateRootVersion, currentState.Key, out var projectedState, out var error))
-            //         {
-            //             return currentState == null ? ;
-            //         }
-            //     }
-            //     return currentState;
-            // }
-            // catch (Exception ex)
-            // {
-            //     return ex;
-            // }
-        }
+            => TryProject(
+                currentState,
+                new UncommittedEvents(events.Select(_ => new UncommittedEvent(_.EventSource, _.Type, _.Public, _.Content)).ToList()),
+                cancellationToken);
 
         /// <inheritdoc/>
-        public Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken)
+        public async Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                _logger.LogDebug("Trying to project {NumEvents} events on embedding {Embedding} and key {Key}", events.Count, _identifier, currentState.Key);
+                for (var i = 0; i < events.Count; i++)
+                {
+                    var tryProject = await TryProjectOne(currentState, events[i], cancellationToken).ConfigureAwait(false);
+                    if (!tryProject.Success)
+                    {
+                        if (i == 0)
+                        {
+                            return tryProject.Exception;
+                        }
+                        return Partial<EmbeddingCurrentState>.PartialSuccess(currentState, tryProject.Exception);
+                    }
+                    currentState = tryProject.Result;
+                }
+                return currentState;
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
-        // bool TryHandleProjectionResult(IProjectionResult result, AggregateRootVersion aggregateRootVersion, ProjectionKey key, out EmbeddingCurrentState currentState, out Exception error)
-        // {
-        //     currentState = null;
-        //     error = null;
-        //     switch (result)
-        //     {
-        //         case ProjectionFailedResult failedResult:
-        //             error = failedResult.Exception;
-        //             return false;
-        //         case ProjectionReplaceResult replaceResult:
-        //             currentState = new EmbeddingCurrentState(aggregateRootVersion, EmbeddingCurrentStateType.Persisted, replaceResult.State, key);
-        //             return true;
-        //         case ProjectionDeleteResult:
-        //             currentState = new EmbeddingCurrentState(aggregateRootVersion, EmbeddingCurrentStateType.Deleted, _initialState, key);
-        //             return true;
-        //         default:
-        //             error = new UnknownProjectionResultType(result);
-        //             return false;
-
-        //     }
-        // }
+        async Task<Try<EmbeddingCurrentState>> TryProjectOne(EmbeddingCurrentState currentState, UncommittedEvent @event, CancellationToken cancellationToken)
+        {
+            var result = await _embedding.Project(currentState, @event, cancellationToken).ConfigureAwait(false);
+            var nextAggregateRootVersion = currentState.Version.Value + 1;
+            switch (result)
+            {
+                case ProjectionFailedResult failedResult:
+                    return failedResult.Exception;
+                case ProjectionReplaceResult replaceResult:
+                    return new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Persisted, replaceResult.State, currentState.Key);
+                case ProjectionDeleteResult:
+                    return new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Deleted, _initialState, currentState.Key);
+                default:
+                    return new UnknownProjectionResultType(result);
+            }
+        }
     }
 }
