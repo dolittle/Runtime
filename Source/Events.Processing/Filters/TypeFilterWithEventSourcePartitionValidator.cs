@@ -15,20 +15,20 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     [SingletonPerTenant]
     public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
     {
-        readonly IValidateFilterByComparingStreams _byComparingStreams;
+        readonly IValidateFilterByComparingEventTypes _byComparingEventTypes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
         /// </summary>
-        /// <param name="byComparingStreams">The <see cref="IValidateFilterByComparingStreams" />.</param>
+        /// <param name="byComparingEventTypes">The <see cref="IValidateFilterByComparingEventTypes" />.</param>
         public TypeFilterWithEventSourcePartitionValidator(
-            IValidateFilterByComparingStreams byComparingStreams)
+            IValidateFilterByComparingEventTypes byComparingEventTypes)
         {
-            _byComparingStreams = byComparingStreams;
+            _byComparingEventTypes = byComparingEventTypes;
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate(IFilterDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken) =>
-            _byComparingStreams.Validate(persistedDefinition, filter, cancellationToken);
+        public Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken) =>
+            _byComparingEventTypes.Validate(persistedDefinition, filter, cancellationToken);
     }
 }

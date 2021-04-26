@@ -46,13 +46,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             _logger.FindingFilterValidator(filter.Identifier);
 
+            if (FilterDefinitionTypeHasChanged(persistedDefinition, filter.Definition))
+            {
+                return Task.FromResult(new FilterValidationResult("Filter definition type has changed"));
+            }
+
             if (TryGetValidatorFor<TDefinition>(out var validator))
             {
                 _logger.ValidatingFilter(filter.Identifier);
-                return validator.Validate(persistedDefinition, filter, cancellationToken);
+                return validator.Validate((TDefinition)persistedDefinition, filter, cancellationToken);
             }
 
-            return Task.FromResult(new FilterValidationResult());
+            return Task.FromResult(new FilterValidationResult($"No available filter validator for type {filter.Definition.GetType()}"));
         }
 
         void PopulateFilterValidatorMap()
@@ -66,6 +71,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 }
             });
         }
+
+        bool FilterDefinitionTypeHasChanged<TDefinition>(IFilterDefinition persitedDefiniton, TDefinition registeredDefinition)
+            => persitedDefiniton.GetType() != registeredDefinition.GetType();
 
         bool TryGetValidatorTypeFor(Type filterDefinitionType, out Type validatorType)
         {

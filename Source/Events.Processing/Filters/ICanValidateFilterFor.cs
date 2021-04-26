@@ -17,10 +17,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Validates a filter of with definition <see typeparam="TDefinition" />.
         /// </summary>
-        /// <param name="persistedDefinition">The persisted <see cref="IFilterDefinition" />.</param>
+        /// <param name="persistedDefinition">The persisted <typeparamref name="TDefinition"/>.</param>
         /// <param name="filter">The <see cref="IFilterProcessor{TDefinition}" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns><see cref="FilterValidationResult" />.</returns>
-        Task<FilterValidationResult> Validate(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken);
+        Task<FilterValidationResult> Validate(TDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken);
     }
 }
