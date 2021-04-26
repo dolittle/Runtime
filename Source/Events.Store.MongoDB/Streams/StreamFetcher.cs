@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         readonly FilterDefinitionBuilder<TEvent> _filter;
         readonly Expression<Func<TEvent, Guid>> _partitionIdExpression;
         readonly Expression<Func<TEvent, ulong>> _sequenceNumberExpression;
-        readonly ProjectionDefinition<TEvent, Store.Streams.StreamEvent> _eventToStreamEvent;
+        readonly ProjectionDefinition<TEvent, StreamEvent> _eventToStreamEvent;
         readonly ProjectionDefinition<TEvent, Artifact> _eventToArtifact;
 
         /// <summary>
@@ -33,14 +33,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="stream">The <see cref="IMongoCollection{TDocument}" />.</param>
         /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
         /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
-        /// <param name="eventToStreamEvent">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="Store.Streams.StreamEvent" />.</param>
+        /// <param name="eventToStreamEvent">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="StreamEvent" />.</param>
         /// <param name="eventToArtifact">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to <see cref="Artifact" />.</param>
         /// <param name="partitionIdExpression">The <see cref="Expression{T}" /> for getting the <see cref="Guid" /> for the Partition Id from the stored event.</param>
         public StreamFetcher(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             Expression<Func<TEvent, ulong>> sequenceNumberExpression,
-            ProjectionDefinition<TEvent, Store.Streams.StreamEvent> eventToStreamEvent,
+            ProjectionDefinition<TEvent, StreamEvent> eventToStreamEvent,
             ProjectionDefinition<TEvent, Artifact> eventToArtifact,
             Expression<Func<TEvent, Guid>> partitionIdExpression = default)
         {
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Try<Store.Streams.StreamEvent>> Fetch(
+        public async Task<Try<StreamEvent>> Fetch(
             StreamPosition streamPosition,
             CancellationToken cancellationToken)
         {
@@ -72,7 +72,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<Try<Store.Streams.StreamEvent>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
+        public async Task<Try<StreamEvent>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             try
             {
@@ -91,7 +91,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Store.Streams.StreamEvent>> FetchRange(
+        public async Task<IEnumerable<StreamEvent>> FetchRange(
             StreamPositionRange range,
             CancellationToken cancellationToken)
         {
@@ -113,17 +113,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchInRange(
+        public async Task<ISet<Artifact>> FetchInRange(
             StreamPositionRange range,
             CancellationToken cancellationToken)
         {
             try
             {
-                return await _stream
+                var types = await _stream
                     .Find(_filter.Gte(_sequenceNumberExpression, range.From.Value)
                         & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
                     .Project(_eventToArtifact)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
+                return new HashSet<Artifact>(types);
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -132,16 +133,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<IEnumerable<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken)
+        public async Task<ISet<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken)
         {
             try
             {
-                return await _stream
+                var types = await _stream
                     .Find(_filter.Eq(_partitionIdExpression, partitionId.Value)
                         & _filter.Gte(_sequenceNumberExpression, range.From.Value)
                         & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
                     .Project(_eventToArtifact)
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
+                return new HashSet<Artifact>(types);
             }
             catch (MongoWaitQueueFullException ex)
             {
