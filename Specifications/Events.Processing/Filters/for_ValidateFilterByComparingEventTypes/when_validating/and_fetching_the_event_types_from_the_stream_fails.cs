@@ -14,7 +14,7 @@ using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingEventTypes.when_validating
 {
-    public class and_source_stream_does_not_contain_the_added_event_type : given.all_dependencies
+    public class and_fetching_the_event_types_from_the_stream_fails : given.all_dependencies
     {
         protected static TypeFilterWithEventSourcePartitionDefinition new_filter_definition;
 
@@ -35,14 +35,15 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
                 .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
                 .Returns(Task.FromResult<Try<IStreamProcessorState>>(new StreamProcessorState(42, DateTimeOffset.Now)));
 
+            
             types_fetcher
                 .Setup(_ => _.FetchInRange(new StreamPositionRange(0, 42), cancellation_token))
-                .Returns(Task.FromResult<ISet<Artifact>>(new HashSet<Artifact>(new[] { filter_definition_event_type_one, filter_definition_event_type_three})));
+                .Returns(Task.FromException<ISet<Artifact>>(new Exception()));
         };
 
         static FilterValidationResult result;
         Because of = () => result = validator.Validate(new_filter_definition, filter_processor, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
+        It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
     }
 }
