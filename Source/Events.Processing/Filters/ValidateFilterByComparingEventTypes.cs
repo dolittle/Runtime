@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -9,12 +10,14 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Lifecycle;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
     /// <summary>
     /// Represents an implementation of <see cref="IValidateFilterByComparingEventTypes"/>.
     /// </summary>
+    [SingletonPerTenant]
     public class ValidateFilterByComparingEventTypes : IValidateFilterByComparingEventTypes
     {
         readonly IEventFetchers _eventFetchers;
@@ -57,6 +60,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
                 cancellationToken)
                 .ConfigureAwait(false);
+            if (tryGetState.HasException)
+            {
+                return new FilterValidationResult(tryGetState.Exception.Message);
+            }
             if (!tryGetState.Success)
             {
                 return new FilterValidationResult();
@@ -68,21 +75,28 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 return new FilterValidationResult();
             }
             
-            var streamTypesFetcher = await _eventFetchers.GetTypeFetcherFor(
-                filter.Scope,
-                new EventLogStreamDefinition(),
-                cancellationToken).ConfigureAwait(false);
-
-            var typesInSourceStream = await streamTypesFetcher.FetchInRange(
-                new StreamPositionRange(StreamPosition.Start, lastUnprocessedEventPosition),
-                cancellationToken).ConfigureAwait(false);
-
-            if (SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes))
+            try
             {
-                return new FilterValidationResult("The new filter definition has added or removed event types that have already been filtered");
-            }
+                var streamTypesFetcher = await _eventFetchers.GetTypeFetcherFor(
+                    filter.Scope,
+                    new EventLogStreamDefinition(),
+                    cancellationToken).ConfigureAwait(false);
 
-            return new FilterValidationResult();
+                var typesInSourceStream = await streamTypesFetcher.FetchInRange(
+                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEventPosition),
+                    cancellationToken).ConfigureAwait(false);
+
+                if (SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes))
+                {
+                    return new FilterValidationResult("The new filter definition has added or removed event types that have already been filtered");
+                }
+
+                return new FilterValidationResult();
+            }
+            catch (Exception exception)
+            {
+                return new FilterValidationResult(exception.Message);
+            }
         }
 
         ISet<ArtifactId> GetChangedEventTypes(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, TypeFilterWithEventSourcePartitionDefinition registeredDefinition)
