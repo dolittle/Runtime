@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Machine.Specifications;
 
@@ -15,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
         {
         };
 
-        Because of = () => result = validator.Validate(new PublicFilterDefinition(source_stream, target_stream), filter_processor.Object, CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = validator.Validate(new PublicFilterDefinition(source_stream, target_stream), filter_processor.Object, cancellation_token).GetAwaiter().GetResult();
         It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
     }
 }

@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Threading;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating
@@ -10,7 +9,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
     {
         static FilterValidationResult result;
 
-        Because of = () => result = validator.Validate(null, filter_processor.Object, CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = validator.Validate(null, filter_processor.Object, cancellation_token).GetAwaiter().GetResult();
         It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
     }
 }
