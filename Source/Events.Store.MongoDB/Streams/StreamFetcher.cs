@@ -27,7 +27,32 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         readonly Expression<Func<TEvent, StreamEvent>> _eventToStreamEvent;
         readonly Expression<Func<TEvent, Guid>> _eventToArtifactId;
         readonly Expression<Func<TEvent, uint>> _eventToArtifactGeneration;
-        readonly Expression<Func<TEvent, Guid>> _partitionIdExpression;
+        readonly Expression<Func<TEvent, Guid>> _partitionIdExpression = default;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="StreamFetcher{T}"/> class.
+        /// </summary>
+        /// <param name="stream">The <see cref="IMongoCollection{TDocument}" />.</param>
+        /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
+        /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
+        /// <param name="eventToStreamEvent">The <see cref="Expression{T}" /> for projecting the stored event to a <see cref="StreamEvent" />.</param>
+        /// <param name="eventToArtifact">The <see cref="Expression{T}" /> for projecting the stored event to <see cref="Artifact" />.</param>
+        /// <param name="partitionIdExpression">The <see cref="Expression{T}" /> for getting the <see cref="Guid" /> for the Partition Id from the stored event.</param>
+        public StreamFetcher(
+            IMongoCollection<TEvent> stream,
+            FilterDefinitionBuilder<TEvent> filter,
+            Expression<Func<TEvent, ulong>> sequenceNumberExpression,
+            Expression<Func<TEvent, StreamEvent>> eventToStreamEvent,
+            Expression<Func<TEvent, Guid>> eventToArtifactId,
+            Expression<Func<TEvent, uint>> eventToArtifactGeneration)
+        {
+            _stream = stream;
+            _filter = filter;
+            _sequenceNumberExpression = sequenceNumberExpression;
+            _eventToStreamEvent = eventToStreamEvent;
+            _eventToArtifactId = eventToArtifactId;
+            _eventToArtifactGeneration = eventToArtifactGeneration;
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamFetcher{T}"/> class.
@@ -45,14 +70,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             Expression<Func<TEvent, StreamEvent>> eventToStreamEvent,
             Expression<Func<TEvent, Guid>> eventToArtifactId,
             Expression<Func<TEvent, uint>> eventToArtifactGeneration,
-            Expression<Func<TEvent, Guid>> partitionIdExpression = default)
+            Expression<Func<TEvent, Guid>> partitionIdExpression)
+            :this(stream, filter, sequenceNumberExpression, eventToStreamEvent, eventToArtifactId, eventToArtifactGeneration)
         {
-            _stream = stream;
-            _filter = filter;
-            _sequenceNumberExpression = sequenceNumberExpression;
-            _eventToStreamEvent = eventToStreamEvent;
-            _eventToArtifactId = eventToArtifactId;
-            _eventToArtifactGeneration = eventToArtifactGeneration;
             _partitionIdExpression = partitionIdExpression;
         }
 
@@ -78,6 +98,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <inheritdoc/>
         public async Task<Try<StreamEvent>> FetchInPartition(PartitionId partitionId, StreamPosition streamPosition, CancellationToken cancellationToken)
         {
+            ThrowIfNotConstructedWithPartitionIdExpression();
             try
             {
                 var @event = await _stream.Find(
@@ -124,12 +145,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 cancellationToken);
 
         /// <inheritdoc/>
-        public Task<ISet<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken)
-            => FetchTypesWithFilter(
+        public async Task<ISet<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken)
+        {
+            ThrowIfNotConstructedWithPartitionIdExpression();
+            return await FetchTypesWithFilter(
                 _filter.Eq(_partitionIdExpression, partitionId.Value)
                     & _filter.Gte(_sequenceNumberExpression, range.From.Value)
                     & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length),
-                cancellationToken);
+                cancellationToken).ConfigureAwait(false);
+        }
 
         public async Task<ISet<Artifact>> FetchTypesWithFilter(FilterDefinition<TEvent> filter, CancellationToken cancellationToken)
         {
@@ -173,6 +197,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             public Guid Id { get; set; }
 
             public IEnumerable<uint> Generations { get; set; }
+        }
+
+        void ThrowIfNotConstructedWithPartitionIdExpression()
+        {
+            if (_partitionIdExpression == default)
+            {
+                throw new StreamFetcherWasNotConstructedWithPartitionIdExpression();
+            }
         }
     }
 }
