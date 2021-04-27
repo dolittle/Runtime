@@ -117,36 +117,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         /// <inheritdoc/>
-        public async Task<ISet<Artifact>> FetchInRange(
-            StreamPositionRange range,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                var typesWithGenerations = await _stream
-                    .Aggregate()
-                    .Match(_filter.Gte(_sequenceNumberExpression, range.From.Value)
-                        & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Group(_eventToArtifactId, _ => new ArtifactWithGenerations(_.Key, _.AsQueryable().Select(_eventToArtifactGeneration).Distinct()))
-                    .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return ExpandToArtifacts(typesWithGenerations);
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-        }
+        public Task<ISet<Artifact>> FetchInRange(StreamPositionRange range, CancellationToken cancellationToken)
+            => FetchTypesWithFilter(
+                _filter.Gte(_sequenceNumberExpression, range.From.Value)
+                    & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length),
+                cancellationToken);
 
         /// <inheritdoc/>
-        public async Task<ISet<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken)
+        public Task<ISet<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken)
+            => FetchTypesWithFilter(
+                _filter.Eq(_partitionIdExpression, partitionId.Value)
+                    & _filter.Gte(_sequenceNumberExpression, range.From.Value)
+                    & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length),
+                cancellationToken);
+
+        public async Task<ISet<Artifact>> FetchTypesWithFilter(FilterDefinition<TEvent> filter, CancellationToken cancellationToken)
         {
             try
             {
                 var typesWithGenerations = await _stream
                     .Aggregate()
-                    .Match(_filter.Eq(_partitionIdExpression, partitionId.Value)
-                        & _filter.Gte(_sequenceNumberExpression, range.From.Value)
-                        & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
+                    .Match(filter)
                     .Group(_eventToArtifactId, _ => new ArtifactWithGenerations(_.Key, _.AsQueryable().Select(_eventToArtifactGeneration).Distinct()))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return ExpandToArtifacts(typesWithGenerations);
