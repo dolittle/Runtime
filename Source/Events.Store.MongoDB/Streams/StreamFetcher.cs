@@ -22,10 +22,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
     {
         readonly IMongoCollection<TEvent> _stream;
         readonly FilterDefinitionBuilder<TEvent> _filter;
-        readonly Expression<Func<TEvent, Guid>> _partitionIdExpression;
         readonly Expression<Func<TEvent, ulong>> _sequenceNumberExpression;
-        readonly ProjectionDefinition<TEvent, StreamEvent> _eventToStreamEvent;
-        readonly ProjectionDefinition<TEvent, Artifact> _eventToArtifact;
+        readonly Expression<Func<TEvent, StreamEvent>> _eventToStreamEvent;
+        readonly Expression<Func<TEvent, Artifact>> _eventToArtifact;
+        readonly Expression<Func<TEvent, Guid>> _partitionIdExpression;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamFetcher{T}"/> class.
@@ -33,15 +33,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// <param name="stream">The <see cref="IMongoCollection{TDocument}" />.</param>
         /// <param name="filter">The <see cref="FilterDefinitionBuilder{TDocument}" />.</param>
         /// <param name="sequenceNumberExpression">The <see cref="Expression{T}" /> for getting the sequence number from the stored event.</param>
-        /// <param name="eventToStreamEvent">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to a <see cref="StreamEvent" />.</param>
-        /// <param name="eventToArtifact">The <see cref="ProjectionDefinition{TSource, TProjection}" /> for projecting the stored event to <see cref="Artifact" />.</param>
+        /// <param name="eventToStreamEvent">The <see cref="Expression{T}" /> for projecting the stored event to a <see cref="StreamEvent" />.</param>
+        /// <param name="eventToArtifact">The <see cref="Expression{T}" /> for projecting the stored event to <see cref="Artifact" />.</param>
         /// <param name="partitionIdExpression">The <see cref="Expression{T}" /> for getting the <see cref="Guid" /> for the Partition Id from the stored event.</param>
         public StreamFetcher(
             IMongoCollection<TEvent> stream,
             FilterDefinitionBuilder<TEvent> filter,
             Expression<Func<TEvent, ulong>> sequenceNumberExpression,
-            ProjectionDefinition<TEvent, StreamEvent> eventToStreamEvent,
-            ProjectionDefinition<TEvent, Artifact> eventToArtifact,
+            Expression<Func<TEvent, StreamEvent>> eventToStreamEvent,
+            Expression<Func<TEvent, Artifact>> eventToArtifact,
             Expression<Func<TEvent, Guid>> partitionIdExpression = default)
         {
             _stream = stream;

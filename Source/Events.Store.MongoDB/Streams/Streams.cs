@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         const string StreamDefinitionCollectionName = "stream-definitions";
 
         readonly ILogger _logger;
-        readonly IMongoCollection<MongoDB.Streams.StreamDefinition> _streamDefinitions;
+        readonly IMongoCollection<StreamDefinition> _streamDefinitions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Streams"/> class.
@@ -32,33 +32,33 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             _logger = logger;
 
-            DefaultEventLog = Database.GetCollection<MongoDB.Events.Event>(EventLogCollectionName);
-            _streamDefinitions = Database.GetCollection<MongoDB.Streams.StreamDefinition>(StreamDefinitionCollectionName);
+            DefaultEventLog = Database.GetCollection<Events.Event>(EventLogCollectionName);
+            _streamDefinitions = Database.GetCollection<StreamDefinition>(StreamDefinitionCollectionName);
 
             CreateCollectionsAndIndexesForEventLog();
             CreateCollectionsAndIndexesForStreamDefinitions();
         }
 
         /// <inheritdoc/>
-        public IMongoCollection<MongoDB.Events.Event> DefaultEventLog { get; }
+        public IMongoCollection<Events.Event> DefaultEventLog { get; }
 
         /// <inheritdoc/>
-        public Task<IMongoCollection<MongoDB.Events.StreamEvent>> Get(ScopeId scopeId, StreamId streamId, CancellationToken token)
+        public Task<IMongoCollection<Events.StreamEvent>> Get(ScopeId scopeId, StreamId streamId, CancellationToken token)
         {
             if (streamId == StreamId.EventLog) throw new CannotGetEventLogStream();
             return GetStreamCollection(scopeId, streamId, token);
         }
 
         /// <inheritdoc/>
-        public Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetPublic(StreamId streamId, CancellationToken token) =>
+        public Task<IMongoCollection<Events.StreamEvent>> GetPublic(StreamId streamId, CancellationToken token) =>
             GetPublicStreamCollection(streamId, token);
 
         /// <inheritdoc/>
-        public Task<IMongoCollection<MongoDB.Streams.StreamDefinition>> GetDefinitions(ScopeId scopeId, CancellationToken token) =>
+        public Task<IMongoCollection<StreamDefinition>> GetDefinitions(ScopeId scopeId, CancellationToken token) =>
             scopeId == ScopeId.Default ? Task.FromResult(_streamDefinitions) : GetScopedStreamDefinitions(scopeId, token);
 
         /// <inheritdoc/>
-        public Task<IMongoCollection<MongoDB.Events.Event>> GetEventLog(ScopeId scopeId, CancellationToken token) =>
+        public Task<IMongoCollection<Events.Event>> GetEventLog(ScopeId scopeId, CancellationToken token) =>
             scopeId == ScopeId.Default ? Task.FromResult(DefaultEventLog) : GetScopedEventLog(scopeId, token);
 
         static string CollectionNameForStream(StreamId streamId) => $"stream-{streamId.Value}";
@@ -71,38 +71,38 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-{scope.Value}-stream-{stream.Value}";
 
-        Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken) =>
+        Task<IMongoCollection<Events.StreamEvent>> GetStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken) =>
             scope == ScopeId.Default ? GetStreamCollection(stream, cancellationToken) : GetScopedStreamCollection(scope, stream, cancellationToken);
 
-        async Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetStreamCollection(StreamId stream, CancellationToken cancellationToken)
+        async Task<IMongoCollection<Events.StreamEvent>> GetStreamCollection(StreamId stream, CancellationToken cancellationToken)
         {
             var collection = Database.GetCollection<Events.StreamEvent>(CollectionNameForStream(stream));
             await CreateCollectionsAndIndexesForStreamEventsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
-        async Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetScopedStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken)
+        async Task<IMongoCollection<Events.StreamEvent>> GetScopedStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken)
         {
             var collection = Database.GetCollection<Events.StreamEvent>(CollectionNameForScopedStream(scope, stream));
             await CreateCollectionsAndIndexesForStreamEventsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
-        async Task<IMongoCollection<MongoDB.Streams.StreamDefinition>> GetScopedStreamDefinitions(ScopeId scope, CancellationToken cancellationToken)
+        async Task<IMongoCollection<StreamDefinition>> GetScopedStreamDefinitions(ScopeId scope, CancellationToken cancellationToken)
         {
-            var collection = Database.GetCollection<MongoDB.Streams.StreamDefinition>(CollectionNameForScopedStreamDefinitions(scope));
+            var collection = Database.GetCollection<StreamDefinition>(CollectionNameForScopedStreamDefinitions(scope));
             await CreateCollectionsIndexesForStreamDefinitionsAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
-        async Task<IMongoCollection<MongoDB.Events.Event>> GetScopedEventLog(ScopeId scope, CancellationToken cancellationToken)
+        async Task<IMongoCollection<Events.Event>> GetScopedEventLog(ScopeId scope, CancellationToken cancellationToken)
         {
-            var collection = Database.GetCollection<MongoDB.Events.Event>(CollectionNameForScopedEventLog(scope));
+            var collection = Database.GetCollection<Events.Event>(CollectionNameForScopedEventLog(scope));
             await CreateCollectionsIndexesForEventLogAsync(collection, cancellationToken).ConfigureAwait(false);
             return collection;
         }
 
-        async Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetPublicStreamCollection(StreamId stream, CancellationToken cancellationToken)
+        async Task<IMongoCollection<Events.StreamEvent>> GetPublicStreamCollection(StreamId stream, CancellationToken cancellationToken)
         {
             var collection = Database.GetCollection<Events.StreamEvent>(CollectionNameForPublicStream(stream));
             await CreateCollectionsAndIndexesForStreamEventsAsync(collection, cancellationToken).ConfigureAwait(false);
@@ -112,12 +112,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         void CreateCollectionsAndIndexesForEventLog()
         {
             _logger.CreatingIndexesFor(EventLogCollectionName);
-            DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
-                Builders<MongoDB.Events.Event>.IndexKeys
+            DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<Events.Event>(
+                Builders<Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)));
 
-            DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
-                Builders<MongoDB.Events.Event>.IndexKeys
+            DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<Events.Event>(
+                Builders<Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)
                     .Ascending(_ => _.Aggregate.TypeId)));
         }
@@ -125,23 +125,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         void CreateCollectionsAndIndexesForStreamDefinitions()
         {
             _logger.CreatingIndexesFor(StreamDefinitionCollectionName);
-            _streamDefinitions.Indexes.CreateOne(new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
-                Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
+            _streamDefinitions.Indexes.CreateOne(new CreateIndexModel<StreamDefinition>(
+                Builders<StreamDefinition>.IndexKeys
                     .Ascending(_ => _.StreamId)));
         }
 
-        async Task CreateCollectionsIndexesForEventLogAsync(IMongoCollection<MongoDB.Events.Event> eventLog, CancellationToken cancellationToken)
+        async Task CreateCollectionsIndexesForEventLogAsync(IMongoCollection<Events.Event> eventLog, CancellationToken cancellationToken)
         {
             _logger.CreatingIndexesFor(eventLog.CollectionNamespace.CollectionName);
             await eventLog.Indexes.CreateOneAsync(
-                new CreateIndexModel<MongoDB.Events.Event>(
-                Builders<MongoDB.Events.Event>.IndexKeys
+                new CreateIndexModel<Events.Event>(
+                Builders<Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await eventLog.Indexes.CreateOneAsync(
-                new CreateIndexModel<MongoDB.Events.Event>(
-                Builders<MongoDB.Events.Event>.IndexKeys
+                new CreateIndexModel<Events.Event>(
+                Builders<Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)
                     .Ascending(_ => _.Aggregate.TypeId)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
@@ -151,38 +151,38 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             _logger.CreatingIndexesFor(stream.CollectionNamespace.CollectionName);
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<MongoDB.Events.StreamEvent>(
-                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
+                new CreateIndexModel<Events.StreamEvent>(
+                    Builders<Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventLogSequenceNumber),
                     new CreateIndexOptions { Unique = true }),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<MongoDB.Events.StreamEvent>(
-                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
+                new CreateIndexModel<Events.StreamEvent>(
+                    Builders<Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<MongoDB.Events.StreamEvent>(
-                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
+                new CreateIndexModel<Events.StreamEvent>(
+                    Builders<Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Partition)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
 
             await stream.Indexes.CreateOneAsync(
-                new CreateIndexModel<MongoDB.Events.StreamEvent>(
-                    Builders<MongoDB.Events.StreamEvent>.IndexKeys
+                new CreateIndexModel<Events.StreamEvent>(
+                    Builders<Events.StreamEvent>.IndexKeys
                         .Ascending(_ => _.Metadata.EventSource)
                         .Ascending(_ => _.Aggregate.TypeId)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
 
-        async Task CreateCollectionsIndexesForStreamDefinitionsAsync(IMongoCollection<MongoDB.Streams.StreamDefinition> streamDefinitions, CancellationToken cancellationToken)
+        async Task CreateCollectionsIndexesForStreamDefinitionsAsync(IMongoCollection<StreamDefinition> streamDefinitions, CancellationToken cancellationToken)
         {
             _logger.CreatingIndexesFor(streamDefinitions.CollectionNamespace.CollectionName);
             await streamDefinitions.Indexes.CreateOneAsync(
-                new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
-                    Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
+                new CreateIndexModel<StreamDefinition>(
+                    Builders<StreamDefinition>.IndexKeys
                         .Ascending(_ => _.StreamId)),
                 cancellationToken: cancellationToken).ConfigureAwait(false);
         }
