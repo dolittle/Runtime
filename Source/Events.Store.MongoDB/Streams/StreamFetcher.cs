@@ -10,6 +10,7 @@ using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store.Streams;
 using MongoDB.Driver;
+using System.Linq;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
@@ -119,12 +120,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var types = await _stream
-                    .Find(_filter.Gte(_sequenceNumberExpression, range.From.Value)
+                var typesWithGenerations = await _stream
+                    .Aggregate()
+                    .Match(_filter.Gte(_sequenceNumberExpression, range.From.Value)
                         & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
                     .Project(_eventToArtifact)
+                    .Group(_ => _.Id, _ => new ArtifactWithGenerations(_.Key.Value, _.Select(_ => _.Generation.Value).Distinct()))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return new HashSet<Artifact>(types);
+                return ExpandToArtifacts(typesWithGenerations);
             }
             catch (MongoWaitQueueFullException ex)
             {
@@ -137,18 +140,47 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var types = await _stream
-                    .Find(_filter.Eq(_partitionIdExpression, partitionId.Value)
+                var typesWithGenerations = await _stream
+                    .Aggregate()
+                    .Match(_filter.Eq(_partitionIdExpression, partitionId.Value)
                         & _filter.Gte(_sequenceNumberExpression, range.From.Value)
                         & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
                     .Project(_eventToArtifact)
+                    .Group(_ => _.Id, _ => new ArtifactWithGenerations(_.Key.Value, _.Select(_ => _.Generation.Value).Distinct()))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
-                return new HashSet<Artifact>(types);
+                return ExpandToArtifacts(typesWithGenerations);
             }
             catch (MongoWaitQueueFullException ex)
             {
                 throw new EventStoreUnavailable("Mongo wait queue is full", ex);
             }
+        }
+
+        ISet<Artifact> ExpandToArtifacts(IEnumerable<ArtifactWithGenerations> artifactsWithGenerations)
+        {
+            var set = new HashSet<Artifact>();
+            foreach (var artifactWithGenerations in artifactsWithGenerations)
+            {
+                foreach (var generation in artifactWithGenerations.Generations)
+                {
+                    set.Add(new Artifact(artifactWithGenerations.Id, generation));
+                }
+            }
+            return set;
+        }
+
+        class ArtifactWithGenerations
+        {
+
+            public ArtifactWithGenerations(Guid id, IEnumerable<uint> generations)
+            {
+                Id = id;
+                Generations = generations;
+            }
+
+            public Guid Id { get; set; }
+
+            public IEnumerable<uint> Generations { get; set; }
         }
     }
 }
