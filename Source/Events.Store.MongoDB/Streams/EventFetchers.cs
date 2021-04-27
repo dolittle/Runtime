@@ -93,7 +93,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 Builders<Events.Event>.Filter,
                 _ => _.EventLogSequenceNumber,
                 _ => _eventConverter.ToRuntimeStreamEvent(_),
-                _ => new Artifacts.Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration));
+                _ => _.Metadata.TypeId,
+                _ => _.Metadata.TypeGeneration);
 
         StreamFetcher<Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<Events.StreamEvent> collection, StreamId streamId, bool partitioned) =>
             new (
@@ -101,7 +102,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 Builders<Events.StreamEvent>.Filter,
                 _ => _.StreamPosition,
                 _ => _eventConverter.ToRuntimeStreamEvent(_, streamId, partitioned),
-                _ => new Artifacts.Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration),
+                _ => _.Metadata.TypeId,
+                _ => _.Metadata.TypeGeneration,
                 _ => _.Partition);
     }
 }

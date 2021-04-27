@@ -25,7 +25,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         readonly FilterDefinitionBuilder<TEvent> _filter;
         readonly Expression<Func<TEvent, ulong>> _sequenceNumberExpression;
         readonly Expression<Func<TEvent, StreamEvent>> _eventToStreamEvent;
-        readonly Expression<Func<TEvent, Artifact>> _eventToArtifact;
+        readonly Expression<Func<TEvent, Guid>> _eventToArtifactId;
+        readonly Expression<Func<TEvent, uint>> _eventToArtifactGeneration;
         readonly Expression<Func<TEvent, Guid>> _partitionIdExpression;
 
         /// <summary>
@@ -42,14 +43,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             FilterDefinitionBuilder<TEvent> filter,
             Expression<Func<TEvent, ulong>> sequenceNumberExpression,
             Expression<Func<TEvent, StreamEvent>> eventToStreamEvent,
-            Expression<Func<TEvent, Artifact>> eventToArtifact,
+            Expression<Func<TEvent, Guid>> eventToArtifactId,
+            Expression<Func<TEvent, uint>> eventToArtifactGeneration,
             Expression<Func<TEvent, Guid>> partitionIdExpression = default)
         {
             _stream = stream;
             _filter = filter;
             _sequenceNumberExpression = sequenceNumberExpression;
             _eventToStreamEvent = eventToStreamEvent;
-            _eventToArtifact = eventToArtifact;
+            _eventToArtifactId = eventToArtifactId;
+            _eventToArtifactGeneration = eventToArtifactGeneration;
             _partitionIdExpression = partitionIdExpression;
         }
 
@@ -120,12 +123,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
+                var query = _stream
+                    .Aggregate()
+                    .Match(_filter.Gte(_sequenceNumberExpression, range.From.Value)
+                        & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
+                    .Group(_eventToArtifactId, _ => new ArtifactWithGenerations(_.Key, _.AsQueryable().Select(_eventToArtifactGeneration).Distinct()))
+                    .ToString();
+
                 var typesWithGenerations = await _stream
                     .Aggregate()
                     .Match(_filter.Gte(_sequenceNumberExpression, range.From.Value)
                         & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Project(_eventToArtifact)
-                    .Group(_ => _.Id, _ => new ArtifactWithGenerations(_.Key.Value, _.Select(_ => _.Generation.Value).Distinct()))
+                    .Group(_eventToArtifactId, _ => new ArtifactWithGenerations(_.Key, _.AsQueryable().Select(_eventToArtifactGeneration).Distinct()))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return ExpandToArtifacts(typesWithGenerations);
             }
@@ -145,8 +154,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     .Match(_filter.Eq(_partitionIdExpression, partitionId.Value)
                         & _filter.Gte(_sequenceNumberExpression, range.From.Value)
                         & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Project(_eventToArtifact)
-                    .Group(_ => _.Id, _ => new ArtifactWithGenerations(_.Key.Value, _.Select(_ => _.Generation.Value).Distinct()))
+                    .Group(_eventToArtifactId, _ => new ArtifactWithGenerations(_.Key, _.AsQueryable().Select(_eventToArtifactGeneration).Distinct()))
                     .ToListAsync(cancellationToken).ConfigureAwait(false);
                 return ExpandToArtifacts(typesWithGenerations);
             }
