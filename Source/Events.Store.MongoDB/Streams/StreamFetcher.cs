@@ -123,13 +123,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         {
             try
             {
-                var query = _stream
-                    .Aggregate()
-                    .Match(_filter.Gte(_sequenceNumberExpression, range.From.Value)
-                        & _filter.Lt(_sequenceNumberExpression, range.From.Value + range.Length))
-                    .Group(_eventToArtifactId, _ => new ArtifactWithGenerations(_.Key, _.AsQueryable().Select(_eventToArtifactGeneration).Distinct()))
-                    .ToString();
-
                 var typesWithGenerations = await _stream
                     .Aggregate()
                     .Match(_filter.Gte(_sequenceNumberExpression, range.From.Value)
