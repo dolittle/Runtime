@@ -38,7 +38,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
-            if (persistedDefinition == default) return new FilterValidationResult();
+            if (persistedDefinition == default)
+            {
+                return new FilterValidationResult();
+            }
 
             if (persistedDefinition.Partitioned != filter.Definition.Partitioned)
             {
