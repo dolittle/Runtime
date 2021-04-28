@@ -30,7 +30,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
 
         protected static Mock<ICanFetchEventTypesFromStream> types_fetcher;
         protected static Mock<IEventFetchers> events_fetchers;
-        protected static Mock<IStreamProcessorStateRepository> stream_processor_states;
         protected static ValidateFilterByComparingEventTypes validator;
         protected static CancellationToken cancellation_token;
 
@@ -70,9 +69,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
                 .Setup(_ => _.GetTypeFetcherFor(scope_id, new EventLogStreamDefinition(), cancellation_token))
                 .Returns(Task.FromResult(types_fetcher.Object));
 
-            stream_processor_states = mocks.Create<IStreamProcessorStateRepository>();
-
-            validator = new ValidateFilterByComparingEventTypes(events_fetchers.Object, stream_processor_states.Object);
+            validator = new ValidateFilterByComparingEventTypes(events_fetchers.Object);
 
             cancellation_token = CancellationToken.None;
         };

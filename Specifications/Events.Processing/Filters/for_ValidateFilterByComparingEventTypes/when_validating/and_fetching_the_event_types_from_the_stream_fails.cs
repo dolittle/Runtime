@@ -1,16 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.Events.Processing.Streams;
-using Machine.Specifications;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
-using System;
-using Dolittle.Runtime.Events.Store.Streams;
-using System.Collections.Generic;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingEventTypes.when_validating
 {
@@ -31,18 +29,13 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
                 },
                 false);
 
-            stream_processor_states
-                .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
-                .Returns(Task.FromResult<Try<IStreamProcessorState>>(new StreamProcessorState(42, DateTimeOffset.Now)));
-
-            
             types_fetcher
                 .Setup(_ => _.FetchInRange(new StreamPositionRange(0, 42), cancellation_token))
                 .Returns(Task.FromException<ISet<Artifact>>(new Exception()));
         };
 
         static FilterValidationResult result;
-        Because of = () => result = validator.Validate(new_filter_definition, filter_processor, CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = validator.Validate(new_filter_definition, filter_processor, 42, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
     }

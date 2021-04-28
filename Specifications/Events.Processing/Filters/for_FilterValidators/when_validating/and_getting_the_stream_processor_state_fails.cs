@@ -7,20 +7,20 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating
+namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating
 {
     public class and_getting_the_stream_processor_state_fails : given.all_dependencies
     {
-        static FilterValidationResult result;
-
         Establish context = () =>
         {
-            stream_processor_states
+            stream_processor_state_repository
                 .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
                 .Returns(Task.FromResult<Try<IStreamProcessorState>>(new Exception()));
         };
 
-        Because of = () => result = validator.Validate(filter_definition, filter_processor.Object, cancellation_token).GetAwaiter().GetResult();
+        static FilterValidationResult result;
+        Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
+
         It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
     }
 }

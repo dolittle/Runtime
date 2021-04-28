@@ -24,7 +24,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
         protected static StreamProcessorId stream_processor_id;
         protected static Mock<IFilterProcessor<FilterDefinition>> filter_processor;
         protected static Mock<IEventFetchers> events_fetchers;
-        protected static Mock<IStreamProcessorStateRepository> stream_processor_states;
         protected static FilterDefinition filter_definition;
         protected static ValidateFilterByComparingStreams validator;
         protected static Mock<ICanFetchRangeOfEventsFromStream> events_from_event_log_fetcher;
@@ -47,9 +46,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             filter_processor.SetupGet(_ => _.Definition).Returns(filter_definition);
             filter_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
             filter_processor.SetupGet(_ => _.Scope).Returns(scope_id);
-            stream_processor_states = mocks.Create<IStreamProcessorStateRepository>();
             events_fetchers = mocks.Create<IEventFetchers>();
-            validator = new ValidateFilterByComparingStreams(events_fetchers.Object, stream_processor_states.Object);
+            validator = new ValidateFilterByComparingStreams(events_fetchers.Object);
             events_from_event_log_fetcher = mocks.Create<ICanFetchRangeOfEventsFromStream>();
             events_from_filtered_stream_fetcher = mocks.Create<ICanFetchRangeOfEventsFromStream>();
             events_in_event_log = new List<StreamEvent>();
