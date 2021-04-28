@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
@@ -20,7 +19,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly IPerformActionOnAllTenants _onAllTenants;
         readonly IFilterValidators _filterValidators;
-        readonly FactoryFor<IFilterDefinitions> _getFilterDefinitions;
         readonly ILogger _logger;
 
         /// <summary>
@@ -28,17 +26,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
         /// <param name="filterValidators">The <see cref="IFilterValidators" />.</param>
-        /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitions" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ValidateFilterForAllTenants(
             IPerformActionOnAllTenants onAllTenants,
             IFilterValidators filterValidators,
-            FactoryFor<IFilterDefinitions> getFilterDefinitions,
             ILogger logger)
         {
             _onAllTenants = onAllTenants;
             _filterValidators = filterValidators;
-            _getFilterDefinitions = getFilterDefinitions;
             _logger = logger;
         }
 
@@ -50,21 +45,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             await _onAllTenants.PerformAsync(async tenantId =>
                 {
                     var filterProcessor = getFilterProcessor();
-                    _logger.TryGetFilterDefinition(filterProcessor.Identifier, tenantId);
-                    var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filterProcessor.Scope, filterProcessor.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
-                    if (tryGetFilterDefinition.Success)
-                    {
-                        _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenantId);
-                        var validationResult = await _filterValidators.Validate(tryGetFilterDefinition.Result, filterProcessor, cancellationToken).ConfigureAwait(false);
-                        result.Add(tenantId, validationResult);
-                    }
-                    else
-                    {
-                        _logger.NoPersistedFilterDefinition(filterProcessor.Identifier, tenantId);
-                        result.Add(tenantId, new FilterValidationResult());
-                    }
+                    _logger.ValidatingFilterForTenant(filterProcessor.Identifier, tenantId);
+                    var validationResult = await _filterValidators.Validate(filterProcessor, cancellationToken).ConfigureAwait(false);
+                    result.Add(tenantId, validationResult);
                 }).ConfigureAwait(false);
-
             return result;
         }
     }

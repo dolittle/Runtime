@@ -12,6 +12,8 @@ using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
+using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Execution;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -23,6 +25,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly ITypeFinder _typeFinder;
         readonly IContainer _container;
+        readonly FactoryFor<IFilterDefinitions> _getFilterDefinitions;
+        readonly IExecutionContextManager _executionContextManager;
+        readonly ICompareFilterDefinitions _definitionComparer;
         readonly ILogger _logger;
         readonly IDictionary<Type, Type> _filterDefinitionToValidatorMap = new Dictionary<Type, Type>();
 
@@ -31,34 +36,83 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="typeFinder">The <see cref="ITypeFinder" />.</param>
         /// <param name="container">The <see cref="IContainer" />.</param>
+        /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitions" />.</param>
+        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
+        /// <param name="definitionComparer">The <see cref="ICompareFilterDefinitions" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public FilterValidators(ITypeFinder typeFinder, IContainer container, ILogger logger)
+        public FilterValidators(
+            ITypeFinder typeFinder,
+            IContainer container,
+            FactoryFor<IFilterDefinitions> getFilterDefinitions,
+            IExecutionContextManager executionContextManager,
+            ICompareFilterDefinitions definitionComparer,
+            ILogger logger)
         {
             _typeFinder = typeFinder;
             _container = container;
+            _getFilterDefinitions = getFilterDefinitions;
+            _executionContextManager = executionContextManager;
+            _definitionComparer = definitionComparer;
             _logger = logger;
             PopulateFilterValidatorMap();
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate<TDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
+        public async Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.FindingFilterValidator(filter.Identifier);
+            _logger.TryGetFilterDefinition(filter.Identifier, _executionContextManager.Current.Tenant);
+
+            var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
+            if (!FilterDefinitionHasBeenPersisted(tryGetFilterDefinition, out var persistedDefinition, out var validationResult))
+            {
+                _logger.NoPersistedFilterDefinition(filter.Identifier, _executionContextManager.Current.Tenant);
+                return validationResult;
+            }
+
+            if (!_definitionComparer.DefinitionsAreEqual(persistedDefinition, filter.Definition, out validationResult))
+            {
+                return validationResult;
+            }
 
             if (FilterDefinitionTypeHasChanged(persistedDefinition, filter.Definition))
             {
-                return Task.FromResult(new FilterValidationResult("Filter definition type has changed"));
+                return new FilterValidationResult("Filter definition type has changed");
             }
 
+            _logger.FindingFilterValidator(filter.Identifier);
             if (TryGetValidatorFor<TDefinition>(out var validator))
             {
                 _logger.ValidatingFilter(filter.Identifier);
-                return validator.Validate((TDefinition)persistedDefinition, filter, cancellationToken);
+                return await validator.Validate((TDefinition)persistedDefinition, filter, cancellationToken).ConfigureAwait(false);
             }
 
-            return Task.FromResult(new FilterValidationResult($"No available filter validator for type {filter.Definition.GetType()}"));
+            return new FilterValidationResult($"No available filter validator for type {filter.Definition.GetType()}");
         }
+
+        bool FilterDefinitionHasBeenPersisted(Try<IFilterDefinition> tryGetFilterDefinition, out IFilterDefinition persistedDefinition, out FilterValidationResult validationResult)
+        {
+            if (tryGetFilterDefinition.HasException)
+            {
+                persistedDefinition = default;
+                validationResult = new FilterValidationResult(tryGetFilterDefinition.Exception.Message);
+                return false;
+            }
+
+            if (!tryGetFilterDefinition.Success)
+            {
+                persistedDefinition = default;
+                validationResult = new FilterValidationResult();
+                return false;
+            }
+
+            persistedDefinition = tryGetFilterDefinition.Result;
+            validationResult = default;
+            return true;
+        }
+
+        bool FilterDefinitionTypeHasChanged<TDefinition>(IFilterDefinition persitedDefiniton, TDefinition registeredDefinition)
+            => persitedDefiniton.GetType() != registeredDefinition.GetType();
 
         void PopulateFilterValidatorMap()
         {
@@ -71,9 +125,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 }
             });
         }
-
-        bool FilterDefinitionTypeHasChanged<TDefinition>(IFilterDefinition persitedDefiniton, TDefinition registeredDefinition)
-            => persitedDefiniton.GetType() != registeredDefinition.GetType();
 
         bool TryGetValidatorTypeFor(Type filterDefinitionType, out Type validatorType)
         {

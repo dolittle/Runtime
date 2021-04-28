@@ -39,21 +39,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public async Task<FilterValidationResult> Validate<TFilterDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TFilterDefinition> filter, CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
-            if (persistedDefinition == default)
-            {
-                return new FilterValidationResult();
-            }
-
-            if (persistedDefinition.Partitioned != filter.Definition.Partitioned)
-            {
-                return new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persistedDefinition.Partitioned ? "The previous filter is partitioned while the new filter is not" : "The previous filter is not partitioned while the new filter is")}");
-            }
-
-            if (persistedDefinition.Public != filter.Definition.Public)
-            {
-                return new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persistedDefinition.Public ? "The previous filter is public while the new filter is not" : "The previous filter is not public while the new filter is")}");
-            }
-
             var tryGetState = await _streamProcessorStates.TryGetFor(
                 new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
                 cancellationToken)
