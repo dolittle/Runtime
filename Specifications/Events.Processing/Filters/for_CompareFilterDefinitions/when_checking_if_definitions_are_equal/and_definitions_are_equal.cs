@@ -17,10 +17,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_CompareFilterDefinition
             registered = new FilterDefinition(source_stream, target_stream, true);
         };
 
-        static bool result;
-        static FilterValidationResult validationResult;
-        Because of = () => result = definition_comparer.DefinitionsAreEqual(persisted, registered, out validationResult);
+        static FilterValidationResult result;
+        Because of = () => result = definition_comparer.DefinitionsAreEqual(persisted, registered);
 
-        It should_return_true = () => result.ShouldBeTrue();
+        It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
     }
 }

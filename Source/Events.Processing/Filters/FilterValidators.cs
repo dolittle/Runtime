@@ -84,12 +84,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 return validationResult;
             }
 
-            if (!_definitionComparer.DefinitionsAreEqual(persistedDefinition, filter.Definition, out validationResult))
+            var definitionResult = _definitionComparer.DefinitionsAreEqual(persistedDefinition, filter.Definition);
+            if (!definitionResult.Succeeded)
             {
-                return validationResult;
+                return definitionResult;
             }
 
-            
             if (FilterDefinitionTypeHasChanged(persistedDefinition, filter.Definition))
             {
                 return new FilterValidationResult("Filter definition type has changed");

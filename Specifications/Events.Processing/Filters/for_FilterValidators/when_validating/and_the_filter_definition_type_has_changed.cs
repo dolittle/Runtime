@@ -16,10 +16,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
                 .Setup(_ => _.TryGetFromStream(scope_id, filter_target_stream, cancellation_token))
                 .Returns(Task.FromResult(new Try<IFilterDefinition>(true, different_filter_definition)));
 
-            var validationResult = new FilterValidationResult();
             definition_comparer
-                .Setup(_ => _.DefinitionsAreEqual(different_filter_definition, filter_definition, out validationResult))
-                .Returns(true);
+                .Setup(_ => _.DefinitionsAreEqual(different_filter_definition, filter_definition))
+                .Returns(new FilterValidationResult());
         };
 
         static FilterValidationResult result;

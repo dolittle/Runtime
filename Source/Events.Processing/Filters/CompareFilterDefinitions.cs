@@ -11,22 +11,19 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     public class CompareFilterDefinitions : ICompareFilterDefinitions
     {
         /// <inheritdoc/>
-        public bool DefinitionsAreEqual(IFilterDefinition persisted, IFilterDefinition registered, out FilterValidationResult validationResult)
+        public FilterValidationResult DefinitionsAreEqual(IFilterDefinition persisted, IFilterDefinition registered)
         {
             if (persisted.Partitioned != registered.Partitioned)
             {
-                validationResult = new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persisted.Partitioned ? "The previous filter is partitioned while the new filter is not" : "The previous filter is not partitioned while the new filter is")}");
-                return false;
+                return new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persisted.Partitioned ? "The previous filter is partitioned while the new filter is not" : "The previous filter is not partitioned while the new filter is")}");
             }
 
             if (persisted.Public != registered.Public)
             {
-                validationResult = new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persisted.Public ? "The previous filter is public while the new filter is not" : "The previous filter is not public while the new filter is")}");
-                return false;
+                return new FilterValidationResult($"The new stream generated from the filter will not match the old stream. {(persisted.Public ? "The previous filter is public while the new filter is not" : "The previous filter is not public while the new filter is")}");
             }
 
-            validationResult = default;
-            return true;
+            return new FilterValidationResult();
         }
     }
 }

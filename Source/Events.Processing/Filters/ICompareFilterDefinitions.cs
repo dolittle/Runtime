@@ -15,8 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="persisted">The persisted <see cref="IFilterDefinition"/>.</param>
         /// <param name="registered">The registered <see cref="IFilterDefinition"/>.</param>
-        /// <param name="validationResult">If the filter definitions are unequal, a <see cref="FilterValidationResult"/> that explains the difference.</param>
-        /// <returns>True if the definitions are equal, false if not.</returns>
-        bool DefinitionsAreEqual(IFilterDefinition persisted, IFilterDefinition registered, out FilterValidationResult validationResult);
+        /// <returns>The <see cref="FilterValidationResult"/> from comparing the definitions.</returns>
+        FilterValidationResult DefinitionsAreEqual(IFilterDefinition persisted, IFilterDefinition registered);
     }
 }
