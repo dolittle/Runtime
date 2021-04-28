@@ -87,16 +87,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             return await GetPartitionedFetcherFor(scopeId, streamDefinition, cancellationToken).ConfigureAwait(false) as ICanFetchEventTypesFromPartitionedStream;
         }
 
-        async Task<StreamFetcher<Events.Event>> CreateStreamFetcherForEventLog(ScopeId scopeId, CancellationToken cancellationToken) =>
-            new StreamFetcher<Events.Event>(
+        async Task<StreamFetcher<MongoDB.Events.Event>> CreateStreamFetcherForEventLog(ScopeId scopeId, CancellationToken cancellationToken) =>
+            new StreamFetcher<MongoDB.Events.Event>(
                 await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
-                Builders<Events.Event>.Filter,
+                Builders<MongoDB.Events.Event>.Filter,
                 _ => _.EventLogSequenceNumber,
                 _ => _eventConverter.ToRuntimeStreamEvent(_),
                 _ => _.Metadata.TypeId,
                 _ => _.Metadata.TypeGeneration);
 
-        StreamFetcher<Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<Events.StreamEvent> collection, StreamId streamId, bool partitioned) =>
+        StreamFetcher<MongoDB.Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<Events.StreamEvent> collection, StreamId streamId, bool partitioned) =>
             new (
                 collection,
                 Builders<Events.StreamEvent>.Filter,

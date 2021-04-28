@@ -36,6 +36,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _streamProcessorStates = streamProcessorStates;
         }
 
+        /// <inheritdoc/>
         public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
         {
             if (persistedDefinition == default)
