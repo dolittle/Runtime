@@ -7,7 +7,6 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
@@ -21,58 +20,36 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     public class ValidateFilterByComparingEventTypes : IValidateFilterByComparingEventTypes
     {
         readonly IEventFetchers _eventFetchers;
-        readonly IStreamProcessorStateRepository _streamProcessorStates;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValidateFilterByComparingEventTypes"/> class.
         /// </summary>
         /// <param name="eventFetchers">The <see cref="IEventFetchers"/>.</param>
-        /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository"/>.</param>
         public ValidateFilterByComparingEventTypes(
-            IEventFetchers eventFetchers,
-            IStreamProcessorStateRepository streamProcessorStates)
+            IEventFetchers eventFetchers)
         {
             _eventFetchers = eventFetchers;
-            _streamProcessorStates = streamProcessorStates;
         }
 
         /// <inheritdoc/>
-        public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, CancellationToken cancellationToken)
+        public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
         {
-            var changedEventTypes = GetChangedEventTypes(persistedDefinition, filter.Definition);
-            if (changedEventTypes.Count == 0)
-            {
-                return new FilterValidationResult();
-            }
-
-            var tryGetState = await _streamProcessorStates.TryGetFor(
-                new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream),
-                cancellationToken)
-                .ConfigureAwait(false);
-            if (tryGetState.HasException)
-            {
-                return new FilterValidationResult(tryGetState.Exception.Message);
-            }
-            if (!tryGetState.Success)
-            {
-                return new FilterValidationResult();
-            }
-
-            var lastUnprocessedEventPosition = tryGetState.Result.Position;
-            if (lastUnprocessedEventPosition == 0)
-            {
-                return new FilterValidationResult();
-            }
-            
             try
             {
+                var changedEventTypes = GetChangedEventTypes(persistedDefinition, filter.Definition);
+
+                if (EventTypesHaveNotChanged(changedEventTypes))
+                {
+                    return new FilterValidationResult();
+                }
+
                 var streamTypesFetcher = await _eventFetchers.GetTypeFetcherFor(
                     filter.Scope,
                     new EventLogStreamDefinition(),
                     cancellationToken).ConfigureAwait(false);
 
                 var typesInSourceStream = await streamTypesFetcher.FetchInRange(
-                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEventPosition),
+                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent),
                     cancellationToken).ConfigureAwait(false);
 
                 if (SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes))
@@ -88,6 +65,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
         }
 
+        bool EventTypesHaveNotChanged(ISet<ArtifactId> changedEventTypes) => !changedEventTypes.Any();
+
+        bool SourceStreamContainsChangedEventTypes(ISet<Artifact> typesInSourceStream, ISet<ArtifactId> changedEventTypes)
+            => typesInSourceStream.Any(_ => changedEventTypes.Contains(_.Id));
+
         ISet<ArtifactId> GetChangedEventTypes(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, TypeFilterWithEventSourcePartitionDefinition registeredDefinition)
         {
             var addedEventTypes = registeredDefinition.Types.Where(_ => !persistedDefinition.Types.Contains(_));
@@ -96,8 +78,5 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var changedEventTypes = addedEventTypes.Concat(removedEventTypes);
             return new HashSet<ArtifactId>(changedEventTypes);
         }
-
-        bool SourceStreamContainsChangedEventTypes(ISet<Artifact> typesInSourceStream, ISet<ArtifactId> changedEventTypes)
-            => typesInSourceStream.Any(_ => changedEventTypes.Contains(_.Id));
     }
 }

@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
@@ -19,9 +20,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <typeparam name="TFilterDefinition">The <see cref="IFilterDefinition" /> type.</typeparam>
         /// <param name="persistedDefinition">The persisted <see cref="IFilterDefinition" />.</param>
         /// <param name="filter">The <see cref="IFilterProcessor{TDefinition}" />.</param>
+        /// <param name="lastUnprocessedEvent">The <see cref="StreamPosition" /> of the last unprocessed event.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="FilterValidationResult" />. </returns>
-        Task<FilterValidationResult> Validate<TFilterDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TFilterDefinition> filter, CancellationToken cancellationToken)
+        Task<FilterValidationResult> Validate<TFilterDefinition>(IFilterDefinition persistedDefinition, IFilterProcessor<TFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition;
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -25,6 +27,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly ITypeFinder _typeFinder;
         readonly IContainer _container;
+        readonly FactoryFor<IStreamProcessorStateRepository> _getStreamProcessorStates;
         readonly FactoryFor<IFilterDefinitions> _getFilterDefinitions;
         readonly IExecutionContextManager _executionContextManager;
         readonly ICompareFilterDefinitions _definitionComparer;
@@ -43,6 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FilterValidators(
             ITypeFinder typeFinder,
             IContainer container,
+            FactoryFor<IStreamProcessorStateRepository> getStreamProcessorStates,
             FactoryFor<IFilterDefinitions> getFilterDefinitions,
             IExecutionContextManager executionContextManager,
             ICompareFilterDefinitions definitionComparer,
@@ -50,6 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         {
             _typeFinder = typeFinder;
             _container = container;
+            _getStreamProcessorStates = getStreamProcessorStates;
             _getFilterDefinitions = getFilterDefinitions;
             _executionContextManager = executionContextManager;
             _definitionComparer = definitionComparer;
@@ -61,10 +66,19 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public async Task<FilterValidationResult> Validate<TDefinition>(IFilterProcessor<TDefinition> filter, CancellationToken cancellationToken)
             where TDefinition : IFilterDefinition
         {
-            _logger.TryGetFilterDefinition(filter.Identifier, _executionContextManager.Current.Tenant);
+            var tryGetProcessorState = await _getStreamProcessorStates()
+                .TryGetFor(new StreamProcessorId(filter.Scope, filter.Definition.TargetStream.Value, filter.Definition.SourceStream), cancellationToken)
+                .ConfigureAwait(false);
 
+            if (!StreamProcessorHasProcessedEvents(tryGetProcessorState, out var validationResult, out var lastUnprocessedEvent))
+            {
+                return validationResult;
+            }
+
+            _logger.TryGetFilterDefinition(filter.Identifier, _executionContextManager.Current.Tenant);
             var tryGetFilterDefinition = await _getFilterDefinitions().TryGetFromStream(filter.Scope, filter.Definition.TargetStream, cancellationToken).ConfigureAwait(false);
-            if (!FilterDefinitionHasBeenPersisted(tryGetFilterDefinition, out var persistedDefinition, out var validationResult))
+
+            if (!FilterDefinitionHasBeenPersisted(tryGetFilterDefinition, out var persistedDefinition, out validationResult))
             {
                 _logger.NoPersistedFilterDefinition(filter.Identifier, _executionContextManager.Current.Tenant);
                 return validationResult;
@@ -75,19 +89,48 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 return validationResult;
             }
 
+            
             if (FilterDefinitionTypeHasChanged(persistedDefinition, filter.Definition))
             {
                 return new FilterValidationResult("Filter definition type has changed");
             }
 
             _logger.FindingFilterValidator(filter.Identifier);
-            if (TryGetValidatorFor<TDefinition>(out var validator))
+            if (!TryGetValidatorFor<TDefinition>(out var validator))
             {
-                _logger.ValidatingFilter(filter.Identifier);
-                return await validator.Validate((TDefinition)persistedDefinition, filter, cancellationToken).ConfigureAwait(false);
+                return new FilterValidationResult($"No available filter validator for type {filter.Definition.GetType()}");
             }
 
-            return new FilterValidationResult($"No available filter validator for type {filter.Definition.GetType()}");
+            _logger.ValidatingFilter(filter.Identifier);
+            return await validator.Validate((TDefinition)persistedDefinition, filter, lastUnprocessedEvent, cancellationToken).ConfigureAwait(false);
+        }
+
+        bool StreamProcessorHasProcessedEvents(Try<IStreamProcessorState> tryGetState, out FilterValidationResult validationResult, out StreamPosition lastUnprocessedEvent)
+        {
+            if (tryGetState.HasException)
+            {
+                validationResult = new FilterValidationResult(tryGetState.Exception.Message);
+                lastUnprocessedEvent = default;
+                return false;
+            }
+
+            if (!tryGetState.Success)
+            {
+                validationResult = new FilterValidationResult();
+                lastUnprocessedEvent = default;
+                return false;
+            }
+
+            lastUnprocessedEvent = tryGetState.Result.Position;
+
+            if (lastUnprocessedEvent == StreamPosition.Start)
+            {
+                validationResult = new FilterValidationResult();
+                return false;
+            }
+
+            validationResult = default;
+            return true;
         }
 
         bool FilterDefinitionHasBeenPersisted(Try<IFilterDefinition> tryGetFilterDefinition, out IFilterDefinition persistedDefinition, out FilterValidationResult validationResult)

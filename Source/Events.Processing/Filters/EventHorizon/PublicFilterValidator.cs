@@ -3,7 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.Lifecycle;
 
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate(PublicFilterDefinition persistedDefinition, IFilterProcessor<PublicFilterDefinition> filter, CancellationToken cancellationToken) =>
-            _byComparingStreams.Validate(persistedDefinition, filter, cancellationToken);
+        public Task<FilterValidationResult> Validate(PublicFilterDefinition persistedDefinition, IFilterProcessor<PublicFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken) =>
+            _byComparingStreams.Validate(persistedDefinition, filter, lastUnprocessedEvent, cancellationToken);
     }
 }
