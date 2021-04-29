@@ -20,45 +20,54 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
         protected static StreamId source_stream;
         protected static StreamId target_stream;
         protected static EventProcessorId event_processor_id;
+        protected static ScopeId scope_id;
+        protected static StreamProcessorId stream_processor_id;
         protected static Mock<IFilterProcessor<FilterDefinition>> filter_processor;
         protected static Mock<IEventFetchers> events_fetchers;
-        protected static Mock<IStreamProcessorStateRepository> stream_processor_states;
         protected static FilterDefinition filter_definition;
         protected static ValidateFilterByComparingStreams validator;
         protected static Mock<ICanFetchRangeOfEventsFromStream> events_from_event_log_fetcher;
         protected static Mock<ICanFetchRangeOfEventsFromStream> events_from_filtered_stream_fetcher;
         protected static IList<StreamEvent> events_in_event_log;
         protected static IList<StreamEvent> events_in_filtered_stream;
+        protected static CancellationToken cancellation_token;
 
         Establish context = () =>
         {
-            source_stream = Guid.NewGuid();
-            target_stream = Guid.NewGuid();
-            filter_processor = new Mock<IFilterProcessor<FilterDefinition>>();
+            var mocks = new MockRepository(MockBehavior.Strict);
+
+            source_stream = Guid.Parse("ad154c87-e62d-4bca-a3b7-dab069220447");
+            target_stream = Guid.Parse("e8534fc4-a0be-4782-bdba-df6c22a26901");
+            event_processor_id = target_stream.Value;
+            scope_id = Guid.Parse("411fd266-cfc7-4871-a90d-699cff2c5d2f");
+            stream_processor_id = new StreamProcessorId(scope_id, event_processor_id, source_stream);
+            filter_processor = mocks.Create<IFilterProcessor<FilterDefinition>>();
             filter_definition = new FilterDefinition(source_stream, target_stream, true);
             filter_processor.SetupGet(_ => _.Definition).Returns(filter_definition);
             filter_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
-            stream_processor_states = new Mock<IStreamProcessorStateRepository>();
-            events_fetchers = new Mock<IEventFetchers>();
-            validator = new ValidateFilterByComparingStreams(events_fetchers.Object, stream_processor_states.Object);
-            events_from_event_log_fetcher = new Mock<ICanFetchRangeOfEventsFromStream>();
-            events_from_filtered_stream_fetcher = new Mock<ICanFetchRangeOfEventsFromStream>();
+            filter_processor.SetupGet(_ => _.Scope).Returns(scope_id);
+            events_fetchers = mocks.Create<IEventFetchers>();
+            validator = new ValidateFilterByComparingStreams(events_fetchers.Object);
+            events_from_event_log_fetcher = mocks.Create<ICanFetchRangeOfEventsFromStream>();
+            events_from_filtered_stream_fetcher = mocks.Create<ICanFetchRangeOfEventsFromStream>();
             events_in_event_log = new List<StreamEvent>();
             events_in_filtered_stream = new List<StreamEvent>();
 
             events_from_event_log_fetcher
-                .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), cancellation_token))
                 .Returns<StreamPositionRange, CancellationToken>((range, _) => Task.FromResult(events_in_event_log.Where(_ => _.Position >= range.From && _.Position < range.From + range.Length)));
             events_from_filtered_stream_fetcher
-                .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.FetchRange(Moq.It.IsAny<StreamPositionRange>(), cancellation_token))
                 .Returns<StreamPositionRange, CancellationToken>((range, _) => Task.FromResult(events_in_filtered_stream.Where(_ => _.Position >= range.From && _.Position < range.From + range.Length)));
 
             events_fetchers
-                .Setup(_ => _.GetRangeFetcherFor(Moq.It.IsAny<ScopeId>(), new EventLogStreamDefinition(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.GetRangeFetcherFor(scope_id, new EventLogStreamDefinition(), cancellation_token))
                 .Returns(Task.FromResult(events_from_event_log_fetcher.Object));
             events_fetchers
-                .Setup(_ => _.GetRangeFetcherFor(Moq.It.IsAny<ScopeId>(), new StreamDefinition(filter_definition), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.GetRangeFetcherFor(scope_id, new StreamDefinition(filter_definition), cancellation_token))
                 .Returns(Task.FromResult(events_from_filtered_stream_fetcher.Object));
+
+            cancellation_token = CancellationToken.None;
         };
 
         protected static void add_event_to_event_log(uint num_events_to_create)

@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="IEnumerable{Artifact}" /> event types.</returns>
-        Task<IEnumerable<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken);
+        /// <returns>The <see cref="ISet{Artifact}" /> event types.</returns>
+        Task<ISet<Artifact>> FetchInRangeAndPartition(PartitionId partitionId, StreamPositionRange range, CancellationToken cancellationToken);
     }
 }
