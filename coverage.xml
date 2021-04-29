@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AnalyseParams>
+    <Output>CoverageReport.xml</Output>
+    <ReportType>DetailedXml</ReportType>
+    <Filters>
+    <ExcludeFilters>
+        <FilterEntry>
+        <ModuleMask>*.Specs</ModuleMask>
+        </FilterEntry>
+        <FilterEntry>
+        <ModuleMask>*.for_*</ModuleMask>
+        </FilterEntry>
+    </ExcludeFilters>
+    </Filters>
+    <Scope>
+        <ScopeEntry>Source/**/*.dll</ScopeEntry>
+    </Scope>
+</AnalyseParams>
+
