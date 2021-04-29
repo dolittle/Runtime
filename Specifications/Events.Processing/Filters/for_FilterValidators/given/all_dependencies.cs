@@ -78,10 +78,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given
             type_finder = mocks.Create<ITypeFinder>();
             type_finder
                 .Setup(_ => _.FindMultiple<IFilterDefinition>())
-                .Returns(new[] { typeof(FilterDefinition) });
+                .Returns(new[] { typeof(FilterDefinition) });
             type_finder
                 .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
-                .Returns(new[] { filter_validator_type });
+                .Returns(new[] { filter_validator_type });
 
             container = mocks.Create<IContainer>();
             container
@@ -91,12 +91,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given
             stream_processor_state_repository = mocks.Create<IStreamProcessorStateRepository>();
             stream_processor_state_repository
                 .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
-                .Returns(Task.FromResult(new Try<IStreamProcessorState>(true, stream_processor_state)));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(stream_processor_state)));
 
             filter_definitions = mocks.Create<IFilterDefinitions>();
             filter_definitions
                 .Setup(_ => _.TryGetFromStream(scope_id, filter_target_stream, cancellation_token))
-                .Returns(Task.FromResult(new Try<IFilterDefinition>(true, filter_definition)));
+                .Returns(Task.FromResult(Try<IFilterDefinition>.Succeeded(filter_definition)));
 
             definition_comparer = mocks.Create<ICompareFilterDefinitions>();
             definition_comparer

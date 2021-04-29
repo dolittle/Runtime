@@ -11,13 +11,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
 {
     public class and_there_is_no_persisted_stream_processor_state : given.all_dependencies
     {
-        Establish context = () =>
-        {
-            stream_processor_states
-                .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
-                .Returns(Task.FromResult(Try<IStreamProcessorState>.Failed()));
-        };
-
         static FilterValidationResult result;
         Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 

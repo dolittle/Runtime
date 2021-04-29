@@ -12,9 +12,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
     {
         Establish context = () =>
         {
-            _ = stream_processor_states
-                .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(new StreamProcessorState(1, DateTimeOffset.UtcNow))));
             add_event_to_event_log(1);
             filter_processor
                 .Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), event_processor_id, cancellation_token))

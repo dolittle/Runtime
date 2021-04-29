@@ -5,6 +5,7 @@ using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating
@@ -15,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
         {
             stream_processor_state_repository
                 .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
-                .Returns(Task.FromResult<Try<IStreamProcessorState>>(new Exception()));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Failed(new Exception())));
         };
 
         static FilterValidationResult result;
