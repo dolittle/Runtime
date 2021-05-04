@@ -1,3 +1,15 @@
+# [5.6.0] - 2021-4-29 [PR: #513](https://github.com/dolittle/Runtime/pull/513)
+## Summary
+
+Adds a new Filter Validation implementation for the kind of filter (event type with eventsource partition) that validates the filter by checking just the types already committed in the event log rather than iterating through all the events.
+
+For most registrations, the Event Handlers have not changed, which is detected by the validator and skips any further analysis. If the events in the filter has changed, the new implementation checks the types of events committed in the event log to determine if the stream would change given the new definition. Initial tests indicate that this process is a lot faster than re-filtering the streams.
+
+### Added
+
+- A new specialised filter validation implementation used for Event Handlers to speed up the registration process that happens during boot. This drastically reduces the CPU utilisation and duration of the initial registration process for Event Handlers.
+
+
 # [5.5.0] - 2021-4-9 [PR: #502](https://github.com/dolittle/Runtime/pull/502)
 ## Summary
 
