@@ -2,8 +2,11 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
@@ -46,9 +49,56 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         /// <inheritdoc/>
-        public Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, CancellationToken cancellationToken)
+        public async Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            var allTransitionEvents = new List<UncommittedEvents>();
+            while (true)
+            {
+                var statesAreEqualResult = await _stateComparer.TryCheckEquality(current.State, desired).ConfigureAwait(false);
+                if (!statesAreEqualResult.Success)
+                {
+                    return statesAreEqualResult.Exception;
+                }
+
+                if (statesAreEqualResult.Result)
+                {
+                    var events = from uncommittedEvents in allTransitionEvents
+                                 from @event in uncommittedEvents
+                                 select @event;
+
+                    return CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
+
+                }
+
+                var transitionEvents = await _embedding.TryCompare(current, desired, cancellationToken).ConfigureAwait(false);
+                if (!transitionEvents.Success)
+                {
+                    return transitionEvents.Exception;
+                }
+
+                allTransitionEvents.Add(transitionEvents.Result);
+
+                var loopDetected = await _loopDetector.TryCheckEventLoops(allTransitionEvents).ConfigureAwait(false);
+                if (!loopDetected.Success)
+                {
+                    return loopDetected.Exception;
+                }
+
+                if (loopDetected.Result)
+                {
+                    return new EmbeddingLoopDetected(_identifier);
+                }
+
+                var intermediateState = await _projector.TryProject(current, transitionEvents.Result, cancellationToken).ConfigureAwait(false);
+                if (!intermediateState.Success)
+                {
+                    return intermediateState.IsPartialResult
+                        ? new CouldNotProjectAllEvents(_identifier)
+                        : new FailedProjectingEvents(_identifier);
+                }
+
+                current = intermediateState.Result;
+            }
         }
 
         /// <inheritdoc/>
@@ -56,5 +106,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
         {
             throw new NotImplementedException();
         }
+
+        UncommittedAggregateEvents CreateUncommittedAggregateEvents(UncommittedEvents events, EmbeddingCurrentState currentState)
+            => new(_identifier.Value, new Artifact(_identifier.Value, ArtifactGeneration.First), currentState.Version, events);
     }
 }
