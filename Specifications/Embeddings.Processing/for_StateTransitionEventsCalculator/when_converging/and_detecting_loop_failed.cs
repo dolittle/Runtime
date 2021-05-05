@@ -25,6 +25,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
             current_state = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "current state", "");
             desired_state = "desired state";
             events = new UncommittedEvents(Array.Empty<UncommittedEvent>());
+            state_comparer
+                .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
+                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
             embedding
                 .Setup(_ => _.TryCompare(current_state, desired_state, cancellation))
                 .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(events)));

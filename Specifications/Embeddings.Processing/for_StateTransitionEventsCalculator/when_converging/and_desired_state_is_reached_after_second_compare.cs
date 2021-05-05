@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
             current_state = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "current state", "");
             intermediate_state = "intermediate state";
             desired_state = "desired state";
-            intermediate_current_embedding_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, desired_state, "");
+            intermediate_current_embedding_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, intermediate_state, "");
             desired_current_embedding_state = new EmbeddingCurrentState(2, EmbeddingCurrentStateType.Persisted, desired_state, "");
             first_event_batch = new UncommittedEvents(Array.Empty<UncommittedEvent>());
             second_event_batch = new UncommittedEvents(Array.Empty<UncommittedEvent>());
@@ -52,6 +52,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 .Setup(_ => _.TryProject(intermediate_current_embedding_state, second_event_batch, cancellation))
                 .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(
                     desired_current_embedding_state)));
+            state_comparer
+                .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
+                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
             state_comparer
                 .Setup(_ => _.TryCheckEquality(intermediate_current_embedding_state.State, desired_state))
                 .Returns(Task.FromResult(Try<bool>.Succeeded(false)));

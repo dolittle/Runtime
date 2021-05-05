@@ -16,15 +16,16 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
     {
         static EmbeddingCurrentState current_state;
         static ProjectionState desired_state;
-        static CouldNotProjectAllEvents exception;
         static UncommittedEvents events;
 
         Establish context = () =>
         {
-            exception = new CouldNotProjectAllEvents(identifier);
             current_state = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "current state", "");
             desired_state = "desired state";
             events = new UncommittedEvents(Array.Empty<UncommittedEvent>());
+            state_comparer
+                .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
+                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
             embedding
                 .Setup(_ => _.TryCompare(current_state, desired_state, cancellation))
                 .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(events)));
@@ -35,7 +36,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 .Setup(_ => _.TryProject(current_state, events, cancellation))
                 .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.PartialSuccess(
                     new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, "new state", ""),
-                    exception)));
+                    new Exception())));
         };
 
         static Try<UncommittedAggregateEvents> result;
@@ -43,7 +44,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
 
         It should_return_a_failure = () => result.Success.ShouldBeFalse();
         It should_have_an_exception = () => result.HasException.ShouldBeTrue();
-        It should_fail_because_detecting_loop_failed = () => result.Exception.ShouldEqual(exception);
+        It should_fail_because_detecting_loop_failed = () => result.Exception.ShouldBeOfExactType<CouldNotProjectAllEvents>();
         It should_only_compare_once = () => embedding.Verify(_ => _.TryCompare(current_state, desired_state, cancellation), Moq.Times.Once);
         It should_not_do_anything_more_with_embedding = () => embedding.VerifyNoOtherCalls();
         It should_project_events = () => project_many_events.Verify(_ => _.TryProject(current_state, events, cancellation), Moq.Times.Once);

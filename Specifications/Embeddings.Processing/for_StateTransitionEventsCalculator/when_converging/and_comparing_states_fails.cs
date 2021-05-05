@@ -37,6 +37,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(
                     desired_current_embedding_state)));
             state_comparer
+                .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
+                .Returns(Task.FromResult(Try<bool>.Failed(exception)));
+            state_comparer
                 .Setup(_ => _.TryCheckEquality(desired_current_embedding_state.State, desired_state))
                 .Returns(Task.FromResult(Try<bool>.Failed(exception)));
         };
@@ -46,10 +49,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
 
         It should_return_a_failure = () => result.Success.ShouldBeFalse();
         It should_have_an_exception = () => result.HasException.ShouldBeTrue();
-        It should_fail_because_detecting_loop_failed = () => result.Exception.ShouldEqual(exception);
-        It should_only_compare_once = () => embedding.Verify(_ => _.TryCompare(current_state, desired_state, cancellation), Moq.Times.Once);
-        It should_not_do_anything_more_with_embedding = () => embedding.VerifyNoOtherCalls();
-        It should_project_events = () => project_many_events.Verify(_ => _.TryProject(current_state, events, cancellation), Moq.Times.Once);
-        It should_not_project_anything_else = () => project_many_events.VerifyNoOtherCalls();
+        It should_fail_because_comparing_states_failed = () => result.Exception.ShouldEqual(exception);
+        It should_not_do_anything_with_embedding = () => embedding.VerifyNoOtherCalls();
+        It should_not_project_anything = () => project_many_events.VerifyNoOtherCalls();
     }
 }

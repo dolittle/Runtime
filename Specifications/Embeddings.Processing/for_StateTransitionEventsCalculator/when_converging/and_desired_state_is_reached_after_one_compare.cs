@@ -36,6 +36,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(
                     desired_current_embedding_state)));
             state_comparer
+                .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
+                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+            state_comparer
                 .Setup(_ => _.TryCheckEquality(desired_current_embedding_state.State, desired_state))
                 .Returns(Task.FromResult(Try<bool>.Succeeded(true)));
 
