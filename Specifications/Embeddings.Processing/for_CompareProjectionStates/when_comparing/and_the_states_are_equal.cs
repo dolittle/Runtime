@@ -17,37 +17,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.whe
 
         Establish context = () =>
         {
-            dynamic left_dynamic = new JObject();
-            left_dynamic.FirstProp = "FirstProp";
-            left_dynamic.Dictionary = new JObject
-            {
-                { "first_key", "first_value" },
-                { "second_key", "second_value" },
-                { "third_key", "third_value" }
-            };
-            left_dynamic.Array = new JArray
-            {
-                "First",
-                "Second",
-                "Third"
-            };
-            left = new ProjectionState(JsonConvert.SerializeObject(left_dynamic));
-
-            dynamic right_dynamic = new JObject();
-            right_dynamic.FirstProp = "FirstProp";
-            right_dynamic.Dictionary = new JObject
-            {
-                { "first_key", "first_value" },
-                { "second_key", "second_value" },
-                { "third_key", "third_value" }
-            };
-            right_dynamic.Array = new JArray
-            {
-                "First",
-                "Second",
-                "Third"
-            };
-            right = new ProjectionState(JsonConvert.SerializeObject(right_dynamic));
+            left = new ProjectionState(JsonConvert.SerializeObject(CreateState()));
+            right = new ProjectionState(JsonConvert.SerializeObject(CreateState()));
 
             comparer = new CompareProjectionStates();
         };
@@ -57,5 +28,24 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.whe
 
         It should_succeed = () => result.Success.ShouldBeTrue();
         It should_be_equal = () => result.Result.ShouldBeTrue();
+
+        static JObject CreateState()
+        {
+            dynamic state = new JObject();
+            state.FirstProp = "FirstProp";
+            state.Dictionary = new JObject
+            {
+                { "first_key", "first_value" },
+                { "second_key", "second_value" },
+                { "third_key", "third_value" }
+            };
+            state.Array = new JArray
+            {
+                "First",
+                "Second",
+                "Third"
+            };
+            return state;
+        }
     }
 }
