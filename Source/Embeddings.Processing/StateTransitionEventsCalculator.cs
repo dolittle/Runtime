@@ -49,62 +49,82 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, CancellationToken cancellationToken)
-        {
-            var allTransitionEvents = new List<UncommittedEvents>();
-            while (true)
-            {
-                var statesAreEqualResult = _stateComparer.TryCheckEquality(current.State, desired);
-                if (!statesAreEqualResult.Success)
-                {
-                    return statesAreEqualResult.Exception;
-                }
-
-                if (statesAreEqualResult.Result)
-                {
-                    var events = from uncommittedEvents in allTransitionEvents
-                                 from @event in uncommittedEvents
-                                 select @event;
-
-                    return CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
-
-                }
-
-                var transitionEvents = await _embedding.TryCompare(current, desired, cancellationToken).ConfigureAwait(false);
-                if (!transitionEvents.Success)
-                {
-                    return transitionEvents.Exception;
-                }
-
-                allTransitionEvents.Add(transitionEvents.Result);
-
-                var loopDetected = await _loopDetector.TryCheckEventLoops(allTransitionEvents).ConfigureAwait(false);
-                if (!loopDetected.Success)
-                {
-                    return loopDetected.Exception;
-                }
-
-                if (loopDetected.Result)
-                {
-                    return new EmbeddingLoopDetected(_identifier);
-                }
-
-                var intermediateState = await _projector.TryProject(current, transitionEvents.Result, cancellationToken).ConfigureAwait(false);
-                if (!intermediateState.Success)
-                {
-                    return intermediateState.IsPartialResult
-                        ? new CouldNotProjectAllEvents(_identifier, intermediateState.Exception)
-                        : new FailedProjectingEvents(_identifier, intermediateState.Exception);
-                }
-
-                current = intermediateState.Result;
-            }
-        }
+        public Task<Try<UncommittedAggregateEvents>> TryConverge(EmbeddingCurrentState current, ProjectionState desired, CancellationToken cancellationToken)
+            => DoWork(
+                current,
+                newCurrent => _stateComparer.TryCheckEquality(newCurrent.State, desired),
+                (newCurrent, token) => _embedding.TryCompare(newCurrent, desired, token),
+                cancellationToken);
 
         /// <inheritdoc/>
         public Task<Try<UncommittedAggregateEvents>> TryDelete(EmbeddingCurrentState current, CancellationToken cancellationToken)
+            => DoWork(
+                current,
+                newCurrent => Try<bool>.Do(() => newCurrent.Type is EmbeddingCurrentStateType.Deleted),
+                (newCurrent, token) => _embedding.TryDelete(newCurrent, token),
+                cancellationToken);
+
+        async Task<Try<UncommittedAggregateEvents>> DoWork(
+            EmbeddingCurrentState current,
+            Func<EmbeddingCurrentState, Try<bool>> isDesiredState,
+            Func<EmbeddingCurrentState, CancellationToken, Task<Try<UncommittedEvents>>> getTransitionEvents,
+            CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var allTransitionEvents = new List<UncommittedEvents>();
+                while (true)
+                {
+                    var isDesiredResult = isDesiredState(current);
+                    if (!isDesiredResult.Success)
+                    {
+                        return isDesiredResult.Exception;
+                    }
+
+                    if (isDesiredResult.Result)
+                    {
+                        var events = from uncommittedEvents in allTransitionEvents
+                                     from @event in uncommittedEvents
+                                     select @event;
+
+                        return CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
+
+                    }
+
+                    var transitionEvents = await getTransitionEvents(current, cancellationToken).ConfigureAwait(false);
+                    if (!transitionEvents.Success)
+                    {
+                        return transitionEvents.Exception;
+                    }
+
+                    allTransitionEvents.Add(transitionEvents.Result);
+
+                    var loopDetected = await _loopDetector.TryCheckEventLoops(allTransitionEvents).ConfigureAwait(false);
+                    if (!loopDetected.Success)
+                    {
+                        return loopDetected.Exception;
+                    }
+
+                    if (loopDetected.Result)
+                    {
+                        return new EmbeddingLoopDetected(_identifier);
+                    }
+
+                    var intermediateState = await _projector.TryProject(current, transitionEvents.Result, cancellationToken).ConfigureAwait(false);
+                    if (!intermediateState.Success)
+                    {
+                        return intermediateState.IsPartialResult
+                            ? new CouldNotProjectAllEvents(_identifier, intermediateState.Exception)
+                            : new FailedProjectingEvents(_identifier, intermediateState.Exception);
+                    }
+
+                    current = intermediateState.Result;
+                }
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
         UncommittedAggregateEvents CreateUncommittedAggregateEvents(UncommittedEvents events, EmbeddingCurrentState currentState)
