@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 namespace Dolittle.Runtime.Embeddings.Processing
 {
 
-    /// <inheritdoc/>
+    /// Represents an implementation of <see cref="ICompareStates" />.
     public class CompareProjectionStates : ICompareStates
     {
         /// <inheritdoc/>

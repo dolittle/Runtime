@@ -28,6 +28,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.whe
 
         It should_fail = () => result.Success.ShouldBeFalse();
         It should_have_an_exception = () => result.HasException.ShouldBeTrue();
-        It should_return_false = () => result.Result.ShouldBeFalse();
+        It should_not_be_equal = () => result.Result.ShouldBeFalse();
     }
 }

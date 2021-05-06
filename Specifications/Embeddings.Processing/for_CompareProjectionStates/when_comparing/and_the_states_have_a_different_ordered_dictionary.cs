@@ -43,6 +43,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.whe
         Because of = () => result = comparer.TryCheckEquality(left, right);
 
         It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_return_true = () => result.Result.ShouldBeTrue();
+        It should_be_equal = () => result.Result.ShouldBeTrue();
     }
 }
