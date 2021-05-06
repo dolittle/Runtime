@@ -16,9 +16,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <summary>
         /// Try to check if a projection's state is equal to one of it's previous states.
         /// </summary>
-        /// <param name="previousStates">An <see cref="IEnumerable{ProjectionState}"/> of the previous states.</param>
         /// <param name="currentState">The current <see cref="ProjectionState"/>.</param>
+        /// <param name="previousStates">An <see cref="IEnumerable{ProjectionState}"/> of the previous states.</param>
         /// <returns>A <see cref= "Try" /> that indicates whether the operation was successful or not.</returns>
-        Try<bool> TryCheckForProjectionStateLoop(IEnumerable<ProjectionState> previousStates, ProjectionState currentState);
+        Try<bool> TryCheckForProjectionStateLoop(ProjectionState currentState, IEnumerable<ProjectionState> previousStates);
     }
 }
