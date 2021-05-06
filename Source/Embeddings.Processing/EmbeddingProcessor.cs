@@ -127,7 +127,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-                await _embeddingStore.TryReplace(_embedding, key, committedEvents.Last().AggregateRootVersion+1, state, cancellationToken).ConfigureAwait(false);
+                await _embeddingStore.TryReplace(_embedding, key, committedEvents.Last().AggregateRootVersion + 1, state, cancellationToken).ConfigureAwait(false);
                 return Try.Succeeded();
             }
             catch (Exception ex)
@@ -156,7 +156,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-                await _embeddingStore.TryRemove(_embedding, key, committedEvents.Last().AggregateRootVersion+1, cancellationToken).ConfigureAwait(false);
+                await _embeddingStore.TryRemove(_embedding, key, committedEvents.Last().AggregateRootVersion + 1, cancellationToken).ConfigureAwait(false);
                 return Try.Succeeded();
             }
             catch (Exception ex)

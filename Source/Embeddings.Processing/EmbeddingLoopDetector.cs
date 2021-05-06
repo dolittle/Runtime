@@ -9,7 +9,9 @@ using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
+    /// <summary>
     /// Represents an implementation of <see cref="IDetectEmbeddingLoop" />.
+    /// </summary>
     public class EmbeddingLoopDetector : IDetectEmdbeddingLoop
     {
         readonly ICompareStates _comparer = new CompareProjectionStates();
