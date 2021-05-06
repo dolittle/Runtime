@@ -104,7 +104,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             {
                 await PerformNextJobs().ConfigureAwait(false);
             }
-            return true;
+            return Try.Succeeded();
         }
 
         async Task<Try> DoUpdate(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)

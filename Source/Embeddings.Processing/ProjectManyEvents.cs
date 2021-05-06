@@ -49,19 +49,18 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public async Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken)
         {
+            var i = 0;
             try
             {
                 _logger.LogDebug("Trying to project {NumEvents} events on embedding {Embedding} and key {Key}", events.Count, _identifier, currentState.Key);
-                for (var i = 0; i < events.Count; i++)
+                for (; i < events.Count; i++)
                 {
                     var tryProject = await TryProjectOne(currentState, events[i], cancellationToken).ConfigureAwait(false);
                     if (!tryProject.Success)
                     {
-                        if (i == 0)
-                        {
-                            return tryProject.Exception;
-                        }
-                        return Partial<EmbeddingCurrentState>.PartialSuccess(currentState, tryProject.Exception);
+                        return i == 0
+                            ? tryProject.Exception
+                            : Partial<EmbeddingCurrentState>.PartialSuccess(currentState, tryProject.Exception);
                     }
                     currentState = tryProject.Result;
                 }
@@ -69,7 +68,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             catch (Exception ex)
             {
-                return ex;
+                return i == 0
+                    ? ex
+                    : Partial<EmbeddingCurrentState>.PartialSuccess(currentState, ex);
             }
         }
 

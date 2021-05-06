@@ -34,33 +34,33 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken) =>
             _onAllTenants.PerformAsync(_ => _getStreamDefinitions().Persist(scope, streamDefinition, cancellationToken));
 
-        /// <inheritdoc/>
-        public async Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId streamId, CancellationToken cancellationToken)
-        {
-            IStreamDefinition result = default;
+        // /// <inheritdoc/>
+        // public async Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId streamId, CancellationToken cancellationToken)
+        // {
+        //     IStreamDefinition result = default;
 
-            await _onAllTenants.PerformAsync(async _ =>
-                {
-                    var tryGetStreamDefinition = await _getStreamDefinitions().TryGet(scope, streamId, cancellationToken).ConfigureAwait(false);
-                    if (tryGetStreamDefinition.Success)
-                    {
-                        var streamDefinition = tryGetStreamDefinition.Result;
-                        if (result == default)
-                        {
-                            result = streamDefinition;
-                        }
-                        else if (tryGetStreamDefinition.Result != result)
-                        {
-                            throw new StreamDefinitionNotTheSameForAllTenants(scope, streamId);
-                        }
-                    }
-                }).ConfigureAwait(false);
+        //     await _onAllTenants.PerformAsync(async _ =>
+        //         {
+        //             var tryGetStreamDefinition = await _getStreamDefinitions().TryGet(scope, streamId, cancellationToken).ConfigureAwait(false);
+        //             if (tryGetStreamDefinition.Success)
+        //             {
+        //                 var streamDefinition = tryGetStreamDefinition.Result;
+        //                 if (result == default)
+        //                 {
+        //                     result = streamDefinition;
+        //                 }
+        //                 else if (tryGetStreamDefinition.Result != result)
+        //                 {
+        //                     throw new StreamDefinitionNotTheSameForAllTenants(scope, streamId);
+        //                 }
+        //             }
+        //         }).ConfigureAwait(false);
 
-            if (result != default)
-            {
-                return Try<IStreamDefinition>.Failed();
-            }
-            return Try<IStreamDefinition>.Succeeded(result);
-        }
+        //     if (result == default)
+        //     {
+        //         return Try<IStreamDefinition>.Failed();
+        //     }
+        //     return Try<IStreamDefinition>.Succeeded(result);
+        // }
     }
 }

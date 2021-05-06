@@ -68,9 +68,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                         "Failed to update embedding state for embedding {Embedding} and key {Key}.{}",
                         _embedding,
                         key,
-                        updateResult.HasException ?
-                            $" {updateResult.Exception.Message}"
-                            : string.Empty);
+                        $" {updateResult.Exception.Message}");
                     result = result.Success ? updateResult : result;
                 }
             }

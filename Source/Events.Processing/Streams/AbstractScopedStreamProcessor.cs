@@ -207,8 +207,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 do
                 {
-                    var tryGetEvent = Try<StreamEvent>.Failed();
-                    while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested)
+                    Try<StreamEvent> tryGetEvent = default;
+                    do
                     {
                         _currentState = await Catchup(_currentState, cancellationToken).ConfigureAwait(false);
                         tryGetEvent = await FetchNextEventToProcess(_currentState, cancellationToken).ConfigureAwait(false);
@@ -222,6 +222,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                                 cancellationToken).ConfigureAwait(false);
                         }
                     }
+                    while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested);
 
                     if (cancellationToken.IsCancellationRequested) break;
                     _currentState = await ProcessEvent(tryGetEvent, _currentState, cancellationToken).ConfigureAwait(false);

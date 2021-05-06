@@ -16,8 +16,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// Initializes a new instance of the <see cref="FailedProjectingEvents"/> class.
         /// </summary>
         /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
-        public FailedProjectingEvents(EmbeddingId embedding)
-            : base($"A failure occurred while projecting events for embedding {embedding.Value}")
+        /// <param name="inner">The inner<see cref="Exception"/> </param>
+        public FailedProjectingEvents(EmbeddingId embedding, Exception inner)
+            : base($"A failure occurred while projecting events for embedding {embedding.Value}", inner)
         {
         }
     }

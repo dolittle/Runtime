@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
             desired_state = "desired state";
             state_comparer
                 .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+                .Returns(Try<bool>.Succeeded(false));
             embedding
                 .Setup(_ => _.TryCompare(current_state, desired_state, cancellation))
                 .Returns(Task.FromResult(Try<UncommittedEvents>.Failed(exception)));
@@ -35,7 +35,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
         Because of = () => result = calculator.TryConverge(current_state, desired_state, cancellation).GetAwaiter().GetResult();
 
         It should_return_a_failure = () => result.Success.ShouldBeFalse();
-        It should_have_an_exception = () => result.HasException.ShouldBeTrue();
         It should_fail_because_detecting_loop_failed = () => result.Exception.ShouldEqual(exception);
         It should_only_compare_once = () => embedding.Verify(_ => _.TryCompare(current_state, desired_state, cancellation), Moq.Times.Once);
         It should_not_do_anything_more_with_embedding = () => embedding.VerifyNoOtherCalls();

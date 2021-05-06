@@ -54,13 +54,13 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                     desired_current_embedding_state)));
             state_comparer
                 .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+                .Returns(Try<bool>.Succeeded(false));
             state_comparer
                 .Setup(_ => _.TryCheckEquality(intermediate_current_embedding_state.State, desired_state))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+                .Returns(Try<bool>.Succeeded(false));
             state_comparer
                 .Setup(_ => _.TryCheckEquality(desired_current_embedding_state.State, desired_state))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(true)));
+                .Returns(Try<bool>.Succeeded(true));
 
         };
 
@@ -68,7 +68,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
         Because of = () => result = calculator.TryConverge(current_state, desired_state, cancellation).GetAwaiter().GetResult();
 
         It should_not_return_a_failure = () => result.Success.ShouldBeTrue();
-        It should_not_have_an_exception = () => result.HasException.ShouldBeFalse();
         It should_compare_current_state = () => embedding.Verify(_ => _.TryCompare(current_state, desired_state, cancellation), Moq.Times.Once);
         It should_compare_intermediate_state = () => embedding.Verify(_ => _.TryCompare(intermediate_current_embedding_state, desired_state, cancellation), Moq.Times.Once);
         It should_not_do_anything_more_with_embedding = () => embedding.VerifyNoOtherCalls();

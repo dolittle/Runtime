@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
 
             definitions
                 .Setup(_ => _.TryGet(definition.Projection, definition.Scope, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<ProjectionDefinition>.Failed()));
+                .Returns(Task.FromResult(Try<ProjectionDefinition>.Failed(new Exception())));
         };
         Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 

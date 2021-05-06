@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
                     {
                         return Task.FromResult(Try<StreamEvent>.Succeeded(@event));
                     }
-                    return Task.FromResult(Try<StreamEvent>.Failed());
+                    return Task.FromResult(Try<StreamEvent>.Failed(new Exception()));
                 });
         };
     }

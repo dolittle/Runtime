@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Projections.Store.Services
         public static Failure ToFailure(this Exception exception)
             => exception switch
             {
-                FailedToGetProjectionDefinition e => new Failure(ProjectionsFailures.FailedToGetProjectionDefinition, e.Message),
+                ProjectionDefinitionDoesNotExist e => new Failure(ProjectionsFailures.FailedToGetProjectionDefinition, e.Message),
                 _ => new Failure(FailureId.Other, $"Error message: {exception.Message}\nStack Trace: {exception.StackTrace}")
             };
     }

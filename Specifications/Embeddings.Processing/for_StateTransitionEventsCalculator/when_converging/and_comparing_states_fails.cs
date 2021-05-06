@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
 
         Establish context = () =>
         {
-            exception = new FailedProjectingEvents(identifier);
+            exception = new FailedProjectingEvents(identifier, new Exception());
             current_state = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "current state", "");
             desired_state = "desired state";
             desired_current_embedding_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, desired_state, "");
@@ -38,17 +38,16 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                     desired_current_embedding_state)));
             state_comparer
                 .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
-                .Returns(Task.FromResult(Try<bool>.Failed(exception)));
+                .Returns(Try<bool>.Failed(exception));
             state_comparer
                 .Setup(_ => _.TryCheckEquality(desired_current_embedding_state.State, desired_state))
-                .Returns(Task.FromResult(Try<bool>.Failed(exception)));
+                .Returns(Try<bool>.Failed(exception));
         };
 
         static Try<UncommittedAggregateEvents> result;
         Because of = () => result = calculator.TryConverge(current_state, desired_state, cancellation).GetAwaiter().GetResult();
 
         It should_return_a_failure = () => result.Success.ShouldBeFalse();
-        It should_have_an_exception = () => result.HasException.ShouldBeTrue();
         It should_fail_because_comparing_states_failed = () => result.Exception.ShouldEqual(exception);
         It should_not_do_anything_with_embedding = () => embedding.VerifyNoOtherCalls();
         It should_not_project_anything = () => project_many_events.VerifyNoOtherCalls();

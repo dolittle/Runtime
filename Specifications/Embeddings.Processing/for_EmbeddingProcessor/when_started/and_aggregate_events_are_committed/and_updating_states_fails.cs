@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_sta
         Establish context = () =>
         {
             event_waiter.Setup(_ => _.WaitForEvent(embedding.Value, Moq.It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
-            state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed()));
+            state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed(new Exception())));
         };
 
         Because of = () => result = embedding_processor.Start(cancellation_token);

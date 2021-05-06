@@ -107,7 +107,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _logger.SettingExecutionContext(arguments.ExecutionContext);
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-            var tryRegisterEventProcessorStreamProcessor = TryRegisterProjection(
+            var registration = TryRegisterProjection(
                 arguments,
                 () => new EventProcessor(
                     arguments.ProjectionDefinition,
@@ -119,14 +119,9 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                     _loggerFactory.CreateLogger<EventProcessor>()),
                 cts.Token);
 
-            if (!tryRegisterEventProcessorStreamProcessor.Success)
+            if (!registration.Success)
             {
-                if (tryRegisterEventProcessorStreamProcessor.HasException)
-                {
-                    var exception = tryRegisterEventProcessorStreamProcessor.Exception;
-                    ExceptionDispatchInfo.Capture(exception).Throw();
-                }
-                else
+                if (registration.Exception is StreamProcessorAlreadyRegistered)
                 {
                     _logger.ProjectionAlreadyRegistered(arguments);
                     var failure = new Failure(
@@ -135,31 +130,25 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                     await dispatcher.Reject(new ProjectionRegistrationResponse { Failure = failure }, cts.Token).ConfigureAwait(false);
                     return;
                 }
+                var exception = registration.Exception;
+                ExceptionDispatchInfo.Capture(exception).Throw();
             }
 
-            using var eventProcessorStreamProcessor = tryRegisterEventProcessorStreamProcessor.Result;
+            using var eventProcessorStreamProcessor = registration.Result;
 
-            var tryStartEventHandler = await TryStartProjection(
+            var tryStart = await TryStartProjection(
                 dispatcher,
                 arguments,
                 eventProcessorStreamProcessor,
                 cts.Token).ConfigureAwait(false);
-            if (!tryStartEventHandler.Success)
+            if (!tryStart.Success)
             {
                 cts.Cancel();
-                if (tryStartEventHandler.HasException)
-                {
-                    var exception = tryStartEventHandler.Exception;
-                    ExceptionDispatchInfo.Capture(exception).Throw();
-                }
-                else
-                {
-                    _logger.CouldNotStartProjection(arguments);
-                    return;
-                }
+                var exception = tryStart.Exception;
+                ExceptionDispatchInfo.Capture(exception).Throw();
             }
 
-            var tasks = tryStartEventHandler.Result;
+            var tasks = tryStart.Result;
             try
             {
                 await Task.WhenAny(tasks).ConfigureAwait(false);
@@ -212,18 +201,16 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             _logger.RegisteringProjection(arguments);
             try
             {
-                if (_streamProcessors.TryRegister(
+                var registration = _streamProcessors.TryCreateAndRegister(
                     arguments.ProjectionDefinition.Scope,
                     arguments.ProjectionDefinition.Projection.Value,
                     new EventLogStreamDefinition(),
                     getEventProcessor,
-                    cancellationToken,
-                    out var outputtedEventProcessorStreamProcessor))
-                {
-                    return outputtedEventProcessorStreamProcessor;
-                }
+                    cancellationToken);
 
-                return Try<StreamProcessor>.Failed();
+                return registration.Success
+                    ? registration.Result
+                    : registration.Exception;
             }
             catch (Exception ex)
             {

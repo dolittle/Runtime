@@ -30,12 +30,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
 
             types_fetcher
                 .Setup(_ => _.FetchInRange(new StreamPositionRange(0, 32), cancellation_token))
-                .Returns(Task.FromResult<ISet<Artifact>>(new HashSet<Artifact>(new[] { filter_definition_event_type_one, filter_definition_event_type_three})));
+                .Returns(Task.FromResult<ISet<Artifact>>(new HashSet<Artifact>(new[] { filter_definition_event_type_one, filter_definition_event_type_three })));
         };
 
         static FilterValidationResult result;
         Because of = () => result = validator.Validate(new_filter_definition, filter_processor, 32, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
+        It should_not_fail_validation = () => result.Success.ShouldBeTrue();
     }
 }

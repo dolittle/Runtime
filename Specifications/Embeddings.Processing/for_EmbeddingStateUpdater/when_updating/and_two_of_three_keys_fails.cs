@@ -98,7 +98,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
                 .Returns(Task.FromResult<Partial<EmbeddingCurrentState>>(projection_result_c));
             embedding_store
                 .Setup(_ => _.TryReplace(embedding, projection_key_c, projection_result_c.Version, projection_result_c.State, cancellation_token))
-                .Returns(Task.FromResult<Try>(true));
+                .Returns(Task.FromResult(Try.Succeeded()));
         };
 
         static Try result;

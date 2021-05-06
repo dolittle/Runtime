@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
                 .Returns(Task.FromResult<Try<EmbeddingCurrentState>>(current_state));
             embedding_store
                 .Setup(_ => _.TryReplace(embedding, projection_key, projection_result.Version, projection_result.State, cancellation_token))
-                .Returns(Task.FromResult<Try>(true));
+                .Returns(Task.FromResult(Try.Succeeded()));
             event_store
                 .Setup(_ => _.FetchForAggregateAfter(event_source, embedding.Value, current_state.Version, cancellation_token))
                 .Returns(Task.FromResult(unprocessed_events));

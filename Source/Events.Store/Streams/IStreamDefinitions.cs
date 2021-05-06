@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <param name="streamId">The <see cref="StreamId" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns a <see cref="Try{TResult}" /> with <see cref="IStreamDefinition" /> result.</returns>
-        Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId streamId, CancellationToken cancellationToken);
+        // Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId streamId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Persists an <see cref="IStreamDefinition" /> for <see cref="ITenants.All" />.

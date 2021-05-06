@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             var allTransitionEvents = new List<UncommittedEvents>();
             while (true)
             {
-                var statesAreEqualResult = await _stateComparer.TryCheckEquality(current.State, desired).ConfigureAwait(false);
+                var statesAreEqualResult = _stateComparer.TryCheckEquality(current.State, desired);
                 if (!statesAreEqualResult.Success)
                 {
                     return statesAreEqualResult.Exception;
@@ -93,8 +93,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 if (!intermediateState.Success)
                 {
                     return intermediateState.IsPartialResult
-                        ? new CouldNotProjectAllEvents(_identifier)
-                        : new FailedProjectingEvents(_identifier);
+                        ? new CouldNotProjectAllEvents(_identifier, intermediateState.Exception)
+                        : new FailedProjectingEvents(_identifier, intermediateState.Exception);
                 }
 
                 current = intermediateState.Result;
