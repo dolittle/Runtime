@@ -12,11 +12,12 @@ namespace Dolittle.Runtime.Embeddings.Processing
     public interface ICompareStates
     {
         /// <summary>
-        /// Tries to compare two projection states to determine equality.
+        /// Tries to compare two projection states to determine equality. Doesn't care about the ordering of
+        /// properties or dictionary keys, but will fail on differently ordered arrays.
         /// </summary>
         /// <param name="left">The first <see cref="ProjectionState"/> to compare.</param>
         /// <param name="right">The second <see cref="ProjectionState"/> to compare.</param>
-        /// <returns>Returns true if they are equal, false if not.</returns>
+        /// <returns>A <see cref="Try{bool}" /> of true if they are equal, false if not.</returns>
         Try<bool> TryCheckEquality(ProjectionState left, ProjectionState right);
     }
 }
