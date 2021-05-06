@@ -21,8 +21,6 @@ namespace Dolittle.Runtime.Rudimentary
             IsPartialResult = true;
         }
 
-        protected Partial() : base() { }
-
         protected Partial(Exception exception) : base(exception) { }
 
         /// <summary>
@@ -45,12 +43,6 @@ namespace Dolittle.Runtime.Rudimentary
         public static Partial<TResult> PartialSuccess(TResult result, Exception exception = default) => new(result, exception);
 
         /// <summary>
-        /// Creates a new <see cref="Partial{TResult}"/> result indicating a failed operation.
-        /// </summary>
-        /// <returns>A new <see cref="Partial{TResult}"/> result.</returns>
-        public static new Partial<TResult> Failed() => new();
-
-        /// <summary>
         /// Creates a new <see cref="Partial{TResult}"/> result indicating a failed operation because of an exception.
         /// </summary>
         /// <param name="exception">The <see cref="Exception" /> that caused the operation to fail.</param>
@@ -60,7 +52,7 @@ namespace Dolittle.Runtime.Rudimentary
         /// <summary>
         /// Implicitly convert <typeparamref name="TResult">result</typeparamref> to <see cref="Try{TResult}" />.
         /// </summary>
-        /// <param name="result">The <typeparamref name="TResult">resulet</typeparamref> to convert.</param>
+        /// <param name="result">The <typeparamref name="TResult">result</typeparamref> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
         public static implicit operator Partial<TResult>(TResult result) => Succeeded(result);
 
