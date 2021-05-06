@@ -16,7 +16,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
     public class and_desired_state_is_reached_after_second_compare : given.all_dependencies
     {
         static EmbeddingCurrentState current_state;
-        static ProjectionState desired_state;
         static EmbeddingCurrentState intermediate_current_embedding_state;
         static EmbeddingCurrentState desired_current_embedding_state;
         static UncommittedEvents first_event_batch;
@@ -30,10 +29,10 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
             first_event_batch = new UncommittedEvents(Array.Empty<UncommittedEvent>());
             second_event_batch = new UncommittedEvents(Array.Empty<UncommittedEvent>());
             embedding
-                .Setup(_ => _.TryCompare(current_state, desired_state, cancellation))
+                .Setup(_ => _.TryDelete(current_state, cancellation))
                 .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(first_event_batch)));
             embedding
-                .Setup(_ => _.TryCompare(intermediate_current_embedding_state, desired_state, cancellation))
+                .Setup(_ => _.TryDelete(intermediate_current_embedding_state, cancellation))
                 .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(second_event_batch)));
             loop_detector
                 .Setup(_ => _.TryCheckEventLoops(new[] { first_event_batch }))
@@ -49,16 +48,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 .Setup(_ => _.TryProject(intermediate_current_embedding_state, second_event_batch, cancellation))
                 .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(
                     desired_current_embedding_state)));
-            state_comparer
-                .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
-                .Returns(Try<bool>.Succeeded(false));
-            state_comparer
-                .Setup(_ => _.TryCheckEquality(intermediate_current_embedding_state.State, desired_state))
-                .Returns(Try<bool>.Succeeded(false));
-            state_comparer
-                .Setup(_ => _.TryCheckEquality(desired_current_embedding_state.State, desired_state))
-                .Returns(Try<bool>.Succeeded(true));
-
         };
 
         static Try<UncommittedAggregateEvents> result;
