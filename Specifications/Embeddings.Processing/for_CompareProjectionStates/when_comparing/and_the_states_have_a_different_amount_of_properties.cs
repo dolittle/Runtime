@@ -9,7 +9,7 @@ using Newtonsoft.Json.Linq;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing
 {
-    public class and_the_states_are_equal
+    public class and_the_states_have_a_different_amount_of_properties
     {
         static CompareProjectionStates comparer;
         static ProjectionState left;
@@ -19,43 +19,25 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.whe
         {
             dynamic left_dynamic = new JObject();
             left_dynamic.FirstProp = "FirstProp";
-            left_dynamic.Dictionary = new JObject
-            {
-                { "first_key", "first_value" },
-                { "second_key", "second_value" },
-                { "third_key", "third_value" }
-            };
-            left_dynamic.Array = new JArray
-            {
-                "First",
-                "Second",
-                "Third"
-            };
+            left_dynamic.SecondProp = "SecondProp";
+            left_dynamic.ThirdProp = 5;
             left = new ProjectionState(JsonConvert.SerializeObject(left_dynamic));
 
             dynamic right_dynamic = new JObject();
             right_dynamic.FirstProp = "FirstProp";
-            right_dynamic.Dictionary = new JObject
-            {
-                { "first_key", "first_value" },
-                { "second_key", "second_value" },
-                { "third_key", "third_value" }
-            };
-            right_dynamic.Array = new JArray
-            {
-                "First",
-                "Second",
-                "Third"
-            };
+            right_dynamic.SecondProp = "SecondProp";
+            right_dynamic.ThirdProp = 5;
+            right_dynamic.FourthProp = "im an extra";
             right = new ProjectionState(JsonConvert.SerializeObject(right_dynamic));
 
             comparer = new CompareProjectionStates();
         };
 
         static Try<bool> result;
+
         Because of = () => result = comparer.TryCheckEquality(left, right);
 
         It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_return_true = () => result.Result.ShouldBeTrue();
+        It should_return_false = () => result.Result.ShouldBeFalse();
     }
 }
