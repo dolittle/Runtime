@@ -20,7 +20,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
             {
                 ProjectionDelete = new Events.Processing.Contracts.ProjectionDeleteResponse()
             };
-            embedding_response.
             request_factory
                 .Setup(_ => _.TryCreate(current_state, @event))
                 .Returns(embedding_request);

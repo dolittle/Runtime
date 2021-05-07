@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
         It should_have_called_the_request_factory = ()
             => request_factory.Verify(_ => _.TryCreate(current_state, @event));
         It should_call_the_dispatcher = ()
-            => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);
+            => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Moq.Times.Once);
         It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
         It should_return_a_projection_failed_result = ()
             => result.ShouldBeOfExactType<ProjectionFailedResult>();

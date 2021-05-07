@@ -20,11 +20,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
         Establish context = () =>
         {
             failure_reason = "sometimes 🙅🕒 you 👆😤 do 💕 be 💪🐝 a 😯 failure";
-            embedding_response = new EmbeddingResponse
+            embedding_response = new EmbeddingResponse()
             {
-                Failure = new Dolittle.Protobuf.Contracts.Failure
+                ProcessorFailure = new Dolittle.Runtime.Events.Processing.Contracts.ProcessorFailure
                 {
-                    Id = new FailureId(Guid.Parse("1f10056e-9cb8-4f8d-8764-01a8cb6b75f8")).ToProtobuf(),
+                    Retry = false,
                     Reason = failure_reason
                 }
             };
