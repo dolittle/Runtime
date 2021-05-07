@@ -242,7 +242,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             var tryRegisterFilter = TryRegisterStreamProcessor(scopeId, filterDefinition, getFilterProcessor, cancellationToken);
             if (!tryRegisterFilter.Success)
             {
-                var error = tryRegisterFilter.Exception;
                 linkedTokenSource.Cancel();
 
                 if (tryRegisterFilter.Exception is StreamProcessorAlreadyRegistered)

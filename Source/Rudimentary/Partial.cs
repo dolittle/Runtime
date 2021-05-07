@@ -39,8 +39,9 @@ namespace Dolittle.Runtime.Rudimentary
         /// Creates a new <see cref="Partial{TResult}"/> result indicating a successful operation.
         /// </summary>
         /// <param name="result">The <see cref="TResult"/> of the operation.</param>
+        /// <param name="exception">The <see cref="Exception"/> that caused the operation to fail.</param>
         /// <returns>A new <see cref="Partial{TResult}"/> result.</returns>
-        public static Partial<TResult> PartialSuccess(TResult result, Exception exception = default) => new(result, exception);
+        public static Partial<TResult> PartialSuccess(TResult result, Exception exception) => new(result, exception);
 
         /// <summary>
         /// Creates a new <see cref="Partial{TResult}"/> result indicating a failed operation because of an exception.
