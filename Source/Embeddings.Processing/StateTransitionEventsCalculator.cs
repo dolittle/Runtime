@@ -75,20 +75,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 var allTransitionEvents = new List<UncommittedEvents>();
                 while (true)
                 {
-                    var isDesiredResult = isDesiredState(current);
-                    if (!isDesiredResult.Success)
+                    if (IsDesiredStateOrError(isDesiredState, current, allTransitionEvents, out var eventsToCommit, out var error))
                     {
-                        return isDesiredResult.Exception;
-                    }
-
-                    if (isDesiredResult.Result)
-                    {
-                        var events = from uncommittedEvents in allTransitionEvents
-                                     from @event in uncommittedEvents
-                                     select @event;
-
-                        return CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
-
+                        return error == default
+                            ? eventsToCommit
+                            : error;
                     }
 
                     var transitionEvents = await getTransitionEvents(current, cancellationToken).ConfigureAwait(false);
@@ -127,6 +118,33 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
         }
 
+        bool IsDesiredStateOrError(
+            Func<EmbeddingCurrentState, Try<bool>> isDesiredState,
+            EmbeddingCurrentState current,
+            List<UncommittedEvents> allTransitionEvents,
+            out UncommittedAggregateEvents eventsToCommit,
+            out Exception error)
+        {
+            eventsToCommit = default;
+            error = default;
+            var isDesiredResult = isDesiredState(current);
+            if (!isDesiredResult.Success)
+            {
+                error = isDesiredResult.Exception;
+                return true;
+            }
+
+            if (isDesiredResult.Result)
+            {
+                var events = from uncommittedEvents in allTransitionEvents
+                             from @event in uncommittedEvents
+                             select @event;
+
+                eventsToCommit = CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
+                return true;
+            }
+            return false;
+        }
         UncommittedAggregateEvents CreateUncommittedAggregateEvents(UncommittedEvents events, EmbeddingCurrentState currentState)
             => new(_identifier.Value, new Artifact(_identifier.Value, ArtifactGeneration.First), currentState.Version, events);
     }
