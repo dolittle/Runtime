@@ -2,7 +2,7 @@
     <PropertyGroup>
         <AutofacVersion>5.0.0</AutofacVersion>
         <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
-        <ContractsVersion>5.3.0</ContractsVersion>
+        <ContractsVersion>5.4.0-embeddings.3</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <GrpcVersion>2.35.0</GrpcVersion>
