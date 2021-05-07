@@ -17,6 +17,24 @@ namespace Dolittle.Runtime.Embeddings.Processing
     public class EmbeddingRequestFactory : IEmbeddingRequestFactory
     {
         /// <inheritdoc/>
+        public EmbeddingRequest Create(ProjectionCurrentState current, UncommittedEvent @event)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public EmbeddingRequest Create(EmbeddingCurrentState current, ProjectionState desiredState)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public EmbeddingRequest Create(EmbeddingCurrentState current)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
         public Try<EmbeddingRequest> TryCreate(ProjectionCurrentState current, UncommittedEvent @event)
         {
             throw new NotImplementedException();

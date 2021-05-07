@@ -21,25 +21,28 @@ namespace Dolittle.Runtime.Embeddings.Processing
     /// </summary>
     public class Embedding : IEmbedding
     {
-        readonly EmbeddingId _identifier;
         readonly IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse> _dispatcher;
         readonly IEmbeddingRequestFactory _requestFactory;
 
+        /// <summary>
+        /// Initializes an instance of the <see cref="Embedding" /> class.
+        /// </summary>
+        /// <param name="dispatcher">The <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
+        /// <param name="requestFactory">The <see cref="IEmbeddingRequestFactory" />.</param>
         public Embedding(
-            EmbeddingId identifier,
             IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse> dispatcher,
             IEmbeddingRequestFactory requestFactory)
         {
-            _identifier = identifier;
             _dispatcher = dispatcher;
             _requestFactory = requestFactory;
         }
 
         /// <inheritdoc/> 
-        public Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken)
+            => HandleResponse(
+                await _dispatcher.Call(
+                    _requestFactory.Create(state, @event),
+                    cancellationToken).ConfigureAwait(false));
 
         /// <inheritdoc/> 
         public Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken)
@@ -52,5 +55,28 @@ namespace Dolittle.Runtime.Embeddings.Processing
         {
             throw new NotImplementedException();
         }
+
+        IProjectionResult HandleResponse(EmbeddingResponse response)
+        {
+            if (IsFailureResponse(response))
+            {
+                return response.FailureCase is EmbeddingResponse.FailureOneofCase.ProcessorFailure
+                    ? new ProjectionFailedResult(response.ProcessorFailure.Reason)
+                    : new ProjectionFailedResult(response.Failure.Reason);
+            }
+            return response.ResponseCase switch
+            {
+                EmbeddingResponse.ResponseOneofCase.Compare
+                    => new ProjectionFailedResult($"Wrong response case {nameof(EmbeddingResponse.ResponseOneofCase.Compare)}"),
+                EmbeddingResponse.ResponseOneofCase.Delete
+                    => new ProjectionFailedResult($"Wrong response case {nameof(EmbeddingResponse.ResponseOneofCase.Delete)}"),
+                EmbeddingResponse.ResponseOneofCase.ProjectionDelete => new ProjectionDeleteResult(),
+                EmbeddingResponse.ResponseOneofCase.ProjectionReplace => new ProjectionReplaceResult(response.ProjectionReplace.State),
+                _ => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}")
+            };
+        }
+
+        bool IsFailureResponse(EmbeddingResponse response)
+            => response.Failure is not null || response.ProcessorFailure is not null;
     }
 }

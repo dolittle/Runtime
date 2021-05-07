@@ -30,13 +30,16 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting
             };
 
             request_factory
-                .Setup(_ => _.TryCreate(current_state, @event))
+                .Setup(_ => _.Create(current_state, @event))
                 .Returns(embedding_request);
             dispatcher
                 .Setup(_ => _.Call(
                     embedding_request,
                     cancellation))
                 .Returns(Task.FromResult(embedding_response));
+            // while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(10);
+
+
         };
 
         static IProjectionResult result;
@@ -44,7 +47,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting
         Because of = () => result = embedding.Project(current_state, @event, cancellation).GetAwaiter().GetResult();
 
         It should_have_called_the_request_factory = ()
-            => request_factory.Verify(_ => _.TryCreate(current_state, @event));
+            => request_factory.Verify(_ => _.Create(current_state, @event));
 
         It should_call_the_dispatcher = ()
             => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);

@@ -21,10 +21,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.given
         {
             cancellation = CancellationToken.None;
             dispatcher = new Mock<IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>>(MockBehavior.Strict);
-            var embeddingId = "76f59adf-5a48-442c-b5d1-0a78a0a51d80";
-            request_factory = new Mock<IEmbeddingRequestFactory>();
+            request_factory = new Mock<IEmbeddingRequestFactory>(MockBehavior.Strict);
             embedding_request = new EmbeddingRequest();
-            embedding = new Embedding(embeddingId, dispatcher.Object, request_factory.Object);
+            embedding = new Embedding(dispatcher.Object, request_factory.Object);
         };
     }
 }

@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
             };
 
             request_factory
-                .Setup(_ => _.TryCreate(current_state, @event))
+                .Setup(_ => _.Create(current_state, @event))
                 .Returns(embedding_request);
             dispatcher
                 .Setup(_ => _.Call(
@@ -47,6 +47,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
         It should_have_the_received_state_in_the_result = ()
             => (result as ProjectionReplaceResult).State.Value.ShouldEqual(received_state);
         It should_have_called_the_request_factory = ()
-            => request_factory.Verify(_ => _.TryCreate(current_state, @event));
+            => request_factory.Verify(_ => _.Create(current_state, @event));
     }
 }

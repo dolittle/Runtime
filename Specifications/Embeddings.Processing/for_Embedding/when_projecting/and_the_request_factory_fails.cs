@@ -19,8 +19,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting
         {
             error = new Exception();
             request_factory
-                .Setup(_ => _.TryCreate(current_state, @event))
-                    .Returns(Try<EmbeddingRequest>.Failed(error));
+                .Setup(_ => _.Create(current_state, @event))
+                .Throws(error);
         };
 
         static Exception result;
@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting
         Because of = () => result = Catch.Exception(() => embedding.Project(current_state, @event, cancellation).GetAwaiter().GetResult());
 
         It should_have_called_the_request_factory = ()
-            => request_factory.Verify(_ => _.TryCreate(current_state, @event));
+            => request_factory.Verify(_ => _.Create(current_state, @event));
         It should_not_do_anything_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
         It should_return_the_correct_error = () => result.ShouldEqual(error);
     }

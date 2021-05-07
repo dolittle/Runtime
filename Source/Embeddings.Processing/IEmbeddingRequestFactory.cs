@@ -20,6 +20,14 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// </summary>
         /// <param name="current">The <see cref="ProjectionCurrentState" />.</param>
         /// <param name="event">The <see cref="UncommittedEvent" />.</param>
+        /// <returns>The projection <see cref="EmbeddingRequest" />.</returns>
+        EmbeddingRequest Create(ProjectionCurrentState current, UncommittedEvent @event);
+
+        /// <summary>
+        /// Creates an <see cref="EmbeddingRequest" /> for projections.
+        /// </summary>
+        /// <param name="current">The <see cref="ProjectionCurrentState" />.</param>
+        /// <param name="event">The <see cref="UncommittedEvent" />.</param>
         /// <returns>A projection <see cref="Try{EmbeddingRequest}" />.</returns>
         Try<EmbeddingRequest> TryCreate(ProjectionCurrentState current, UncommittedEvent @event);
 
@@ -28,8 +36,23 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// </summary>
         /// <param name="current">The <see cref="EmbeddingCurrentState" />.</param>
         /// <param name="desiredState">The desired <see cref="ProjectionState" />.</param>
+        /// <returns>The compare <see cref="EmbeddingRequest" />.</returns>
+        EmbeddingRequest Create(EmbeddingCurrentState current, ProjectionState desiredState);
+
+        /// <summary>
+        /// Creates an <see cref="EmbeddingRequest" /> for comparisons.
+        /// </summary>
+        /// <param name="current">The <see cref="EmbeddingCurrentState" />.</param>
+        /// <param name="desiredState">The desired <see cref="ProjectionState" />.</param>
         /// <returns>A compare <see cref="Try{EmbeddingRequest}" />.</returns>
         Try<EmbeddingRequest> TryCreate(EmbeddingCurrentState current, ProjectionState desiredState);
+
+        /// <summary>
+        /// Creates an <see cref="EmbeddingRequest" /> for deleting.
+        /// </summary>
+        /// <param name="current">The <see cref="EmbeddingCurrentState" />.</param>
+        /// <returns>A delete <see cref="EmbeddingRequest" />.</returns>
+        EmbeddingRequest Create(EmbeddingCurrentState current);
 
         /// <summary>
         /// Creates an <see cref="EmbeddingRequest" /> for deleting.

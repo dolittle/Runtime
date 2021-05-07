@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting
         {
             error = new Exception();
             request_factory
-                .Setup(_ => _.TryCreate(current_state, @event))
+                .Setup(_ => _.Create(current_state, @event))
                     .Returns(embedding_request);
             dispatcher
                 .Setup(_ => _.Call(
