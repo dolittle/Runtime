@@ -16,6 +16,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
     {
         readonly ICompareStates _comparer;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EmbeddingLoopDetector"/> class.
+        /// </summary>
+        /// <param name="comparer">The <see cref="ICompareStates"/> to use for comparing current and previous states.</param>
         public EmbeddingLoopDetector(ICompareStates comparer)
         {
             _comparer = comparer;
@@ -24,20 +28,21 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public Try<bool> TryCheckForProjectionStateLoop(ProjectionState currentState, IEnumerable<ProjectionState> previousStates)
         {
-            try
-            {
-                // Note: ParallelEnumerable.Any() does not short circuit on true/exceptions like the
-                // normal IEnumerable.Any() does, it always goes through the whole ParallelQuery
-                return previousStates.AsParallel().Any(previousState =>
+            var equalityResults = previousStates.AsParallel()
+                .Select(previousState =>
                 {
-                    var tryResult = _comparer.TryCheckEquality(previousState, currentState);
-                    return tryResult.Success ? tryResult.Result : throw tryResult.Exception;
-                });
-            }
-            catch (Exception ex)
+                    Console.WriteLine($"ME BE COMAPRING: {previousState}, {currentState}");
+                    return _comparer.TryCheckEquality(previousState, currentState);
+                })
+                // The query execution is deferred so need to call for ToList here
+                // https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/introduction-to-plinq#the-forall-operator
+                .ToList();
+            var failure = equalityResults.FirstOrDefault(_ => !_.Success);
+            if (failure is not null)
             {
-                return ex;
+                return failure.Exception;
             }
+            return equalityResults.Any(_ => _.Result);
         }
     }
 }
