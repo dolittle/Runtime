@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
             };
 
             request_factory
-                .Setup(_ => _.Create(current_state))
+                .Setup(_ => _.TryCreate(current_state))
                 .Returns(embedding_request);
             dispatcher
                 .Setup(_ => _.Call(
@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
         Because of = () => result = embedding.TryDelete(current_state, cancellation).GetAwaiter().GetResult();
 
         It should_have_called_the_request_factory = ()
-            => request_factory.Verify(_ => _.Create(current_state));
+            => request_factory.Verify(_ => _.TryCreate(current_state));
 
         It should_call_the_dispatcher = ()
             => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);

@@ -17,8 +17,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_comparing
         {
             error = new Exception();
             request_factory
-                .Setup(_ => _.Create(current_state, desired_state))
-                .Throws(error);
+                .Setup(_ => _.TryCreate(current_state, desired_state))
+                .Returns(error);
         };
 
         static Try<UncommittedEvents> result;
@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_comparing
         Because of = () => result = embedding.TryCompare(current_state, desired_state, cancellation).GetAwaiter().GetResult();
 
         It should_have_called_the_request_factory = ()
-            => request_factory.Verify(_ => _.Create(current_state, desired_state));
+            => request_factory.Verify(_ => _.TryCreate(current_state, desired_state));
         It should_not_do_anything_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
         It should_return_failure = () => result.Success.ShouldBeFalse();
         It should_return_the_correct_error = () => result.Exception.ShouldEqual(error);

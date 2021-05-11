@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
             embedding_response.Delete.Events.AddRange(new[] { pb_uncommitted_event });
 
             request_factory
-                .Setup(_ => _.Create(current_state))
+                .Setup(_ => _.TryCreate(current_state))
                 .Returns(embedding_request);
             dispatcher
                 .Setup(_ => _.Call(
@@ -65,6 +65,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
             events[0].Type.Id.Value.ShouldEqual(pb_uncommitted_event.Artifact.Id.ToGuid());
             events[0].Type.Generation.Value.ShouldEqual(pb_uncommitted_event.Artifact.Generation);
         };
-        It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.Create(current_state));
+        It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.TryCreate(current_state));
     }
 }

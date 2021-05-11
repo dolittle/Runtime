@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_comparing
         {
             error = new Exception();
             request_factory
-                .Setup(_ => _.Create(current_state, desired_state))
+                .Setup(_ => _.TryCreate(current_state, desired_state))
                     .Returns(embedding_request);
             dispatcher
                 .Setup(_ => _.Call(

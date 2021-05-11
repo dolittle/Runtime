@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
             };
 
             request_factory
-                .Setup(_ => _.Create(current_state))
+                .Setup(_ => _.TryCreate(current_state))
                 .Returns(embedding_request);
             dispatcher
                 .Setup(_ => _.Call(
@@ -40,6 +40,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
         It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
         It should_return_a_failure_result = () => result.Success.ShouldBeFalse();
         It should_fail_because_unexpected_response_case = () => result.Exception.ShouldBeOfExactType<UnexpectedEmbeddingResponse>();
-        It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.Create(current_state));
+        It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.TryCreate(current_state));
     }
 }
