@@ -29,11 +29,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         public Try<bool> TryCheckForProjectionStateLoop(ProjectionState currentState, IEnumerable<ProjectionState> previousStates)
         {
             var equalityResults = previousStates.AsParallel()
-                .Select(previousState =>
-                {
-                    Console.WriteLine($"ME BE COMAPRING: {previousState}, {currentState}");
-                    return _comparer.TryCheckEquality(previousState, currentState);
-                })
+                .Select(previousState => _comparer.TryCheckEquality(previousState, currentState))
                 // The query execution is deferred so need to call for ToList here
                 // https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/introduction-to-plinq#the-forall-operator
                 .ToList();
