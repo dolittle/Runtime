@@ -55,49 +55,33 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/> 
         public async Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken)
         {
-            try
+            var request = _requestFactory.TryCreate(currentState, desiredState);
+            if (!request.Success)
             {
-                var request = _requestFactory.Create(currentState, desiredState);
-                var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
-                if (IsFailureResponse(response))
-                {
-                    return new FailedCompareEmbedding(_embeddingId, GetFailureReason(response));
-                }
-
-                return response.ResponseCase switch
-                {
-                    EmbeddingResponse.ResponseOneofCase.Compare => ToUncommittedEvents(response.Compare.Events),
-                    _ => new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase)
-                };
+                return request.Exception;
             }
-            catch (Exception ex)
-            {
-                return ex;
-            }
+            return await DispatchAndHandleEmbeddingResponse(
+                request,
+                EmbeddingResponse.ResponseOneofCase.Compare,
+                response => response.Compare.Events,
+                (embedding, failureReason) => new FailedCompareEmbedding(embedding, failureReason),
+                cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc/> 
         public async Task<Try<UncommittedEvents>> TryDelete(EmbeddingCurrentState currentState, CancellationToken cancellationToken)
         {
-            try
+            var request = _requestFactory.TryCreate(currentState);
+            if (!request.Success)
             {
-                var request = _requestFactory.Create(currentState);
-                var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
-                if (IsFailureResponse(response))
-                {
-                    return new FailedDeleteEmbedding(_embeddingId, GetFailureReason(response));
-                }
-
-                return response.ResponseCase switch
-                {
-                    EmbeddingResponse.ResponseOneofCase.Delete => ToUncommittedEvents(response.Delete.Events),
-                    _ => new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase)
-                };
+                return request.Exception;
             }
-            catch (Exception ex)
-            {
-                return ex;
-            }
+            return await DispatchAndHandleEmbeddingResponse(
+                request,
+                EmbeddingResponse.ResponseOneofCase.Delete,
+                response => response.Delete.Events,
+                (embedding, failureReason) => new FailedDeleteEmbedding(embedding, failureReason),
+                cancellationToken).ConfigureAwait(false);
         }
 
         IProjectionResult HandleProjectionResponse(EmbeddingResponse response)
@@ -117,6 +101,32 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 _ => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}")
             };
         }
+
+        async Task<Try<UncommittedEvents>> DispatchAndHandleEmbeddingResponse(
+            EmbeddingRequest request,
+            EmbeddingResponse.ResponseOneofCase expectedResponse,
+            Func<EmbeddingResponse, IEnumerable<Events.Contracts.UncommittedEvent>> getEvents,
+            Func<EmbeddingId, string, Exception> createFailedException,
+            CancellationToken cancellationToken)
+        {
+            try
+            {
+                var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
+                if (IsFailureResponse(response))
+                {
+                    return createFailedException(_embeddingId, GetFailureReason(response));
+                }
+
+                return response.ResponseCase == expectedResponse
+                    ? ToUncommittedEvents(getEvents(response))
+                    : new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase);
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
+        }
+
 
         bool IsFailureResponse(EmbeddingResponse response)
             => response.Failure is not null || response.ProcessorFailure is not null;
