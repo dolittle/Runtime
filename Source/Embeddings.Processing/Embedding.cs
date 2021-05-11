@@ -53,9 +53,27 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     cancellationToken).ConfigureAwait(false));
 
         /// <inheritdoc/> 
-        public Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken)
+        public async Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var request = _requestFactory.Create(currentState, desiredState);
+                var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
+                if (IsFailureResponse(response))
+                {
+                    return new FailedCompareEmbedding(_embeddingId, GetFailureReason(response));
+                }
+
+                return response.ResponseCase switch
+                {
+                    EmbeddingResponse.ResponseOneofCase.Compare => ToUncommittedEvents(response.Compare.Events),
+                    _ => new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase)
+                };
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
         /// <inheritdoc/> 
