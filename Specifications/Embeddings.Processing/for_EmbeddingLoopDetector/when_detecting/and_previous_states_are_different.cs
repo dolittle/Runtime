@@ -4,6 +4,8 @@
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting
 {
@@ -15,6 +17,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_
         Establish context = () =>
         {
             current_state = CreateStateWithKeyValue("ImAUniqueKey", "AndAUniqueValue");
+            comparer
+                .Setup(_ => _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state))
+                .Returns(Try<bool>.Succeeded(false));
         };
 
         static Try<bool> result;
@@ -23,5 +28,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_
 
         It should_succeed = () => result.Success.ShouldBeTrue();
         It should_not_detect_a_loop = () => result.Result.ShouldBeFalse();
+        It should_call_the_comparer_on_the_whole_list = () =>
+            comparer.Verify(_ =>
+                _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state),
+                Times.Exactly(previous_states.Count));
     }
 }

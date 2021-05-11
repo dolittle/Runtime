@@ -14,13 +14,20 @@ namespace Dolittle.Runtime.Embeddings.Processing
     /// </summary>
     public class EmbeddingLoopDetector : IDetectEmdbeddingLoop
     {
-        readonly ICompareStates _comparer = new CompareProjectionStates();
+        readonly ICompareStates _comparer;
+
+        public EmbeddingLoopDetector(ICompareStates comparer)
+        {
+            _comparer = comparer;
+        }
 
         /// <inheritdoc/>
         public Try<bool> TryCheckForProjectionStateLoop(ProjectionState currentState, IEnumerable<ProjectionState> previousStates)
         {
             try
             {
+                // Note: ParallelEnumerable.Any() does not short circuit on true/exceptions like the
+                // normal IEnumerable.Any() does, it always goes through the whole ParallelQuery
                 return previousStates.AsParallel().Any(previousState =>
                 {
                     var tryResult = _comparer.TryCheckEquality(previousState, currentState);

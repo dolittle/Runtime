@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -14,6 +15,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.given
     public class all_dependencies
     {
         protected static IDetectEmdbeddingLoop detector;
+        protected static Mock<ICompareStates> comparer;
         protected static IList<ProjectionState> previous_states;
 
         Establish context = () =>
@@ -28,7 +30,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.given
                 CreateStateWithKeyValue("SixthObject", "SixthObjectValue")
             };
 
-            detector = new EmbeddingLoopDetector();
+            comparer = new Mock<ICompareStates>();
+            detector = new EmbeddingLoopDetector(comparer.Object);
         };
 
         protected static ProjectionState CreateStateWithKeyValue(string key, string value)

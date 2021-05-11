@@ -4,6 +4,8 @@
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting
 {
@@ -24,5 +26,10 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_
 
         It should_succeed = () => result.Success.ShouldBeTrue();
         It should_not_detect_a_loop = () => result.Result.ShouldBeFalse();
+
+        It should_not_call_the_comparer = () =>
+            comparer.Verify(_ =>
+                _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state),
+                Times.Never());
     }
 }
