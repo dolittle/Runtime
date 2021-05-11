@@ -7,7 +7,7 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB
 {
     /// <summary>
-    /// Represents a resource configuration for a MongoDB Read model implementation.
+    /// Represents a resource configuration for a MongoDB Embedding implementation.
     /// </summary>
     public class EmbeddingsConfiguration
     {
