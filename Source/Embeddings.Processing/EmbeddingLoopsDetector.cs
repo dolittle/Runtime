@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Projections.Store.State;
@@ -10,17 +9,17 @@ using Dolittle.Runtime.Rudimentary;
 namespace Dolittle.Runtime.Embeddings.Processing
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IDetectEmbeddingLoop" />.
+    /// Represents an implementation of <see cref="IDetectEmbeddingLoops" />.
     /// </summary>
-    public class EmbeddingLoopDetector : IDetectEmdbeddingLoop
+    public class EmbeddingLoopsDetector : IDetectEmbeddingLoops
     {
         readonly ICompareStates _comparer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EmbeddingLoopDetector"/> class.
+        /// Initializes a new instance of the <see cref="EmbeddingLoopsDetector"/> class.
         /// </summary>
         /// <param name="comparer">The <see cref="ICompareStates"/> to use for comparing current and previous states.</param>
-        public EmbeddingLoopDetector(ICompareStates comparer)
+        public EmbeddingLoopsDetector(ICompareStates comparer)
         {
             _comparer = comparer;
         }

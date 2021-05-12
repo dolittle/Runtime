@@ -2,8 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Embeddings.Processing
@@ -14,10 +13,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
     public interface IDetectEmbeddingLoops
     {
         /// <summary>
-        /// Tries to check a set of uncommitted events for loops.
+        /// Try to check if a projection's state is equal to one of it's previous states.
         /// </summary>
-        /// <param name="events">The <see cref="IEnumerable{T}"/> of <see cref="UncommittedEvents"/> from an embedding.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of true if it contains loops, false if not.</returns>
-        Task<Try<bool>> TryCheckEventLoops(IEnumerable<UncommittedEvents> events);
+        /// <param name="currentState">The current <see cref="ProjectionState"/>.</param>
+        /// <param name="previousStates">An <see cref="IEnumerable{ProjectionState}"/> of the previous states.</param>
+        /// <returns>A <see cref= "Try" /> that indicates whether the operation was successful or not.</returns>
+        Try<bool> TryCheckForProjectionStateLoop(ProjectionState currentState, IEnumerable<ProjectionState> previousStates);
     }
 }

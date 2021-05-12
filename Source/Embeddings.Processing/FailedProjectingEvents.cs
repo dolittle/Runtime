@@ -8,7 +8,7 @@ using Dolittle.Runtime.Embeddings.Store;
 namespace Dolittle.Runtime.Embeddings.Processing
 {
     /// <summary>
-    /// Exception that gets thrown when a loop is detected in an embedding.
+    /// Exception that gets thrown when no events could be projected.
     /// </summary>
     public class FailedProjectingEvents : Exception
     {

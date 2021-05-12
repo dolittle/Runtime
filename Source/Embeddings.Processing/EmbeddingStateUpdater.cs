@@ -101,11 +101,20 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
             if (projectedState.Result.Type == EmbeddingCurrentStateType.Deleted)
             {
-                return await _embeddingStore.TryRemove(_embedding, projectedState.Result.Key, projectedState.Result.Version, cancellationToken);
+                return await _embeddingStore.TryRemove(
+                    _embedding,
+                    projectedState.Result.Key,
+                    projectedState.Result.Version,
+                    cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                return await _embeddingStore.TryReplace(_embedding, projectedState.Result.Key, projectedState.Result.Version, projectedState.Result.State, cancellationToken);
+                return await _embeddingStore.TryReplace(
+                    _embedding,
+                    projectedState.Result.Key,
+                    projectedState.Result.Version,
+                    projectedState.Result.State,
+                    cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -114,7 +123,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 var eventSource = _keyToEventSourceConverter.GetEventSourceIdFor(key);
-                return await _eventStore.FetchForAggregateAfter(eventSource, _embedding.Value, aggregateRootVersion, cancellationToken).ConfigureAwait(false);
+                return await _eventStore.FetchForAggregateAfter(
+                    eventSource,
+                    _embedding.Value,
+                    aggregateRootVersion,
+                    cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

@@ -15,32 +15,15 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
     {
         static EmbeddingCurrentState current_state;
         static ProjectionState desired_state;
-        static FailedProjectingEvents exception;
-        static EmbeddingCurrentState desired_current_embedding_state;
-        static UncommittedEvents events;
+        static Exception exception;
 
         Establish context = () =>
         {
-            exception = new FailedProjectingEvents(identifier, new Exception());
+            exception = new Exception();
             current_state = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "current state", "");
             desired_state = "desired state";
-            desired_current_embedding_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, desired_state, "");
-            events = new UncommittedEvents(Array.Empty<UncommittedEvent>());
-            embedding
-                .Setup(_ => _.TryCompare(current_state, desired_state, cancellation))
-                .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(events)));
-            loop_detector
-                .Setup(_ => _.TryCheckEventLoops(new[] { events }))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
-            project_many_events
-                .Setup(_ => _.TryProject(current_state, events, cancellation))
-                .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(
-                    desired_current_embedding_state)));
             state_comparer
                 .Setup(_ => _.TryCheckEquality(current_state.State, desired_state))
-                .Returns(Try<bool>.Failed(exception));
-            state_comparer
-                .Setup(_ => _.TryCheckEquality(desired_current_embedding_state.State, desired_state))
                 .Returns(Try<bool>.Failed(exception));
         };
 

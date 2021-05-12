@@ -49,45 +49,38 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public async Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken)
         {
-            var i = 0;
-            try
+            _logger.LogDebug("Trying to project {NumEvents} events on embedding {Embedding} and key {Key}", events.Count, _identifier, currentState.Key);
+            for (var i = 0; i < events.Count; i++)
             {
-                _logger.LogDebug("Trying to project {NumEvents} events on embedding {Embedding} and key {Key}", events.Count, _identifier, currentState.Key);
-                for (; i < events.Count; i++)
+                var tryProject = await TryProjectOne(currentState, events[i], cancellationToken).ConfigureAwait(false);
+                if (!tryProject.Success)
                 {
-                    var tryProject = await TryProjectOne(currentState, events[i], cancellationToken).ConfigureAwait(false);
-                    if (!tryProject.Success)
-                    {
-                        return i == 0
-                            ? tryProject.Exception
-                            : Partial<EmbeddingCurrentState>.PartialSuccess(currentState, tryProject.Exception);
-                    }
-                    currentState = tryProject.Result;
+                    return i == 0
+                        ? tryProject.Exception
+                        : Partial<EmbeddingCurrentState>.PartialSuccess(currentState, tryProject.Exception);
                 }
-                return currentState;
+                currentState = tryProject.Result;
             }
-            catch (Exception ex)
-            {
-                return i == 0
-                    ? ex
-                    : Partial<EmbeddingCurrentState>.PartialSuccess(currentState, ex);
-            }
+            return currentState;
         }
 
         async Task<Try<EmbeddingCurrentState>> TryProjectOne(EmbeddingCurrentState currentState, UncommittedEvent @event, CancellationToken cancellationToken)
         {
-            var result = await _embedding.Project(currentState, @event, cancellationToken).ConfigureAwait(false);
-            var nextAggregateRootVersion = currentState.Version.Value + 1;
-            switch (result)
+            try
             {
-                case ProjectionFailedResult failedResult:
-                    return failedResult.Exception;
-                case ProjectionReplaceResult replaceResult:
-                    return new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Persisted, replaceResult.State, currentState.Key);
-                case ProjectionDeleteResult:
-                    return new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Deleted, _initialState, currentState.Key);
-                default:
-                    return new UnknownProjectionResultType(result);
+                var result = await _embedding.Project(currentState, @event, cancellationToken).ConfigureAwait(false);
+                var nextAggregateRootVersion = currentState.Version.Value + 1;
+                return result switch
+                {
+                    ProjectionFailedResult failedResult => failedResult.Exception,
+                    ProjectionReplaceResult replaceResult => new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Persisted, replaceResult.State, currentState.Key),
+                    ProjectionDeleteResult => new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Deleted, _initialState, currentState.Key),
+                    _ => new UnknownProjectionResultType(result)
+                };
+            }
+            catch (Exception ex)
+            {
+                return ex;
             }
         }
     }

@@ -73,13 +73,27 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 var allTransitionEvents = new List<UncommittedEvents>();
+                var previousStates = new List<ProjectionState>();
+
                 while (true)
                 {
-                    if (IsDesiredStateOrError(isDesiredState, current, allTransitionEvents, out var eventsToCommit, out var error))
+                    if (cancellationToken.IsCancellationRequested)
                     {
-                        return error == default
-                            ? eventsToCommit
-                            : error;
+                        return new CalculateStateTransitionEventsCancelled(_identifier);
+                    }
+
+                    var isDesired = isDesiredState(current);
+                    if (!isDesired.Success)
+                    {
+                        return isDesired.Exception;
+                    }
+                    if (isDesired.Result)
+                    {
+                        var events = from uncommittedEvents in allTransitionEvents
+                                     from @event in uncommittedEvents
+                                     select @event;
+
+                        return CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
                     }
 
                     var transitionEvents = await getTransitionEvents(current, cancellationToken).ConfigureAwait(false);
@@ -90,7 +104,15 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
                     allTransitionEvents.Add(transitionEvents.Result);
 
-                    var loopDetected = await _loopDetector.TryCheckEventLoops(allTransitionEvents).ConfigureAwait(false);
+                    var intermediateState = await _projector.TryProject(current, transitionEvents.Result, cancellationToken).ConfigureAwait(false);
+                    if (!intermediateState.Success)
+                    {
+                        return intermediateState.IsPartialResult
+                            ? new CouldNotProjectAllEvents(_identifier, intermediateState.Exception)
+                            : new FailedProjectingEvents(_identifier, intermediateState.Exception);
+                    }
+
+                    var loopDetected = _loopDetector.TryCheckForProjectionStateLoop(intermediateState.Result.State, previousStates);
                     if (!loopDetected.Success)
                     {
                         return loopDetected.Exception;
@@ -100,15 +122,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     {
                         return new EmbeddingLoopDetected(_identifier);
                     }
-
-                    var intermediateState = await _projector.TryProject(current, transitionEvents.Result, cancellationToken).ConfigureAwait(false);
-                    if (!intermediateState.Success)
-                    {
-                        return intermediateState.IsPartialResult
-                            ? new CouldNotProjectAllEvents(_identifier, intermediateState.Exception)
-                            : new FailedProjectingEvents(_identifier, intermediateState.Exception);
-                    }
-
+                    previousStates.Add(current.State);
                     current = intermediateState.Result;
                 }
             }
@@ -118,33 +132,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
         }
 
-        bool IsDesiredStateOrError(
-            Func<EmbeddingCurrentState, Try<bool>> isDesiredState,
-            EmbeddingCurrentState current,
-            List<UncommittedEvents> allTransitionEvents,
-            out UncommittedAggregateEvents eventsToCommit,
-            out Exception error)
-        {
-            eventsToCommit = default;
-            error = default;
-            var isDesiredResult = isDesiredState(current);
-            if (!isDesiredResult.Success)
-            {
-                error = isDesiredResult.Exception;
-                return true;
-            }
-
-            if (isDesiredResult.Result)
-            {
-                var events = from uncommittedEvents in allTransitionEvents
-                             from @event in uncommittedEvents
-                             select @event;
-
-                eventsToCommit = CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
-                return true;
-            }
-            return false;
-        }
         UncommittedAggregateEvents CreateUncommittedAggregateEvents(UncommittedEvents events, EmbeddingCurrentState currentState)
             => new(_identifier.Value, new Artifact(_identifier.Value, ArtifactGeneration.First), currentState.Version, events);
     }
