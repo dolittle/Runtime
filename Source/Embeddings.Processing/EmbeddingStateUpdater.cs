@@ -94,29 +94,33 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
 
             var projectedState = await _projectManyEvents.TryProject(currentState, unprocessedEvents, cancellationToken).ConfigureAwait(false);
-            if (!projectedState.Success && !projectedState.IsPartialResult)
+            if (projectedState.Success || projectedState.IsPartialResult)
             {
-                return Try.Failed(projectedState.Exception);
+                var updateState = await TryUpdateOrDeleteState(projectedState.Result, cancellationToken).ConfigureAwait(false);
+                if (updateState.Success && projectedState.IsPartialResult)
+                {
+                    return projectedState.Exception;
+                }
+
+                return updateState;
             }
 
-            if (projectedState.Result.Type == EmbeddingCurrentStateType.Deleted)
-            {
-                return await _embeddingStore.TryRemove(
-                    _embedding,
-                    projectedState.Result.Key,
-                    projectedState.Result.Version,
-                    cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                return await _embeddingStore.TryReplace(
-                    _embedding,
-                    projectedState.Result.Key,
-                    projectedState.Result.Version,
-                    projectedState.Result.State,
-                    cancellationToken).ConfigureAwait(false);
-            }
+            return Try.Failed(projectedState.Exception);
         }
+
+        Task<Try> TryUpdateOrDeleteState(EmbeddingCurrentState state, CancellationToken cancellationToken)
+            => state.Type == EmbeddingCurrentStateType.Deleted
+                ? _embeddingStore.TryRemove(
+                    _embedding,
+                    state.Key,
+                    state.Version,
+                    cancellationToken)
+                : _embeddingStore.TryReplace(
+                    _embedding,
+                    state.Key,
+                    state.Version,
+                    state.State,
+                    cancellationToken);
 
         async Task<Try<CommittedAggregateEvents>> TryGetUnprocessedEvents(ProjectionKey key, AggregateRootVersion aggregateRootVersion, CancellationToken cancellationToken)
         {

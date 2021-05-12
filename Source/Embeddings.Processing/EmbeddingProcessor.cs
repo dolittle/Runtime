@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
     /// </summary>
     public class EmbeddingProcessor : IEmbeddingProcessor
     {
-        readonly ConcurrentQueue<Func<Task>> _jobs = new();
+        readonly ConcurrentQueue<Func<bool, Task>> _jobs = new();
         readonly EmbeddingId _embedding;
         readonly IUpdateEmbeddingStates _stateUpdater;
         readonly IWaitForAggregateRootEvents _eventWaiter;
@@ -69,16 +69,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         /// <inheritdoc/>
         public async Task<Try<ProjectionState>> Update(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)
-        {
-            var result = await ScheduleJob(() => DoUpdate(key, state, cancellationToken)).ConfigureAwait(false);
-            return result.With(state);
-        }
+            => (await ScheduleJob(() => DoUpdate(key, state, cancellationToken)).ConfigureAwait(false)).With(state);
 
         /// <inheritdoc/>
         public Task<Try> Delete(ProjectionKey key, CancellationToken cancellationToken)
-        {
-            return ScheduleJob(() => DoDelete(key, cancellationToken));
-        }
+            => ScheduleJob(() => DoDelete(key, cancellationToken));
 
         async Task<Try> Loop()
         {
@@ -102,7 +97,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             finally
             {
-                await PerformNextJobs().ConfigureAwait(false);
+                await CancelRemainingJobs().ConfigureAwait(false);
             }
             return Try.Succeeded();
         }
@@ -192,9 +187,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
 
             var completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _jobs.Enqueue(async () =>
+            _jobs.Enqueue(async (shouldRun) =>
             {
-                if (_cancellationToken.IsCancellationRequested)
+                if (!shouldRun || _cancellationToken.IsCancellationRequested)
                 {
                     completionSource.SetResult(new OperationCanceledException());
                 }
@@ -212,7 +207,15 @@ namespace Dolittle.Runtime.Embeddings.Processing
         {
             while (_jobs.TryDequeue(out var job))
             {
-                await job().ConfigureAwait(false);
+                await job(true).ConfigureAwait(false);
+            }
+        }
+
+        async Task CancelRemainingJobs()
+        {
+            while (_jobs.TryDequeue(out var job))
+            {
+                await job(false).ConfigureAwait(false);
             }
         }
 

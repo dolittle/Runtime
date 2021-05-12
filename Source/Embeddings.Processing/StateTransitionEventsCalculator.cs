@@ -125,6 +125,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     {
                         return new EmbeddingLoopDetected(_identifier);
                     }
+
                     previousStates.Add(intermediateState.Result.State);
                     current = intermediateState.Result;
                 }

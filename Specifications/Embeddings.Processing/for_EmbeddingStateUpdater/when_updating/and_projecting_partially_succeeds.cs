@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
         static Try result;
         Because of = () => result = state_updater.TryUpdateAll(cancellation_token).GetAwaiter().GetResult();
 
-        It should_succeed = () => result.Success.ShouldBeTrue();
+        It should_not_succeed = () => result.Success.ShouldBeFalse();
         It should_ask_the_embedding_store_for_keys = () => embedding_store.Verify(_ => _.TryGetKeys(embedding, cancellation_token));
         It should_get_the_last_state_from_the_embedding_store = () => embedding_store.Verify(_ => _.TryGet(embedding, projection_key, cancellation_token));
         It should_ask_the_event_store_for_new_events = () => event_store.Verify(_ => _.FetchForAggregateAfter(event_source, embedding.Value, current_state.Version, cancellation_token));
