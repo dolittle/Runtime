@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Projections.Store
         /// <param name="projection">The projection id.</param>
         /// <param name="scope">The scope id.</param>
         public ProjectionDefinitionDoesNotExist(ProjectionId projection, ScopeId scope)
-            : base($"Failed to get projection definition for projection {projection.Value} in scope {scope.Value}")
+            : base($"Projection definition for projection {projection.Value} in scope {scope.Value} does not exist")
         {
         }
     }
