@@ -13,7 +13,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
     public class an_embedding_delete_response : given.all_dependencies
     {
         static EmbeddingResponse embedding_response;
-        static string received_state;
         Establish context = () =>
         {
             embedding_response = new EmbeddingResponse
