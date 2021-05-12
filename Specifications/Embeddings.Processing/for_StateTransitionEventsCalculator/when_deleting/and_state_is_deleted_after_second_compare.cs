@@ -35,11 +35,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 .Setup(_ => _.TryDelete(intermediate_current_embedding_state, cancellation))
                 .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(second_event_batch)));
             loop_detector
-                .Setup(_ => _.TryCheckEventLoops(new[] { first_event_batch }))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+                .Setup(_ => _.TryCheckForProjectionStateLoop(intermediate_current_embedding_state.State, new[] { current_state.State }))
+                .Returns(false);
             loop_detector
-                .Setup(_ => _.TryCheckEventLoops(new[] { first_event_batch, second_event_batch }))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+                .Setup(_ => _.TryCheckForProjectionStateLoop(desired_current_embedding_state.State, new[] { current_state.State, intermediate_current_embedding_state.State }))
+                .Returns(false);
             project_many_events
                 .Setup(_ => _.TryProject(current_state, first_event_batch, cancellation))
                 .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(

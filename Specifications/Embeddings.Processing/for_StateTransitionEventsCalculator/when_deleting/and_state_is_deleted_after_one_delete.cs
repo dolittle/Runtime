@@ -27,8 +27,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 .Setup(_ => _.TryDelete(current_state, cancellation))
                 .Returns(Task.FromResult(Try<UncommittedEvents>.Succeeded(events)));
             loop_detector
-                .Setup(_ => _.TryCheckEventLoops(new[] { events }))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+                .Setup(_ => _.TryCheckForProjectionStateLoop(desired_current_embedding_state.State, new[] { current_state.State }))
+                .Returns(false);
             project_many_events
                 .Setup(_ => _.TryProject(current_state, events, cancellation))
                 .Returns(Task.FromResult(Partial<EmbeddingCurrentState>.Succeeded(

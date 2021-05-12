@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.given
 
     public class all_dependencies
     {
-        protected static IDetectEmdbeddingLoop detector;
+        protected static IDetectEmbeddingLoops detector;
         protected static Mock<ICompareStates> comparer;
         protected static IList<ProjectionState> previous_states;
 
