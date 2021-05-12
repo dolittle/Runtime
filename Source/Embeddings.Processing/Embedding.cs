@@ -95,10 +95,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 EmbeddingResponse.ResponseOneofCase.ProjectionDelete => new ProjectionDeleteResult(),
                 EmbeddingResponse.ResponseOneofCase.ProjectionReplace => new ProjectionReplaceResult(response.ProjectionReplace.State),
                 EmbeddingResponse.ResponseOneofCase.Compare
-                    => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}"),
+                    => new ProjectionFailedResult(new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase)),
                 EmbeddingResponse.ResponseOneofCase.Delete
-                    => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}"),
-                _ => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}")
+                    => new ProjectionFailedResult(new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase)),
+                _ => new ProjectionFailedResult(new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase))
             };
         }
 

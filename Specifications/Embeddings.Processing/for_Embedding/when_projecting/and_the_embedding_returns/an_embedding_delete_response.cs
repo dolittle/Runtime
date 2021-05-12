@@ -42,5 +42,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
         It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
         It should_return_a_projection_failed_result = ()
             => result.ShouldBeOfExactType<ProjectionFailedResult>();
+
+        It should_return_a_projection_failed_result_with_the_correct_exception_type = ()
+            => ((ProjectionFailedResult)result).Exception.ShouldBeOfExactType<UnexpectedEmbeddingResponse>();
     }
 }
