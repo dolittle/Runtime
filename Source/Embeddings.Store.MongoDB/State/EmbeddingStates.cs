@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -54,7 +55,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<Try<EmbeddingState>> TryGet(EmbeddingId embedding, EmbeddingKey key, CancellationToken token)
+        public async Task<Try<EmbeddingState>> TryGet(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
         {
             try
             {
@@ -74,7 +75,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<Try<IEnumerable<(EmbeddingState State, EmbeddingKey Key)>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
+        public async Task<Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
         {
             try
             {
@@ -82,7 +83,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection => await collection
                                             .Find(Builders<Embedding>.Filter.Empty)
-                                            .Project(_ => new Tuple<EmbeddingState, EmbeddingKey>(_.ContentRaw, _.Key))
+                                            .Project(_ => new Tuple<EmbeddingState, ProjectionKey>(_.ContentRaw, _.Key))
                                             .ToListAsync(token),
                     token).ConfigureAwait(false);
                 var result = states.Select(_ =>
@@ -90,7 +91,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     return (_.Item1, _.Item2);
                 });
 
-                return Try<IEnumerable<(EmbeddingState State, EmbeddingKey Key)>>.Succeeded(result);
+                return Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>.Succeeded(result);
             }
             catch (Exception ex)
             {
@@ -99,7 +100,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryRemove(EmbeddingId embedding, EmbeddingKey key, CancellationToken token)
+        public async Task<bool> TryRemove(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
         {
             try
             {
@@ -121,7 +122,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryReplace(EmbeddingId embedding, EmbeddingKey key, EmbeddingState state, CancellationToken token)
+        public async Task<bool> TryReplace(EmbeddingId embedding, ProjectionKey key, EmbeddingState state, CancellationToken token)
         {
             try
             {
@@ -152,6 +153,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         async Task<TResult> OnEmbedding<TResult>(EmbeddingId embedding, Func<IMongoCollection<Embedding>, Task<TResult>> callback, CancellationToken token)
             => await callback(await _embeddings.GetStates(embedding, token).ConfigureAwait(false)).ConfigureAwait(false);
 
-        FilterDefinition<Embedding> CreateKeyFilter(EmbeddingKey key) => Builders<Embedding>.Filter.Eq(_ => _.Key, key.Value);
+        FilterDefinition<Embedding> CreateKeyFilter(ProjectionKey key) => Builders<Embedding>.Filter.Eq(_ => _.Key, key.Value);
     }
 }

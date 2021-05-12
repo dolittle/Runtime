@@ -3,8 +3,8 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.Projections.Store.Definition;
 using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
             Store.State.EmbeddingState initialState)
             => new(
                 embedding,
-                eventSelectors.Select(_ => new Store.Definition.EmbeddingEventSelector(
+                eventSelectors.Select(_ => new ProjectionEventSelector(
                     _.EventType,
                     _.EventKeySelectorType,
                     _.EventKeySelectorExpression)),

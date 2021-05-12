@@ -5,7 +5,6 @@ using System.Linq;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.ResourceTypes.Configuration;
 using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB
@@ -16,13 +15,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB
     [SingletonPerTenant]
     public class DatabaseConnection
     {
-        /// <summary>
-        /// Initializes static members of the <see cref="DatabaseConnection"/> class.
-        /// </summary>
-        static DatabaseConnection()
-        {
-            RegisterCustomDiscriminators();
-        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.

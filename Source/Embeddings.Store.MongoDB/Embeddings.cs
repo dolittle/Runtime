@@ -35,9 +35,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB
 
         /// <inheritdoc/>
         public Task<IMongoCollection<State.Embedding>> GetStates(EmbeddingId embeddingId, CancellationToken token)
-            => GetEmbeddingCollection(embeddingId);
-
-        Task<IMongoCollection<State.Embedding>> GetEmbeddingCollection(EmbeddingId embedding)
-            => Task.FromResult(Database.GetCollection<State.Embedding>(CollectionNameForEmbedding(embedding)));
+            => Task.FromResult(Database.GetCollection<State.Embedding>(CollectionNameForEmbedding(embeddingId)));
     }
 }
