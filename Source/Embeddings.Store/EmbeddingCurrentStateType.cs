@@ -8,7 +8,6 @@ namespace Dolittle.Runtime.Embeddings.Store
     /// </summary>
     public enum EmbeddingCurrentStateType
     {
-
         CreatedFromInitialState = 0,
         Persisted,
         Deleted
