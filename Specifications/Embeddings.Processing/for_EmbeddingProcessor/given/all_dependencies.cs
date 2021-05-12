@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
         protected static Mock<IWaitForAggregateRootEvents> event_waiter;
         protected static Mock<IEventStore> event_store;
         protected static Mock<IEmbeddingStore> embedding_store;
-        protected static Mock<ICalculateStateTransistionEvents> transition_calculator;
+        protected static Mock<ICalculateStateTransitionEvents> transition_calculator;
         protected static EmbeddingProcessor embedding_processor;
         protected static CancellationToken cancellation_token;
 
@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
             event_waiter = new Mock<IWaitForAggregateRootEvents>();
             event_store = new Mock<IEventStore>();
             embedding_store = new Mock<IEmbeddingStore>();
-            transition_calculator = new Mock<ICalculateStateTransistionEvents>();
+            transition_calculator = new Mock<ICalculateStateTransitionEvents>();
             embedding_processor = new EmbeddingProcessor(
                 embedding,
                 state_updater.Object,

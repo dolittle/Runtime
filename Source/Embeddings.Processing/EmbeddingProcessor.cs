@@ -19,13 +19,13 @@ namespace Dolittle.Runtime.Embeddings.Processing
     /// </summary>
     public class EmbeddingProcessor : IEmbeddingProcessor
     {
-        readonly ConcurrentQueue<Func<Task>> _jobs = new();
+        readonly ConcurrentQueue<Func<bool, Task>> _jobs = new();
         readonly EmbeddingId _embedding;
         readonly IUpdateEmbeddingStates _stateUpdater;
         readonly IWaitForAggregateRootEvents _eventWaiter;
         readonly IEventStore _eventStore;
         readonly IEmbeddingStore _embeddingStore;
-        readonly ICalculateStateTransistionEvents _transitionCalculator;
+        readonly ICalculateStateTransitionEvents _transitionCalculator;
         CancellationToken _cancellationToken;
         CancellationTokenSource _waitForEvent;
         bool _started;
@@ -38,14 +38,14 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="eventWaiter">The <see cref="IWaitForAggregateRootEvents"/> to use for waiting on aggregate root events to be committed.</param>
         /// <param name="eventStore">The <see cref="IEventStore"/> to use for fetching and committing aggregate root events.</param>
         /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> to use for fetching, replacing and removing embedding states.</param>
-        /// <param name="transitionCalculator">The <see cref="ICalculateStateTransistionEvents"/> to use for calculating state transition events.</param>
+        /// <param name="transitionCalculator">The <see cref="ICalculateStateTransitionEvents"/> to use for calculating state transition events.</param>
         public EmbeddingProcessor(
             EmbeddingId embedding,
             IUpdateEmbeddingStates stateUpdater,
             IWaitForAggregateRootEvents eventWaiter,
             IEventStore eventStore,
             IEmbeddingStore embeddingStore,
-            ICalculateStateTransistionEvents transitionCalculator)
+            ICalculateStateTransitionEvents transitionCalculator)
         {
             _embedding = embedding;
             _stateUpdater = stateUpdater;
@@ -69,16 +69,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         /// <inheritdoc/>
         public async Task<Try<ProjectionState>> Update(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)
-        {
-            var result = await ScheduleJob(() => DoUpdate(key, state, cancellationToken)).ConfigureAwait(false);
-            return result.With(state);
-        }
+            => (await ScheduleJob(() => DoUpdate(key, state, cancellationToken)).ConfigureAwait(false)).With(state);
 
         /// <inheritdoc/>
         public Task<Try> Delete(ProjectionKey key, CancellationToken cancellationToken)
-        {
-            return ScheduleJob(() => DoDelete(key, cancellationToken));
-        }
+            => ScheduleJob(() => DoDelete(key, cancellationToken));
 
         async Task<Try> Loop()
         {
@@ -102,9 +97,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             finally
             {
-                await PerformNextJobs().ConfigureAwait(false);
+                await CancelRemainingJobs().ConfigureAwait(false);
             }
-            return true;
+            return Try.Succeeded();
         }
 
         async Task<Try> DoUpdate(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)
@@ -192,9 +187,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
 
             var completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
-            _jobs.Enqueue(async () =>
+            _jobs.Enqueue(async (shouldRun) =>
             {
-                if (_cancellationToken.IsCancellationRequested)
+                if (!shouldRun || _cancellationToken.IsCancellationRequested)
                 {
                     completionSource.SetResult(new OperationCanceledException());
                 }
@@ -212,7 +207,15 @@ namespace Dolittle.Runtime.Embeddings.Processing
         {
             while (_jobs.TryDequeue(out var job))
             {
-                await job().ConfigureAwait(false);
+                await job(true).ConfigureAwait(false);
+            }
+        }
+
+        async Task CancelRemainingJobs()
+        {
+            while (_jobs.TryDequeue(out var job))
+            {
+                await job(false).ConfigureAwait(false);
             }
         }
 

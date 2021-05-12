@@ -11,7 +11,7 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_updating
 {
     public class and_getting_current_state_fails : given.all_dependencies
     {

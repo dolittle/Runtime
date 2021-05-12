@@ -22,6 +22,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
         static FilterValidationResult result;
         Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
-        It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
+        It should_fail_validation = () => result.Success.ShouldBeFalse();
     }
 }

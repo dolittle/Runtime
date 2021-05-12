@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.Rudimentary
 {
@@ -11,19 +12,14 @@ namespace Dolittle.Runtime.Rudimentary
     /// <typeparam name="TResult">The result type.</typeparam>
     public class Try<TResult> : Try
     {
-        protected Try(TResult result) : base(true)
-        {
-            Result = result;
-        }
+        protected Try(TResult result) => Result = result;
 
-        protected Try() : base(false) {}
-
-        protected Try(Exception exception) : base(exception) {}
+        protected Try(Exception exception) : base(exception) { }
 
         /// <summary>
         /// Gets the <typeparamref name="TResult">result</typeparamref>.
         /// </summary>
-        public TResult Result { get; }
+        public TResult Result { get; protected set; }
 
         /// <summary>
         /// Projects the successfull result if the operation succeeded, or returns the original failure if the operation failed.
@@ -32,17 +28,50 @@ namespace Dolittle.Runtime.Rudimentary
         /// <typeparam name="TSelectResult">The type of the projected result.</typeparam>
         /// <returns>A new <see cref="Try{TSelectResult}"/> result that contains the projected result if the operation succeeded.</returns>
         public Try<TSelectResult> Select<TSelectResult>(Func<TResult, TSelectResult> selector)
+            => Success
+                ? Try<TSelectResult>.Succeeded(selector(Result))
+                : Try<TSelectResult>.Failed(Exception);
+
+        /// <summary>
+        /// Try to do something that returns a result.
+        /// </summary>
+        /// <param name="try">What to try do.</param>
+        /// <returns>The <see cref="Try{TResult}"/> representing an action that has been tried and resulted in either an exception or a <typeparamref name="TResult"/>.</returns>
+        public static Try<TResult> Do(Func<TResult> @try)
         {
-            if (Success)
+            try
             {
-                return Try<TSelectResult>.Succeeded(selector(Result));
+                return @try();
             }
-            else if (HasException)
+            catch (Exception ex)
             {
-                return Try<TSelectResult>.Failed(Exception);
+                return Failed(ex);
             }
-            return Try<TSelectResult>.Failed();
         }
+
+        /// <summary>
+        /// Try to do something asynchronously that returns a result.
+        /// </summary>
+        /// <param name="try">What to try do.</param>
+        /// <returns>A <see cref="Task<T>" /> that, when resolved, returns the <see cref="Try{TResult}"/> representing an action that has been tried and resulted in either an exception or a <typeparamref name="TResult"/>.</returns>
+        public static async Task<Try<TResult>> DoAsync(Func<Task<TResult>> @try)
+        {
+            try
+            {
+                return await @try().ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                return Failed(ex);
+            }
+        }
+
+        /// <summary>
+        /// Try to do something asynchronously that returns a result.
+        /// </summary>
+        /// <param name="try">What to try do.</param>
+        /// <returns>A <see cref="Task<T>" /> that, when resolved, returns the <see cref="Try{TResult}"/> representing an action that has been tried and resulted in either an exception or a <typeparamref name="TResult"/>.</returns>
+        public static Task<Try<TResult>> DoAsync(Func<TResult> @try) => DoAsync(() => Task.FromResult(@try()));
 
         /// <summary>
         /// Creates a new <see cref="Try{TResult}"/> result indicating a successful operation.
@@ -50,12 +79,6 @@ namespace Dolittle.Runtime.Rudimentary
         /// <param name="result">The <see cref="TResult"/> of the operation.</param>
         /// <returns>A new <see cref="Try{TResult}"/> result.</returns>
         public static Try<TResult> Succeeded(TResult result) => new(result);
-
-        /// <summary>
-        /// Creates a new <see cref="Try{TResult}"/> result indicating a failed operation.
-        /// </summary>
-        /// <returns>A new <see cref="Try{TResult}"/> result.</returns>
-        public static new Try<TResult> Failed() => new();
 
         /// <summary>
         /// Creates a new <see cref="Try{TResult}"/> result indicating a failed operation because of an exception.
@@ -90,13 +113,13 @@ namespace Dolittle.Runtime.Rudimentary
         /// </summary>
         /// <param name="result">The <typeparamref name="TResult">result</typeparamref> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>(TResult result) => new(result);
+        public static implicit operator Try<TResult>(TResult result) => Succeeded(result);
 
         /// <summary>
         /// Implicitly convert <see cref="bool" /> to <see cref="Try{TResult}" />.
         /// </summary>
         /// <param name="exception">The <see cref="Exception" /> to convert.</param>
         /// <return><see cref="Try{TResult}" />.</return>
-        public static implicit operator Try<TResult>(Exception exception) => new(exception);
+        public static implicit operator Try<TResult>(Exception exception) => Failed(exception);
     }
 }

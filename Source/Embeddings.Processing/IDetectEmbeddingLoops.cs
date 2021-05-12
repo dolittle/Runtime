@@ -7,11 +7,10 @@ using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
-
     /// <summary>
-    /// Defines a system, that can detect when an embedding is looping.
+    /// Defines a system that can detect loops in the logic of an <see cref="IEmbedding"/>.
     /// </summary>
-    public interface IDetectEmdbeddingLoop
+    public interface IDetectEmbeddingLoops
     {
         /// <summary>
         /// Try to check if a projection's state is equal to one of it's previous states.

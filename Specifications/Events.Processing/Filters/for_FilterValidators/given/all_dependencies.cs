@@ -101,7 +101,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given
             definition_comparer = mocks.Create<ICompareFilterDefinitions>();
             definition_comparer
                 .Setup(_ => _.DefinitionsAreEqual(filter_definition, filter_definition))
-                .Returns(new FilterValidationResult());
+                .Returns(FilterValidationResult.Succeeded());
 
             var execution_context_manager = mocks.Create<IExecutionContextManager>();
             execution_context_manager

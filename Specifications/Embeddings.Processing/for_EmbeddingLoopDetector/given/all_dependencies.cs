@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.given
 
     public class all_dependencies
     {
-        protected static IDetectEmdbeddingLoop detector;
+        protected static IDetectEmbeddingLoops detector;
         protected static Mock<ICompareStates> comparer;
         protected static IList<ProjectionState> previous_states;
 
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.given
             };
 
             comparer = new Mock<ICompareStates>();
-            detector = new EmbeddingLoopDetector(comparer.Object);
+            detector = new EmbeddingLoopsDetector(comparer.Object);
         };
 
         protected static ProjectionState CreateStateWithKeyValue(string key, string value)

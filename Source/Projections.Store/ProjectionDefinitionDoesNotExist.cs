@@ -10,15 +10,15 @@ namespace Dolittle.Runtime.Projections.Store
     /// <summary>
     /// Exception that gets thrown when a <see cref="ProjectionDefinition" /> could not be retrieved.
     /// </summary>
-    public class FailedToGetProjectionDefinition : Exception
+    public class ProjectionDefinitionDoesNotExist : Exception
     {
         /// <summary>
-        /// Initializes an instance of the <see cref="FailedToGetProjectionDefinition" /> class.
+        /// Initializes an instance of the <see cref="ProjectionDefinitionDoesNotExist" /> class.
         /// </summary>
         /// <param name="projection">The projection id.</param>
         /// <param name="scope">The scope id.</param>
-        public FailedToGetProjectionDefinition(ProjectionId projection, ScopeId scope)
-            : base($"Failed to get projection definition for projection {projection.Value} in scope {scope.Value}")
+        public ProjectionDefinitionDoesNotExist(ProjectionId projection, ScopeId scope)
+            : base($"Projection definition for projection {projection.Value} in scope {scope.Value} does not exist")
         {
         }
     }

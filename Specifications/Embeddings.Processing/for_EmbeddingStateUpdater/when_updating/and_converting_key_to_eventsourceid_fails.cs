@@ -11,7 +11,7 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_updating
 {
     public class and_converting_key_to_eventsourceid_fails : given.all_dependencies
     {
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
         Establish context = () =>
         {
             projection_key = "projection-key";
-            current_state = new EmbeddingCurrentState(3, ProjectionCurrentStateType.Persisted, "state-current", projection_key);
+            current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
             exception = new Exception();
 
             embedding_store
