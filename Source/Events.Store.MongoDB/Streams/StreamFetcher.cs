@@ -98,7 +98,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     .Project(_eventToStreamEvent)
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 return @event == default
-                    ? new NoEventInStreamAtPostion(_stream, _scope, streamPosition)
+                    ? new NoEventInStreamAtPosition(_stream, _scope, streamPosition)
                     : @event;
             }
             catch (MongoWaitQueueFullException ex)
@@ -120,7 +120,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                     .Project(_eventToStreamEvent)
                     .FirstOrDefaultAsync(cancellationToken).ConfigureAwait(false);
                 return @event == default
-                    ? new NoEventInPartitionInStreamFromPostion(_stream, _scope, partitionId, streamPosition)
+                    ? new NoEventInPartitionInStreamFromPosition(_stream, _scope, partitionId, streamPosition)
                     : @event;
             }
             catch (MongoWaitQueueFullException ex)
