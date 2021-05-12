@@ -73,7 +73,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 var allTransitionEvents = new List<UncommittedEvents>();
-                var previousStates = new List<ProjectionState>();
+                var previousStates = new List<ProjectionState>
+                {
+                    current.State
+                };
 
                 while (true)
                 {
@@ -122,7 +125,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     {
                         return new EmbeddingLoopDetected(_identifier);
                     }
-                    previousStates.Add(current.State);
+                    previousStates.Add(intermediateState.Result.State);
                     current = intermediateState.Result;
                 }
             }
