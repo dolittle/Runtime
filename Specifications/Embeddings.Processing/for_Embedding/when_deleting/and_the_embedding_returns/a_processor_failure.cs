@@ -54,6 +54,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
         It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
         It should_return_a_failed_result = () => result.Success.ShouldBeFalse();
 
-        It should_fail_because_embedding_delete_failed = () => result.Exception.ShouldBeOfExactType<FailedDeleteEmbedding>();
+        It should_fail_because_embedding_delete_failed = () => result.Exception.ShouldBeOfExactType<EmbeddingRemoteDeleteCallFailed>();
     }
 }

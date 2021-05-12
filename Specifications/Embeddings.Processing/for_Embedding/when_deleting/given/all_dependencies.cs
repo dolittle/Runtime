@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.giv
         {
             current_state = new EmbeddingCurrentState(
                 0,
-                ProjectionCurrentStateType.Persisted,
+                EmbeddingCurrentStateType.Persisted,
                 "projectionState",
                 "projectionKey");
 
