@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -23,12 +24,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <param name="streamProcessor">The registered <see cref="StreamProcessor" />.</param>
         /// <returns>A value indicating whether a new <see cref="StreamProcessor" /> was registered.</returns>
-        bool TryRegister(
+        Try<StreamProcessor> TryCreateAndRegister(
             ScopeId scopeId,
             EventProcessorId eventProcessorId,
             IStreamDefinition sourceStreamDefinition,
             Func<IEventProcessor> getEventProcessor,
-            CancellationToken cancellationToken,
-            out StreamProcessor streamProcessor);
+            CancellationToken cancellationToken);
     }
 }

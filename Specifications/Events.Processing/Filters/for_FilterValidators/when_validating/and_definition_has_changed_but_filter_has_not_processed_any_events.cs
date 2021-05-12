@@ -25,12 +25,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
 
             filter_validator
                 .Setup(_ => _.Validate(filter_definition, filter_processor, StreamPosition.Start, cancellation_token))
-                .Returns(Task.FromResult(new FilterValidationResult("something went wrong")));
+                .Returns(Task.FromResult(FilterValidationResult.Failed("something went wrong")));
         };
 
         static FilterValidationResult result;
         Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
-        It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
+        It should_not_fail_validation = () => result.Success.ShouldBeTrue();
     }
 }

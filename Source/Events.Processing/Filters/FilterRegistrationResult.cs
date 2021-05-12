@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public FilterRegistrationResult(StreamProcessor streamProcessor)
         {
             StreamProcessor = streamProcessor;
-            FilterValidationResult = new FilterValidationResult();
+            FilterValidationResult = FilterValidationResult.Succeeded();
             Success = streamProcessor != default;
         }
 

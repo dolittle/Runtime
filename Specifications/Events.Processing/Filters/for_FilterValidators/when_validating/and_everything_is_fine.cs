@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
 
         Establish context = () =>
         {
-            validationResult = new FilterValidationResult();
+            validationResult = FilterValidationResult.Succeeded();
 
             filter_validator
                 .Setup(_ => _.Validate(filter_definition, filter_processor, stream_processor_state.Position, cancellation_token))

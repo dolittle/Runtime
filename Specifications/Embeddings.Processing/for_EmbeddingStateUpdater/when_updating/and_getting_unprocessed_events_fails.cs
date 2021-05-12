@@ -13,7 +13,7 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_updating
 {
     public class and_getting_unprocessed_events_fails : given.all_dependencies
     {
@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater
             projection_key = "projection-key";
             event_source = Guid.Parse("642ca1f2-c8e1-4e5c-a213-246ce95a8376");
             aggregate_root_type = new Artifact(embedding.Value, ArtifactGeneration.First);
-            current_state = new EmbeddingCurrentState(3, ProjectionCurrentStateType.Persisted, "state-current", projection_key);
+            current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
             exception = new Exception();
 
             embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key }));
