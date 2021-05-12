@@ -5,12 +5,13 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Projections.Store;
+using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Embeddings.Store.State
 {
     /// <summary>
-    /// Defines the repository for <see cref="EmbeddingState" />.
+    /// Defines the repository for the embeddings <see cref="ProjectionState" />.
     /// </summary>
     public interface IEmbeddingStates
     {
@@ -42,13 +43,13 @@ namespace Dolittle.Runtime.Embeddings.Store.State
         Task<bool> TryReplace(EmbeddingId embedding, ProjectionKey key, EmbeddingState state, CancellationToken token);
 
         /// <summary>
-        /// Try to remove a specific <see cref="EmbeddingState" />.
+        /// Try to mark a specific <see cref="EmbeddingState" /> as removed.
         /// </summary>
         /// <param name="embedding">The embedding id.</param>
         /// <param name="key">The embedding key.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns value indicating whether the state was successfully removed.</returns>
-        Task<bool> TryRemove(EmbeddingId embedding, ProjectionKey key, CancellationToken token);
+        Task<bool> TryMarkAsRemove(EmbeddingId embedding, ProjectionKey key, CancellationToken token);
 
         /// <summary>
         /// Try to drop the whole <see cref="EmbeddingState" /> collection.

@@ -7,9 +7,9 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store;
+using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -17,18 +17,18 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IEmbeddingStates" />.
+    /// Represents an implementation of <see cref="IProjectionStates" />.
     /// </summary>
     [SingletonPerTenant]
-    public class EmbeddingStates : IEmbeddingStates
+    public class ProjectionStates : IEmbeddingStates
     {
         readonly IEmbeddings _embeddings;
 
         /// <summary>
-        /// Initializes an instance of the <see cref="EmbeddingStates" /> class.
+        /// Initializes an instance of the <see cref="ProjectionStates" /> class.
         /// </summary>
         /// <param name="embeddings">The embeddings repository.</param>
-        public EmbeddingStates(IEmbeddings embeddings)
+        public ProjectionStates(IEmbeddings embeddings)
         {
             _embeddings = embeddings;
         }
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<Try<EmbeddingState>> TryGet(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
+        public async Task<Try<ProjectionState>> TryGet(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
         {
             try
             {
@@ -66,7 +66,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                                             .Project(_ => _.ContentRaw)
                                             .SingleOrDefaultAsync(token),
                     token).ConfigureAwait(false);
-                return string.IsNullOrEmpty(embeddingState) ? Try<EmbeddingState>.Failed() : new EmbeddingState(embeddingState);
+                return string.IsNullOrEmpty(embeddingState) ? Try<ProjectionState>.Failed() : new ProjectionState(embeddingState);
             }
             catch (Exception ex)
             {
@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
+        public async Task<Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
         {
             try
             {
@@ -83,7 +83,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection => await collection
                                             .Find(Builders<Embedding>.Filter.Empty)
-                                            .Project(_ => new Tuple<EmbeddingState, ProjectionKey>(_.ContentRaw, _.Key))
+                                            .Project(_ => new Tuple<ProjectionState, ProjectionKey>(_.ContentRaw, _.Key))
                                             .ToListAsync(token),
                     token).ConfigureAwait(false);
                 var result = states.Select(_ =>
@@ -91,7 +91,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     return (_.Item1, _.Item2);
                 });
 
-                return Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>.Succeeded(result);
+                return Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>.Succeeded(result);
             }
             catch (Exception ex)
             {
@@ -100,7 +100,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryRemove(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
+        public async Task<bool> TryMarkAsRemove(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
         {
             try
             {
@@ -122,7 +122,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryReplace(EmbeddingId embedding, ProjectionKey key, EmbeddingState state, CancellationToken token)
+        public async Task<bool> TryReplace(EmbeddingId embedding, ProjectionKey key, ProjectionState state, CancellationToken token)
         {
             try
             {
