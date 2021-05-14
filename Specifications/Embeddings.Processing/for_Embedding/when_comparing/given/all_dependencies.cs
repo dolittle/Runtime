@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_comparing.gi
             desired_state = "desired state";
             current_state = new EmbeddingCurrentState(
                 0,
-                ProjectionCurrentStateType.Persisted,
+                EmbeddingCurrentStateType.Persisted,
                 "projectionState",
                 "projectionKey");
 

@@ -67,7 +67,9 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                                             .Project(_ => _.ContentRaw)
                                             .SingleOrDefaultAsync(token),
                     token).ConfigureAwait(false);
-                return string.IsNullOrEmpty(projectionState) ? Try<ProjectionState>.Failed() : new ProjectionState(projectionState);
+                return string.IsNullOrEmpty(projectionState)
+                    ? Try<ProjectionState>.Failed(new ProjectionStateDoesNotExist(projection, key, scope))
+                    : new ProjectionState(projectionState);
             }
             catch (Exception ex)
             {
@@ -93,7 +95,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                     return (_.Item1, _.Item2);
                 });
 
-                return  Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>.Succeeded(result);
+                return Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>.Succeeded(result);
             }
             catch (Exception ex)
             {

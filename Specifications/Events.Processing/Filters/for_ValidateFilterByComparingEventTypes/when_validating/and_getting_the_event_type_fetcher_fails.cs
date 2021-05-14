@@ -35,6 +35,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
         static FilterValidationResult result;
         Because of = () => result = validator.Validate(new_filter_definition, filter_processor, 87, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
+        It should_fail_validation = () => result.Success.ShouldBeFalse();
     }
 }

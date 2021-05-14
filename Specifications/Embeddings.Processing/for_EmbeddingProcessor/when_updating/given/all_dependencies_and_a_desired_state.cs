@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
         Establish context = () =>
         {
             key = "projection-key";
-            current_state = new EmbeddingCurrentState(1, ProjectionCurrentStateType.Persisted, "{}", key);
+            current_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, "{}", key);
             uncommitted_events = new UncommittedAggregateEvents(
                 Guid.Parse("1d137f3a-b8d0-43a5-a08a-f8eb35b5e932"),
                 new Artifact("5512cda5-5e38-4654-ba86-3a7d917f3eb0", ArtifactGeneration.First),
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
             committed_events = new CommittedAggregateEvents(
                 Guid.Parse("1d137f3a-b8d0-43a5-a08a-f8eb35b5e932"),
                 "5512cda5-5e38-4654-ba86-3a7d917f3eb0",
-                new[] { committed_event });
+                new[] { committed_event });
             desired_state = "{}";
         };
     }

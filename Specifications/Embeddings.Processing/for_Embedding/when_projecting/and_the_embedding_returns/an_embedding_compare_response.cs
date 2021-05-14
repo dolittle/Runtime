@@ -12,7 +12,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
     public class an_embedding_compare_response : given.all_dependencies
     {
         static EmbeddingResponse embedding_response;
-        static string received_state;
         Establish context = () =>
         {
             embedding_response = new EmbeddingResponse()
@@ -41,5 +40,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.a
         It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
         It should_return_a_projection_failed_result = ()
             => result.ShouldBeOfExactType<ProjectionFailedResult>();
+
+        It should_return_a_projection_failed_result_with_the_correct_exception_type = ()
+            => ((ProjectionFailedResult)result).Exception.ShouldBeOfExactType<UnexpectedEmbeddingResponse>();
     }
 }

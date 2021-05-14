@@ -47,10 +47,33 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         /// <inheritdoc/> 
         public async Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken)
-            => HandleProjectionResponse(
-                await _dispatcher.Call(
-                    _requestFactory.Create(state, @event),
-                    cancellationToken).ConfigureAwait(false));
+        {
+            try
+            {
+                var response = await _dispatcher.Call(
+                        _requestFactory.Create(state, @event),
+                        cancellationToken).ConfigureAwait(false);
+
+                if (IsFailureResponse(response))
+                {
+                    return new ProjectionFailedResult(GetFailureReason(response));
+                }
+                return response.ResponseCase switch
+                {
+                    EmbeddingResponse.ResponseOneofCase.ProjectionDelete => new ProjectionDeleteResult(),
+                    EmbeddingResponse.ResponseOneofCase.ProjectionReplace => new ProjectionReplaceResult(response.ProjectionReplace.State),
+                    EmbeddingResponse.ResponseOneofCase.Compare
+                        => new ProjectionFailedResult(new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase)),
+                    EmbeddingResponse.ResponseOneofCase.Delete
+                        => new ProjectionFailedResult(new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase)),
+                    _ => new ProjectionFailedResult(new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase))
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ProjectionFailedResult(ex);
+            }
+        }
 
         /// <inheritdoc/> 
         public async Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken)
@@ -64,7 +87,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 request,
                 EmbeddingResponse.ResponseOneofCase.Compare,
                 response => response.Compare.Events,
-                (embedding, failureReason) => new FailedCompareEmbedding(embedding, failureReason),
+                (embedding, failureReason) => new EmbeddingRemoteCompareCallFailed(embedding, failureReason),
                 cancellationToken).ConfigureAwait(false);
         }
 
@@ -80,26 +103,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 request,
                 EmbeddingResponse.ResponseOneofCase.Delete,
                 response => response.Delete.Events,
-                (embedding, failureReason) => new FailedDeleteEmbedding(embedding, failureReason),
+                (embedding, failureReason) => new EmbeddingRemoteDeleteCallFailed(embedding, failureReason),
                 cancellationToken).ConfigureAwait(false);
-        }
-
-        IProjectionResult HandleProjectionResponse(EmbeddingResponse response)
-        {
-            if (IsFailureResponse(response))
-            {
-                return new ProjectionFailedResult(GetFailureReason(response));
-            }
-            return response.ResponseCase switch
-            {
-                EmbeddingResponse.ResponseOneofCase.ProjectionDelete => new ProjectionDeleteResult(),
-                EmbeddingResponse.ResponseOneofCase.ProjectionReplace => new ProjectionReplaceResult(response.ProjectionReplace.State),
-                EmbeddingResponse.ResponseOneofCase.Compare
-                    => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}"),
-                EmbeddingResponse.ResponseOneofCase.Delete
-                    => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}"),
-                _ => new ProjectionFailedResult($"Unexpected response case {response.ResponseCase}")
-            };
         }
 
         async Task<Try<UncommittedEvents>> DispatchAndHandleEmbeddingResponse(

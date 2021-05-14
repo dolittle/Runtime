@@ -6,6 +6,7 @@ using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_registering
@@ -17,8 +18,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_r
         static ScopeId scope_id;
         static IStreamDefinition stream_definition;
         static Moq.Mock<IEventProcessor> event_processor;
-        static bool first_registration_result;
-        static bool second_registration_result;
 
         Establish context = () =>
         {
@@ -30,13 +29,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_r
             event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
         };
 
+        static Try<StreamProcessor> first_registration_result;
+        static Try<StreamProcessor> second_registration_result;
+
         Because of = () =>
         {
-            first_registration_result = stream_processors.TryRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None, out var _);
-            second_registration_result = stream_processors.TryRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None, out var _);
+            first_registration_result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None);
+            second_registration_result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None);
         };
 
-        It should_have_registered_the_first_time = () => first_registration_result.ShouldBeTrue();
-        It should_not_have_registered_the_second_time = () => second_registration_result.ShouldBeFalse();
+        It should_have_registered_the_first_time = () => first_registration_result.Success.ShouldBeTrue();
+        It should_not_have_registered_the_second_time = () => second_registration_result.Success.ShouldBeFalse();
     }
 }
