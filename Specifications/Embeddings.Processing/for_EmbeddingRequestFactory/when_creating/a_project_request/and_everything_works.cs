@@ -10,7 +10,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.when_creating.a_project_request
 {
-    public class and_there_are_no_events : given.all_dependencies
+    public class and_everything_works : given.all_dependencies
     {
         static UncommittedEvent @event;
         Establish context = () =>
