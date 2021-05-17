@@ -23,19 +23,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
             {
                 Projection = new EmbeddingProjectRequest
                 {
-                    CurrentState = new Projections.Contracts.ProjectionCurrentState
-                    {
-                        Type = current.Type.ToProtobuf(),
-                        Key = current.Key,
-                        State = current.State
-                    },
+                    CurrentState = current.ToProtobuf(),
                     Event = new Events.Contracts.UncommittedEvent
                     {
-                        Artifact = new Dolittle.Artifacts.Contracts.Artifact
-                        {
-                            Generation = @event.Type.Generation.Value,
-                            Id = @event.Type.Id.ToProtobuf()
-                        },
+                        Artifact = @event.Type.ToProtobuf(),
                         Content = @event.Content,
                         EventSourceId = @event.EventSource.ToProtobuf(),
                         Public = @event.Public,
@@ -45,32 +36,35 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         /// <inheritdoc/>
         public EmbeddingRequest Create(EmbeddingCurrentState current, ProjectionState desiredState)
-        {
-            throw new NotImplementedException();
-        }
+            => new()
+            {
+                Compare = new EmbeddingCompareRequest
+                {
+                    ProjectionState = current.ToProtobuf(),
+                    EntityState = desiredState
+                }
+            };
 
         /// <inheritdoc/>
         public EmbeddingRequest Create(EmbeddingCurrentState current)
-        {
-            throw new NotImplementedException();
-        }
+            => new()
+            {
+                Delete = new EmbeddingDeleteRequest
+                {
+                    ProjectionState = current.ToProtobuf()
+                }
+            };
 
         /// <inheritdoc/>
         public Try<EmbeddingRequest> TryCreate(ProjectionCurrentState current, UncommittedEvent @event)
-        {
-            throw new NotImplementedException();
-        }
+            => Try<EmbeddingRequest>.Do(() => Create(current, @event));
 
         /// <inheritdoc/>
         public Try<EmbeddingRequest> TryCreate(EmbeddingCurrentState current, ProjectionState desiredState)
-        {
-            throw new NotImplementedException();
-        }
+            => Try<EmbeddingRequest>.Do(() => Create(current, desiredState));
 
         /// <inheritdoc/>
         public Try<EmbeddingRequest> TryCreate(EmbeddingCurrentState current)
-        {
-            throw new NotImplementedException();
-        }
+            => Try<EmbeddingRequest>.Do(() => Create(current));
     }
 }
