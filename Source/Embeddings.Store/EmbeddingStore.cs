@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         {
             try
             {
-                // _logger.GettingOneEmbedding(embedding, key);
+                _logger.GettingOneEmbedding(embedding, key);
 
                 var tryGetState = await _embeddingStates.TryGet(embedding, key, token);
                 if (tryGetState.Success)
@@ -85,7 +85,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         {
             try
             {
-                // _logger.GettingAllEmbeddings(embedding);
+                _logger.GettingAllEmbeddings(embedding);
 
                 var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
                 if (tryGetStateTuples.Success)
@@ -118,7 +118,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         {
             try
             {
-                // _logger.GettingEmbeddingKeys(embedding);
+                _logger.GettingEmbeddingKeys(embedding);
 
                 var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
                 if (tryGetStateTuples.Success)
@@ -146,7 +146,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         {
             try
             {
-                // _logger.RemovingEmbedding(embedding);
+                _logger.RemovingEmbedding(embedding, key, version);
 
                 var tryMarkAsRemoved = await _embeddingStates.TryMarkAsRemove(embedding, key, version, token).ConfigureAwait(false);
                 if (tryMarkAsRemoved.Success)
@@ -172,7 +172,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         {
             try
             {
-                // _logger.ReplacingEmbedding(embedding);
+                _logger.ReplacingEmbedding(embedding, key, version, state);
                 var embeddingState = new EmbeddingState(state, version);
 
                 var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token).ConfigureAwait(false);
@@ -189,7 +189,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Error replaceing embedding with id {embedding}, key {key} and version {version} with state {state}");
+                _logger.LogWarning(ex, $"Error replacing embedding with id {embedding}, key {key} and version {version} with state {state}");
                 return ex;
             }
         }
