@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
@@ -39,17 +40,18 @@ namespace Dolittle.Runtime.Embeddings.Store.State
         /// <param name="key">The embedding key.</param>
         /// <param name="state">The new embedding state.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns value indicating whether the state was successfully replaced.</returns>
-        Task<bool> TryReplace(EmbeddingId embedding, ProjectionKey key, EmbeddingState state, CancellationToken token);
+        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{bool}"/> indicating whether the state was successfully replaced.</returns>
+        Task<Try<bool>> TryReplace(EmbeddingId embedding, ProjectionKey key, EmbeddingState state, CancellationToken token);
 
         /// <summary>
         /// Try to mark a specific <see cref="EmbeddingState" /> as removed.
         /// </summary>
         /// <param name="embedding">The embedding id.</param>
         /// <param name="key">The embedding key.</param>
+        /// <param name="version">The <see cref="AggregateRootVersion"/>.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns value indicating whether the state was successfully removed.</returns>
-        Task<bool> TryMarkAsRemove(EmbeddingId embedding, ProjectionKey key, CancellationToken token);
+        Task<Try<bool>> TryMarkAsRemove(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, CancellationToken token);
 
         /// <summary>
         /// Try to drop the whole <see cref="EmbeddingState" /> collection.

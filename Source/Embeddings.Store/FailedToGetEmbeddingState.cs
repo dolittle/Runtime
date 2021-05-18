@@ -12,5 +12,9 @@ namespace Dolittle.Runtime.Embeddings.Store
             : base($"Failed to get embedding's state: Id: {embedding} Key: {key}")
         {
         }
+        public FailedToGetEmbeddingState(EmbeddingId embedding)
+            : base($"Failed to get embedding's state: Id: {embedding}")
+        {
+        }
     }
 }

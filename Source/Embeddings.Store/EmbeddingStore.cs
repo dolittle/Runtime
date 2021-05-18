@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.Definition;
@@ -35,6 +36,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             _logger = logger;
         }
 
+        /// <inheritdoc/>
         public async Task<Try<EmbeddingCurrentState>> TryGet(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
         {
             try
@@ -55,7 +57,7 @@ namespace Dolittle.Runtime.Embeddings.Store
                     return tryGetState.Exception;
                 }
 
-                var tryGetDefinition = await _embeddingDefinitions.TryGet(embedding, token);
+                var tryGetDefinition = await _embeddingDefinitions.TryGet(embedding, token).ConfigureAwait(false);
                 if (tryGetDefinition.Success)
                 {
                     return new EmbeddingCurrentState(
@@ -73,13 +75,123 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error getting embedding");
+                _logger.LogWarning(ex, $"Error getting embedding with id {embedding} and key {key}");
                 return ex;
             }
         }
-        public Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, CancellationToken cancellationToken) => throw new System.NotImplementedException();
-        public Task<Try<IEnumerable<ProjectionKey>>> TryGetKeys(EmbeddingId embedding, CancellationToken cancellationToken) => throw new System.NotImplementedException();
-        public Task<Try> TryRemove(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, CancellationToken cancellationToken) => throw new System.NotImplementedException();
-        public Task<Try> TryReplace(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, ProjectionState state, CancellationToken cancellationToken) => throw new System.NotImplementedException();
+
+        /// <inheritdoc/>
+        public async Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
+        {
+            try
+            {
+                // _logger.GettingAllEmbeddings(embedding);
+
+                var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
+                if (tryGetStateTuples.Success)
+                {
+                    return tryGetStateTuples
+                        .Select(_ =>
+                             _.Select(resultTuple =>
+                                new EmbeddingCurrentState(
+                                    resultTuple.State.Version,
+                                    ProjectionCurrentStateType.Persisted,
+                                    resultTuple.State.State,
+                                    resultTuple.Key)));
+                }
+                if (tryGetStateTuples.HasException)
+                {
+                    return tryGetStateTuples.Exception;
+                }
+
+                return new FailedToGetEmbeddingState(embedding);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Error getting all embeddings with id {embedding}");
+                return ex;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Try<IEnumerable<ProjectionKey>>> TryGetKeys(EmbeddingId embedding, CancellationToken token)
+        {
+            try
+            {
+                // _logger.GettingEmbeddingKeys(embedding);
+
+                var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
+                if (tryGetStateTuples.Success)
+                {
+                    return tryGetStateTuples
+                        .Select(_ =>
+                             _.Select(resultTuple => resultTuple.Key));
+                }
+                if (tryGetStateTuples.HasException)
+                {
+                    return tryGetStateTuples.Exception;
+                }
+
+                return new FailedToGetEmbeddingKeys(embedding);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Error getting an embedding's {embedding} keys");
+                return ex;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Try> TryRemove(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, CancellationToken token)
+        {
+            try
+            {
+                // _logger.RemovingEmbedding(embedding);
+
+                var tryMarkAsRemoved = await _embeddingStates.TryMarkAsRemove(embedding, key, version, token).ConfigureAwait(false);
+                if (tryMarkAsRemoved.Success)
+                {
+                    return Try.Succeeded();
+                }
+                if (tryMarkAsRemoved.HasException)
+                {
+                    return tryMarkAsRemoved.Exception;
+                }
+
+                return new FailedToRemoveEmbedding(embedding, key, version);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Error removing embedding with id {embedding}, key {key} and version {version}");
+                return ex;
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<Try> TryReplace(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, ProjectionState state, CancellationToken token)
+        {
+            try
+            {
+                // _logger.ReplacingEmbedding(embedding);
+                var embeddingState = new EmbeddingState(state, version);
+
+                var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token).ConfigureAwait(false);
+                if (tryReplace.Success)
+                {
+                    return Try.Succeeded();
+                }
+                if (tryReplace.HasException)
+                {
+                    return tryReplace.Exception;
+                }
+
+                return new FailedToReplaceEmbedding(embedding, key, version, state);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, $"Error replaceing embedding with id {embedding}, key {key} and version {version} with state {state}");
+                return ex;
+            }
+        }
     }
 }

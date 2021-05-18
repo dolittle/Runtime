@@ -12,7 +12,7 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_keys
+namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_state
 {
     public class and_a_key_is_found : given.all_dependencies
     {
