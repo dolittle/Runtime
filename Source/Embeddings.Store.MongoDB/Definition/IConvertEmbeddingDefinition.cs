@@ -16,6 +16,5 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
             EmbeddingId embedding,
             IEnumerable<EmbeddingEventSelector> eventSelectors,
             ProjectionState initialState);
-
     }
 }

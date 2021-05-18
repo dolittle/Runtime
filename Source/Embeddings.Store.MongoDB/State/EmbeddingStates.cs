@@ -35,7 +35,10 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<Try<EmbeddingState>> TryGet(EmbeddingId embeddingId, ProjectionKey key, CancellationToken token)
+        public async Task<Try<EmbeddingState>> TryGet(
+            EmbeddingId embeddingId,
+            ProjectionKey key,
+            CancellationToken token)
         {
             try
             {
@@ -49,7 +52,9 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                 {
                     return Try<EmbeddingState>.Failed();
                 }
-                return string.IsNullOrEmpty(embedding.ContentRaw) ? Try<EmbeddingState>.Failed() : new EmbeddingState(embedding.ContentRaw, embedding.Version);
+                return string.IsNullOrEmpty(embedding.ContentRaw)
+                    ? Try<EmbeddingState>.Failed()
+                    : new EmbeddingState(embedding.ContentRaw, embedding.Version);
             }
             catch (Exception ex)
             {
@@ -58,7 +63,9 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
+        public async Task<Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>> TryGetAll(
+            EmbeddingId embedding,
+            CancellationToken token)
         {
             try
             {
@@ -66,7 +73,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection => await collection
                                             .Find(Builders<Embedding>.Filter.Empty)
-                                            .Project(_ => new Tuple<ProjectionState, ProjectionKey>(_.ContentRaw, _.Key))
+                                            .Project(_ => new Tuple<EmbeddingState, ProjectionKey>(new EmbeddingState(_.ContentRaw, _.Version), _.Key))
                                             .ToListAsync(token),
                     token).ConfigureAwait(false);
                 var result = states.Select(_ =>
@@ -74,7 +81,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     return (_.Item1, _.Item2);
                 });
 
-                return Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>.Succeeded(result);
+                return Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>.Succeeded(result);
             }
             catch (Exception ex)
             {
@@ -83,7 +90,11 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryMarkAsRemove(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
+        public async Task<Try<bool>> TryMarkAsRemove(
+            EmbeddingId embedding,
+            ProjectionKey key,
+            AggregateRootVersion version,
+            CancellationToken token)
         {
             try
             {
@@ -92,7 +103,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     async collection =>
                     {
                         var deleteResult = await collection.DeleteOneAsync(
-                            CreateKeyFilter(key),
+                            Builders<Embedding>.Filter.And(CreateKeyFilter(key), CreateAggregateVersionFilter(version)),
                             token).ConfigureAwait(false);
                         return deleteResult.IsAcknowledged;
                     },
@@ -105,7 +116,11 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryReplace(EmbeddingId embedding, ProjectionKey key, ProjectionState state, CancellationToken token)
+        public async Task<Try<bool>> TryReplace(
+            EmbeddingId embedding,
+            ProjectionKey key,
+            EmbeddingState state,
+            CancellationToken token)
         {
             try
             {
@@ -113,13 +128,14 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection =>
                     {
-                        var filter = CreateKeyFilter(key);
+                        // @joel do we need to check the version of the aggregate root here so that it has incremented?
                         var updateDefinition = Builders<Embedding>
                                                 .Update
-                                                .Set(_ => _.Content, BsonDocument.Parse(state.Value))
-                                                .Set(_ => _.ContentRaw, state.Value);
+                                                .Set(_ => _.Content, BsonDocument.Parse(state.State))
+                                                .Set(_ => _.ContentRaw, state.State)
+                                                .Set(_ => _.Version, state.Version.Value);
                         var updateResult = await collection.UpdateOneAsync(
-                            filter,
+                            CreateKeyFilter(key),
                             updateDefinition,
                             new UpdateOptions { IsUpsert = true },
                             token).ConfigureAwait(false);
@@ -142,7 +158,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection =>
                     {
-                        var deleteResult = await collection.DeleteManyAsync(Builders<Embedding>.Filter.Empty, token).ConfigureAwait(false);
+                        var deleteResult = await collection.DeleteManyAsync(Builders<Embedding>.Filter.Empty, token)
+                            .ConfigureAwait(false);
                         return deleteResult.IsAcknowledged;
                     },
                     token).ConfigureAwait(false);
@@ -154,12 +171,15 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
             }
         }
 
-        async Task<TResult> OnEmbedding<TResult>(EmbeddingId embedding, Func<IMongoCollection<Embedding>, Task<TResult>> callback, CancellationToken token)
+        async Task<TResult> OnEmbedding<TResult>(
+            EmbeddingId embedding,
+            Func<IMongoCollection<Embedding>, Task<TResult>> callback,
+            CancellationToken token)
             => await callback(await _embeddings.GetStates(embedding, token).ConfigureAwait(false)).ConfigureAwait(false);
 
-        FilterDefinition<Embedding> CreateKeyFilter(ProjectionKey key) => Builders<Embedding>.Filter.Eq(_ => _.Key, key.Value);
-        Task<Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>> IEmbeddingStates.TryGetAll(EmbeddingId embedding, CancellationToken token) => throw new NotImplementedException();
-        public Task<Try<bool>> TryReplace(EmbeddingId embedding, ProjectionKey key, EmbeddingState state, CancellationToken token) => throw new NotImplementedException();
-        public Task<Try<bool>> TryMarkAsRemove(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, CancellationToken token) => throw new NotImplementedException();
+        FilterDefinition<Embedding> CreateKeyFilter(ProjectionKey key) =>
+            Builders<Embedding>.Filter.Eq(_ => _.Key, key.Value);
+        FilterDefinition<Embedding> CreateAggregateVersionFilter(AggregateRootVersion version) =>
+            Builders<Embedding>.Filter.Eq(_ => _.Version, version.Value);
     }
 }

@@ -5,7 +5,6 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.Definition;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
 using MongoDB.Driver;
