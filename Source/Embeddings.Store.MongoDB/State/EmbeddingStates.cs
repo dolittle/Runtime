@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
@@ -20,7 +21,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
     /// Represents an implementation of <see cref="IProjectionStates" />.
     /// </summary>
     [SingletonPerTenant]
-    public class ProjectionStates : IEmbeddingStates
+    public class EmbeddingStates : IEmbeddingStates
     {
         readonly IEmbeddings _embeddings;
 
@@ -28,45 +29,27 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         /// Initializes an instance of the <see cref="ProjectionStates" /> class.
         /// </summary>
         /// <param name="embeddings">The embeddings repository.</param>
-        public ProjectionStates(IEmbeddings embeddings)
+        public EmbeddingStates(IEmbeddings embeddings)
         {
             _embeddings = embeddings;
         }
 
-        /// <inheritdoc/>    
-        public async Task<bool> TryDrop(EmbeddingId embedding, CancellationToken token)
-        {
-            try
-            {
-                await OnEmbedding(
-                    embedding,
-                    async collection =>
-                    {
-                        var deleteResult = await collection.DeleteManyAsync(Builders<Embedding>.Filter.Empty, token).ConfigureAwait(false);
-                        return deleteResult.IsAcknowledged;
-                    },
-                    token).ConfigureAwait(false);
-                return true;
-            }
-            catch (MongoWaitQueueFullException)
-            {
-                return false;
-            }
-        }
-
         /// <inheritdoc/>
-        public async Task<Try<ProjectionState>> TryGet(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
+        public async Task<Try<EmbeddingState>> TryGet(EmbeddingId embeddingId, ProjectionKey key, CancellationToken token)
         {
             try
             {
-                var embeddingState = await OnEmbedding(
-                    embedding,
+                var embedding = await OnEmbedding(
+                    embeddingId,
                     async collection => await collection
                                             .Find(CreateKeyFilter(key))
-                                            .Project(_ => _.ContentRaw)
                                             .SingleOrDefaultAsync(token),
                     token).ConfigureAwait(false);
-                return string.IsNullOrEmpty(embeddingState) ? Try<ProjectionState>.Failed() : new ProjectionState(embeddingState);
+                if (embedding.IsRemoved)
+                {
+                    return Try<EmbeddingState>.Failed();
+                }
+                return string.IsNullOrEmpty(embedding.ContentRaw) ? Try<EmbeddingState>.Failed() : new EmbeddingState(embedding.ContentRaw, embedding.Version);
             }
             catch (Exception ex)
             {
@@ -150,9 +133,33 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
             }
         }
 
+        /// <inheritdoc/>
+        public async Task<bool> TryDrop(EmbeddingId embedding, CancellationToken token)
+        {
+            try
+            {
+                await OnEmbedding(
+                    embedding,
+                    async collection =>
+                    {
+                        var deleteResult = await collection.DeleteManyAsync(Builders<Embedding>.Filter.Empty, token).ConfigureAwait(false);
+                        return deleteResult.IsAcknowledged;
+                    },
+                    token).ConfigureAwait(false);
+                return true;
+            }
+            catch (MongoWaitQueueFullException)
+            {
+                return false;
+            }
+        }
+
         async Task<TResult> OnEmbedding<TResult>(EmbeddingId embedding, Func<IMongoCollection<Embedding>, Task<TResult>> callback, CancellationToken token)
             => await callback(await _embeddings.GetStates(embedding, token).ConfigureAwait(false)).ConfigureAwait(false);
 
         FilterDefinition<Embedding> CreateKeyFilter(ProjectionKey key) => Builders<Embedding>.Filter.Eq(_ => _.Key, key.Value);
+        Task<Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>> IEmbeddingStates.TryGetAll(EmbeddingId embedding, CancellationToken token) => throw new NotImplementedException();
+        public Task<Try<bool>> TryReplace(EmbeddingId embedding, ProjectionKey key, EmbeddingState state, CancellationToken token) => throw new NotImplementedException();
+        public Task<Try<bool>> TryMarkAsRemove(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, CancellationToken token) => throw new NotImplementedException();
     }
 }
