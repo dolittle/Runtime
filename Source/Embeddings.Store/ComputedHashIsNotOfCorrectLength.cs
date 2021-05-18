@@ -16,8 +16,9 @@ namespace Dolittle.Runtime.Embeddings.Store
         /// Initializes a new instance of the <see cref="ComputedHashIsNotOfCorrectLength"/> class.
         /// </summary>
         /// <param name="computedHashLength">The length of the computed hash in bits.</param>
-        public ComputedHashIsNotOfCorrectLength(int computedHashLength)
-             : base($"The calculated hash was {computedHashLength} bits long, expected {ProjectionKeyToEventSourceIdConverter.EventSourceIdBitLength} bits.")
+        /// <param name="expectedHashLength">The expected length of the hash in bits.</param>
+        public ComputedHashIsNotOfCorrectLength(int computedHashLength, int expectedHashLength)
+             : base($"The calculated hash was {computedHashLength} bits long, expected {expectedHashLength} bits.")
         {
         }
     }
