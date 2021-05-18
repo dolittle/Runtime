@@ -10,7 +10,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.whe
 {
     public class and_everything_works : given.all_dependencies
     {
-        static UncommittedEvent @event;
 
         static Try<Contracts.EmbeddingRequest> result;
 
