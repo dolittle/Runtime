@@ -15,13 +15,15 @@ namespace Dolittle.Runtime.Embeddings.Store
     /// </summary>
     public class ProjectionKeyToEventSourceIdConverter : IConvertProjectionKeysToEventSourceIds
     {
+        public const int EventSourceIdBitLength = 128; 
+
         readonly Encoding _encoding;
         readonly ICityHash _hasher;
 
         public ProjectionKeyToEventSourceIdConverter()
         {
             _encoding = Encoding.Unicode;
-            _hasher = CityHashFactory.Instance.Create(new CityHashConfig { HashSizeInBits = 128 });
+            _hasher = CityHashFactory.Instance.Create(new CityHashConfig { HashSizeInBits = EventSourceIdBitLength });
         }
 
         /// <inheritdoc/>
@@ -30,14 +32,14 @@ namespace Dolittle.Runtime.Embeddings.Store
             var bytes = _encoding.GetBytes(key.Value);
             var hash = _hasher.ComputeHash(bytes);
 
-            ThrowIfHashIsNot128BitsLong(hash);
+            ThrowIfComputedHashIsNotCorrectLength(hash);
 
             return new Guid(hash.Hash);
         }
 
-        void ThrowIfHashIsNot128BitsLong(IHashValue hash)
+        void ThrowIfComputedHashIsNotCorrectLength(IHashValue hash)
         {
-            if (hash.BitLength != 128)
+            if (hash.BitLength != EventSourceIdBitLength)
             {
                 throw new ComputedHashIsNotOfCorrectLength(hash.BitLength);
             }

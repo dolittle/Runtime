@@ -8,7 +8,7 @@ using Dolittle.Runtime.Projections.Store;
 namespace Dolittle.Runtime.Embeddings.Store
 {
     /// <summary>
-    /// Exception that gets throw when the computed hash to use for constructing an <see cref="EventSourceId"/> from a <see cref="ProjectionKey"/> is not 128 bits long.
+    /// Exception that gets throw when the computed hash to use for constructing an <see cref="EventSourceId"/> from a <see cref="ProjectionKey"/> is not the correct bit length.
     /// </summary>
     public class ComputedHashIsNotOfCorrectLength : Exception
     {
@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         /// </summary>
         /// <param name="computedHashLength">The length of the computed hash in bits.</param>
         public ComputedHashIsNotOfCorrectLength(int computedHashLength)
-             : base($"The calculated hash was {computedHashLength} bits long, expected 128 bits.")
+             : base($"The calculated hash was {computedHashLength} bits long, expected {ProjectionKeyToEventSourceIdConverter.EventSourceIdBitLength} bits.")
         {
         }
     }
