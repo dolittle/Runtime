@@ -85,20 +85,20 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             }
 
             var definitionResult = _definitionComparer.DefinitionsAreEqual(persistedDefinition, filter.Definition);
-            if (!definitionResult.Succeeded)
+            if (!definitionResult.Success)
             {
                 return definitionResult;
             }
 
             if (FilterDefinitionTypeHasChanged(persistedDefinition, filter.Definition))
             {
-                return new FilterValidationResult("Filter definition type has changed");
+                return FilterValidationResult.Failed("Filter definition type has changed");
             }
 
             _logger.FindingFilterValidator(filter.Identifier);
             if (!TryGetValidatorFor<TDefinition>(out var validator))
             {
-                return new FilterValidationResult($"No available filter validator for type {filter.Definition.GetType()}");
+                return FilterValidationResult.Failed($"No available filter validator for type {filter.Definition.GetType()}");
             }
 
             _logger.ValidatingFilter(filter.Identifier);
@@ -107,16 +107,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         bool StreamProcessorHasProcessedEvents(Try<IStreamProcessorState> tryGetState, out FilterValidationResult validationResult, out StreamPosition lastUnprocessedEvent)
         {
-            if (tryGetState.HasException)
-            {
-                validationResult = new FilterValidationResult(tryGetState.Exception.Message);
-                lastUnprocessedEvent = default;
-                return false;
-            }
-
             if (!tryGetState.Success)
             {
-                validationResult = new FilterValidationResult();
+                validationResult = tryGetState.Exception is StreamProcessorStateDoesNotExist
+                    ? FilterValidationResult.Succeeded()
+                    : FilterValidationResult.Failed(tryGetState.Exception.Message);
                 lastUnprocessedEvent = default;
                 return false;
             }
@@ -125,7 +120,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
             if (lastUnprocessedEvent == StreamPosition.Start)
             {
-                validationResult = new FilterValidationResult();
+                validationResult = FilterValidationResult.Succeeded();
                 return false;
             }
 
@@ -135,17 +130,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         bool FilterDefinitionHasBeenPersisted(Try<IFilterDefinition> tryGetFilterDefinition, out IFilterDefinition persistedDefinition, out FilterValidationResult validationResult)
         {
-            if (tryGetFilterDefinition.HasException)
-            {
-                persistedDefinition = default;
-                validationResult = new FilterValidationResult(tryGetFilterDefinition.Exception.Message);
-                return false;
-            }
-
             if (!tryGetFilterDefinition.Success)
             {
+                validationResult = tryGetFilterDefinition.Exception is StreamDefinitionDoesNotExist
+                    ? FilterValidationResult.Succeeded()
+                    : FilterValidationResult.Failed(tryGetFilterDefinition.Exception.Message);
                 persistedDefinition = default;
-                validationResult = new FilterValidationResult();
                 return false;
             }
 
@@ -154,8 +144,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             return true;
         }
 
-        bool FilterDefinitionTypeHasChanged<TDefinition>(IFilterDefinition persitedDefiniton, TDefinition registeredDefinition)
-            => persitedDefiniton.GetType() != registeredDefinition.GetType();
+        bool FilterDefinitionTypeHasChanged<TDefinition>(IFilterDefinition persistedDefinition, TDefinition registeredDefinition)
+            => persistedDefinition.GetType() != registeredDefinition.GetType();
 
         void PopulateFilterValidatorMap()
         {

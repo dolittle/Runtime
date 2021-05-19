@@ -243,13 +243,8 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             if (!tryRegisterFilter.Success)
             {
                 linkedTokenSource.Cancel();
-                if (tryRegisterFilter.HasException)
-                {
-                    var exception = tryRegisterFilter.Exception;
-                    _logger.ErrorWhileRegisteringFilter(exception, filterDefinition.TargetStream);
-                    ExceptionDispatchInfo.Capture(exception).Throw();
-                }
-                else
+
+                if (tryRegisterFilter.Exception is StreamProcessorAlreadyRegistered)
                 {
                     _logger.FilterAlreadyRegistered(filterDefinition.TargetStream);
                     var failure = new Failure(
@@ -257,6 +252,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                         $"Failed to register Filter '{filterDefinition.TargetStream}'. Filter already registered.");
                     await WriteFailedRegistrationResponse(dispatcher, failure, externalCancellationToken).ConfigureAwait(false);
                     return;
+                }
+                else
+                {
+                    var exception = tryRegisterFilter.Exception;
+                    _logger.ErrorWhileRegisteringFilter(exception, filterDefinition.TargetStream);
+                    ExceptionDispatchInfo.Capture(exception).Throw();
                 }
             }
 
@@ -271,17 +272,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             if (!tryStartFilter.Success)
             {
                 linkedTokenSource.Cancel();
-                if (tryStartFilter.HasException)
-                {
-                    var exception = tryStartFilter.Exception;
-                    _logger.ErrorWhileStartingFilter(exception, filterDefinition.TargetStream, scopeId);
-                    ExceptionDispatchInfo.Capture(exception).Throw();
-                }
-                else
-                {
-                    _logger.CouldNotStartFilter(filterDefinition.TargetStream, scopeId);
-                    return;
-                }
+                var exception = tryStartFilter.Exception;
+                _logger.ErrorWhileStartingFilter(exception, filterDefinition.TargetStream, scopeId);
+                ExceptionDispatchInfo.Capture(exception).Throw();
             }
 
             var tasks = tryStartFilter.Result;
@@ -348,18 +341,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger.RegisteringStreamProcessorForFilter(filterDefinition.TargetStream, filterDefinition.SourceStream);
             try
             {
-                if (_streamProcessors.TryRegister(
+                return _streamProcessors.TryCreateAndRegister(
                     scopeId,
                     filterDefinition.TargetStream.Value,
                     new EventLogStreamDefinition(),
                     () => getFilterProcessor(),
-                    cancellationToken,
-                    out var outputtedFilterStreamProcessor))
-                {
-                    return outputtedFilterStreamProcessor;
-                }
-
-                return Try<StreamProcessor>.Failed();
+                    cancellationToken);
             }
             catch (Exception ex)
             {
@@ -382,9 +369,9 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             _logger.ValidatingFilter(filterDefinition.TargetStream);
             var filterValidationResults = await _filterForAllTenants.Validate(getFilterProcessor, cancellationToken).ConfigureAwait(false);
 
-            if (filterValidationResults.Any(_ => !_.Value.Succeeded))
+            if (filterValidationResults.Any(_ => !_.Value.Success))
             {
-                var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Succeeded);
+                var firstFailedValidation = filterValidationResults.Select(_ => _.Value).First(_ => !_.Success);
                 _logger.FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 throw new FilterValidationFailed(filterDefinition.TargetStream, firstFailedValidation.FailureReason);
             }

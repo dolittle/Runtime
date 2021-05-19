@@ -2,7 +2,7 @@
     <PropertyGroup>
         <AutofacVersion>5.0.0</AutofacVersion>
         <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
-        <ContractsVersion>5.3.0</ContractsVersion>
+        <ContractsVersion>5.4.0-embeddings.3</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <GrpcVersion>2.35.0</GrpcVersion>
@@ -20,6 +20,7 @@
         <ProtobufVersion>3.14.0</ProtobufVersion>
         <PollyVersion>7.2.0</PollyVersion>
         <PrometheusVersion>3.3.0</PrometheusVersion>
+        <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
         <SystemReactiveVersion>4.4.1</SystemReactiveVersion>
         <SystemRuntimeVersion>4.3.0</SystemRuntimeVersion>

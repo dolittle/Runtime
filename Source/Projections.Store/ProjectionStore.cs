@@ -47,27 +47,14 @@ namespace Dolittle.Runtime.Projections.Store
             {
                 _logger.GettingOneProjection(projection, scope, key);
 
-                var tryGetState = await _projectionStates.TryGet(projection, scope, key, token).ConfigureAwait(false);
-                if (tryGetState.Success)
-                {
-                    return new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, tryGetState.Result, key);
-                }
-                if (tryGetState.HasException)
-                {
-                    return tryGetState.Exception;
-                }
+                var state = await _projectionStates.TryGet(projection, scope, key, token).ConfigureAwait(false);
 
-                var tryGetDefinition = await _projectionDefinitions.TryGet(projection, scope, token).ConfigureAwait(false);
-                if (tryGetDefinition.Success)
+                return state switch
                 {
-                    return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, tryGetDefinition.Result.InititalState, key);
-                }
-                if (tryGetDefinition.HasException)
-                {
-                    return tryGetDefinition.Exception;
-                }
-
-                return new FailedToGetProjectionDefinition(projection, scope);
+                    { Success: true } => new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, state.Result, key),
+                    { Success: false, Exception: ProjectionStateDoesNotExist } => await TryGetInitialState(projection, key, scope, token).ConfigureAwait(false),
+                    _ => state.Exception
+                };
             }
             catch (Exception ex)
             {
@@ -91,6 +78,17 @@ namespace Dolittle.Runtime.Projections.Store
                 _logger.LogWarning(ex, "Error getting all projections");
                 return ex;
             }
+        }
+
+        async Task<Try<ProjectionCurrentState>> TryGetInitialState(ProjectionId projection, ProjectionKey key, ScopeId scope, CancellationToken token)
+        {
+            var definition = await _projectionDefinitions.TryGet(projection, scope, token).ConfigureAwait(false);
+            if (!definition.Success)
+            {
+                return definition.Exception;
+            }
+
+            return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, definition.Result.InititalState, key);
         }
 
         /// <inheritdoc/>

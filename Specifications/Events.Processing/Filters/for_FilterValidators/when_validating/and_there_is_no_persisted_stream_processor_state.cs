@@ -6,6 +6,7 @@ using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Machine.Specifications;
 using Dolittle.Runtime.Events.Store.Streams;
+using System;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_validating
 {
@@ -15,11 +16,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
          {
              stream_processor_state_repository
                  .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
-                 .Returns(Task.FromResult(Try<IStreamProcessorState>.Failed()));
+                 .Returns(Task.FromResult(Try<IStreamProcessorState>.Failed(new StreamProcessorStateDoesNotExist(stream_processor_id))));
          };
         static FilterValidationResult result;
         Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
-        It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
+        It should_not_fail_validation = () => result.Success.ShouldBeTrue();
     }
 }
