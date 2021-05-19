@@ -25,6 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
             _embeddings = embeddings;
             _definitionConverter = definitionConverter;
         }
+
         public async Task<Try<Store.Definition.EmbeddingDefinition>> TryGet(EmbeddingId embedding, CancellationToken token)
         {
             try
@@ -32,14 +33,12 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                 return await OnDefinitions<Try<Store.Definition.EmbeddingDefinition>>(
                     async collection =>
                     {
-                        var findResult = await collection
+                        var definition = await collection
                                             .Find(CreateIdFilter(embedding))
-                                            .Project(_ => Tuple.Create(_.InitialStateRaw, _.EventSelectors))
                                             .SingleOrDefaultAsync(token)
                                             .ConfigureAwait(false);
-                        if (findResult == null) return Try<Store.Definition.EmbeddingDefinition>.Failed();
-                        var (initialState, eventSelectors) = findResult;
-                        return _definitionConverter.ToRuntime(embedding, eventSelectors, initialState);
+                        if (definition == null) return Try<Store.Definition.EmbeddingDefinition>.Failed();
+                        return _definitionConverter.ToRuntime(definition);
                     },
                     token).ConfigureAwait(false);
             }

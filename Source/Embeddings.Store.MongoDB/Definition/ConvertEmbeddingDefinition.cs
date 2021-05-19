@@ -16,17 +16,14 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
     [Singleton]
     public class ConvertEmbeddingDefinition : IConvertEmbeddingDefinition
     {
-        public Store.Definition.EmbeddingDefinition ToRuntime(
-            EmbeddingId embedding,
-            IEnumerable<ProjectionEventSelector> eventSelectors,
-            ProjectionState initialState)
+        public Store.Definition.EmbeddingDefinition ToRuntime(EmbeddingDefinition definition)
             => new(
-                embedding,
-                eventSelectors.Select(_ => new Projections.Store.Definition.ProjectionEventSelector(
+                definition.Embedding,
+                definition.EventSelectors.Select(_ => new Projections.Store.Definition.ProjectionEventSelector(
                     _.EventType,
                     _.EventKeySelectorType,
                     _.EventKeySelectorExpression)),
-                initialState);
+                definition.InitialStateRaw);
         public EmbeddingDefinition ToStored(Store.Definition.EmbeddingDefinition definition)
             => new()
             {

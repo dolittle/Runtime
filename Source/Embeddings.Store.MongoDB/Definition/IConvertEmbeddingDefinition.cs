@@ -1,10 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
-using Dolittle.Runtime.Projections.Store.State;
-
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
 {
     /// <summary>
@@ -13,9 +9,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
     public interface IConvertEmbeddingDefinition
     {
         EmbeddingDefinition ToStored(Store.Definition.EmbeddingDefinition definition);
-        Store.Definition.EmbeddingDefinition ToRuntime(
-            EmbeddingId embedding,
-            IEnumerable<ProjectionEventSelector> eventSelectors,
-            ProjectionState initialState);
+        Store.Definition.EmbeddingDefinition ToRuntime(EmbeddingDefinition definition);
     }
 }
