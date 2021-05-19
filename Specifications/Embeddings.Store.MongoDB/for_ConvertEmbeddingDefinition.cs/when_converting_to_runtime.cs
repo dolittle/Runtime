@@ -4,11 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
-// using Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
 using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
-// using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
 using MongoDB.Bson;
