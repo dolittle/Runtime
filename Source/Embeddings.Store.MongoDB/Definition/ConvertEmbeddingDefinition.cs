@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using MongoDB.Bson;
 
@@ -18,11 +18,11 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
     {
         public Store.Definition.EmbeddingDefinition ToRuntime(
             EmbeddingId embedding,
-            IEnumerable<EmbeddingEventSelector> eventSelectors,
+            IEnumerable<ProjectionEventSelector> eventSelectors,
             ProjectionState initialState)
             => new(
                 embedding,
-                eventSelectors.Select(_ => new ProjectionEventSelector(
+                eventSelectors.Select(_ => new Projections.Store.Definition.ProjectionEventSelector(
                     _.EventType,
                     _.EventKeySelectorType,
                     _.EventKeySelectorExpression)),
@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                 Embedding = definition.Embedding,
                 InitialStateRaw = definition.InititalState,
                 InitialState = BsonDocument.Parse(definition.InititalState),
-                EventSelectors = definition.Events.Select(_ => new EmbeddingEventSelector
+                EventSelectors = definition.Events.Select(_ => new ProjectionEventSelector
                 {
                     EventKeySelectorType = _.KeySelectorType,
                     EventKeySelectorExpression = _.KeySelectorExpression,

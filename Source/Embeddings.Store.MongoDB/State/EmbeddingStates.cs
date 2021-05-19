@@ -46,7 +46,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embeddingId,
                     async collection => await collection
                                             .Find(CreateKeyFilter(key))
-                                            .SingleOrDefaultAsync(token),
+                                            .SingleOrDefaultAsync(token)
+                                            .ConfigureAwait(false),
                     token).ConfigureAwait(false);
                 if (embedding.IsRemoved)
                 {
@@ -73,8 +74,9 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection => await collection
                                             .Find(Builders<Embedding>.Filter.Empty)
-                                            .Project(_ => new Tuple<EmbeddingState, ProjectionKey>(new EmbeddingState(_.ContentRaw, _.Version), _.Key))
-                                            .ToListAsync(token),
+                                            .Project(_ => Tuple.Create<EmbeddingState, ProjectionKey>(new EmbeddingState(_.ContentRaw, _.Version), _.Key))
+                                            .ToListAsync(token)
+                                            .ConfigureAwait(false),
                     token).ConfigureAwait(false);
                 var result = states.Select(_ =>
                 {
@@ -102,9 +104,13 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection =>
                     {
-                        var deleteResult = await collection.DeleteOneAsync(
-                            Builders<Embedding>.Filter.And(CreateKeyFilter(key), CreateAggregateVersionFilter(version)),
-                            token).ConfigureAwait(false);
+                        // @joel the version only works here to check that you really know what you're deleting, right?
+                        // eg. you are at the latest change to the embedding
+                        var deleteResult = await collection
+                            .DeleteOneAsync(
+                                Builders<Embedding>.Filter.And(CreateKeyFilter(key), CreateAggregateVersionFilter(version)),
+                                token)
+                            .ConfigureAwait(false);
                         return deleteResult.IsAcknowledged;
                     },
                     token).ConfigureAwait(false);
@@ -134,11 +140,13 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                                                 .Set(_ => _.Content, BsonDocument.Parse(state.State))
                                                 .Set(_ => _.ContentRaw, state.State)
                                                 .Set(_ => _.Version, state.Version.Value);
-                        var updateResult = await collection.UpdateOneAsync(
-                            CreateKeyFilter(key),
-                            updateDefinition,
-                            new UpdateOptions { IsUpsert = true },
-                            token).ConfigureAwait(false);
+                        var updateResult = await collection
+                            .UpdateOneAsync(
+                                CreateKeyFilter(key),
+                                updateDefinition,
+                                new UpdateOptions { IsUpsert = true },
+                                token)
+                            .ConfigureAwait(false);
                         return updateResult.IsAcknowledged;
                     },
                     token).ConfigureAwait(false);
@@ -158,7 +166,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection =>
                     {
-                        var deleteResult = await collection.DeleteManyAsync(Builders<Embedding>.Filter.Empty, token)
+                        var deleteResult = await collection
+                            .DeleteManyAsync(Builders<Embedding>.Filter.Empty, token)
                             .ConfigureAwait(false);
                         return deleteResult.IsAcknowledged;
                     },
@@ -175,7 +184,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
             EmbeddingId embedding,
             Func<IMongoCollection<Embedding>, Task<TResult>> callback,
             CancellationToken token)
-            => await callback(await _embeddings.GetStates(embedding, token).ConfigureAwait(false)).ConfigureAwait(false);
+            => await callback(await _embeddings.GetStates(embedding, token).ConfigureAwait(false))
+                .ConfigureAwait(false);
 
         FilterDefinition<Embedding> CreateKeyFilter(ProjectionKey key) =>
             Builders<Embedding>.Filter.Eq(_ => _.Key, key.Value);

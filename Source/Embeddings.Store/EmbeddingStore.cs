@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Error getting embedding with id {embedding} and key {key}");
+                _logger.LogWarning(ex, "Error getting embedding {Embedding} and key {Key}", embedding, key);
                 return ex;
             }
         }
@@ -108,7 +108,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Error getting all embeddings with id {embedding}");
+                _logger.LogWarning(ex, "Error getting all readmodels of embedding {Embedding}", embedding);
                 return ex;
             }
         }
@@ -136,7 +136,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Error getting an embedding's {embedding} keys");
+                _logger.LogWarning(ex, "Error getting keys for embedding {Embedding}", embedding);
                 return ex;
             }
         }
@@ -162,20 +162,31 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Error removing embedding with id {embedding}, key {key} and version {version}");
+                _logger.LogWarning(
+                    ex,
+                    "Error removing embedding {Embedding} with key {Key} and version {Version}",
+                    embedding,
+                    key,
+                    version);
                 return ex;
             }
         }
 
         /// <inheritdoc/>
-        public async Task<Try> TryReplace(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, ProjectionState state, CancellationToken token)
+        public async Task<Try> TryReplace(
+            EmbeddingId embedding,
+            ProjectionKey key,
+            AggregateRootVersion version,
+            ProjectionState state,
+            CancellationToken token)
         {
             try
             {
                 _logger.ReplacingEmbedding(embedding, key, version, state);
                 var embeddingState = new EmbeddingState(state, version);
 
-                var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token).ConfigureAwait(false);
+                var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token)
+                    .ConfigureAwait(false);
                 if (tryReplace.Success)
                 {
                     return Try.Succeeded();
@@ -189,7 +200,13 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, $"Error replacing embedding with id {embedding}, key {key} and version {version} with state {state}");
+                _logger.LogWarning(
+                    ex,
+                    "Error replacing embedding {Embedding}, key {Key} and version {Version} with state {State}",
+                    embedding,
+                    key,
+                    version,
+                    state);
                 return ex;
             }
         }

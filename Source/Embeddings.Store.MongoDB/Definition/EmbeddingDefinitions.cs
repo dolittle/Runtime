@@ -35,7 +35,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                         var findResult = await collection
                                             .Find(CreateIdFilter(embedding))
                                             .Project(_ => Tuple.Create(_.InitialStateRaw, _.EventSelectors))
-                                            .SingleOrDefaultAsync(token).ConfigureAwait(false);
+                                            .SingleOrDefaultAsync(token)
+                                            .ConfigureAwait(false);
                         if (findResult == null) return Try<Store.Definition.EmbeddingDefinition>.Failed();
                         var (initialState, eventSelectors) = findResult;
                         return _definitionConverter.ToRuntime(embedding, eventSelectors, initialState);
@@ -59,7 +60,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                                                 CreateIdFilter(definition.Embedding),
                                                 _definitionConverter.ToStored(definition),
                                                 new ReplaceOptions { IsUpsert = true },
-                                                token).ConfigureAwait(false);
+                                                token)
+                                            .ConfigureAwait(false);
                         return updateResult.IsAcknowledged;
                     },
                     token).ConfigureAwait(false);
@@ -70,8 +72,11 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
             }
         }
 
-        async Task<TResult> OnDefinitions<TResult>(Func<IMongoCollection<EmbeddingDefinition>, Task<TResult>> callback, CancellationToken token)
-            => await callback(await _embeddings.GetDefinitions(token).ConfigureAwait(false)).ConfigureAwait(false);
+        async Task<TResult> OnDefinitions<TResult>(
+            Func<IMongoCollection<EmbeddingDefinition>, Task<TResult>> callback,
+            CancellationToken token)
+            => await callback(await _embeddings.GetDefinitions(token).ConfigureAwait(false))
+                .ConfigureAwait(false);
 
         FilterDefinition<EmbeddingDefinition> CreateIdFilter(EmbeddingId embedding)
             => Builders<EmbeddingDefinition>.Filter.Eq(_ => _.Embedding, embedding.Value);
