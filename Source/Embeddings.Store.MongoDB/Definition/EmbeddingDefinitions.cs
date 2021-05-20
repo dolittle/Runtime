@@ -37,8 +37,9 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                                             .Find(CreateIdFilter(embedding))
                                             .SingleOrDefaultAsync(token)
                                             .ConfigureAwait(false);
-                        if (definition == null) return Try<Store.Definition.EmbeddingDefinition>.Failed();
-                        return _definitionConverter.ToRuntime(definition);
+                        return definition == null
+                            ? Try<Store.Definition.EmbeddingDefinition>.Failed(new EmbeddingDefinitionDoesNotExist(embedding))
+                            : _definitionConverter.ToRuntime(definition);
                     },
                     token).ConfigureAwait(false);
             }

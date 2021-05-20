@@ -2,21 +2,18 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
-using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_state
 {
-    public class and_nothing_is_found : given.all_dependencies
+    public class and_a_definition_is_not_found : given.all_dependencies
     {
 
         static EmbeddingId id;
@@ -28,11 +25,11 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
 
             states
                 .Setup(_ => _.TryGet(id, key, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<EmbeddingState>.Failed()));
+                .Returns(Task.FromResult(Try<EmbeddingState>.Failed(new EmbeddingStateDoesNotExist(id, key))));
 
             definitions
                 .Setup(_ => _.TryGet(id, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<EmbeddingDefinition>.Failed()));
+                .Returns(Task.FromResult(Try<EmbeddingDefinition>.Failed(new Exception())));
         };
 
         static Try<EmbeddingCurrentState> result;
@@ -41,6 +38,6 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
 
         It should_fail = () => result.Success.ShouldBeFalse();
 
-        It should_return_a_failure = () => result.HasException.ShouldBeTrue();
+        It should_return_a_failure = () => result.Exception.ShouldNotBeNull();
     }
 }

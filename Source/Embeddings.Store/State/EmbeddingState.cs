@@ -11,5 +11,5 @@ namespace Dolittle.Runtime.Embeddings.Store.State
     /// </summary>
     /// <param name="State">The state.</param>
     /// <param name="Version">The aggregate root version the state was calculated from.</param>
-    public record EmbeddingState(string State, AggregateRootVersion Version) : ProjectionState(State);
+    public record EmbeddingState(string State, AggregateRootVersion Version, bool IsRemoved) : ProjectionState(State);
 }

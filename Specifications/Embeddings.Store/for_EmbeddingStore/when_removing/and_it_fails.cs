@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_removing
 
             states
                 .Setup(_ => _.TryMarkAsRemove(id, key, version, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<bool>.Failed()));
+                .Returns(Task.FromResult(Try<bool>.Failed(new Exception())));
         };
 
         static Try result;
@@ -33,6 +33,6 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_removing
         Because of = () => result = store.TryRemove(id, key, version, CancellationToken.None).Result;
 
         It should_fail = () => result.Success.ShouldBeFalse();
-        It should_have_an_exception = () => result.HasException.ShouldBeTrue();
+        It should_have_an_exception = () => result.Exception.ShouldNotBeNull();
     }
 }

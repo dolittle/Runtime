@@ -43,35 +43,18 @@ namespace Dolittle.Runtime.Embeddings.Store
             {
                 _logger.GettingOneEmbedding(embedding, key);
 
-                var tryGetState = await _embeddingStates.TryGet(embedding, key, token);
-                if (tryGetState.Success)
-                {
-                    return new EmbeddingCurrentState(
-                        tryGetState.Result.Version,
-                        ProjectionCurrentStateType.Persisted,
-                        tryGetState.Result.State,
-                        key);
-                }
-                if (tryGetState.HasException)
-                {
-                    return tryGetState.Exception;
-                }
+                var state = await _embeddingStates.TryGet(embedding, key, token);
 
-                var tryGetDefinition = await _embeddingDefinitions.TryGet(embedding, token).ConfigureAwait(false);
-                if (tryGetDefinition.Success)
+                return state switch
                 {
-                    return new EmbeddingCurrentState(
-                        AggregateRootVersion.Initial,
-                        ProjectionCurrentStateType.CreatedFromInitialState,
-                        tryGetDefinition.Result.InititalState,
-                        key);
-                }
-                if (tryGetDefinition.HasException)
-                {
-                    return tryGetDefinition.Exception;
-                }
-
-                return new FailedToGetEmbeddingState(embedding, key);
+                    { Success: true } => new EmbeddingCurrentState(
+                        state.Result.Version,
+                        state.Result.IsRemoved ? EmbeddingCurrentStateType.Deleted : EmbeddingCurrentStateType.Persisted,
+                        state.Result.State,
+                        key),
+                    { Success: false, Exception: EmbeddingStateDoesNotExist } => await TryGetInitialState(embedding, key, token),
+                    _ => state.Exception
+                };
             }
             catch (Exception ex)
             {
@@ -88,23 +71,18 @@ namespace Dolittle.Runtime.Embeddings.Store
                 _logger.GettingAllEmbeddings(embedding);
 
                 var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
-                if (tryGetStateTuples.Success)
-                {
-                    return tryGetStateTuples
-                        .Select(_ =>
-                             _.Select(resultTuple =>
-                                new EmbeddingCurrentState(
-                                    resultTuple.State.Version,
-                                    ProjectionCurrentStateType.Persisted,
-                                    resultTuple.State.State,
-                                    resultTuple.Key)));
-                }
-                if (tryGetStateTuples.HasException)
+                if (!tryGetStateTuples.Success)
                 {
                     return tryGetStateTuples.Exception;
                 }
-
-                return new FailedToGetEmbeddingState(embedding);
+                return tryGetStateTuples
+                    .Select(_ =>
+                         _.Select(resultTuple =>
+                            new EmbeddingCurrentState(
+                                resultTuple.State.Version,
+                                EmbeddingCurrentStateType.Persisted,
+                                resultTuple.State.State,
+                                resultTuple.Key)));
             }
             catch (Exception ex)
             {
@@ -121,18 +99,13 @@ namespace Dolittle.Runtime.Embeddings.Store
                 _logger.GettingEmbeddingKeys(embedding);
 
                 var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
-                if (tryGetStateTuples.Success)
-                {
-                    return tryGetStateTuples
-                        .Select(_ =>
-                             _.Select(resultTuple => resultTuple.Key));
-                }
-                if (tryGetStateTuples.HasException)
+                if (!tryGetStateTuples.Success)
                 {
                     return tryGetStateTuples.Exception;
                 }
-
-                return new FailedToGetEmbeddingKeys(embedding);
+                return tryGetStateTuples
+                    .Select(_ =>
+                         _.Select(resultTuple => resultTuple.Key));
             }
             catch (Exception ex)
             {
@@ -149,16 +122,7 @@ namespace Dolittle.Runtime.Embeddings.Store
                 _logger.RemovingEmbedding(embedding, key, version);
 
                 var tryMarkAsRemoved = await _embeddingStates.TryMarkAsRemove(embedding, key, version, token).ConfigureAwait(false);
-                if (tryMarkAsRemoved.Success)
-                {
-                    return Try.Succeeded();
-                }
-                if (tryMarkAsRemoved.HasException)
-                {
-                    return tryMarkAsRemoved.Exception;
-                }
-
-                return new FailedToRemoveEmbedding(embedding, key, version);
+                return tryMarkAsRemoved.Success ? Try.Succeeded() : tryMarkAsRemoved.Exception;
             }
             catch (Exception ex)
             {
@@ -183,20 +147,11 @@ namespace Dolittle.Runtime.Embeddings.Store
             try
             {
                 _logger.ReplacingEmbedding(embedding, key, version, state);
-                var embeddingState = new EmbeddingState(state, version);
+                var embeddingState = new EmbeddingState(state, version, false);
 
                 var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token)
                     .ConfigureAwait(false);
-                if (tryReplace.Success)
-                {
-                    return Try.Succeeded();
-                }
-                if (tryReplace.HasException)
-                {
-                    return tryReplace.Exception;
-                }
-
-                return new FailedToReplaceEmbedding(embedding, key, version, state);
+                return tryReplace.Success ? Try.Succeeded() : tryReplace.Exception;
             }
             catch (Exception ex)
             {
@@ -209,6 +164,23 @@ namespace Dolittle.Runtime.Embeddings.Store
                     state);
                 return ex;
             }
+        }
+
+        async Task<Try<EmbeddingCurrentState>> TryGetInitialState(
+            EmbeddingId embedding,
+            ProjectionKey key,
+            CancellationToken token)
+        {
+            var definition = await _embeddingDefinitions.TryGet(embedding, token).ConfigureAwait(false);
+            if (!definition.Success)
+            {
+                return definition.Exception;
+            }
+            return new EmbeddingCurrentState(
+                AggregateRootVersion.Initial,
+                EmbeddingCurrentStateType.CreatedFromInitialState,
+                definition.Result.InititalState,
+                key);
         }
     }
 }

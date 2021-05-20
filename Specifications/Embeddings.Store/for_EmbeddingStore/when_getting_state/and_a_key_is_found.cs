@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
             id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
             key = new ProjectionKey("test_key");
 
-            persisted_state = new EmbeddingState("persisted_state", 1);
+            persisted_state = new EmbeddingState("persisted_state", 1, false);
 
             states
                 .Setup(_ => _.TryGet(id, key, Moq.It.IsAny<CancellationToken>()))
@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
         It should_get_the_state = () => result.Result.State.Value.ShouldEqual(persisted_state.State);
         It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
         It should_have_the_same_aggregate_version = () => result.Result.Version.ShouldEqual(persisted_state.Version);
-        It should_get_a_persisted_state = () => result.Result.Type.ShouldEqual(ProjectionCurrentStateType.Persisted);
+        It should_get_a_persisted_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
 
     }
 }

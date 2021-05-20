@@ -26,9 +26,9 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_keys
 
             persisted_states = new List<(EmbeddingState, ProjectionKey)>
             {
-                (new EmbeddingState("persisted_state 1", 1), "first"),
-                (new EmbeddingState("persisted_state 2", 1), "second"),
-                (new EmbeddingState("persisted_state 🌲", 1), "third"),
+                (new EmbeddingState("persisted_state 1", 1, false), "first"),
+                (new EmbeddingState("persisted_state 2", 1, false), "second"),
+                (new EmbeddingState("persisted_state 🌲", 1, false), "third"),
             };
 
             states

@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
 
             states
                 .Setup(_ => _.TryGetAll(id, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<IEnumerable<(EmbeddingState, ProjectionKey)>>.Failed()));
+                .Returns(Task.FromResult(Try<IEnumerable<(EmbeddingState, ProjectionKey)>>.Failed(new Exception())));
         };
 
         static Try<IEnumerable<EmbeddingCurrentState>> result;
@@ -35,6 +35,6 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
         Because of = () => result = store.TryGetAll(id, CancellationToken.None).Result;
 
         It should_fail = () => result.Success.ShouldBeFalse();
-        It should_return_a_failure = () => result.HasException.ShouldBeTrue();
+        It should_return_a_failure = () => result.Exception.ShouldNotBeNull();
     }
 }

@@ -49,13 +49,10 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                                             .SingleOrDefaultAsync(token)
                                             .ConfigureAwait(false),
                     token).ConfigureAwait(false);
-                if (embedding.IsRemoved)
-                {
-                    return Try<EmbeddingState>.Failed();
-                }
+
                 return string.IsNullOrEmpty(embedding.ContentRaw)
-                    ? Try<EmbeddingState>.Failed()
-                    : new EmbeddingState(embedding.ContentRaw, embedding.Version);
+                    ? Try<EmbeddingState>.Failed(new EmbeddingStateDoesNotExist(embeddingId, key))
+                    : new EmbeddingState(embedding.ContentRaw, embedding.Version, embedding.IsRemoved);
             }
             catch (Exception ex)
             {
@@ -74,7 +71,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection => await collection
                                             .Find(Builders<Embedding>.Filter.Empty)
-                                            .Project(_ => Tuple.Create<EmbeddingState, ProjectionKey>(new EmbeddingState(_.ContentRaw, _.Version), _.Key))
+                                            .Project(_ => Tuple.Create<EmbeddingState, ProjectionKey>(
+                                                new EmbeddingState(_.ContentRaw, _.Version, _.IsRemoved), _.Key))
                                             .ToListAsync(token)
                                             .ConfigureAwait(false),
                     token).ConfigureAwait(false);

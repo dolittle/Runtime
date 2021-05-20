@@ -24,9 +24,9 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
 
             persisted_states = new List<(EmbeddingState, ProjectionKey)>
             {
-                (new EmbeddingState("persisted_state 1", 1), "first"),
-                (new EmbeddingState("persisted_state 2", 1), "second"),
-                (new EmbeddingState("persisted_state 🌲", 1), "third"),
+                (new EmbeddingState("persisted_state 1", 1, false), "first"),
+                (new EmbeddingState("persisted_state 2", 1, false), "second"),
+                (new EmbeddingState("persisted_state 🌲", 1, false), "third"),
             };
 
             states
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
             result.Result.ShouldEachConformTo(current_state =>
                 persisted_states.Contains(
                     new Tuple<EmbeddingState, ProjectionKey>(
-                        new EmbeddingState(current_state.State.Value, current_state.Version),
+                        new EmbeddingState(current_state.State.Value, current_state.Version, current_state.Type == EmbeddingCurrentStateType.Deleted),
                         current_state.Key)
                     .ToValueTuple()));
     }

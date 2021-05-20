@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
 
             states
                 .Setup(_ => _.TryGet(id, key, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<EmbeddingState>.Failed()));
+                .Returns(Task.FromResult(Try<EmbeddingState>.Failed(new EmbeddingStateDoesNotExist(id, key))));
 
             definitions
                 .Setup(_ => _.TryGet(id, Moq.It.IsAny<CancellationToken>()))
@@ -47,9 +47,9 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
         Because of = () => result = store.TryGet(id, key, CancellationToken.None).Result;
 
         It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_get_a_state = () => result.Result.State.ShouldEqual(initial_state);
+        It should_get_the_initial_state_state = () => result.Result.State.ShouldEqual(initial_state);
         It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
         It should_have_an_aggregate_version_of_0 = () => result.Result.Version.Value.ShouldEqual((ulong)0);
-        It should_get_an_initial_state = () => result.Result.Type.ShouldEqual(ProjectionCurrentStateType.CreatedFromInitialState);
+        It should_get_an_initial_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.CreatedFromInitialState);
     }
 }

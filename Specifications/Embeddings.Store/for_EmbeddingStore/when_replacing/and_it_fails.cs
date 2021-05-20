@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_replacing
 
             states
                 .Setup(_ => _.TryReplace(id, key, Moq.It.IsAny<EmbeddingState>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<bool>.Failed()));
+                .Returns(Task.FromResult(Try<bool>.Failed(new Exception())));
         };
 
         static Try result;
@@ -37,6 +37,6 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_replacing
         Because of = () => result = store.TryReplace(id, key, version, state, CancellationToken.None).Result;
 
         It should_fail = () => result.Success.ShouldBeFalse();
-        It should_have_an_exception = () => result.HasException.ShouldBeTrue();
+        It should_have_an_exception = () => result.Exception.ShouldNotBeNull();
     }
 }
