@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         /// <inheritdoc/>
         public IEnumerable<Service> BindServices() =>
-            new Service[]
+            new[]
             {
                 new Service(_embeddings, Contracts.Embeddings.BindService(_embeddings), Contracts.Embeddings.Descriptor)
             };
