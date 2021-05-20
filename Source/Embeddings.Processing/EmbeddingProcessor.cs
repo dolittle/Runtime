@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
@@ -22,7 +23,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly ConcurrentQueue<Func<bool, Task>> _jobs = new();
         readonly EmbeddingId _embedding;
         readonly IUpdateEmbeddingStates _stateUpdater;
-        readonly IWaitForAggregateRootEvents _eventWaiter;
+        readonly IStreamEventWatcher _eventWaiter;
         readonly IEventStore _eventStore;
         readonly IEmbeddingStore _embeddingStore;
         readonly ICalculateStateTransitionEvents _transitionCalculator;
@@ -35,14 +36,14 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// </summary>
         /// <param name="embedding">The <see cref="EmbeddingId"/> that identifies the embedding.</param>
         /// <param name="stateUpdater">The <see cref="IUpdateEmbeddingStates"/> to use for recalculating embedding states from aggregate root events.</param>
-        /// <param name="eventWaiter">The <see cref="IWaitForAggregateRootEvents"/> to use for waiting on aggregate root events to be committed.</param>
+        /// <param name="eventWaiter">The <see cref="IStreamEventWatcher"/> to use for waiting on events to be committed to the event log.</param>
         /// <param name="eventStore">The <see cref="IEventStore"/> to use for fetching and committing aggregate root events.</param>
         /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> to use for fetching, replacing and removing embedding states.</param>
         /// <param name="transitionCalculator">The <see cref="ICalculateStateTransitionEvents"/> to use for calculating state transition events.</param>
         public EmbeddingProcessor(
             EmbeddingId embedding,
             IUpdateEmbeddingStates stateUpdater,
-            IWaitForAggregateRootEvents eventWaiter,
+            IStreamEventWatcher eventWaiter,
             IEventStore eventStore,
             IEmbeddingStore embeddingStore,
             ICalculateStateTransitionEvents transitionCalculator)
@@ -171,7 +172,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _waitForEvent = CancellationTokenSource.CreateLinkedTokenSource(_cancellationToken);
             try
             {
-                await _eventWaiter.WaitForEvent(_embedding.Value, _waitForEvent.Token).ConfigureAwait(false);
+                await _eventWaiter.WaitForEvent(ScopeId.Default, StreamId.EventLog, _waitForEvent.Token);
             }
             catch (TaskCanceledException)
             {
