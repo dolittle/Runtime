@@ -13,7 +13,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_states
 {
-    public class and_they_are_found : given.all_dependencies
+    public class and_only_unremoved_states_are_found : given.all_dependencies
     {
         static EmbeddingId id;
         static List<(EmbeddingState, ProjectionKey)> persisted_states;
@@ -27,6 +27,8 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
                 (new EmbeddingState("persisted_state 1", 1, false), "first"),
                 (new EmbeddingState("persisted_state 2", 1, false), "second"),
                 (new EmbeddingState("persisted_state 🌲", 1, false), "third"),
+                (new EmbeddingState("persisted_state removed", 1, true), "fourth"),
+                (new EmbeddingState("persisted_state five", 1, false), "fifth"),
             };
 
             states
@@ -47,5 +49,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
                         new EmbeddingState(current_state.State.Value, current_state.Version, current_state.Type == EmbeddingCurrentStateType.Deleted),
                         current_state.Key)
                     .ToValueTuple()));
+        It should_only_get_existing_states = () =>
+            result.Result.ShouldEachConformTo(_ => _.Type != EmbeddingCurrentStateType.Deleted);
     }
 }

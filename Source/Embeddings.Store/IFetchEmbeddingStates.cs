@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         /// <param name="embedding">The embedding id.</param>
         /// <param name="key">The projection key.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="EmbeddingCurrentState" />.</returns>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="EmbeddingCurrentState" />. If the found embedding is marked as removed, returns the inital state.</returns>
         Task<Try<EmbeddingCurrentState>> TryGet(EmbeddingId embedding, ProjectionKey key, CancellationToken cancellationToken);
 
         /// <summary>
@@ -30,5 +30,14 @@ namespace Dolittle.Runtime.Embeddings.Store
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="IEnumerable{EmbeddingCurrentState}" />.</returns>
         Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Try to get all the states of an embedding by id.
+        /// </summary>
+        /// <param name="embedding">The embedding id.</param>
+        /// <param name="includeRemoved">Whether to include removed embeddings in the result too.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="IEnumerable{EmbeddingCurrentState}" />.</returns>
+        Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, bool includeRemoved, CancellationToken cancellationToken);
     }
 }

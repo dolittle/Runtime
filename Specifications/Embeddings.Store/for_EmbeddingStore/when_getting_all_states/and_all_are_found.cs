@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Embeddings.Store.State;
@@ -12,11 +11,10 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_keys
+namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_states
 {
-    public class and_they_are_found : given.all_dependencies
+    public class and_all_are_found : given.all_dependencies
     {
-
         static EmbeddingId id;
         static List<(EmbeddingState, ProjectionKey)> persisted_states;
 
@@ -29,6 +27,8 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_keys
                 (new EmbeddingState("persisted_state 1", 1, false), "first"),
                 (new EmbeddingState("persisted_state 2", 1, false), "second"),
                 (new EmbeddingState("persisted_state 🌲", 1, false), "third"),
+                (new EmbeddingState("persisted_state removed", 1, true), "fourth"),
+                (new EmbeddingState("persisted_state five", 1, false), "fifth"),
             };
 
             states
@@ -37,12 +37,20 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_keys
                     Try<IEnumerable<(EmbeddingState, ProjectionKey)>>.Succeeded(persisted_states)));
         };
 
-        static Try<IEnumerable<ProjectionKey>> result;
+        static Try<IEnumerable<EmbeddingCurrentState>> result;
 
-        Because of = () => result = store.TryGetKeys(id, CancellationToken.None).Result;
+        Because of = () => result = store.TryGetAll(id, true, CancellationToken.None).Result;
 
         It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_get_the_keys = () =>
-            result.Result.ShouldEachConformTo(result_key => persisted_states.Any(_ => _.Item2 == result_key));
+        It should_get_the_current_states = () =>
+            result.Result.ShouldEachConformTo(current_state =>
+                persisted_states.Contains(
+                    new Tuple<EmbeddingState, ProjectionKey>(
+                        new EmbeddingState(
+                            current_state.State.Value,
+                            current_state.Version,
+                            current_state.Type == EmbeddingCurrentStateType.Deleted),
+                        current_state.Key)
+                    .ToValueTuple()));
     }
 }

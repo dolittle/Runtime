@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                                             .ConfigureAwait(false),
                     token).ConfigureAwait(false);
 
-                return string.IsNullOrEmpty(embedding.ContentRaw)
+                return embedding == default
                     ? Try<EmbeddingState>.Failed(new EmbeddingStateDoesNotExist(embeddingId, key))
                     : new EmbeddingState(embedding.ContentRaw, embedding.Version, embedding.IsRemoved);
             }
@@ -61,6 +61,9 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
+        /// <remark>
+        /// Returns all of the stored embedding states, even ones that have been marked as removed.
+        /// <remark/>
         public async Task<Try<IEnumerable<(EmbeddingState State, ProjectionKey Key)>>> TryGetAll(
             EmbeddingId embedding,
             CancellationToken token)
@@ -102,14 +105,18 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection =>
                     {
-                        // @joel the version only works here to check that you really know what you're deleting, right?
-                        // eg. you are at the latest change to the embedding
-                        var deleteResult = await collection
-                            .DeleteOneAsync(
-                                Builders<Embedding>.Filter.And(CreateKeyFilter(key), CreateAggregateVersionFilter(version)),
+                        var markDefinition = Builders<Embedding>
+                            .Update
+                            .Set(_ => _.IsRemoved, true)
+                            .Set(_ => _.Version, version.Value);
+                        var markResult = await collection
+                            .UpdateOneAsync(
+                                CreateKeyFilter(key),
+                                markDefinition,
+                                new UpdateOptions { IsUpsert = true },
                                 token)
                             .ConfigureAwait(false);
-                        return deleteResult.IsAcknowledged;
+                        return markResult.IsAcknowledged;
                     },
                     token).ConfigureAwait(false);
             }
@@ -132,7 +139,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     embedding,
                     async collection =>
                     {
-                        // @joel do we need to check the version of the aggregate root here so that it has incremented?
                         var updateDefinition = Builders<Embedding>
                                                 .Update
                                                 .Set(_ => _.Content, BsonDocument.Parse(state.State))
@@ -187,7 +193,5 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
 
         FilterDefinition<Embedding> CreateKeyFilter(ProjectionKey key) =>
             Builders<Embedding>.Filter.Eq(_ => _.Key, key.Value);
-        FilterDefinition<Embedding> CreateAggregateVersionFilter(AggregateRootVersion version) =>
-            Builders<Embedding>.Filter.Eq(_ => _.Version, version.Value);
     }
 }
