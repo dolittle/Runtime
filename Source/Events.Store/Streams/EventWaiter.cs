@@ -39,9 +39,27 @@ namespace Dolittle.Runtime.Events.Store.Streams
         public EventWaiterId Id { get; }
 
         /// <summary>
-        /// Waits for an event to arrive at a given position.
-        /// If a position has already been notified about, completes the task immediately.
+        /// Waits for an event to be appended to the stream.
         /// </summary>
+        /// <param name="token">The <see cref="CancellationToken" />.</param>
+        /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
+        public async Task Wait(CancellationToken token)
+        {
+            TaskCompletionSource<bool> tcs;
+            lock (_lock)
+            {
+                var nextExpectedPosition = _lastNotified == null ? StreamPosition.Start : (StreamPosition)(_lastNotified + 1);
+                tcs = GetOrAddTaskCompletionSourceLocking(nextExpectedPosition);
+            }
+            await tcs.Task.WaitAsync(token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Waits for an event to arrive at a given position.
+        /// </summary>
+        /// <remarks>
+        /// If a position has already been notified about, completes the task immediately.
+        /// </remarks>
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>

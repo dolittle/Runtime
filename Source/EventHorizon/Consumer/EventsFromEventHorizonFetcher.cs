@@ -55,6 +55,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
 
         /// <inheritdoc/>
+        public Task WaitForEvent(ScopeId scope, StreamId stream, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
+
+        /// <inheritdoc/>
+        public Task WaitForEvent(ScopeId scope, StreamId stream, CancellationToken token) => Task.Delay(60 * 1000, token);
+
+        /// <inheritdoc/>
         public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
 
         /// <inheritdoc/>
