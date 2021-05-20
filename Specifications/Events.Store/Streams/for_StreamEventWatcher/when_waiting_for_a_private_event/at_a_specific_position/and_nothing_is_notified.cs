@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher.when_wait
         Because of = () =>
         {
             result = event_watcher.WaitForEvent(scope_id, stream_id, stream_position, cancellation_token);
-            Thread.Sleep(10);
+            Thread.Sleep(20);
         };
 
         It should_not_be_completed = () => result.IsCompleted.ShouldBeFalse();

@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher.when_wait
         {
             result = event_watcher.WaitForEvent(stream_id, stream_position, cancellation_token);
             event_watcher.NotifyForEvent(stream_id, stream_position);
-            Thread.Sleep(10);
+            Thread.Sleep(20);
         };
 
         It should_be_completed = () => result.IsCompleted.ShouldBeTrue();
