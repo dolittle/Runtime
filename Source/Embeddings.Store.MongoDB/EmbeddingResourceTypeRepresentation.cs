@@ -11,7 +11,9 @@ using Dolittle.Runtime.ResourceTypes;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB
 {
-    /// <inheritdoc/>
+    /// <summary>
+    /// Represents an implementation of <see cref="IRepresentAResourceType"/> for the embedding resource type.
+    /// </summary>
     public class EmbeddingResourceTypeRepresentation : IRepresentAResourceType
     {
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
