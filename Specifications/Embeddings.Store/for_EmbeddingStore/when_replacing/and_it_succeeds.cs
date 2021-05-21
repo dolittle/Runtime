@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_replacing
 
         static Try result;
 
-        Because of = () => result = store.TryReplace(id, key, version, state, CancellationToken.None).Result;
+        Because of = () => result = store.TryReplace(id, key, version, state, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_succeed = () => result.Success.ShouldBeTrue();
     }
