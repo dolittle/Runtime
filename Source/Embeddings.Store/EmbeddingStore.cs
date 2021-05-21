@@ -50,13 +50,14 @@ namespace Dolittle.Runtime.Embeddings.Store
                         embedding,
                         key,
                         state.Result.Version,
-                        token),
+                        token).ConfigureAwait(false),
                     { Success: true } => new EmbeddingCurrentState(
                         state.Result.Version,
                         EmbeddingCurrentStateType.Persisted,
                         state.Result.State,
                         key),
-                    { Success: false, Exception: EmbeddingStateDoesNotExist } => await TryGetInitialState(embedding, key, token),
+                    { Success: false, Exception: EmbeddingStateDoesNotExist } =>
+                        await TryGetInitialState(embedding, key, token).ConfigureAwait(false),
                     _ => state.Exception
                 };
             }
@@ -69,7 +70,7 @@ namespace Dolittle.Runtime.Embeddings.Store
 
         /// <inheritdoc/>
         public async Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
-            => await TryGetAll(embedding, false, token);
+            => await TryGetAll(embedding, false, token).ConfigureAwait(false);
 
 
         /// <inheritdoc/>
@@ -103,7 +104,7 @@ namespace Dolittle.Runtime.Embeddings.Store
 
         /// <inheritdoc/>
         public async Task<Try<IEnumerable<ProjectionKey>>> TryGetKeys(EmbeddingId embedding, CancellationToken token)
-            => await TryGetKeys(embedding, false, token);
+            => await TryGetKeys(embedding, false, token).ConfigureAwait(false);
 
 
         /// <inheritdoc/>
@@ -187,7 +188,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             EmbeddingId embedding,
             ProjectionKey key,
             CancellationToken token)
-            => await TryGetInitialState(embedding, key, AggregateRootVersion.Initial, token);
+            => await TryGetInitialState(embedding, key, AggregateRootVersion.Initial, token).ConfigureAwait(false);
 
         async Task<Try<EmbeddingCurrentState>> TryGetInitialState(
             EmbeddingId embedding,
