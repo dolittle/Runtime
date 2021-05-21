@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseConnection"/> class.
         /// </summary>
-        /// <param name="configuration">A <see cref="IConfigurationFor{EventStoreConfiguration}"/> with database connection parameters.</param>
+        /// <param name="configuration">A <see cref="IConfigurationFor{EmbeddingsConfiguration}"/> with database connection parameters.</param>
         public DatabaseConnection(IConfigurationFor<EmbeddingsConfiguration> configuration)
         {
             var config = configuration.Instance;
