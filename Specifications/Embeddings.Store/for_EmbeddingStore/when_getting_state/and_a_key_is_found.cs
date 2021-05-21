@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
 
         static Try<EmbeddingCurrentState> result;
 
-        Because of = () => result = store.TryGet(id, key, CancellationToken.None).Result;
+        Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_succeed = () => result.Success.ShouldBeTrue();
         It should_get_the_state = () => result.Result.State.Value.ShouldEqual(persisted_state.State);

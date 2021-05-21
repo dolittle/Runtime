@@ -8,7 +8,7 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB
 {
     /// <summary>
-    /// Defines a system that knows projections.
+    /// Defines a system that knows about embeddings.
     /// </summary>
     public interface IEmbeddings : IEmbeddingsConnection
     {

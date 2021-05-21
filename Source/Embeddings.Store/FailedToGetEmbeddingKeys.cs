@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Embeddings.Store
     public class FailedToGetEmbeddingKeys : Exception
     {
         public FailedToGetEmbeddingKeys(EmbeddingId embedding)
-            : base($"Failed to get embedding's keys, EmbeddingId: {embedding}")
+            : base($"Failed to get embedding's keys, EmbeddingId: {embedding.Value}")
         {
         }
     }

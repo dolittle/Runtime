@@ -30,9 +30,9 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_removing
 
         static Try result;
 
-        Because of = () => result = store.TryRemove(id, key, version, CancellationToken.None).Result;
+        Because of = () => result = store.TryRemove(id, key, version, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_fail = () => result.Success.ShouldBeFalse();
-        It should_have_an_exception = () => result.Exception.ShouldNotBeNull();
+        It should_have_the_correct_exception = () => result.Exception.ShouldEqual(exception);
     }
 }

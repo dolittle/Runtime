@@ -9,11 +9,11 @@ namespace Dolittle.Runtime.Embeddings.Store
     public class FailedToGetEmbeddingState : Exception
     {
         public FailedToGetEmbeddingState(EmbeddingId embedding, ProjectionKey key)
-            : base($"Failed to get embedding's state: Id: {embedding} Key: {key}")
+            : base($"Failed to get embedding's state: Id: {embedding.Value} Key: {key.Value}")
         {
         }
         public FailedToGetEmbeddingState(EmbeddingId embedding)
-            : base($"Failed to get embedding's state: Id: {embedding}")
+            : base($"Failed to get embedding's state: Id: {embedding.Value}")
         {
         }
     }

@@ -9,7 +9,7 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB
 {
     /// <summary>
-    /// Represents a <see cref="IEmbeddings" />.
+    /// Represents an implementation of <see cref="IEmbeddings" />.
     /// </summary>
     [SingletonPerTenant]
     public class Embeddings : EmbeddingsConnection, IEmbeddings

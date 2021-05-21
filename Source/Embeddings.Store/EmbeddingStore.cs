@@ -97,7 +97,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error getting all readmodels of embedding {Embedding}", embedding);
+                _logger.LogWarning(ex, "Error getting all instances of embedding {Embedding}", embedding.Value);
                 return ex;
             }
         }
@@ -126,7 +126,7 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error getting keys for embedding {Embedding}", embedding);
+                _logger.LogWarning(ex, "Error getting keys for embedding {Embedding}", embedding.Value);
                 return ex;
             }
         }
@@ -147,9 +147,9 @@ namespace Dolittle.Runtime.Embeddings.Store
                 _logger.LogWarning(
                     ex,
                     "Error removing embedding {Embedding} with key {Key} and version {Version}",
-                    embedding,
-                    key,
-                    version);
+                    embedding.Value,
+                    key.Value,
+                    version.Value);
                 return ex;
             }
         }
@@ -176,10 +176,10 @@ namespace Dolittle.Runtime.Embeddings.Store
                 _logger.LogWarning(
                     ex,
                     "Error replacing embedding {Embedding}, key {Key} and version {Version} with state {State}",
-                    embedding,
-                    key,
-                    version,
-                    state);
+                    embedding.Value,
+                    key.Value,
+                    version.Value,
+                    state.Value);
                 return ex;
             }
         }

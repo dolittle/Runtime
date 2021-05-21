@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.given
         {
             states = new Mock<IEmbeddingStates>();
             definitions = new Mock<IEmbeddingDefinitions>();
-            store = new EmbeddingStore(states.Object, definitions.Object, new Mock<ILogger>().Object);
+            store = new EmbeddingStore(states.Object, definitions.Object, Mock.Of<ILogger>());
         };
     }
 }

@@ -37,6 +37,6 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_replacing
         Because of = () => result = store.TryReplace(id, key, version, state, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_fail = () => result.Success.ShouldBeFalse();
-        It should_have_an_exception = () => result.Exception.ShouldNotBeNull();
+        It should_have_the_correct_exception = () => result.Exception.ShouldEqual(exception);
     }
 }

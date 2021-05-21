@@ -10,7 +10,7 @@ using MongoDB.Bson.Serialization.Attributes;
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
 {
     /// <summary>
-    /// Represents the persisted definition of a embedding.
+    /// Represents the persisted definition of an embedding.
     /// </summary>
     public class EmbeddingDefinition
     {

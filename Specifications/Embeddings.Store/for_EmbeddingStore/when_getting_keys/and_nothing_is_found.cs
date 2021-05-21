@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_keys
 
         static Try<IEnumerable<ProjectionKey>> result;
 
-        Because of = () => result = store.TryGetKeys(id, CancellationToken.None).Result;
+        Because of = () => result = store.TryGetKeys(id, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_fail = () => result.Success.ShouldBeFalse();
         It should_return_a_failure = () => result.Exception.ShouldNotBeNull();

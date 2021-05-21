@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Embeddings.Store
     public class FailedToReplaceEmbedding : Exception
     {
         public FailedToReplaceEmbedding(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, ProjectionState state)
-            : base($"Failed to replace embedding with id {embedding}, key {key} and aggregate root version {version} with state {state}")
+            : base($"Failed to replace embedding with id {embedding.Value}, key {key.Value} and aggregate root version {version.Value} with state {state.Value}")
         {
         }
     }

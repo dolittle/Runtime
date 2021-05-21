@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Embeddings.Store
     public class FailedToRemoveEmbedding : Exception
     {
         public FailedToRemoveEmbedding(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version)
-            : base($"Failed to remove embedding with id {embedding}, key {key} and aggregate root version {version}")
+            : base($"Failed to remove embedding with id {embedding.Value}, key {key.Value} and aggregate root version {version.Value}")
         {
         }
     }

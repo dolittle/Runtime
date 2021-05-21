@@ -3,7 +3,8 @@
   <Import Project="../../specs.props"/>
 
   <PropertyGroup>
-    <AssemblyName>Dolittle.Runtime.Collections.Specs</AssemblyName>
+    <AssemblyName>Dolittle.Runtime.Embeddings.Store.MongoDB.Specs</AssemblyName>
+
   </PropertyGroup>
 
   <ItemGroup>

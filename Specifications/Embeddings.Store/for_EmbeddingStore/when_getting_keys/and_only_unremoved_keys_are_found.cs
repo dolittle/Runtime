@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_keys
 
         static Try<IEnumerable<ProjectionKey>> result;
 
-        Because of = () => result = store.TryGetKeys(id, CancellationToken.None).Result;
+        Because of = () => result = store.TryGetKeys(id, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_succeed = () => result.Success.ShouldBeTrue();
         It should_get_the_unremoved_keys = () =>

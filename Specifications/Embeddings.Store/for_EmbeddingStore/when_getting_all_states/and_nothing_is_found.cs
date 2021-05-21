@@ -32,9 +32,9 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
 
         static Try<IEnumerable<EmbeddingCurrentState>> result;
 
-        Because of = () => result = store.TryGetAll(id, CancellationToken.None).Result;
+        Because of = () => result = store.TryGetAll(id, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_fail = () => result.Success.ShouldBeFalse();
-        It should_return_a_failure = () => result.Exception.ShouldNotBeNull();
+        It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
     }
 }
