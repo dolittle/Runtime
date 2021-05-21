@@ -20,14 +20,16 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_all_
     {
 
         static EmbeddingId id;
+        static Exception exception;
 
         Establish context = () =>
         {
             id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
+            exception = new Exception();
 
             states
                 .Setup(_ => _.TryGetAll(id, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<IEnumerable<(EmbeddingState, ProjectionKey)>>.Failed(new Exception())));
+                .Returns(Task.FromResult(Try<IEnumerable<(EmbeddingState, ProjectionKey)>>.Failed(exception)));
         };
 
         static Try<IEnumerable<EmbeddingCurrentState>> result;

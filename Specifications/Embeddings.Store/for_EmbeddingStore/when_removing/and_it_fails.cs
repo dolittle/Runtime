@@ -17,15 +17,17 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_removing
         static EmbeddingId id;
         static ProjectionKey key;
         static AggregateRootVersion version;
+        static Exception exception;
         Establish context = () =>
         {
             id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
             key = new ProjectionKey("test_key");
             version = AggregateRootVersion.Initial;
+            exception = new Exception();
 
             states
                 .Setup(_ => _.TryMarkAsRemove(id, key, version, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<bool>.Failed(new Exception())));
+                .Returns(Task.FromResult(Try<bool>.Failed(exception)));
         };
 
         static Try result;

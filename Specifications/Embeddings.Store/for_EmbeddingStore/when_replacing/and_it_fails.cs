@@ -20,16 +20,18 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_replacing
         static ProjectionKey key;
         static AggregateRootVersion version;
         static ProjectionState state;
+        static Exception exception;
         Establish context = () =>
         {
             id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
             key = new ProjectionKey("test_key");
             version = AggregateRootVersion.Initial;
             state = new ProjectionState("im an emojiless state");
+            exception = new Exception();
 
             states
                 .Setup(_ => _.TryReplace(id, key, Moq.It.IsAny<EmbeddingState>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<bool>.Failed(new Exception())));
+                .Returns(Task.FromResult(Try<bool>.Failed(exception)));
         };
 
         static Try result;
