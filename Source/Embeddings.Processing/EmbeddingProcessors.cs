@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         /// <inheritdoc/>
-        public async Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken)
+        public async Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, CreateEmbeddingProcessorForTenant factory, CancellationToken cancellationToken)
         {
             if (!TryRegisterAndCreateProcessors(embedding, factory, out var processors, out var error))
             {
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             return false;
         }
 
-        bool TryRegisterAndCreateProcessors(EmbeddingId embedding, EmbeddingProcessorFactory createProcessor, out Dictionary<TenantId, IEmbeddingProcessor> processors, out Exception error)
+        bool TryRegisterAndCreateProcessors(EmbeddingId embedding, CreateEmbeddingProcessorForTenant createProcessor, out Dictionary<TenantId, IEmbeddingProcessor> processors, out Exception error)
         {
             try
             {
