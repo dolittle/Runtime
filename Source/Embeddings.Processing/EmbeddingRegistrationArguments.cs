@@ -10,7 +10,7 @@ using Dolittle.Runtime.Projections.Store.State;
 namespace Dolittle.Runtime.Embeddings.Processing
 {
     /// <summary>
-    /// Represents the runtime representation of the embedding registartion arguments.
+    /// Represents the runtime representation of the embedding registration arguments.
     /// </summary>
     /// <param name="ExecutionContext">The execution context.</param>
     /// <param name="EmbeddingId">The embedding identifier.</param>
