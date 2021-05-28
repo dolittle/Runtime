@@ -71,8 +71,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     embeddingId,
                     CreateEmbeddingStateUpdater(embeddingId, eventStore, embeddingStore, projectManyEvents),
                     _streamEventWatcherFactory(),
-                    _eventStoreFactory(),
-                    _embeddingStoreFactory(),
+                    eventStore,
+                    embeddingStore,
                     CreateStateTransitionEventsCalculator(embeddingId, embedding, projectManyEvents));
             }
             finally
