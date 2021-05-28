@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEventWatcher.when_mult
             first_result = event_watcher.WaitForEvent(scope_id, first_stream_id, stream_position, cancellation_token);
             second_result = event_watcher.WaitForEvent(scope_id, second_stream_id, stream_position, cancellation_token);
             event_watcher.NotifyForEvent(scope_id, second_stream_id, stream_position);
-            Thread.Sleep(20);
+            Thread.Sleep(100);
         };
 
         It first_should_not_be_completed = () => first_result.IsCompleted.ShouldBeFalse();

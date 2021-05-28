@@ -19,7 +19,6 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
 
         Because of = () =>
         {
-            // while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(50);
             dispatcher.Accept(connect_response, CancellationToken.None).GetAwaiter().GetResult();
         };
 
