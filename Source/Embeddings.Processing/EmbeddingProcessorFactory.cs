@@ -64,7 +64,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             try
             {
                 _executionContextManager.CurrentFor(tenant);
-                var streamEventWatcher = _streamEventWatcherFactory();
                 var eventStore = _eventStoreFactory();
                 var embeddingStore = _embeddingStoreFactory();
                 var projectManyEvents = CreateProjectManyEvents(embeddingId, embedding, initialState);
