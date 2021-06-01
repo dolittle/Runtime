@@ -27,7 +27,7 @@ const client = new ApolloClient({
             fetchPolicy: 'no-cache'
         }
     }
-})
+});
 
 ReactDOM.render(
     <ApolloProvider client={client}>

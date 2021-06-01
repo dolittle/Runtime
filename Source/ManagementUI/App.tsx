@@ -9,7 +9,7 @@ const query = gql`
     query {
     eventHandlers {
         allForTenant(tenantId:"709f5739-0f3f-4cac-83bb-7ea3fed6d97d") {
-        id
+            id
         }
     }
     }`;
