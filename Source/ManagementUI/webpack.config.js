@@ -5,8 +5,8 @@ const webpack = require('./WebPack');
 module.exports = (env, argv) => {
     return webpack(env, argv, '/', config => {
         config.devServer.proxy = {
-            '/graphql': 'http://localhost:3000',
-            '/api': 'http://localhost:3000'
+            '/graphql': 'http://localhost:8001',
+            '/api': 'http://localhost:8001'
         };
     }, 9000, 'Dolittle Runtime Management UI');
 };
