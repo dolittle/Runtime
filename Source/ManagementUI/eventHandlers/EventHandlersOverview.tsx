@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
-import { DetailsList, IColumn } from '@fluentui/react';
+import { DetailsList, IColumn, ShimmeredDetailsList } from '@fluentui/react';
 
 const query = gql`
     query {
@@ -48,12 +48,13 @@ const columns: IColumn[] = [
 export const EventHandlersOverview = () => {
     const { loading, error, data } = useQuery(query);
 
-    if (loading) return <p>Loading...</p>;
     if (error) return <p>Error :(</p>;
+
+    const result = data?.eventHandlers?.allForTenant || [];
 
     return (
         <>
-            <DetailsList columns={columns} items={data.eventHandlers.allForTenant} />
+            <ShimmeredDetailsList columns={columns} items={result} enableShimmer={loading} />
         </>
     );
 };
