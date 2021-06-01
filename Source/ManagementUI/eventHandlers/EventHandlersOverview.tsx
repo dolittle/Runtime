@@ -3,7 +3,7 @@
 
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
-import { DetailsList, IColumn, ShimmeredDetailsList } from '@fluentui/react';
+import { IColumn, ShimmeredDetailsList } from '@fluentui/react';
 
 const query = gql`
     query {
