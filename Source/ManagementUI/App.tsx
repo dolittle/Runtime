@@ -4,7 +4,7 @@
 import { PrimaryButton } from '@fluentui/react';
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
-import { Layout } from './Layout/Layout';
+import { Layout } from './layouts/Layout';
 import { BrowserRouter as Router } from 'react-router-dom';
 
 import './App.scss';
