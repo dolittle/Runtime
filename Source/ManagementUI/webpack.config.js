@@ -1,18 +1,12 @@
-const path = require('path');
-const envPath = path.resolve(process.cwd(), 'dolittle.env');
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-require('dotenv').config({ path: envPath });
-
-const webpack = require('@dolittle/typescript.webpack.aurelia').webpack
-const originalConfig = webpack(__dirname);
-
-console.log(process.env.DOLITTLE_WEB_TITLE);
-
-module.exports = () => {
-    const config = originalConfig.apply(null, arguments);
-    config.devServer = {
-        historyApiFallback: true,
-        port: 8081
-      };
-    return config;    
+const webpack = require('./WebPack');
+module.exports = (env, argv) => {
+    return webpack(env, argv, '/', config => {
+        config.devServer.proxy = {
+            '/graphql': 'http://localhost:3000',
+            '/api': 'http://localhost:3000'
+        };
+    }, 9000, 'Dolittle Runtime Management UI');
 };
