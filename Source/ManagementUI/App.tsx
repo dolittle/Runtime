@@ -4,6 +4,10 @@
 import { PrimaryButton } from '@fluentui/react';
 import React from 'react';
 import { useQuery, gql } from '@apollo/client';
+import { Layout } from './Layout/Layout';
+import { BrowserRouter as Router } from 'react-router-dom';
+
+import './App.scss';
 
 const query = gql`
     query {
@@ -15,14 +19,20 @@ const query = gql`
     }`;
 
 export const App = () => {
-    const { loading, error, data } = useQuery(query);
+    const { loading, error, data } = useQuery(query);
 
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error :(</p>;
 
     return (
         <>
-            <PrimaryButton>Hello there</PrimaryButton>
+            <Router>
+                <Layout />
+                <div className="content">
+                    <PrimaryButton>Hello there</PrimaryButton>
+
+                </div>
+            </Router>
         </>
     )
 };

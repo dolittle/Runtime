@@ -7,6 +7,9 @@ import ReactDOM from 'react-dom';
 
 import { App } from './App';
 
+import './Styles/theme';
+import './index.scss';
+
 const cache = new InMemoryCache();
 const link = new HttpLink({
     uri: '/graphql/'
