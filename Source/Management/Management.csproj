@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="HotChocolate.AspNetCore" Version="$(HotChocolateVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Services/Services.csproj" />
   </ItemGroup>
 </Project>
