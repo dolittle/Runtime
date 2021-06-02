@@ -174,12 +174,12 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         }
 
         void SetReversCallArgumentsNotReceivedBecauseNoFirstMessage()
-            => _reverseCallContext.SetException(new ReverseCallArgumentsContextNotReceivedInFirstMessage("no message was received"));
+            => _reverseCallContext.SetException(new ArgumentsContextNotReceivedInFirstMessage("no message was received"));
 
         void SetReversCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage()
-            => _reverseCallContext.SetException(new ReverseCallArgumentsContextNotReceivedInFirstMessage("first message did not contain connect arguments"));
+            => _reverseCallContext.SetException(new ArgumentsContextNotReceivedInFirstMessage("first message did not contain connect arguments"));
 
         void SetReversCallArgumentsNotReceivedBecauseNoContextOnConnectArguments()
-            => _reverseCallContext.SetException(new ReverseCallArgumentsContextNotReceivedInFirstMessage("connect arguments did not contain a context"));
+            => _reverseCallContext.SetException(new ArgumentsContextNotReceivedInFirstMessage("connect arguments did not contain a context"));
     }
 }

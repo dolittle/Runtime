@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace Dolittle.Runtime.Services.ReverseCalls
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IPingedReverseCallConnection{TClientMessage, TServerMessage}"/>.
+    /// Represents an implementation of <see cref="IPingedConnection{TClientMessage, TServerMessage}"/>.
     /// </summary>
     /// <typeparam name="TClientMessage">Type of the <see cref="IMessage">messages</see> that is sent from the Client to the Runtime.</typeparam>
     /// <typeparam name="TServerMessage">Type of the <see cref="IMessage">messages</see> that is sent from the Runtime to the Client.</typeparam>
@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
     /// <typeparam name="TConnectResponse">Type of the response that is received after the initial Connect call.</typeparam>
     /// <typeparam name="TRequest">Type of the requests sent from the Runtime to the Client.</typeparam>
     /// <typeparam name="TResponse">Type of the responses sent from the Client to the Runtime.</typeparam>
-    public class PingedReverseCallConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IPingedReverseCallConnection<TClientMessage, TServerMessage>
+    public class PingedConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IPingedConnection<TClientMessage, TServerMessage>
         where TClientMessage : IMessage, new()
         where TServerMessage : IMessage, new()
         where TConnectArguments : class
@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         bool _disposed;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PingedReverseCallConnection{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
+        /// Initializes a new instance of the <see cref="PingedConnection{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
         /// </summary>
         /// <param name="requestId">The request id for the gRPC method call.</param>
         /// <param name="requestId">The request id for the gRPC method call.</param>
@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         /// <param name="messageConverter">The <see cref="MethodConverter"/> to use for decoding the connect arguments and reading the desired ping interval from.</param>
         /// <param name="metrics">The metrics collector to use for metrics about reverse calls.</param>
         /// <param name="loggerFactory">The logger factory to use to create loggers.</param>
-        public PingedReverseCallConnection(
+        public PingedConnection(
             RequestId requestId,
             IAsyncStreamReader<TClientMessage> runtimeStream,
             IAsyncStreamWriter<TServerMessage> clientStream,
@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                 _cancellationTokenSource.Token);
 
             _metrics = metrics;
-            _logger = loggerFactory.CreateLogger<PingedReverseCallConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>();
+            _logger = loggerFactory.CreateLogger<PingedConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>();
 
             _pingStarter = WaitForFirstMessageThenStartPinging(_cancellationTokenSource.Token);
             _keepAliveExpiredRegistration = _keepAliveTokenSource.Token.Register(NotifyKeepaliveTimedOut);

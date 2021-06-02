@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
     /// <summary>
     /// Defines a system that can create pinged reverse call connections from gRPC duplex streaming method calls. 
     /// </summary>
-    public interface IKeepReverseCallConnectionsAlive
+    public interface IKeepConnectionsAlive
     {
         /// <summary>
         /// Creates a pinged reverse call connection from a gRPC duplex streaming method call.
@@ -26,8 +26,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         /// <typeparam name="TConnectResponse">Type of the response that is received after the initial Connect call.</typeparam>
         /// <typeparam name="TRequest">Type of the requests sent from the Runtime to the Client.</typeparam>
         /// <typeparam name="TResponse">Type of the responses sent from the Client to the Runtime.</typeparam>
-        /// <returns>A <see cref="IPingedReverseCallConnection{TClientMessage, TServerMessage}"/> that will be kept alive using ping messages.</returns>
-        IPingedReverseCallConnection<TClientMessage, TServerMessage> CreatePingedReverseCallConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+        /// <returns>A <see cref="IPingedConnection{TClientMessage, TServerMessage}"/> that will be kept alive using ping messages.</returns>
+        IPingedConnection<TClientMessage, TServerMessage> CreatePingedReverseCallConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
             RequestId requestId,
             IAsyncStreamReader<TClientMessage> runtimeStream,
             IAsyncStreamWriter<TServerMessage> clientStream,
