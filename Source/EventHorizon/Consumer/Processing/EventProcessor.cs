@@ -10,7 +10,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
     /// <summary>
     /// Represents an implementation of <see cref="IEventProcessor" />.

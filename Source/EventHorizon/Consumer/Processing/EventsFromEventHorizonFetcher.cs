@@ -9,7 +9,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Nito.AsyncEx;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanFetchEventsFromStream" />.

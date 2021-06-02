@@ -9,6 +9,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -18,10 +19,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [SingletonPerTenant]
     public class Subscriptions : ISubscriptions
     {
-        readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new ConcurrentDictionary<SubscriptionId, Subscription>();
+        readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new();
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
         readonly ILoggerFactory _loggerFactory;
+        readonly IStreamProcessorFactory _streamProcessorFactory;
         readonly ILogger<Subscriptions> _logger;
 
         /// <summary>
@@ -30,11 +32,16 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
-        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy, ILoggerFactory loggerFactory)
+        public Subscriptions(
+            IResilientStreamProcessorStateRepository streamProcessorStates,
+            IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+            IStreamProcessorFactory streamProcessorFactory,
+            ILoggerFactory loggerFactory)
         {
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcherPolicy = eventsFetcherPolicy;
             _loggerFactory = loggerFactory;
+            _streamProcessorFactory = streamProcessorFactory;
             _logger = loggerFactory.CreateLogger<Subscriptions>();
         }
 

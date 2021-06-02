@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -15,7 +16,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Handles a subscription request.
         /// </summary>
         /// <param name="subscriptionId">The <see cref="SubscriptionId" />.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="SubscriptionResponse" />.</returns>
-        Task<SubscriptionResponse> HandleSubscription(SubscriptionId subscriptionId);
+        Task<SubscriptionResponse> HandleSubscriptionRequest(SubscriptionId subscriptionId, CancellationToken cancellationToken);
     }
 }

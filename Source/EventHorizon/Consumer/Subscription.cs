@@ -9,9 +9,12 @@ using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
+using EventHorizonStreamProcessor = Dolittle.Runtime.EventHorizon.Consumer.Processing.StreamProcessor;
+using Nito.AsyncEx;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -21,18 +24,13 @@ namespace Dolittle.Runtime.EventHorizon
     public class Subscription : IDisposable
     {
         readonly SubscriptionId _identifier;
-        readonly IEventProcessor _eventProcessor;
-        readonly Action _unregister;
-        readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
-        readonly EventsFromEventHorizonFetcher _eventsFetcher;
-        readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-        readonly ILoggerFactory _loggerFactory;
+        readonly IEstablishEventHorizonConnections _connectionEstablisher;
         readonly ILogger _logger;
-        readonly CancellationToken _cancellationToken;
-        readonly CancellationTokenRegistration _unregisterTokenRegistration;
-        ScopedStreamProcessor _streamProcessor;
-        bool _initialized;
-        bool _started;
+        readonly EventHorizonStreamProcessor _streamProcessor;
+        readonly AsyncProducerConsumerQueue<StreamEvent> _eventFromEventHorizon;
+        readonly CancellationToken _externalCancellationToken;
+        readonly CancellationTokenSource _cts;
+        bool _registered;
         bool _disposed;
 
         /// <summary>
@@ -48,89 +46,47 @@ namespace Dolittle.Runtime.EventHorizon
         /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         public Subscription(
-            ConsentId consentId,
-            SubscriptionId subscriptionId,
-            EventProcessor eventProcessor,
-            EventsFromEventHorizonFetcher eventsFetcher,
-            IResilientStreamProcessorStateRepository streamProcessorStates,
-            Action unregister,
-            IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+            ConsentId consent,
+            SubscriptionId identifier,
+            IStreamProcessorFactory streamProcessorFactory,
             ILoggerFactory loggerFactory,
             CancellationToken cancellationToken)
         {
-            _identifier = subscriptionId;
-            _eventProcessor = eventProcessor;
-            _unregister = unregister;
-            _streamProcessorStates = streamProcessorStates;
-            _eventsFetcher = eventsFetcher;
-            _eventsFetcherPolicy = eventsFetcherPolicy;
-            _loggerFactory = loggerFactory;
-            _logger = loggerFactory.CreateLogger<StreamProcessor>();
-            _cancellationToken = cancellationToken;
-            _unregisterTokenRegistration = _cancellationToken.Register(_unregister);
-
-            ConsentId = consentId;
+            Consent = consent;
+            Identifier = identifier;
+            _logger = loggerFactory.CreateLogger<Subscription>();
+            _streamProcessor = streamProcessorFactory.Create(Consent, Identifier, new EventsFromEventHorizonFetcher(_eventFromEventHorizon));
+            _externalCancellationToken = cancellationToken;
+            _cts = CancellationTokenSource.CreateLinkedTokenSource(_externalCancellationToken);
         }
 
         /// <summary>
         /// Gets the <see cref="ConsentId" />.
         /// </summary>
-        public ConsentId ConsentId { get; }
+        public ConsentId Consent { get; }
 
         /// <summary>
-        /// Initializes the stream processor.
+        /// Gets the <see cref="SubscriptionId" />.
         /// </summary>
-        /// <returns>A <see cref="Task" />that represents the asynchronous operation.</returns>
-        public async Task Initialize()
-        {
-            _cancellationToken.ThrowIfCancellationRequested();
-            if (_initialized) throw new StreamProcessorAlreadyInitialized(_identifier);
-            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, _cancellationToken).ConfigureAwait(false);
-            if (!tryGetStreamProcessorState.Success)
-            {
-                tryGetStreamProcessorState = StreamProcessorState.New;
-                await _streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, _cancellationToken).ConfigureAwait(false);
-            }
-
-            _streamProcessor = new ScopedStreamProcessor(
-                _identifier.ConsumerTenantId,
-                _identifier,
-                new StreamDefinition(new FilterDefinition(_identifier.ProducerTenantId.Value, _identifier.ConsumerTenantId.Value, false)),
-                tryGetStreamProcessorState.Result as StreamProcessorState,
-                _eventProcessor,
-                _streamProcessorStates,
-                _eventsFetcher,
-                _eventsFetcherPolicy,
-                _eventsFetcher,
-                new TimeToRetryForUnpartitionedStreamProcessor(),
-                _loggerFactory.CreateLogger<ScopedStreamProcessor>());
-            _initialized = true;
-        }
+        /// <value></value>
+        public SubscriptionId Identifier { get; }
 
         /// <summary>
         /// Starts the stream processing for all tenants.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        public async Task Start()
+        public async Task<Try<bool>> Register()
         {
-            if (!_initialized) throw new StreamProcessorNotInitialized(_identifier);
-            if (_started) throw new StreamProcessorAlreadyProcessingStream(_identifier);
-            _unregisterTokenRegistration.Dispose();
-            _started = true;
             try
             {
-                await _streamProcessor.Start(_cancellationToken).ConfigureAwait(false);
+                if (_registered)
+                {
+                    return new SubscriptionAlreadyRegistered(Identifier, Consent);
+                }
             }
             catch (Exception ex)
             {
-                if (!_cancellationToken.IsCancellationRequested)
-                {
-                    _logger.FailedStartingSubscription(ex, _identifier);
-                }
-            }
-            finally
-            {
-                _unregister();
+                return ex;
             }
         }
 
@@ -147,11 +103,17 @@ namespace Dolittle.Runtime.EventHorizon
         /// <param name="disposing">Whether to dispose managed state.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed) return;
-            if (!_started && !_cancellationToken.IsCancellationRequested) _unregister();
+            if (_disposed)
+            {
+                return;
+            }
+            if (_registered)
+            {
+                _cts.Cancel();
+            }
             if (disposing)
             {
-                _unregisterTokenRegistration.Dispose();
+                _cts.Dispose();
             }
 
             _disposed = true;

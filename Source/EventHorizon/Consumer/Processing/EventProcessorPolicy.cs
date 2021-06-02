@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Polly;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
     /// <summary>
     /// Defines the policy for processing an event from an event horizon.

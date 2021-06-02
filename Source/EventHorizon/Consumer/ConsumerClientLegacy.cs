@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     /// Represents an implementation of <see cref="IConsumerClient" />.
     /// </summary>
     [SingletonPerTenant]
-    public partial class ConsumerClient : IConsumerClient
+    public partial class ConsumerClientLegacy : IConsumerClient
     {
         readonly IClientManager _clientManager;
         readonly ISubscriptions _subscriptions;
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
         /// <param name="reverseCallClients"><see cref="IReverseCallClients"/>.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public ConsumerClient(
+        public ConsumerClientLegacy(
             IClientManager clientManager,
             ISubscriptions subscriptions,
             MicroservicesConfiguration microservicesConfiguration,

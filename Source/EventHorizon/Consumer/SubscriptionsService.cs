@@ -46,10 +46,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public override async Task<Contracts.SubscriptionResponse> Subscribe(Contracts.Subscription subscriptionRequest, ServerCallContext context)
         {
-            _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
-            var consumerTenant = _executionContextManager.Current.Tenant;
             var subscriptionId = new SubscriptionId(
-                consumerTenant,
+                subscriptionRequest.CallContext.ExecutionContext.TenantId.ToGuid(),
                 subscriptionRequest.MicroserviceId.ToGuid(),
                 subscriptionRequest.TenantId.ToGuid(),
                 subscriptionRequest.ScopeId.ToGuid(),
@@ -58,12 +56,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             try
             {
                 _logger.IncomingSubscripton(subscriptionId);
-                var subscriptionResponse = await _getConsumerClient().HandleSubscription(subscriptionId).ConfigureAwait(false);
+                _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
+                var subscriptionResponse = await _getConsumerClient().HandleSubscriptionRequest(subscriptionId, context.CancellationToken).ConfigureAwait(false);
 
                 return subscriptionResponse switch
                 {
                     { Success: false } => new Contracts.SubscriptionResponse { Failure = subscriptionResponse.Failure },
-                    _ => new Contracts.SubscriptionResponse { ConsentId = subscriptionResponse.ConsentId.ToProtobuf() },
+                    _ => new Contracts.SubscriptionResponse { ConsentId = subscriptionResponse.ConsentId.ToProtobuf() },
                 };
             }
             catch (TaskCanceledException)
