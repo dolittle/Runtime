@@ -19,12 +19,13 @@
         "@apollo/client": "^3.3.19",
         "@fluentui/font-icons-mdl2": "^8.1.1",
         "@fluentui/react": "8.14.4",
+        "@fluentui/react-charting": "5.2.0",
         "@fluentui/react-hooks": "8.2.0",
         "@fluentui/react-icons": "1.1.123",
-        "graphql": "^15.5.0",
+        "graphql": "15.5.0",
         "react": ">=16.8.0 <17.0.0",
         "react-dom": ">=16.8.0 <17.0.0",
-        "react-router-dom": "^5.2.0"
+        "react-router-dom": "5.2.0"
     },
     "devDependencies": {
         "@types/react": ">=16.8.0 <17.0.0",

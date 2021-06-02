@@ -7,6 +7,7 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 
 import './App.scss';
 import { EventHandlersOverview } from './eventHandlers/EventHandlersOverview';
+import { Dashboard } from './home/Dashboard';
 
 
 export const App = () => {
@@ -18,7 +19,7 @@ export const App = () => {
                 <div className="content">
                     
                     <Route exact path="/">
-                        Home
+                        <Dashboard/>
                     </Route>
                     <Route path="/event-handlers">
                         <EventHandlersOverview/>
