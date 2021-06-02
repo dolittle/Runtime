@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Immutability
     /// </summary>
     public static class ImmutableExtensions
     {
-        const BindingFlags _publicInstancePropertyFlag = BindingFlags.Public | BindingFlags.Instance;
+        const BindingFlags PublicInstancePropertyFlag = BindingFlags.Public | BindingFlags.Instance;
 
         /// <summary>
         /// Check if a type is immutable by virtue of it having public properties or fields that can be written to.
@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Immutability
         /// <param name="type"><see cref="Type"/> to get from.</param>
         /// <returns>Writeable <see cref="PropertyInfo">properties</see>.</returns>
         public static PropertyInfo[] GetWriteableProperties(this Type type)
-            => type.GetProperties(_publicInstancePropertyFlag)
+            => type.GetProperties(PublicInstancePropertyFlag)
                 .Where(_ => _.CanWrite)
                 .Where(_ => !IsInitSetter(_))
                 .ToArray();
@@ -68,7 +68,7 @@ namespace Dolittle.Runtime.Immutability
         /// <returns>Writeable <see cref="FieldInfo">fields</see>.</returns>
         public static FieldInfo[] GetWriteableFields(this Type type)
             => type
-                .GetFields(_publicInstancePropertyFlag)
+                .GetFields(PublicInstancePropertyFlag)
                 .Where(_ => (_.Attributes & FieldAttributes.InitOnly) == 0)
                 .ToArray();
         
