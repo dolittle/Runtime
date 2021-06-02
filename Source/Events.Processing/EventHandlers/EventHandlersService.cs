@@ -76,23 +76,22 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             _logger.LogDebug("Connecting Event Handler");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-            var tryConnect = await _reverseCallServices.Connect(
+            var connectResult = await _reverseCallServices.Connect(
                 runtimeStream,
                 clientStream,
                 context,
                 _eventHandlersProtocol,
                 cts.Token).ConfigureAwait(false);
-            if (!tryConnect.Success) return;
-            var (dispatcher, arguments) = tryConnect.Result;
-            _logger.SettingExecutionContext(arguments.ExecutionContext);
-            _executionContextManager.CurrentFor(arguments.ExecutionContext);
+            if (!connectResult.Success) return;
+            _logger.SettingExecutionContext(connectResult.Result.arguments.ExecutionContext);
+            _executionContextManager.CurrentFor(connectResult.Result.arguments.ExecutionContext);
 
             await new EventHandler(
                 _streamProcessors,
                 _filterForAllTenants,
                 _streamDefinitions,
-                dispatcher,
-                arguments,
+                connectResult.Result.dispatcher,
+                connectResult.Result.arguments,
                 _getEventsToStreamsWriter,
                 _loggerFactory,
                 cts
