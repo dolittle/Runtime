@@ -25,7 +25,8 @@
         "graphql": "15.5.0",
         "react": ">=16.8.0 <17.0.0",
         "react-dom": ">=16.8.0 <17.0.0",
-        "react-router-dom": "5.2.0"
+        "react-router-dom": "5.2.0",
+        "shallow-equal": "^1.2.1"
     },
     "devDependencies": {
         "@types/react": ">=16.8.0 <17.0.0",

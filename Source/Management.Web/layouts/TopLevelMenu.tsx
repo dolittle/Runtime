@@ -11,7 +11,6 @@ export const TopLevelMenu = () => {
     const location = useLocation();
     const history = useHistory();
 
-
     function linkClicked(item?: PivotItem, ev?: React.MouseEvent<HTMLElement>) {
         history.push(item?.props.itemKey!);
     }
@@ -20,6 +19,7 @@ export const TopLevelMenu = () => {
         <div className="top-level-menu">
             <Pivot onLinkClick={linkClicked} selectedKey={location.pathname}>
                 <PivotItem headerText="Home" itemKey="/"></PivotItem>
+                <PivotItem headerText="Metrics" itemKey="/allmetrics"></PivotItem>
                 <PivotItem headerText="EventHandlers" itemKey="/event-handlers/"></PivotItem>
             </Pivot>
         </div>

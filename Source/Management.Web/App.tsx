@@ -8,18 +8,21 @@ import { BrowserRouter as Router, Route } from 'react-router-dom';
 import './App.scss';
 import { EventHandlersOverview } from './eventHandlers/EventHandlersOverview';
 import { Dashboard } from './home/Dashboard';
+import { Metrics } from './metrics/Metrics';
 
 
 export const App = () => {
-
     return (
         <>
             <Router>
                 <Layout />
                 <div className="content">
                     
-                    <Route exact path="/">
+                <Route exact path="/">
                         <Dashboard/>
+                    </Route>
+                    <Route exact path="/allmetrics">
+                        <Metrics/>
                     </Route>
                     <Route path="/event-handlers">
                         <EventHandlersOverview/>

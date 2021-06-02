@@ -7,7 +7,9 @@ module.exports = (env, argv) => {
         config.devServer.proxy = {
             '/graphql': 'http://localhost:8001',
             '/graphql/ui': 'http://localhost:8001',
-            '/api': 'http://localhost:8001'
+            '/api': 'http://localhost:8001',
+            '/metrics': 'http://localhost:9700'
         };
+        config.devServer.before = (app, server, compiler) => { };
     }, 9000, 'Dolittle Runtime Management UI');
 };
