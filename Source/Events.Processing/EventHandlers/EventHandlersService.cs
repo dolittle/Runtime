@@ -7,7 +7,6 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
@@ -16,13 +15,21 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Contracts.EventHandlers;
+using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
+                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerClientToRuntimeMessage,
+                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRuntimeToClientMessage,
+                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationRequest,
+                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
+                                    Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
+                                    Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
@@ -102,97 +109,17 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             if (await RejectIfNonWriteableStream(dispatcher, arguments.EventHandler, cts.Token).ConfigureAwait(false)) return;
 
             _logger.LogDebug("Connecting Event Handler '{EventHandlerId}'", arguments.EventHandler.Value);
+
             var filterDefinition = new TypeFilterWithEventSourcePartitionDefinition(StreamId.EventLog, targetStream, arguments.EventTypes, arguments.Partitioned);
+            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor = () => GetFilterProcessor(arguments, filterDefinition);
 
-            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor = () => new TypeFilterWithEventSourcePartition(
-                    arguments.Scope,
-                    filterDefinition,
-                    _getEventsToStreamsWriter(),
-                    _loggerFactory.CreateLogger<TypeFilterWithEventSourcePartition>());
-            var tryRegisterFilterStreamProcessor = TryRegisterFilterStreamProcessor<TypeFilterWithEventSourcePartitionDefinition>(
-                arguments.Scope,
-                arguments.EventHandler,
-                getFilterProcessor,
-                cts.Token);
-
-            if (!tryRegisterFilterStreamProcessor.Success)
-            {
-                if (tryRegisterFilterStreamProcessor.HasException)
-                {
-                    var exception = tryRegisterFilterStreamProcessor.Exception;
-                    _logger.ErrorWhileRegisteringEventHandler(exception, arguments.EventHandler);
-                    ExceptionDispatchInfo.Capture(exception).Throw();
-                }
-                else
-                {
-                    _logger.EventHandlerAlreadyRegistered(arguments.EventHandler);
-                    var failure = new Failure(
-                        FiltersFailures.FailedToRegisterFilter,
-                        $"Failed to register Event Handler: {arguments.EventHandler.Value}. Filter already registered.");
-                    await dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, cts.Token).ConfigureAwait(false);
-                    return;
-                }
-            }
-
+            var tryRegisterFilterStreamProcessor = await RegisterFilterStreamProcessor(arguments, dispatcher, getFilterProcessor, cts.Token).ConfigureAwait(false);
             using var filterStreamProcessor = tryRegisterFilterStreamProcessor.Result;
 
-            // This should be the stream definition of the filtered stream for an event processor to use
-            var filteredStreamDefinition = new StreamDefinition(new TypeFilterWithEventSourcePartitionDefinition(targetStream, targetStream, arguments.EventTypes, arguments.Partitioned));
-            var tryRegisterEventProcessorStreamProcessor = TryRegisterEventProcessorStreamProcessor(
-                arguments.Scope,
-                arguments.EventHandler,
-                filteredStreamDefinition,
-                () => new EventProcessor(
-                    arguments.Scope,
-                    arguments.EventHandler,
-                    dispatcher,
-                    _loggerFactory.CreateLogger<EventProcessor>()),
-                cts.Token);
-
-            if (!tryRegisterEventProcessorStreamProcessor.Success)
-            {
-                if (tryRegisterEventProcessorStreamProcessor.HasException)
-                {
-                    var exception = tryRegisterEventProcessorStreamProcessor.Exception;
-                    _logger.ErrorWhileRegisteringEventHandler(exception, arguments.EventHandler);
-                    ExceptionDispatchInfo.Capture(exception).Throw();
-                }
-                else
-                {
-                    _logger.EventHandlerAlreadyRegisteredOnSourceStream(arguments.EventHandler);
-                    var failure = new Failure(
-                        FiltersFailures.FailedToRegisterFilter,
-                        $"Failed to register Event Handler: {arguments.EventHandler.Value}. Event Processor already registered on Source Stream: '{arguments.EventHandler.Value}'");
-                    await dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, cts.Token).ConfigureAwait(false);
-                    return;
-                }
-            }
-
+            var tryRegisterEventProcessorStreamProcessor = await RegisterEventProcessorStreamProcessor(arguments, targetStream, dispatcher, cts.Token).ConfigureAwait(false);
             using var eventProcessorStreamProcessor = tryRegisterEventProcessorStreamProcessor.Result;
 
-            var tryStartEventHandler = await TryStartEventHandler(
-                dispatcher,
-                filterStreamProcessor,
-                eventProcessorStreamProcessor,
-                arguments.Scope,
-                filterDefinition,
-                getFilterProcessor,
-                cts.Token).ConfigureAwait(false);
-            if (!tryStartEventHandler.Success)
-            {
-                cts.Cancel();
-                if (tryStartEventHandler.HasException)
-                {
-                    var exception = tryStartEventHandler.Exception;
-                    _logger.ErrorWhileStartingEventHandler(exception, arguments.EventHandler, arguments.Scope);
-                    ExceptionDispatchInfo.Capture(exception).Throw();
-                }
-                else
-                {
-                    _logger.CouldNotStartEventHandler(arguments.EventHandler, arguments.Scope);
-                    return;
-                }
-            }
+            var tryStartEventHandler = await StartEventHandler(arguments, dispatcher, filterStreamProcessor, eventProcessorStreamProcessor, filterDefinition, getFilterProcessor, cts).ConfigureAwait(false);
 
             var tasks = tryStartEventHandler.Result;
             try
@@ -213,8 +140,43 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
         }
 
+        async Task<Try<IEnumerable<Task>>> StartEventHandler(
+            EventHandlerRegistrationArguments arguments,
+            ReverseCallDispatcherType dispatcher,
+            StreamProcessor filterStreamProcessor,
+            StreamProcessor eventProcessorStreamProcessor,
+            TypeFilterWithEventSourcePartitionDefinition filterDefinition,
+            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor,
+            CancellationTokenSource cancellationTokenSource)
+        {
+            var tryStartEventHandler = await TryStartEventHandler(
+                dispatcher,
+                filterStreamProcessor,
+                eventProcessorStreamProcessor,
+                arguments.Scope,
+                filterDefinition,
+                getFilterProcessor,
+                cancellationTokenSource.Token).ConfigureAwait(false);
+            if (!tryStartEventHandler.Success)
+            {
+                cancellationTokenSource.Cancel();
+                if (tryStartEventHandler.HasException)
+                {
+                    var exception = tryStartEventHandler.Exception;
+                    _logger.ErrorWhileStartingEventHandler(exception, arguments.EventHandler, arguments.Scope);
+                    ExceptionDispatchInfo.Capture(exception).Throw();
+                }
+                else
+                {
+                    _logger.CouldNotStartEventHandler(arguments.EventHandler, arguments.Scope);
+                }
+            }
+
+            return tryStartEventHandler;
+        }
+
         async Task<bool> RejectIfNonWriteableStream(
-            IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse> dispatcher,
+            ReverseCallDispatcherType dispatcher,
             EventProcessorId eventHandler,
             CancellationToken cancellationToken)
         {
@@ -231,18 +193,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             return false;
         }
 
-        async Task<Try<IEnumerable<Task>>> TryStartEventHandler<TClientMessage, TConnectRequest, TResponse, TFilterDefinition>(
-            IReverseCallDispatcher<TClientMessage, EventHandlerRuntimeToClientMessage, TConnectRequest, EventHandlerRegistrationResponse, HandleEventRequest, TResponse> dispatcher,
+        async Task<Try<IEnumerable<Task>>> TryStartEventHandler(
+            ReverseCallDispatcherType dispatcher,
             StreamProcessor filterStreamProcessor,
             StreamProcessor eventProcessorStreamProcessor,
             ScopeId scopeId,
-            TFilterDefinition filterDefinition,
-            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+            TypeFilterWithEventSourcePartitionDefinition filterDefinition,
+            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor,
             CancellationToken cancellationToken)
-            where TClientMessage : IMessage, new()
-            where TConnectRequest : class
-            where TResponse : class
-            where TFilterDefinition : IFilterDefinition
         {
             _logger.StartingEventHandler(filterDefinition.TargetStream);
             try
@@ -329,7 +287,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         async Task ValidateFilter<TFilterDefinition>(
             ScopeId scopeId,
             TFilterDefinition filterDefinition,
-            Func<IFilterProcessor<TFilterDefinition>> getFilterProcessor,
+            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor,
             CancellationToken cancellationToken)
             where TFilterDefinition : IFilterDefinition
         {
@@ -346,6 +304,96 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             var filteredStreamDefinition = new StreamDefinition(filterDefinition);
             _logger.PersistingStreamDefinition(filteredStreamDefinition.StreamId);
             await _streamDefinitions.Persist(scopeId, filteredStreamDefinition, cancellationToken).ConfigureAwait(false);
+        }
+
+        async Task<Try<StreamProcessor>> RegisterFilterStreamProcessor(
+            EventHandlerRegistrationArguments arguments,
+            ReverseCallDispatcherType dispatcher,
+            Func<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>> getFilterProcessor,
+            CancellationToken cancellationToken)
+        {
+            var tryRegisterFilterStreamProcessor = TryRegisterFilterStreamProcessor<TypeFilterWithEventSourcePartitionDefinition>(
+                arguments.Scope,
+                arguments.EventHandler,
+                getFilterProcessor,
+                cancellationToken);
+
+            if (!tryRegisterFilterStreamProcessor.Success)
+            {
+                if (tryRegisterFilterStreamProcessor.HasException)
+                {
+                    var exception = tryRegisterFilterStreamProcessor.Exception;
+                    _logger.ErrorWhileRegisteringEventHandler(exception, arguments.EventHandler);
+                    ExceptionDispatchInfo.Capture(exception).Throw();
+                }
+                else
+                {
+                    _logger.EventHandlerAlreadyRegistered(arguments.EventHandler);
+                    var failure = new Failure(
+                        FiltersFailures.FailedToRegisterFilter,
+                        $"Failed to register Event Handler: {arguments.EventHandler.Value}. Filter already registered.");
+                    await dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            return tryRegisterFilterStreamProcessor;
+        }
+
+        IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> GetFilterProcessor(
+            EventHandlerRegistrationArguments arguments,
+            TypeFilterWithEventSourcePartitionDefinition filterDefinition)
+        {
+            return new TypeFilterWithEventSourcePartition(
+                    arguments.Scope,
+                    filterDefinition,
+                    _getEventsToStreamsWriter(),
+                    _loggerFactory.CreateLogger<TypeFilterWithEventSourcePartition>());
+        }
+
+        async Task<Try<StreamProcessor>> RegisterEventProcessorStreamProcessor(
+            EventHandlerRegistrationArguments arguments,
+            StreamId targetStream,
+            ReverseCallDispatcherType dispatcher,
+            CancellationToken cancellationToken)
+        {
+            // This should be the stream definition of the filtered stream for an event processor to use
+            var filteredStreamDefinition = new StreamDefinition(
+                new TypeFilterWithEventSourcePartitionDefinition(
+                        targetStream,
+                        targetStream,
+                        arguments.EventTypes,
+                        arguments.Partitioned));
+
+            var tryRegisterEventProcessorStreamProcessor = TryRegisterEventProcessorStreamProcessor(
+                arguments.Scope,
+                arguments.EventHandler,
+                filteredStreamDefinition,
+                () => new EventProcessor(
+                    arguments.Scope,
+                    arguments.EventHandler,
+                    dispatcher,
+                    _loggerFactory.CreateLogger<EventProcessor>()),
+                cancellationToken);
+
+            if (!tryRegisterEventProcessorStreamProcessor.Success)
+            {
+                if (tryRegisterEventProcessorStreamProcessor.HasException)
+                {
+                    var exception = tryRegisterEventProcessorStreamProcessor.Exception;
+                    _logger.ErrorWhileRegisteringEventHandler(exception, arguments.EventHandler);
+                    ExceptionDispatchInfo.Capture(exception).Throw();
+                }
+                else
+                {
+                    _logger.EventHandlerAlreadyRegisteredOnSourceStream(arguments.EventHandler);
+                    var failure = new Failure(
+                        FiltersFailures.FailedToRegisterFilter,
+                        $"Failed to register Event Handler: {arguments.EventHandler.Value}. Event Processor already registered on Source Stream: '{arguments.EventHandler.Value}'");
+                    await dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, cancellationToken).ConfigureAwait(false);
+                }
+            }
+
+            return tryRegisterEventProcessorStreamProcessor;
         }
     }
 }
