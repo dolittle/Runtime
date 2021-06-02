@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.wh
         };
 
         static Exception result;
-        Because of = () => result = Catch.Exception(() => wrapped_writer.MaybeWritePing().GetAwaiter().GetResult());
+        Because of = () => result = Catch.Exception(() => wrapped_writer.MaybeWritePing());
 
         It should_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(ping_message));
         It should_fail_with_the_original_exception = () => result.ShouldEqual(exception);

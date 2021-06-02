@@ -95,14 +95,31 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                 _logger.WritingMessageUnblockedAfter(_requestId, typeof(TServerMessage), stopwatch.Elapsed);
             }
 
-            await WriteRecordMetricsAndReleaseLock(message, false);
+            try
+            {
+                _cancellationToken.ThrowIfCancellationRequested();
+
+                var stopwatch = Stopwatch.StartNew();
+
+                await _originalStream.WriteAsync(message).ConfigureAwait(false);
+
+                stopwatch.Stop();
+                var messageSize = message.CalculateSize();
+                _metrics.AddToTotalStreamWriteTime(stopwatch.Elapsed);
+                _metrics.IncrementTotalStreamWrites();
+                _metrics.IncrementTotalStreamWriteBytes(messageSize);
+                _logger.WroteMessage(_requestId, stopwatch.Elapsed, messageSize);
+            }
+            finally
+            {
+                _writeLock.Release();
+            }
         }
 
         /// <summary>
-        /// Writes a ping message asynchronously if another write operation is not in progress.
+        /// Writes a ping message synchronously if another write operation is not in progress.
         /// </summary>
-        /// <returns>A task that will complete when the ping is sent or skipped.</returns>
-        public Task MaybeWritePing()
+        public void MaybeWritePing()
         {
             _logger.WritingPing(_requestId);
             _cancellationToken.ThrowIfCancellationRequested();
@@ -110,14 +127,31 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             if (!_writeLock.Wait(0))
             {
                 _logger.WritingPingSkipped(_requestId);
-                return Task.CompletedTask;
+                return;
             }
 
-            var ping = new Ping();
-            var message = new TServerMessage();
-            _messageConverter.SetPing(message, ping);
+            try
+            {
+                var ping = new Ping();
+                var message = new TServerMessage();
+                _messageConverter.SetPing(message, ping);
 
-            return WriteRecordMetricsAndReleaseLock(message, true);
+                var stopwatch = Stopwatch.StartNew();
+
+                _originalStream.WriteAsync(message).GetAwaiter().GetResult();
+
+                stopwatch.Stop();
+                var messageSize = message.CalculateSize();
+                _metrics.AddToTotalStreamWriteTime(stopwatch.Elapsed);
+                _metrics.IncrementTotalStreamWrites();
+                _metrics.IncrementTotalStreamWriteBytes(messageSize);
+                _metrics.IncrementTotalPingsSent();
+                _logger.WrotePing(_requestId, stopwatch.Elapsed);
+            }
+            finally
+            {
+                _writeLock.Release();
+            }
         }
 
         /// <inheritdoc/>
@@ -140,38 +174,6 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             }
 
             _disposed = true;
-        }
-
-        async Task WriteRecordMetricsAndReleaseLock(TServerMessage message, bool messageIsPing)
-        {
-            try
-            {
-                _cancellationToken.ThrowIfCancellationRequested();
-
-                var stopwatch = Stopwatch.StartNew();
-
-                await _originalStream.WriteAsync(message).ConfigureAwait(false);
-
-                stopwatch.Stop();
-                var messageSize = message.CalculateSize();
-                _metrics.AddToTotalStreamWriteTime(stopwatch.Elapsed);
-                _metrics.IncrementTotalStreamWrites();
-                _metrics.IncrementTotalStreamWriteBytes(messageSize);
-
-                if (messageIsPing)
-                {
-                    _metrics.IncrementTotalPingsSent();
-                    _logger.WrotePing(_requestId, stopwatch.Elapsed);
-                }
-                else
-                {
-                    _logger.WroteMessage(_requestId, stopwatch.Elapsed, messageSize);
-                }
-            }
-            finally
-            {
-                _writeLock.Release();
-            }
         }
     }
 }

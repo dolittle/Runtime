@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.wh
                 .Returns(Task.CompletedTask);
         };
 
-        Because of = () => wrapped_writer.MaybeWritePing().GetAwaiter().GetResult();
+        Because of = () => wrapped_writer.MaybeWritePing();
 
         It should_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(ping_message));
     }

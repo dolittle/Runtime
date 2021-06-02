@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.wh
         Because of = () =>
         {
             _ = wrapped_writer.WriteAsync(another_message);
-            wrapped_writer.MaybeWritePing().GetAwaiter().GetResult();
+            wrapped_writer.MaybeWritePing();
         };
 
         It should_not_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(Moq.It.IsAny<a_message>()), Times.Once);
