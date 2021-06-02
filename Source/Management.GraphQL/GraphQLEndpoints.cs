@@ -4,7 +4,7 @@
 using HotChocolate.Execution.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.Management
+namespace Dolittle.Runtime.Management.GraphQL
 {
     /// <summary>
     /// Represents extension methods for working with exposing the GraphQL endpoints for management.
@@ -18,7 +18,12 @@ namespace Dolittle.Runtime.Management
         /// <returns><see cref="IRequestExecutorBuilder"/> for continuation.</returns>
         public static IRequestExecutorBuilder AddManagementAPI(this IRequestExecutorBuilder graphQLBuilder)
         {
-            graphQLBuilder.AddQueryType<Query>();
+            //graphQLBuilder.AddQueryType<Query>();
+            graphQLBuilder.AddQueryType(_ => _
+                .Name("Query")
+                    .AddSubObject<EventHandlers.EventHandlers>("eventHandlers")
+                    .AddSubObject<Tenancy.Tenants>("tenancy")
+            );
             return graphQLBuilder;
         }
     }

@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.Management;
+using Dolittle.Runtime.Management.GraphQL;
 using GraphQL.Server.Ui.Playground;
 using HotChocolate.AspNetCore;
 using HotChocolate.Types;
@@ -82,6 +82,8 @@ namespace Dolittle.Runtime.Server
                     Tool = { Enable = false }
                 });
             });
+
+            ObjectFieldExtensions.ServiceProvider = app.ApplicationServices;
         }
     }
 }

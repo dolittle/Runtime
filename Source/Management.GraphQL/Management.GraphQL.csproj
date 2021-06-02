@@ -2,10 +2,15 @@
     <Import Project="../../default.props"/>
 
     <PropertyGroup>
-        <AssemblyName>Dolittle.Runtime.Management</AssemblyName>
+        <AssemblyName>Dolittle.Runtime.Management.GraphQL</AssemblyName>
     </PropertyGroup>
 
     <ItemGroup>
         <PackageReference Include="HotChocolate.AspNetCore" Version="$(HotChocolateVersion)" />
     </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Tenancy/Tenancy.csproj"/>
+    </ItemGroup>
+    
 </Project>

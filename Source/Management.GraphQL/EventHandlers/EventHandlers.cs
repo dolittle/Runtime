@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Management.EventHandlers
+namespace Dolittle.Runtime.Management.GraphQL.EventHandlers
 {
     public class EventHandlers
     {

@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Management.EventHandlers
+namespace Dolittle.Runtime.Management.GraphQL.EventHandlers
 {
     public class EventHandler
     {
