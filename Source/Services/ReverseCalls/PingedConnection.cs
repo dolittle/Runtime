@@ -108,7 +108,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
             if (disposing)
             {
-                _logger.DisposingPingedReverseCallConnection(_requestId);
+                _logger.DisposingPingedConnection(_requestId);
                 _cancellationTokenSource.Cancel();
                 WaitForPingStarterToCompleteIgnoringExceptions();
                 MaybeStopPinging();
@@ -116,7 +116,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                 _wrappedReader.MessageReceived -= ResetKeepaliveTokenCancellation;
                 _cancellationTokenSource.Dispose();
                 _wrappedWriter.Dispose();
-                _logger.DisposedPingedReverseCallConnection(_requestId);
+                _logger.DisposedPingedConnection(_requestId);
             }
 
             _disposed = true;
@@ -125,18 +125,26 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         Task WaitForFirstMessageThenStartPinging(CancellationToken cancellationToken) =>
             Task.Run(async () =>
             {
-                var stopwatch = Stopwatch.StartNew();
-                _logger.WaitingForReverseCallContext(_requestId);
+                try
+                {
+                    var stopwatch = Stopwatch.StartNew();
+                    _logger.WaitingForReverseCallContext(_requestId);
 
-                var context = await _wrappedReader.ReverseCallContext.ConfigureAwait(false);
+                    var context = await _wrappedReader.ReverseCallContext.ConfigureAwait(false);
 
-                stopwatch.Stop();
-                _metrics.AddToTotalWaitForFirstMessageTime(stopwatch.Elapsed);
-                _logger.ReceivedReverseCallContext(_requestId);
+                    stopwatch.Stop();
+                    _metrics.AddToTotalWaitForFirstMessageTime(stopwatch.Elapsed);
+                    _logger.ReceivedReverseCallContext(_requestId);
 
-                var pingInterval = context.PingInterval.ToTimeSpan();
-                StartPinging(pingInterval);
-                StartKeepaliveTokenTimeout(pingInterval);
+                    var pingInterval = context.PingInterval.ToTimeSpan();
+                    StartPinging(pingInterval);
+                    StartKeepaliveTokenTimeout(pingInterval);
+                }
+                catch (Exception exception)
+                {
+                    _cancellationTokenSource.Cancel();
+                    _logger.FailedToStartPingAndTimeout(_requestId, exception);
+                }
             }, cancellationToken);
 
         void StartPinging(TimeSpan pingInterval)

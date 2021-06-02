@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
 #region WrappedAsyncStreamReader
         static readonly Action<ILogger, RequestId, Exception> _readingMessage = LoggerMessage.Define<RequestId>(
-            LogLevel.Trace,
+            LogLevel.Debug,
             new EventId(001299866, nameof(ReadingMessage)),
             "Reading message for {Request}");
         internal static void ReadingMessage(this ILogger logger, RequestId requestId)
@@ -133,6 +133,13 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         internal static void StartKeepaliveTokenTimeout(this ILogger logger, RequestId requestId, TimeSpan pingInterval)
             => _startKeepaliveTokenTimeout(logger, requestId, pingInterval, null);
 
+        static readonly Action<ILogger, RequestId, Exception> _failedToStartPingAndTimeout = LoggerMessage.Define<RequestId>(
+            LogLevel.Warning,
+            new EventId(670097578, nameof(FailedToStartPingAndTimeout)),
+            "Failed to start pinging and keepalive timeout for {Request}, the connection will be cancelled");
+        internal static void FailedToStartPingAndTimeout(this ILogger logger, RequestId requestId, Exception exception)
+            => _failedToStartPingAndTimeout(logger, requestId, exception);
+
         static readonly Action<ILogger, RequestId, Exception> _stoppingPings = LoggerMessage.Define<RequestId>(
             LogLevel.Trace,
             new EventId(126021885, nameof(StoppingPings)),
@@ -175,19 +182,19 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         internal static void PingStarterCompleted(this ILogger logger, RequestId requestId)
             => _pingStarterCompleted(logger, requestId, null);
 
-        static readonly Action<ILogger, RequestId, Exception> _disposingPingedReverseCallConnection = LoggerMessage.Define<RequestId>(
+        static readonly Action<ILogger, RequestId, Exception> _disposingPingedConnection = LoggerMessage.Define<RequestId>(
             LogLevel.Trace,
-            new EventId(102323333, nameof(DisposingPingedReverseCallConnection)),
-            "Disposing of PingedReverseCallConnection for {Request}");
-        internal static void DisposingPingedReverseCallConnection(this ILogger logger, RequestId requestId)
-            => _disposingPingedReverseCallConnection(logger, requestId, null);
+            new EventId(102323333, nameof(DisposingPingedConnection)),
+            "Disposing of PingedConnection for {Request}");
+        internal static void DisposingPingedConnection(this ILogger logger, RequestId requestId)
+            => _disposingPingedConnection(logger, requestId, null);
 
-        static readonly Action<ILogger, RequestId, Exception> _disposedPingedReverseCallConnection = LoggerMessage.Define<RequestId>(
+        static readonly Action<ILogger, RequestId, Exception> _disposedPingedConnection = LoggerMessage.Define<RequestId>(
             LogLevel.Trace,
-            new EventId(458986405, nameof(DisposedPingedReverseCallConnection)),
-            "Disposed of PingedReverseCallConnection for {Request}");
-        internal static void DisposedPingedReverseCallConnection(this ILogger logger, RequestId requestId)
-            => _disposedPingedReverseCallConnection(logger, requestId, null);
+            new EventId(458986405, nameof(DisposedPingedConnection)),
+            "Disposed of PingedConnection for {Request}");
+        internal static void DisposedPingedConnection(this ILogger logger, RequestId requestId)
+            => _disposedPingedConnection(logger, requestId, null);
 #endregion
     }
 }
