@@ -42,7 +42,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly StreamDefinition _filteredStreamDefinition;
 
-
         bool _disposed;
 
         StreamProcessor _filterStreamProcessor;
@@ -130,7 +129,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 _logger.EventHandlerIsInvalid(EventProcessor);
                 await Fail(
                     EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
-                    $"Cannot register Event Handler: '{EventProcessor.Value}' because it is an invalid Stream Id").ConfigureAwait(false)
+                    $"Cannot register Event Handler: '{EventProcessor.Value}' because it is an invalid Stream Id").ConfigureAwait(false);
 
                 return true;
             }
