@@ -11,11 +11,8 @@ namespace Dolittle.Runtime.Services
     /// </summary>
     public class CallbackScheduler : ICanScheduleCallbacks
     {
-
         /// <inheritdoc/>
-        public IDisposable RegisterCallback(Action callback, TimeSpan delay)
-        {
-            return new Timer((object state) => callback(), null, TimeSpan.Zero, delay);
-        }
+        public IDisposable RegisterCallback(Action callback, TimeSpan interval)
+            => new ScheduledCallback(callback, interval);
     }
 }
