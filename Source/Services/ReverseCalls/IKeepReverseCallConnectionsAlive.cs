@@ -15,6 +15,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         /// <summary>
         /// Creates a pinged reverse call connection from a gRPC duplex streaming method call.
         /// </summary>
+        /// <param name="requestId">The request id for the gRPC method call.</param>
         /// <param name="runtimeStream">The <see cref="IAsyncStreamReader{TClientMessage}"/> to read messages to the Runtime.</param>
         /// <param name="clientStream">The <see cref="IServerStreamWriter{TServerMessage}"/> to write messages to the Client.</param>
         /// <param name="context">The <see cref="ServerCallContext"/> of the method call.</param>
@@ -27,6 +28,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         /// <typeparam name="TResponse">Type of the responses sent from the Client to the Runtime.</typeparam>
         /// <returns>A <see cref="IPingedReverseCallConnection{TClientMessage, TServerMessage}"/> that will be kept alive using ping messages.</returns>
         IPingedReverseCallConnection<TClientMessage, TServerMessage> CreatePingedReverseCallConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
+            RequestId requestId,
             IAsyncStreamReader<TClientMessage> runtimeStream,
             IAsyncStreamWriter<TServerMessage> clientStream,
             ServerCallContext context,
