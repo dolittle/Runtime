@@ -128,10 +128,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             if (TargetStream.IsNonWriteable)
             {
                 _logger.EventHandlerIsInvalid(EventProcessor);
-                var failure = new Failure(
+                await Fail(
                     EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
-                    $"Cannot register Event Handler: '{EventProcessor.Value}' because it is an invalid Stream Id");
-                await _dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, _cancellationTokenSource.Token).ConfigureAwait(false);
+                    $"Cannot register Event Handler: '{EventProcessor.Value}' because it is an invalid Stream Id").ConfigureAwait(false)
+
                 return true;
             }
             return false;
