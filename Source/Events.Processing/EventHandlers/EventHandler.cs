@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     public class EventHandler
     {
         readonly IStreamProcessors _streamProcessors;
-        readonly IValidateFilterForAllTenants _filterForAllTenants;
+        readonly IValidateFilterForAllTenants _filterValidator;
         readonly IStreamDefinitions _streamDefinitions;
         readonly ReverseCallDispatcherType _dispatcher;
         readonly EventHandlerRegistrationArguments _arguments;
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             _logger = loggerFactory.CreateLogger<EventHandler>();
             _streamProcessors = streamProcessors;
-            _filterForAllTenants = filterForAllTenants;
+            _filterValidator = filterForAllTenants;
             _streamDefinitions = streamDefinitions;
             _dispatcher = dispatcher;
             _arguments = arguments;
@@ -277,7 +277,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         async Task ValidateFilter()
         {
             _logger.ValidatingFilter(_filterDefinition.TargetStream);
-            var filterValidationResults = await _filterForAllTenants.Validate(GetFilterProcessor, _cancellationTokenSource.Token).ConfigureAwait(false);
+            var filterValidationResults = await _filterValidator.Validate(GetFilterProcessor, _cancellationTokenSource.Token).ConfigureAwait(false);
 
             if (filterValidationResults.Any(_ => !_.Value.Succeeded))
             {

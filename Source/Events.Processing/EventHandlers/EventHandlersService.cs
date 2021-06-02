@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventHandlersService : EventHandlersBase
     {
-        readonly IValidateFilterForAllTenants _filterForAllTenants;
+        readonly IValidateFilterForAllTenants _filterValidator;
         readonly IStreamProcessors _streamProcessors;
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly IStreamDefinitions _streamDefinitions;
@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IEventHandlersProtocol eventHandlersProtocol,
             ILoggerFactory loggerFactory)
         {
-            _filterForAllTenants = filterForAllTenants;
+            _filterValidator = filterForAllTenants;
             _streamProcessors = streamProcessors;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _streamDefinitions = streamDefinitions;
@@ -88,7 +88,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             await new EventHandler(
                 _streamProcessors,
-                _filterForAllTenants,
+                _filterValidator,
                 _streamDefinitions,
                 connectResult.Result.dispatcher,
                 connectResult.Result.arguments,
