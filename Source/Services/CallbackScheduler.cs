@@ -6,14 +6,14 @@ using System.Threading;
 
 namespace Dolittle.Runtime.Services
 {
-    public class CallbackScheduler : ICanCallYouLater
+    /// <summary>
+    /// Represents a <see cref="ICanScheduleCallbacks"/>.
+    /// </summary>
+    public class CallbackScheduler : ICanScheduleCallbacks
     {
 
-        public CallbackScheduler()
-        {
-        }
-
-        public IDisposable TryRegisterCallback(Action callback, TimeSpan delay)
+        /// <inheritdoc/>
+        public IDisposable RegisterCallback(Action callback, TimeSpan delay)
         {
             return new Timer((object state) => callback(), null, TimeSpan.Zero, delay);
         }
