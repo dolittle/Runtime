@@ -204,9 +204,9 @@ namespace Dolittle.Runtime.Services
                 if (disposing)
                 {
                     _writeSemaphore.Dispose();
+                    _reverseCallConnection.Dispose();
                 }
 
-                _reverseCallConnection.Dispose();
                 _disposed = true;
             }
         }
