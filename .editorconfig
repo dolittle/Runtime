@@ -36,7 +36,7 @@ dotnet_style_prefer_conditional_expression_over_assignment = true:none
 # dont need to declare private
 dotnet_style_require_accessibility_modifiers = never:error
 
-# consts can be pascal and camel case
+# consts are pascal case
 dotnet_naming_rule.const_fields.symbols                                         = const_fields
 dotnet_naming_rule.const_fields.style                                           = const_fields
 dotnet_naming_rule.const_fields.severity                                        = suggestion
@@ -48,7 +48,7 @@ dotnet_naming_symbols.const_fields.required_modifiers                           
 dotnet_naming_style.const_fields.capitalization                                 = pascal_case
 dotnet_naming_style.const_fields.required_prefix                                = 
 
-# static can be pascal and camel case
+# public static fields are pascal case
 dotnet_naming_rule.static_readonly_fields.symbols                               = static_readonly_fields
 dotnet_naming_rule.static_readonly_fields.style                                 = static_readonly_fields
 dotnet_naming_rule.static_readonly_fields.severity                              = suggestion
