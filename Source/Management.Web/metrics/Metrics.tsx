@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import { DetailsList, IColumn } from '@fluentui/react';
+import { CommandBar, DetailsList, IColumn, ICommandBarItemProps, Stack } from '@fluentui/react';
 import React, { useEffect, useState } from 'react';
 import { Prometheus } from '../prometheus/Prometheus';
 
@@ -18,7 +18,7 @@ const columns: IColumn[] = [
         fieldName: 'help',
         minWidth: 300
     },
-    { 
+    {
         key: 'metrics',
         name: 'Metrics',
         fieldName: 'metrics',
@@ -33,19 +33,38 @@ const columns: IColumn[] = [
     }
 ];
 
+
+
 export const Metrics = () => {
     const [metrics, setMetrics] = useState<any>({});
 
-    useEffect(() => {
+    const loadData = () => {
         Prometheus.getMetrics().then(_ => {
             setMetrics(_);
         });
+    };
 
+    const commandBarItems: ICommandBarItemProps[] = [
+        { key: 'refresh', text: 'Refresh', iconProps: { iconName: 'Refresh' }, onClick:loadData }
+    ];
+
+    useEffect(() => {
+        loadData();
     }, []);
 
     return (
         <>
-            <DetailsList columns={columns} items={metrics} />
+            <Stack>
+                <CommandBar
+                    styles={{
+                        root: {
+                            alignItems: 'center',
+                        },
+                    }}
+                    items={commandBarItems} />
+
+                <DetailsList columns={columns} items={metrics} />
+            </Stack>
         </>
     );
 };
