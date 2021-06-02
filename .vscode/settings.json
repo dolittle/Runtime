@@ -10,6 +10,8 @@
     },
     "git.ignoreLimitWarning": true,
     "cSpell.words": [
-        "fluentui"
+        "fluentui",
+        "Grpc",
+        "Protobuf"
     ]
 }
