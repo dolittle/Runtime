@@ -36,6 +36,7 @@ module.exports = {
     rules: {
         'no-irregular-whitespace': 0,
         'semi': [2, "always"],
+        'react/display-name': 0,
         'no-prototype-builtins': 0,
         '@typescript-eslint/no-unused-vars': 0,
         '@typescript-eslint/no-explicit-any': 0,
