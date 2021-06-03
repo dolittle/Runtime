@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Services
         /// </summary>
         /// <param name="callback">The <see cref="Action"/>.</param>
         /// <param name="unregister">The <see cref="Action"/> to call when this instance is disposed.</param>
-        public DisposableCallback(Action callback, Action unregister)
+        public DisposableCallback(Action callback, Action<DisposableCallback> unregister)
         {
             Callback = callback;
             Unregister = unregister;
@@ -28,11 +28,11 @@ namespace Dolittle.Runtime.Services
         /// <summary>
         /// Gets the callback that's called when disposed of.
         /// </summary>
-        public Action Unregister { get; }
+        public Action<DisposableCallback> Unregister { get; }
 
         public void Dispose()
         {
-            Unregister();
+            Unregister(this);
             GC.SuppressFinalize(this);
         }
     }

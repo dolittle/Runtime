@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Services
                 LogLevel.Debug,
                 new EventId(259558300, nameof(ExposingService)),
                 "Exposing service: {ServiceName}");
-        
+
         static readonly Action<ILogger, string, Exception> _couldNotStartHost = LoggerMessage
             .Define<string>(
                 LogLevel.Debug,
@@ -33,6 +33,12 @@ namespace Dolittle.Runtime.Services
                 "Couldn't start {EndpointVisibility} host");
 
         static readonly Action<ILogger, Guid, Exception> _writingRequest = LoggerMessage
+            .Define<Guid>(
+                LogLevel.Trace,
+                new EventId(382757357, nameof(WritingRequest)),
+                "Writing request with call id: {CallId}");
+
+        static readonly Action<ILogger, Exception> _callbackGroupFailure = LoggerMessage
             .Define<Guid>(
                 LogLevel.Trace,
                 new EventId(382757357, nameof(WritingRequest)),

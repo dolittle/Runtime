@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Hosting;
@@ -17,22 +16,25 @@ namespace Dolittle.Runtime.Services
     [Singleton]
     public class CallbackScheduler : ICallbackScheduler
     {
-        readonly ConcurrentDictionary<TimeSpan, CallbackRegister> _callbackDict = new();
-        readonly IHostApplicationLifetime _hostApplicationLifetime;
+        static readonly TimeSpan _timeResolution = TimeSpan.FromMilliseconds(10);
+        readonly CancellationToken _hostApplicationStopping;
+        readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
-        readonly TimeSpan _defaultInterval = TimeSpan.FromSeconds(2);
+        readonly ConcurrentDictionary<TimeSpan, ScheduledCallbackGroup> _groups = new();
+        readonly ManualResetEvent _waitForNewCallback = new(false);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CallbackScheduler"/> class.
         /// </summary>
         /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         public CallbackScheduler(
             IHostApplicationLifetime hostApplicationLifetime,
-            ILogger logger)
+            ILoggerFactory loggerFactory)
         {
-            _hostApplicationLifetime = hostApplicationLifetime;
-            _logger = logger;
+            _hostApplicationStopping = hostApplicationLifetime.ApplicationStopping;
+            _loggerFactory = loggerFactory;
+            _logger = loggerFactory.CreateLogger<CallbackScheduler>();
             var thread = new Thread(CallbackLoop)
             {
                 Priority = ThreadPriority.Highest,
@@ -44,24 +46,50 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public IDisposable ScheduleCallback(Action callback, TimeSpan interval)
         {
-            var callbackRegister = _callbackDict.GetOrAdd(interval, new CallbackRegister());
-            return callbackRegister.RegisterCallback(callback);
+            var group = _groups.GetOrAdd(interval,
+                new ScheduledCallbackGroup(interval, _loggerFactory.CreateLogger<ScheduledCallbackGroup>()));
+            var disposableCallback = group.RegisterCallback(callback);
+            _waitForNewCallback.Set();
+            return disposableCallback;
         }
 
         void CallbackLoop()
         {
-            while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
+            while (!_hostApplicationStopping.IsCancellationRequested)
             {
+                _waitForNewCallback.Reset();
+
+                var timeToNextCall = TimeSpan.MaxValue;
                 try
                 {
-                    var now = DateTime.UtcNow;
-                    foreach (var item in _callbackDict)
+                    foreach (var group in _groups.Values)
                     {
-                        var interval = item.Key;
-                        var callbacks = item.Value;
-                        if (ShouldBeCalled(callbacks.LastCalled, now, interval))
+                        var timeToNextGroupCall = group.TimeToNextCall;
+
+                        if (timeToNextGroupCall < TimeSpan.Zero)
                         {
-                            callbacks.CallRegisteredCallbacks();
+                            // AddToTotalSchedulesMissed
+                            // AddToTotalSchedulesMissedTime(-timeToNextGroupCall)
+                        }
+
+                        if (timeToNextGroupCall <= _timeResolution)
+                        {
+                            try
+                            {
+                                group.CallRegisteredCallbacks();
+                            }
+                            catch (Exception ex)
+                            {
+                                // Incremendd
+                                _logger.LogWarning(ex, "An error occured while calling registered callbacks");
+                            }
+
+                            timeToNextGroupCall = group.TimeToNextCall;
+                        }
+
+                        if (timeToNextGroupCall < timeToNextCall)
+                        {
+                            timeToNextCall = timeToNextGroupCall;
                         }
                     }
                 }
@@ -70,25 +98,11 @@ namespace Dolittle.Runtime.Services
                     _logger.LogWarning(ex, "An error occured while calling registered callbacks");
                 }
 
-                Thread.Sleep(GetNextExpiringInterval());
+                if (timeToNextCall > _timeResolution)
+                {
+                    _waitForNewCallback.WaitOne(timeToNextCall - _timeResolution);
+                }
             }
         }
-
-        TimeSpan GetNextExpiringInterval()
-        {
-            var nextExpiringIntervall = _callbackDict
-               .Select(kvp => kvp.Value.LastCalled + kvp.Key)
-               .OrderBy(projectedTime => projectedTime)
-               .FirstOrDefault();
-            if (nextExpiringIntervall == default)
-            {
-                return _defaultInterval;
-            }
-            var nextCall = DateTime.UtcNow - nextExpiringIntervall;
-            var minimumInterval = TimeSpan.FromMilliseconds(10);
-            return nextCall > minimumInterval ? nextCall : minimumInterval;
-        }
-
-        bool ShouldBeCalled(DateTime lastCalled, DateTime now, TimeSpan interval) => lastCalled < now - interval;
     }
 }
