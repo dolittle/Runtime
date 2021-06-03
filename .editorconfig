@@ -80,7 +80,8 @@ dotnet_diagnostic.IDE0083.severity = none
 dotnet_diagnostic.CA1309.severity = none
 # CA1000: Do not declare static members on generic types
 dotnet_diagnostic.CA1000.severity = none
-
+# RCS1018: Add accessibility modifiers
+dotnet_diagnostic.RCS1018.severity = none
 
 #### C# Coding Conventions ####
 
