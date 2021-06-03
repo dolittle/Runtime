@@ -8,7 +8,7 @@ using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services.Callbacks
 {
     /// <summary>
     /// Represents a <see cref="ICallbackScheduler"/>.
@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.Services
         readonly CancellationToken _hostApplicationStopping;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
+        readonly ICallbackMetricsCollector _metrics;
         readonly ConcurrentDictionary<TimeSpan, ScheduledCallbackGroup> _groups = new();
         readonly ManualResetEvent _waitForNewCallback = new(false);
 
@@ -30,11 +31,13 @@ namespace Dolittle.Runtime.Services
         /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         public CallbackScheduler(
             IHostApplicationLifetime hostApplicationLifetime,
-            ILoggerFactory loggerFactory)
+            ILoggerFactory loggerFactory,
+            ICallbackMetricsCollector metrics)
         {
             _hostApplicationStopping = hostApplicationLifetime.ApplicationStopping;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<CallbackScheduler>();
+            _metrics = metrics;
             var thread = new Thread(CallbackLoop)
             {
                 Priority = ThreadPriority.Highest,
@@ -47,7 +50,10 @@ namespace Dolittle.Runtime.Services
         public IDisposable ScheduleCallback(Action callback, TimeSpan interval)
         {
             var group = _groups.GetOrAdd(interval,
-                new ScheduledCallbackGroup(interval, _loggerFactory.CreateLogger<ScheduledCallbackGroup>()));
+                new ScheduledCallbackGroup(
+                        interval,
+                        _loggerFactory.CreateLogger<ScheduledCallbackGroup>(),
+                        _metrics));
             var disposableCallback = group.RegisterCallback(callback);
             _waitForNewCallback.Set();
             return disposableCallback;
@@ -59,7 +65,7 @@ namespace Dolittle.Runtime.Services
             {
                 _waitForNewCallback.Reset();
 
-                var timeToNextCall = TimeSpan.MaxValue;
+                var timeToNextCall = TimeSpan.FromMilliseconds(int.MaxValue);
                 try
                 {
                     foreach (var group in _groups.Values)
@@ -68,8 +74,8 @@ namespace Dolittle.Runtime.Services
 
                         if (timeToNextGroupCall < TimeSpan.Zero)
                         {
-                            // AddToTotalSchedulesMissed
-                            // AddToTotalSchedulesMissedTime(-timeToNextGroupCall)
+                            _metrics.IncrementTotalSchedulesMissed();
+                            _metrics.AddToTotalSchedulesMissedTime(-timeToNextGroupCall);
                         }
 
                         if (timeToNextGroupCall <= _timeResolution)
@@ -87,6 +93,7 @@ namespace Dolittle.Runtime.Services
                 }
                 catch (Exception ex)
                 {
+                    _metrics.IncrementTotalCallbackLoopsFailed();
                     _logger.CallbackLoopFailed(ex);
                 }
 

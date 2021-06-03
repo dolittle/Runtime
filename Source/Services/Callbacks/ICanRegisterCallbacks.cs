@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services.Callbacks
 {
     /// <summary>
     /// Defines a system that can register and call a set of callbacks.

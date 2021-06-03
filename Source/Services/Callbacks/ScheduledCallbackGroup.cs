@@ -3,9 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services.Callbacks
 {
     /// <summary>
     /// Represents a <see cref="ICanRegisterCallbacks"/>.
@@ -16,11 +17,13 @@ namespace Dolittle.Runtime.Services
         readonly ILogger _logger;
         readonly TimeSpan _interval;
         DateTime _lastCalled = DateTime.MinValue;
+        readonly ICallbackMetricsCollector _metrics;
 
-        public ScheduledCallbackGroup(TimeSpan interval, ILogger logger)
+        public ScheduledCallbackGroup(TimeSpan interval, ILogger logger, ICallbackMetricsCollector metrics)
         {
             _interval = interval;
             _logger = logger;
+            _metrics = metrics;
         }
 
         /// <summary>
@@ -30,7 +33,7 @@ namespace Dolittle.Runtime.Services
         /// <returns>An <see cref="IDisposable"/>, which when disposed will deregister the callback.</returns>
         public IDisposable RegisterCallback(Action callback)
         {
-            //AddToTotalCallbacksRegistered
+            _metrics.IncrementTotalCallbacksRegistered();
             lock (_callbacks)
             {
                 var scheduledCallback = new DisposableCallback(callback, UnregisterCallback);
@@ -51,13 +54,15 @@ namespace Dolittle.Runtime.Services
                 {
                     try
                     {
-                        // IncrementTotalCallbacks
+                        _metrics.IncrementTotalCallbacksCalled();
+                        var stopwatch = Stopwatch.StartNew();
                         scheduledCallback.Callback();
-                        // AddToTotalCallbackTime
+                        stopwatch.Stop();
+                        _metrics.AddToTotalCallbackTime(stopwatch.Elapsed);
                     }
                     catch (Exception ex)
                     {
-                        // IncrementTotalCallbacksFailed
+                        _metrics.IncrementTotalCallbacksFailed();
                         _logger.CallbackCallFailed(ex);
                     }
                 }
@@ -72,7 +77,7 @@ namespace Dolittle.Runtime.Services
 
         void UnregisterCallback(DisposableCallback callback)
         {
-            //IncrementTotalCallbacksUnregistered
+            _metrics.IncrementTotalCallbacksUnregistered();
             lock (_callbacks)
             {
                 _callbacks.Remove(callback);

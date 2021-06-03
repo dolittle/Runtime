@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services.Callbacks
 {
 
     /// <summary>
