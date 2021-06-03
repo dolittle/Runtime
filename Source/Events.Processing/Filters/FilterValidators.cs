@@ -19,6 +19,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
+
     /// <summary>
     /// Represents an implementation of <see cref="IFilterValidators" />.
     /// </summary>
@@ -39,6 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// </summary>
         /// <param name="typeFinder">The <see cref="ITypeFinder" />.</param>
         /// <param name="container">The <see cref="IContainer" />.</param>
+        /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> <see cref="IStreamProcessorStateRepository"/>.</param>
         /// <param name="getFilterDefinitions">The <see cref="FactoryFor{T}" /> <see cref="IFilterDefinitions" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="definitionComparer">The <see cref="ICompareFilterDefinitions" />.</param>
