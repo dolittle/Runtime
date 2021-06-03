@@ -4,22 +4,17 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Google.Protobuf;
 
 namespace Dolittle.Runtime.Services.Clients
 {
     /// <summary>
     /// Defines a client for reverse calls coming from server to client.
     /// </summary>
-    /// <typeparam name="TClientMessage">Type of the <see cref="IMessage">messages</see> that is sent from the client to the server.</typeparam>
-    /// <typeparam name="TServerMessage">Type of the <see cref="IMessage">messages</see> that is sent from the server to the client.</typeparam>
     /// <typeparam name="TConnectArguments">Type of the arguments that are sent along with the initial Connect call.</typeparam>
     /// <typeparam name="TConnectResponse">Type of the response that is received after the initial Connect call.</typeparam>
-    /// <typeparam name="TRequest">Type of the requests sent from the server to the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
-    /// <typeparam name="TResponse">Type of the responses received from the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
-    public interface IReverseCallClient<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>
-        where TClientMessage : IMessage, new()
-        where TServerMessage : IMessage, new()
+    /// <typeparam name="TRequest">Type of the requests sent from the server to the client.</typeparam>
+    /// <typeparam name="TResponse">Type of the responses received from the client.</typeparam>
+    public interface IReverseCallClient<TConnectArguments, TConnectResponse, TRequest, TResponse>
         where TConnectArguments : class
         where TConnectResponse : class
         where TRequest : class

@@ -17,14 +17,15 @@ namespace Dolittle.Runtime.Services.Clients
     /// <summary>
     /// Represents an implementation of <see cref="IReverseCallClient{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/>.
     /// </summary>
+    /// <typeparam name="TClient">Type of the client to use for calls to the server.</typeparam>
     /// <typeparam name="TClientMessage">Type of the <see cref="IMessage">messages</see> that is sent from the client to the server.</typeparam>
     /// <typeparam name="TServerMessage">Type of the <see cref="IMessage">messages</see> that is sent from the server to the client.</typeparam>
     /// <typeparam name="TConnectArguments">Type of the arguments that are sent along with the initial Connect call.</typeparam>
     /// <typeparam name="TConnectResponse">Type of the response that is received after the initial Connect call.</typeparam>
     /// <typeparam name="TRequest">Type of the requests sent from the server to the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
     /// <typeparam name="TResponse">Type of the responses received from the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
-    public class ReverseCallClient<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>
-        : IDisposable, IReverseCallClient<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>
+    public class ReverseCallClient<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IReverseCallClient<TConnectArguments, TConnectResponse, TRequest, TResponse>, IDisposable
+        where TClient : ClientBase<TClient>
         where TClientMessage : IMessage, new()
         where TServerMessage : IMessage, new()
         where TConnectArguments : class
@@ -32,22 +33,14 @@ namespace Dolittle.Runtime.Services.Clients
         where TRequest : class
         where TResponse : class
     {
-        readonly Func<AsyncDuplexStreamingCall<TClientMessage, TServerMessage>> _establishConnection;
-        readonly Action<TConnectArguments, ReverseCallArgumentsContext> _setArgumentsContext;
-        readonly Action<TClientMessage, TConnectArguments> _setConnectArguments;
-        readonly Func<TServerMessage, TConnectResponse> _getConnectResponse;
-        readonly Func<TServerMessage, TRequest> _getMessageRequest;
-        readonly Func<TRequest, ReverseCallRequestContext> _getRequestContext;
-        readonly Action<TResponse, ReverseCallResponseContext> _setResponseContext;
-        readonly Func<TServerMessage, Ping> _getPing;
-        readonly Action<TClientMessage, Pong> _setPong;
+        readonly IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _protocol;
+        readonly TClient _client;
         readonly TimeSpan _pingInterval;
-        readonly Action<TClientMessage, TResponse> _setMessageResponse;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
-        readonly SemaphoreSlim _writeResponseSemaphore = new (1);
-        readonly object _connectLock = new ();
-        readonly object _handleLock = new ();
+        readonly SemaphoreSlim _writeResponseSemaphore = new(1);
+        readonly object _connectLock = new();
+        readonly object _handleLock = new();
         IClientStreamWriter<TClientMessage> _clientToServer;
         IAsyncStreamReader<TServerMessage> _serverToClient;
         bool _connecting;
@@ -58,45 +51,20 @@ namespace Dolittle.Runtime.Services.Clients
         /// <summary>
         /// Initializes a new instance of the <see cref="ReverseCallClient{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
         /// </summary>
-        /// <param name="establishConnection">The <see cref="AsyncDuplexStreamingCall{TRequest, TResponse}" />.</param>
-        /// <param name="setConnectArguments">A delegate to set the <typeparamref name="TConnectArguments" /> on a <typeparamref name="TClientMessage" />.</param>
-        /// <param name="getConnectResponse">A delegate to get the <typeparamref name="TConnectResponse" /> from a <typeparamref name="TServerMessage" />.</param>
-        /// <param name="getMessageRequest">A delegate to get the <typeparamref name="TRequest" /> from the <typeparamref name="TServerMessage" />.</param>
-        /// <param name="setMessageResponse">A delegate to set the <typeparamref name="TResponse" /> on a <typeparamref name="TClientMessage" />.</param>
-        /// <param name="setArgumentsContext">A delegate to set the <see cref="ReverseCallArgumentsContext" /> on a <typeparamref name="TConnectArguments" />.</param>
-        /// <param name="getRequestContext">A delegate to get the <see cref="ReverseCallRequestContext" /> from the <typeparamref name="TRequest" />.</param>
-        /// <param name="setResponseContext">A delegate to set the <see cref="ReverseCallResponseContext" /> on a <typeparamref name="TResponse" />.</param>
-        /// <param name="getPing">A delegate to get the <see cref="Ping" /> from the <typeparamref name="TServerMessage" />.</param>
-        /// <param name="setPong">A delegate to set the <see cref="Ping" /> on a <typeparamref name="TClientMessage" />.</param>
-        /// <param name="pingInterval">A <see cref="TimeSpan" /> for the interval between pings from the server.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
+        /// <param name="protocol">The protocol for this reverse call.</param>
+        /// <param name="pingInterval">The interval to request and expect pings to keep the connection alive.</param>
+        /// <param name="executionContextManager">The execution context manager to use for setting the execution context for each request.</param>
+        /// <param name="logger">The logger to use.</param>
         public ReverseCallClient(
-            Func<AsyncDuplexStreamingCall<TClientMessage, TServerMessage>> establishConnection,
-            Action<TClientMessage, TConnectArguments> setConnectArguments,
-            Func<TServerMessage, TConnectResponse> getConnectResponse,
-            Func<TServerMessage, TRequest> getMessageRequest,
-            Action<TClientMessage, TResponse> setMessageResponse,
-            Action<TConnectArguments, ReverseCallArgumentsContext> setArgumentsContext,
-            Func<TRequest, ReverseCallRequestContext> getRequestContext,
-            Action<TResponse, ReverseCallResponseContext> setResponseContext,
-            Func<TServerMessage, Ping> getPing,
-            Action<TClientMessage, Pong> setPong,
+            IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> protocol,
+            TClient client,
             TimeSpan pingInterval,
             IExecutionContextManager executionContextManager,
             ILogger logger)
         {
             ThrowIfInvalidPingInterval(pingInterval);
-            _establishConnection = establishConnection;
-            _setConnectArguments = setConnectArguments;
-            _getConnectResponse = getConnectResponse;
-            _getMessageRequest = getMessageRequest;
-            _setMessageResponse = setMessageResponse;
-            _setArgumentsContext = setArgumentsContext;
-            _getRequestContext = getRequestContext;
-            _setResponseContext = setResponseContext;
-            _getPing = getPing;
-            _setPong = setPong;
+            _protocol = protocol;
+            _client = client;
             _pingInterval = pingInterval;
             _executionContextManager = executionContextManager;
             _logger = logger;
@@ -115,17 +83,18 @@ namespace Dolittle.Runtime.Services.Clients
                 _connecting = true;
             }
 
-            var streamingCall = _establishConnection();
+            var callOptions = new CallOptions(cancellationToken: cancellationToken);
+            var streamingCall = _protocol.Call(_client, callOptions);
             _clientToServer = streamingCall.RequestStream;
             _serverToClient = streamingCall.ResponseStream;
             var callContext = new ReverseCallArgumentsContext
-                {
-                    ExecutionContext = _executionContextManager.Current.ToProtobuf(),
-                    PingInterval = Duration.FromTimeSpan(_pingInterval)
-                };
-            _setArgumentsContext(connectArguments, callContext);
+            {
+                ExecutionContext = _executionContextManager.Current.ToProtobuf(),
+                PingInterval = Duration.FromTimeSpan(_pingInterval)
+            };
+            _protocol.SetConnectArgumentsContext(callContext, connectArguments);
             var message = new TClientMessage();
-            _setConnectArguments(message, connectArguments);
+            _protocol.SetConnectArguments(connectArguments, message);
 
             await _clientToServer.WriteAsync(message).ConfigureAwait(false);
 
@@ -136,7 +105,7 @@ namespace Dolittle.Runtime.Services.Clients
             {
                 if (await _serverToClient.MoveNext(linkedCts.Token).ConfigureAwait(false))
                 {
-                    var response = _getConnectResponse(_serverToClient.Current);
+                    var response = _protocol.GetConnectResponse(_serverToClient.Current);
                     if (response != null)
                     {
                         _logger.LogTrace("Received connect response");
@@ -190,8 +159,8 @@ namespace Dolittle.Runtime.Services.Clients
                 while (await _serverToClient.MoveNext(linkedCts.Token).ConfigureAwait(false))
                 {
                     var message = _serverToClient.Current;
-                    var ping = _getPing(message);
-                    var request = _getMessageRequest(message);
+                    var ping = _protocol.GetPing(message);
+                    var request = _protocol.GetRequest(message);
                     if (ping != null)
                     {
                         _logger.LogTrace("Received ping");
@@ -263,7 +232,7 @@ namespace Dolittle.Runtime.Services.Clients
                 }
 
                 var message = new TClientMessage();
-                _setPong(message, new Pong());
+                _protocol.SetPong(new Pong(), message);
 
                 _logger.LogTrace("Writing pong");
                 await _clientToServer.WriteAsync(message).ConfigureAwait(false);
@@ -281,7 +250,7 @@ namespace Dolittle.Runtime.Services.Clients
         {
             try
             {
-                var requestContext = _getRequestContext(request);
+                var requestContext = _protocol.GetRequestContext(request);
                 ReverseCallId callId = requestContext.CallId.ToGuid();
                 TResponse response;
                 try
@@ -320,9 +289,9 @@ namespace Dolittle.Runtime.Services.Clients
         Task WriteResponse(TResponse response, ReverseCallId callId, CancellationToken cancellationToken)
         {
             var responseContext = new ReverseCallResponseContext { CallId = callId.ToProtobuf() };
-            _setResponseContext(response, responseContext);
+            _protocol.SetResponseContext(responseContext, response);
             var message = new TClientMessage();
-            _setMessageResponse(message, response);
+            _protocol.SetResponse(response, message);
             if (!cancellationToken.IsCancellationRequested)
             {
                 _logger.WritingResponse(callId);
