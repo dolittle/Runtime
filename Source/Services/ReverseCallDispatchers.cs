@@ -16,22 +16,22 @@ namespace Dolittle.Runtime.Services
     {
         readonly IExecutionContextManager _executionContextManager;
         readonly ILoggerFactory _loggerFactory;
-        readonly IMetricsCollector _metricsCollector;
+        readonly IKeepReverseCallConnectionsAlive _pingedConnectionFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReverseCallDispatchers"/> class.
         /// </summary>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for creating instances of <see cref="ILogger"/>.</param>
-        /// <param name="metricsCollector"><see cref="IMetricsCollector"/> for collecting metrics.</param>
+        /// <param name="pingedConnectionFactory">The <see cref="IKeepReverseCallConnectionsAlive"/> for creating pinged connections.</param>
         public ReverseCallDispatchers(
             IExecutionContextManager executionContextManager,
             ILoggerFactory loggerFactory,
-            IMetricsCollector metricsCollector)
+            IKeepReverseCallConnectionsAlive pingedConnectionFactory)
         {
             _executionContextManager = executionContextManager;
             _loggerFactory = loggerFactory;
-            _metricsCollector = metricsCollector;
+            _pingedConnectionFactory = pingedConnectionFactory;
         }
 
         /// <inheritdoc/>
@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Services
             where TRequest : class
             where TResponse : class
             => new ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-                new PingedReverseCallConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(clientStream, serverStream, context, messageConverter, _metricsCollector),
+                _pingedConnectionFactory.CreatePingedReverseCallConnection(clientStream, serverStream, context, messageConverter),
                 messageConverter,
                 _executionContextManager,
                 _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());
