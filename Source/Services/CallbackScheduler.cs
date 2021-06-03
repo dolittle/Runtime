@@ -54,11 +54,12 @@ namespace Dolittle.Runtime.Services
             {
                 try
                 {
+                    var now = DateTime.UtcNow;
                     foreach (var item in _callbackDict)
                     {
                         var interval = item.Key;
                         var callbacks = item.Value;
-                        if (ShouldBeCalled(callbacks.LastCalled, interval))
+                        if (ShouldBeCalled(callbacks.LastCalled, now, interval))
                         {
                             callbacks.CallRegisteredCallbacks();
                         }
@@ -88,6 +89,6 @@ namespace Dolittle.Runtime.Services
             return nextCall > minimumInterval ? nextCall : minimumInterval;
         }
 
-        bool ShouldBeCalled(DateTime lastCalled, TimeSpan interval) => lastCalled < DateTime.UtcNow - interval;
+        bool ShouldBeCalled(DateTime lastCalled, DateTime now, TimeSpan interval) => lastCalled < now - interval;
     }
 }
