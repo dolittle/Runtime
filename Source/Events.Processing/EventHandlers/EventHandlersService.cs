@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     connectResult.Result.arguments,
                     _getEventsToStreamsWriter,
                     _loggerFactory,
-                    cts
+                    cts.Token
                 );
                 await eventHandler.RegisterAndStart().ConfigureAwait(false);
             }
