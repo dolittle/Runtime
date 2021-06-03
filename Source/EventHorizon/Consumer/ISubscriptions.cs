@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading;
+using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -21,7 +22,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <param name="subscription">The <see cref="Subscription" />.</param>
         /// <returns>False if the Subscription already exists, true if not.</returns>
-        bool TrySubscribe(ConsentId consentId, SubscriptionId subscriptionId, EventProcessor eventProcessor, EventsFromEventHorizonFetcher eventsFetcher, CancellationToken cancellationToken, out Subscription subscription);
+        Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken);
 
         /// <summary>
         /// Tries to get the <see cref="ConsentId "/> for a <see cref="SubscriptionId" />.

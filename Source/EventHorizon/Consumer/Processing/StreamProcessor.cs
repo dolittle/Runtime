@@ -16,9 +16,9 @@ using Dolittle.Runtime.Rudimentary;
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
     /// <summary>
-    /// Represents a system for working with <see cref="ScopedStreamProcessor" /> registered for an Event Horizon Subscription.
+    /// Represents an implementation of <see cref="IStreamProcessor" />.
     /// </summary>
-    public class StreamProcessor
+    public class StreamProcessor : IStreamProcessor
     {
         readonly SubscriptionId _identifier;
         readonly IEventProcessor _eventProcessor;
@@ -66,12 +66,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         public ConsentId ConsentId { get; }
 
 
-        /// <summary>
-        /// Starts the stream processing.
-        /// </summary>
-        /// <param name="cancellationToken"> The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task{T}"/> representing the asynchronous operation.</returns>
-        public async Task<Try<bool>> StartAndWait(CancellationToken cancellationToken)
+        /// <inheritdoc/>
+        public async Task<Try<bool>> TryStartAndWait(CancellationToken cancellationToken)
         {
             try
             {
@@ -108,10 +104,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
             }
             catch (Exception ex)
             {
-                if (!cancellationToken.IsCancellationRequested)
-                {
-                    _logger.FailedStartingSubscription(ex, _identifier);
-                }
                 return ex;
             }
             finally

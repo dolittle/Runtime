@@ -46,11 +46,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         }
 
         /// <inheritdoc/>
-        public StreamProcessor Create(
+        public IStreamProcessor Create(
             ConsentId consent,
             SubscriptionId subscription,
             EventsFromEventHorizonFetcher eventsFromEventHorizonFetcher)
-            => new(
+            => new StreamProcessor(
                 consent,
                 subscription,
                 new EventProcessor(

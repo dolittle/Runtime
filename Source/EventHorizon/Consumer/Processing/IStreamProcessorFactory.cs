@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="subscription">The <see cref="SubscriptionId" />.</param>
         /// <param name="eventsFromEventHorizonFetcher">The <see cref="EventsFromEventHorizonFetcher" />.</param>
         /// <returns></returns>
-        StreamProcessor Create(
+        IStreamProcessor Create(
             ConsentId consent,
             SubscriptionId subscription,
             EventsFromEventHorizonFetcher eventsFromEventHorizonFetcher);

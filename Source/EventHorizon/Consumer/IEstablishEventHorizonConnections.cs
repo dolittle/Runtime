@@ -1,10 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Threading;
-using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Microservices;
 using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -17,13 +15,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Try to establish an event horizon connection.
         /// </summary>
-        /// <param name="subscription">The <see cref="SubscriptionId" />.</param>
-        /// <param name="eventsFromEventHorizon">The <see cref="AsyncProducerConsumerQueue{T}" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <param name="subscription">The <see cref="SubscriptionId" /> that this connection is for.</param>
+        /// <param name="connectionAddress">The <see cref="MicroserviceAddress" /> to connect to.</param>
+        /// <param name="eventsFromEventHorizon">The <see cref="AsyncProducerConsumerQueue{T}" /> that is used to transfer events from the event horizon connection to the stream processor.</param>
         /// <returns></returns>
-        Task<Try<SubscriptionResponse>> TryEstablish(
-            SubscriptionId subscription,
-            AsyncProducerConsumerQueue<StreamEvent> eventsFromEventHorizon,
-            CancellationToken cancellationToken);
+        IEventHorizonConnection Establish(SubscriptionId subscription, MicroserviceAddress connectionAddress, AsyncProducerConsumerQueue<StreamEvent> eventsFromEventHorizon);
     }
 }

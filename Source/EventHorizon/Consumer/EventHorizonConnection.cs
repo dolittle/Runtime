@@ -4,14 +4,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.EventHorizon.Contracts;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.Services.Clients;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 
@@ -27,10 +24,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly Contracts.Consumer.ConsumerClient _client;
         readonly IAsyncPolicyFor<ConsumerClient> _policy;
         readonly IStreamProcessorStateRepository _streamProcessorStates;
-        readonly IReverseCallClients _reverseCallClients;
+        readonly IEventHorizons _eventHorizons;
         readonly AsyncProducerConsumerQueue<StreamEvent> _eventsFromEventHorizon;
         readonly ILogger _logger;
-        readonly CancellationToken _cancellationToken;
+        readonly CancellationTokenSource _cancellationTokenSource = new();
+        readonly TaskCompletionSource<SubscriptionResponse> _firstSubscriptionResponse = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        bool _is_first_connection = true;
+        bool disposed;
 
         public EventHorizonConnection(
             SubscriptionId subscription,
@@ -38,160 +38,101 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             Contracts.Consumer.ConsumerClient client,
             IAsyncPolicyFor<ConsumerClient> policy,
             IStreamProcessorStateRepository streamProcessorStates,
-            IReverseCallClients reverseCallClients,
+            IEventHorizons eventHorizons,
             AsyncProducerConsumerQueue<StreamEvent> eventsFromEventHorizon,
-            ILogger logger,
-            CancellationToken cancellationToken)
+            ILogger logger)
         {
             _subscription = subscription;
             _connectionAddress = connectionAddress;
             _client = client;
             _policy = policy;
             _streamProcessorStates = streamProcessorStates;
-            _reverseCallClients = reverseCallClients;
+            _eventHorizons = eventHorizons;
             _eventsFromEventHorizon = eventsFromEventHorizon;
             _logger = logger;
-            _cancellationToken = cancellationToken;
         }
 
         /// <inheritdoc/>
-        public Task<SubscriptionResponse> InitiateAndKeepConnection()
-            => _policy.Execute(
-                async _ =>
+        public Task<SubscriptionResponse> FirstSubscriptionResponse => _firstSubscriptionResponse.Task;
+
+        /// <inheritdoc/>
+        public void StartResilientConnection()
+            => _policy.Execute(StartConnection, _cancellationTokenSource.Token).ConfigureAwait(false);
+
+        async Task StartConnection(CancellationToken cancellationToken)
+        {
+            try
+            {
+                var eventHorizon = SetupEventHorizon(cancellationToken);
+                var response = await Connect(eventHorizon, cancellationToken).ConfigureAwait(false);
+
+                if (_is_first_connection)
                 {
-                    var (response, _) = await ConnectAndDo(
-                        reverseCallClient => Task.Run(() => StartProcessingAndKeepAlive(reverseCallClient)),
-                        () => { }).ConfigureAwait(false);
+                    _firstSubscriptionResponse.SetResult(response);
+                    _is_first_connection = false;
+                    if (!response.Success)
+                    {
+                        return;
+                    }
+                }
 
-                    return response;
-                },
-                _cancellationToken);
+                await eventHorizon.StartHandleEvents().ConfigureAwait(false);
+                throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
+            }
+            catch (Exception ex)
+            {
+                if (_is_first_connection)
+                {
+                    _firstSubscriptionResponse.SetResult(SubscriptionResponse.Failed(new Protobuf.Failure(SubscriptionFailures.CouldNotConnectToProducerRuntime, $"Connecting to producer runtime failed with exception: {ex.Message}")));
+                    return;
+                }
 
-        async Task<SubscriptionResponse> Connect(
-            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
+                throw;
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                _cancellationTokenSource.Cancel();
+                _cancellationTokenSource.Dispose();
+                _firstSubscriptionResponse.TrySetCanceled();
+            }
+
+            disposed = true;
+        }
+
+        IEventHorizonProcessor SetupEventHorizon(CancellationToken cancellationToken)
+            => _eventHorizons.Get(
+                () => _client.Subscribe(cancellationToken: cancellationToken),
+                _subscription,
+                _eventsFromEventHorizon,
+                cancellationToken);
+
+        async Task<SubscriptionResponse> Connect(IEventHorizonProcessor eventHorizon, CancellationToken cancellationToken)
         {
             _logger.TenantSubscribedTo(
                 _subscription.ConsumerTenantId,
                 _subscription.ProducerTenantId,
                 _subscription.ProducerMicroserviceId,
                 _connectionAddress);
-            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_subscription, _cancellationToken).ConfigureAwait(false);
+            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_subscription, cancellationToken).ConfigureAwait(false);
 
             var publicEventsPosition = tryGetStreamProcessorState.Result?.Position ?? StreamPosition.Start;
-            var receivedResponse = await reverseCallClient.Connect(
-                new ConsumerSubscriptionRequest
-                {
-                    PartitionId = _subscription.PartitionId.ToProtobuf(),
-                    StreamId = _subscription.StreamId.ToProtobuf(),
-                    StreamPosition = publicEventsPosition.Value,
-                    TenantId = _subscription.ProducerTenantId.ToProtobuf()
-                },
-                _cancellationToken).ConfigureAwait(false);
-
-            if (!receivedResponse)
-            {
-                _logger.DidNotReceiveSubscriptionResponse(_subscription);
-                return SubscriptionResponse.Failed(new Failure(SubscriptionFailures.DidNotReceiveSubscriptionResponse, "Did not receive a subscription response when subscribing"));
-            }
-
-            var failure = reverseCallClient.ConnectResponse.Failure;
-            if (failure != null)
-            {
-                _logger.FailedSubscring(_subscription, failure.Reason);
-                return SubscriptionResponse.Failed(failure);
-            }
-            _logger.SuccessfulSubscring(_subscription);
-            return SubscriptionResponse.Succeeded(reverseCallClient.ConnectResponse.ConsentId.ToGuid());
+            return await eventHorizon.Connect(publicEventsPosition).ConfigureAwait(false);
         }
-
-        async Task StartProcessingAndKeepAlive(
-            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient
-        )
-        {
-            try
-            {
-                await ReadEventsFromEventHorizon(reverseCallClient).ConfigureAwait(false);
-                throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
-            }
-            catch (Exception ex)
-            {
-                _logger.ReconnectingEventHorizon(ex, _subscription);
-                await _policy.Execute(
-                    async _ =>
-                    {
-                        var (response, newReverseCallClient) = await ConnectAndDo(_ => { }, () => throw new Todo());
-                        reverseCallClient = newReverseCallClient;
-                        await ReadEventsFromEventHorizon(reverseCallClient).ConfigureAwait(false);
-                        throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
-                    }, _cancellationToken).ConfigureAwait(false);
-            }
-        }
-        async Task ReadEventsFromEventHorizon(
-            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
-        {
-            _logger.ConnectedEventHorizon(_subscription);
-
-            await reverseCallClient.Handle(
-                (request, cancellationToken) => HandleConsumerRequest(request.Event, cancellationToken),
-                _cancellationToken).ConfigureAwait(false);
-        }
-
-        async Task<ConsumerResponse> HandleConsumerRequest(
-            EventHorizonEvent @event,
-            CancellationToken cancellationToken)
-        {
-            try
-            {
-                await _eventsFromEventHorizon.EnqueueAsync(
-                    new StreamEvent(
-                        @event.Event.ToCommittedEvent(),
-                        @event.StreamSequenceNumber,
-                        StreamId.EventLog,
-                        Guid.Empty,
-                        false),
-                    cancellationToken).ConfigureAwait(false);
-                return new ConsumerResponse();
-            }
-            catch (Exception ex)
-            {
-                _logger.ErrorWhileHandlingEventFromSubscription(ex, _subscription);
-                return new ConsumerResponse
-                {
-                    Failure = new Failure(FailureId.Other, $"An error occurred while handling event horizon event coming from subscription {_subscription}. {ex.Message}")
-                };
-            }
-        }
-
-        async Task<(SubscriptionResponse, IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>)> ConnectAndDo(
-            Action<IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>> onConnected,
-            Action onNotConnected
-        )
-        {
-            var reverseCallClient = CreateClient();
-            var response = await Connect(reverseCallClient).ConfigureAwait(false);
-            if (response.Success)
-            {
-                onConnected(reverseCallClient);
-            }
-            else
-            {
-                onNotConnected();
-            }
-            return (response, reverseCallClient);
-        }
-
-        IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> CreateClient()
-              => _reverseCallClients.GetFor<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>(
-                  () => _client.Subscribe(cancellationToken: _cancellationToken),
-                  (message, arguments) => message.SubscriptionRequest = arguments,
-                  message => message.SubscriptionResponse,
-                  message => message.Request,
-                  (message, response) => message.Response = response,
-                  (arguments, context) => arguments.CallContext = context,
-                  request => request.CallContext,
-                  (response, context) => response.CallContext = context,
-                  message => message.Ping,
-                  (message, pong) => message.Pong = pong,
-                  TimeSpan.FromSeconds(7));
     }
 }
