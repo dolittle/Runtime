@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Services
         static readonly Action<ILogger, Exception> _callbackLoopFailed = LoggerMessage
             .Define(
                 LogLevel.Trace,
-                new EventId(221023257, nameof(CallbackLoopFailed)),
+                new EventId(269816071, nameof(CallbackLoopFailed)),
                 "An error occurred in the callback loop");
 
         internal static void RegisteringBoundService(this ILogger logger, string serviceName)
