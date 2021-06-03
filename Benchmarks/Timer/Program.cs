@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Timer
 {
@@ -13,17 +14,28 @@ namespace Timer
     {
         static void Main(string[] args)
         {
+            using var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder
+                    .AddFilter("Microsoft", LogLevel.Warning)
+                    .AddFilter("System", LogLevel.Warning)
+                    .AddFilter("LoggingConsoleApp.Program", LogLevel.Debug)
+                    .AddConsole();
+            });
+
+            ILogger logger = loggerFactory.CreateLogger<Program>();
             var timerAmount = 10;
-            var timerInterval = 1500;
+            var timerInterval = 1000;
             var taskAmount = 4000;
             var taskLength = 2;
             Console.WriteLine($"Creating {timerAmount} timers with {timerInterval}ms interval, and spawning {taskAmount} tasks that take {taskLength}s to complete.");
 
             using var cts = new CancellationTokenSource();
-            var scheduler = new CallbackScheduler(cts.Token);
+            var scheduler = new CallbackScheduler(cts.Token, logger);
             var timers = RegisterTimers(scheduler, timerAmount, timerInterval);
-            timers.AddRange(RegisterTimers(scheduler, 10, 600));
-            timers.AddRange(RegisterTimers(scheduler, 2, 100));
+            timers.AddRange(RegisterTimers(scheduler, 10, 1600));
+            timers.AddRange(RegisterTimers(scheduler, 2, 696));
+            timers.AddRange(RegisterTimers(scheduler, 15, 5000));
 
             var tasks = SpawnTasks(taskAmount, taskLength);
             Task.WhenAll(tasks).Wait();
@@ -35,7 +47,7 @@ namespace Timer
             }
         }
 
-        static List<IDisposable> RegisterTimers(ICanScheduleCallbacks scheduler, int amount, int interval)
+        static List<IDisposable> RegisterTimers(ICallbackScheduler scheduler, int amount, int interval)
         {
             var timers = new List<IDisposable>();
             for (var i = 0; i < amount; i++)

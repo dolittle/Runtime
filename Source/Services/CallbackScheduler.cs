@@ -7,36 +7,33 @@ using System.Linq;
 using System.Threading;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services
 {
     /// <summary>
-    /// Represents a <see cref="ICanScheduleCallbacks"/>.
+    /// Represents a <see cref="ICallbackScheduler"/>.
     /// </summary>
     [Singleton]
-    public class CallbackScheduler : ICanScheduleCallbacks
+    public class CallbackScheduler : ICallbackScheduler
     {
-        readonly ConcurrentDictionary<TimeSpan, CallbackRegister> _callbackDict;
+        readonly ConcurrentDictionary<TimeSpan, CallbackRegister> _callbackDict = new();
         readonly IHostApplicationLifetime _hostApplicationLifetime;
-        readonly CancellationToken _token;
+        readonly ILogger _logger;
+        readonly TimeSpan _defaultInterval = TimeSpan.FromSeconds(2);
+        readonly TimeSpan _minimumInterval = TimeSpan.FromMilliseconds(500);
 
-        public CallbackScheduler(CancellationToken token)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CallbackScheduler"/> class.
+        /// </summary>
+        /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
+        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+        public CallbackScheduler(
+            IHostApplicationLifetime hostApplicationLifetime,
+            ILogger logger)
         {
-            _callbackDict = new();
-            _token = token;
-            _hostApplicationLifetime = default;
-            var thread = new Thread(CallbackLoop)
-            {
-                Priority = ThreadPriority.Highest,
-                IsBackground = true
-            };
-            thread.Start();
-        }
-
-        public CallbackScheduler(IHostApplicationLifetime hostApplicationLifetime)
-        {
-            _callbackDict = new();
             _hostApplicationLifetime = hostApplicationLifetime;
+            _logger = logger;
             var thread = new Thread(CallbackLoop)
             {
                 Priority = ThreadPriority.Highest,
@@ -50,46 +47,60 @@ namespace Dolittle.Runtime.Services
         {
             if (_callbackDict.TryGetValue(interval, out var callbacks))
             {
+                _logger.LogTrace("Registed callback for {Interval} interval", interval);
                 return callbacks.RegisterCallback(callback);
             }
-            else
+            var callbackRegister = new CallbackRegister();
+            var scheduledCallback = callbackRegister.RegisterCallback(callback);
+            if (!_callbackDict.TryAdd(interval, callbackRegister))
             {
-                var scheduledCallbacks = new CallbackRegister();
-                var scheduledCallback = scheduledCallbacks.RegisterCallback(callback);
-                if (!_callbackDict.TryAdd(interval, scheduledCallbacks))
-                {
-                    //Something went very wrong, maybe jsut retry as the problems should fix themselvs
-                    return ScheduleCallback(callback, interval);
-                }
-                return scheduledCallback;
+                // Something went very wrong, maybe jsut retry as the problems should fix themselvs
+                return ScheduleCallback(callback, interval);
             }
+            return scheduledCallback;
+
         }
 
         void CallbackLoop()
         {
-            var threadInterval = TimeSpan.FromMilliseconds(250);
-            // while (!_token.IsCancellationRequested)
+            var threadInterval = _defaultInterval;
             while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
             {
-                var smallestInterval = _callbackDict.Keys.OrderBy(_ => _).FirstOrDefault();
-                if (smallestInterval != default && smallestInterval < threadInterval)
+                try
                 {
-                    threadInterval = smallestInterval;
-                }
+                    threadInterval = GetSmallestInterval(threadInterval);
 
-                foreach (var item in _callbackDict)
-                {
-                    var interval = item.Key;
-                    var callbacks = item.Value;
-                    if (callbacks.LastCalled < DateTime.UtcNow - interval)
+                    foreach (var item in _callbackDict)
                     {
-                        callbacks.CallRegisteredCallbacks();
+                        var interval = item.Key;
+                        var callbacks = item.Value;
+                        if (ShouldBeCalled(callbacks.LastCalled, interval))
+                        {
+                            callbacks.CallRegisteredCallbacks();
+                        }
                     }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "An error occured while calling registered callbacks");
                 }
 
                 Thread.Sleep(threadInterval);
             }
-            Console.WriteLine("DoneWith CallbackLoop");
         }
+
+        TimeSpan GetSmallestInterval(TimeSpan currentInterval)
+        {
+            var smallestInterval = _callbackDict.Keys.OrderBy(_ => _).FirstOrDefault();
+            if (smallestInterval != default
+                && smallestInterval < currentInterval
+                && smallestInterval > _minimumInterval)
+            {
+                return smallestInterval;
+            }
+            return currentInterval;
+        }
+
+        bool ShouldBeCalled(DateTime lastCalled, TimeSpan interval) => lastCalled < DateTime.UtcNow - interval;
     }
 }

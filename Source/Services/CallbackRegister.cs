@@ -6,11 +6,18 @@ using System.Collections.Concurrent;
 
 namespace Dolittle.Runtime.Services
 {
+    /// <summary>
+    /// Represents a <see cref="ICanRegisterCallbacks"/>.
+    /// </summary>
     public class CallbackRegister : ICanRegisterCallbacks
     {
         readonly ConcurrentDictionary<Guid, DisposableCallback> _callbacks = new();
+        /// <summary>
+        /// Gets when the registerd callbacks were last called.
+        /// </summary>
         public DateTime LastCalled { get; private set; }
 
+        /// <inheritdoc/>
         public IDisposable RegisterCallback(Action callback)
         {
             var callbackId = Guid.NewGuid();
@@ -19,6 +26,7 @@ namespace Dolittle.Runtime.Services
             return scheduledCallback;
         }
 
+        /// <inheritdoc/>
         public void CallRegisteredCallbacks()
         {
             foreach (var scheduledCallback in _callbacks.Values)

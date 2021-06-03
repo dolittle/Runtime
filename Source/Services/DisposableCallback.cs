@@ -6,15 +6,29 @@ using System;
 namespace Dolittle.Runtime.Services
 {
 
+    /// <summary>
+    /// Represents a callback with a callback on it's Dispose() method.
+    /// </summary>
     public class DisposableCallback : IDisposable
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DisposableCallback"/> class.
+        /// </summary>
+        /// <param name="callback">The <see cref="Action"/>.</param>
+        /// <param name="unregister">The <see cref="Action"/> to call when this instance is disposed.</param>
         public DisposableCallback(Action callback, Action unregister)
         {
             Callback = callback;
             Unregister = unregister;
         }
-        public Action Callback { get; internal set; }
-        public Action Unregister { get; internal set; }
+        /// <summary>
+        /// Gets the callback.
+        /// </summary>
+        public Action Callback { get; }
+        /// <summary>
+        /// Gets the callback that's called when disposed of.
+        /// </summary>
+        public Action Unregister { get; }
 
         public void Dispose()
         {
