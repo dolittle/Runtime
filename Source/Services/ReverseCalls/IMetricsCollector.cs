@@ -17,6 +17,10 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         void IncrementTotalStreamReadBytes(int writtenBytes);
         void IncrementTotalPingsSent();
         void IncrementTotalPongsReceived();
+        void IncrementTotalKeepaliveTokenResets();
+        void IncrementTotalKeepaliveTimeouts();
+        void AddToTotalWaitForFirstMessageTime(TimeSpan waitTime);
+        void AddToTotalWaitForPingStarterToCompleteTime(TimeSpan waitTime);
     }
 
     public class MetricsCollector : IMetricsCollector

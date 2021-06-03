@@ -9,13 +9,14 @@ namespace Dolittle.Runtime.Services.ReverseCalls
     /// <summary>
     /// Exception that gets thrown when the first message of a reverse call connection does not contain a <see cref="ReverseCallArgumentsContext"/>.
     /// </summary>
-    public class ReverseCallArgumentsContextNotReceivedInFirstMessage : Exception
+    public class ArgumentsContextNotReceivedInFirstMessage : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReverseCallArgumentsContextNotReceivedInFirstMessage"/> class.
+        /// Initializes a new instance of the <see cref="ArgumentsContextNotReceivedInFirstMessage"/> class.
         /// </summary>
-        public ReverseCallArgumentsContextNotReceivedInFirstMessage()
-            : base($"The first message received for the reverse call connection did not contain a {nameof(ReverseCallArgumentsContext)}")
+        /// <param name="reason">The reason for the missing reverse call arguments context.</param>
+        public ArgumentsContextNotReceivedInFirstMessage(string reason)
+            : base($"The first message received for the reverse call connection did not contain a {nameof(ReverseCallArgumentsContext)} because {reason}")
         {
         }
     }

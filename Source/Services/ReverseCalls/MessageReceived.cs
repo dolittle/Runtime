@@ -3,5 +3,8 @@
 
 namespace Dolittle.Runtime.Services.ReverseCalls
 {
+    /// <summary>
+    /// Defines the signature of a message received event.
+    /// </summary>
     public delegate void MessageReceived();
 }
