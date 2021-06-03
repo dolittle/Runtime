@@ -39,7 +39,6 @@ namespace Dolittle.Runtime.Services
             }
         }
 
-
         /// <summary>
         /// Calls all of the registered callbacks.
         /// </summary>
@@ -56,9 +55,10 @@ namespace Dolittle.Runtime.Services
                         scheduledCallback.Callback();
                         // AddToTotalCallbackTime
                     }
-                    catch
+                    catch (Exception ex)
                     {
                         // IncrementTotalCallbacksFailed
+                        _logger.CallbackCallFailed(ex);
                     }
                 }
             }
@@ -72,7 +72,7 @@ namespace Dolittle.Runtime.Services
 
         void UnregisterCallback(DisposableCallback callback)
         {
-            //AddToTotalCallbacksUnregistered
+            //IncrementTotalCallbacksUnregistered
             lock (_callbacks)
             {
                 _callbacks.Remove(callback);

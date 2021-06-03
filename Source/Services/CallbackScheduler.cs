@@ -74,15 +74,7 @@ namespace Dolittle.Runtime.Services
 
                         if (timeToNextGroupCall <= _timeResolution)
                         {
-                            try
-                            {
-                                group.CallRegisteredCallbacks();
-                            }
-                            catch (Exception ex)
-                            {
-                                // Incremendd
-                                _logger.LogWarning(ex, "An error occured while calling registered callbacks");
-                            }
+                            group.CallRegisteredCallbacks();
 
                             timeToNextGroupCall = group.TimeToNextCall;
                         }
@@ -95,7 +87,7 @@ namespace Dolittle.Runtime.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, "An error occured while calling registered callbacks");
+                    _logger.CallbackLoopFailed(ex);
                 }
 
                 if (timeToNextCall > _timeResolution)
