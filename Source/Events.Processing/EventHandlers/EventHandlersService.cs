@@ -76,27 +76,34 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             _logger.LogDebug("Connecting Event Handler");
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
-            var connectResult = await _reverseCallServices.Connect(
-                runtimeStream,
-                clientStream,
-                context,
-                _eventHandlersProtocol,
-                cts.Token).ConfigureAwait(false);
-            if (!connectResult.Success) return;
-            _logger.SettingExecutionContext(connectResult.Result.arguments.ExecutionContext);
-            _executionContextManager.CurrentFor(connectResult.Result.arguments.ExecutionContext);
+            try
+            {
+                var connectResult = await _reverseCallServices.Connect(
+                    runtimeStream,
+                    clientStream,
+                    context,
+                    _eventHandlersProtocol,
+                    cts.Token).ConfigureAwait(false);
+                if (!connectResult.Success) return;
+                _logger.SettingExecutionContext(connectResult.Result.arguments.ExecutionContext);
+                _executionContextManager.CurrentFor(connectResult.Result.arguments.ExecutionContext);
 
-            using var eventHandler = new EventHandler(
-                _streamProcessors,
-                _filterValidator,
-                _streamDefinitions,
-                connectResult.Result.dispatcher,
-                connectResult.Result.arguments,
-                _getEventsToStreamsWriter,
-                _loggerFactory,
-                cts
-            );
-            await eventHandler.RegisterAndStart().ConfigureAwait(false);
+                using var eventHandler = new EventHandler(
+                    _streamProcessors,
+                    _filterValidator,
+                    _streamDefinitions,
+                    connectResult.Result.dispatcher,
+                    connectResult.Result.arguments,
+                    _getEventsToStreamsWriter,
+                    _loggerFactory,
+                    cts
+                );
+                await eventHandler.RegisterAndStart().ConfigureAwait(false);
+            }
+            finally
+            {
+                cts.Cancel();
+            }
         }
     }
 }
