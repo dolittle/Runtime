@@ -204,7 +204,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         Try<StreamProcessor> TryRegisterProjection(
             ProjectionRegistrationArguments arguments,
-            Func<IEventProcessor> getEventProcessor,
+            FactoryFor<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken)
         {
             _logger.RegisteringProjection(arguments);
