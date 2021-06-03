@@ -132,12 +132,15 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
             _nextPendingMessage = new();
             _readMessageException = new(-1, null);
 
+            var fakeKeepaliveDeadline = new SimulatedKeepaliveDeadline(this);
+
             var connection = new PingedConnection<a_message, a_message, object, object, object, object>(
                 requestId,
                 new SimulatedStreamReader(this),
                 new SimulatedStreamWriter(this),
                 context,
                 messageConverter,
+                fakeKeepaliveDeadline,
                 metrics,
                 loggerFactory);
 
@@ -195,6 +198,23 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
             {
                 _scenario._writtenMessages.Add(new(_scenario._simulatedTime, message));
                 return Task.CompletedTask;
+            }
+        }
+
+        class SimulatedKeepaliveDeadline : ICancelTokenIfDeadlineIsMissed
+        {
+            readonly CancellationTokenSource _source = new();
+            readonly Scenario _scenario;
+            public SimulatedKeepaliveDeadline(Scenario scenario) => _scenario = scenario;
+
+            public CancellationToken Token => _source.Token;
+
+            public void Dispose()
+                => _source.Dispose();
+
+            public void RefreshDeadline(TimeSpan nextRefreshBefore)
+            {
+                // TODO: Implement with fake time
             }
         }
 
