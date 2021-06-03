@@ -29,6 +29,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given
                 new MyClient(server_stream, client_stream),
                 new TimeSpan(0, 0, 0, 0, 500),
                 execution_context_manager.Object,
+                Mock.Of<IMetricsCollector>(),
                 Mock.Of<ILogger>());
         };
     }
