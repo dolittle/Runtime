@@ -32,7 +32,6 @@ namespace Dolittle.Runtime.Services
         where TRequest : class
         where TResponse : class
     {
-        readonly SemaphoreSlim _writeSemaphore = new(1);
         readonly ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new();
         readonly IPingedReverseCallConnection<TClientMessage, TServerMessage> _reverseCallConnection;
         readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
@@ -156,26 +155,18 @@ namespace Dolittle.Runtime.Services
 
             try
             {
-                await _writeSemaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
-                try
+                var callContext = new ReverseCallRequestContext
                 {
-                    var callContext = new ReverseCallRequestContext
-                    {
-                        CallId = callId.ToProtobuf(),
-                        ExecutionContext = _executionContextManager.Current.ToProtobuf(),
-                    };
-                    _messageConverter.SetRequestContext(callContext, request);
+                    CallId = callId.ToProtobuf(),
+                    ExecutionContext = _executionContextManager.Current.ToProtobuf(),
+                };
+                _messageConverter.SetRequestContext(callContext, request);
 
-                    var message = new TServerMessage();
-                    _messageConverter.SetRequest(request, message);
-                    _logger.LogTrace("Writing request with CallId: {CallId}", callId);
-                    _logger.WritingRequest(callId);
-                    await _reverseCallConnection.ClientStream.WriteAsync(message).ConfigureAwait(false);
-                }
-                finally
-                {
-                    _writeSemaphore.Release();
-                }
+                var message = new TServerMessage();
+                _messageConverter.SetRequest(request, message);
+                _logger.LogTrace("Writing request with CallId: {CallId}", callId);
+                _logger.WritingRequest(callId);
+                await _reverseCallConnection.ClientStream.WriteAsync(message).ConfigureAwait(false);
 
                 return await completionSource.Task.ConfigureAwait(false);
             }
@@ -203,7 +194,6 @@ namespace Dolittle.Runtime.Services
             {
                 if (disposing)
                 {
-                    _writeSemaphore.Dispose();
                     _reverseCallConnection.Dispose();
                 }
 
@@ -213,7 +203,7 @@ namespace Dolittle.Runtime.Services
 
         async Task HandleClientMessages(CancellationToken cancellationToken)
         {
-            using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+            using var jointCts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, _reverseCallConnection.CancellationToken);
             try
             {
                 var clientToRuntimeStream = _reverseCallConnection.RuntimeStream;
@@ -250,7 +240,7 @@ namespace Dolittle.Runtime.Services
             }
             catch (Exception ex)
             {
-                if (!cancellationToken.IsCancellationRequested)
+                if (!jointCts.Token.IsCancellationRequested)
                 {
                     _logger.LogWarning(ex, "An error occurred during handling of client messages");
                 }
