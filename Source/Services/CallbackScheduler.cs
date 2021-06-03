@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Services
         readonly IHostApplicationLifetime _hostApplicationLifetime;
         readonly ILogger _logger;
         readonly TimeSpan _defaultInterval = TimeSpan.FromSeconds(2);
-        readonly TimeSpan _minimumInterval = TimeSpan.FromMilliseconds(500);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CallbackScheduler"/> class.
@@ -51,13 +50,10 @@ namespace Dolittle.Runtime.Services
 
         void CallbackLoop()
         {
-            var threadInterval = _defaultInterval;
             while (!_hostApplicationLifetime.ApplicationStopping.IsCancellationRequested)
             {
                 try
                 {
-                    threadInterval = GetSmallestInterval(threadInterval);
-
                     foreach (var item in _callbackDict)
                     {
                         var interval = item.Key;
@@ -73,20 +69,23 @@ namespace Dolittle.Runtime.Services
                     _logger.LogWarning(ex, "An error occured while calling registered callbacks");
                 }
 
-                Thread.Sleep(threadInterval);
+                Thread.Sleep(GetNextExpiringInterval());
             }
         }
 
-        TimeSpan GetSmallestInterval(TimeSpan currentInterval)
+        TimeSpan GetNextExpiringInterval()
         {
-            var smallestInterval = _callbackDict.Keys.OrderBy(_ => _).FirstOrDefault();
-            if (smallestInterval != default
-                && smallestInterval < currentInterval
-                && smallestInterval > _minimumInterval)
+            var nextExpiringIntervall = _callbackDict
+               .Select(kvp => kvp.Value.LastCalled + kvp.Key)
+               .OrderBy(projectedTime => projectedTime)
+               .FirstOrDefault();
+            if (nextExpiringIntervall == default)
             {
-                return smallestInterval;
+                return _defaultInterval;
             }
-            return currentInterval;
+            var nextCall = DateTime.UtcNow - nextExpiringIntervall;
+            var minimumInterval = TimeSpan.FromMilliseconds(10);
+            return nextCall > minimumInterval ? nextCall : minimumInterval;
         }
 
         bool ShouldBeCalled(DateTime lastCalled, TimeSpan interval) => lastCalled < DateTime.UtcNow - interval;
