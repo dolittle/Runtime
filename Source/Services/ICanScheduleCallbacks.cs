@@ -17,6 +17,6 @@ namespace Dolittle.Runtime.Services
         /// <param name="callback">The <see cref="Action"/> to call immediately and at each interval afterwards.</param>
         /// <param name="interval">A <see cref="TimeSpan"/> for the interval between each call.</param>
         /// <returns>A <see cref="IDisposable"/>, which when disposed will cancel the callback.</returns>
-        IDisposable RegisterCallback(Action callback, TimeSpan interval);
+        IDisposable ScheduleCallback(Action callback, TimeSpan interval);
     }
 }
