@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
     /// </summary>
     /// <typeparam name="TClientMessage">Type of the <see cref="IMessage">messages</see> that is sent from the Client to the Runtime.</typeparam>
     /// <typeparam name="TServerMessage">Type of the <see cref="IMessage">messages</see> that is sent from the Runtime to the Client.</typeparam>
-    public interface IPingedReverseCallConnection<TClientMessage, TServerMessage> : IDisposable
+    public interface IPingedConnection<TClientMessage, TServerMessage> : IDisposable
         where TClientMessage : IMessage, new()
         where TServerMessage : IMessage, new()
     {
