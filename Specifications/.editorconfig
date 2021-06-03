@@ -1,2 +1,9 @@
 # this is to just supress the main editorconfig from applying here
 root = true
+
+dotnet_diagnostic.IDE1006.severity = none
+dotnet_diagnostic.IDE0044.severity = none
+dotnet_diagnostic.RCS1169.severity = none
+dotnet_diagnostic.RCS1018.severity = none
+dotnet_diagnostic.RCS1213.severity = none
+

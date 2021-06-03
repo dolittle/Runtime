@@ -4,6 +4,7 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <IsTestProject>true</IsTestProject>
+        <NoWarn>IDE1006;RCS1169;RCS1018;RCS1213;IDE0044</NoWarn>
     </PropertyGroup>
 
     <ItemGroup>
