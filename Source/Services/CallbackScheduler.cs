@@ -45,20 +45,8 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public IDisposable ScheduleCallback(Action callback, TimeSpan interval)
         {
-            if (_callbackDict.TryGetValue(interval, out var callbacks))
-            {
-                _logger.LogTrace("Registed callback for {Interval} interval", interval);
-                return callbacks.RegisterCallback(callback);
-            }
-            var callbackRegister = new CallbackRegister();
-            var scheduledCallback = callbackRegister.RegisterCallback(callback);
-            if (!_callbackDict.TryAdd(interval, callbackRegister))
-            {
-                // Something went very wrong, maybe jsut retry as the problems should fix themselvs
-                return ScheduleCallback(callback, interval);
-            }
-            return scheduledCallback;
-
+            var callbackRegister = _callbackDict.GetOrAdd(interval, new CallbackRegister());
+            return callbackRegister.RegisterCallback(callback);
         }
 
         void CallbackLoop()
