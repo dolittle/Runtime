@@ -28,9 +28,9 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         where TRequest : class
         where TResponse : class
     {
-        readonly CancellationTokenSource _keepAliveTokenSource;
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly RequestId _requestId;
+        readonly ICancelTokenIfDeadlineIsMissed _keepalive;
         readonly IMetricsCollector _metrics;
         readonly WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedReader;
         readonly WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedWriter;
@@ -49,6 +49,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         /// <param name="clientStream">The <see cref="IServerStreamWriter{TServerMessage}"/> to write messages to the Client.</param>
         /// <param name="context">The <see cref="ServerCallContext"/> of the method call.</param>
         /// <param name="messageConverter">The <see cref="MethodConverter"/> to use for decoding the connect arguments and reading the desired ping interval from.</param>
+        /// <param name="metrics">The cancellation token deadline refresher to use to monitor timing of pongs.</param>
         /// <param name="metrics">The metrics collector to use for metrics about reverse calls.</param>
         /// <param name="loggerFactory">The logger factory to use to create loggers.</param>
         public PingedConnection(
@@ -57,13 +58,15 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             IAsyncStreamWriter<TServerMessage> clientStream,
             ServerCallContext context,
             IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
+            ICancelTokenIfDeadlineIsMissed keepalive,
             IMetricsCollector metrics,
             ILoggerFactory loggerFactory)
         {
-            _keepAliveTokenSource = new CancellationTokenSource();
-            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, _keepAliveTokenSource.Token);
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(context.CancellationToken, keepalive.Token);
 
             _requestId = requestId;
+            _keepalive = keepalive;
+
             _wrappedReader = new(
                 requestId,
                 runtimeStream,
@@ -83,7 +86,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _logger = loggerFactory.CreateLogger<PingedConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>();
 
             _pingStarter = WaitForFirstMessageThenStartPinging(_cancellationTokenSource.Token);
-            _keepAliveExpiredRegistration = _keepAliveTokenSource.Token.Register(NotifyKeepaliveTimedOut);
+            _keepAliveExpiredRegistration = keepalive.Token.Register(NotifyKeepaliveTimedOut);
         }
 
         /// <inheritdoc/>
@@ -113,6 +116,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                 WaitForPingStarterToCompleteIgnoringExceptions();
                 MaybeStopPinging();
                 _keepAliveExpiredRegistration.Dispose();
+                _keepalive.Dispose();
                 _wrappedReader.MessageReceived -= ResetKeepaliveTokenCancellation;
                 _cancellationTokenSource.Dispose();
                 _wrappedWriter.Dispose();
