@@ -89,10 +89,16 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
                 await _writeLock.WaitAsync(_cancellationToken).ConfigureAwait(false);
 
-                stopwatch.Stop();
-                _metrics.DecrementPendingStreamWrites();
-                _metrics.AddToTotalStreamWriteWaitTime(stopwatch.Elapsed);
-                _logger.WritingMessageUnblockedAfter(_requestId, typeof(TServerMessage), stopwatch.Elapsed);
+                try
+                {
+                    stopwatch.Stop();
+                    _metrics.DecrementPendingStreamWrites();
+                    _metrics.AddToTotalStreamWriteWaitTime(stopwatch.Elapsed);
+                    _logger.WritingMessageUnblockedAfter(_requestId, typeof(TServerMessage), stopwatch.Elapsed);
+                }
+                catch
+                {
+                }
             }
 
             try
