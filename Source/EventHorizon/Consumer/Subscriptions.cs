@@ -106,11 +106,4 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             return result;
         }
     }
-
-    public class S
-    {
-        publicBbool Connecting { get; }
-        public bool Connected { get; }
-        public ConsentId Consent { get; }
-    }
 }

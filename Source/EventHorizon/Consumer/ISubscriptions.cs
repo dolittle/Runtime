@@ -23,13 +23,5 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="subscription">The <see cref="Subscription" />.</param>
         /// <returns>A <see cref="SubscriptionResponse"/>.</returns>
         Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Tries to get the <see cref="Subscription "/> for a <see cref="SubscriptionId" />.
-        /// </summary>
-        /// <param name="subscriptionId">The <see cref="SubscriptionId" />.</param>
-        /// <param name="Subscription">The <see cref="Subscription" />.</param>
-        /// <returns>A value indicating whether the subscription exists or not.</returns>
-        bool TryGetSubscriptionFor(SubscriptionId subscriptionId, out Subscription subscription);
     }
 }
