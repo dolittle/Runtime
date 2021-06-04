@@ -19,14 +19,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
     /// </summary>
     public class EventHorizonProcessor : IEventHorizonProcessor
     {
-        readonly IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> _reverseCallClient;
+        readonly IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> _reverseCallClient;
         readonly SubscriptionId _subscription;
         readonly AsyncProducerConsumerQueue<StreamEvent> _eventsFromEventHorizon;
         readonly ILogger _logger;
         readonly CancellationToken _cancellationToken;
 
         public EventHorizonProcessor(
-            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,
+            IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,
             SubscriptionId subscription,
             AsyncProducerConsumerQueue<StreamEvent> eventsFromEventHorizon,
             ILogger logger,

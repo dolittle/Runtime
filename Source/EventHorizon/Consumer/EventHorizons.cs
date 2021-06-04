@@ -4,9 +4,8 @@
 using System;
 using System.Threading;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
-using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
-using Grpc.Core;
+using Dolittle.Runtime.Microservices;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 
@@ -28,22 +27,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         /// <inheritdoc/>
         public IEventHorizonProcessor Get(
-            Func<AsyncDuplexStreamingCall<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage>> establishConnection,
+            MicroserviceAddress connectionAddress,
             SubscriptionId subscription,
             AsyncProducerConsumerQueue<StreamEvent> eventsFromEventHorizon,
             CancellationToken cancellationToken)
             => new EventHorizonProcessor(
-                _reverseCallClients.GetFor<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>(
-                    establishConnection,
-                    (message, arguments) => message.SubscriptionRequest = arguments,
-                    message => message.SubscriptionResponse,
-                    message => message.Request,
-                    (message, response) => message.Response = response,
-                    (arguments, context) => arguments.CallContext = context,
-                    request => request.CallContext,
-                    (response, context) => response.CallContext = context,
-                    message => message.Ping,
-                    (message, pong) => message.Pong = pong,
+                _reverseCallClients.GetFor(
+                    new EventHorizonProtocol(),
+                    connectionAddress.Host,
+                    connectionAddress.Port,
                     TimeSpan.FromSeconds(10)),
                 subscription,
                 eventsFromEventHorizon,

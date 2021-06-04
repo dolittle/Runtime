@@ -117,7 +117,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         IEventHorizonProcessor SetupEventHorizon(CancellationToken cancellationToken)
             => _eventHorizons.Get(
-                () => _client.Subscribe(cancellationToken: cancellationToken),
+                _connectionAddress,
                 _subscription,
                 _eventsFromEventHorizon,
                 cancellationToken);

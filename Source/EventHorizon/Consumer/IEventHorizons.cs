@@ -1,12 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
-using Dolittle.Runtime.EventHorizon.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
-using Grpc.Core;
+using Dolittle.Runtime.Microservices;
 using Nito.AsyncEx;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -25,7 +23,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         IEventHorizonProcessor Get(
-            Func<AsyncDuplexStreamingCall<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage>> establishConnection,
+            MicroserviceAddress connectionAddress,
             SubscriptionId subscription,
             AsyncProducerConsumerQueue<StreamEvent> eventsFromEventHorizon,
             CancellationToken cancellationToken);
