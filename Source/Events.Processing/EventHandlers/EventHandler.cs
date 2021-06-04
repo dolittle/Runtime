@@ -49,7 +49,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
-        readonly CancellationToken _cancellationToken;
+        readonly CancellationTokenSource _cancellationTokenSource;
+
         bool _disposed;
 
         /// <summary>
@@ -81,7 +82,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _arguments = arguments;
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _loggerFactory = loggerFactory;
-            _cancellationToken = cancellationToken;
+            _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+
             FilterDefinition = new TypeFilterWithEventSourcePartitionDefinition(
                 StreamId.EventLog,
                 TargetStream,
@@ -160,6 +162,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 {
                     FilterStreamProcessor?.Dispose();
                     EventProcessorStreamProcessor?.Dispose();
+                    _cancellationTokenSource.Dispose();
                 }
 
                 _disposed = true;
@@ -229,7 +232,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     EventProcessor,
                     streamDefinition,
                     getProcessor,
-                    _cancellationToken,
+                    _cancellationTokenSource.Token,
                     out var streamProcessor);
 
                 onStreamProcessor(streamProcessor);
@@ -247,7 +250,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
             catch (Exception ex)
             {
-                if (!_cancellationToken.IsCancellationRequested)
+                if (!_cancellationTokenSource.Token.IsCancellationRequested)
                 {
                     onException(ex);
                 }
@@ -264,7 +267,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _logger.StartingEventHandler(FilterDefinition.TargetStream);
             try
             {
-                var runningDispatcher = _dispatcher.Accept(new EventHandlerRegistrationResponse(), _cancellationToken);
+                var runningDispatcher = _dispatcher.Accept(new EventHandlerRegistrationResponse(), _cancellationTokenSource.Token);
                 await FilterStreamProcessor.Initialize().ConfigureAwait(false);
                 await EventProcessorStreamProcessor.Initialize().ConfigureAwait(false);
                 await ValidateFilter().ConfigureAwait(false);
@@ -274,6 +277,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 try
                 {
                     await Task.WhenAny(tasks).ConfigureAwait(false);
+                    _cancellationTokenSource.Cancel();
 
                     if (tasks.TryGetFirstInnerMostException(out var ex))
                     {
@@ -289,7 +293,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             }
             catch (Exception ex)
             {
-                if (!_cancellationToken.IsCancellationRequested)
+                if (!_cancellationTokenSource.Token.IsCancellationRequested)
                 {
                     _logger.ErrorWhileStartingEventHandler(ex, EventProcessor, Scope);
                 }
@@ -300,7 +304,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         async Task ValidateFilter()
         {
             _logger.ValidatingFilter(FilterDefinition.TargetStream);
-            var filterValidationResults = await _filterValidator.Validate(GetFilterProcessor, _cancellationToken).ConfigureAwait(false);
+            var filterValidationResults = await _filterValidator.Validate(GetFilterProcessor, _cancellationTokenSource.Token).ConfigureAwait(false);
 
             if (filterValidationResults.Any(_ => !_.Value.Succeeded))
             {
@@ -311,7 +315,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             var filteredStreamDefinition = new StreamDefinition(FilterDefinition);
             _logger.PersistingStreamDefinition(filteredStreamDefinition.StreamId);
-            await _streamDefinitions.Persist(Scope, filteredStreamDefinition, _cancellationToken).ConfigureAwait(false);
+            await _streamDefinitions.Persist(Scope, filteredStreamDefinition, _cancellationTokenSource.Token).ConfigureAwait(false);
         }
 
         IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> GetFilterProcessor()
@@ -335,7 +339,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         async Task Fail(FailureId failureId, string message)
         {
             var failure = new Failure(failureId, message);
-            await _dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, _cancellationToken).ConfigureAwait(false);
+            await _dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, _cancellationTokenSource.Token).ConfigureAwait(false);
         }
     }
 }
