@@ -5,6 +5,9 @@ using System;
 
 namespace Dolittle.Runtime.Services.ReverseCalls
 {
+    /// <summary>
+    /// Defines a system for collecting metrics about reverse calls.
+    /// </summary>
     public interface IMetricsCollector
     {
         void IncrementPendingStreamWrites();
