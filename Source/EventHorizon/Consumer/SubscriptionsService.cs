@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.EventHorizon.Contracts.Subscriptions;
+using Dolittle.Runtime.Execution;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -19,6 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public class SubscriptionsService : SubscriptionsBase
     {
         readonly IConsumerClient _consumerClient;
+        readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
         /// <summary>
@@ -26,8 +28,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// </summary>
         /// <param name="consumerClient">The <see cref="IConsumerClient" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public SubscriptionsService(IConsumerClient consumerClient, ILogger logger)
+        public SubscriptionsService(IConsumerClient consumerClient, IExecutionContextManager executionContextManager, ILogger logger)
         {
+            _executionContextManager = executionContextManager;
             _consumerClient = consumerClient;
             _logger = logger;
         }
@@ -35,6 +38,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <inheritdoc/>
         public override async Task<Contracts.SubscriptionResponse> Subscribe(Contracts.Subscription subscriptionRequest, ServerCallContext context)
         {
+            _executionContextManager.CurrentFor(subscriptionRequest.CallContext.ExecutionContext);
             var subscription = new SubscriptionId(
                 subscriptionRequest.CallContext.ExecutionContext.TenantId.ToGuid(),
                 subscriptionRequest.MicroserviceId.ToGuid(),
@@ -45,6 +49,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             try
             {
                 _logger.IncomingSubscripton(subscription);
+
                 var subscriptionResponse = await _consumerClient.HandleSubscriptionRequest(subscription, context.CancellationToken).ConfigureAwait(false);
 
                 return subscriptionResponse switch
