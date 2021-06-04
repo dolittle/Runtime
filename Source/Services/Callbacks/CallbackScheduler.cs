@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Services.Callbacks
         readonly CancellationToken _hostApplicationStopping;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
-        readonly ICallbackMetricsCollector _metrics;
+        readonly IMetricsCollector _metrics;
         readonly ConcurrentDictionary<TimeSpan, ScheduledCallbackGroup> _groups = new();
         readonly ManualResetEvent _waitForNewCallback = new(false);
 
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Services.Callbacks
         public CallbackScheduler(
             IHostApplicationLifetime hostApplicationLifetime,
             ILoggerFactory loggerFactory,
-            ICallbackMetricsCollector metrics)
+            IMetricsCollector metrics)
         {
             _hostApplicationStopping = hostApplicationLifetime.ApplicationStopping;
             _loggerFactory = loggerFactory;
