@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Services
         where TResponse : class
     {
         readonly ConcurrentDictionary<ReverseCallId, TaskCompletionSource<TResponse>> _calls = new();
-        readonly IPingedReverseCallConnection<TClientMessage, TServerMessage> _reverseCallConnection;
+        readonly IPingedConnection<TClientMessage, TServerMessage> _reverseCallConnection;
         readonly IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _messageConverter;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
@@ -50,12 +50,12 @@ namespace Dolittle.Runtime.Services
         /// <summary>
         /// Initializes a new instance of the <see cref="ReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
         /// </summary>
-        /// <param name="reverseCallConnection">The <see cref="IPingedReverseCallConnection{TClientMessage, TServerMessage}"/></param>
+        /// <param name="reverseCallConnection">The <see cref="IPingedConnection{TClientMessage, TServerMessage}"/></param>
         /// <param name="messageConverter">The <see cref="IConvertReverseCallMessages{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
         /// <param name="logger">The <see cref="ILogger"/> to use.</param>
         public ReverseCallDispatcher(
-            IPingedReverseCallConnection<TClientMessage, TServerMessage> reverseCallConnection,
+            IPingedConnection<TClientMessage, TServerMessage> reverseCallConnection,
             IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
             IExecutionContextManager executionContextManager,
             ILogger logger)

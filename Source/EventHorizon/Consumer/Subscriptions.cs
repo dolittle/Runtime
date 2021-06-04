@@ -9,6 +9,11 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
+using System.Threading.Tasks;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Microservices;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -18,10 +23,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [SingletonPerTenant]
     public class Subscriptions : ISubscriptions
     {
-        readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new ConcurrentDictionary<SubscriptionId, Subscription>();
-        readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
-        readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
+        readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new();
         readonly ILoggerFactory _loggerFactory;
+        readonly IStreamProcessorFactory _streamProcessorFactory;
+
+        readonly MicroservicesConfiguration _microservicesConfiguration;
+        readonly IEstablishEventHorizonConnections _eventHorizonConnectionEstablisher;
         readonly ILogger<Subscriptions> _logger;
 
         /// <summary>
@@ -29,12 +36,19 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// </summary>
         /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
+        /// <param name="streamProcessorFactory">The <see cref="IStreamProcessorFactory" />.</param>
+        /// <param name="microservicesConfiguration">The <see cref="MicroservicesConfiguration" />.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
-        public Subscriptions(IResilientStreamProcessorStateRepository streamProcessorStates, IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy, ILoggerFactory loggerFactory)
+        public Subscriptions(
+            IStreamProcessorFactory streamProcessorFactory,
+            MicroservicesConfiguration microservicesConfiguration,
+            IEstablishEventHorizonConnections eventHorizonConnectionEstablisher,
+            ILoggerFactory loggerFactory)
         {
-            _streamProcessorStates = streamProcessorStates;
-            _eventsFetcherPolicy = eventsFetcherPolicy;
             _loggerFactory = loggerFactory;
+            _streamProcessorFactory = streamProcessorFactory;
+            _microservicesConfiguration = microservicesConfiguration;
+            _eventHorizonConnectionEstablisher = eventHorizonConnectionEstablisher;
             _logger = loggerFactory.CreateLogger<Subscriptions>();
         }
 
@@ -42,51 +56,53 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         public bool TryGetConsentFor(SubscriptionId subscriptionId, out ConsentId consentId)
         {
             var result = _subscriptions.TryGetValue(subscriptionId, out var subscription);
-            consentId = subscription?.ConsentId;
+            consentId = subscription?.Consent;
             return result;
         }
 
         /// <inheritdoc />
-        public bool TrySubscribe(
-            ConsentId consentId,
-            SubscriptionId subscriptionId,
-            EventProcessor eventProcessor,
-            EventsFromEventHorizonFetcher eventsFetcher,
-            CancellationToken cancellationToken,
-            out Subscription subscription)
+        public async Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken)
         {
-            subscription = default;
             if (_subscriptions.ContainsKey(subscriptionId))
             {
                 _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                return false;
+                return SubscriptionResponse.Succeeded(_subscriptions[subscriptionId].Consent);
             }
 
-            subscription = new Subscription(
-                consentId,
+            var producerMicroservice = subscriptionId.ProducerMicroserviceId;
+            if (!TryGetMicroserviceAddress(producerMicroservice, out var connectionAddress))
+            {
+                _logger.NoMicroserviceConfigurationFor(producerMicroservice);
+                return SubscriptionResponse.Failed(new Failure(
+                    SubscriptionFailures.MissingMicroserviceConfiguration,
+                    $"No microservice configuration for producer mircoservice {producerMicroservice}"));
+            }
+
+            var subscription = new Subscription(
                 subscriptionId,
-                eventProcessor,
-                eventsFetcher,
-                _streamProcessorStates,
-                () => Unregister(subscriptionId),
-                _eventsFetcherPolicy,
-                _loggerFactory,
-                cancellationToken);
+                connectionAddress,
+                _streamProcessorFactory,
+                _eventHorizonConnectionEstablisher,
+                _loggerFactory);
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
             {
                 _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                subscription = default;
-                return false;
+                return SubscriptionResponse.Succeeded(_subscriptions[subscriptionId].Consent);
             }
 
-            _logger.SuccessfullyRegisteredSubscription(subscriptionId);
-            return true;
+            var response = await subscription.Register().ConfigureAwait(false);
+            if (!response.Success)
+            {
+                _subscriptions.TryRemove(subscriptionId, out var _);
+            }
+            return response;
         }
 
-        void Unregister(SubscriptionId id)
+        bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
         {
-            _logger.UnregisteringSubscription(id);
-            _subscriptions.TryRemove(id, out var _);
+            var result = _microservicesConfiguration.TryGetValue(producerMicroservice, out var microserviceAddressConfig);
+            microserviceAddress = microserviceAddressConfig;
+            return result;
         }
     }
 }

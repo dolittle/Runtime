@@ -18,6 +18,7 @@
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />
         <ProjectReference Include="../Resilience/Resilience.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
         <ProjectReference Include="../Microservices/Microservices.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />

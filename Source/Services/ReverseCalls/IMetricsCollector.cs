@@ -5,6 +5,9 @@ using System;
 
 namespace Dolittle.Runtime.Services.ReverseCalls
 {
+    /// <summary>
+    /// Defines a system for collecting metrics about reverse calls.
+    /// </summary>
     public interface IMetricsCollector
     {
         void IncrementPendingStreamWrites();
@@ -17,19 +20,9 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         void IncrementTotalStreamReadBytes(int writtenBytes);
         void IncrementTotalPingsSent();
         void IncrementTotalPongsReceived();
-    }
-
-    public class MetricsCollector : IMetricsCollector
-    {
-        public void AddToTotalStreamWriteTime(TimeSpan writeTime) { }
-        public void AddToTotalStreamWriteWaitTime(TimeSpan waitTime) { }
-        public void DecrementPendingStreamWrites() { }
-        public void IncrementPendingStreamWrites() { }
-        public void IncrementTotalPingsSent() { }
-        public void IncrementTotalPongsReceived() { }
-        public void IncrementTotalStreamReadBytes(int writtenBytes) { }
-        public void IncrementTotalStreamReads() { }
-        public void IncrementTotalStreamWriteBytes(int writtenBytes) { }
-        public void IncrementTotalStreamWrites() { }
+        void IncrementTotalKeepaliveTokenResets();
+        void IncrementTotalKeepaliveTimeouts();
+        void AddToTotalWaitForFirstMessageTime(TimeSpan waitTime);
+        void AddToTotalWaitForPingStarterToCompleteTime(TimeSpan waitTime);
     }
 }
