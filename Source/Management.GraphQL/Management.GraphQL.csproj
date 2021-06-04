@@ -11,6 +11,7 @@
 
     <ItemGroup>
         <ProjectReference Include="../Tenancy/Tenancy.csproj"/>
+        <ProjectReference Include="../Events.Processing/Events.Processing.csproj"/>
     </ItemGroup>
     
 </Project>
