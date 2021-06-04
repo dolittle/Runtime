@@ -12,7 +12,6 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Microservices;
@@ -20,6 +19,12 @@ using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Services.Clients;
 using Nito.AsyncEx;
+
+using EventHorizonReverseCallClient = Dolittle.Runtime.Services.Clients.IReverseCallClient<
+    Dolittle.Runtime.EventHorizon.Contracts.ConsumerSubscriptionRequest,
+    Dolittle.Runtime.EventHorizon.Contracts.SubscriptionResponse,
+    Dolittle.Runtime.EventHorizon.Contracts.ConsumerRequest,
+    Dolittle.Runtime.EventHorizon.Contracts.ConsumerResponse>;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -29,7 +34,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [SingletonPerTenant]
     public class ConsumerClient : IConsumerClient
     {
-        readonly IClientManager _clientManager;
         readonly ISubscriptions _subscriptions;
         readonly MicroservicesConfiguration _microservicesConfiguration;
         readonly IStreamProcessorStateRepository _streamProcessorStates;
@@ -45,7 +49,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// Initializes a new instance of the <see cref="ConsumerClient"/> class.
         /// </summary>
-        /// <param name="clientManager">The <see cref="IClientManager" />.</param>
         /// <param name="subscriptions">The <see cref="ISubscriptions" />.</param>
         /// <param name="microservicesConfiguration">The <see cref="MicroservicesConfiguration" />.</param>
         /// <param name="streamProcessorStates">The <see cref="IStreamProcessorStateRepository" />.</param>
@@ -55,7 +58,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="reverseCallClients"><see cref="IReverseCallClients"/>.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public ConsumerClient(
-            IClientManager clientManager,
             ISubscriptions subscriptions,
             MicroservicesConfiguration microservicesConfiguration,
             IStreamProcessorStateRepository streamProcessorStates,
@@ -65,7 +67,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IReverseCallClients reverseCallClients,
             ILogger logger)
         {
-            _clientManager = clientManager;
             _subscriptions = subscriptions;
             _microservicesConfiguration = microservicesConfiguration;
             _streamProcessorStates = streamProcessorStates;
@@ -113,7 +114,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             return await _policy.Execute(
                 async _ =>
                 {
-                    var client = CreateClient(microserviceAddress, _cancellationToken);
+                    var client = CreateClient(microserviceAddress);
                     var receivedResponse = await Subscribe(client, subscriptionId, microserviceAddress, _cancellationToken).ConfigureAwait(false);
                     var response = HandleSubscriptionResponse(receivedResponse, client.ConnectResponse, subscriptionId);
                     if (response.Success) StartProcessingEventHorizon(response.ConsentId, subscriptionId, microserviceAddress, client);
@@ -138,29 +139,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _disposed = true;
         }
 
-        IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> CreateClient(
-            MicroserviceAddress microserviceAddress,
-            CancellationToken cancellationToken)
-        {
-            var client = _clientManager.Get<Contracts.Consumer.ConsumerClient>(
-                microserviceAddress.Host,
-                microserviceAddress.Port);
-            return _reverseCallClients.GetFor<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse>(
-                () => client.Subscribe(cancellationToken: cancellationToken),
-                (message, arguments) => message.SubscriptionRequest = arguments,
-                message => message.SubscriptionResponse,
-                message => message.Request,
-                (message, response) => message.Response = response,
-                (arguments, context) => arguments.CallContext = context,
-                request => request.CallContext,
-                (response, context) => response.CallContext = context,
-                message => message.Ping,
-                (message, pong) => message.Pong = pong,
-                TimeSpan.FromSeconds(7));
-        }
+        EventHorizonReverseCallClient CreateClient(MicroserviceAddress microserviceAddress)
+            => _reverseCallClients.GetFor(new EventHorizonProtocol(), microserviceAddress.Host, microserviceAddress.Port, TimeSpan.FromSeconds(7));
 
         async Task<bool> Subscribe(
-            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,
+            EventHorizonReverseCallClient reverseCallClient,
             SubscriptionId subscriptionId,
             MicroserviceAddress microserviceAddress,
             CancellationToken cancellationToken)
@@ -205,7 +188,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             ConsentId consentId,
             SubscriptionId subscriptionId,
             MicroserviceAddress microserviceAddress,
-            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
+            EventHorizonReverseCallClient reverseCallClient)
         {
             Task.Run(async () =>
                 {
@@ -220,7 +203,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         await _policy.Execute(
                             async _ =>
                             {
-                                reverseCallClient = CreateClient(microserviceAddress, _cancellationToken);
+                                reverseCallClient = CreateClient(microserviceAddress);
                                 var receivedResponse = await Subscribe(reverseCallClient, subscriptionId, microserviceAddress, _cancellationToken).ConfigureAwait(false);
                                 var response = HandleSubscriptionResponse(receivedResponse, reverseCallClient.ConnectResponse, subscriptionId);
                                 if (!response.Success) throw new Todo(); // TODO: This is a hack to get the policy going. Remove this when we can have policies on return values
@@ -235,7 +218,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         async Task ReadEventsFromEventHorizon(
             ConsentId consentId,
             SubscriptionId subscriptionId,
-            IReverseCallClient<EventHorizonConsumerToProducerMessage, EventHorizonProducerToConsumerMessage, ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient)
+            EventHorizonReverseCallClient reverseCallClient)
             {
             _logger.ConnectedEventHorizon(subscriptionId);
             var queue = new AsyncProducerConsumerQueue<StreamEvent>();

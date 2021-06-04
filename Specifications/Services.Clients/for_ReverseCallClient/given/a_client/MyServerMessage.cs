@@ -5,15 +5,15 @@ using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
-namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient
+namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client
 {
-    public class MyClientMessage : IMessage
+    public class MyServerMessage : IMessage
     {
-        public MyResponse Response { get; set; }
+        public MyConnectResponse ConnectResponse { get; set; }
 
-        public MyConnectArguments Arguments { get; set; }
+        public MyRequest Request { get; set; }
 
-        public Pong Pong { get; set; }
+        public Ping Ping { get; set; }
 
         public MessageDescriptor Descriptor => throw new System.NotImplementedException();
 
