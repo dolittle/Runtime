@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             ScopeId scopeId,
             EventProcessorId eventProcessorId,
             IStreamDefinition sourceStreamDefinition,
-            Func<IEventProcessor> getEventProcessor,
+            FactoryFor<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken,
             out StreamProcessor streamProcessor)
         {

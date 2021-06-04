@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Services
     /// </summary>
     public class InitiateReverseCallServices : IInitiateReverseCallServices
     {
-        static readonly string ArgumentsNotReceived = "Connection arguments were not received";
+        static readonly string _argumentsNotReceived = "Connection arguments were not received";
         readonly IReverseCallDispatchers _reverseCallDispatchers;
         readonly ILogger _logger;
 
@@ -49,8 +49,8 @@ namespace Dolittle.Runtime.Services
             _logger.LogTrace("Waiting for connection arguments");
             if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
             {
-                _logger.LogWarning(ArgumentsNotReceived);
-                await dispatcher.Reject(protocol.CreateFailedConnectResponse(ArgumentsNotReceived), cancellationToken).ConfigureAwait(false);
+                _logger.LogWarning(_argumentsNotReceived);
+                await dispatcher.Reject(protocol.CreateFailedConnectResponse(_argumentsNotReceived), cancellationToken).ConfigureAwait(false);
                 return false;
             }
             _logger.LogTrace("Received connection arguments");

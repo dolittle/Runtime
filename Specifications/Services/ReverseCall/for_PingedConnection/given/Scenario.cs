@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.Callbacks;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Grpc.Core;
 using Machine.Specifications;
@@ -16,25 +17,25 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
     public class Scenario
     {
         readonly List<Step> _steps = new();
-        Scenario() {}
+        Scenario() { }
 
         public static Scenario New(Action<Builder> build)
         {
             var scenario = new Scenario();
-            
+
             build(new Builder(scenario));
 
             var error = scenario._steps.Select(_ => _.Validate()).FirstOrDefault(_ => _ != default);
             if (error != default) throw error;
-            
+
             scenario._steps.Sort((a, b) => a.At.Value - b.At.Value);
 
             var lastStep = scenario._steps.LastOrDefault();
             var finalStepTime = 0;
             if (lastStep != default) finalStepTime = lastStep.At.Value + 100;
 
-            scenario._steps.Add(new FinalStep{ At = finalStepTime });
-            
+            scenario._steps.Add(new FinalStep { At = finalStepTime });
+
             return scenario;
         }
 
@@ -53,10 +54,10 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
                 public ReceiveBuilder(Scenario scenario) => _scenario = scenario;
 
                 public AtSetter Message(a_message message)
-                    => _scenario.AddStep(new ReceiveMessageStep{ Message = message });
+                    => _scenario.AddStep(new ReceiveMessageStep { Message = message });
 
                 public AtSetter Exception(Exception exception)
-                    => _scenario.AddStep(new ReceiveExceptionStep{ Exception = exception });
+                    => _scenario.AddStep(new ReceiveExceptionStep { Exception = exception });
             }
         }
 

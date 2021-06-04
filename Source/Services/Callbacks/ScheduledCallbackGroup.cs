@@ -17,9 +17,9 @@ namespace Dolittle.Runtime.Services.Callbacks
         readonly ILogger _logger;
         readonly TimeSpan _interval;
         DateTime _lastCalled = DateTime.MinValue;
-        readonly ICallbackMetricsCollector _metrics;
+        readonly IMetricsCollector _metrics;
 
-        public ScheduledCallbackGroup(TimeSpan interval, ILogger logger, ICallbackMetricsCollector metrics)
+        public ScheduledCallbackGroup(TimeSpan interval, ILogger logger, IMetricsCollector metrics)
         {
             _interval = interval;
             _logger = logger;

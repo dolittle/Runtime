@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services.Callbacks
 {
     /// <summary>
     /// Defines a system that can schedule callbacks to be called at regular intervals.

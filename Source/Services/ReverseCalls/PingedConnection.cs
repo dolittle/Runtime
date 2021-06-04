@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.Callbacks;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -37,7 +38,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         readonly WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedWriter;
         readonly ILogger _logger;
         readonly Task _pingStarter;
-        readonly CancellationTokenRegistration  _keepAliveExpiredRegistration;
+        readonly CancellationTokenRegistration _keepAliveExpiredRegistration;
         TimeSpan _keepaliveTimeout;
         IDisposable _scheduledPings;
         bool _disposed;
@@ -200,7 +201,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             var stopwatch = Stopwatch.StartNew();
             _logger.WaitingForPingStarterToComplete(_requestId);
 
-            _pingStarter.ContinueWith(_ => {}).GetAwaiter().GetResult();
+            _pingStarter.ContinueWith(_ => { }).GetAwaiter().GetResult();
 
             stopwatch.Stop();
             _metrics.AddToTotalWaitForPingStarterToCompleteTime(stopwatch.Elapsed);

@@ -5,7 +5,7 @@
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
-            "preLaunchTask": "build",
+            "preLaunchTask": "build server",
             "program": "${workspaceFolder}/Source/Server/bin/Debug/net5.0/Dolittle.Runtime.Server.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Source/Server",
