@@ -57,6 +57,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         }
 
         /// <inheritdoc/>
+        public async Task<EventLogSequenceNumber> GetTailEventLogSequenceNumber()
+        {
+            return (ulong) await _streams.DefaultEventLog.CountDocumentsAsync(_eventFilter.Empty).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc/>
         public async Task<CommittedEvents> CommitEvents(UncommittedEvents events, CancellationToken cancellationToken)
         {
             ThrowIfNoEventsToCommit(events);
