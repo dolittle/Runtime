@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using Dolittle.Runtime.DependencyInversion;
@@ -9,8 +8,8 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -88,8 +87,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         void Unregister(StreamProcessorId id)
         {
+            StreamProcessor existing;
+            do
+            {
+                _streamProcessors.TryRemove(id, out existing);
+            }
+            while (existing != default);
             _logger.StreamProcessorUnregistered(id);
-            _streamProcessors.TryRemove(id, out var _);
         }
     }
 }
