@@ -35,7 +35,6 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         readonly IMetricsCollector _metrics;
         readonly ILogger _logger;
         readonly CancellationToken _cancellationToken;
-        readonly TaskCompletionSource<ReverseCallArgumentsContext> _reverseCallContext = new(TaskCreationOptions.RunContinuationsAsynchronously);
         bool _firstMoveNextCalled;
 
         /// <summary>
@@ -63,16 +62,20 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _cancellationToken = cancellationToken;
         }
 
-
-        /// <summary>
-        /// Gets a task that resolves when the first message containing the reverse call context is read.
-        /// </summary>
-        public Task<ReverseCallArgumentsContext> ReverseCallContext => _reverseCallContext.Task;
-
         /// <summary>
         /// Event that occurs when a message is received from the Client.
         /// </summary>
         public event MessageReceived MessageReceived;
+
+        /// <summary>
+        /// Event that occurs when the reverse call context is received from the Client.
+        /// </summary>
+        public event ReverseCallContextReceived ReverseCallContextReceived;
+
+        /// <summary>
+        /// Event that occurs when the reverse call context is not received in the first message from the Client.
+        /// </summary>
+        public event ReverseCallContextNotReceivedInFirstMessage ReverseCallContextNotReceivedInFirstMessage;
 
         /// <inheritdoc/>
         public TClientMessage Current => _originalStream.Current;
@@ -96,21 +99,16 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                 _firstMoveNextCalled = true;
                 if (await MoveNextSkippingPongsAndRecordMetrics(cancellationToken).ConfigureAwait(false))
                 {
-                    SetReverseCallArgumentsContextFromFirstMessage(_originalStream.Current);
+                    FetchReverseCallArgumentsContextFromFirstMessage(_originalStream.Current);
                     return true;
                 }
                 
-                SetReversCallArgumentsNotReceivedBecauseNoFirstMessage();
+                ReverseCallArgumentsNotReceivedBecauseNoFirstMessage();
                 return false;
             }
-            catch (TaskCanceledException)
+            catch
             {
-                _reverseCallContext.SetCanceled();
-                throw;
-            }
-            catch (Exception ex)
-            {
-                _reverseCallContext.SetException(ex);
+                ReverseCallContextNotReceivedInFirstMessage?.Invoke();
                 throw;
             }
         }
@@ -154,32 +152,41 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             return _messageConverter.GetPong(_originalStream.Current) != default;
         }
 
-        void SetReverseCallArgumentsContextFromFirstMessage(TClientMessage message)
+        void FetchReverseCallArgumentsContextFromFirstMessage(TClientMessage message)
         {
             var connectArguments = _messageConverter.GetConnectArguments(message);
             if (connectArguments == default)
             {
-                SetReversCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage();
+                ReverseCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage();
                 return;
             }
 
             var argumentsContext = _messageConverter.GetArgumentsContext(connectArguments);
             if (argumentsContext == default)
             {
-                SetReversCallArgumentsNotReceivedBecauseNoContextOnConnectArguments();
+                ReverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments();
                 return;
             }
 
-            _reverseCallContext.SetResult(argumentsContext);
+            ReverseCallContextReceived?.Invoke(argumentsContext);
         }
 
-        void SetReversCallArgumentsNotReceivedBecauseNoFirstMessage()
-            => _reverseCallContext.SetException(new ArgumentsContextNotReceivedInFirstMessage("no message was received"));
+        void ReverseCallArgumentsNotReceivedBecauseNoFirstMessage()
+        {
+            ReverseCallContextNotReceivedInFirstMessage?.Invoke();
+            _logger.ReverseCallArgumentsNotReceivedBecauseNoFirstMessage(_requestId);
+        }
 
-        void SetReversCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage()
-            => _reverseCallContext.SetException(new ArgumentsContextNotReceivedInFirstMessage("first message did not contain connect arguments"));
+        void ReverseCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage()
+        {
+            ReverseCallContextNotReceivedInFirstMessage?.Invoke();
+            _logger.ReverseCallArgumentsNotReceivedBecauseNoFirstMessage(_requestId);
+        }
 
-        void SetReversCallArgumentsNotReceivedBecauseNoContextOnConnectArguments()
-            => _reverseCallContext.SetException(new ArgumentsContextNotReceivedInFirstMessage("connect arguments did not contain a context"));
+        void ReverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments()
+        {
+            ReverseCallContextNotReceivedInFirstMessage?.Invoke();
+            _logger.ReverseCallArgumentsNotReceivedBecauseNoFirstMessage(_requestId);
+        }
     }
 }

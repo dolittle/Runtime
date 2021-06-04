@@ -4,10 +4,12 @@
 using System;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Machine.Specifications;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.when_waiting_for_reverse_call_context
 {
-    public class and_the_first_message_does_not_contain_context : all_dependencies
+    public class and_the_first_message_does_not_contain_context : given.all_dependencies
     {
         static a_message first_message;
         static object first_message_arguments;
@@ -35,15 +37,14 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
                 metrics,
                 logger,
                 cancellation_token);
+
+            wrapped_reader.ReverseCallContextReceived += reverse_call_context_received.Object;
+            wrapped_reader.ReverseCallContextNotReceivedInFirstMessage += reverse_call_context_not_received_in_first_message.Object;
         };
 
-        static Exception result;
-        Because of = () =>
-        {
-            wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult();
-            result = Catch.Exception(() => wrapped_reader.ReverseCallContext.GetAwaiter().GetResult());
-        };
+        Because of = () => wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult();
 
-        It should_fail = () => result.ShouldBeOfExactType<ArgumentsContextNotReceivedInFirstMessage>();
+        It should_not_have_invoked_the_received_event = () => reverse_call_context_received.VerifyNoOtherCalls();
+        It should_have_invoked_the_not_received_event = () => reverse_call_context_not_received_in_first_message.Verify(_ => _(), Times.Once);
     }
 }
