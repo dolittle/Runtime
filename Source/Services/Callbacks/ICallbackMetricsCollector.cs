@@ -6,7 +6,7 @@ using System;
 
 namespace Dolittle.Runtime.Services.Callbacks
 {
-    public interface ICallbackMetricsCollector
+    public interface IMetricsCollector
     {
 
         void IncrementTotalCallbacksRegistered();

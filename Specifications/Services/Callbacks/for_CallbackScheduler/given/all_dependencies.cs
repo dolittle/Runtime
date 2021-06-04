@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler.given
             scheduler = new CallbackScheduler(
                 host_application_lifetime.Object,
                 Mock.Of<ILoggerFactory>(),
-                Mock.Of<ICallbackMetricsCollector>());
+                Mock.Of<IMetricsCollector>());
         };
     }
 }
