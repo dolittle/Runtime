@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 import React, { useState } from 'react';
-import { useQuery } from '@apollo/client';
+import { useLazyQuery, useQuery } from '@apollo/client';
 import {
     CommandBar,
     Dropdown,
@@ -26,30 +26,39 @@ const columns: IColumn[] = [
         minWidth: 250
     },
     {
-        key: 'sourceStream',
-        fieldName: 'sourceStream',
-        name: 'Source Stream',
+        key: 'scope',
+        fieldName: 'scope',
+        name: 'Scope',
         minWidth: 250
     },
     {
-        key: 'position',
-        fieldName: 'position',
-        name: 'Position',
+        key: 'filterPosition',
+        fieldName: 'filterPosition',
+        name: 'Filter Position',
         minWidth: 100
     },
     {
-        key: 'failed',
-        fieldName: 'failed',
-        name: 'Failed',
+        key: 'eventProcessorPosition',
+        fieldName: 'eventProcessorPosition',
+        name: 'Event Processor Position',
+        minWidth: 100
+    },
+    {
+        key: 'tailEventLogSequenceNumber',
+        fieldName: 'tailEventLogSequenceNumber',
+        name: 'Tail Event Log Sequence Number',
         minWidth: 100
     }
+
+
+    
 ];
 
 
 export const EventHandlersOverview = () => {
     const [tenantId, setTenantId] = useState<string>();
     const tenantsQueryResult = useQuery(tenantsQuery);
-    const eventHandlersQueryResult = useQuery(eventHandlersQuery, {
+    const [getEventHandlers, eventHandlersQueryResult] = useLazyQuery(eventHandlersQuery, {
         variables: {
             tenantId
         }
@@ -78,11 +87,20 @@ export const EventHandlersOverview = () => {
                             placeholder="Select tenant"
                             defaultSelectedKey="local"
                             selectedKey={tenantId}
-                            onChange={(e, o) => setTenantId(o?.key as string)}
+                            onChange={(e, o) => {
+                                setTenantId(o?.key as string);
+                                getEventHandlers();
+                            }}
                             options={tenantsOptions} />
                     </Stack>
                 );
             }
+        },
+        {
+            key: 'refresh',
+            text: 'Refresh',
+            iconProps: { iconName: 'Refresh' },
+            onClick: () => getEventHandlers()
         }
     ];
 

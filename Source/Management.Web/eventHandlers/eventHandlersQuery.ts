@@ -8,9 +8,10 @@ export const eventHandlersQuery = gql`
         eventHandlers {
             allForTenant(tenantId:$tenantId) {
                 id
-                sourceStream
-                position
-                failed
+                scope
+                filterPosition
+                eventProcessorPosition
+                tailEventLogSequenceNumber
             }
         }
     }
