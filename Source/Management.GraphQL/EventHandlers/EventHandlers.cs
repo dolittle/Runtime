@@ -3,18 +3,46 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Events.Processing.EventHandlers;
+using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Execution;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Management.GraphQL.EventHandlers
 {
     public class EventHandlers
     {
-        public IEnumerable<EventHandler> AllForTenant(Guid tenantId)
+        readonly IEventHandlers _eventHandlers;
+        readonly IExecutionContextManager _executionContextManager;
+        readonly IContainer _container;
+        readonly ILogger _logger;
+
+        public EventHandlers(IEventHandlers eventHandlers, IExecutionContextManager executionContextManager, IContainer container, ILogger logger)
         {
-            return new EventHandler[] {
-                new () { Id = Guid.Parse("0571cc9f-1c14-4e05-81cd-18a7557e56c0"), SourceStream = Guid.Empty, Position=0, Failed = false },
-                new () { Id = Guid.Parse("c509ff72-6214-46da-b0c6-7c0ee8f90674"), SourceStream = Guid.Empty, Position=0, Failed = false },
-                new () { Id = Guid.Parse("4822545c-add5-4d10-8b57-7993f559e923"), SourceStream = Guid.Empty, Position=0, Failed = false }
-            };
+            _eventHandlers = eventHandlers;
+            _executionContextManager = executionContextManager;
+            _container = container;
+            _logger = logger;
+        }
+
+        public async Task<IEnumerable<EventHandler>> AllForTenant(Guid tenantId)
+        {
+            _executionContextManager.CurrentFor(Microservice.NotSet, tenantId);
+            var eventStore = _container.Get<FactoryFor<IEventStore>>()();
+            var tailEventLogSequenceNumber = await eventStore.GetTailEventLogSequenceNumber().ConfigureAwait(false);
+
+            return _eventHandlers.All.Select(_ => new EventHandler
+            {
+                Id = _.EventProcessor,
+                Scope = _.Scope,
+                FilterPosition = (int)_.FilterStreamProcessor?.GetScopedStreamProcessorFor(tenantId).CurrentState.Position.Value,
+                EventProcessorPosition = (int)_.EventProcessorStreamProcessor?.GetScopedStreamProcessorFor(tenantId).CurrentState.Position.Value,
+                TailEventLogSequenceNumber = (int)tailEventLogSequenceNumber.Value
+            });
         }
     }
 }
