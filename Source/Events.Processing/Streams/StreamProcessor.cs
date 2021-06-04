@@ -10,8 +10,8 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -66,6 +66,20 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _executionContextManager = executionContextManager;
             _logger = logger;
             _stopAllScopedStreamProcessorsTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        }
+
+        /// <summary>
+        /// Get a specific underlying <see cref="AbstractScopedStreamProcessor"/> for a specific tenant.
+        /// </summary>
+        /// <param name="tenantId">Tenant to get for</param>
+        /// <returns><see cref="AbstractScopedStreamProcessor"/></returns>
+        public AbstractScopedStreamProcessor GetScopedStreamProcessorFor(TenantId tenantId)
+        {
+            if (!_streamProcessors.ContainsKey(tenantId))
+            {
+                throw new MissingScopedStreamProcessorTenant(tenantId);
+            }
+            return _streamProcessors[tenantId];
         }
 
         /// <summary>
