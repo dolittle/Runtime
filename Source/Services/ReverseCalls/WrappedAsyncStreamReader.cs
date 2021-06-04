@@ -94,15 +94,23 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
         async Task<bool> FirstMoveNext(CancellationToken cancellationToken)
         {
-            _firstMoveNextCalled = true;
-            if (await MoveNextSkippingPongsAndRecordMetrics(cancellationToken).ConfigureAwait(false))
+            try
             {
-                FetchReverseCallArgumentsContextFromFirstMessage(_originalStream.Current);
-                return true;
+                _firstMoveNextCalled = true;
+                if (await MoveNextSkippingPongsAndRecordMetrics(cancellationToken).ConfigureAwait(false))
+                {
+                    FetchReverseCallArgumentsContextFromFirstMessage(_originalStream.Current);
+                    return true;
+                }
+                
+                ReverseCallArgumentsNotReceivedBecauseNoFirstMessage();
+                return false;
             }
-            
-            ReverseCallArgumentsNotReceivedBecauseNoFirstMessage();
-            return false;
+            catch
+            {
+                ReverseCallContextNotReceivedInFirstMessage?.Invoke();
+                throw;
+            }
         }
 
         async Task<bool> MoveNextSkippingPongsAndRecordMetrics(CancellationToken cancellationToken)

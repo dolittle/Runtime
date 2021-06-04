@@ -152,6 +152,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         }
         void OnReverseCallContextNotReceivedInFirstMessage()
         {
+            _cancellationTokenSource.Cancel();
             _waitForCallContextStopwatch.Stop();
             _logger.FailedToStartPingAndTimeout(_requestId, _waitForCallContextStopwatch.Elapsed);
         }
