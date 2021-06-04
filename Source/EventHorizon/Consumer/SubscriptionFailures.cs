@@ -24,5 +24,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Gets the <see cref="FailureId" /> that represents the 'SubscriptionCancelled' failure type.
         /// </summary>
         public static FailureId SubscriptionCancelled => FailureId.Create("2ed211ce-7f9b-4a9f-ae9d-973bfe8aaf2b");
+
+        /// <summary>
+        /// Gets the <see cref="FailureId" /> that represents the 'CouldNotConnectToProducerRuntime' failure type.
+        /// </summary>
+        public static FailureId CouldNotConnectToProducerRuntime => FailureId.Create("2e6b926a-a213-4175-a597-df64aee4a497");
     }
 }

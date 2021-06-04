@@ -24,7 +24,10 @@ namespace Dolittle.Runtime.Execution
         /// <param name="microservice">Which <see cref="Microservice"/> that is running.</param>
         /// <param name="version">The <see cref="Version" /> of the <see cref="Microservice" />.</param>
         /// <param name="environment">Which <see cref="Environment"/> the system is running in.</param>
-        void SetConstants(Microservice microservice, Version version, Environment environment);
+        /// <param name="filePath">FilePath of the caller.</param>
+        /// <param name="lineNumber">Linenumber in the file of the caller.</param>
+        /// <param name="member">Membername of the caller.</param>
+        void SetConstants(Microservice microservice, Version version, Environment environment, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 
         /// <summary>
         /// Sets the current execution context to be for the system.
