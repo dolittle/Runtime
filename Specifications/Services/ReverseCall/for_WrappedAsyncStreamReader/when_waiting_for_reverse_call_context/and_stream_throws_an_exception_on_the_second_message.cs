@@ -5,10 +5,12 @@ using System;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Dolittle.Services.Contracts;
 using Machine.Specifications;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.when_waiting_for_reverse_call_context
 {
-    public class and_stream_throws_an_exception_on_the_second_message : all_dependencies
+    public class and_stream_throws_an_exception_on_the_second_message : given.all_dependencies
     {
         static a_message message;
         static object message_arguments;
@@ -40,17 +42,19 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
                 metrics,
                 logger,
                 cancellation_token);
+
+            wrapped_reader.ReverseCallContextReceived += reverse_call_context_received.Object;
+            wrapped_reader.ReverseCallContextNotReceivedInFirstMessage += reverse_call_context_not_received_in_first_message.Object;
         };
 
-        static ReverseCallArgumentsContext result;
         Because of = () =>
         {
             wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult();
-            result = wrapped_reader.ReverseCallContext.GetAwaiter().GetResult();
-            Catch.Exception(() => wrapped_reader.ReverseCallContext.GetAwaiter().GetResult());
+            Catch.Exception(() => wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult());
         };
 
-        It should_return_the_arguments_context = () => result.ShouldEqual(message_arguments_context);
+        It should_have_invoked_the_received_event = () => reverse_call_context_received.Verify(_ => _(message_arguments_context), Times.Once);
+        It should_not_have_invoked_the_not_received_event = () => reverse_call_context_not_received_in_first_message.VerifyNoOtherCalls();
         It should_call_the_converter_with_the_first_message = () => message_converter.Verify(_ => _.GetConnectArguments(message));
         It should_call_the_converter_with_the_connect_arguments = () => message_converter.Verify(_ => _.GetArgumentsContext(message_arguments));
     }

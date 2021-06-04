@@ -4,10 +4,12 @@
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Dolittle.Services.Contracts;
 using Machine.Specifications;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.when_waiting_for_reverse_call_context
 {
-    public class and_there_are_two_messages_with_arguments_context : all_dependencies
+    public class and_there_are_two_messages_with_arguments_context : given.all_dependencies
     {
         static a_message first_message;
         static object first_message_arguments;
@@ -50,19 +52,17 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
                 metrics,
                 logger,
                 cancellation_token);
+
+            wrapped_reader.ReverseCallContextReceived += reverse_call_context_received.Object;
+            wrapped_reader.ReverseCallContextNotReceivedInFirstMessage += reverse_call_context_not_received_in_first_message.Object;
         };
 
-        static ReverseCallArgumentsContext first_result;
-        static ReverseCallArgumentsContext second_result;
         Because of = () =>
         {
             wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult();
-            first_result = wrapped_reader.ReverseCallContext.GetAwaiter().GetResult();
             wrapped_reader.MoveNext(cancellation_token).GetAwaiter().GetResult();
-            second_result = wrapped_reader.ReverseCallContext.GetAwaiter().GetResult();
         };
 
-        It should_return_the_first_arguments_context_the_first_time = () => first_result.ShouldEqual(first_message_arguments_context);
-        It should_return_the_first_arguments_context_the_second_time = () => second_result.ShouldEqual(first_message_arguments_context);
+        It should_have_invoked_the_received_event_once = () => reverse_call_context_received.Verify(_ => _(first_message_arguments_context), Times.Once);
     }
 }
