@@ -75,7 +75,7 @@ jobs:
           tags: dolittle/runtime:latest
 
   release-runtime-debug-image:
-    name: Release Runtime Production Image
+    name: Release Runtime Debug Image
     needs: setup
     runs-on: ubuntu-latest
     if: needs.setup.outputs.should-publish == 'true'
