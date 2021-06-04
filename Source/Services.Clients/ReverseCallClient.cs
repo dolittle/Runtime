@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Services.Clients
         readonly SemaphoreSlim _writeLock = new(1);
         IClientStreamWriter<TClientMessage> _clientToServer;
         IAsyncStreamReader<TServerMessage> _serverToClient;
-        Func<TRequest, CancellationToken, Task<TResponse>> _callback;
+        ReverseCallHandler<TRequest, TResponse> _callback;
         bool _connecting;
         bool _connectionEstablished;
         bool _startedHandling;
@@ -89,7 +89,7 @@ namespace Dolittle.Runtime.Services.Clients
         }
 
         /// <inheritdoc/>
-        public async Task Handle(Func<TRequest, CancellationToken, Task<TResponse>> callback, CancellationToken cancellationToken)
+        public async Task Handle(ReverseCallHandler<TRequest, TResponse> callback, CancellationToken cancellationToken)
         {
             ThrowIfConnectionNotEstablished();
             EnsureOnlyHandlingOnce();

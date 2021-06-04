@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -36,9 +35,9 @@ namespace Dolittle.Runtime.Services.Clients
         /// <summary>
         /// Handle a call.
         /// </summary>
-        /// <param name="callback">The <see cref="Func{T1, T2, TReturn}">callback</see> for requests coming from server.</param>
+        /// <param name="callback">The <see cref="ReverseCallHandler{TRequest, TResponse}"/> for requests coming from server.</param>
         /// <param name="token">Optional. A <see cref="CancellationToken" /> to cancel the operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task Handle(Func<TRequest, CancellationToken, Task<TResponse>> callback, CancellationToken token);
+        Task Handle(ReverseCallHandler<TRequest,TResponse> callback, CancellationToken token);
     }
 }
