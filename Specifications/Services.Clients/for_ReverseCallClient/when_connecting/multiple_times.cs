@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connecting
