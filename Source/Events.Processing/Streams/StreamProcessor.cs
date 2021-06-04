@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly StreamProcessorId _identifier;
         readonly IPerformActionOnAllTenants _onAllTenants;
         readonly IStreamDefinition _streamDefinition;
-        readonly Func<IEventProcessor> _getEventProcessor;
+        readonly FactoryFor<IEventProcessor> _getEventProcessor;
         readonly Action _unregister;
         readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
         readonly IExecutionContextManager _executionContextManager;
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             StreamProcessorId streamProcessorId,
             IPerformActionOnAllTenants onAllTenants,
             IStreamDefinition streamDefinition,
-            Func<IEventProcessor> getEventProcessor,
+            FactoryFor<IEventProcessor> getEventProcessor,
             Action unregister,
             FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
             IExecutionContextManager executionContextManager,
