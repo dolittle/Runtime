@@ -6,7 +6,7 @@
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
-            "program": "${workspaceFolder}/Source/Server/bin/Debug/netcoreapp3.1/Server.dll",
+            "program": "${workspaceFolder}/Source/Server/bin/Debug/net5.0/Dolittle.Runtime.Server.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Source/Server",
             "externalConsole": false,
