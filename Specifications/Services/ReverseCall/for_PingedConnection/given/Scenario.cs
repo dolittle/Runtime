@@ -133,6 +133,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
             _readMessageException = new(-1, null);
 
             var fakeKeepaliveDeadline = new SimulatedKeepaliveDeadline(this);
+            var fakeCallbackScheduler = new SimulatedCallbackScheduler(this);
 
             var connection = new PingedConnection<a_message, a_message, object, object, object, object>(
                 requestId,
@@ -141,6 +142,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
                 context,
                 messageConverter,
                 fakeKeepaliveDeadline,
+                fakeCallbackScheduler,
                 metrics,
                 loggerFactory);
 
@@ -215,6 +217,17 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
             public void RefreshDeadline(TimeSpan nextRefreshBefore)
             {
                 // TODO: Implement with fake time
+            }
+        }
+
+        class SimulatedCallbackScheduler : ICallbackScheduler
+        {
+            readonly Scenario _scenario;
+            public SimulatedCallbackScheduler(Scenario scenario) => _scenario = scenario;
+            public IDisposable ScheduleCallback(Action callback, TimeSpan interval)
+            {
+                // TODO: Implement with fake time
+                return null;
             }
         }
 

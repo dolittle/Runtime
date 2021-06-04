@@ -31,6 +31,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         readonly CancellationTokenSource _cancellationTokenSource;
         readonly RequestId _requestId;
         readonly ICancelTokenIfDeadlineIsMissed _keepalive;
+        readonly ICallbackScheduler _pingScheduler;
         readonly IMetricsCollector _metrics;
         readonly WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedReader;
         readonly WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedWriter;
@@ -38,18 +39,19 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         readonly Task _pingStarter;
         readonly CancellationTokenRegistration  _keepAliveExpiredRegistration;
         TimeSpan _keepaliveTimeout;
+        IDisposable _scheduledPings;
         bool _disposed;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PingedConnection{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}"/> class.
         /// </summary>
         /// <param name="requestId">The request id for the gRPC method call.</param>
-        /// <param name="requestId">The request id for the gRPC method call.</param>
         /// <param name="runtimeStream">The <see cref="IAsyncStreamReader{TClientMessage}"/> to read messages to the Runtime.</param>
         /// <param name="clientStream">The <see cref="IServerStreamWriter{TServerMessage}"/> to write messages to the Client.</param>
         /// <param name="context">The <see cref="ServerCallContext"/> of the method call.</param>
         /// <param name="messageConverter">The <see cref="MethodConverter"/> to use for decoding the connect arguments and reading the desired ping interval from.</param>
-        /// <param name="metrics">The cancellation token deadline refresher to use to monitor timing of pongs.</param>
+        /// <param name="keepalive">The keepalive token canceller to use for keeping track of ping timeouts.</param>
+        /// <param name="pingScheduler">The callback scheduler to use for scheduling accurate pings.</param>
         /// <param name="metrics">The metrics collector to use for metrics about reverse calls.</param>
         /// <param name="loggerFactory">The logger factory to use to create loggers.</param>
         public PingedConnection(
@@ -59,6 +61,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             ServerCallContext context,
             IConvertReverseCallMessages<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> messageConverter,
             ICancelTokenIfDeadlineIsMissed keepalive,
+            ICallbackScheduler pingScheduler,
             IMetricsCollector metrics,
             ILoggerFactory loggerFactory)
         {
@@ -66,6 +69,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
             _requestId = requestId;
             _keepalive = keepalive;
+            _pingScheduler = pingScheduler;
 
             _wrappedReader = new(
                 requestId,
@@ -154,20 +158,26 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         void StartPinging(TimeSpan pingInterval)
         {
             _logger.StartPings(_requestId, pingInterval);
-            // TODO: to be implemented once the "ping service" is ready
-            // _wrappedWriter.MaybeWritePing();
+            _scheduledPings = _pingScheduler.ScheduleCallback(_wrappedWriter.MaybeWritePing, pingInterval);
         }
 
         void MaybeStopPinging()
         {
-            // _logger.StoppingPings(_requestId);
-            // _logger.NotStoppingPingsBecauseItWasNotStarted(_requestId);
+            if (_scheduledPings != null)
+            {
+                _logger.StoppingPings(_requestId);
+                _scheduledPings.Dispose();
+            }
+            else
+            {
+                _logger.NotStoppingPingsBecauseItWasNotStarted(_requestId);
+            }
         }
 
         void StartKeepaliveTokenTimeout(TimeSpan pingInterval)
         {
             _logger.StartKeepaliveTokenTimeout(_requestId, pingInterval);
-            _keepaliveTimeout = pingInterval;
+            _keepaliveTimeout = pingInterval.Multiply(3);
             _wrappedReader.MessageReceived += ResetKeepaliveTokenCancellation;
             ResetKeepaliveTokenCancellation();
         }
