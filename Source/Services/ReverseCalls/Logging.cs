@@ -101,6 +101,27 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             "No more messages to read for {Request}");
         internal static void NoMoreMessagesToRead(this ILogger logger, RequestId requestId)
             => _noMoreMessagesToRead(logger, requestId, null);
+
+        static readonly Action<ILogger, RequestId, Exception> _reverseCallArgumentsNotReceivedBecauseNoFirstMessage = LoggerMessage.Define<RequestId>(
+            LogLevel.Trace,
+            new EventId(434181373, nameof(ReverseCallArgumentsNotReceivedBecauseNoFirstMessage)),
+            "Reverse call arguments context {Request} because there was no first message");
+        internal static void ReverseCallArgumentsNotReceivedBecauseNoFirstMessage(this ILogger logger, RequestId requestId)
+            => _reverseCallArgumentsNotReceivedBecauseNoFirstMessage(logger, requestId, null);
+
+        static readonly Action<ILogger, RequestId, Exception> _reverseCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage = LoggerMessage.Define<RequestId>(
+            LogLevel.Trace,
+            new EventId(959653385, nameof(ReverseCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage)),
+            "Reverse call arguments context {Request} because there was no connect arguments in the first message");
+        internal static void ReverseCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage(this ILogger logger, RequestId requestId)
+            => _reverseCallArgumentsNotReceivedBecauseNoConnectArgumentsInFirstMessage(logger, requestId, null);
+
+        static readonly Action<ILogger, RequestId, Exception> _reverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments = LoggerMessage.Define<RequestId>(
+            LogLevel.Trace,
+            new EventId(786579103, nameof(ReverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments)),
+            "Reverse call arguments context {Request} because there was no context in the connect arguments");
+        internal static void ReverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments(this ILogger logger, RequestId requestId)
+            => _reverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments(logger, requestId, null);
 #endregion
 
 #region PingedReverseCallConnection
@@ -112,12 +133,12 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         internal static void WaitingForReverseCallContext(this ILogger logger, RequestId requestId)
             => _waitingForReverseCallContext(logger, requestId, null);
 
-        static readonly Action<ILogger, RequestId, Exception> _receivedReverseCallContext = LoggerMessage.Define<RequestId>(
+        static readonly Action<ILogger, RequestId, TimeSpan, Exception> _receivedReverseCallContext = LoggerMessage.Define<RequestId, TimeSpan>(
             LogLevel.Trace,
             new EventId(234474181, nameof(ReceivedReverseCallContext)),
-            "Received for reverse call arguments context for {Request}");
-        internal static void ReceivedReverseCallContext(this ILogger logger, RequestId requestId)
-            => _receivedReverseCallContext(logger, requestId, null);
+            "Received reverse call arguments context for {Request} after {WaitTime}");
+        internal static void ReceivedReverseCallContext(this ILogger logger, RequestId requestId, TimeSpan waitTime)
+            => _receivedReverseCallContext(logger, requestId, waitTime, null);
 
         static readonly Action<ILogger, RequestId, TimeSpan, Exception> _startPings = LoggerMessage.Define<RequestId, TimeSpan>(
             LogLevel.Trace,
@@ -133,12 +154,12 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         internal static void StartKeepaliveTokenTimeout(this ILogger logger, RequestId requestId, TimeSpan pingInterval)
             => _startKeepaliveTokenTimeout(logger, requestId, pingInterval, null);
 
-        static readonly Action<ILogger, RequestId, Exception> _failedToStartPingAndTimeout = LoggerMessage.Define<RequestId>(
+        static readonly Action<ILogger, RequestId, TimeSpan, Exception> _failedToStartPingAndTimeout = LoggerMessage.Define<RequestId, TimeSpan>(
             LogLevel.Warning,
             new EventId(670097578, nameof(FailedToStartPingAndTimeout)),
-            "Failed to start pinging and keepalive timeout for {Request}, the connection will be cancelled");
-        internal static void FailedToStartPingAndTimeout(this ILogger logger, RequestId requestId, Exception exception)
-            => _failedToStartPingAndTimeout(logger, requestId, exception);
+            "Failed to start pinging and keepalive timeout for {Request} because reverse call arguments was not received after waiting {WaitTime}");
+        internal static void FailedToStartPingAndTimeout(this ILogger logger, RequestId requestId, TimeSpan waitTime)
+            => _failedToStartPingAndTimeout(logger, requestId, waitTime, null);
 
         static readonly Action<ILogger, RequestId, Exception> _stoppingPings = LoggerMessage.Define<RequestId>(
             LogLevel.Trace,
