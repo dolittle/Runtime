@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Services
                 LogLevel.Debug,
                 new EventId(259558300, nameof(ExposingService)),
                 "Exposing service: {ServiceName}");
-        
+
         static readonly Action<ILogger, string, Exception> _couldNotStartHost = LoggerMessage
             .Define<string>(
                 LogLevel.Debug,
@@ -37,6 +37,18 @@ namespace Dolittle.Runtime.Services
                 LogLevel.Trace,
                 new EventId(382757357, nameof(WritingRequest)),
                 "Writing request with call id: {CallId}");
+
+        static readonly Action<ILogger, Exception> _callbackCallFailed = LoggerMessage
+            .Define(
+                LogLevel.Trace,
+                new EventId(221023257, nameof(CallbackCallFailed)),
+                "An error occurred while calling a registered callback");
+
+        static readonly Action<ILogger, Exception> _callbackLoopFailed = LoggerMessage
+            .Define(
+                LogLevel.Trace,
+                new EventId(269816071, nameof(CallbackLoopFailed)),
+                "An error occurred in the callback loop");
 
         internal static void RegisteringBoundService(this ILogger logger, string serviceName)
             => _registeringBoundService(logger, serviceName, null);
@@ -52,5 +64,11 @@ namespace Dolittle.Runtime.Services
 
         internal static void WritingRequest(this ILogger logger, ReverseCallId callId)
             => _writingRequest(logger, callId, null);
+
+        internal static void CallbackCallFailed(this ILogger logger, Exception ex)
+            => _callbackCallFailed(logger, ex);
+
+        internal static void CallbackLoopFailed(this ILogger logger, Exception ex)
+            => _callbackLoopFailed(logger, ex);
     }
 }

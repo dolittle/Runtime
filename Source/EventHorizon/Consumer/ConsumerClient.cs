@@ -7,6 +7,12 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 
+using EventHorizonReverseCallClient = Dolittle.Runtime.Services.Clients.IReverseCallClient<
+    Dolittle.Runtime.EventHorizon.Contracts.ConsumerSubscriptionRequest,
+    Dolittle.Runtime.EventHorizon.Contracts.SubscriptionResponse,
+    Dolittle.Runtime.EventHorizon.Contracts.ConsumerRequest,
+    Dolittle.Runtime.EventHorizon.Contracts.ConsumerResponse>;
+
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
