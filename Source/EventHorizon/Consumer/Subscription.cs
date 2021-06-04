@@ -5,13 +5,13 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Microservices;
 using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Nito.AsyncEx;
 using EventHorizonStreamProcessor = Dolittle.Runtime.EventHorizon.Consumer.Processing.IStreamProcessor;
-using Dolittle.Runtime.Microservices;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -60,6 +60,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// <inheritdoc/>
         public async Task<SubscriptionResponse> Register()
         {
+            _logger.LogDebug("Registering Subscription: {Identifier}", Identifier);
             _eventHorizonConnection = _connectionEstablisher.Establish(Identifier, _connectionAddress, _eventFromEventHorizon);
             var response = await _eventHorizonConnection.FirstSubscriptionResponse.ConfigureAwait(false);
             if (response.Success)
@@ -71,6 +72,7 @@ namespace Dolittle.Runtime.EventHorizon
             }
             else
             {
+                _logger.LogDebug("EventHorizonConnections first response failed for subscription: {Identifier}, disposing the connection", Identifier);
                 _eventHorizonConnection.Dispose();
             }
             return response;

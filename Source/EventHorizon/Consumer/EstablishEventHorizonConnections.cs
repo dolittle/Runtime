@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Services.Clients;
@@ -23,6 +23,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IStreamProcessorStateRepository _streamProcessorStates;
         readonly IEventHorizons _eventHorizons;
         readonly ILoggerFactory _loggerFactory;
+        readonly ILogger _logger;
 
         public EstablishEventHorizonConnections(
             IClientManager clientManager,
@@ -36,6 +37,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _streamProcessorStates = streamProcessorStates;
             _eventHorizons = eventHorizons;
             _loggerFactory = loggerFactory;
+            _logger = _loggerFactory.CreateLogger<EstablishEventHorizonConnections>();
         }
 
         /// <inheritdoc/>
@@ -44,6 +46,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             MicroserviceAddress connectionAddress,
             AsyncProducerConsumerQueue<StreamEvent> eventsFromEventHorizon)
         {
+            _logger.LogDebug("Establishing EventHorizonConnection: {subscription} to address {connectionAddress}", subscription, connectionAddress);
             var connection = new EventHorizonConnection(
                 subscription,
                 connectionAddress,

@@ -63,6 +63,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             try
             {
+                _logger.LogDebug("Getting an Event Horizon for subscription: {Subcription}", _subscription);
                 var eventHorizon = SetupEventHorizon(cancellationToken);
                 var response = await Connect(eventHorizon, cancellationToken).ConfigureAwait(false);
 
