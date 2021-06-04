@@ -65,7 +65,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// </summary>
         public ConsentId ConsentId { get; }
 
-
         /// <inheritdoc/>
         public async Task<Try<bool>> TryStartAndWait(CancellationToken cancellationToken)
         {

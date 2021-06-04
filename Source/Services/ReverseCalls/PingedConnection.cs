@@ -4,8 +4,8 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
-using System.Threading.Tasks;
 using Dolittle.Runtime.Services.Callbacks;
+using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
@@ -37,8 +37,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         readonly WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedReader;
         readonly WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _wrappedWriter;
         readonly ILogger _logger;
-        readonly Task _pingStarter;
         readonly CancellationTokenRegistration _keepAliveExpiredRegistration;
+        Stopwatch _waitForCallContextStopwatch;
         TimeSpan _keepaliveTimeout;
         IDisposable _scheduledPings;
         bool _disposed;
@@ -90,7 +90,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _metrics = metrics;
             _logger = loggerFactory.CreateLogger<PingedConnection<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>();
 
-            _pingStarter = WaitForFirstMessageThenStartPinging(_cancellationTokenSource.Token);
+            WaitForCallContextInFirstMessageThenStartPinging();
             _keepAliveExpiredRegistration = keepalive.Token.Register(NotifyKeepaliveTimedOut);
         }
 
@@ -118,10 +118,11 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             {
                 _logger.DisposingPingedConnection(_requestId);
                 _cancellationTokenSource.Cancel();
-                WaitForPingStarterToCompleteIgnoringExceptions();
                 MaybeStopPinging();
                 _keepAliveExpiredRegistration.Dispose();
                 _keepalive.Dispose();
+                _wrappedReader.ReverseCallContextReceived -= OnReverseCallContextReceived;
+                _wrappedReader.ReverseCallContextNotReceivedInFirstMessage -= OnReverseCallContextNotReceivedInFirstMessage;
                 _wrappedReader.MessageReceived -= ResetKeepaliveTokenCancellation;
                 _cancellationTokenSource.Dispose();
                 _wrappedWriter.Dispose();
@@ -131,30 +132,30 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _disposed = true;
         }
 
-        Task WaitForFirstMessageThenStartPinging(CancellationToken cancellationToken) =>
-            Task.Run(async () =>
-            {
-                try
-                {
-                    var stopwatch = Stopwatch.StartNew();
-                    _logger.WaitingForReverseCallContext(_requestId);
+        void WaitForCallContextInFirstMessageThenStartPinging()
+        {
+            _wrappedReader.ReverseCallContextReceived += OnReverseCallContextReceived;
+            _wrappedReader.ReverseCallContextNotReceivedInFirstMessage += OnReverseCallContextNotReceivedInFirstMessage;
+            _waitForCallContextStopwatch = Stopwatch.StartNew();
+            _logger.WaitingForReverseCallContext(_requestId);
+        }
 
-                    var context = await _wrappedReader.ReverseCallContext.ConfigureAwait(false);
+        void OnReverseCallContextReceived(ReverseCallArgumentsContext context)
+        {
+            _waitForCallContextStopwatch.Stop();
+            _metrics.AddToTotalWaitForFirstMessageTime(_waitForCallContextStopwatch.Elapsed);
+            _logger.ReceivedReverseCallContext(_requestId, _waitForCallContextStopwatch.Elapsed);
 
-                    stopwatch.Stop();
-                    _metrics.AddToTotalWaitForFirstMessageTime(stopwatch.Elapsed);
-                    _logger.ReceivedReverseCallContext(_requestId);
-
-                    var pingInterval = context.PingInterval.ToTimeSpan();
-                    StartPinging(pingInterval);
-                    StartKeepaliveTokenTimeout(pingInterval);
-                }
-                catch (Exception exception)
-                {
-                    _cancellationTokenSource.Cancel();
-                    _logger.FailedToStartPingAndTimeout(_requestId, exception);
-                }
-            }, cancellationToken);
+            var pingInterval = context.PingInterval.ToTimeSpan();
+            StartPinging(pingInterval);
+            StartKeepaliveTokenTimeout(pingInterval);
+        }
+        void OnReverseCallContextNotReceivedInFirstMessage()
+        {
+            _cancellationTokenSource.Cancel();
+            _waitForCallContextStopwatch.Stop();
+            _logger.FailedToStartPingAndTimeout(_requestId, _waitForCallContextStopwatch.Elapsed);
+        }
 
         void StartPinging(TimeSpan pingInterval)
         {
@@ -194,18 +195,6 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         {
             _metrics.IncrementTotalKeepaliveTimeouts();
             _logger.KeepaliveTimedOut(_requestId);
-        }
-
-        void WaitForPingStarterToCompleteIgnoringExceptions()
-        {
-            var stopwatch = Stopwatch.StartNew();
-            _logger.WaitingForPingStarterToComplete(_requestId);
-
-            _pingStarter.ContinueWith(_ => { }).GetAwaiter().GetResult();
-
-            stopwatch.Stop();
-            _metrics.AddToTotalWaitForPingStarterToCompleteTime(stopwatch.Elapsed);
-            _logger.PingStarterCompleted(_requestId);
         }
     }
 }

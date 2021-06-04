@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly CancellationTokenSource _cancellationTokenSource = new();
         readonly TaskCompletionSource<SubscriptionResponse> _firstSubscriptionResponse = new(TaskCreationOptions.RunContinuationsAsynchronously);
         bool _is_first_connection = true;
-        bool disposed;
+        bool _disposed;
 
         public EventHorizonConnection(
             SubscriptionId subscription,
@@ -101,7 +101,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
+            if (_disposed)
             {
                 return;
             }
@@ -113,7 +113,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _firstSubscriptionResponse.TrySetCanceled();
             }
 
-            disposed = true;
+            _disposed = true;
         }
 
         IEventHorizonProcessor SetupEventHorizon(CancellationToken cancellationToken)
