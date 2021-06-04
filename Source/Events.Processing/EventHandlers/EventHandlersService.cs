@@ -29,6 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         readonly IExecutionContextManager _executionContextManager;
         readonly IInitiateReverseCallServices _reverseCallServices;
         readonly IEventHandlersProtocol _eventHandlersProtocol;
+        readonly IEventHandlers _eventHandlers;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
         readonly IHostApplicationLifetime _hostApplicationLifetime;
@@ -44,6 +45,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
         /// <param name="eventHandlersProtocol">The <see cref="IEventHandlersProtocol" />.</param>
+        /// <param name="eventHandlers"><see cref="IEventHandlers"/> for keeping track of what event handlers are in the system.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public EventHandlersService(
             IHostApplicationLifetime hostApplicationLifetime,
@@ -54,6 +56,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             IExecutionContextManager executionContextManager,
             IInitiateReverseCallServices reverseCallServices,
             IEventHandlersProtocol eventHandlersProtocol,
+            IEventHandlers eventHandlers,
             ILoggerFactory loggerFactory)
         {
             _filterValidator = filterForAllTenants;
@@ -63,6 +66,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _executionContextManager = executionContextManager;
             _reverseCallServices = reverseCallServices;
             _eventHandlersProtocol = eventHandlersProtocol;
+            _eventHandlers = eventHandlers;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<EventHandlersService>();
             _hostApplicationLifetime = hostApplicationLifetime;
@@ -75,6 +79,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             ServerCallContext context)
         {
             _logger.LogDebug("Connecting Event Handler");
+            EventHandler actualEventHandler = null;
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
             try
             {
@@ -98,11 +103,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     _loggerFactory,
                     cts.Token
                 );
+                actualEventHandler = eventHandler;
+                _eventHandlers.Register(eventHandler);
                 await eventHandler.RegisterAndStart().ConfigureAwait(false);
             }
             finally
             {
                 cts.Cancel();
+                _eventHandlers.Unregister(actualEventHandler);
             }
         }
     }
