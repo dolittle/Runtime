@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Services.Clients
         {
         }
 
-        public void IncrementTotalCancelledConections()
+        public void IncrementTotalCancelledConnections()
         {
         }
 

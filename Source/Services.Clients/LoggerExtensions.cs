@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services.Clients
 {
-    public static class Logging
+    internal static class LoggerExtensions
     {
 #region ReverseCallClient
 

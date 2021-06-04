@@ -41,6 +41,7 @@ namespace Dolittle.Runtime.Services.Clients
         readonly IMetricsCollector _metrics;
         readonly ILogger _logger;
         readonly SemaphoreSlim _writeLock = new(1);
+        readonly object _acceptHandleLock = new();
         IClientStreamWriter<TClientMessage> _clientToServer;
         IAsyncStreamReader<TServerMessage> _serverToClient;
         ReverseCallHandler<TRequest, TResponse> _callback;
@@ -123,14 +124,14 @@ namespace Dolittle.Runtime.Services.Clients
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
-                    _metrics.IncrementTotalStartedConnections();
+                    _metrics.IncrementTotalCancelledConnections();
                     _logger.ConnectionCancelledWhileHandlingRequests("client");
                     return;
                 }
 
                 if (!keepalive.IsCancellationRequested)
                 {
-                    _metrics.IncrementTotalStartedConnections();
+                    _metrics.IncrementTotalCancelledConnections();
                     _logger.ConnectionCancelledWhileHandlingRequests("server");
                     return;
                 }
@@ -194,13 +195,13 @@ namespace Dolittle.Runtime.Services.Clients
 
         async Task<bool> ReceiveConnectResponse(CancellationToken cancellationToken)
         {
+            using var keepalive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
+                keepalive.CancelAfter(_pingInterval.Multiply(3));
+
                 var stopwatch = Stopwatch.StartNew();
                 _logger.ReceivingConnectResponse(typeof(TConnectResponse));
-
-                using var keepalive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-                keepalive.CancelAfter(_pingInterval.Multiply(3));
 
                 if (await ReadMessageFromServerWhileRespondingToPings(keepalive).ConfigureAwait(false))
                 {
@@ -225,17 +226,25 @@ namespace Dolittle.Runtime.Services.Clients
             }
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
             {
+
                 if (cancellationToken.IsCancellationRequested)
                 {
+                    _metrics.IncrementTotalCancelledConnections();
                     _logger.DidNotReceiveConnectResponse(typeof(TConnectResponse), "Connection was closed by the client");
-                }
-                else
-                {
-                    _logger.DidNotReceiveConnectResponse(typeof(TConnectResponse), "Connection was closed by the server");
+                    return false;
                 }
 
-                _metrics.IncrementTotalCancelledConections();
-                return false;
+                if (!keepalive.IsCancellationRequested)
+                {
+                    _metrics.IncrementTotalCancelledConnections();
+                    _logger.DidNotReceiveConnectResponse(typeof(TConnectResponse), "Connection was closed by the server");
+                    return false;
+                }
+
+                _metrics.IncrementTotalPingTimeouts();
+                _logger.PingTimedOut();
+
+                throw new PingTimedOut();
             }
             catch (Exception exception)
             {
@@ -424,7 +433,7 @@ namespace Dolittle.Runtime.Services.Clients
         {
 
             if (_connecting) throw new ReverseCallClientAlreadyCalledConnect();
-            lock (this)
+            lock (_acceptHandleLock)
             {
                 if (_connecting) throw new ReverseCallClientAlreadyCalledConnect();
                 _connecting = true;
@@ -442,7 +451,7 @@ namespace Dolittle.Runtime.Services.Clients
         void EnsureOnlyHandlingOnce()
         {
             if (_startedHandling) throw new ReverseCallClientAlreadyStartedHandling();
-            lock (this)
+            lock (_acceptHandleLock)
             {
                 if (_startedHandling) throw new ReverseCallClientAlreadyStartedHandling();
                 _startedHandling = true;

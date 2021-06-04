@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Services.Clients
         void IncrementTotalWrites();
         void AddToTotalWriteBytes(int messageSize);
         void AddToTotalWaitForConnectResponseTime(TimeSpan waitTime);
-        void IncrementTotalCancelledConections();
+        void IncrementTotalCancelledConnections();
         void IncrementTotalReceivedMessages();
         void AddToTotalReceivedBytes(int messageSize);
         void IncrementTotalPingsReceived();
