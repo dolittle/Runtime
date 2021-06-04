@@ -3,17 +3,17 @@
 
 using System.Collections.Concurrent;
 using System.Threading;
+using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.EventHorizon.Consumer.Processing;
-using System.Threading.Tasks;
-using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Resilience;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -26,7 +26,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new();
         readonly ILoggerFactory _loggerFactory;
         readonly IStreamProcessorFactory _streamProcessorFactory;
-
         readonly MicroservicesConfiguration _microservicesConfiguration;
         readonly IEstablishEventHorizonConnections _eventHorizonConnectionEstablisher;
         readonly ILogger<Subscriptions> _logger;
@@ -52,21 +51,20 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _logger = loggerFactory.CreateLogger<Subscriptions>();
         }
 
-        /// <inheritdoc/>
-        public bool TryGetConsentFor(SubscriptionId subscriptionId, out ConsentId consentId)
-        {
-            var result = _subscriptions.TryGetValue(subscriptionId, out var subscription);
-            consentId = subscription?.Consent;
-            return result;
-        }
-
         /// <inheritdoc />
         public async Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken)
         {
-            if (_subscriptions.ContainsKey(subscriptionId))
+            if (_subscriptions.TryGetValue(subscriptionId, out var existingSubscription))
             {
-                _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                return SubscriptionResponse.Succeeded(_subscriptions[subscriptionId].Consent);
+                if (existingSubscription.HasFinishedSubscribing)
+                {
+                    _logger.SubscriptionAlreadyRegistered(subscriptionId);
+                    return SubscriptionResponse.Succeeded(existingSubscription.Consent);
+                }
+                _logger.SubscriptionIsAlreadyRegistering(subscriptionId);
+                return SubscriptionResponse.Failed(new Failure(
+                    SubscriptionFailures.SubscriptionIsAlreadyRegistering,
+                    $"Subscription {subscriptionId} is already being registered"));
             }
 
             var producerMicroservice = subscriptionId.ProducerMicroserviceId;
@@ -75,7 +73,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _logger.NoMicroserviceConfigurationFor(producerMicroservice);
                 return SubscriptionResponse.Failed(new Failure(
                     SubscriptionFailures.MissingMicroserviceConfiguration,
-                    $"No microservice configuration for producer mircoservice {producerMicroservice}"));
+                    $"No microservice configuration for producer microservice {producerMicroservice}"));
             }
 
             var subscription = new Subscription(
@@ -84,14 +82,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _streamProcessorFactory,
                 _eventHorizonConnectionEstablisher,
                 _loggerFactory);
+
             if (!_subscriptions.TryAdd(subscriptionId, subscription))
             {
                 _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                return SubscriptionResponse.Succeeded(_subscriptions[subscriptionId].Consent);
             }
-
             var response = await subscription.Register().ConfigureAwait(false);
-            if (!response.Success)
+            if (response.Success)
+            {
+                return SubscriptionResponse.Succeeded(subscription.Consent);
+            }
+            else
             {
                 _subscriptions.TryRemove(subscriptionId, out var _);
             }
@@ -104,5 +105,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             microserviceAddress = microserviceAddressConfig;
             return result;
         }
+    }
+
+    public class S
+    {
+        publicBbool Connecting { get; }
+        public bool Connected { get; }
+        public ConsentId Consent { get; }
     }
 }

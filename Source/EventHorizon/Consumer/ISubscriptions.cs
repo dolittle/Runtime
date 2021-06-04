@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public interface ISubscriptions
     {
         /// <summary>
-        /// Adds an event horizon subscription.
+        /// Adds an event horizon subscription if one isn't already present.
         /// </summary>
         /// <param name="consentId">The <see cref="ConsentId" />.</param>
         /// <param name="subscriptionId">The <see cref="SubscriptionId"/>.</param>
@@ -21,15 +21,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="eventsFetcher">The <see cref="EventsFromEventHorizonFetcher" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <param name="subscription">The <see cref="Subscription" />.</param>
-        /// <returns>False if the Subscription already exists, true if not.</returns>
+        /// <returns>A <see cref="SubscriptionResponse"/>.</returns>
         Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Tries to get the <see cref="ConsentId "/> for a <see cref="SubscriptionId" />.
+        /// Tries to get the <see cref="Subscription "/> for a <see cref="SubscriptionId" />.
         /// </summary>
         /// <param name="subscriptionId">The <see cref="SubscriptionId" />.</param>
-        /// <param name="consentId">The <see cref="ConsentId" />.</param>
+        /// <param name="Subscription">The <see cref="Subscription" />.</param>
         /// <returns>A value indicating whether the subscription exists or not.</returns>
-        bool TryGetConsentFor(SubscriptionId subscriptionId, out ConsentId consentId);
+        bool TryGetSubscriptionFor(SubscriptionId subscriptionId, out Subscription subscription);
     }
 }

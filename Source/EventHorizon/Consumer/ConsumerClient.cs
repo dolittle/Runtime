@@ -31,12 +31,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             _executionContextManager.CurrentFor(subscriptionId.ConsumerTenantId);
             var subscriptions = _getSubscriptions();
-            if (subscriptions.TryGetConsentFor(subscriptionId, out var consentId))
-            {
-                _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                return SubscriptionResponse.Succeeded(consentId);
-            }
-
             return await subscriptions.Subscribe(subscriptionId, cancellationToken).ConfigureAwait(false);
         }
     }

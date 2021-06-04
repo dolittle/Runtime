@@ -29,5 +29,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Gets the <see cref="FailureId" /> that represents the 'CouldNotConnectToProducerRuntime' failure type.
         /// </summary>
         public static FailureId CouldNotConnectToProducerRuntime => FailureId.Create("2e6b926a-a213-4175-a597-df64aee4a497");
+
+        /// <summary>
+        /// Gets the <see cref="FailureId" /> that represents the 'SubscriptionIsAlreadyRegistering' failure type.
+        /// </summary>
+        public static FailureId SubscriptionIsAlreadyRegistering => FailureId.Create("0299ce71-3157-4198-a4bd-fc52c1b16ebd");
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     internal static class LoggerExtensions
-    {   
+    {
         static readonly Action<ILogger, Guid, Exception> _noMicroserviceConfigurationFor = LoggerMessage
             .Define<Guid>(
                 LogLevel.Warning,
@@ -120,6 +120,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 new EventId(1317844869, nameof(ErrorWhileSubscribing)),
                 "An error occurred while trying to handling event horizon subscription: {Subscription}");
 
+        static readonly Action<ILogger, SubscriptionId, Exception> _subscriptionIsAlreadyRegistering = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Information,
+                new EventId(2047860053, nameof(SubscriptionIsAlreadyRegistering)),
+                "Subscription {Subscription} is already being registered");
+
         internal static void NoMicroserviceConfigurationFor(this ILogger logger, Microservice producerMicroservice)
             => _noMicroserviceConfigurationFor(logger, producerMicroservice, null);
 
@@ -163,7 +169,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         internal static void SuccessfullyRegisteredSubscription(this ILogger logger, SubscriptionId subscription)
             => _successfullyRegisteredSubscription(logger, subscription, null);
-        
+
         internal static void UnregisteringSubscription(this ILogger logger, SubscriptionId subscription)
             => _unregisteringSubscription(logger, subscription, null);
 
@@ -172,5 +178,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         internal static void ErrorWhileSubscribing(this ILogger logger, Exception exception, SubscriptionId subscription)
             => _errorWhileSubscribing(logger, subscription, exception);
+
+        internal static void SubscriptionIsAlreadyRegistering(this ILogger logger, SubscriptionId subscription)
+            => _subscriptionIsAlreadyRegistering(logger, subscription, null);
     }
 }

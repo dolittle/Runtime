@@ -53,6 +53,11 @@ namespace Dolittle.Runtime.EventHorizon
         public ConsentId Consent { get; private set; }
 
         /// <summary>
+        /// Gets whether the Subscription has finished subscribing.
+        /// </summary>
+        public bool HasFinishedSubscribing => Consent != null;
+
+        /// <summary>
         /// Gets the <see cref="SubscriptionId" />.
         /// </summary>
         public SubscriptionId Identifier { get; }
