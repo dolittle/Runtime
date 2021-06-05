@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store.Streams;
 using Nito.AsyncEx;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
+namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
 {
     /// <summary>
     /// Defines an event horizon connection to a producer microservice Runtime.

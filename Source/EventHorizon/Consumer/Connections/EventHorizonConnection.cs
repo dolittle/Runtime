@@ -12,7 +12,7 @@ using Dolittle.Runtime.Services.Clients;
 using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
+namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
 {
     /// <summary>
     /// Represent an implementation <see cref="IEventHorizonConnection" />. 
