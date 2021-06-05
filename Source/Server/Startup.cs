@@ -12,6 +12,7 @@ using Microsoft.Extensions.Hosting;
 
 namespace Dolittle.Runtime.Server
 {
+
     /// <summary>
     /// The startup for Asp.Net Core.
     /// </summary>
@@ -83,6 +84,8 @@ namespace Dolittle.Runtime.Server
                     Tool = { Enable = false }
                 });
             });
+
+            app.UseProxyServer("/metrics", "http://localhost:9700/metrics");
 
             ObjectFieldExtensions.ServiceProvider = app.ApplicationServices;
         }
