@@ -1,9 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Events.Store.EventHorizon;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -13,15 +11,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public interface ISubscriptions
     {
         /// <summary>
-        /// Adds an event horizon subscription if one isn't already present.
+        /// Creates a new event horizon subscription if one does not already exist for the provided <see cref="SubscriptionId"/>.
         /// </summary>
-        /// <param name="consentId">The <see cref="ConsentId" />.</param>
-        /// <param name="subscriptionId">The <see cref="SubscriptionId"/>.</param>
-        /// <param name="eventProcessor">The <see cref="EventProcessor" />.</param>
-        /// <param name="eventsFetcher">The <see cref="EventsFromEventHorizonFetcher" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <param name="subscription">The <see cref="Subscription" />.</param>
-        /// <returns>A <see cref="SubscriptionResponse"/>.</returns>
-        Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken);
+        /// <param name="subscriptionId">The subscription identifier which describes the subscription to create.</param>
+        /// <returns>
+        /// A task that, when resolved returns the <see cref="SubscriptionResponse"/> from the connection to the producer Runtime.
+        /// If the subscription is already connected, this immediately resolves to the last connection result.
+        /// Otherwise, it will resolve once the next connection attempt succeeds or fails.
+        /// </returns>
+        Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId);
     }
 }
