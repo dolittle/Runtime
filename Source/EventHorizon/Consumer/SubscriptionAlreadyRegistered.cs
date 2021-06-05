@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Exception that gets thrown when a <see cref="Subscription" /> has already been registered.

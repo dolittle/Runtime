@@ -2,9 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
-using Dolittle.Runtime.EventHorizon.Consumer;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Defines a resilient subscription to an event horizon.

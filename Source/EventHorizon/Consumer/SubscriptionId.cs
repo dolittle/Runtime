@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Represents an the unique identifier of an Event Horizon Subscription.
