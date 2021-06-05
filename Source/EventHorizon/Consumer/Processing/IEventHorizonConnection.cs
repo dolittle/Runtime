@@ -9,13 +9,14 @@ using Nito.AsyncEx;
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
     /// <summary>
-    /// Defines a system that connects to the producer Runtime.
+    /// Defines an event horizon connection to a producer microservice Runtime.
     /// </summary>
     public interface IEventHorizonConnection
     {
         /// <summary>
         /// Connects to the producer Runtime, and returns the response.
         /// </summary>
+        /// <param name="subscription">The subscription to request public events for.</param>
         /// <param name="publicEventsPosition">The position of the producer Runtimes public stream to start from, one greater than last event already received.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the connection attempt.</param>
         /// <returns>
@@ -23,7 +24,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// If <see cref="SubscriptionResponse.Success"/> is true, the connection is started and <see cref="StartRecevingEventsInto(AsyncProducerConsumerQueue{StreamEvent}, CancellationToken)"/> should be called.
         /// Else, the connection failed and should it should not be used.
         /// </returns>
-        Task<SubscriptionResponse> Connect(StreamPosition publicEventsPosition, CancellationToken cancellationToken);
+        Task<SubscriptionResponse> Connect(
+            SubscriptionId subscription,
+            StreamPosition publicEventsPosition,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Starts the handling events from the producer Runtime.
@@ -37,6 +41,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="connectionToStreamProcessorQueue">The async queue to write the events for the stream processor into</param>
         /// <param name="cancellationToken">A cancellation token that can be used to close the connection.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task StartRecevingEventsInto(AsyncProducerConsumerQueue<StreamEvent> connectionToStreamProcessorQueue, CancellationToken cancellationToken);
+        Task StartReceivingEventsInto(
+            AsyncProducerConsumerQueue<StreamEvent> connectionToStreamProcessorQueue,
+            CancellationToken cancellationToken);
     }
 }

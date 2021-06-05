@@ -12,11 +12,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     public interface IEventHorizonConnectionFactory
     {
         /// <summary>
-        /// Creates a new <see cref="IEventHorizonConnection"/> to another Runtime for a subscription.
+        /// Creates a new <see cref="IEventHorizonConnection"/> to another Runtime.
         /// </summary>
         /// <param name="connectionAddress">The address of the other microservices Runtime to connect to.</param>
-        /// <param name="subscription">The subscription to request public events for.</param>
         /// <returns>A new <see cref="IEventHorizonConnection"/> that is ready to be connected.</returns>
-        IEventHorizonConnection Create(MicroserviceAddress connectionAddress, SubscriptionId subscription);
+        IEventHorizonConnection Create(MicroserviceAddress connectionAddress);
     }
 }

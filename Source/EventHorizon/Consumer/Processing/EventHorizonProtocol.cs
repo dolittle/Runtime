@@ -8,7 +8,7 @@ using Dolittle.Services.Contracts;
 using Grpc.Core;
 using Client = Dolittle.Runtime.EventHorizon.Contracts.Consumer.ConsumerClient;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
     /// <summary>
     /// Represents an implementation of the event horizon reverse call protocol.
