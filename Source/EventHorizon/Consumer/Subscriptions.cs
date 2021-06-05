@@ -2,12 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Concurrent;
-using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Microservices;
@@ -52,58 +50,44 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         /// <inheritdoc />
-        public async Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken)
+        public Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId)
         {
-            if (_subscriptions.TryGetValue(subscriptionId, out var existingSubscription))
+            _logger.SubscribingTo(subscriptionId);
+
+            var producerMicroserviceId = subscriptionId.ProducerMicroserviceId;
+            if (!TryGetProducerMicroserviceAddress(producerMicroserviceId, out var producerConnectionAddress))
             {
-                if (existingSubscription.HasFinishedSubscribing)
-                {
-                    _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                    return SubscriptionResponse.Succeeded(existingSubscription.Consent);
-                }
-                _logger.SubscriptionIsAlreadyRegistering(subscriptionId);
-                return SubscriptionResponse.Failed(new Failure(
-                    SubscriptionFailures.SubscriptionIsAlreadyRegistering,
-                    $"Subscription {subscriptionId} is already being registered"));
+                _logger.NoMicroserviceConfigurationFor(producerMicroserviceId);
+                return Task.FromResult(
+                    SubscriptionResponse.Failed(
+                        new Failure(
+                            SubscriptionFailures.MissingMicroserviceConfiguration,
+                            $"No microservice configuration for producer microservice {producerMicroserviceId}")));
             }
 
-            var producerMicroservice = subscriptionId.ProducerMicroserviceId;
-            if (!TryGetMicroserviceAddress(producerMicroservice, out var connectionAddress))
-            {
-                _logger.NoMicroserviceConfigurationFor(producerMicroservice);
-                return SubscriptionResponse.Failed(new Failure(
-                    SubscriptionFailures.MissingMicroserviceConfiguration,
-                    $"No microservice configuration for producer microservice {producerMicroservice}"));
-            }
+            var subscription = _subscriptions.GetOrAdd(subscriptionId, CreateNewSubscription(subscriptionId, producerConnectionAddress));
 
-            var subscription = new Subscription(
-                subscriptionId,
-                connectionAddress,
-                _streamProcessorFactory,
-                _eventHorizonConnectionEstablisher,
-                _loggerFactory);
-
-            if (!_subscriptions.TryAdd(subscriptionId, subscription))
+            if (subscription.State == SubscriptionState.Created)
             {
-                _logger.SubscriptionAlreadyRegistered(subscriptionId);
-            }
-            var response = await subscription.Register().ConfigureAwait(false);
-            if (response.Success)
-            {
-                return SubscriptionResponse.Succeeded(subscription.Consent);
+                _logger.StartingCreatedSubscription(subscriptionId);
+                subscription.Start();
             }
             else
             {
-                _subscriptions.TryRemove(subscriptionId, out var _);
+                _logger.SubscriptionAlreadyRegistered(subscriptionId);
             }
-            return response;
+
+            return subscription.ConnectionResponse;
         }
 
-        bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
+        bool TryGetProducerMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
         {
             var result = _microservicesConfiguration.TryGetValue(producerMicroservice, out var microserviceAddressConfig);
             microserviceAddress = microserviceAddressConfig;
             return result;
         }
+
+        Subscription CreateNewSubscription(SubscriptionId subscriptionId, MicroserviceAddress producerMicroserviceAddress)
+            => throw new System.NotImplementedException();
     }
 }
