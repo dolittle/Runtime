@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Server
                 localResponse.Clear();
                 localResponse.ContentType = "application/text";
 
-                while (bytesRead > 0) // && localResponse.IsClientConnected)
+                while (bytesRead > 0)
                 {
                     await localResponse.Body.WriteAsync(buffer.AsMemory(0, bytesRead)).ConfigureAwait(false);
                     bytesRead = remoteStream.Read(buffer, 0, buffer.Length);
