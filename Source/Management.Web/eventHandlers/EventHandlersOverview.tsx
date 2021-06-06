@@ -104,8 +104,6 @@ export const EventHandlersOverview = () => {
         }
     ];
 
-    //if (eventHandlersQueryResult.error) return <p>Error :(</p>;
-
     const result = eventHandlersQueryResult.data?.eventHandlers?.allForTenant || [];
 
     return (
