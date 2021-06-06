@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
@@ -19,19 +20,19 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [Singleton]
     public class SubscriptionsService : SubscriptionsBase
     {
-        readonly IConsumerClient _consumerClient;
+        readonly FactoryFor<ISubscriptions> _getSubscriptions;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionsService"/> class.
         /// </summary>
-        /// <param name="consumerClient">The <see cref="IConsumerClient" />.</param>
+        /// <param name="getSubscriptions">The <see cref="FactoryFor{T}" /> <see cref="ISubscriptions" />.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public SubscriptionsService(IConsumerClient consumerClient, IExecutionContextManager executionContextManager, ILogger logger)
+        public SubscriptionsService(FactoryFor<ISubscriptions> getSubscriptions, IExecutionContextManager executionContextManager, ILogger logger)
         {
             _executionContextManager = executionContextManager;
-            _consumerClient = consumerClient;
+            _getSubscriptions = getSubscriptions;
             _logger = logger;
         }
 
@@ -50,7 +51,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             {
                 _logger.IncomingSubscripton(subscription);
 
-                var subscriptionResponse = await _consumerClient.HandleSubscriptionRequest(subscription, context.CancellationToken).ConfigureAwait(false);
+                var subscriptionResponse = await _getSubscriptions().Subscribe(subscription).ConfigureAwait(false);
 
                 return subscriptionResponse switch
                 {
@@ -62,11 +63,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             {
                 return new Contracts.SubscriptionResponse { Failure = new Failure(SubscriptionFailures.SubscriptionCancelled, "Event Horizon subscription was cancelled") };
             }
-            catch (Exception ex)
+            catch (Exception exception)
             {
                 if (!context.CancellationToken.IsCancellationRequested)
                 {
-                    _logger.ErrorWhileSubscribing(ex, subscription);
+                    _logger.ErrorWhileSubscribing(subscription, exception);
                 }
 
                 return new Contracts.SubscriptionResponse { Failure = new Failure(FailureId.Other, "InternalServerError") };

@@ -51,7 +51,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
             SubscriptionId subscription,
             EventsFromEventHorizonFetcher eventsFromEventHorizonFetcher)
             => new StreamProcessor(
-                consent,
                 subscription,
                 new EventProcessor(
                     consent,
