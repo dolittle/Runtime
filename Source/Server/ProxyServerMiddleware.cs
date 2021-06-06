@@ -10,12 +10,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.Server
 {
+    /// <summary>
+    /// Represents a simple middleware that proxies requests to a relative path to a defined target.
+    /// </summary>
     public class ProxyServerMiddleware
     {
         readonly string _route;
         readonly string _target;
         private readonly RequestDelegate _next;
 
+        /// <summary>
+        /// Initializes a new instance of <see cref="ProxyServerMiddleware"/>.
+        /// </summary>
+        /// <param name="route">Route to represent.</param>
+        /// <param name="route">The relative - rooted route (e.g. /proxy).</param>
+        /// <param name="target">The fully qualified URL to proxy through to.</param>
+        /// <param name="next">Next <see cref="RequestDelegate">middleware</see>.</param>
         public ProxyServerMiddleware(string route, string target, RequestDelegate next)
         {
             _route = route;
@@ -23,6 +33,11 @@ namespace Dolittle.Runtime.Server
             _next = next;
         }
 
+        /// <summary>
+        /// Middleware invoke handler.
+        /// </summary>
+        /// <param name="context"><see cref="HttpContext"/> to work with.</param>
+        /// <returns>Asynchronous <see cref="Task"/>.</returns>
         public async Task Invoke(HttpContext context)
         {
             var endRequest = false;
@@ -37,7 +52,7 @@ namespace Dolittle.Runtime.Server
             }
         }
 
-        private static async Task StreamAsync(HttpContext context, string url)
+        async Task StreamAsync(HttpContext context, string url)
         {
             var httpClientHandler = new HttpClientHandler
             {
