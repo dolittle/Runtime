@@ -30,12 +30,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
             CancellationToken cancellationToken);
 
         /// <summary>
-        /// Starts the handling events from the producer Runtime.
-        /// </summary>
-        /// <param name="cancellationToken">A cancellation token that can be used to close the connection.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-
-        /// <summary>
         /// Starts receiving events over the connection and writes then to the provided queue.
         /// </summary>
         /// <param name="connectionToStreamProcessorQueue">The async queue to write the events for the stream processor into</param>

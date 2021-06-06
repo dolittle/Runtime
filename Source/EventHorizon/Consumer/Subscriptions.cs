@@ -29,6 +29,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
         readonly ILogger<Subscriptions> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Subscriptions"/> class.
+        /// </summary>
+        /// <param name="streamProcessorFactory">The factory to use for creating stream processors that write the received events.</param>
+        /// <param name="microservicesConfiguration">The configuration to use for finding the address of a producer Runtime from it's microservice id.</param>
+        /// <param name="eventHorizonConnectionFactory">The factory to use for creating new connections to the producer Runtime.</param>
+        /// <param name="subscriptionPolicy">The policy to use for handling the <see cref="SubscribeLoop(CancellationToken)"/>.</param>
+        /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
+        /// <param name="loggerFactory">The logger factory to use for creating loggers.</param>
         public Subscriptions(
             IStreamProcessorFactory streamProcessorFactory,
             MicroservicesConfiguration microservicesConfiguration,

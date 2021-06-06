@@ -23,6 +23,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         readonly ILogger _logger;
         SubscriptionId _subscriptionId;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EventHorizonConnection" /> class.
+        /// </summary>
+        /// <param name="reverseCallClient">The reverse call client.</param>
+        /// <param name="logger">The logger.</param>
         public EventHorizonConnection(
             IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,
             ILogger logger)
