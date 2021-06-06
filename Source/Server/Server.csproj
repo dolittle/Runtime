@@ -22,6 +22,7 @@
         <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcAspNetCoreVersion)" />
         <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
         <PackageReference Include="GraphQL.Server.Ui.Playground" Version="$(GraphQLPlaygroundVersion)" />
+        <PackageReference Include="prometheus-net.AspNetCore" Version="$(PrometheusVersion)" />
     </ItemGroup>
 
 </Project>

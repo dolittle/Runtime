@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Prometheus;
 
 namespace Dolittle.Runtime.Server
 {
@@ -83,9 +84,9 @@ namespace Dolittle.Runtime.Server
                 {
                     Tool = { Enable = false }
                 });
-            });
 
-            app.UseProxyServer("/metrics", "http://localhost:9700/metrics");
+                endpoints.MapMetrics(registry:app.ApplicationServices.GetService<CollectorRegistry>());
+            });
 
             ObjectFieldExtensions.ServiceProvider = app.ApplicationServices;
             app.RunAsSinglePageApplication();
