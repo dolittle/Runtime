@@ -20,8 +20,8 @@
         <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="$(AutofacExtensionsVersion)" />
         <PackageReference Include="Grpc.AspNetCore" Version="$(GrpcAspNetCoreVersion)" />
         <PackageReference Include="Grpc.AspNetCore.Web" Version="$(GrpcAspNetCoreVersion)" />
-        <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
-        <PackageReference Include="GraphQL.Server.Ui.Playground" Version="5.0.1" />
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="$(SwashbuckleVersion)" />
+        <PackageReference Include="GraphQL.Server.Ui.Playground" Version="$(GraphQLPlaygroundVersion)" />
     </ItemGroup>
 
 </Project>

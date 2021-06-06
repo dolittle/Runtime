@@ -5,6 +5,7 @@
         <ContractsVersion>5.3.0</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
+        <GraphQLPlaygroundVersion>5.0.1</GraphQLPlaygroundVersion>
         <GrpcVersion>2.35.0</GrpcVersion>
         <GrpcAspNetCoreVersion>2.34.0</GrpcAspNetCoreVersion>
         <HotChocolateVersion>11.0.6</HotChocolateVersion>
@@ -21,6 +22,7 @@
         <ProtobufVersion>3.14.0</ProtobufVersion>
         <PollyVersion>7.2.0</PollyVersion>
         <PrometheusVersion>3.3.0</PrometheusVersion>
+        <SwashbuckleVersion>5.6.3</SwashbuckleVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
         <SystemReactiveVersion>4.4.1</SystemReactiveVersion>
         <SystemRuntimeVersion>4.3.0</SystemRuntimeVersion>
