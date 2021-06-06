@@ -20,6 +20,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         PartitionId PartitionId) : IStreamProcessorId
     {
         /// <inheritdoc/>
-        public override string ToString() => $"Consumer Tenant: '{ConsumerTenantId.Value} Producer Microservice: '{ProducerMicroserviceId.Value}' Producer Tenant: '{ProducerTenantId.Value}' Scope: '{ScopeId.Value}' Stream: '{StreamId.Value}' Partition: '{PartitionId.Value}''";
+        public override string ToString() => $"Consumer Tenant: {ConsumerTenantId.Value} Producer Microservice: {ProducerMicroserviceId.Value} Producer Tenant: {ProducerTenantId.Value} Scope: {ScopeId.Value} Stream: {StreamId.Value} Partition: {PartitionId.Value}'";
     }
 }

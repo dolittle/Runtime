@@ -4,9 +4,8 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
-using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
@@ -25,27 +24,25 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly ILoggerFactory _loggerFactory;
         readonly IStreamProcessorFactory _streamProcessorFactory;
         readonly MicroservicesConfiguration _microservicesConfiguration;
-        readonly IEstablishEventHorizonConnections _eventHorizonConnectionEstablisher;
+        readonly IEventHorizonConnectionFactory _eventHorizonConnectionFactory;
+        readonly IAsyncPolicyFor<Subscription> _subscriptionPolicy;
+        readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
         readonly ILogger<Subscriptions> _logger;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Subscriptions"/> class.
-        /// </summary>
-        /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-        /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="streamProcessorFactory">The <see cref="IStreamProcessorFactory" />.</param>
-        /// <param name="microservicesConfiguration">The <see cref="MicroservicesConfiguration" />.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         public Subscriptions(
             IStreamProcessorFactory streamProcessorFactory,
             MicroservicesConfiguration microservicesConfiguration,
-            IEstablishEventHorizonConnections eventHorizonConnectionEstablisher,
+            IEventHorizonConnectionFactory eventHorizonConnectionFactory,
+            IAsyncPolicyFor<Subscription> subscriptionPolicy,
+            IGetNextEventToReceiveForSubscription subscriptionPositions,
             ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
             _streamProcessorFactory = streamProcessorFactory;
             _microservicesConfiguration = microservicesConfiguration;
-            _eventHorizonConnectionEstablisher = eventHorizonConnectionEstablisher;
+            _eventHorizonConnectionFactory = eventHorizonConnectionFactory;
+            _subscriptionPolicy = subscriptionPolicy;
+            _subscriptionPositions = subscriptionPositions;
             _logger = loggerFactory.CreateLogger<Subscriptions>();
         }
 
@@ -88,6 +85,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         }
 
         Subscription CreateNewSubscription(SubscriptionId subscriptionId, MicroserviceAddress producerMicroserviceAddress)
-            => throw new System.NotImplementedException();
+            => new(
+                subscriptionId,
+                producerMicroserviceAddress,
+                _subscriptionPolicy,
+                _eventHorizonConnectionFactory,
+                _streamProcessorFactory,
+                _subscriptionPositions,
+                _loggerFactory.CreateLogger<Subscription>());
     }
 }

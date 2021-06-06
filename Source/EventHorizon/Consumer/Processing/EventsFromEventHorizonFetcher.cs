@@ -28,6 +28,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
         {
             var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
+            if (@event.Position != streamPosition)
+            {
+                throw new WrongEventReceivedOverEventHorizons(streamPosition, @event.Position);
+            }
             return (@event != default, @event);
         }
 

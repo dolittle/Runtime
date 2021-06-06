@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         SubscriptionState State { get; }
 
         /// <summary>
-        /// Starts the resislient subscription.
+        /// Starts the resilient subscription.
         /// </summary>
         /// <remarks>
         /// This will start a new connection to the producer runtime, and will keep retrying the connection forever if it fails.

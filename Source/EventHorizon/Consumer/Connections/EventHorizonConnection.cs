@@ -82,14 +82,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
             try
             {
                 _logger.HandlingEventForSubscription(_subscriptionId);
-                await connectionToStreamProcessorQueue.EnqueueAsync(
-                    new StreamEvent(
+                var streamEvent = new StreamEvent(
                         @event.Event.ToCommittedEvent(),
                         @event.StreamSequenceNumber,
                         StreamId.EventLog,
                         Guid.Empty,
-                        false),
-                    cancellationToken).ConfigureAwait(false);
+                        false);
+
+                await connectionToStreamProcessorQueue.EnqueueAsync(streamEvent, cancellationToken).ConfigureAwait(false);
                 return CreateSuccessfulResponse();
             }
             catch (Exception exception)
