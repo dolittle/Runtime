@@ -88,6 +88,7 @@ namespace Dolittle.Runtime.Server
             app.UseProxyServer("/metrics", "http://localhost:9700/metrics");
 
             ObjectFieldExtensions.ServiceProvider = app.ApplicationServices;
+            app.RunAsSinglePageApplication();
         }
     }
 }
