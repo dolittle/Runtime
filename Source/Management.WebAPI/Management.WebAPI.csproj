@@ -3,6 +3,7 @@
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Management.WepAPI</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Management.WepAPI</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

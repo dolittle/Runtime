@@ -3,6 +3,7 @@
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Management.GraphQL</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Management.GraphQL</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
