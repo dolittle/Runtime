@@ -2,27 +2,6 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": ".NET Core Attach Remote",
-            "type": "coreclr",
-            "request": "attach",
-            "pipeTransport": {
-                "pipeCwd": "${workspaceFolder}",
-                "pipeProgram": "kubectl",
-                "pipeArgs": [
-                    "exec",
-                    "-i",
-                    "dev-pricing-77cd6d79cf-5pfcs",
-                    "-c runtime",
-                    "--"
-                ],
-                "debuggerPath": "/root/vsdbg/vsdbg",
-                "quoteArgs": false
-            },
-            "sourceFileMap": {
-                "/app/Source": "${workspaceRoot}/Source"
-            }                
-        },
-        {
             "name": ".NET Core Launch (console)",
             "type": "coreclr",
             "request": "launch",
