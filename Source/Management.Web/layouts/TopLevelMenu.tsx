@@ -19,7 +19,7 @@ export const TopLevelMenu = () => {
         <div className="top-level-menu">
             <Pivot onLinkClick={linkClicked} selectedKey={location.pathname}>
                 <PivotItem headerText="Home" itemKey="/"></PivotItem>
-                <PivotItem headerText="Metrics" itemKey="/allmetrics"></PivotItem>
+                <PivotItem headerText="Metrics" itemKey="/metrics-list"></PivotItem>
                 <PivotItem headerText="EventHandlers" itemKey="/event-handlers/"></PivotItem>
             </Pivot>
         </div>

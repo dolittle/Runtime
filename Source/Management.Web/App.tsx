@@ -21,7 +21,7 @@ export const App = () => {
                 <Route exact path="/">
                         <Dashboard/>
                     </Route>
-                    <Route exact path="/allmetrics">
+                    <Route exact path="/metrics-list">
                         <Metrics/>
                     </Route>
                     <Route path="/event-handlers">
