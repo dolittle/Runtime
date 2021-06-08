@@ -10,7 +10,7 @@ using Dolittle.Runtime.Resilience;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventHorizonEventProcessor.given
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.given
 {
     public class all_dependencies
     {
