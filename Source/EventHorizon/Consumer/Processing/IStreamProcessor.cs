@@ -4,7 +4,6 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
@@ -14,10 +13,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
     public interface IStreamProcessor
     {
         /// <summary>
-        /// Try to start and wait for stream processor to finish.
+        /// Start and wait for stream processor to finish.
         /// </summary>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns></returns>
-        Task<Try<bool>> TryStartAndWait(CancellationToken cancellationToken);
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        Task StartAndWait(CancellationToken cancellationToken);
     }
 }

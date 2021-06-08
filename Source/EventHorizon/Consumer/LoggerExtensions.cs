@@ -3,174 +3,139 @@
 
 using System;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     internal static class LoggerExtensions
-    {   
+    {
+
+        #region Subscriptions
+        static readonly Action<ILogger, SubscriptionId, Exception> _subscribingTo = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Debug,
+                new EventId(296984987, nameof(SubscribingTo)),
+                "Subscribing to events for subscription {Subscription}");
+        internal static void SubscribingTo(this ILogger logger, SubscriptionId subscriptionId)
+            => _subscribingTo(logger, subscriptionId, null);
+
         static readonly Action<ILogger, Guid, Exception> _noMicroserviceConfigurationFor = LoggerMessage
             .Define<Guid>(
                 LogLevel.Warning,
                 new EventId(371825462, nameof(NoMicroserviceConfigurationFor)),
                 "There is no microservice configuration for the producer microservice: {ProducerMicrosrevice}");
+        internal static void NoMicroserviceConfigurationFor(this ILogger logger, Microservice producerMicroservice)
+            => _noMicroserviceConfigurationFor(logger, producerMicroservice, null);
 
-        static readonly Action<ILogger, Guid, Guid, Guid, string, int, Exception> _tenantSubscribedTo = LoggerMessage
-            .Define<Guid, Guid, Guid, string, int>(
-                LogLevel.Debug,
-                new EventId(35626265, nameof(TenantSubscribedTo)),
-                "Tenant: {ConsumerTenantId} is subscribing to events from tenant: {ProducerTenantId} in microservice: {ProducerMicroserviceId} on {Host}:{Port}");
-        static readonly Action<ILogger, SubscriptionId, Exception> _didNotReceiveSubscriptionResponse = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Warning,
-                new EventId(161145735, nameof(DidNotReceiveSubscriptionResponse)),
-                "Reverse call client did not receive a subscription response while subscribing: {Subscription}");
-
-        static readonly Action<ILogger, SubscriptionId, FailureReason, Exception> _failedSubscring = LoggerMessage
-            .Define<SubscriptionId, FailureReason>(
-                LogLevel.Warning,
-                new EventId(265824309, nameof(FailedSubscring)),
-                "Failed subscribing with subscription: {SubscriptionId}. {Reason}");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _successfulSubscring = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Trace,
-                new EventId(1573331110, nameof(SuccessfulSubscring)),
-                "Subscription response for subscription: {SubscriptionId} was successful");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _reconnectingEventHorizon = LoggerMessage
+        static readonly Action<ILogger, SubscriptionId, Exception> _startingCreatedSubscription = LoggerMessage
             .Define<SubscriptionId>(
                 LogLevel.Debug,
-                new EventId(382210240, nameof(ReconnectingEventHorizon)),
-                "Reconnecting to event horizon with subscription: {SubscriptionId}");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _connectedEventHorizon = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Information,
-                new EventId(304788361, nameof(ConnectedEventHorizon)),
-                "Successfully connected event horizon with subscription: {SubscriptionId}.\nWaiting for events to process");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _errorInitializingSubscription = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Warning,
-                new EventId(294838925, nameof(ErrorInitializingSubscription)),
-                "Error occurred while initializing subscription: {SubscriptionId}");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _errorWhileProcessingSubscription = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Warning,
-                new EventId(1328073767, nameof(ErrorWhileProcessingSubscription)),
-                "Error occurred while processing subscription: {SubscriptionId}");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _errorWhileHandlingEventFromSubscription = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Warning,
-                new EventId(829474082, nameof(ErrorWhileHandlingEventFromSubscription)),
-                "An error occurred while handling event horizon event coming from subscription: {Subscription}");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _retryProcessEvent = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Trace,
-                new EventId(315586919, nameof(RetryProcessEvent)),
-                "Retrying processing of event from Event Horizon for subscription: {Subscription}");
-
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Exception> _processEvent = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid>(
-                LogLevel.Trace,
-                new EventId(1329962982, nameof(ProcessEvent)),
-                "Processing event type: {EventType} from event horizon in scope: {Scope} from microservice: {ProducerMicroservice} and tenant: {ProducerTenant}");
-
-        static readonly Action<ILogger, SubscriptionId, Exception> _failedStartingSubscription = LoggerMessage
-            .Define<SubscriptionId>(
-                LogLevel.Warning,
-                new EventId(227530761, nameof(FailedStartingSubscription)),
-                "Subscription: {SubscriptionId} failed");
+                new EventId(251473054, nameof(StartingCreatedSubscription)),
+                "Starting newly created subscription for subscription {Subscription}");
+        internal static void StartingCreatedSubscription(this ILogger logger, SubscriptionId subscriptionId)
+            => _startingCreatedSubscription(logger, subscriptionId, null);
 
         static readonly Action<ILogger, SubscriptionId, Exception> _subscriptionAlreadyRegistered = LoggerMessage
             .Define<SubscriptionId>(
-                LogLevel.Warning,
+                LogLevel.Debug,
                 new EventId(34552119, nameof(SubscriptionAlreadyRegistered)),
-                "Subscription: {SubscriptionId} already registered");
+                "Subscription already registered for subscription {Subscription}");
+        internal static void SubscriptionAlreadyRegistered(this ILogger logger, SubscriptionId subscriptionId)
+            => _subscriptionAlreadyRegistered(logger, subscriptionId, null);
 
-        static readonly Action<ILogger, SubscriptionId, Exception> _successfullyRegisteredSubscription = LoggerMessage
-            .Define<SubscriptionId>(
+
+        #endregion
+
+        #region SubscriptionPolicy
+
+        static readonly Action<ILogger, Exception> _subscriptionConnectionFailed = LoggerMessage
+            .Define(
+                LogLevel.Warning,
+                new EventId(669934152, nameof(SubscriptionConnectionFailed)),
+                "Subscription connection failed with exception, policy will restart a new connection");
+        internal static void SubscriptionConnectionFailed(this ILogger logger, Exception exception)
+            => _subscriptionConnectionFailed(logger, exception);
+
+        #endregion
+
+        #region Subscription
+
+        static readonly Action<ILogger, SubscriptionState, SubscriptionId, Exception> _subscriptionAlreadyStarted = LoggerMessage
+            .Define<SubscriptionState, SubscriptionId>(
                 LogLevel.Trace,
-                new EventId(92493948, nameof(SuccessfullyRegisteredSubscription)),
-                "Subscription: {SubscriptionId} successfully registered");
+                new EventId(606555688, nameof(SubscriptionAlreadyStarted)),
+                "Subscription is already started and in state {SubscriptionState} for subscription {Subscription}");
+        internal static void SubscriptionAlreadyStarted(this ILogger logger, SubscriptionId subscriptionId, SubscriptionState state)
+            => _subscriptionAlreadyStarted(logger, state, subscriptionId, null);
 
-        static readonly Action<ILogger, SubscriptionId, Exception> _unregisteringSubscription = LoggerMessage
+        static readonly Action<ILogger, SubscriptionId, Exception> _subscriptionStarting = LoggerMessage
             .Define<SubscriptionId>(
                 LogLevel.Debug,
-                new EventId(908025101, nameof(UnregisteringSubscription)),
-                "Unregistering subscription: {SubscriptionId}");
+                new EventId(794823441, nameof(SubscriptionStarting)),
+                "Subscription starting for subscription {Subscription}");
+        internal static void SubscriptionStarting(this ILogger logger, SubscriptionId subscriptionId)
+            => _subscriptionStarting(logger, subscriptionId, null);
 
+        static readonly Action<ILogger, SubscriptionState, SubscriptionId, Exception> _subscriptionLoopStarting = LoggerMessage
+            .Define<SubscriptionState, SubscriptionId>(
+                LogLevel.Debug,
+                new EventId(606555688, nameof(SubscriptionLoopStarting)),
+                "Subscription loop starting from previous state {PreviousState} for subscription {Subscription}");
+        internal static void SubscriptionLoopStarting(this ILogger logger, SubscriptionId subscriptionId, SubscriptionState previousState)
+            => _subscriptionLoopStarting(logger, previousState, subscriptionId, null);
+
+        static readonly Action<ILogger, Failure, SubscriptionId, Exception> _subscriptionFailedToConnectToProducerRuntime = LoggerMessage
+            .Define<Failure, SubscriptionId>(
+                LogLevel.Warning,
+                new EventId(720998740, nameof(SubscriptionFailedToConnectToProducerRuntime)),
+                "Subscription failed to connect to producer runtime because {FailureReason} for subscription {Subscription}");
+        internal static void SubscriptionFailedToConnectToProducerRuntime(this ILogger logger, SubscriptionId subscriptionId, Failure failure)
+            => _subscriptionFailedToConnectToProducerRuntime(logger, failure, subscriptionId, null);
+
+        static readonly Action<ILogger, SubscriptionId, Exception> _subscriptionFailedWithException = LoggerMessage
+            .Define<SubscriptionId>(
+                LogLevel.Warning,
+                new EventId(426941604, nameof(SubscriptionAlreadyStarted)),
+                "Subscription failed with exception for subscription {Subscription}");
+        internal static void SubscriptionFailedWithException(this ILogger logger, SubscriptionId subscriptionId, Exception exception)
+            => _subscriptionFailedWithException(logger, subscriptionId, exception);
+
+        static readonly Action<ILogger, ConsentId, SubscriptionId, Exception> _subscriptionIsReceivingAndWriting = LoggerMessage
+            .Define<ConsentId, SubscriptionId>(
+                LogLevel.Debug,
+                new EventId(556421021, nameof(SubscriptionIsReceivingAndWriting)),
+                "Subscription is receiving and writing events with consent {Consent} for subscription {Subscription}");
+        internal static void SubscriptionIsReceivingAndWriting(this ILogger logger, SubscriptionId subscriptionId, ConsentId consentId)
+            => _subscriptionIsReceivingAndWriting(logger, consentId, subscriptionId, null);
+
+        static readonly Action<ILogger, ConsentId, SubscriptionId, Exception> _subsciptionFailedWhileReceivingAndWriting = LoggerMessage
+            .Define<ConsentId, SubscriptionId>(
+                LogLevel.Warning,
+                new EventId(254259038, nameof(SubsciptionFailedWhileReceivingAndWriting)),
+                "Subscription failed while receiving and writing events with consent {Consent} for subscription {Subscription}");
+        internal static void SubsciptionFailedWhileReceivingAndWriting(this ILogger logger, SubscriptionId subscriptionId, ConsentId consentId)
+            => _subsciptionFailedWhileReceivingAndWriting(logger, consentId, subscriptionId, null);
+
+        #endregion
+
+        #region SubscriptionsService
         static readonly Action<ILogger, SubscriptionId, Exception> _incomingSubscripton = LoggerMessage
             .Define<SubscriptionId>(
                 LogLevel.Information,
                 new EventId(409082696, nameof(IncomingSubscripton)),
-                "Incoming event horizon subscription request from head to runtime for subscription: {SubscriptionId}");
+                "Incoming event horizon subscription for subscription {Subscription}");
+        internal static void IncomingSubscripton(this ILogger logger, SubscriptionId subscriptionId)
+            => _incomingSubscripton(logger, subscriptionId, null);
 
         static readonly Action<ILogger, SubscriptionId, Exception> _errorWhileSubscribing = LoggerMessage
             .Define<SubscriptionId>(
                 LogLevel.Warning,
                 new EventId(1317844869, nameof(ErrorWhileSubscribing)),
-                "An error occurred while trying to handling event horizon subscription: {Subscription}");
-
-        internal static void NoMicroserviceConfigurationFor(this ILogger logger, Microservice producerMicroservice)
-            => _noMicroserviceConfigurationFor(logger, producerMicroservice, null);
-
-        internal static void TenantSubscribedTo(this ILogger logger, TenantId consumerTenant, TenantId producerTenant, Microservice producerMicroservice, MicroserviceAddress microserviceAddress)
-            => _tenantSubscribedTo(logger, consumerTenant, producerTenant, producerMicroservice, microserviceAddress.Host, microserviceAddress.Port, null);
-        internal static void DidNotReceiveSubscriptionResponse(this ILogger logger, SubscriptionId subscription)
-            => _didNotReceiveSubscriptionResponse(logger, subscription, null);
-
-        internal static void FailedSubscring(this ILogger logger, SubscriptionId subscription, FailureReason reason)
-            => _failedSubscring(logger, subscription, reason, null);
-
-        internal static void SuccessfulSubscring(this ILogger logger, SubscriptionId subscription)
-            => _successfulSubscring(logger, subscription, null);
-
-        internal static void ReconnectingEventHorizon(this ILogger logger, Exception exception, SubscriptionId subscription)
-            => _reconnectingEventHorizon(logger, subscription, exception);
-
-        internal static void ConnectedEventHorizon(this ILogger logger, SubscriptionId subscription)
-            => _connectedEventHorizon(logger, subscription, null);
-
-        internal static void ErrorInitializingSubscription(this ILogger logger, Exception exception, SubscriptionId subscription)
-            => _errorInitializingSubscription(logger, subscription, exception);
-
-        internal static void ErrorWhileProcessingSubscription(this ILogger logger, Exception exception, SubscriptionId subscription)
-            => _errorWhileProcessingSubscription(logger, subscription, exception);
-
-        internal static void ErrorWhileHandlingEventFromSubscription(this ILogger logger, Exception exception, SubscriptionId subscription)
-            => _errorWhileHandlingEventFromSubscription(logger, subscription, exception);
-
-        internal static void RetryProcessEvent(this ILogger logger, SubscriptionId subscription)
-            => _retryProcessEvent(logger, subscription, null);
-
-        internal static void ProcessEvent(this ILogger logger, ArtifactId eventTypeId, ScopeId scope, Microservice producerMicroservice, TenantId producerTenant)
-            => _processEvent(logger, eventTypeId, scope, producerMicroservice, producerTenant, null);
-
-        internal static void FailedStartingSubscription(this ILogger logger, Exception exception, SubscriptionId subscription)
-            => _failedStartingSubscription(logger, subscription, exception);
-
-        internal static void SubscriptionAlreadyRegistered(this ILogger logger, SubscriptionId subscription)
-            => _subscriptionAlreadyRegistered(logger, subscription, null);
-
-        internal static void SuccessfullyRegisteredSubscription(this ILogger logger, SubscriptionId subscription)
-            => _successfullyRegisteredSubscription(logger, subscription, null);
-        
-        internal static void UnregisteringSubscription(this ILogger logger, SubscriptionId subscription)
-            => _unregisteringSubscription(logger, subscription, null);
-
-        internal static void IncomingSubscripton(this ILogger logger, SubscriptionId subscription)
-            => _incomingSubscripton(logger, subscription, null);
-
-        internal static void ErrorWhileSubscribing(this ILogger logger, Exception exception, SubscriptionId subscription)
-            => _errorWhileSubscribing(logger, subscription, exception);
+                "An error occurred while trying to handling event horizon subscription for {Subscription}");
+        internal static void ErrorWhileSubscribing(this ILogger logger, SubscriptionId subscriptionId, Exception exception)
+            => _errorWhileSubscribing(logger, subscriptionId, exception);
+        #endregion
     }
 }

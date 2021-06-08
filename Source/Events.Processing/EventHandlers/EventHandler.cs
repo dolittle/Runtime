@@ -202,7 +202,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 try
                 {
                     await Task.WhenAny(tasks).ConfigureAwait(false);
-                    _cancellationTokenSource.Cancel();
 
                     if (tasks.TryGetFirstInnerMostException(out var ex))
                     {
@@ -212,6 +211,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 }
                 finally
                 {
+                    _cancellationTokenSource.Cancel();
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     _logger.EventHandlerDisconnected(EventProcessor, Scope);
                 }
@@ -328,7 +328,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             await _dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, _cancellationTokenSource.Token).ConfigureAwait(false);
         }
 
-       async Task ValidateFilter()
+        async Task ValidateFilter()
         {
             _logger.ValidatingFilter(FilterDefinition.TargetStream);
             var filterValidationResults = await _filterValidator.Validate(GetFilterProcessor, _cancellationTokenSource.Token).ConfigureAwait(false);
@@ -344,6 +344,5 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _logger.PersistingStreamDefinition(filteredStreamDefinition.StreamId);
             await _streamDefinitions.Persist(Scope, filteredStreamDefinition, _cancellationTokenSource.Token).ConfigureAwait(false);
         }
-
     }
 }
