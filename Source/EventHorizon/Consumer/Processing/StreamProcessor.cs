@@ -1,17 +1,14 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
@@ -32,17 +29,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamProcessor"/> class.
         /// </summary>
-        /// <param name="consentId">The <see cref="ConsentId" />.</param>
-        /// <param name="subscriptionId">The <see cref="StreamProcessorId" />.</param>
-        /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
-        /// <param name="eventsFetcher">The <see cref="EventsFromEventHorizonFetcher" />.</param>
-        /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-        /// <param name="unregister">An <see cref="Action" /> that unregisters the <see cref="ScopedStreamProcessor" />.</param>
-        /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+        /// <param name="subscriptionId">The identifier of the subscription the stream processor will receive events for.</param>
+        /// <param name="eventProcessor">The event processor that writes the received events to a scoped event log.</param>
+        /// <param name="eventsFetcher">The event fetcher that receives fetches events over an event horizon connection.</param>
+        /// <param name="streamProcessorStates">The repository to use for getting the subscription state.</param>
+        /// <param name="eventsFetcherPolicy">The policy around fetching events.</param>
+        /// <param name="loggerFactory">The factory for creating loggers.</param>
         public StreamProcessor(
-            ConsentId consentId,
             SubscriptionId subscriptionId,
             EventProcessor eventProcessor,
             EventsFromEventHorizonFetcher eventsFetcher,
@@ -57,58 +50,48 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
             _eventsFetcherPolicy = eventsFetcherPolicy;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<StreamProcessor>();
-            ConsentId = consentId;
         }
 
-        /// <summary>
-        /// Gets the <see cref="ConsentId" />.
-        /// </summary>
-        public ConsentId ConsentId { get; }
-
         /// <inheritdoc/>
-        public async Task<Try<bool>> TryStartAndWait(CancellationToken cancellationToken)
+        public async Task StartAndWait(CancellationToken cancellationToken)
         {
-            try
+            if (cancellationToken.IsCancellationRequested)
             {
-                if (cancellationToken.IsCancellationRequested)
-                {
-                    return new OperationCanceledException("Won't start event horizon stream processor because operation is cancelled", cancellationToken);
-                }
-                if (_started)
-                {
-                    return new StreamProcessorAlreadyProcessingStream(_identifier);
-                }
-                _started = true;
-                var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, cancellationToken).ConfigureAwait(false);
-                if (!tryGetStreamProcessorState.Success)
-                {
-                    tryGetStreamProcessorState = StreamProcessorState.New;
-                    await _streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
-                }
+                _logger.StreamProcessorCancellationRequested(_identifier);
+                return;
+            }
 
-                await new ScopedStreamProcessor(
-                    _identifier.ConsumerTenantId,
-                    _identifier,
-                    new StreamDefinition(new FilterDefinition(_identifier.ProducerTenantId.Value, _identifier.ConsumerTenantId.Value, false)),
-                    tryGetStreamProcessorState.Result as StreamProcessorState,
-                    _eventProcessor,
-                    _streamProcessorStates,
-                    _eventsFetcher,
-                    _eventsFetcherPolicy,
-                    _eventsFetcher,
-                    new TimeToRetryForUnpartitionedStreamProcessor(),
-                    _loggerFactory.CreateLogger<ScopedStreamProcessor>()).Start(cancellationToken).ConfigureAwait(false);
+            if (_started)
+            {
+                _logger.StreamProcessorAlreadyProcessingStream(_identifier);
+                throw new StreamProcessorAlreadyProcessingStream(_identifier);
+            }
+            _started = true;
 
-                return new Try<bool>(true, true);
-            }
-            catch (Exception ex)
+            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, cancellationToken).ConfigureAwait(false);
+            if (!tryGetStreamProcessorState.Success)
             {
-                return ex;
+                _logger.StreamProcessorPersitingNewState(_identifier);
+                tryGetStreamProcessorState = StreamProcessorState.New;
+                await _streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
             }
-            finally
+            else
             {
-                _started = false;
+                _logger.StreamProcessorFetchedState(_identifier, tryGetStreamProcessorState.Result);
             }
+
+            await new ScopedStreamProcessor(
+                _identifier.ConsumerTenantId,
+                _identifier,
+                new StreamDefinition(new FilterDefinition(_identifier.ProducerTenantId.Value, _identifier.ConsumerTenantId.Value, false)),
+                tryGetStreamProcessorState.Result as StreamProcessorState,
+                _eventProcessor,
+                _streamProcessorStates,
+                _eventsFetcher,
+                _eventsFetcherPolicy,
+                _eventsFetcher,
+                new TimeToRetryForUnpartitionedStreamProcessor(),
+                _loggerFactory.CreateLogger<ScopedStreamProcessor>()).Start(cancellationToken).ConfigureAwait(false);
         }
     }
 }

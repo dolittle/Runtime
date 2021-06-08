@@ -2,18 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Concurrent;
-using System.Threading;
-using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.EventHorizon;
-using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
-using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.EventHorizon.Consumer.Connections;
+using Dolittle.Runtime.EventHorizon.Consumer.Processing;
+using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Resilience;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {
@@ -26,83 +23,84 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new();
         readonly ILoggerFactory _loggerFactory;
         readonly IStreamProcessorFactory _streamProcessorFactory;
-
         readonly MicroservicesConfiguration _microservicesConfiguration;
-        readonly IEstablishEventHorizonConnections _eventHorizonConnectionEstablisher;
+        readonly IEventHorizonConnectionFactory _eventHorizonConnectionFactory;
+        readonly IAsyncPolicyFor<Subscription> _subscriptionPolicy;
+        readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
         readonly ILogger<Subscriptions> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscriptions"/> class.
         /// </summary>
-        /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-        /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="streamProcessorFactory">The <see cref="IStreamProcessorFactory" />.</param>
-        /// <param name="microservicesConfiguration">The <see cref="MicroservicesConfiguration" />.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
+        /// <param name="streamProcessorFactory">The factory to use for creating stream processors that write the received events.</param>
+        /// <param name="microservicesConfiguration">The configuration to use for finding the address of a producer Runtime from it's microservice id.</param>
+        /// <param name="eventHorizonConnectionFactory">The factory to use for creating new connections to the producer Runtime.</param>
+        /// <param name="subscriptionPolicy">The policy to use for handling the <see cref="SubscribeLoop(CancellationToken)"/>.</param>
+        /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
+        /// <param name="loggerFactory">The logger factory to use for creating loggers.</param>
         public Subscriptions(
             IStreamProcessorFactory streamProcessorFactory,
             MicroservicesConfiguration microservicesConfiguration,
-            IEstablishEventHorizonConnections eventHorizonConnectionEstablisher,
+            IEventHorizonConnectionFactory eventHorizonConnectionFactory,
+            IAsyncPolicyFor<Subscription> subscriptionPolicy,
+            IGetNextEventToReceiveForSubscription subscriptionPositions,
             ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
             _streamProcessorFactory = streamProcessorFactory;
             _microservicesConfiguration = microservicesConfiguration;
-            _eventHorizonConnectionEstablisher = eventHorizonConnectionEstablisher;
+            _eventHorizonConnectionFactory = eventHorizonConnectionFactory;
+            _subscriptionPolicy = subscriptionPolicy;
+            _subscriptionPositions = subscriptionPositions;
             _logger = loggerFactory.CreateLogger<Subscriptions>();
         }
 
-        /// <inheritdoc/>
-        public bool TryGetConsentFor(SubscriptionId subscriptionId, out ConsentId consentId)
-        {
-            var result = _subscriptions.TryGetValue(subscriptionId, out var subscription);
-            consentId = subscription?.Consent;
-            return result;
-        }
-
         /// <inheritdoc />
-        public async Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId, CancellationToken cancellationToken)
+        public Task<SubscriptionResponse> Subscribe(SubscriptionId subscriptionId)
         {
-            if (_subscriptions.ContainsKey(subscriptionId))
+            _logger.SubscribingTo(subscriptionId);
+
+            var producerMicroserviceId = subscriptionId.ProducerMicroserviceId;
+            if (!TryGetProducerMicroserviceAddress(producerMicroserviceId, out var producerConnectionAddress))
+            {
+                _logger.NoMicroserviceConfigurationFor(producerMicroserviceId);
+                return Task.FromResult(
+                    SubscriptionResponse.Failed(
+                        new Failure(
+                            SubscriptionFailures.MissingMicroserviceConfiguration,
+                            $"No microservice configuration for producer microservice {producerMicroserviceId}")));
+            }
+
+            var subscription = _subscriptions.GetOrAdd(subscriptionId, CreateNewSubscription(subscriptionId, producerConnectionAddress));
+
+            if (subscription.State == SubscriptionState.Created)
+            {
+                _logger.StartingCreatedSubscription(subscriptionId);
+                subscription.Start();
+            }
+            else
             {
                 _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                return SubscriptionResponse.Succeeded(_subscriptions[subscriptionId].Consent);
             }
 
-            var producerMicroservice = subscriptionId.ProducerMicroserviceId;
-            if (!TryGetMicroserviceAddress(producerMicroservice, out var connectionAddress))
-            {
-                _logger.NoMicroserviceConfigurationFor(producerMicroservice);
-                return SubscriptionResponse.Failed(new Failure(
-                    SubscriptionFailures.MissingMicroserviceConfiguration,
-                    $"No microservice configuration for producer mircoservice {producerMicroservice}"));
-            }
-
-            var subscription = new Subscription(
-                subscriptionId,
-                connectionAddress,
-                _streamProcessorFactory,
-                _eventHorizonConnectionEstablisher,
-                _loggerFactory);
-            if (!_subscriptions.TryAdd(subscriptionId, subscription))
-            {
-                _logger.SubscriptionAlreadyRegistered(subscriptionId);
-                return SubscriptionResponse.Succeeded(_subscriptions[subscriptionId].Consent);
-            }
-
-            var response = await subscription.Register().ConfigureAwait(false);
-            if (!response.Success)
-            {
-                _subscriptions.TryRemove(subscriptionId, out var _);
-            }
-            return response;
+            return subscription.ConnectionResponse;
         }
 
-        bool TryGetMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
+        bool TryGetProducerMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
         {
             var result = _microservicesConfiguration.TryGetValue(producerMicroservice, out var microserviceAddressConfig);
             microserviceAddress = microserviceAddressConfig;
             return result;
         }
+
+        Subscription CreateNewSubscription(SubscriptionId subscriptionId, MicroserviceAddress producerMicroserviceAddress)
+            => new(
+                subscriptionId,
+                producerMicroserviceAddress,
+                _subscriptionPolicy,
+                _eventHorizonConnectionFactory,
+                _streamProcessorFactory,
+                _subscriptionPositions,
+                _loggerFactory.CreateLogger<Subscription>());
     }
 }

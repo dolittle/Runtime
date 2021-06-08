@@ -277,7 +277,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 try
                 {
                     await Task.WhenAny(tasks).ConfigureAwait(false);
-                    _cancellationTokenSource.Cancel();
 
                     if (tasks.TryGetFirstInnerMostException(out var ex))
                     {
@@ -287,6 +286,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 }
                 finally
                 {
+                    _cancellationTokenSource.Cancel();
                     await Task.WhenAll(tasks).ConfigureAwait(false);
                     _logger.EventHandlerDisconnected(EventProcessor, Scope);
                 }
