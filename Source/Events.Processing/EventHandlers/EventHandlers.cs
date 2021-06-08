@@ -84,6 +84,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         }
 
         /// <inheritdoc/>
-        public void Unregister(EventHandler eventHandler) => _eventHandlers = new(_eventHandlers.Except(new[] { eventHandler }));
+        public void Unregister(EventHandler eventHandler)
+        {
+            eventHandler.Dispose();
+            _eventHandlers = new(_eventHandlers.Except(new[] { eventHandler }));
+        }
     }
 }
+

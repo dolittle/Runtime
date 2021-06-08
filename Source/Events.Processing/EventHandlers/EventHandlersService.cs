@@ -83,7 +83,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             {
                 cts.Cancel();
                 _eventHandlers.Unregister(eventHandler);
-                eventHandler.Dispose();
             }
         }
     }
