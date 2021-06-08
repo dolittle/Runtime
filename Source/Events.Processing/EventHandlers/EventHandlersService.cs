@@ -3,11 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Processing.Filters;
-using Dolittle.Runtime.Events.Processing.Streams;
-using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Services;
 using Grpc.Core;
@@ -22,10 +18,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// </summary>
     public class EventHandlersService : EventHandlersBase
     {
-        readonly IValidateFilterForAllTenants _filterValidator;
-        readonly IStreamProcessors _streamProcessors;
-        readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
-        readonly IStreamDefinitions _streamDefinitions;
         readonly IExecutionContextManager _executionContextManager;
         readonly IInitiateReverseCallServices _reverseCallServices;
         readonly IEventHandlersProtocol _eventHandlersProtocol;
@@ -38,10 +30,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
         /// </summary>
         /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
-        /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
-        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
-        /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> <see cref="IWriteEventsToStreams" />.</param>
-        /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
         /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
         /// <param name="eventHandlersProtocol">The <see cref="IEventHandlersProtocol" />.</param>
@@ -49,20 +37,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
         public EventHandlersService(
             IHostApplicationLifetime hostApplicationLifetime,
-            IValidateFilterForAllTenants filterForAllTenants,
-            IStreamProcessors streamProcessors,
-            FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
-            IStreamDefinitions streamDefinitions,
             IExecutionContextManager executionContextManager,
             IInitiateReverseCallServices reverseCallServices,
             IEventHandlersProtocol eventHandlersProtocol,
             IEventHandlers eventHandlers,
             ILoggerFactory loggerFactory)
         {
-            _filterValidator = filterForAllTenants;
-            _streamProcessors = streamProcessors;
-            _getEventsToStreamsWriter = getEventsToStreamsWriter;
-            _streamDefinitions = streamDefinitions;
             _executionContextManager = executionContextManager;
             _reverseCallServices = reverseCallServices;
             _eventHandlersProtocol = eventHandlersProtocol;
@@ -79,7 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             ServerCallContext context)
         {
             _logger.LogDebug("Connecting Event Handler");
-            EventHandler actualEventHandler = null;
+            EventHandler eventHandler = null;
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
             try
             {
@@ -93,24 +73,16 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 _logger.SettingExecutionContext(connectResult.Result.arguments.ExecutionContext);
                 _executionContextManager.CurrentFor(connectResult.Result.arguments.ExecutionContext);
 
-                using var eventHandler = new EventHandler(
-                    _streamProcessors,
-                    _filterValidator,
-                    _streamDefinitions,
-                    connectResult.Result.dispatcher,
-                    connectResult.Result.arguments,
-                    _getEventsToStreamsWriter,
-                    _loggerFactory,
-                    cts.Token
-                );
-                actualEventHandler = eventHandler;
-                _eventHandlers.Register(eventHandler);
-                await eventHandler.RegisterAndStart().ConfigureAwait(false);
+                eventHandler = await _eventHandlers.Register(
+                                        connectResult.Result.dispatcher,
+                                        connectResult.Result.arguments,
+                                        cts.Token).ConfigureAwait(false);
+                await eventHandler.Start().ConfigureAwait(false);
             }
             finally
             {
                 cts.Cancel();
-                _eventHandlers.Unregister(actualEventHandler);
+                _eventHandlers.Unregister(eventHandler);
             }
         }
     }
