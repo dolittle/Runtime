@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Management.GraphQL
         /// <returns><see cref="IRequestExecutorBuilder"/> for continuation.</returns>
         public static IRequestExecutorBuilder AddManagementAPI(this IRequestExecutorBuilder graphQLBuilder)
         {
-            //graphQLBuilder.AddQueryType<Query>();
             graphQLBuilder.AddQueryType(_ => _
                 .Name("Query")
                     .AddSubObject<EventHandlers.EventHandlers>("eventHandlers")
