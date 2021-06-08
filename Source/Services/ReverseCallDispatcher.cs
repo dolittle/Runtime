@@ -144,7 +144,9 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public async Task<TResponse> Call(TRequest request, CancellationToken cancellationToken)
         {
+            Console.WriteLine("WOOHOO CALLING");
             ThrowIfCompletedCall();
+            Console.WriteLine("WOOHOO WE AINT THROINW");
 
             var completionSource = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var callId = ReverseCallId.New();
@@ -210,7 +212,8 @@ namespace Dolittle.Runtime.Services
                 while (!jointCts.IsCancellationRequested && await clientToRuntimeStream.MoveNext(jointCts.Token).ConfigureAwait(false))
                 {
                     var message = clientToRuntimeStream.Current;
-                    var response = _messageConverter.GetResponse(clientToRuntimeStream.Current);
+                    Console.WriteLine($"leMsage be: {message}");
+                    var response = _messageConverter.GetResponse(message);
                     if (response != null)
                     {
                         _logger.LogTrace("Received response");
@@ -240,6 +243,7 @@ namespace Dolittle.Runtime.Services
             }
             catch (Exception ex)
             {
+                Console.WriteLine(ex);
                 if (!jointCts.Token.IsCancellationRequested)
                 {
                     _logger.LogWarning(ex, "An error occurred during handling of client messages");
@@ -247,6 +251,7 @@ namespace Dolittle.Runtime.Services
             }
             finally
             {
+                Console.WriteLine("OH NO WE FINALLY");
                 _completed = true;
                 foreach ((_, var completionSource) in _calls)
                 {

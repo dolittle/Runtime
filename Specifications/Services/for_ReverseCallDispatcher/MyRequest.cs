@@ -7,6 +7,6 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher
 {
     public class MyRequest
     {
-        public ReverseCallRequestContext Context { get; set; }
+        public ReverseCallRequestContext Context { get; set; }
     }
 }

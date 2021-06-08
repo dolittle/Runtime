@@ -7,18 +7,28 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
 {
-    public class and_there_are_no_more_client_responses : given.a_dispatcher
+    public class and_the_token_is_cancelled : given.a_dispatcher
     {
         static MyConnectResponse connect_response;
+        static CancellationTokenSource cst;
         Establish context = () =>
         {
+            cst = new();
             connect_response = new MyConnectResponse();
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
+            client_stream
+                .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(true))
+                // cancel the token after returning the value
+                .Callback(() =>
+                {
+                    cst.Cancel();
+                    cst.Dispose();
+                });
         };
 
         Because of = () =>
         {
-            dispatcher.Accept(connect_response, CancellationToken.None).GetAwaiter().GetResult();
+            dispatcher.Accept(connect_response, cst.Token).GetAwaiter().GetResult();
         };
 
         It should_write_one_message = () => server_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.ConnectResponse.Equals(connect_response))), Moq.Times.Once);
