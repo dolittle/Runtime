@@ -11,9 +11,9 @@ namespace Dolittle.Runtime.Events.Store
     public interface IEventStore : ICommitEvents, IFetchCommittedEvents
     {
         /// <summary>
-        /// Get the tail events <see cref="EventLogSequenceNumber"/>.
+        /// Get the <see cref="EventLogSequenceNumber"/> for the last committed event.
         /// </summary>
         /// <returns><see cref="EventLogSequenceNumber"/> for the event at the tail.</returns>
-        Task<EventLogSequenceNumber> GetTailEventLogSequenceNumber();
+        Task<EventLogSequenceNumber> GetLastCommittedEventSequenceNumber();
     }
 }

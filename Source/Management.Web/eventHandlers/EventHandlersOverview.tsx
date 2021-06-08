@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLazyQuery, useQuery } from '@apollo/client';
 import {
     CommandBar,
@@ -32,6 +32,12 @@ const columns: IColumn[] = [
         minWidth: 250
     },
     {
+        key: 'lastCommittedEventSequenceNumber',
+        fieldName: 'lastCommittedEventSequenceNumber',
+        name: 'Last Committed Sequence Number',
+        minWidth: 100
+    },
+    {
         key: 'filterPosition',
         fieldName: 'filterPosition',
         name: 'Filter Position',
@@ -42,27 +48,15 @@ const columns: IColumn[] = [
         fieldName: 'eventProcessorPosition',
         name: 'Event Processor Position',
         minWidth: 100
-    },
-    {
-        key: 'tailEventLogSequenceNumber',
-        fieldName: 'tailEventLogSequenceNumber',
-        name: 'Tail Event Log Sequence Number',
-        minWidth: 100
     }
-
-
-    
 ];
 
 
 export const EventHandlersOverview = () => {
     const [tenantId, setTenantId] = useState<string>();
     const tenantsQueryResult = useQuery(tenantsQuery);
-    const [getEventHandlers, eventHandlersQueryResult] = useLazyQuery(eventHandlersQuery, {
-        variables: {
-            tenantId
-        }
-    });
+    const [getEventHandlers, eventHandlersQueryResult] = useLazyQuery(eventHandlersQuery);
+    const [eventHandlers, setEventHandlers] = useState([]);
 
     const tenantsOptions = tenantsQueryResult.data?.tenancy?.all.map(_ => {
         return {
@@ -70,6 +64,19 @@ export const EventHandlersOverview = () => {
             text: _
         } as IDropdownOption;
     });
+
+    const filterEventHandlersForTenant = (tenantId: string) => {
+        setEventHandlers(eventHandlersQueryResult.data?.eventHandlers?.all.map(_ => {
+            const status = _.statusPerTenant.find(_ => _.tenantId == tenantId);
+            return {
+                id: _.id,
+                scope: _.scope,
+                lastCommittedEventSequenceNumber: status.lastCommittedEventSequenceNumber,
+                filterPosition: status.filterPosition,
+                eventProcessorPosition: status.eventProcessorPosition
+            };
+        }) || []);
+    };
 
     const commandBarItems: ICommandBarItemProps[] = [
         {
@@ -89,7 +96,7 @@ export const EventHandlersOverview = () => {
                             selectedKey={tenantId}
                             onChange={(e, o) => {
                                 setTenantId(o?.key as string);
-                                getEventHandlers();
+                                filterEventHandlersForTenant(o?.key as string);
                             }}
                             options={tenantsOptions} />
                     </Stack>
@@ -104,7 +111,9 @@ export const EventHandlersOverview = () => {
         }
     ];
 
-    const result = eventHandlersQueryResult.data?.eventHandlers?.allForTenant || [];
+    useEffect(() => {
+        getEventHandlers();
+    }, []);
 
     return (
         <>
@@ -117,7 +126,7 @@ export const EventHandlersOverview = () => {
                     }}
                     items={commandBarItems} />
 
-                <ShimmeredDetailsList columns={columns} items={result} enableShimmer={eventHandlersQueryResult.loading} />
+                <ShimmeredDetailsList columns={columns} items={eventHandlers} enableShimmer={eventHandlersQueryResult.loading} />
             </Stack>
         </>
     );

@@ -4,14 +4,17 @@
 import { gql } from '@apollo/client';
 
 export const eventHandlersQuery = gql`
-    query ($tenantId:Uuid!) {
+    query {
         eventHandlers {
-            allForTenant(tenantId:$tenantId) {
+            all {
                 id
                 scope
-                filterPosition
-                eventProcessorPosition
-                tailEventLogSequenceNumber
+                statusPerTenant {
+                    tenantId
+                    lastCommittedEventSequenceNumber
+                    filterPosition
+                    eventProcessorPosition
+                }
             }
         }
     }

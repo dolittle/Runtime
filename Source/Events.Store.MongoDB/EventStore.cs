@@ -57,9 +57,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         }
 
         /// <inheritdoc/>
-        public async Task<EventLogSequenceNumber> GetTailEventLogSequenceNumber()
+        public async Task<EventLogSequenceNumber> GetLastCommittedEventSequenceNumber()
         {
-            return (ulong) await _streams.DefaultEventLog.CountDocumentsAsync(_eventFilter.Empty).ConfigureAwait(false) -1;
+            return (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(_eventFilter.Empty).ConfigureAwait(false) - 1;
         }
 
         /// <inheritdoc/>
