@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,6 +13,9 @@ using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Management.GraphQL.EventHandlers
 {
+    /// <summary>
+    /// Represents an API endpoint for working with event handlers.
+    /// </summary>
     public class EventHandlers
     {
         readonly IEventHandlers _eventHandlers;
@@ -21,7 +23,18 @@ namespace Dolittle.Runtime.Management.GraphQL.EventHandlers
         readonly IContainer _container;
         readonly ITenants _tenants;
 
-        public EventHandlers(IEventHandlers eventHandlers, IExecutionContextManager executionContextManager, IContainer container, ITenants tenants)
+        /// <summary>
+        /// Initializes a new instance of <see cref="EventHandlers"/>.
+        /// </summary>
+        /// <param name="eventHandlers">The runtime <see cref="IEventHandlers"/>.</param>
+        /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> for working with execution context.</param>
+        /// <param name="container">The <see cref="IContainer"/> for service location.</param>
+        /// <param name="tenants">The <see cref="ITenants"/> of the runtime.</param>
+        public EventHandlers(
+            IEventHandlers eventHandlers,
+            IExecutionContextManager executionContextManager,
+            IContainer container,
+            ITenants tenants)
         {
             _eventHandlers = eventHandlers;
             _executionContextManager = executionContextManager;
@@ -29,6 +42,9 @@ namespace Dolittle.Runtime.Management.GraphQL.EventHandlers
             _tenants = tenants;
         }
 
+        /// <summary>
+        /// Get all event handlers and their statuses.
+        /// </summary>
         public async Task<IEnumerable<EventHandler>> All()
         {
             var lastCommittedEventSequenceNumberPerTenant = new Dictionary<TenantId, EventLogSequenceNumber>();
