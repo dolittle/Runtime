@@ -23,6 +23,5 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         void IncrementTotalKeepaliveTokenResets();
         void IncrementTotalKeepaliveTimeouts();
         void AddToTotalWaitForFirstMessageTime(TimeSpan waitTime);
-        void AddToTotalWaitForPingStarterToCompleteTime(TimeSpan waitTime);
     }
 }
