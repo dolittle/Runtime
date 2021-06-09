@@ -3,10 +3,9 @@
 
 using System;
 using System.Threading;
-using System.Threading.Tasks;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_rejecting
 {
     public class and_its_gets_rejected_again : given.a_dispatcher
     {
@@ -16,11 +15,10 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
         Establish context = () =>
         {
             connect_response = new MyConnectResponse();
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
             dispatcher.Reject(connect_response, CancellationToken.None).GetAwaiter().GetResult();
         };
 
-        Because of = () => exception = Catch.Exception(() => dispatcher.Accept(connect_response, CancellationToken.None).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => dispatcher.Reject(connect_response, CancellationToken.None).GetAwaiter().GetResult());
 
         It should_fail_because_dispatcher_has_already_been_rejected = () => exception.ShouldBeOfExactType<ReverseCallDispatcherAlreadyRejected>();
     }

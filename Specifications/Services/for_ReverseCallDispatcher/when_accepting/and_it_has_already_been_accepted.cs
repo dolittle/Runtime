@@ -8,7 +8,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
 {
-    public class multiple_times : given.a_dispatcher
+    public class and_it_has_already_been_accepted : given.a_dispatcher
     {
         static MyConnectResponse connect_response;
         static Exception exception;
