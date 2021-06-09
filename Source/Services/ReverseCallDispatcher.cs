@@ -144,9 +144,7 @@ namespace Dolittle.Runtime.Services
         /// <inheritdoc/>
         public async Task<TResponse> Call(TRequest request, CancellationToken cancellationToken)
         {
-            Console.WriteLine("WOOHOO CALLING");
             ThrowIfCompletedCall();
-            Console.WriteLine("WOOHOO WE AINT THROINW");
 
             var completionSource = new TaskCompletionSource<TResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var callId = ReverseCallId.New();
@@ -166,14 +164,14 @@ namespace Dolittle.Runtime.Services
 
                 var message = new TServerMessage();
                 _messageConverter.SetRequest(request, message);
-                _logger.LogTrace("Writing request with CallId: {CallId}", callId);
                 _logger.WritingRequest(callId);
                 await _reverseCallConnection.ClientStream.WriteAsync(message).ConfigureAwait(false);
 
                 return await completionSource.Task.ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.CallFailed(ex);
                 _calls.TryRemove(callId, out _);
                 throw;
             }
@@ -212,7 +210,6 @@ namespace Dolittle.Runtime.Services
                 while (!jointCts.IsCancellationRequested && await clientToRuntimeStream.MoveNext(jointCts.Token).ConfigureAwait(false))
                 {
                     var message = clientToRuntimeStream.Current;
-                    Console.WriteLine($"leMsage be: {message}");
                     var response = _messageConverter.GetResponse(message);
                     if (response != null)
                     {
@@ -243,7 +240,6 @@ namespace Dolittle.Runtime.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex);
                 if (!jointCts.Token.IsCancellationRequested)
                 {
                     _logger.LogWarning(ex, "An error occurred during handling of client messages");
@@ -251,7 +247,6 @@ namespace Dolittle.Runtime.Services
             }
             finally
             {
-                Console.WriteLine("OH NO WE FINALLY");
                 _completed = true;
                 foreach ((_, var completionSource) in _calls)
                 {

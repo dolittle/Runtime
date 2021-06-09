@@ -50,6 +50,12 @@ namespace Dolittle.Runtime.Services
                 new EventId(269816071, nameof(CallbackLoopFailed)),
                 "An error occurred in the callback loop");
 
+        static readonly Action<ILogger, Exception> _callFailed = LoggerMessage
+            .Define(
+                LogLevel.Warning,
+                new EventId(2145278013, nameof(CallFailed)),
+                "An error occurred while calling the reverse call dispatcher");
+
         internal static void RegisteringBoundService(this ILogger logger, string serviceName)
             => _registeringBoundService(logger, serviceName, null);
 
@@ -70,5 +76,7 @@ namespace Dolittle.Runtime.Services
 
         internal static void CallbackLoopFailed(this ILogger logger, Exception ex)
             => _callbackLoopFailed(logger, ex);
+        internal static void CallFailed(this ILogger logger, Exception ex)
+            => _callFailed(logger, ex);
     }
 }
