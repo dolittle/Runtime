@@ -15,53 +15,25 @@ namespace Dolittle.Runtime.Services.ReverseCalls
     [Singleton]
     public class MetricsCollector : ICanProvideMetrics, IMetricsCollector
     {
-        Counter _totalStreamWriteTime;
-        Counter _totalStreamWriteWaitTime;
-        Counter _totalFirstMessageWaitTime;
         Gauge _currentPendingStreamWrites;
-        Counter _totalKeepaliveResets;
-        Counter _totalKeepaliveTimeouts;
-        Counter _totalPingsSent;
-        Counter _totalPongsReceived;
         Counter _totalStreamWrites;
         Counter _totalStreamWriteBytes;
+        Counter _totalStreamWriteWaitTime;
+        Counter _totalStreamWriteTime;
         Counter _totalStreamReads;
         Counter _totalStreamReadBytes;
+        Counter _totalPingsSent;
+        Counter _totalPongsReceived;
+        Counter _totalKeepaliveResets;
+        Counter _totalKeepaliveTimeouts;
+        Counter _totalFirstMessageWaitTime;
 
         /// <inheritdoc/>
         public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
         {
-            _totalStreamWriteTime = metricFactory.Counter(
-                "dolittle_system_runtime_services_reversecalls_stream_write_seconds_total",
-                "ReverseCall total time spent writing to streams");
-
-            _totalStreamWriteWaitTime = metricFactory.Counter(
-                "dolittle_system_runtime_services_reversecalls_stream_write_wait_seconds_total",
-                "ReverseCall total time spent waiting to write to streams");
-
-            _totalFirstMessageWaitTime = metricFactory.Counter(
-                "dolittle_system_runtime_services_reversecalls_first_message_wait_seconds_total",
-                "ReverseCall total time spent waiting for first message");
-
             _currentPendingStreamWrites = metricFactory.Gauge(
                 "dolittle_system_runtime_services_reversecalls_pending_writes",
                 "ReverseCall current pending stream writes waiting");
-
-            _totalKeepaliveResets = metricFactory.Counter(
-                "dolittle_system_runtime_services_reversecalls_keepalive_resets_total",
-                "ReverseCall total number of times ping keepalive tokens have been reset");
-
-            _totalKeepaliveTimeouts = metricFactory.Counter(
-                "dolittle_system_runtime_services_reversecalls_keepalive_timeouts_total",
-                "ReverseCall total number of times ping keepalive tokens have timed out");
-
-            _totalPingsSent = metricFactory.Counter(
-                "dolittle_system_runtime_services_reversecalls_pings_sent_total",
-                "ReverseCall total number of pings sent");
-
-            _totalPongsReceived = metricFactory.Counter(
-                "dolittle_system_runtime_services_reversecalls_pongs_received_total",
-                "ReverseCall total number of pongs received");
 
             _totalStreamWrites = metricFactory.Counter(
                 "dolittle_system_runtime_services_reversecalls_stream_writes_total",
@@ -71,6 +43,14 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                 "dolittle_system_runtime_services_reversecalls_stream_write_bytes_total",
                 "ReverseCall total number of bytes written to streams");
 
+            _totalStreamWriteWaitTime = metricFactory.Counter(
+                "dolittle_system_runtime_services_reversecalls_stream_write_wait_seconds_total",
+                "ReverseCall total time spent waiting to write to streams");
+
+            _totalStreamWriteTime = metricFactory.Counter(
+                "dolittle_system_runtime_services_reversecalls_stream_write_seconds_total",
+                "ReverseCall total time spent writing to streams");
+
             _totalStreamReads = metricFactory.Counter(
                 "dolittle_system_runtime_services_reversecalls_stream_reads_total",
                 "ReverseCall total number of reads from streams");
@@ -78,35 +58,43 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _totalStreamReadBytes = metricFactory.Counter(
                 "dolittle_system_runtime_services_reversecalls_stream_read_bytes_total",
                 "ReverseCall total number of bytes read from streams");
+
+            _totalPingsSent = metricFactory.Counter(
+                "dolittle_system_runtime_services_reversecalls_pings_sent_total",
+                "ReverseCall total number of pings sent");
+
+            _totalPongsReceived = metricFactory.Counter(
+                "dolittle_system_runtime_services_reversecalls_pongs_received_total",
+                "ReverseCall total number of pongs received");
+
+            _totalKeepaliveResets = metricFactory.Counter(
+                "dolittle_system_runtime_services_reversecalls_keepalive_resets_total",
+                "ReverseCall total number of times ping keepalive tokens have been reset");
+
+            _totalKeepaliveTimeouts = metricFactory.Counter(
+                "dolittle_system_runtime_services_reversecalls_keepalive_timeouts_total",
+                "ReverseCall total number of times ping keepalive tokens have timed out");
+
+            _totalFirstMessageWaitTime = metricFactory.Counter(
+                "dolittle_system_runtime_services_reversecalls_first_message_wait_seconds_total",
+                "ReverseCall total time spent waiting for first message");
  
             return new Collector[]
             {
-                _totalStreamWriteTime,
-                _totalStreamWriteWaitTime,
-                _totalFirstMessageWaitTime,
                 _currentPendingStreamWrites,
-                _totalKeepaliveResets,
-                _totalKeepaliveTimeouts,
-                _totalPingsSent,
-                _totalPongsReceived,
                 _totalStreamWrites,
                 _totalStreamWriteBytes,
+                _totalStreamWriteWaitTime,
+                _totalStreamWriteTime,
                 _totalStreamReads,
-                _totalStreamReadBytes
+                _totalStreamReadBytes,
+                _totalPingsSent,
+                _totalPongsReceived,
+                _totalKeepaliveResets,
+                _totalKeepaliveTimeouts,
+                _totalFirstMessageWaitTime,
             };
         }
-
-        /// <inheritdoc/>
-        public void AddToTotalStreamWriteTime(TimeSpan writeTime)
-            => _totalStreamWriteTime.Inc(writeTime.TotalSeconds);
-
-        /// <inheritdoc/>
-        public void AddToTotalStreamWriteWaitTime(TimeSpan waitTime)
-            => _totalStreamWriteWaitTime.Inc(waitTime.TotalSeconds);
-
-        /// <inheritdoc/>
-        public void AddToTotalWaitForFirstMessageTime(TimeSpan waitTime)
-            => _totalFirstMessageWaitTime.Inc(waitTime.TotalSeconds);
 
         /// <inheritdoc/>
         public void IncrementPendingStreamWrites()
@@ -117,20 +105,20 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             => _currentPendingStreamWrites.Dec();
 
         /// <inheritdoc/>
-        public void IncrementTotalKeepaliveTokenResets()
-            => _totalKeepaliveResets.Inc();
+        public void IncrementTotalStreamWrites()
+            => _totalStreamWrites.Inc();
 
         /// <inheritdoc/>
-        public void IncrementTotalKeepaliveTimeouts()
-            => _totalKeepaliveTimeouts.Inc();
+        public void IncrementTotalStreamWriteBytes(int writtenBytes)
+            => _totalStreamWriteBytes.Inc();
 
         /// <inheritdoc/>
-        public void IncrementTotalPingsSent()
-            => _totalPingsSent.Inc();
+        public void AddToTotalStreamWriteWaitTime(TimeSpan waitTime)
+            => _totalStreamWriteWaitTime.Inc(waitTime.TotalSeconds);
 
         /// <inheritdoc/>
-        public void IncrementTotalPongsReceived()
-            => _totalPongsReceived.Inc();
+        public void AddToTotalStreamWriteTime(TimeSpan writeTime)
+            => _totalStreamWriteTime.Inc(writeTime.TotalSeconds);
 
         /// <inheritdoc/>
         public void IncrementTotalStreamReads()
@@ -141,11 +129,23 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             => _totalStreamReadBytes.Inc(writtenBytes);
 
         /// <inheritdoc/>
-        public void IncrementTotalStreamWrites()
-            => _totalStreamWrites.Inc();
+        public void IncrementTotalPingsSent()
+            => _totalPingsSent.Inc();
 
         /// <inheritdoc/>
-        public void IncrementTotalStreamWriteBytes(int writtenBytes)
-            => _totalStreamWriteBytes.Inc();
+        public void IncrementTotalPongsReceived()
+            => _totalPongsReceived.Inc();
+
+        /// <inheritdoc/>
+        public void IncrementTotalKeepaliveTokenResets()
+            => _totalKeepaliveResets.Inc();
+
+        /// <inheritdoc/>
+        public void IncrementTotalKeepaliveTimeouts()
+            => _totalKeepaliveTimeouts.Inc();
+
+        /// <inheritdoc/>
+        public void AddToTotalWaitForFirstMessageTime(TimeSpan waitTime)
+            => _totalFirstMessageWaitTime.Inc(waitTime.TotalSeconds);
     }
 }
