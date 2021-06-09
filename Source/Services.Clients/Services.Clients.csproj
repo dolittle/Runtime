@@ -6,10 +6,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Services/Services.csproj"/>
     <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj"/>
-    <ProjectReference Include="../Resilience/Resilience.csproj"/>
+    <ProjectReference Include="../Metrics/Metrics.csproj"/>
+    <ProjectReference Include="../Services/Services.csproj"/>
     <ProjectReference Include="../Reflection/Reflection.csproj"/>
+    <ProjectReference Include="../Resilience/Resilience.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
