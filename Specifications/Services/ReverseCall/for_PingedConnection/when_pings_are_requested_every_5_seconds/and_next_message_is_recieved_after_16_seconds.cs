@@ -3,22 +3,17 @@
 
 using System;
 using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
-using Dolittle.Runtime.Services.ReverseCalls.given;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
+namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings_are_requested_every_5_seconds
 {
-    public class when_first_read_fails : all_dependencies
+    public class and_next_message_is_recieved_after_16_seconds : given.all_dependencies
     {
-        static Exception exception;
-        static Scenario scenario;
-
         Establish context = () =>
         {
-            exception = new();
-
             scenario = Scenario.New(_ => {
-                _.Receive.Exception(exception).AtTime(10);
+                _.Receive.Message(first_message_with_5_second_pings).AtTime(12);
+                _.Receive.Message(new()).AtTime(28);
             });
         };
 
@@ -29,8 +24,9 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
             metrics,
             logger_factory);
 
+        It should_schedule_a_ping_callback_every_5_seconds = () => scenario.ScheduledCallbacks.ShouldContainOnly(TimeSpan.FromSeconds(5));
+        It should_have_written_a_pings = () => scenario.WrittenMessageTimes.ShouldContainOnly(12, 17, 22);
+        It should_have_set_the_initial_refresh_time = () => scenario.RefreshedTokenTimes.ShouldContainOnly(12);
         It should_set_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
-        It should_have_passed_along_the_read_exception = () => scenario.RuntimeStreamMoveNextException.ShouldEqual(exception);
-        It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.ShouldBeEmpty();
     }
 }
