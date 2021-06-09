@@ -13,9 +13,9 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher
 
         public MyRequest Request { get; set; }
 
-        public Ping Ping { get; set; }
+        public Ping Ping { get; set; }
 
-        public MessageDescriptor Descriptor => throw new System.NotImplementedException();
+        public MessageDescriptor Descriptor { get; set; }
 
         public int CalculateSize()
         {
