@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
         {
             _totalInncommingSubscriptions = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_producer_consumer_service_inncomming_subscriptions_total",
+                "dolittle_shared_runtime_event_horizon_producer_incoming_subscriptions_total",
                 "ConsumerService total number of subscription received from other Runtimes");
 
             _totalRejectedSubscriptions = metricFactory.Counter(
