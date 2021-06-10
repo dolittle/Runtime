@@ -21,6 +21,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         readonly SubscriptionId _subscriptionId;
         readonly IWriteEventHorizonEvents _receivedEventsWriter;
         readonly IAsyncPolicyFor<EventProcessor> _policy;
+        readonly IMetricsCollector _metrics;
         readonly ILogger _logger;
 
         /// <summary>
@@ -30,12 +31,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="subscription">The <see cref="Subscription" />.</param>
         /// <param name="receivedEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
+        /// <param name="metrics">The system for capturing metrics.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
             ConsentId consentId,
             SubscriptionId subscription,
             IWriteEventHorizonEvents receivedEventsWriter,
             IAsyncPolicyFor<EventProcessor> policy,
+            IMetricsCollector metrics,
             ILogger logger)
         {
             _consentId = consentId;
@@ -44,6 +47,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
             _subscriptionId = subscription;
             _receivedEventsWriter = receivedEventsWriter;
             _policy = policy;
+            _metrics = metrics;
             _logger = logger;
         }
 
@@ -65,6 +69,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 
         async Task<IProcessingResult> Process(CommittedEvent @event, CancellationToken cancellationToken)
         {
+            _metrics.IncrementTotalEventHorizonEventsProcessed();
             _logger.ProcessEvent(@event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
             await _policy.Execute(
                 cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),

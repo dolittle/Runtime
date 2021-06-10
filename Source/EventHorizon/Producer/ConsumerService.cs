@@ -41,6 +41,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         readonly FactoryFor<IStreamEventWatcher> _getStreamWatcher;
         readonly IInitiateReverseCallServices _reverseCalls;
         readonly IConsumerProtocol _protocol;
+        readonly IMetricsCollector _metrics;
         readonly ILogger _logger;
 
         bool _disposed;
@@ -56,6 +57,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="getStreamWatcher">The <see cref="FactoryFor{T}" /> <see cref="IStreamEventWatcher" />.</param>
         /// <param name="reverseCalls">The <see cref="IInitiateReverseCallServices" />.</param>
         /// <param name="protocol">The <see cref="IConsumerProtocol" />.</param>
+        /// <param name="metrics">The system for capturing metrics.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public ConsumerService(
             BoundedContextConfiguration boundedContextConfiguration,
@@ -66,6 +68,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             FactoryFor<IStreamEventWatcher> getStreamWatcher,
             IInitiateReverseCallServices reverseCalls,
             IConsumerProtocol protocol,
+            IMetricsCollector metrics,
             ILogger logger)
         {
             _thisMicroservice = boundedContextConfiguration.BoundedContext;
@@ -76,6 +79,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             _getStreamWatcher = getStreamWatcher;
             _reverseCalls = reverseCalls;
             _protocol = protocol;
+            _metrics = metrics;
             _logger = logger;
         }
 
@@ -112,7 +116,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             var (dispatcher, arguments) = tryConnect.Result;
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-
+            _metrics.IncrementTotalInncommingSubscriptions();
             _logger.IncomingEventHorizonSubscription(
                 arguments.ConsumerMicroservice,
                 arguments.ConsumerTenant,
@@ -124,10 +128,12 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             var subscriptionResponse = CreateSubscriptionResponse(arguments.ConsumerMicroservice, arguments.ConsumerTenant, arguments.ProducerTenant, arguments.PublicStream, arguments.Partition);
             if (subscriptionResponse.Failure != null)
             {
+                _metrics.IncrementTotalRejectedSubscriptions();
                 await dispatcher.Reject(subscriptionResponse, context.CancellationToken).ConfigureAwait(false);
                 return;
             }
 
+            _metrics.IncrementTotalAcceptedSubscriptions();
             _logger.SuccessfullySubscribed(
                 arguments.ConsumerMicroservice,
                 arguments.ConsumerTenant,
@@ -255,6 +261,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                         }
 
                         var streamEvent = tryGetStreamEvent.Result;
+                        _metrics.IncrementTotalEventsWrittenToEventHorizon();
                         var response = await dispatcher.Call(
                             new ConsumerRequest { Event = streamEvent.ToEventHorizonEvent() },
                             cancellationToken).ConfigureAwait(false);

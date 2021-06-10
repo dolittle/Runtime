@@ -27,5 +27,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         /// Increments the total number of failure connection responses.
         /// </summary>
         void IncrementTotalFailureResponses();
+
+        /// <summary>
+        /// Increments the total number of event horizon events handled.
+        /// </summary>
+        void IncrementTotalEventHorizonEventsHandled();
+
+        /// <summary>
+        /// Increments the total number of event horizon events failed handling.
+        /// </summary>
+        void IncrementTotalEventHorizonEventsFailedHandling();
     }
 }

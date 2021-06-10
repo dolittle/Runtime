@@ -18,6 +18,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         Counter _totalConnectionsFailed;
         Counter _totalSuccessfulResponses;
         Counter _totalFailureResponses;
+        Counter _totalEventHorizonEventsHandled;
+        Counter _totalEventHorizonEventsFailedHandling;
 
 
         /// <inheritdoc/>
@@ -39,12 +41,22 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
                 "dolittle_shared_runtime_event_horizon_consumer_connections_failure_responses_total",
                 "EventHorizonConnection total number of failure connection responses");
 
+            _totalEventHorizonEventsHandled = metricFactory.Counter(
+                "dolittle_shared_runtime_event_horizon_consumer_connections_event_horizon_events_handled_total",
+                "EventHorizonConnection total number of event horizon events handled");
+
+            _totalEventHorizonEventsFailedHandling = metricFactory.Counter(
+                "dolittle_shared_runtime_event_horizon_consumer_connections_event_horizon_events_failed_handling_total",
+                "EventHorizonConnection total number of event horizon events failed handling");
+
             return new Collector[]
             {
                 _totalConnectionAttempts,
                 _totalConnectionsFailed,
                 _totalSuccessfulResponses,
-                _totalFailureResponses
+                _totalFailureResponses,
+                _totalEventHorizonEventsHandled,
+                _totalEventHorizonEventsFailedHandling
             };
         }
 
@@ -63,5 +75,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         /// <inheritdoc/>
         public void IncrementTotalFailureResponses()
             => _totalFailureResponses.Inc();
+
+        /// <inheritdoc/>
+        public void IncrementTotalEventHorizonEventsHandled()
+            => _totalEventHorizonEventsHandled.Inc();
+
+        /// <inheritdoc/>
+        public void IncrementTotalEventHorizonEventsFailedHandling()
+            => _totalEventHorizonEventsFailedHandling.Inc();
     }
 }

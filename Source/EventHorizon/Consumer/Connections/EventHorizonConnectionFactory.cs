@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
     public class EventHorizonConnectionFactory : IEventHorizonConnectionFactory
     {
         readonly IReverseCallClients _reverseCallClients;
+        readonly IMetricsCollector _metrics;
         readonly ILoggerFactory _loggerFactory;
 
         /// <summary>
@@ -21,9 +22,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         /// </summary>
         /// <param name="reverseCallClients">The reverse call clients to use for creating event horizon clients.</param>
         /// <param name="loggerFactory">The logger factory to use for creating loggers for the event horizon connections</param>
-        public EventHorizonConnectionFactory(IReverseCallClients reverseCallClients, ILoggerFactory loggerFactory)
+        /// <param name="metrics">The system for collecting metrics.</param>
+        public EventHorizonConnectionFactory(IReverseCallClients reverseCallClients, IMetricsCollector metrics, ILoggerFactory loggerFactory)
         {
             _reverseCallClients = reverseCallClients;
+            _metrics = metrics;
             _loggerFactory = loggerFactory;
         }
 
@@ -39,6 +42,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
 
             return new EventHorizonConnection(
                 client,
+                _metrics,
                 _loggerFactory.CreateLogger<EventHorizonConnection>());
         }
     }

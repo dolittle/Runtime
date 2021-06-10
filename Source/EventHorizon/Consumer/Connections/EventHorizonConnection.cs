@@ -93,6 +93,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         {
             try
             {
+                _metrics.IncrementTotalEventHorizonEventsHandled();
                 _logger.HandlingEventForSubscription(_subscriptionId);
                 var streamEvent = new StreamEvent(
                         @event.Event.ToCommittedEvent(),
@@ -106,6 +107,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
             }
             catch (Exception exception)
             {
+                _metrics.IncrementTotalEventHorizonEventsFailedHandling();
                 _logger.ErrorWhileHandlingEventFromSubscription(_subscriptionId, exception);
                 return CreateFailureResponse(new Failure(
                     SubscriptionFailures.ErrorHandlingEvent,
