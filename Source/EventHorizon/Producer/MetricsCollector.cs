@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 "dolittle_shared_runtime_event_horizon_producer_accepted_subscriptions_total",
                 "ConsumerService total number of accepted subscriptions");
             _totalEventsWrittenToEventHorizon = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_producer_consumer_service_event_horizon_events_written_total",
+                "dolittle_shared_runtime_event_horizon_producer_events_written_total",
                 "ConsumerService total number of events written to event horizon");
 
             return new Collector[]
