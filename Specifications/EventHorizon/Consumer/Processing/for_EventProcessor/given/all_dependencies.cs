@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Machine.Specifications;
 using Moq;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.given
 {
@@ -17,17 +18,33 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.g
         protected static ConsentId consent_id;
         protected static SubscriptionId subscription_id;
         protected static IAsyncPolicyFor<EventProcessor> event_processor_policy;
-        protected static Moq.Mock<IWriteEventHorizonEvents> event_horizon_events_writer;
+        protected static Mock<IWriteEventHorizonEvents> event_horizon_events_writer;
+        protected static IMetricsCollector metrics;
+        protected static ILogger logger;
         protected static CommittedEvent @event;
         protected static PartitionId partition;
 
         Establish context = () =>
         {
             event_processor_policy = new AsyncPolicyFor<EventProcessor>(new EventProcessorPolicy(Mock.Of<ILogger<EventProcessor>>()).Define());
+
             consent_id = Guid.NewGuid();
-            subscription_id = new SubscriptionId(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid());
+
+            subscription_id = new SubscriptionId(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                Guid.NewGuid());
+
             partition = Guid.NewGuid();
-            event_horizon_events_writer = new Moq.Mock<IWriteEventHorizonEvents>();
+
+            event_horizon_events_writer = new Mock<IWriteEventHorizonEvents>();
+
+            metrics = Mock.Of<IMetricsCollector>();
+            logger = NullLogger.Instance;
+
             @event = new CommittedEvent(
                 0,
                 DateTimeOffset.Now,

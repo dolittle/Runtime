@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         /// Initializes a new instance of the <see cref="EventHorizonConnection" /> class.
         /// </summary>
         /// <param name="reverseCallClient">The reverse call client.</param>
-        /// <param name="metrics">The system for capturing metrics.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="logger">The logger.</param>
         public EventHorizonConnection(
             IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,

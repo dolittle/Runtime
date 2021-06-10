@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
-        /// <param name="metrics">The system for capturing metrics.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         public StreamProcessorFactory(
             IResilientStreamProcessorStateRepository streamProcessorStates,

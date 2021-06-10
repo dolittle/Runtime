@@ -21,8 +21,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         /// Initializes a new instance of the <see cref="EventHorizonConnectionFactory"/> class.
         /// </summary>
         /// <param name="reverseCallClients">The reverse call clients to use for creating event horizon clients.</param>
-        /// <param name="loggerFactory">The logger factory to use for creating loggers for the event horizon connections</param>
         /// <param name="metrics">The system for collecting metrics.</param>
+        /// <param name="loggerFactory">The logger factory to use for creating loggers for the event horizon connections</param>
         public EventHorizonConnectionFactory(IReverseCallClients reverseCallClients, IMetricsCollector metrics, ILoggerFactory loggerFactory)
         {
             _reverseCallClients = reverseCallClients;
