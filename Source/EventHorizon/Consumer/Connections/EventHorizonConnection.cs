@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
     public class EventHorizonConnection : IEventHorizonConnection
     {
         readonly IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> _reverseCallClient;
+        readonly IMetricsCollector _metrics;
         readonly ILogger _logger;
         SubscriptionId _subscriptionId;
 
@@ -27,12 +28,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         /// Initializes a new instance of the <see cref="EventHorizonConnection" /> class.
         /// </summary>
         /// <param name="reverseCallClient">The reverse call client.</param>
+        /// <param name="metrics">The system for capturing metrics.</param>
         /// <param name="logger">The logger.</param>
         public EventHorizonConnection(
             IReverseCallClient<ConsumerSubscriptionRequest, Contracts.SubscriptionResponse, ConsumerRequest, ConsumerResponse> reverseCallClient,
+            IMetricsCollector metrics,
             ILogger logger)
         {
             _reverseCallClient = reverseCallClient;
+            _metrics = metrics;
             _logger = logger;
         }
 
@@ -44,20 +48,23 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         {
             if (await _reverseCallClient.Connect(CreateRequest(subscription, publicEventsPosition), cancellationToken).ConfigureAwait(false))
             {
+                _metrics.IncrementTotalConnectionAttempts();
                 _subscriptionId = subscription;
 
                 var response = _reverseCallClient.ConnectResponse;
 
                 if (response.Failure != default)
                 {
+                    _metrics.IncrementTotalFailureResponses();
                     _logger.ConnectionToProducerRuntimeFailed(subscription, response.Failure.Reason);
                     return SubscriptionResponse.Failed(response.Failure);
                 }
-
+                _metrics.IncrementTotalSuccessfulResponses();
                 _logger.ConnectionToProducerRuntimeSucceeded(subscription);
                 return SubscriptionResponse.Succeeded(response.ConsentId.ToGuid());
             }
 
+            _metrics.IncrementTotalConnectionsFailed();
             _logger.CouldNotConnectToProducerRuntime(subscription);
             return SubscriptionResponse.Failed(
                 new Failure(

@@ -28,6 +28,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IEventHorizonConnectionFactory _connectionFactory;
         readonly IStreamProcessorFactory _streamProcessorFactory;
         readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
+        readonly IMetricsCollector _metrics;
         readonly ILogger _logger;
         TaskCompletionSource<SubscriptionResponse> _connectionResponse;
 
@@ -40,6 +41,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="connectionFactory">The factory to use for creating new connections to the producer Runtime.</param>
         /// <param name="streamProcessorFactory">The factory to use for creating stream processors that write the received events.</param>
         /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
+        /// <param name="metrics">The system for capturing metrics.</param>
+        /// <param name="logger">The system for logging messages.</param>
         public Subscription(
             SubscriptionId identifier,
             MicroserviceAddress connectionAddress,
@@ -47,6 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IEventHorizonConnectionFactory connectionFactory,
             IStreamProcessorFactory streamProcessorFactory,
             IGetNextEventToReceiveForSubscription subscriptionPositions,
+            IMetricsCollector metrics,
             ILogger logger)
         {
             Identifier = identifier;
@@ -55,6 +59,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _connectionFactory = connectionFactory;
             _streamProcessorFactory = streamProcessorFactory;
             _subscriptionPositions = subscriptionPositions;
+            _metrics = metrics;
             _logger = logger;
             CreateUnresolvedConnectionResponse();
         }
@@ -132,6 +137,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 if (connectionResponse.Success)
                 {
                     State = SubscriptionState.Connected;
+                    _metrics.IncrementTotalConnectedSubscriptions();
                     await ReceiveAndWriteEvents(connection, connectionResponse.ConsentId, cancellationToken).ConfigureAwait(false);
                     throw new SubscriptionLoopCompleted(Identifier);
                 }
@@ -155,30 +161,38 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         async Task ReceiveAndWriteEvents(IEventHorizonConnection connection, ConsentId consent, CancellationToken cancellationToken)
         {
-            _logger.SubscriptionIsReceivingAndWriting(Identifier, consent);
-
-            using var processingCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-            var connectionToStreamProcessorQueue = new AsyncProducerConsumerQueue<StreamEvent>();
-
-            var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue));
-
-            var tasks = new[]
+            try
             {
-                writeEventsStreamProcessor.StartAndWait(
-                    processingCancellationToken.Token),
-                connection.StartReceivingEventsInto(
-                    connectionToStreamProcessorQueue,
-                    processingCancellationToken.Token),
-            };
+                _logger.SubscriptionIsReceivingAndWriting(Identifier, consent);
 
-            await Task.WhenAny(tasks).ConfigureAwait(false);
+                using var processingCancellationToken = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-            processingCancellationToken.Cancel();
-            State = SubscriptionState.FailedToProcess;
-            _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent);
+                var connectionToStreamProcessorQueue = new AsyncProducerConsumerQueue<StreamEvent>();
 
-            await Task.WhenAll(tasks).ConfigureAwait(false);
+                var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue));
+
+                var tasks = new[]
+                {
+                    writeEventsStreamProcessor.StartAndWait(
+                        processingCancellationToken.Token),
+                    connection.StartReceivingEventsInto(
+                        connectionToStreamProcessorQueue,
+                        processingCancellationToken.Token),
+                };
+
+                await Task.WhenAny(tasks).ConfigureAwait(false);
+
+                processingCancellationToken.Cancel();
+                State = SubscriptionState.FailedToProcess;
+                _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent);
+
+                await Task.WhenAll(tasks).ConfigureAwait(false);
+            }
+            catch
+            {
+                _metrics.DecrementTotalConnectedSubscriptions();
+                throw;
+            }
         }
 
         void SetConnectionResponse(SubscriptionResponse response)
