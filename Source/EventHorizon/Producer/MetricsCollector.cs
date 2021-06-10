@@ -57,6 +57,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <inheritdoc/>
         public void IncrementTotalAcceptedSubscriptions()
             => _totalAcceptedSubscriptions.Inc();
+
+        /// <inheritdoc/>
         public void IncrementTotalEventsWrittenToEventHorizon()
             => _totalEventsWrittenToEventHorizon.Inc();
     }
