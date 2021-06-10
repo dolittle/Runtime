@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_rejecting

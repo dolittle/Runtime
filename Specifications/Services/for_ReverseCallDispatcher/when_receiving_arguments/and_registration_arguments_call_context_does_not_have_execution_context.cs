@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
 using Machine.Specifications;
 

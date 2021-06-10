@@ -3,11 +3,12 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments
 {
-    public class and_first_message_in_client_stream_is_not_connect_arguments : given.a_dispatcher
+    public class and_first_message_in_client_stream_is_not_connect_arguments : a_dispatcher
     {
         static bool result;
 

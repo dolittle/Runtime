@@ -17,8 +17,8 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
         protected static Mock<IExecutionContextManager> execution_context_manager;
         protected static Mock<IPingedConnection<MyClientMessage, MyServerMessage>> pinged_connection;
 
-        protected static Mock<IAsyncStreamReader<MyClientMessage>> client_stream;
-        protected static Mock<IServerStreamWriter<MyServerMessage>> server_stream;
+        protected static Mock<IAsyncStreamReader<MyClientMessage>> client_to_runtime_stream;
+        protected static Mock<IServerStreamWriter<MyServerMessage>> runtime_to_client_stream;
 
         protected static CancellationToken cancellation_token;
 
@@ -26,12 +26,12 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
         {
             execution_context_manager = new();
             pinged_connection = new();
-            client_stream = new();
-            server_stream = new();
+            client_to_runtime_stream = new();
+            runtime_to_client_stream = new();
             cancellation_token = new();
 
-            pinged_connection.SetupGet(_ => _.RuntimeStream).Returns(client_stream.Object);
-            pinged_connection.SetupGet(_ => _.ClientStream).Returns(server_stream.Object);
+            pinged_connection.SetupGet(_ => _.RuntimeStream).Returns(client_to_runtime_stream.Object);
+            pinged_connection.SetupGet(_ => _.ClientStream).Returns(runtime_to_client_stream.Object);
             pinged_connection.SetupGet(_ => _.CancellationToken).Returns(cancellation_token);
             dispatcher = new ReverseCallDispatcher<MyClientMessage, MyServerMessage, MyConnectArguments, MyConnectResponse, MyRequest, MyResponse>(
                 pinged_connection.Object,

@@ -19,13 +19,25 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
 
         Establish context = () =>
         {
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
+            client_stream
+                .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(true));
-            client_message = new() { Response = new() { Context = new() } };
-            // return a blank response to keep the while loop going, this gets changed later to break the loop
-            client_stream.SetupGet(_ => _.Current).Returns(client_message);
 
-            server_stream.Setup(_ => _.WriteAsync(Moq.It.IsAny<MyServerMessage>()))
+            client_message = new()
+            {
+                Response = new()
+                {
+                    Context = new()
+                }
+            };
+
+            // return a blank response to keep the while loop going, this gets changed later to break the loop
+            client_stream
+                .SetupGet(_ => _.Current)
+                .Returns(client_message);
+
+            server_stream
+                .Setup(_ => _.WriteAsync(Moq.It.IsAny<MyServerMessage>()))
                 .Callback<MyServerMessage>(server_message =>
                 {
                     if (server_message.Request?.Context?.CallId != null)
@@ -42,7 +54,8 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
                 .Returns(Task.FromResult(true));
 
             execution_context = execution_contexts.create();
-            execution_context_manager.SetupGet(_ => _.Current)
+            execution_context_manager
+                .SetupGet(_ => _.Current)
                 .Returns(execution_context);
 
             cts = new();

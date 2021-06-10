@@ -5,6 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
 using Google.Protobuf.WellKnownTypes;
 using Machine.Specifications;

@@ -4,7 +4,7 @@
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
 {
     public class MyProtocol : IConvertReverseCallMessages<MyClientMessage, MyServerMessage, MyConnectArguments, MyConnectResponse, MyRequest, MyResponse>
     {

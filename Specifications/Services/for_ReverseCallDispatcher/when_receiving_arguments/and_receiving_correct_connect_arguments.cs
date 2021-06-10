@@ -7,6 +7,7 @@ using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Google.Protobuf.WellKnownTypes;
 using Machine.Specifications;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using ExecutionContracts = Dolittle.Execution.Contracts;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments
