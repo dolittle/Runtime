@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
         Establish context = () =>
         {
             connect_response = new MyConnectResponse();
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
+            client_to_runtime_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
             dispatcher.Accept(connect_response, CancellationToken.None).GetAwaiter().GetResult();
         };
 

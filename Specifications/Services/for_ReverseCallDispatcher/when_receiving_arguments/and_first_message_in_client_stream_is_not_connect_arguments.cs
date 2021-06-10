@@ -8,14 +8,14 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments
 {
-    public class and_first_message_in_client_stream_is_not_connect_arguments : a_dispatcher
+    public class and_first_message_in_client_stream_is_not_connect_arguments : given.a_dispatcher
     {
         static bool result;
 
         Establish context = () =>
         {
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
-            client_stream.SetupGet(_ => _.Current).Returns(new MyClientMessage());
+            client_to_runtime_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
+            client_to_runtime_stream.SetupGet(_ => _.Current).Returns(new MyClientMessage());
         };
 
         Because of = () => result = dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();

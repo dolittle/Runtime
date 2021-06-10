@@ -9,7 +9,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
 {
-    public class and_its_gets_rejected_again : given.a_dispatcher
+    public class and_it_has_already_been_rejected : given.a_dispatcher
     {
         static MyConnectResponse connect_response;
         static Exception exception;
@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
         Establish context = () =>
         {
             connect_response = new MyConnectResponse();
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
+            client_to_runtime_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
             dispatcher.Reject(connect_response, CancellationToken.None).GetAwaiter().GetResult();
         };
 

@@ -8,6 +8,7 @@ using Grpc.Core;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
 {
@@ -15,8 +16,8 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
     {
         protected static IReverseCallDispatcher<MyClientMessage, MyServerMessage, MyConnectArguments, MyConnectResponse, MyRequest, MyResponse> dispatcher;
         protected static Mock<IExecutionContextManager> execution_context_manager;
+        protected static ExecutionContext execution_context;
         protected static Mock<IPingedConnection<MyClientMessage, MyServerMessage>> pinged_connection;
-
         protected static Mock<IAsyncStreamReader<MyClientMessage>> client_to_runtime_stream;
         protected static Mock<IServerStreamWriter<MyServerMessage>> runtime_to_client_stream;
 
@@ -38,6 +39,11 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
                 new MyProtocol(),
                 execution_context_manager.Object,
                 Mock.Of<ILogger>());
+
+            execution_context = execution_contexts.create();
+            execution_context_manager
+                .SetupGet(_ => _.Current)
+                .Returns(execution_context);
         };
     }
 }

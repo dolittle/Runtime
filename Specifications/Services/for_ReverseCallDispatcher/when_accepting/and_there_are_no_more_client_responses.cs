@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
         Establish context = () =>
         {
             connect_response = new MyConnectResponse();
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
+            client_to_runtime_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
         };
 
         Because of = () =>
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_accepting
             dispatcher.Accept(connect_response, CancellationToken.None).GetAwaiter().GetResult();
         };
 
-        It should_write_one_message = () => server_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.ConnectResponse.Equals(connect_response))), Moq.Times.Once);
-        It should_move_client_stream_once = () => client_stream.Verify(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
+        It should_write_one_message = () => runtime_to_client_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.ConnectResponse.Equals(connect_response))), Moq.Times.Once);
+        It should_move_client_stream_once = () => client_to_runtime_stream.Verify(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     }
 }

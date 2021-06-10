@@ -15,8 +15,8 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arg
 
         Establish context = () =>
         {
-            client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
-            client_stream.SetupGet(_ => _.Current).Returns(new MyClientMessage { Arguments = new MyConnectArguments { Context = new ReverseCallArgumentsContext() } });
+            client_to_runtime_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
+            client_to_runtime_stream.SetupGet(_ => _.Current).Returns(new MyClientMessage { Arguments = new MyConnectArguments { Context = new ReverseCallArgumentsContext() } });
         };
 
         Because of = () => result = dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();
