@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 "ConsumerService total number of subscription received from other Runtimes");
 
             _totalRejectedSubscriptions = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_producer_consumer_service_rejected_subscriptions_total",
+                "dolittle_shared_runtime_event_horizon_producer_rejected_subscriptions_total",
                 "ConsumerService total number of rejected subscriptions");
 
             _totalAcceptedSubscriptions = metricFactory.Counter(
