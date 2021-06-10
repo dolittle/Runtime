@@ -116,7 +116,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
             var (dispatcher, arguments) = tryConnect.Result;
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-            _metrics.IncrementTotalInncommingSubscriptions();
+            _metrics.IncrementTotalIncomingSubscriptions();
             _logger.IncomingEventHorizonSubscription(
                 arguments.ConsumerMicroservice,
                 arguments.ConsumerTenant,
