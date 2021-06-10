@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events.Processing;
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventHorizonEventProcessor.when_processing
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.when_processing
 {
     public class an_event : given.all_dependencies
     {

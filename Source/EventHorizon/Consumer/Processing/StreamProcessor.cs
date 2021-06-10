@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="loggerFactory">The factory for creating loggers.</param>
         public StreamProcessor(
             SubscriptionId subscriptionId,
-            EventProcessor eventProcessor,
+            IEventProcessor eventProcessor,
             EventsFromEventHorizonFetcher eventsFetcher,
             IResilientStreamProcessorStateRepository streamProcessorStates,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,

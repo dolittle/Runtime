@@ -4,7 +4,7 @@
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventHorizonEventProcessor
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor
 {
     public class when_creating : given.all_dependencies
     {

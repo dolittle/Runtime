@@ -4,12 +4,9 @@
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.EventHorizon.Consumer.Connections;
-using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
-using Dolittle.Runtime.Resilience;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
@@ -20,39 +17,25 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
     [SingletonPerTenant]
     public class Subscriptions : ISubscriptions
     {
-        readonly ConcurrentDictionary<SubscriptionId, Subscription> _subscriptions = new();
-        readonly ILoggerFactory _loggerFactory;
-        readonly IStreamProcessorFactory _streamProcessorFactory;
+        readonly ConcurrentDictionary<SubscriptionId, ISubscription> _subscriptions = new();
         readonly MicroservicesConfiguration _microservicesConfiguration;
-        readonly IEventHorizonConnectionFactory _eventHorizonConnectionFactory;
-        readonly IAsyncPolicyFor<Subscription> _subscriptionPolicy;
-        readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
-        readonly ILogger<Subscriptions> _logger;
+        readonly ISubscriptionFactory _subscriptionFactory;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Subscriptions"/> class.
         /// </summary>
-        /// <param name="streamProcessorFactory">The factory to use for creating stream processors that write the received events.</param>
         /// <param name="microservicesConfiguration">The configuration to use for finding the address of a producer Runtime from it's microservice id.</param>
-        /// <param name="eventHorizonConnectionFactory">The factory to use for creating new connections to the producer Runtime.</param>
-        /// <param name="subscriptionPolicy">The policy to use for handling the <see cref="SubscribeLoop(CancellationToken)"/>.</param>
-        /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
-        /// <param name="loggerFactory">The logger factory to use for creating loggers.</param>
+        /// <param name="subscriptionFactory">The factory to use for creating subscriptions that subscribes to a producer microservice.</param>
+        /// <param name="logger">The logger.</param>
         public Subscriptions(
-            IStreamProcessorFactory streamProcessorFactory,
             MicroservicesConfiguration microservicesConfiguration,
-            IEventHorizonConnectionFactory eventHorizonConnectionFactory,
-            IAsyncPolicyFor<Subscription> subscriptionPolicy,
-            IGetNextEventToReceiveForSubscription subscriptionPositions,
-            ILoggerFactory loggerFactory)
+            ISubscriptionFactory subscriptionFactory,
+            ILogger logger)
         {
-            _loggerFactory = loggerFactory;
-            _streamProcessorFactory = streamProcessorFactory;
             _microservicesConfiguration = microservicesConfiguration;
-            _eventHorizonConnectionFactory = eventHorizonConnectionFactory;
-            _subscriptionPolicy = subscriptionPolicy;
-            _subscriptionPositions = subscriptionPositions;
-            _logger = loggerFactory.CreateLogger<Subscriptions>();
+            _subscriptionFactory = subscriptionFactory;
+            _logger = logger;
         }
 
         /// <inheritdoc />
@@ -71,7 +54,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                             $"No microservice configuration for producer microservice {producerMicroserviceId}")));
             }
 
-            var subscription = _subscriptions.GetOrAdd(subscriptionId, CreateNewSubscription(subscriptionId, producerConnectionAddress));
+            var subscription = _subscriptions.GetOrAdd(subscriptionId, _ => _subscriptionFactory.Create(_, producerConnectionAddress));
 
             if (subscription.State == SubscriptionState.Created)
             {
@@ -88,19 +71,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         bool TryGetProducerMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
         {
-            var result = _microservicesConfiguration.TryGetValue(producerMicroservice, out var microserviceAddressConfig);
+            microserviceAddress = default;
+            if (!_microservicesConfiguration.TryGetValue(producerMicroservice, out var microserviceAddressConfig))
+            {
+                return false;
+            }
             microserviceAddress = microserviceAddressConfig;
-            return result;
+            return true;
         }
-
-        Subscription CreateNewSubscription(SubscriptionId subscriptionId, MicroserviceAddress producerMicroserviceAddress)
-            => new(
-                subscriptionId,
-                producerMicroserviceAddress,
-                _subscriptionPolicy,
-                _eventHorizonConnectionFactory,
-                _streamProcessorFactory,
-                _subscriptionPositions,
-                _loggerFactory.CreateLogger<Subscription>());
     }
 }

@@ -1,12 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Services.Contracts;
