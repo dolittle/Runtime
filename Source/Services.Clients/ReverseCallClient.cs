@@ -266,7 +266,7 @@ namespace Dolittle.Runtime.Services.Clients
                 {
                     var messageSize = _serverToClient.Current.CalculateSize();
                     _logger.ReadMessage(typeof(TClientMessage), messageSize);
-                    _metrics.IncrementTotalWrites();
+                    _metrics.IncrementTotalReceivedMessages();
                     _metrics.AddToTotalReceivedBytes(messageSize);
 
                     if (CurrentMessageIsPing())

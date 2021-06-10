@@ -38,9 +38,17 @@ namespace Dolittle.Runtime.Heads
         /// <inheritdoc/>
         public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
         {
-            _connectedHeads = metricFactory.Gauge("ConnectedHeads", "Number of connected heads");
-            _headConnects = metricFactory.Counter("HeadConnects", "Number of connections established from heads");
-            _headDisconnects = metricFactory.Counter("HeadDisconnects", "Number of connections disconnected from heads");
+            _connectedHeads = metricFactory.Gauge(
+                "dolittle_shared_runtime_heads_connected",
+                "Current number of connected heads");
+
+            _headConnects = metricFactory.Counter(
+                "dolittle_shared_runtime_heads_connections_total",
+                "Total number of connections established from heads");
+
+            _headDisconnects = metricFactory.Counter(
+                "dolittle_shared_runtime_heads_disconnections_total",
+                "Total number of connections closed from heads");
 
             return new Collector[]
             {

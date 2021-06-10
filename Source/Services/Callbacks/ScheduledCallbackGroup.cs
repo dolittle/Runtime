@@ -16,14 +16,15 @@ namespace Dolittle.Runtime.Services.Callbacks
         readonly List<DisposableCallback> _callbacks = new();
         readonly ILogger _logger;
         readonly TimeSpan _interval;
-        DateTime _lastCalled = DateTime.MinValue;
         readonly IMetricsCollector _metrics;
+        DateTime _lastCalled;
 
         public ScheduledCallbackGroup(TimeSpan interval, ILogger logger, IMetricsCollector metrics)
         {
             _interval = interval;
             _logger = logger;
             _metrics = metrics;
+            _lastCalled = DateTime.UtcNow - interval;
         }
 
         /// <summary>
