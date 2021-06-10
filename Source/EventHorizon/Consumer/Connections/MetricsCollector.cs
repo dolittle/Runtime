@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
                 "EventHorizonConnection total number of failure connection responses");
 
             _totalEventHorizonEventsHandled = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_consumer_connections_event_horizon_events_handled_total",
+                "dolittle_shared_runtime_event_horizon_consumer_handled_events_total",
                 "EventHorizonConnection total number of event horizon events handled");
 
             _totalEventHorizonEventsFailedHandling = metricFactory.Counter(
