@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
     public interface IMetricsCollector
     {
         /// <summary>
-        /// Increments the total number of event horizon events failed handling.
+        /// Increments the total number of event horizon events processed.
         /// </summary>
         void IncrementTotalEventHorizonEventsProcessed();
     }

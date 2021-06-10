@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
         {
             _totalEventHorizonEventsProcessed = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_consumer_processing_event_horizon_events_processed_total",
+                "dolittle_shared_runtime_event_horizon_consumer_events_processed_total",
                 "EventProcessor total number of event horizon events processed");
 
 

@@ -26,11 +26,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
         {
             _totalConnectionAttempts = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_consumer_connections_connection_attempts_total",
+                "dolittle_shared_runtime_event_horizon_consumer_connection_attempts_total",
                 "EventHorizonConnection total number of connection attempts");
 
             _totalConnectionsFailed = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_consumer_connections_connections_failed_total",
+                "dolittle_shared_runtime_event_horizon_consumer_failed_connections_total",
                 "EventHorizonConnection total number of failed connections");
 
             _totalSuccessfulResponses = metricFactory.Counter(
@@ -42,11 +42,11 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
                 "EventHorizonConnection total number of failure connection responses");
 
             _totalEventHorizonEventsHandled = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_consumer_connections_event_horizon_events_handled_total",
+                "dolittle_shared_runtime_event_horizon_consumer_handled_events_total",
                 "EventHorizonConnection total number of event horizon events handled");
 
             _totalEventHorizonEventsFailedHandling = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_consumer_connections_event_horizon_events_failed_handling_total",
+                "dolittle_shared_runtime_event_horizon_consumer_failed_event_handling_total",
                 "EventHorizonConnection total number of event horizon events failed handling");
 
             return new Collector[]

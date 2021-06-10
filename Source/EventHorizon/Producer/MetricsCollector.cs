@@ -23,18 +23,18 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         public IEnumerable<Collector> Provide(IMetricFactory metricFactory)
         {
             _totalInncommingSubscriptions = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_producer_consumer_service_inncomming_subscriptions_total",
+                "dolittle_shared_runtime_event_horizon_producer_incoming_subscriptions_total",
                 "ConsumerService total number of subscription received from other Runtimes");
 
             _totalRejectedSubscriptions = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_producer_consumer_service_rejected_subscriptions_total",
+                "dolittle_shared_runtime_event_horizon_producer_rejected_subscriptions_total",
                 "ConsumerService total number of rejected subscriptions");
 
             _totalAcceptedSubscriptions = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_producer_consumer_service_accepted_subscriptions_total",
+                "dolittle_shared_runtime_event_horizon_producer_accepted_subscriptions_total",
                 "ConsumerService total number of accepted subscriptions");
             _totalEventsWrittenToEventHorizon = metricFactory.Counter(
-                "dolittle_shared_runtime_event_horizon_producer_consumer_service_event_horizon_events_written_total",
+                "dolittle_shared_runtime_event_horizon_producer_events_written_total",
                 "ConsumerService total number of events written to event horizon");
 
             return new Collector[]

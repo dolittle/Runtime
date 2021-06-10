@@ -9,9 +9,9 @@ namespace Dolittle.Runtime.EventHorizon.Producer
     public interface IMetricsCollector
     {
         /// <summary>
-        /// Increments the total number of inncomming subscriptions from another Runtime.
+        /// Increments the total number of incoming subscriptions from another Runtime.
         /// </summary>
-        void IncrementTotalInncommingSubscriptions();
+        void IncrementTotalIncomingSubscriptions();
 
         /// <summary>
         /// Increments the total number of rejected subscriptions from another Runtime.
