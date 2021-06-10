@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 "Subscriptions total number of registered subscriptions");
 
             _totalConnectedSubscriptions = metricFactory.Gauge(
-                "dolittle_shared_runtime_event_horizon_consumer_connected_subscriptions_total",
+                "dolittle_shared_runtime_event_horizon_consumer_connected_subscriptions",
                 "Subscription total number of connected subscriptions");
 
             return new Collector[]
