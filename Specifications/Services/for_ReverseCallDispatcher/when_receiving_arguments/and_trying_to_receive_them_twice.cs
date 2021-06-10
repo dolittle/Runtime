@@ -1,20 +1,21 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Dolittle.Services.Contracts;
 using Google.Protobuf.WellKnownTypes;
 using Machine.Specifications;
-using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
-using System;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments
 {
-    public class and_receiving_correct_connect_arguments : given.a_dispatcher
+    public class and_trying_to_receive_them_twice : given.a_dispatcher
     {
-        static bool result;
         static MyConnectArguments arguments;
 
         Establish context = () =>
@@ -35,17 +36,14 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arg
                 .SetupGet(_ => _.Current)
                 .Returns(new MyClientMessage { Arguments = arguments });
         };
+        static Exception exception;
+        Because of = () =>
+        {
+            dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();
+            exception = Catch.Exception(() => dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult());
+        };
 
-        Because of = () => result = dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();
-
-        It should_return_true = () => result.ShouldBeTrue();
-        It should_have_the_correct_arguments = () => dispatcher.Arguments.ShouldEqual(arguments);
-        It should_change_execution_context = () => execution_context_manager
-            .Verify(
-                _ => _.CurrentFor(
-                    execution_context,
-                    Moq.It.IsAny<string>(),
-                    Moq.It.IsAny<int>(),
-                    Moq.It.IsAny<string>()), Moq.Times.Once);
+        It should_throw_exception_on_second_try = () => exception.ShouldBeOfExactType<ReverseCallDispatcherAlreadyTriedToReceiveArguments>();
+        It shouldnt_have_tried_to_read_the_stream_again = () => client_to_runtime_stream.Verify(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()), Times.Once);
     }
 }

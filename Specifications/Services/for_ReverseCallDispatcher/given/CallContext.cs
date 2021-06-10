@@ -6,7 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
 {
     public class CallContext : ServerCallContext
     {
