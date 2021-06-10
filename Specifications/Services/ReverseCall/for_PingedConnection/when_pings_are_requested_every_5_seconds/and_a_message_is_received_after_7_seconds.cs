@@ -7,7 +7,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings_are_requested_every_5_seconds
 {
-    public class and_a_message_is_recieved_after_7_seconds : given.all_dependencies
+    public class and_a_message_is_received_after_7_seconds : given.all_dependencies
     {
         Establish context = () =>
         {

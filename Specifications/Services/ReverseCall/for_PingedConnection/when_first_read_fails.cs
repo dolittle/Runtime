@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
             metrics,
             logger_factory);
 
-        It should_set_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
+        It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
         It should_have_passed_along_the_read_exception = () => scenario.RuntimeStreamMoveNextException.ShouldEqual(exception);
         It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.ShouldBeEmpty();
     }

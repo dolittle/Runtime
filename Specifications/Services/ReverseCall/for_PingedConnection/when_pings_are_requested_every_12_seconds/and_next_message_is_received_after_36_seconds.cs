@@ -6,13 +6,13 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings_are_requested_every_12_seconds
 {
-    public class and_next_message_is_recieved_after_35_seconds : given.all_dependencies
+    public class and_next_message_is_received_after_36_seconds : given.all_dependencies
     {
         Establish context = () =>
         {
             scenario = Scenario.New(_ => {
                 _.Receive.Message(first_message_with_12_second_pings).AtTime(20);
-                _.Receive.Message(new()).AtTime(55);
+                _.Receive.Message(new()).AtTime(56);
             });
         };
 
@@ -23,8 +23,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
             metrics,
             logger_factory);
 
-        It should_have_written_a_pings = () => scenario.WrittenMessageTimes.ShouldContainOnly(20, 32, 44);
-        It should_have_set_the_initial_refresh_time = () => scenario.RefreshedTokenTimes.ShouldContainOnly(20, 55);
-        It should_not_set_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeFalse();
+        It should_have_written_pings = () => scenario.WrittenMessageTimes.ShouldContainOnly(20, 32, 44);
+        It should_have_set_the_initial_refresh_time = () => scenario.RefreshedTokenTimes.ShouldContainOnly(20);
+        It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
     }
 }

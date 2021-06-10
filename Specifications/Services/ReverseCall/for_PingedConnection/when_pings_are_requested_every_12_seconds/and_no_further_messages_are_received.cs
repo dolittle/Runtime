@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
             metrics,
             logger_factory);
 
-        It should_schedule_a_ping_callback_every_5_seconds = () => scenario.ScheduledCallbacks.ShouldContainOnly(TimeSpan.FromSeconds(12));
+        It should_schedule_a_ping_callback_every_12_seconds = () => scenario.ScheduledCallbacks.ShouldContainOnly(TimeSpan.FromSeconds(12));
         It should_have_set_the_initial_refresh_time = () => scenario.RefreshedTokenTimes.ShouldContainOnly(2);
     }
 }

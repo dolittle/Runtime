@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
             metrics,
             logger_factory);
 
-        It should_have_written_a_pings_and_messages = () => scenario.WrittenMessageTimes.ShouldContainOnly(5, 10, 12, 15, 20, 20);
+        It should_have_written_pings_and_messages = () => scenario.WrittenMessageTimes.ShouldContainOnly(5, 10, 12, 15, 20, 20);
         It should_have_refreshed_the_token = () => scenario.RefreshedTokenTimes.ShouldContainOnly(5, 10, 14, 22);
         It should_have_sent_the_two_messages = () => scenario.WrittenMessages.ShouldContain(first_message_to_send, second_message_to_send);
     }

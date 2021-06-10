@@ -15,14 +15,12 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
     {
         protected static Scenario scenario;
         protected static a_message first_message_with_5_second_pings;
-        static object first_message_connect_arguments;
-        static ReverseCallArgumentsContext first_message_arguments_context;
 
         Establish context = () =>
         {
             first_message_with_5_second_pings = new();
-            first_message_connect_arguments = new();
-            first_message_arguments_context = new()
+            var first_message_connect_arguments = new object();
+            var first_message_arguments_context = new ReverseCallArgumentsContext()
             {
                 PingInterval = Duration.FromTimeSpan(TimeSpan.FromSeconds(5)),
             };
