@@ -186,7 +186,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
         void ResetKeepaliveTokenCancellation()
         {
-            _cancellationTokenSource.CancelAfter(_keepaliveTimeout);
+            _keepalive.RefreshDeadline(_keepaliveTimeout);
             _metrics.IncrementTotalKeepaliveTokenResets();
             _logger.ResettingKeepaliveToken(_requestId);
         }
