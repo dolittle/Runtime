@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
         It should_not_start_stream_processor = () => stream_processor.Verify(_ => _.StartAndWait(
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
-        It should_not_start_receiving_events_once = () => event_horizon_connection.Verify(_ => _.StartReceivingEventsInto(
+        It should_not_start_receiving_events = () => event_horizon_connection.Verify(_ => _.StartReceivingEventsInto(
             Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 

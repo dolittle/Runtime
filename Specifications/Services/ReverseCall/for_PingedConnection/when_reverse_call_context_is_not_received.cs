@@ -7,13 +7,22 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
 {
-    public class when_receiving_no_messages : all_dependencies
+    public class when_reverse_call_context_is_not_received : all_dependencies
     {
+        static a_message first_message;
         static Scenario scenario;
 
         Establish context = () =>
         {
-            scenario = Scenario.New(_ => {});
+            first_message = new();
+
+            message_converter
+                .Setup(_ => _.GetConnectArguments(first_message))
+                .Returns(null);
+
+            scenario = Scenario.New(_ => {
+                _.Receive.Message(first_message).AtTime(10);
+            });
         };
 
         Because of = () => scenario.Simulate(
