@@ -3,7 +3,6 @@
 
 using System;
 using Machine.Specifications;
-using System.Threading;
 using Dolittle.Runtime.Services.Clients;
 using Dolittle.Runtime.EventHorizon.Contracts;
 
@@ -11,7 +10,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonCon
 {
     public class when_creating : given.all_dependencies
     {
-        static CancellationTokenSource cts;
         Establish context = () =>
         {
             reverse_call_clients

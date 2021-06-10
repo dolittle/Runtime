@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// </summary>
         /// <param name="microservicesConfiguration">The configuration to use for finding the address of a producer Runtime from it's microservice id.</param>
         /// <param name="subscriptionFactory">The factory to use for creating subscriptions that subscribes to a producer microservice.</param>
-        /// <param name="metrics">The system for capturing metrics.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="logger">The logger.</param>
         public Subscriptions(
             MicroservicesConfiguration microservicesConfiguration,

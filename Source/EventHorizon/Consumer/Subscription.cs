@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="connectionFactory">The factory to use for creating new connections to the producer Runtime.</param>
         /// <param name="streamProcessorFactory">The factory to use for creating stream processors that write the received events.</param>
         /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
-        /// <param name="metrics">The system for capturing metrics.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="logger">The system for logging messages.</param>
         public Subscription(
             SubscriptionId identifier,

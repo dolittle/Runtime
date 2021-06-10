@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         readonly IWriteEventHorizonEvents _eventHorizonEventsWriter;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
         readonly IAsyncPolicyFor<EventProcessor> _eventProcessorPolicy;
+        readonly IMetricsCollector _metrics;
         readonly ILoggerFactory _loggerFactory;
 
         /// <summary>
@@ -29,12 +30,14 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="eventHorizonEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
         /// <param name="eventProcessorPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
         public StreamProcessorFactory(
             IResilientStreamProcessorStateRepository streamProcessorStates,
             IWriteEventHorizonEvents eventHorizonEventsWriter,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
             IAsyncPolicyFor<EventProcessor> eventProcessorPolicy,
+            IMetricsCollector metrics,
             ILoggerFactory loggerFactory
         )
         {
@@ -42,6 +45,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
             _eventHorizonEventsWriter = eventHorizonEventsWriter;
             _eventsFetcherPolicy = eventsFetcherPolicy;
             _eventProcessorPolicy = eventProcessorPolicy;
+            _metrics = metrics;
             _loggerFactory = loggerFactory;
         }
 
@@ -57,6 +61,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
                     subscription,
                     _eventHorizonEventsWriter,
                     _eventProcessorPolicy,
+                    _metrics,
                     _loggerFactory.CreateLogger<EventProcessor>()),
                 eventsFromEventHorizonFetcher,
                 _streamProcessorStates,
