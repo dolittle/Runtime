@@ -47,13 +47,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
             StreamPosition publicEventsPosition,
             CancellationToken cancellationToken)
         {
+            _metrics.IncrementTotalConnectionAttempts();
             var watch = new Stopwatch();
             watch.Start();
             if (await _reverseCallClient.Connect(CreateRequest(subscription, publicEventsPosition), cancellationToken).ConfigureAwait(false))
             {
                 watch.Stop();
                 _metrics.AddTotalTimeSpentConnecting(watch.Elapsed);
-                _metrics.IncrementTotalConnectionAttempts();
                 _subscriptionId = subscription;
 
                 var response = _reverseCallClient.ConnectResponse;
@@ -62,7 +62,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
                 {
                     _metrics.IncrementTotalFailureResponses();
                     _logger.ConnectionToProducerRuntimeFailed(subscription, response.Failure.Reason);
-
 
                     if (response.Failure.Id.ToGuid() == Producer.SubscriptionFailures.MissingConsent.Value)
                     {
