@@ -72,7 +72,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
                 _totalSuccessfulResponses,
                 _totalFailureResponses,
                 _totalEventHorizonEventsHandled,
-                _totalEventHorizonEventsFailedHandling
+                _totalEventHorizonEventsFailedHandling,
+                _totalTimeSpentConnecting,
+                _totalSubscriptionsWithMissingArguments,
+                _totalSubscriptionsWithMissingConsent
             };
         }
 
