@@ -50,6 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var producerMicroserviceId = subscriptionId.ProducerMicroserviceId;
             if (!TryGetProducerMicroserviceAddress(producerMicroserviceId, out var producerConnectionAddress))
             {
+                _metrics.IncrementSubscriptionsMissingProducerMicroserviceAddress();
                 _logger.NoMicroserviceConfigurationFor(producerMicroserviceId);
                 return Task.FromResult(
                     SubscriptionResponse.Failed(
@@ -68,6 +69,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             }
             else
             {
+                _metrics.IncrementSubscriptionsAlreadyStarted();
                 _logger.SubscriptionAlreadyRegistered(subscriptionId);
             }
 

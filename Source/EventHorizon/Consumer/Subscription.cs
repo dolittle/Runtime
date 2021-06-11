@@ -29,6 +29,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IStreamProcessorFactory _streamProcessorFactory;
         readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
         readonly IMetricsCollector _metrics;
+        readonly Processing.IMetricsCollector _processingMetrics;
         readonly ILogger _logger;
         TaskCompletionSource<SubscriptionResponse> _connectionResponse;
 
@@ -51,6 +52,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IStreamProcessorFactory streamProcessorFactory,
             IGetNextEventToReceiveForSubscription subscriptionPositions,
             IMetricsCollector metrics,
+            Processing.IMetricsCollector processingMetrics,
             ILogger logger)
         {
             Identifier = identifier;
@@ -60,6 +62,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _streamProcessorFactory = streamProcessorFactory;
             _subscriptionPositions = subscriptionPositions;
             _metrics = metrics;
+            _processingMetrics = processingMetrics;
             _logger = logger;
             CreateUnresolvedConnectionResponse();
         }
@@ -123,6 +126,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             try
             {
+                _metrics.IncrementSubscriptionLoops();
                 _logger.SubscriptionLoopStarting(Identifier, State);
 
                 State = SubscriptionState.Connecting;
@@ -137,7 +141,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 if (connectionResponse.Success)
                 {
                     State = SubscriptionState.Connected;
-                    _metrics.IncrementTotalConnectedSubscriptions();
+                    _metrics.IncrementCurrentConnectedSubscriptions();
                     await ReceiveAndWriteEvents(connection, connectionResponse.ConsentId, cancellationToken).ConfigureAwait(false);
                     throw new SubscriptionLoopCompleted(Identifier);
                 }
@@ -169,7 +173,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
                 var connectionToStreamProcessorQueue = new AsyncProducerConsumerQueue<StreamEvent>();
 
-                var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue));
+                var writeEventsStreamProcessor = _streamProcessorFactory.Create(consent, Identifier, new EventsFromEventHorizonFetcher(connectionToStreamProcessorQueue, _processingMetrics));
 
                 var tasks = new[]
                 {
@@ -187,11 +191,16 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent);
 
                 await Task.WhenAll(tasks).ConfigureAwait(false);
+                _metrics.IncrementSubscriptionsFailedDueToReceivingOrWritingEventsCompleted();
             }
             catch
             {
-                _metrics.DecrementTotalConnectedSubscriptions();
+                _metrics.IncrementSubscriptionsFailedDueToException();
                 throw;
+            }
+            finally
+            {
+                _metrics.DecrementCurrentConnectedSubscriptions();
             }
         }
 
