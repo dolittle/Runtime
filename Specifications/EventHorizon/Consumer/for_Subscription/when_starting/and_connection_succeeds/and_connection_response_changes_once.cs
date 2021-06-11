@@ -1,13 +1,12 @@
-using System;
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Consumer.Processing;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Runtime.Microservices;
 using Machine.Specifications;
 using Nito.AsyncEx;
 
@@ -55,9 +54,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
 
         Because of = () =>
         {
-            // while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(10);
             subscription.Start();
-            Task.Delay(50).GetAwaiter().GetResult();
+            Task.Delay(300).GetAwaiter().GetResult();
         };
 
         It should_create_connection_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(producer_microservice_address), Moq.Times.Exactly(2));
