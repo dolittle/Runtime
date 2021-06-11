@@ -28,8 +28,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
                 .Setup(_ => _.Connect(subscription_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(() =>
                 {
-                    if (connection_calls++ == 0)
+                    if (connection_calls == 0)
                     {
+                        connection_calls++;
                         return Task.FromResult(SubscriptionResponse.Succeeded(first_consent));
                     }
                     return Task.FromResult(SubscriptionResponse.Succeeded(second_consent));
@@ -40,8 +41,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
                 .Setup(_ => _.StartAndWait(Moq.It.IsAny<CancellationToken>()))
                 .Returns<CancellationToken>(cancellationToken => Task.Run(async () =>
                 {
-                    if (start_and_wait_calls++ == 0)
+                    if (start_and_wait_calls == 0)
                     {
+                        start_and_wait_calls++;
                         throw new Exception();
 
                     }

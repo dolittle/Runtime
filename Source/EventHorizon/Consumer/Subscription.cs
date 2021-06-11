@@ -216,9 +216,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             lock (_responseLock)
             {
-                _connectionResponse.TrySetCanceled();
-                CreateUnresolvedConnectionResponse();
+                if (_connectionResponse.Task.IsCompleted)
+                {
+                    _connectionResponse.TrySetCanceled();
+                    CreateUnresolvedConnectionResponse();
+                }
             }
         }
+
     }
 }
