@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="subscription">The <see cref="Subscription" />.</param>
         /// <param name="receivedEventsWriter">The <see cref="IWriteEventHorizonEvents" />.</param>
         /// <param name="policy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="EventProcessor" />.</param>
-        /// <param name="metrics">The system for capturing metrics.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
         public EventProcessor(
             ConsentId consentId,
@@ -71,9 +71,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         {
             _metrics.IncrementTotalEventHorizonEventsProcessed();
             _logger.ProcessEvent(@event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
-            await _policy.Execute(
+
+            try
+            {
+                await _policy.Execute(
                 cancellationToken => _receivedEventsWriter.Write(@event, _consentId, Scope, cancellationToken),
                 cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                _metrics.IncrementTotalEventHorizonEventWritesFailed();
+            }
             return new SuccessfulProcessing();
         }
     }

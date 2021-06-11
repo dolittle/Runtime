@@ -17,16 +17,23 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
     public class EventsFromEventHorizonFetcher : ICanFetchEventsFromStream, IStreamEventWatcher
     {
         readonly AsyncProducerConsumerQueue<StreamEvent> _events;
+        readonly IMetricsCollector _metrics;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventsFromEventHorizonFetcher"/> class.
         /// </summary>
         /// <param name="events">The <see cref="AsyncProducerConsumerQueue{TResponse}" />.</param>
-        public EventsFromEventHorizonFetcher(AsyncProducerConsumerQueue<StreamEvent> events) => _events = events;
+        /// <param name="metrics">The system for collecting metrics.</param>
+        public EventsFromEventHorizonFetcher(AsyncProducerConsumerQueue<StreamEvent> events, IMetricsCollector metrics)
+        {
+            _events = events;
+            _metrics = metrics;
+        }
 
         /// <inheritdoc/>
         public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
         {
+            _metrics.IncrementTotalEventsFetched();
             var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
             return (@event != default, @event);
         }
