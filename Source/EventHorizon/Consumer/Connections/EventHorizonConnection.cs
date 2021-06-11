@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.EventHorizon.Contracts;
@@ -46,8 +47,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
             StreamPosition publicEventsPosition,
             CancellationToken cancellationToken)
         {
+            var watch = new Stopwatch();
+            watch.Start();
             if (await _reverseCallClient.Connect(CreateRequest(subscription, publicEventsPosition), cancellationToken).ConfigureAwait(false))
             {
+                watch.Stop();
+                _metrics.AddTotalTimeSpentConnecting(watch.Elapsed);
                 _metrics.IncrementTotalConnectionAttempts();
                 _subscriptionId = subscription;
 
@@ -57,13 +62,23 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
                 {
                     _metrics.IncrementTotalFailureResponses();
                     _logger.ConnectionToProducerRuntimeFailed(subscription, response.Failure.Reason);
+
+
+                    if (response.Failure.Id.ToGuid() == Producer.SubscriptionFailures.MissingConsent.Value)
+                    {
+                        _metrics.IncrementTotalSubscriptionsWithMissingConsent();
+                    }
+                    if (response.Failure.Id.ToGuid() == Producer.SubscriptionFailures.MissingSubscriptionArguments.Value)
+                    {
+                        _metrics.IncrementTotalSubcriptionsWithMissingArguments();
+                    }
                     return SubscriptionResponse.Failed(response.Failure);
                 }
                 _metrics.IncrementTotalSuccessfulResponses();
                 _logger.ConnectionToProducerRuntimeSucceeded(subscription);
                 return SubscriptionResponse.Succeeded(response.ConsentId.ToGuid());
             }
-
+            watch.Stop();
             _metrics.IncrementTotalConnectionsFailed();
             _logger.CouldNotConnectToProducerRuntime(subscription);
             return SubscriptionResponse.Failed(
