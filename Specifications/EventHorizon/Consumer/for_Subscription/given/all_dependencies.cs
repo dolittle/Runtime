@@ -65,6 +65,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.given
                 stream_processor_factory.Object,
                 get_next_event.Object,
                 Mock.Of<IMetricsCollector>(),
+                Mock.Of<Processing.IMetricsCollector>(),
                 Mock.Of<ILogger>());
         };
 

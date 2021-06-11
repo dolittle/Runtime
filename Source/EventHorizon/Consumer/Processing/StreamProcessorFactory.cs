@@ -66,6 +66,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
                 eventsFromEventHorizonFetcher,
                 _streamProcessorStates,
                 _eventsFetcherPolicy,
+                _metrics,
                 _loggerFactory);
     }
 }

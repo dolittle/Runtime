@@ -22,6 +22,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IAsyncPolicyFor<Subscription> _subscriptionPolicy;
         readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
         readonly IMetricsCollector _metrics;
+        readonly Processing.IMetricsCollector _processingMetrics;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionFactory"/> class.
@@ -32,6 +33,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="subscriptionPolicy">The policy to use for handling the <see cref="SubscribeLoop(CancellationToken)"/>.</param>
         /// <param name="subscriptionPositions">The system to use for getting the next event to receive for a subscription.</param>
         /// <param name="metrics">The system for collecting metrics.</param>
+        /// <param name="processingMetrics">The system for collecting metrics for event horizon consumer processing.</param>
         /// <param name="loggerFactory">The logger factory to use for creating loggers.</param>
         public SubscriptionFactory(
             IStreamProcessorFactory streamProcessorFactory,
@@ -39,6 +41,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             IAsyncPolicyFor<Subscription> subscriptionPolicy,
             IGetNextEventToReceiveForSubscription subscriptionPositions,
             IMetricsCollector metrics,
+            Processing.IMetricsCollector processingMetrics,
             ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
@@ -47,6 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _subscriptionPolicy = subscriptionPolicy;
             _subscriptionPositions = subscriptionPositions;
             _metrics = metrics;
+            _processingMetrics = processingMetrics;
         }
         /// <inheritdoc />
         public ISubscription Create(SubscriptionId subscriptionId, MicroserviceAddress producerMicroserviceAddress)
@@ -58,6 +62,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _streamProcessorFactory,
                 _subscriptionPositions,
                 _metrics,
+                _processingMetrics,
                 _loggerFactory.CreateLogger<Subscription>());
     }
 }
