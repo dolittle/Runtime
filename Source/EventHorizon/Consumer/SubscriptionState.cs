@@ -21,21 +21,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <summary>
         /// This state means that the subscription is currently connected to the producer Runtime and processing events.
         /// </summary>
-        Connected,
-
-        /// <summary>
-        /// This state means that the last connection to the producer Runtime failed, and that the subscription will restart.
-        /// </summary>
-        FailedToConnect,
-
-        /// <summary>
-        /// This state means that the subscription failed to to process events during the last connection, and that the subscription will restart.
-        /// </summary>
-        FailedToProcess,
-
-        /// <summary>
-        /// This state means that the subscription was done processing events for some reason during the last connection, and that the subscription will restart.
-        /// </summary>
-        CompletedProcessing,
+        Connected
     }
 }
