@@ -32,5 +32,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// This state means that the subscription failed to to process events during the last connection, and that the subscription will restart.
         /// </summary>
         FailedToProcess,
+
+        /// <summary>
+        /// This state means that the subscription was done processing events for some reason during the last connection, and that the subscription will restart.
+        /// </summary>
+        CompletedProcessing,
     }
 }

@@ -42,7 +42,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
             Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.AtLeast(2));
 
-        It should_be_connected = () => subscription.State.ShouldEqual(SubscriptionState.FailedToProcess);
         It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.ShouldBeTrue();
         It should_have_the_correct_consent = () => subscription.ConnectionResponse.Result.ConsentId.ShouldEqual(consent);
     }
