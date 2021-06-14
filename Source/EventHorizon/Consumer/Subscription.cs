@@ -138,7 +138,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             }
             else
             {
-                State = SubscriptionState.FailedToConnect;
                 _logger.SubscriptionFailedToConnectToProducerRuntime(Identifier, connectionResponse.Failure);
                 throw new CouldNotConnectToProducerRuntime(Identifier, connectionResponse.Failure);
             }
@@ -159,7 +158,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 SetConnectionResponse(
                     SubscriptionResponse.Failed(
                         new Failure(SubscriptionFailures.CouldNotConnectToProducerRuntime, exception.Message)));
-                State = SubscriptionState.FailedToConnect;
                 throw;
             }
         }
@@ -191,12 +189,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent);
 
                 await Task.WhenAll(tasks).ConfigureAwait(false);
-                State = SubscriptionState.CompletedProcessing;
                 _metrics.IncrementSubscriptionsFailedDueToReceivingOrWritingEventsCompleted();
             }
             catch
             {
-                State = SubscriptionState.FailedToProcess;
                 _metrics.IncrementSubscriptionsFailedDueToException();
                 throw;
             }
