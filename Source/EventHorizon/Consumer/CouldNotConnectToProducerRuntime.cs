@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="subscription">The identifier for the subscription that the processing loop failed for.</param>
         /// <param name="failure">The connection failure.</param>
         public CouldNotConnectToProducerRuntime(SubscriptionId subscription, Failure failure)
-            : base($"Could not connect to producer Runtime because {failure.Reason} for subscription: tenant {subscription.ConsumerTenantId.Value} from partition {subscription.PartitionId.Value} in stream {subscription.StreamId.Value} from tenant {subscription.ProducerTenantId.Value} in microservice {subscription.ProducerMicroserviceId.Value} into scope {subscription.ScopeId.Value}")
+            : base($"Could not connect to producer Runtime because {failure.Reason.Value} for subscription: tenant {subscription.ConsumerTenantId.Value} from partition {subscription.PartitionId.Value} in stream {subscription.StreamId.Value} from tenant {subscription.ProducerTenantId.Value} in microservice {subscription.ProducerMicroserviceId.Value} into scope {subscription.ScopeId.Value}")
         {
         }
     }
