@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
         Because of = () =>
         {
             subscription.Start();
-            Task.Delay(100).GetAwaiter().GetResult();
+            Task.Delay(300).GetAwaiter().GetResult();
         };
 
         It should_create_connection_at_least_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(producer_microservice_address), Moq.Times.AtLeast(2));
