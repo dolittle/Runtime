@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using Grpc.Core;
 using Machine.Specifications;
 using Moq;
 using Contracts = Dolittle.Services.Contracts;
@@ -13,7 +14,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting.and_connection_is_established
 {
-    public class and_we_get_a_request : given.a_reverse_call_client
+    public class and_the_ping_times_out : given.a_reverse_call_client
     {
         static Execution.ExecutionContext execution_context;
         static ReverseCallHandler<MyRequest, MyResponse> callback;
@@ -84,53 +85,20 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
             }, CancellationToken.None).GetAwaiter().GetResult();
 
             server_to_client_stream
-                .SetupGet(_ => _.Current)
-                .Returns(server_request)
-                .Callback(() =>
-                    // stop reading after the handler gets the request
-                    server_to_client_stream
-                        .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
-                        .Returns(() => Task.FromResult(false))
-                );
+                .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
+                // wait for the keepalive to timeout, then throw the exception mimicking a cancelled connection
+                .Callback(() => Thread.Sleep(ping_interval.Multiply(3)))
+                .Throws(new RpcException(new(StatusCode.Cancelled, "")));
         };
 
-        Because of = () =>
-        {
-            reverse_call_client.Handle(callback, CancellationToken.None).GetAwaiter().GetResult();
-            try
-            {
-                Task.Delay(500, cts.Token).GetAwaiter().GetResult();
-            }
-            catch
-            {
-            }
-        };
+        static Exception exception;
 
-        It should_call_the_callback = () =>
-            callback_was_called.ShouldBeTrue();
-        It should_call_the_callback_with_the_request = () =>
-            callback_argument.ShouldEqual(request);
-        It should_write_the_response = () =>
-            client_to_server_stream
-                .Verify(_ => _.WriteAsync(Moq.It.Is<MyClientMessage>(_ =>
-                        _.Response != default
-                        && _.Response.Equals(response))),
-                    Times.Once());
-        It should_write_the_same_call_id_to_the_response = () =>
-            client_to_server_stream
-                .Verify(_ => _.WriteAsync(
-                    Moq.It.Is<MyClientMessage>(_ =>
-                        _.Response != default
-                        && _.Response.Context.CallId.Equals(call_id.ToProtobuf()))),
-                    Times.Once());
-        It should_set_the_execution_context_from_the_request = () =>
-            execution_context_manager
-                .Verify(
-                    _ => _.CurrentFor(
-                        request.Context.ExecutionContext.ToExecutionContext(),
-                        Moq.It.IsAny<string>(),
-                        Moq.It.IsAny<int>(),
-                        Moq.It.IsAny<string>()),
-                    Times.Once);
+        Because of = () => exception = Catch.Exception(() =>
+            reverse_call_client.Handle(callback, CancellationToken.None).GetAwaiter().GetResult());
+
+        It should_not_call_the_callback = () =>
+            callback_was_called.ShouldBeFalse();
+        It should_throw_an_exception = () =>
+            exception.ShouldBeOfExactType<PingTimedOut>();
     }
 }

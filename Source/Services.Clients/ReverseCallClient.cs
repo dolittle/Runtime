@@ -80,13 +80,16 @@ namespace Dolittle.Runtime.Services.Clients
         /// <inheritdoc/>
         public async Task<bool> Connect(TConnectArguments connectArguments, CancellationToken cancellationToken)
         {
+            Console.WriteLine("Starting Connect");
             EnsureOnlyConnectingOnce();
 
             StartConnection(cancellationToken);
 
             await SendConnectArguments(connectArguments, cancellationToken).ConfigureAwait(false);
 
-            return await ReceiveConnectResponse(cancellationToken).ConfigureAwait(false);
+            var result = await ReceiveConnectResponse(cancellationToken).ConfigureAwait(false);
+            Console.WriteLine($"RESULT OF CONNECT: {result}");
+            return result;
         }
 
         /// <inheritdoc/>
@@ -226,7 +229,7 @@ namespace Dolittle.Runtime.Services.Clients
             }
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
             {
-
+                Console.WriteLine("WE GET DA GRPOC EXCPET");
                 if (cancellationToken.IsCancellationRequested)
                 {
                     _metrics.IncrementTotalCancelledConnections();
@@ -257,7 +260,6 @@ namespace Dolittle.Runtime.Services.Clients
             => Task.Run(() => OnReceivedRequest(request, cancellationToken), cancellationToken);
 
         async Task<bool> ReadMessageFromServerWhileRespondingToPings(CancellationTokenSource keepalive)
-
         {
             while (!keepalive.Token.IsCancellationRequested)
             {
