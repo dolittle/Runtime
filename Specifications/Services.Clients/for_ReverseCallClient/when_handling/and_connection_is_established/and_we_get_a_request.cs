@@ -34,19 +34,10 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
                 .SetupGet(_ => _.Current)
                 .Returns(execution_context);
 
-            var move_counter = 0;
             server_to_client_stream
                 .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
-                // stop the reading after 2 reads, one for the Connect and one for the Handle
-                .Returns(() =>
-                {
-                    move_counter++;
-                    if (move_counter < 3)
-                    {
-                        return Task.FromResult(true);
-                    }
-                    return Task.FromResult(false);
-                });
+                .Returns(() => Task.FromResult(true));
+
             server_to_client_stream
                 .SetupGet(_ => _.Current)
                 .Returns(new MyServerMessage { ConnectResponse = new MyConnectResponse() });
@@ -92,24 +83,28 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
                     ExecutionContext = execution_context.ToProtobuf()
                 }
             }, CancellationToken.None).GetAwaiter().GetResult();
+
             server_to_client_stream
                 .SetupGet(_ => _.Current)
-                .Returns(server_request);
+                .Returns(server_request)
+                .Callback(() =>
+                    // stop reading after the handler gets the request
+                    server_to_client_stream
+                        .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
+                        .Returns(() => Task.FromResult(false))
+                );
         };
 
         Because of = () =>
         {
             reverse_call_client.Handle(callback, CancellationToken.None).GetAwaiter().GetResult();
-            Task.Run(() =>
+            try
             {
-                try
-                {
-                    Task.Delay(2000, cts.Token).GetAwaiter().GetResult();
-                }
-                catch
-                {
-                }
-            }).GetAwaiter().GetResult();
+                Task.Delay(500, cts.Token).GetAwaiter().GetResult();
+            }
+            catch
+            {
+            }
         };
 
         It should_call_the_callback = () =>
@@ -127,5 +122,14 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
                         _.Response != default
                         && _.Response.Context.CallId.Equals(call_id.ToProtobuf()))),
                     Times.Once());
+        It should_set_the_execution_context_from_the_request = () =>
+            execution_context_manager
+                .Verify(
+                    _ => _.CurrentFor(
+                        request.Context.ExecutionContext.ToExecutionContext(),
+                        Moq.It.IsAny<string>(),
+                        Moq.It.IsAny<int>(),
+                        Moq.It.IsAny<string>()),
+                    Moq.Times.Once);
     }
 }

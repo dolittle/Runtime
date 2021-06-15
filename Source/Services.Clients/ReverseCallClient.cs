@@ -338,7 +338,7 @@ namespace Dolittle.Runtime.Services.Clients
                     _logger.HandlingRequest(typeof(TRequest), callId);
                     var stopwatch = Stopwatch.StartNew();
 
-                    _executionContextManager.CurrentFor(requestContext.ExecutionContext);
+                    _executionContextManager.CurrentFor(requestContext.ExecutionContext.ToExecutionContext());
                     var response = await _callback(request, cancellationToken).ConfigureAwait(false);
 
                     stopwatch.Stop();

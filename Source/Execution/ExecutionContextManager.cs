@@ -5,9 +5,9 @@ using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Security;
 using Dolittle.Runtime.Versioning;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Execution
 {
@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Execution
     [Singleton]
     public class ExecutionContextManager : IExecutionContextManager
     {
-        static readonly AsyncLocal<ExecutionContext> _executionContext = new AsyncLocal<ExecutionContext>();
+        static readonly AsyncLocal<ExecutionContext> _executionContext = new();
 
         static bool _initialExecutionContextSet = false;
 
