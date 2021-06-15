@@ -40,7 +40,6 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
                 // stop the reading after 2 reads, one for the Connect and one for the Handle
                 .Returns(() =>
                 {
-                    Console.WriteLine("Reading MoveNext");
                     move_counter++;
                     if (move_counter < 3)
                     {
@@ -70,29 +69,22 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
 
             callback = (request, token) =>
             {
-                Console.WriteLine($"IM GEINVBFUING CALLLDDD;dddddddDDD");
                 callback_was_called = true;
                 callback_argument = request;
-                Console.WriteLine($"I SET ALL THE VARS IN THEcallbsck: {callback_was_called}");
-                Thread.Sleep(599);
                 return Task.FromResult(response);
             };
-            Console.WriteLine($"Callback hash is: {callback.GetHashCode()}");
 
             client_to_server_stream
                 .Setup(_ => _.WriteAsync(Moq.It.IsAny<MyClientMessage>()))
                 .Returns(Task.FromResult(true))
                 .Callback<MyClientMessage>(message =>
                 {
-                    Console.WriteLine($"Writing a message {message}");
                     if (message.Response != default)
                     {
-                        Console.WriteLine("CANCELLING");
-                        // cts.Cancel();
+                        cts.Cancel();
                     }
                 });
 
-            Console.WriteLine("starting connect");
             var connect_response = reverse_call_client.Connect(new MyConnectArguments
             {
                 Context = new Contracts.ReverseCallArgumentsContext
@@ -100,15 +92,25 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
                     ExecutionContext = execution_context.ToProtobuf()
                 }
             }, CancellationToken.None).GetAwaiter().GetResult();
-            // connect_task.ContinueWith(_ =>
             server_to_client_stream
                 .SetupGet(_ => _.Current)
                 .Returns(server_request);
-            // connect_task.GetAwaiter().GetResult();
-            Console.WriteLine($"Done with connect, {connect_response}");
         };
 
-        Because of = () => reverse_call_client.Handle(callback, cts.Token).GetAwaiter().GetResult();
+        Because of = () =>
+        {
+            reverse_call_client.Handle(callback, CancellationToken.None).GetAwaiter().GetResult();
+            Task.Run(() =>
+            {
+                try
+                {
+                    Task.Delay(2000, cts.Token).GetAwaiter().GetResult();
+                }
+                catch
+                {
+                }
+            }).GetAwaiter().GetResult();
+        };
 
         It should_call_the_callback = () =>
             callback_was_called.ShouldBeTrue();
