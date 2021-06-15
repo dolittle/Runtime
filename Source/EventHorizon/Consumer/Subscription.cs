@@ -186,13 +186,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 await Task.WhenAny(tasks).ConfigureAwait(false);
 
                 processingCancellationToken.Cancel();
-                _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent);
-
                 await Task.WhenAll(tasks).ConfigureAwait(false);
+                _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent, null);
                 _metrics.IncrementSubscriptionsFailedDueToReceivingOrWritingEventsCompleted();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent, ex);
                 _metrics.IncrementSubscriptionsFailedDueToException();
                 throw;
             }
