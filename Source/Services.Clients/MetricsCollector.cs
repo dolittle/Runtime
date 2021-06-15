@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
 
@@ -11,6 +12,7 @@ namespace Dolittle.Runtime.Services.Clients
     /// <summary>
     /// Represents an implementation of <see cref="IMetricsCollector"/>.
     /// </summary>
+    [Singleton]
     public class MetricsCollector : ICanProvideMetrics, IMetricsCollector
     {
         Counter _totalStartedConnections;
