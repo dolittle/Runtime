@@ -95,7 +95,6 @@ namespace Dolittle.Runtime.Services.Clients
             ThrowIfConnectionNotEstablished();
             EnsureOnlyHandlingOnce();
 
-            Console.WriteLine($"Setting callback {callback}");
             _callback = callback;
 
             using var keepalive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -108,7 +107,6 @@ namespace Dolittle.Runtime.Services.Clients
                     var request = _protocol.GetRequest(_serverToClient.Current);
                     if (request != default)
                     {
-                        Console.WriteLine("Got a request!");
                         _metrics.IncrementTotalRequestsReceived();
                         _logger.ReceivedRequest(typeof(TRequest));
                         StartRequestHandler(request, cancellationToken);
@@ -211,7 +209,6 @@ namespace Dolittle.Runtime.Services.Clients
                     if (response == default)
                     {
                         _logger.DidNotReceiveConnectResponse(typeof(TConnectResponse), "Message did not contain a connect response");
-                        Console.WriteLine("oh no default respons");
                         return false;
                     }
 
@@ -221,12 +218,10 @@ namespace Dolittle.Runtime.Services.Clients
 
                     ConnectResponse = response;
                     _connectionEstablished = true;
-                    Console.WriteLine("recived conenct response, we done");
                     return true;
                 }
 
                 _logger.DidNotReceiveConnectResponse(typeof(TConnectResponse), "No message received from server");
-                Console.WriteLine("oh no empty sterm");
                 return false;
             }
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
@@ -344,7 +339,6 @@ namespace Dolittle.Runtime.Services.Clients
                     var stopwatch = Stopwatch.StartNew();
 
                     _executionContextManager.CurrentFor(requestContext.ExecutionContext);
-                    Console.WriteLine($"calling calback, hash is: {_callback.GetHashCode()}");
                     var response = await _callback(request, cancellationToken).ConfigureAwait(false);
 
                     stopwatch.Stop();
@@ -368,7 +362,6 @@ namespace Dolittle.Runtime.Services.Clients
 
         async Task WriteResponse(TResponse response, ReverseCallId callId, CancellationToken cancellationToken)
         {
-            Console.WriteLine("Writing a response");
             try
             {
                 var responseContext = new ReverseCallResponseContext { CallId = callId.ToProtobuf() };
