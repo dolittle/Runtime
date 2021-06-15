@@ -126,31 +126,38 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             _metrics.IncrementSubscriptionLoops();
             _logger.SubscriptionLoopStarting(Identifier, State);
-            EnsureConnectionResponseIsUnresolved();
 
-            var connection = _connectionFactory.Create(_connectionAddress);
-            var connectionResponse = await ConnectToEventHorizon(connection, cancellationToken).ConfigureAwait(false);
-            if (connectionResponse.Success)
+            try
             {
-                _metrics.IncrementCurrentConnectedSubscriptions();
-                await ReceiveAndWriteEvents(connection, connectionResponse.ConsentId, cancellationToken).ConfigureAwait(false);
-                throw new SubscriptionLoopCompleted(Identifier);
+                var (connection, response) = await ConnectToEventHorizon(cancellationToken).ConfigureAwait(false);
+                if (response.Success)
+                {
+                    _metrics.IncrementCurrentConnectedSubscriptions();
+                    await ReceiveAndWriteEvents(connection, response.ConsentId, cancellationToken).ConfigureAwait(false);
+                    throw new SubscriptionLoopCompleted(Identifier);
+                }
+                else
+                {
+                    _logger.SubscriptionFailedToConnectToProducerRuntime(Identifier, response.Failure);
+                    throw new CouldNotConnectToProducerRuntime(Identifier, response.Failure);
+                }
             }
-            else
+            finally
             {
-                _logger.SubscriptionFailedToConnectToProducerRuntime(Identifier, connectionResponse.Failure);
-                throw new CouldNotConnectToProducerRuntime(Identifier, connectionResponse.Failure);
+                EnsureConnectionResponseIsUnresolved();
             }
         }
-        async Task<SubscriptionResponse> ConnectToEventHorizon(IEventHorizonConnection connection, CancellationToken cancellationToken)
+        async Task<(IEventHorizonConnection, SubscriptionResponse)> ConnectToEventHorizon(CancellationToken cancellationToken)
         {
             try
             {
                 State = SubscriptionState.Connecting;
+
+                var connection = _connectionFactory.Create(_connectionAddress);
                 var nextEventToReceive = await _subscriptionPositions.GetNextEventToReceiveFor(Identifier, cancellationToken);
-                var connectionResponse = await connection.Connect(Identifier, nextEventToReceive, cancellationToken).ConfigureAwait(false);
-                SetConnectionResponse(connectionResponse);
-                return connectionResponse;
+                var response = await connection.Connect(Identifier, nextEventToReceive, cancellationToken).ConfigureAwait(false);
+                SetConnectionResponse(response);
+                return (connection, response);
             }
             catch (Exception exception)
             {
