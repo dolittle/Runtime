@@ -12,7 +12,7 @@ using IMetricFactory = Dolittle.Runtime.Metrics.IMetricFactory;
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IMetrics"/>.
+    /// Represents an implementation of <see cref="IMetricsCollector"/>.
     /// </summary>
     [Singleton]
     public class MetricsCollector : ICanProvideMetrics, IMetricsCollector
