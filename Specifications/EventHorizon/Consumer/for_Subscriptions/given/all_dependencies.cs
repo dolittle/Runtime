@@ -4,11 +4,7 @@
 using System;
 using Machine.Specifications;
 using Moq;
-using Dolittle.Runtime.Resilience;
-using Microsoft.Extensions.Logging.Abstractions;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Runtime.EventHorizon.Consumer.Processing;
-using Dolittle.Runtime.EventHorizon.Consumer.Connections;
 using System.Collections.Generic;
 using Dolittle.Runtime.ApplicationModel;
 using System.Linq;
@@ -68,6 +64,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscriptions.given
             subscriptions = new Subscriptions(
                 microservices_configuration,
                 subscription_factory.Object,
+                Mock.Of<IMetricsCollector>(),
                 Mock.Of<ILogger>());
         };
 

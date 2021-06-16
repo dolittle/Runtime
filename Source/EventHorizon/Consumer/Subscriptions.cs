@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly ConcurrentDictionary<SubscriptionId, ISubscription> _subscriptions = new();
         readonly MicroservicesConfiguration _microservicesConfiguration;
         readonly ISubscriptionFactory _subscriptionFactory;
+        readonly IMetricsCollector _metrics;
         readonly ILogger _logger;
 
         /// <summary>
@@ -27,14 +28,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// </summary>
         /// <param name="microservicesConfiguration">The configuration to use for finding the address of a producer Runtime from it's microservice id.</param>
         /// <param name="subscriptionFactory">The factory to use for creating subscriptions that subscribes to a producer microservice.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="logger">The logger.</param>
         public Subscriptions(
             MicroservicesConfiguration microservicesConfiguration,
             ISubscriptionFactory subscriptionFactory,
+            IMetricsCollector metrics,
             ILogger logger)
         {
             _microservicesConfiguration = microservicesConfiguration;
             _subscriptionFactory = subscriptionFactory;
+            _metrics = metrics;
             _logger = logger;
         }
 
@@ -46,6 +50,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             var producerMicroserviceId = subscriptionId.ProducerMicroserviceId;
             if (!TryGetProducerMicroserviceAddress(producerMicroserviceId, out var producerConnectionAddress))
             {
+                _metrics.IncrementSubscriptionsMissingProducerMicroserviceAddress();
                 _logger.NoMicroserviceConfigurationFor(producerMicroserviceId);
                 return Task.FromResult(
                     SubscriptionResponse.Failed(
@@ -58,11 +63,13 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
             if (subscription.State == SubscriptionState.Created)
             {
+                _metrics.IncrementTotalRegisteredSubscriptions();
                 _logger.StartingCreatedSubscription(subscriptionId);
                 subscription.Start();
             }
             else
             {
+                _metrics.IncrementSubscriptionsAlreadyStarted();
                 _logger.SubscriptionAlreadyRegistered(subscriptionId);
             }
 

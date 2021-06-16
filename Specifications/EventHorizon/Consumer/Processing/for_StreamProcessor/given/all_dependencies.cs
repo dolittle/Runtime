@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_StreamProcessor.
             cancellation_token = CancellationToken.None;
             event_processor = new Mock<IEventProcessor>();
             event_queue = new AsyncProducerConsumerQueue<StreamEvent>();
-            event_fetcher = new EventsFromEventHorizonFetcher(event_queue);
+            event_fetcher = new EventsFromEventHorizonFetcher(event_queue, Mock.Of<IMetricsCollector>());
             stream_processor_states = new Mock<IResilientStreamProcessorStateRepository>();
             policy = new Mock<IAsyncPolicyFor<ICanFetchEventsFromStream>>();
             stream_processor = new StreamProcessor(
@@ -47,6 +47,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_StreamProcessor.
                 event_fetcher,
                 stream_processor_states.Object,
                 policy.Object,
+                Mock.Of<IMetricsCollector>(),
                 NullLoggerFactory.Instance);
         };
     }

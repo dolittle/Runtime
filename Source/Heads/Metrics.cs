@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
+using IMetricFactory = Dolittle.Runtime.Metrics.IMetricFactory;
 
 namespace Dolittle.Runtime.Heads
 {

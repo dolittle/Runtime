@@ -14,7 +14,6 @@ using System.Threading;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Nito.AsyncEx;
-using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.given
 {
@@ -65,6 +64,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.given
                 event_horizon_connection_factory.Object,
                 stream_processor_factory.Object,
                 get_next_event.Object,
+                Mock.Of<IMetricsCollector>(),
+                Mock.Of<Processing.IMetricsCollector>(),
                 Mock.Of<ILogger>());
         };
 

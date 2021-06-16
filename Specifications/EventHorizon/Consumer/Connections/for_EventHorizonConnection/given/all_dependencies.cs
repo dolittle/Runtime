@@ -4,15 +4,7 @@
 using System;
 using Machine.Specifications;
 using Moq;
-using Dolittle.Runtime.Events.Processing.Streams;
 using System.Threading;
-using Dolittle.Runtime.Events.Processing;
-using Dolittle.Runtime.Resilience;
-using Dolittle.Runtime.Events.Store.Streams;
-using Nito.AsyncEx;
-using Microsoft.Extensions.Logging.Abstractions;
-using Dolittle.Runtime.Services.Clients;
-using Dolittle.Runtime.Microservices;
 using ReverseCallClient = Dolittle.Runtime.Services.Clients.IReverseCallClient<
                             Dolittle.Runtime.EventHorizon.Contracts.ConsumerSubscriptionRequest,
                             Dolittle.Runtime.EventHorizon.Contracts.SubscriptionResponse,
@@ -43,7 +35,10 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonCon
 
             cancellation_token = CancellationToken.None;
 
-            connection = new EventHorizonConnection(reverse_call_client.Object, Mock.Of<ILogger>());
+            connection = new EventHorizonConnection(
+                reverse_call_client.Object,
+                Mock.Of<IMetricsCollector>(),
+                Mock.Of<ILogger>());
         };
     }
 }

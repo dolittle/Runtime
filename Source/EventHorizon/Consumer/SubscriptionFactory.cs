@@ -21,6 +21,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         readonly IEventHorizonConnectionFactory _eventHorizonConnectionFactory;
         readonly IAsyncPolicyFor<Subscription> _subscriptionPolicy;
         readonly IGetNextEventToReceiveForSubscription _subscriptionPositions;
+        readonly IMetricsCollector _metrics;
+        readonly Processing.IMetricsCollector _processingMetrics;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubscriptionFactory"/> class.
@@ -29,13 +31,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// <param name="microservicesConfiguration">The configuration to use for finding the address of a producer Runtime from it's microservice id.</param>
         /// <param name="eventHorizonConnectionFactory">The factory to use for creating new connections to the producer Runtime.</param>
         /// <param name="subscriptionPolicy">The policy to use for handling the <see cref="SubscribeLoop(CancellationToken)"/>.</param>
-        /// <param name="subscriptionPositions">The system to use for getting the next event to recieve for a subscription.</param>
+        /// <param name="subscriptionPositions">The system to use for getting the next event to receive for a subscription.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
+        /// <param name="processingMetrics">The system for collecting metrics for event horizon consumer processing.</param>
         /// <param name="loggerFactory">The logger factory to use for creating loggers.</param>
         public SubscriptionFactory(
             IStreamProcessorFactory streamProcessorFactory,
             IEventHorizonConnectionFactory eventHorizonConnectionFactory,
             IAsyncPolicyFor<Subscription> subscriptionPolicy,
             IGetNextEventToReceiveForSubscription subscriptionPositions,
+            IMetricsCollector metrics,
+            Processing.IMetricsCollector processingMetrics,
             ILoggerFactory loggerFactory)
         {
             _loggerFactory = loggerFactory;
@@ -43,6 +49,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
             _eventHorizonConnectionFactory = eventHorizonConnectionFactory;
             _subscriptionPolicy = subscriptionPolicy;
             _subscriptionPositions = subscriptionPositions;
+            _metrics = metrics;
+            _processingMetrics = processingMetrics;
         }
         /// <inheritdoc />
         public ISubscription Create(SubscriptionId subscriptionId, MicroserviceAddress producerMicroserviceAddress)
@@ -53,6 +61,8 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 _eventHorizonConnectionFactory,
                 _streamProcessorFactory,
                 _subscriptionPositions,
+                _metrics,
+                _processingMetrics,
                 _loggerFactory.CreateLogger<Subscription>());
     }
 }
