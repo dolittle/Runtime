@@ -9,7 +9,7 @@ using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Machine.Specifications;
 using Contracts = Dolittle.Services.Contracts;
 
-namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting.and_connection_is_established
+namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established
 {
     public class and_handle_is_called_multiple_times : given.a_reverse_call_client
     {

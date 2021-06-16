@@ -11,7 +11,7 @@ using Moq;
 using Contracts = Dolittle.Services.Contracts;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting.and_connection_is_established
+namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established
 {
     public class and_we_get_a_request : given.a_reverse_call_client
     {

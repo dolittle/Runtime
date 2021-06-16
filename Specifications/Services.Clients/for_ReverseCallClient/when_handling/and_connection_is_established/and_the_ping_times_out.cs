@@ -12,7 +12,7 @@ using Moq;
 using Contracts = Dolittle.Services.Contracts;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting.and_connection_is_established
+namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established
 {
     public class and_the_ping_times_out : given.a_reverse_call_client
     {
@@ -87,8 +87,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_accepting
             server_to_client_stream
                 .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
                 // wait for the keepalive to timeout, then throw the exception mimicking a cancelled connection
-                .Callback(() => Thread.Sleep(ping_interval.Multiply(3)))
-                .Throws(new RpcException(new(StatusCode.Cancelled, "")));
+                .ThrowsAsync(new RpcException(new(StatusCode.Cancelled, "")), ping_interval.Multiply(3));
         };
 
         static Exception exception;
