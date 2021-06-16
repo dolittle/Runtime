@@ -28,12 +28,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         readonly IEventCommitter _eventCommitter;
         readonly IEventConverter _eventConverter;
         readonly IAggregateRoots _aggregateRoots;
-<<<<<<< HEAD
-        readonly IMetrics _metrics;
-        readonly ILogger _logger;
-=======
         readonly IStreamEventWatcher _streamWatcher;
->>>>>>> 6534b9f518c6bda1ffc857449ccc1b55ab49d0e6
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventStore"/> class.
@@ -43,11 +38,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="eventCommitter">The <see cref="IEventCommitter" />.</param>
         /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
-<<<<<<< HEAD
-        /// <param name="metrics"><see cref="IMetrics"/> for event store.</param>
-=======
         /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
->>>>>>> 6534b9f518c6bda1ffc857449ccc1b55ab49d0e6
         /// <param name="logger">An <see cref="ILogger"/>.</param>
         public EventStore(
             IExecutionContextManager executionContextManager,
@@ -55,24 +46,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             IEventCommitter eventCommitter,
             IEventConverter eventConverter,
             IAggregateRoots aggregateRoots,
-<<<<<<< HEAD
-            IMetrics metrics,
-            ILogger logger)
-=======
             IStreamEventWatcher streamWatcher)
->>>>>>> 6534b9f518c6bda1ffc857449ccc1b55ab49d0e6
         {
             _executionContextManager = executionContextManager;
             _streams = streams;
             _eventCommitter = eventCommitter;
             _eventConverter = eventConverter;
             _aggregateRoots = aggregateRoots;
-<<<<<<< HEAD
-            _metrics = metrics;
-            _logger = logger;
-=======
             _streamWatcher = streamWatcher;
->>>>>>> 6534b9f518c6bda1ffc857449ccc1b55ab49d0e6
         }
 
         /// <inheritdoc/>
@@ -81,41 +62,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             ThrowIfNoEventsToCommit(events);
             return await DoCommit<CommittedEvents, CommittedEvent>(async (transaction, cancel) =>
             {
-<<<<<<< HEAD
-                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                return await session.WithTransactionAsync(
-                    async (transaction, cancel) =>
-                    {
-                        var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
-                            transaction,
-                            _eventFilter.Empty,
-                            cancellationToken: cancel).ConfigureAwait(false);
-                        var committedEventsList = new List<CommittedEvent>();
-                        foreach (var @event in events)
-                        {
-                            var committedEvent = await _eventCommitter.CommitEvent(
-                                transaction,
-                                eventLogSequenceNumber,
-                                DateTimeOffset.UtcNow,
-                                _executionContextManager.Current,
-                                @event,
-                                cancel).ConfigureAwait(false);
-                            committedEventsList.Add(committedEvent);
-                            eventLogSequenceNumber++;
-                        }
-
-                        var committedEvents = new CommittedEvents(committedEventsList);
-                        _metrics.IncrementCommittedEvents(committedEvents);
-                        return committedEvents;
-                    },
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                _metrics.IncrementFailedEvents(events);
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-=======
                 var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
                     transaction,
                     _eventFilter.Empty,
@@ -135,7 +81,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 }
                 return new CommittedEvents(committedEvents);
             }, cancellationToken).ConfigureAwait(false);
->>>>>>> 6534b9f518c6bda1ffc857449ccc1b55ab49d0e6
         }
 
         /// <inheritdoc/>
@@ -144,56 +89,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             ThrowIfNoEventsToCommit(events);
             return await DoCommit<CommittedAggregateEvents, CommittedAggregateEvent>(async (transaction, cancel) =>
             {
-<<<<<<< HEAD
-                using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                return await session.WithTransactionAsync(
-                    async (transaction, cancel) =>
-                    {
-                        var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
-                            transaction,
-                            _eventFilter.Empty,
-                            cancellationToken: cancel).ConfigureAwait(false);
-                        var aggregateRootVersion = events.ExpectedAggregateRootVersion.Value;
-
-                        var committedEvents = new List<CommittedAggregateEvent>();
-
-                        foreach (var @event in events)
-                        {
-                            var committedEvent = await _eventCommitter.CommitAggregateEvent(
-                                transaction,
-                                events.AggregateRoot,
-                                aggregateRootVersion,
-                                eventLogSequenceNumber,
-                                DateTimeOffset.UtcNow,
-                                events.EventSource,
-                                _executionContextManager.Current,
-                                @event,
-                                cancel).ConfigureAwait(false);
-                            committedEvents.Add(committedEvent);
-                            eventLogSequenceNumber++;
-                            aggregateRootVersion++;
-                        }
-
-                        await _aggregateRoots.IncrementVersionFor(
-                            transaction,
-                            events.EventSource,
-                            events.AggregateRoot.Id,
-                            events.ExpectedAggregateRootVersion,
-                            aggregateRootVersion,
-                            cancel).ConfigureAwait(false);
-
-                        var committedAggregateEvents = new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
-                        _metrics.IncrementCommittedAggregateEvents(committedAggregateEvents);
-                        return committedAggregateEvents;
-                    },
-                    cancellationToken: cancellationToken).ConfigureAwait(false);
-            }
-            catch (MongoWaitQueueFullException ex)
-            {
-                _metrics.IncrementFailedAggregateEvents(events);
-                throw new EventStoreUnavailable("Mongo wait queue is full", ex);
-            }
-=======
                 var eventLogSequenceNumber = (ulong)await _streams.DefaultEventLog.CountDocumentsAsync(
                     transaction,
                     _eventFilter.Empty,
@@ -229,7 +124,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
                 return new CommittedAggregateEvents(events.EventSource, events.AggregateRoot.Id, committedEvents);
             }, cancellationToken).ConfigureAwait(false);
->>>>>>> 6534b9f518c6bda1ffc857449ccc1b55ab49d0e6
         }
 
         /// <inheritdoc/>
