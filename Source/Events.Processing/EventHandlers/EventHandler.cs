@@ -175,12 +175,21 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <returns>Async <see cref="Task"/>.</returns>
         public async Task RegisterAndStart()
         {
-            if (await RejectIfNonWriteableStream().ConfigureAwait(false)) return;
+            if (await RejectIfNonWriteableStream().ConfigureAwait(false))
+            {
+                return;
+            }
 
             _logger.LogDebug($"Connecting Event Handler '{EventProcessor.Value}'");
 
-            if (!await RegisterFilterStreamProcessor().ConfigureAwait(false)) return;
-            if (!await RegisterEventProcessorStreamProcessor().ConfigureAwait(false)) return;
+            if (!await RegisterFilterStreamProcessor().ConfigureAwait(false))
+            {
+                return;
+            }
+            if (!await RegisterEventProcessorStreamProcessor().ConfigureAwait(false))
+            {
+                return;
+            }
             await Start().ConfigureAwait(false);
         }
 

@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Services.Clients
         /// <summary>
         /// The amount of ping intervals to wait until it times out. 
         /// </summary>
-        public const int PingThreshold = 3;
+        public static readonly int PingThreshold = 3;
 
         readonly IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _protocol;
         readonly TClient _client;
@@ -404,8 +404,7 @@ namespace Dolittle.Runtime.Services.Clients
                     _logger.WritingMessageUnblockedAfter(typeof(TServerMessage), stopwatch.Elapsed);
                 }
                 catch
-                {
-                }
+                { }
             }
 
             try
@@ -437,11 +436,19 @@ namespace Dolittle.Runtime.Services.Clients
         void EnsureOnlyConnectingOnce()
         {
 
-            if (_connecting) throw new ReverseCallClientAlreadyCalledConnect();
+            ThrowIfAlreadyConnecting();
             lock (_acceptHandleLock)
             {
-                if (_connecting) throw new ReverseCallClientAlreadyCalledConnect();
+                ThrowIfAlreadyConnecting();
                 _connecting = true;
+            }
+        }
+
+        void ThrowIfAlreadyConnecting()
+        {
+            if (_connecting)
+            {
+                throw new ReverseCallClientAlreadyCalledConnect();
             }
         }
 
@@ -455,11 +462,20 @@ namespace Dolittle.Runtime.Services.Clients
 
         void EnsureOnlyHandlingOnce()
         {
-            if (_startedHandling) throw new ReverseCallClientAlreadyStartedHandling();
+
+            ThrowIfAlreadyStartedHandling();
             lock (_acceptHandleLock)
             {
-                if (_startedHandling) throw new ReverseCallClientAlreadyStartedHandling();
+                ThrowIfAlreadyStartedHandling();
                 _startedHandling = true;
+            }
+        }
+
+        void ThrowIfAlreadyStartedHandling()
+        {
+            if (_startedHandling)
+            {
+                throw new ReverseCallClientAlreadyStartedHandling();
             }
         }
     }
