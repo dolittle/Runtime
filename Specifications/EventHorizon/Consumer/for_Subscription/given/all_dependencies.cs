@@ -110,7 +110,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.given
 
             stream_processor = new Mock<IStreamProcessor>();
             stream_processor_factory
-                .Setup(_ => _.Create(consent, subscription_id, Moq.It.IsAny<EventsFromEventHorizonFetcher>()))
+                .Setup(_ => _.Create(Moq.It.IsAny<ConsentId>(), subscription_id, Moq.It.IsAny<EventsFromEventHorizonFetcher>()))
                 .Returns(stream_processor.Object);
 
             stream_processor

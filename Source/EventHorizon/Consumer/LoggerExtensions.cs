@@ -102,21 +102,21 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         internal static void SubscriptionFailedWithException(this ILogger logger, SubscriptionId subscriptionId, Exception exception)
             => _subscriptionFailedWithException(logger, subscriptionId, exception);
 
-        static readonly Action<ILogger, ConsentId, SubscriptionId, Exception> _subscriptionIsReceivingAndWriting = LoggerMessage
-            .Define<ConsentId, SubscriptionId>(
+        static readonly Action<ILogger, Guid, SubscriptionId, Exception> _subscriptionIsReceivingAndWriting = LoggerMessage
+            .Define<Guid, SubscriptionId>(
                 LogLevel.Debug,
                 new EventId(556421021, nameof(SubscriptionIsReceivingAndWriting)),
                 "Subscription is receiving and writing events with consent {Consent} for subscription {Subscription}");
         internal static void SubscriptionIsReceivingAndWriting(this ILogger logger, SubscriptionId subscriptionId, ConsentId consentId)
             => _subscriptionIsReceivingAndWriting(logger, consentId, subscriptionId, null);
 
-        static readonly Action<ILogger, ConsentId, SubscriptionId, Exception> _subsciptionFailedWhileReceivingAndWriting = LoggerMessage
-            .Define<ConsentId, SubscriptionId>(
+        static readonly Action<ILogger, Guid, SubscriptionId, Exception> _subsciptionFailedWhileReceivingAndWriting = LoggerMessage
+            .Define<Guid, SubscriptionId>(
                 LogLevel.Warning,
                 new EventId(254259038, nameof(SubsciptionFailedWhileReceivingAndWriting)),
                 "Subscription failed while receiving and writing events with consent {Consent} for subscription {Subscription}");
-        internal static void SubsciptionFailedWhileReceivingAndWriting(this ILogger logger, SubscriptionId subscriptionId, ConsentId consentId)
-            => _subsciptionFailedWhileReceivingAndWriting(logger, consentId, subscriptionId, null);
+        internal static void SubsciptionFailedWhileReceivingAndWriting(this ILogger logger, SubscriptionId subscriptionId, ConsentId consentId, Exception exception)
+            => _subsciptionFailedWhileReceivingAndWriting(logger, consentId, subscriptionId, exception);
 
         #endregion
 

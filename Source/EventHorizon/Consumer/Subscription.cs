@@ -124,45 +124,50 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
 
         async Task SubscribeLoop(CancellationToken cancellationToken)
         {
+            _metrics.IncrementSubscriptionLoops();
+            _logger.SubscriptionLoopStarting(Identifier, State);
+
             try
             {
-                _metrics.IncrementSubscriptionLoops();
-                _logger.SubscriptionLoopStarting(Identifier, State);
-
-                State = SubscriptionState.Connecting;
-                EnsureConnectionResponseIsUnresolved();
-
-                var connection = _connectionFactory.Create(_connectionAddress);
-                var nextEventToReceive = await _subscriptionPositions.GetNextEventToReceiveFor(Identifier, cancellationToken);
-                var connectionResponse = await connection.Connect(Identifier, nextEventToReceive, cancellationToken).ConfigureAwait(false);
-
-                SetConnectionResponse(connectionResponse);
-
-                if (connectionResponse.Success)
+                var (connection, response) = await ConnectToEventHorizon(cancellationToken).ConfigureAwait(false);
+                if (response.Success)
                 {
-                    State = SubscriptionState.Connected;
                     _metrics.IncrementCurrentConnectedSubscriptions();
-                    await ReceiveAndWriteEvents(connection, connectionResponse.ConsentId, cancellationToken).ConfigureAwait(false);
+                    await ReceiveAndWriteEvents(connection, response.ConsentId, cancellationToken).ConfigureAwait(false);
                     throw new SubscriptionLoopCompleted(Identifier);
                 }
                 else
                 {
-                    State = SubscriptionState.FailedToConnect;
-                    _logger.SubscriptionFailedToConnectToProducerRuntime(Identifier, connectionResponse.Failure);
-                    throw new CouldNotConnectToProducerRuntime(Identifier, connectionResponse.Failure);
+                    _logger.SubscriptionFailedToConnectToProducerRuntime(Identifier, response.Failure);
+                    throw new CouldNotConnectToProducerRuntime(Identifier, response.Failure);
                 }
+            }
+            finally
+            {
+                EnsureConnectionResponseIsUnresolved();
+            }
+        }
+        async Task<(IEventHorizonConnection, SubscriptionResponse)> ConnectToEventHorizon(CancellationToken cancellationToken)
+        {
+            try
+            {
+                State = SubscriptionState.Connecting;
+
+                var connection = _connectionFactory.Create(_connectionAddress);
+                var nextEventToReceive = await _subscriptionPositions.GetNextEventToReceiveFor(Identifier, cancellationToken);
+                var response = await connection.Connect(Identifier, nextEventToReceive, cancellationToken).ConfigureAwait(false);
+                SetConnectionResponse(response);
+                return (connection, response);
             }
             catch (Exception exception)
             {
+                _logger.SubscriptionFailedWithException(Identifier, exception);
                 SetConnectionResponse(
                     SubscriptionResponse.Failed(
                         new Failure(SubscriptionFailures.CouldNotConnectToProducerRuntime, exception.Message)));
-                State = SubscriptionState.FailedToConnect;
-                _logger.SubscriptionFailedWithException(Identifier, exception);
                 throw;
             }
         }
-
         async Task ReceiveAndWriteEvents(IEventHorizonConnection connection, ConsentId consent, CancellationToken cancellationToken)
         {
             try
@@ -184,17 +189,17 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                         processingCancellationToken.Token),
                 };
 
+                State = SubscriptionState.Connected;
                 await Task.WhenAny(tasks).ConfigureAwait(false);
 
                 processingCancellationToken.Cancel();
-                State = SubscriptionState.FailedToProcess;
-                _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent);
-
                 await Task.WhenAll(tasks).ConfigureAwait(false);
+                _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent, null);
                 _metrics.IncrementSubscriptionsFailedDueToReceivingOrWritingEventsCompleted();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.SubsciptionFailedWhileReceivingAndWriting(Identifier, consent, ex);
                 _metrics.IncrementSubscriptionsFailedDueToException();
                 throw;
             }
@@ -220,5 +225,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 CreateUnresolvedConnectionResponse();
             }
         }
+
     }
 }

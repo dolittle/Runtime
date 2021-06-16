@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
         Because of = () =>
         {
             subscription.Start();
-            Task.Delay(100).GetAwaiter().GetResult();
+            Task.Delay(300).GetAwaiter().GetResult();
         };
 
         It should_create_connection_at_least_twice = () => event_horizon_connection_factory.Verify(_ => _.Create(producer_microservice_address), Moq.Times.AtLeast(2));
@@ -45,7 +45,6 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
             Moq.It.IsAny<AsyncProducerConsumerQueue<StreamEvent>>(),
             Moq.It.IsAny<CancellationToken>()), Moq.Times.AtLeast(2));
 
-        It should_be_connected = () => subscription.State.ShouldEqual(SubscriptionState.FailedToProcess);
         It should_get_the_successfull_response = () => subscription.ConnectionResponse.Result.Success.ShouldBeTrue();
         It should_have_the_correct_consent = () => subscription.ConnectionResponse.Result.ConsentId.ShouldEqual(consent);
     }
