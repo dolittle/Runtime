@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler.when_running
             {
                 Task.Delay(interval).GetAwaiter().GetResult();
             }
-            Task.Delay(interval * callCount).GetAwaiter();
+            Task.Delay(interval * callCount).GetAwaiter().GetResult();
         };
 
         It should_have_called_the_first_callback_at_least_thrice = () => not_cancelled_callback.Verify(_ => _(), Times.AtLeast(callCount));
