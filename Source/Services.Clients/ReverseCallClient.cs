@@ -34,6 +34,11 @@ namespace Dolittle.Runtime.Services.Clients
         where TRequest : class
         where TResponse : class
     {
+        /// <summary>
+        /// The amount of ping intervals to wait until it times out. 
+        /// </summary>
+        public const int PingThreshold = 3;
+
         readonly IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _protocol;
         readonly TClient _client;
         readonly TimeSpan _pingInterval;
@@ -100,7 +105,7 @@ namespace Dolittle.Runtime.Services.Clients
             using var keepalive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
-                keepalive.CancelAfter(_pingInterval.Multiply(3));
+                keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
 
                 while (await ReadMessageFromServerWhileRespondingToPings(keepalive).ConfigureAwait(false))
                 {
@@ -117,7 +122,7 @@ namespace Dolittle.Runtime.Services.Clients
                         _logger.ReceivedEmptyMessage();
                     }
 
-                    keepalive.CancelAfter(_pingInterval.Multiply(3));
+                    keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
                 }
             }
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
@@ -198,7 +203,7 @@ namespace Dolittle.Runtime.Services.Clients
             using var keepalive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
-                keepalive.CancelAfter(_pingInterval.Multiply(3));
+                keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
 
                 var stopwatch = Stopwatch.StartNew();
                 _logger.ReceivingConnectResponse(typeof(TConnectResponse));
@@ -276,7 +281,7 @@ namespace Dolittle.Runtime.Services.Clients
 
                         await MaybeRespondWithPong().ConfigureAwait(false);
 
-                        keepalive.CancelAfter(_pingInterval.Multiply(3));
+                        keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
                         continue;
                     }
 

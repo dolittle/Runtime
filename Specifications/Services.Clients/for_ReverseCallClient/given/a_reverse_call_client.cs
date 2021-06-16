@@ -8,12 +8,19 @@ using Grpc.Core;
 using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
-
+using ReverseCallClient = Dolittle.Runtime.Services.Clients.ReverseCallClient<
+                            Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyClient,
+                            Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyClientMessage,
+                            Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyServerMessage,
+                            Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyConnectArguments,
+                            Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyConnectResponse,
+                            Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyRequest,
+                            Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyResponse>;
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given
 {
     public class a_reverse_call_client
     {
-        protected static IReverseCallClient<MyConnectArguments, MyConnectResponse, MyRequest, MyResponse> reverse_call_client;
+        protected static ReverseCallClient reverse_call_client;
         protected static Mock<IExecutionContextManager> execution_context_manager;
         protected static Mock<IAsyncStreamReader<MyServerMessage>> server_to_client_stream;
         protected static Mock<IClientStreamWriter<MyClientMessage>> client_to_server_stream;
@@ -26,7 +33,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given
             client_to_server_stream = new();
             ping_interval = new(0, 0, 0, 0, 500);
 
-            reverse_call_client = new ReverseCallClient<MyClient, MyClientMessage, MyServerMessage, MyConnectArguments, MyConnectResponse, MyRequest, MyResponse>(
+            reverse_call_client = new ReverseCallClient(
                 new MyProtocol(),
                 new MyClient(server_to_client_stream, client_to_server_stream),
                 ping_interval,
