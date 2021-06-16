@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Metrics;
 using Prometheus;
+using IMetricFactory = Dolittle.Runtime.Metrics.IMetricFactory;
 
 namespace Dolittle.Runtime.Services.ReverseCalls
 {
@@ -78,7 +79,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _totalFirstMessageWaitTime = metricFactory.Counter(
                 "dolittle_system_runtime_services_reversecalls_first_message_wait_seconds_total",
                 "ReverseCall total time spent waiting for first message");
- 
+
             return new Collector[]
             {
                 _currentPendingStreamWrites,
@@ -92,7 +93,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                 _totalPongsReceived,
                 _totalKeepaliveResets,
                 _totalKeepaliveTimeouts,
-                _totalFirstMessageWaitTime,
+                _totalFirstMessageWaitTime
             };
         }
 
