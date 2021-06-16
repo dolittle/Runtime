@@ -1,7 +1,7 @@
 # [6.0.0] - 2021-6-16 [PR: #532](https://github.com/dolittle/Runtime/pull/532)
 ## Summary
 
-Changes the behavior of the pinging system to be more reliable and to also start immediately when receiving a connection. This is a **breaking behavioral change**, as the pinging behavior now expects the client to be immediately ready to receive pings and write pongs after creating the connection. Older versions of the SDKs wont function correctly with this release of the Runtime. For this we've added a [compatibility table](https://dolittle.io/docs/reference/runtime/compatibility).
+Changes the behavior of the pinging system to be more reliable and to also start immediately when receiving a connection. This is to deal with a bug that was causing connections between the SDK and the Runtime to be dropped. This is a **breaking behavioral change**, as the pinging behavior now expects the client to be immediately ready to receive pings and write pongs after creating the connection. Older versions of the SDKs wont function correctly with this release of the Runtime. For this we've added a [compatibility table](https://dolittle.io/docs/reference/runtime/compatibility).
 
 We also added a Prometheus metric system into the Runtime, which you can access from `localhost:9700/metrics` to see the full list of all the metrics reported.
 
