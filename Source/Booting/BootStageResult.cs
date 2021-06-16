@@ -31,16 +31,16 @@ namespace Dolittle.Runtime.Booting
         /// <summary>
         /// Gets the Container to use from the <see cref="BootStage"/> and on.
         /// </summary>
-        public IContainer Container { get; }
+        public IContainer Container { get; }
 
         /// <summary>
         /// Gets the <see cref="IBindingCollection">bindings</see> built from the stage.
         /// </summary>
-        public IBindingCollection Bindings { get; }
+        public IBindingCollection Bindings { get; }
 
         /// <summary>
         /// Gets any associations of type vs instance.
         /// </summary>
-        public IReadOnlyDictionary<string, object> Associations { get; }
+        public IReadOnlyDictionary<string, object> Associations { get; }
     }
 }

@@ -14,6 +14,6 @@ namespace Dolittle.Runtime.ApplicationModel
         /// Implicitly converts from a <see cref="string"/> to a <see cref="MicroserviceName"/>.
         /// </summary>
         /// <param name="microserviceName">Name of the <see cref="Microservice"/>.</param>
-        public static implicit operator MicroserviceName(string microserviceName) => new (microserviceName);
+        public static implicit operator MicroserviceName(string microserviceName) => new(microserviceName);
     }
 }

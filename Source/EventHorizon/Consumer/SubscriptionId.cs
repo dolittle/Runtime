@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon.Consumer
 {
     /// <summary>
     /// Represents an the unique identifier of an Event Horizon Subscription.
@@ -20,6 +20,6 @@ namespace Dolittle.Runtime.EventHorizon
         PartitionId PartitionId) : IStreamProcessorId
     {
         /// <inheritdoc/>
-        public override string ToString() => $"Consumer Tenant: '{ConsumerTenantId.Value} Producer Microservice: '{ProducerMicroserviceId.Value}' Producer Tenant: '{ProducerTenantId.Value}' Scope: '{ScopeId.Value}' Stream: '{StreamId.Value}' Partition: '{PartitionId.Value}''";
+        public override string ToString() => $"Consumer Tenant: {ConsumerTenantId.Value} Producer Microservice: {ProducerMicroserviceId.Value} Producer Tenant: {ProducerTenantId.Value} Scope: {ScopeId.Value} Stream: {StreamId.Value} Partition: {PartitionId.Value}'";
     }
 }

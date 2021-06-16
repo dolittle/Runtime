@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Reflection
     /// </summary>
     public static class TypeExtensions
     {
-        static readonly HashSet<Type> AdditionalPrimitiveTypes = new HashSet<Type>
+        static readonly HashSet<Type> _additionalPrimitiveTypes = new HashSet<Type>
             {
                 typeof(decimal),
                 typeof(string),
@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Reflection
                 typeof(TimeSpan)
             };
 
-        static readonly HashSet<Type> NumericTypes = new HashSet<Type>
+        static readonly HashSet<Type> _numericTypes = new HashSet<Type>
         {
             typeof(byte), typeof(sbyte),
             typeof(short), typeof(int), typeof(long),
@@ -62,8 +62,8 @@ namespace Dolittle.Runtime.Reflection
         /// <returns>True if type is numeric, false if not.</returns>
         public static bool IsNumericType(this Type type)
         {
-            return NumericTypes.Contains(type) ||
-                   NumericTypes.Contains(Nullable.GetUnderlyingType(type));
+            return _numericTypes.Contains(type) ||
+                   _numericTypes.Contains(Nullable.GetUnderlyingType(type));
         }
 
         /// <summary>
@@ -242,7 +242,7 @@ namespace Dolittle.Runtime.Reflection
         public static bool IsAPrimitiveType(this Type type)
         {
             return type.GetTypeInfo().IsPrimitive
-                    || type.IsNullable() || AdditionalPrimitiveTypes.Contains(type);
+                    || type.IsNullable() || _additionalPrimitiveTypes.Contains(type);
         }
 
         /// <summary>

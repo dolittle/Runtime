@@ -78,10 +78,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given
             type_finder = mocks.Create<ITypeFinder>();
             type_finder
                 .Setup(_ => _.FindMultiple<IFilterDefinition>())
-                .Returns(new[] { typeof(FilterDefinition) });
+                .Returns(new[] { typeof(FilterDefinition) });
             type_finder
                 .Setup(_ => _.FindMultiple(typeof(ICanValidateFilterFor<FilterDefinition>)))
-                .Returns(new[] { filter_validator_type });
+                .Returns(new[] { filter_validator_type });
 
             container = mocks.Create<IContainer>();
             container

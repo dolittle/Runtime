@@ -25,9 +25,10 @@ namespace Dolittle.Runtime.Booting.Stages
 
             builder.Associate(WellKnownAssociations.LoggerFactory, loggerFactory);
             builder.Bindings.Bind<ILoggerFactory>().To(loggerFactory);
-            builder.Bindings.Bind(typeof(ILogger<>)).To(context => {
+            builder.Bindings.Bind(typeof(ILogger<>)).To(context =>
+            {
 
-                var createLoggerMethodNonGeneric = GetType().GetMethod(nameof(CreateLogger),BindingFlags.Static | BindingFlags.NonPublic);
+                var createLoggerMethodNonGeneric = GetType().GetMethod(nameof(CreateLogger), BindingFlags.Static | BindingFlags.NonPublic);
                 var createLoggerMethod = createLoggerMethodNonGeneric.MakeGenericMethod(context.Service.GetGenericArguments()[0]);
                 var logger = createLoggerMethod.Invoke(this, new object[] { loggerFactory });
                 return logger;

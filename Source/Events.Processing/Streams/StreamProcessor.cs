@@ -24,14 +24,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly StreamProcessorId _identifier;
         readonly IPerformActionOnAllTenants _onAllTenants;
         readonly IStreamDefinition _streamDefinition;
-        readonly Func<IEventProcessor> _getEventProcessor;
+        readonly FactoryFor<IEventProcessor> _getEventProcessor;
         readonly Action _unregister;
         readonly FactoryFor<ICreateScopedStreamProcessors> _getScopedStreamProcessorsCreator;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger<StreamProcessor> _logger;
-        readonly CancellationToken _externalCancellationToken;
-        readonly CancellationTokenSource _internalCancellationTokenSource;
-        readonly CancellationTokenRegistration _unregisterTokenRegistration;
+        readonly CancellationTokenSource _stopAllScopedStreamProcessorsTokenSource;
         bool _initialized;
         bool _started;
         bool _disposed;
@@ -52,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             StreamProcessorId streamProcessorId,
             IPerformActionOnAllTenants onAllTenants,
             IStreamDefinition streamDefinition,
-            Func<IEventProcessor> getEventProcessor,
+            FactoryFor<IEventProcessor> getEventProcessor,
             Action unregister,
             FactoryFor<ICreateScopedStreamProcessors> getScopedStreamProcessorsCreator,
             IExecutionContextManager executionContextManager,
@@ -67,9 +65,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _getScopedStreamProcessorsCreator = getScopedStreamProcessorsCreator;
             _executionContextManager = executionContextManager;
             _logger = logger;
-            _internalCancellationTokenSource = new CancellationTokenSource();
-            _externalCancellationToken = cancellationToken;
-            _unregisterTokenRegistration = _externalCancellationToken.Register(_unregister);
+            _stopAllScopedStreamProcessorsTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         }
 
         /// <summary>
@@ -79,8 +75,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public async Task Initialize()
         {
             _logger.InitializingStreamProcessor(_identifier);
-            _externalCancellationToken.ThrowIfCancellationRequested();
-            if (_initialized) throw new StreamProcessorAlreadyInitialized(_identifier);
+
+            _stopAllScopedStreamProcessorsTokenSource.Token.ThrowIfCancellationRequested();
+            if (_initialized)
+            {
+                throw new StreamProcessorAlreadyInitialized(_identifier);
+            }
+            _initialized = true;
+
             await _onAllTenants.PerformAsync(async tenant =>
                 {
                     var scopedStreamProcessorsCreators = _getScopedStreamProcessorsCreator();
@@ -88,10 +90,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         _streamDefinition,
                         _identifier,
                         _getEventProcessor(),
-                        _externalCancellationToken).ConfigureAwait(false);
+                        _stopAllScopedStreamProcessorsTokenSource.Token).ConfigureAwait(false);
                     _streamProcessors.Add(tenant, scopedStreamProcessor);
                 }).ConfigureAwait(false);
-            _initialized = true;
         }
 
         /// <summary>
@@ -101,21 +102,28 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public async Task Start()
         {
             _logger.StartingStreamProcessor(_identifier);
-            if (!_initialized) throw new StreamProcessorNotInitialized(_identifier);
-            if (_started) throw new StreamProcessorAlreadyProcessingStream(_identifier);
+
+            if (!_initialized)
+            {
+                throw new StreamProcessorNotInitialized(_identifier);
+            }
+
+            if (_started)
+            {
+                throw new StreamProcessorAlreadyProcessingStream(_identifier);
+            }
+
             _started = true;
-            _unregisterTokenRegistration.Dispose();
             try
             {
-                using var linkedTokenSource = CancellationTokenSource.CreateLinkedTokenSource(_internalCancellationTokenSource.Token, _externalCancellationToken);
-                var tasks = StartScopedStreamProcessors(linkedTokenSource.Token);
+                var tasks = StartScopedStreamProcessors(_stopAllScopedStreamProcessorsTokenSource.Token);
                 await Task.WhenAny(tasks).ConfigureAwait(false);
                 if (TryGetException(tasks, out var ex))
                 {
                     _logger.ScopedStreamProcessorFailed(ex, _identifier);
                 }
 
-                _internalCancellationTokenSource.Cancel();
+                _stopAllScopedStreamProcessorsTokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
             }
             finally
@@ -138,12 +146,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected virtual void Dispose(bool disposing)
         {
             if (_disposed) return;
-            if (!_internalCancellationTokenSource.IsCancellationRequested) _internalCancellationTokenSource.Cancel();
-            if (!_started && !_externalCancellationToken.IsCancellationRequested) _unregister();
+
             if (disposing)
             {
-                _internalCancellationTokenSource.Dispose();
-                _unregisterTokenRegistration.Dispose();
+                _stopAllScopedStreamProcessorsTokenSource.Cancel();
+                _stopAllScopedStreamProcessorsTokenSource.Dispose();
+
+                if (!_started)
+                {
+                    _unregister();
+                }
             }
 
             _disposed = true;
@@ -155,7 +167,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     (var tenant, var streamProcessor) = _;
                     _executionContextManager.CurrentFor(tenant);
                     await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
-                })).ToList();
+                }, cancellationToken)).ToList();
 
         static bool TryGetException(IEnumerable<Task> tasks, out Exception exception)
         {
