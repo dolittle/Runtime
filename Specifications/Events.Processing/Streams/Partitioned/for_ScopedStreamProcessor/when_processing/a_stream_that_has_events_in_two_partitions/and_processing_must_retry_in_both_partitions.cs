@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
@@ -29,14 +29,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason, true, TimeSpan.Zero)));
             event_processor
-                .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(),  Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
             events_fetcher
                 .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(first_event));
+                .Returns(Task.FromResult<Try<StreamEvent>>(first_event));
             events_fetcher
                 .Setup(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(second_event));
+                .Returns(Task.FromResult<Try<StreamEvent>>(second_event));
             events_fetcher
                 .Setup(_ => _.FetchInPartition(first_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<Try<StreamEvent>>(first_event));

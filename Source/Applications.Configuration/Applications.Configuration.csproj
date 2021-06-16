@@ -6,12 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.ApplicationModel" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Booting" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Configuration" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Concepts.Serialization.Json" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Execution" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.ResourceTypes.Configuration" Version="$(FundamentalsVersion)" />
-    <PackageReference Include="Dolittle.Serialization.Json" Version="$(FundamentalsVersion)" />
+    <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
+    <ProjectReference Include="../Booting/Booting.csproj" />
+    <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj"/>
   </ItemGroup>
 </Project>

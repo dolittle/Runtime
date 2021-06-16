@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Dolittle.Protobuf;
+using Dolittle.Runtime.Protobuf;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -18,11 +18,12 @@ namespace Dolittle.Runtime.Events.Store
         /// <returns>The converted <see cref="Contracts.CommittedAggregateEvents" />.</returns>
         public static Contracts.CommittedAggregateEvents ToProtobuf(this CommittedAggregateEvents committedAggregateEvents)
         {
+            var aggregateRootVersion = committedAggregateEvents.AsEnumerable().LastOrDefault()?.AggregateRootVersion ?? 0;
             var protobuf = new Contracts.CommittedAggregateEvents
             {
-                AggregateRootId = committedAggregateEvents.AggregateRoot.Value.ToProtobuf(),
+                AggregateRootId = committedAggregateEvents.AggregateRoot.ToProtobuf(),
                 EventSourceId = committedAggregateEvents.EventSource.ToProtobuf(),
-                AggregateRootVersion = committedAggregateEvents.AsEnumerable().LastOrDefault()?.AggregateRootVersion
+                AggregateRootVersion = aggregateRootVersion
             };
             protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));
             return protobuf;

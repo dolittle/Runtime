@@ -1,10 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Artifacts;
-using Dolittle.Protobuf;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.WellKnownTypes;
+using ArtifactsContracts = Dolittle.Artifacts.Contracts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -21,20 +22,20 @@ namespace Dolittle.Runtime.Events.Store
         public static Contracts.CommittedEvent ToProtobuf(this CommittedEvent @event) =>
             @event is CommittedExternalEvent externalEvent ?
                 externalEvent.ToProtobuf()
-                : new Contracts.CommittedEvent
+                : new()
+                {
+                    EventLogSequenceNumber = @event.EventLogSequenceNumber,
+                    Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
+                    EventSourceId = @event.EventSource.ToProtobuf(),
+                    ExecutionContext = @event.ExecutionContext.ToProtobuf(),
+                    Type = new ArtifactsContracts.Artifact
                     {
-                        EventLogSequenceNumber = @event.EventLogSequenceNumber,
-                        Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-                        EventSourceId = @event.EventSource.ToProtobuf(),
-                        ExecutionContext = @event.ExecutionContext.ToProtobuf(),
-                        Type = new Artifacts.Contracts.Artifact
-                        {
-                            Id = @event.Type.Id.ToProtobuf(),
-                            Generation = @event.Type.Generation
-                        },
-                        Content = @event.Content,
-                        Public = @event.Public
-                    };
+                        Id = @event.Type.Id.ToProtobuf(),
+                        Generation = @event.Type.Generation
+                    },
+                    Content = @event.Content,
+                    Public = @event.Public
+                };
 
         /// <summary>
         /// Convert to from <see cref="Contracts.CommittedEvent"/> to <see cref="CommittedEvent"/>.
@@ -42,12 +43,12 @@ namespace Dolittle.Runtime.Events.Store
         /// <param name="event"><see cref="Contracts.CommittedEvent"/> to convert from.</param>
         /// <returns>Converted <see cref="CommittedEvent"/>.</returns>
         public static CommittedEvent ToCommittedEvent(this Contracts.CommittedEvent @event) =>
-            new CommittedEvent(
+            new(
                 @event.EventLogSequenceNumber,
                 @event.Occurred.ToDateTimeOffset(),
-                @event.EventSourceId.To<EventSourceId>(),
+                @event.EventSourceId.ToGuid(),
                 @event.ExecutionContext.ToExecutionContext(),
-                new Artifact(@event.Type.Id.To<ArtifactId>(), @event.Type.Generation),
+                new Artifact(@event.Type.Id.ToGuid(), @event.Type.Generation),
                 @event.Public,
                 @event.Content);
     }

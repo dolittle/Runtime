@@ -56,16 +56,16 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the event sourcing specific <see cref="AggregateMetadata"/>.
         /// </summary>
-        public AggregateMetadata Aggregate { get; set; }
+        public AggregateMetadata Aggregate { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="EventHorizonMetadata" />.
         /// </summary>
-        public EventHorizonMetadata EventHorizon { get; set; }
+        public EventHorizonMetadata EventHorizon { get; set; }
 
         /// <summary>
         /// Gets or sets the domain specific event data.
         /// </summary>
-        public BsonDocument Content { get; set; }
+        public BsonDocument Content { get; set; }
     }
 }

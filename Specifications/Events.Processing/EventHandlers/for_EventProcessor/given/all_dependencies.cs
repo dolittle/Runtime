@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Execution;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Store;
-using Dolittle.Services;
+using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Services;
 using Machine.Specifications;
 using Moq;
 

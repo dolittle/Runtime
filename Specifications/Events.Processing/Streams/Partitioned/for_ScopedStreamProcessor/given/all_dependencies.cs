@@ -2,11 +2,13 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Logging;
-using Dolittle.Resilience;
+using System.Threading;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Resilience;
 using Machine.Specifications;
 using Moq;
 
@@ -25,6 +27,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
         protected static Mock<IStreamProcessors> stream_processors;
         protected static Mock<IEventProcessor> event_processor;
         protected static ScopedStreamProcessor stream_processor;
+        protected static Mock<IStreamEventWatcher> event_waiter;
 
         Establish context = () =>
         {
@@ -45,17 +48,21 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
                 stream_processor_state_repository,
                 event_processor.Object,
                 events_fetcher.Object,
-                events_fetcher_policy,
-                Mock.Of<ILogger<FailingPartitions>>());
+                events_fetcher_policy);
+            event_waiter = new Mock<IStreamEventWatcher>();
+            event_waiter.Setup(_ => _.WaitForEvent(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
             stream_processor = new ScopedStreamProcessor(
                 tenant_id,
                 stream_processor_id,
+                new StreamDefinition(new FilterDefinition(source_stream_id, stream_processor_id.EventProcessorId.Value, true)),
                 StreamProcessorState.New,
                 event_processor.Object,
                 stream_processor_state_repository,
                 events_fetcher.Object,
                 failing_partitiones,
                 events_fetcher_policy,
+                event_waiter.Object,
+                new TimeToRetryForPartitionedStreamProcessor(),
                 Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
     }

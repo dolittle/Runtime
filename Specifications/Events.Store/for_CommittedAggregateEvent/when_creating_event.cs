@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Artifacts;
-using Dolittle.Execution;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Execution;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvent
@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvent
 
         Because of = () =>
             @event = new CommittedAggregateEvent(
-                new Artifact(aggregate_root_id,  aggregate_root_generation),
+                new Artifact(aggregate_root_id, aggregate_root_generation),
                 aggregate_root_version,
                 event_log_sequence_number,
                 occurred,

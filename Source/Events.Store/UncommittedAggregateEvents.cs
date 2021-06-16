@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Gets the Event Source that the uncommitted events was applied to.
         /// </summary>
-        public EventSourceId EventSource { get; }
+        public EventSourceId EventSource { get; }
 
         /// <summary>
         /// Gets the <see cref="Artifact"/> representing the type of the Aggregate Root that applied the Event to the Event Source.

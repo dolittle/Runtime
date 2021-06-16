@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
@@ -43,7 +44,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.w
                     });
             events_fetcher
                 .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, false)));
+                .Returns(Task.FromResult<Try<StreamEvent>>(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, false)));
         };
 
         Because of = () => stream_processor.Start(cancellation_token_source.Token).GetAwaiter().GetResult();

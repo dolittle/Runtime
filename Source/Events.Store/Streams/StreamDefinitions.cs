@@ -3,9 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.DependencyInversion;
-using Dolittle.Lifecycle;
-using Dolittle.Runtime.Async;
+using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Store.Streams

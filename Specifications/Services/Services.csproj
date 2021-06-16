@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Services.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Services/Services.csproj" />
+    <ProjectReference Include="../../Source/Types.Testing/Types.Testing.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+  </ItemGroup>
+</Project>

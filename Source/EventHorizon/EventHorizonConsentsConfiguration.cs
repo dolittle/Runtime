@@ -1,11 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using Dolittle.Configuration;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Configuration;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -14,14 +15,14 @@ namespace Dolittle.Runtime.EventHorizon
     /// </summary>
     [Name("event-horizon-consents")]
     public class EventHorizonConsentsConfiguration :
-        ReadOnlyDictionary<TenantId, IEnumerable<EventHorizonConsent>>,
+        ReadOnlyDictionary<Guid, IEnumerable<EventHorizonConsentConfiguration>>,
         IConfigurationObject
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHorizonConsentsConfiguration"/> class.
         /// </summary>
         /// <param name="configuration">Dictionary for <see cref="TenantId"/> with <see cref="IEnumerable{T}" /> of <see cref="EventHorizonConsent"/>.</param>
-        public EventHorizonConsentsConfiguration(IDictionary<TenantId, IEnumerable<EventHorizonConsent>> configuration)
+        public EventHorizonConsentsConfiguration(IDictionary<Guid, IEnumerable<EventHorizonConsentConfiguration>> configuration)
             : base(configuration)
         {
         }
@@ -32,9 +33,10 @@ namespace Dolittle.Runtime.EventHorizon
         /// <param name="producerTenant">The producer <see cref="TenantId" />.</param>
         /// <returns>The <see cref="IEnumerable{T}" /> list of <see cref="EventHorizonConsent" /> for a producer tenant.</returns>
         public IEnumerable<EventHorizonConsent> GetConsentConfigurationsFor(TenantId producerTenant)
-        {
-            if (!TryGetValue(producerTenant, out var consents)) return Enumerable.Empty<EventHorizonConsent>();
-            return consents;
-        }
+            => TryGetValue(producerTenant, out var consents) switch
+            {
+                true => consents.Select(_ => (EventHorizonConsent)_),
+                false => Enumerable.Empty<EventHorizonConsent>(),
+            };
     }
 }

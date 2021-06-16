@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
-using Dolittle.Lifecycle;
-using Dolittle.ResourceTypes.Configuration;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
+using Dolittle.Runtime.Lifecycle;
+using Dolittle.Runtime.ResourceTypes.Configuration;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization;
 using MongoDB.Bson.Serialization.Conventions;
@@ -36,8 +36,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             var config = configuration.Instance;
             var settings = new MongoClientSettings
             {
-                Servers = config.Servers.Select(_ => new MongoServerAddress(_)),
-                GuidRepresentation = GuidRepresentation.Standard
+                Servers = config.Servers.Select(_ => MongoServerAddress.Parse(_)),
+                GuidRepresentation = GuidRepresentation.Standard,
+                MaxConnectionPoolSize = config.MaxConnectionPoolSize,
             };
 
             MongoClient = new MongoClient(settings.Freeze());

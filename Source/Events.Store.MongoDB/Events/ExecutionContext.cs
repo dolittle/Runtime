@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Execution;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Execution;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 {
@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the <see cref="CorrelationId"/>.
         /// </summary>
-        public Guid Correlation { get; set; }
+        public Guid Correlation { get; set; }
 
         /// <summary>
         /// Gets or sets the producer <see cref="Microservice"/>.

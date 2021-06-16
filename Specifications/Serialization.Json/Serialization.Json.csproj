@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Serialization.Json.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Serialization.Json/Serialization.Json.csproj" />
+  </ItemGroup>
+</Project>

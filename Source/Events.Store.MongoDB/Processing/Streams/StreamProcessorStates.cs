@@ -3,9 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
+using Dolittle.Runtime.Lifecycle;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     {
         const string StreamProcessorStateCollectionName = "stream-processor-states";
 
-        readonly ILogger<StreamProcessorStates> _logger;
+        readonly ILogger _logger;
         readonly IMongoCollection<MongoDB.Processing.Streams.AbstractStreamProcessorState> _streamProcessorStates;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public StreamProcessorStates(DatabaseConnection connection, ILogger<StreamProcessorStates> logger)
+        public StreamProcessorStates(DatabaseConnection connection, ILogger logger)
             : base(connection)
         {
             _logger = logger;
@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public Task<IMongoCollection<AbstractStreamProcessorState>> Get(ScopeId scopeId, CancellationToken token) =>
             scopeId == ScopeId.Default ? Task.FromResult(_streamProcessorStates) : GetScopedStreamProcessorStateCollection(scopeId, token);
 
-        static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{scope}-{StreamProcessorStateCollectionName}";
+        static string CollectionNameForScopedStreamProcessorStates(ScopeId scope) => $"x-{scope.Value}-{StreamProcessorStateCollectionName}";
 
         async Task<IMongoCollection<AbstractStreamProcessorState>> GetScopedStreamProcessorStateCollection(
             ScopeId scope,
@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// </summary>
         void CreateCollectionsAndIndexesForStreamProcessorStates()
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", StreamProcessorStateCollectionName);
+            _logger.CreatingIndexesFor(StreamProcessorStateCollectionName);
             _streamProcessorStates.Indexes.CreateOne(
                 new CreateIndexModel<AbstractStreamProcessorState>(
                     Builders<AbstractStreamProcessorState>.IndexKeys
@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             IMongoCollection<AbstractStreamProcessorState> streamProcessorStates,
             CancellationToken cancellationToken)
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", streamProcessorStates.CollectionNamespace.CollectionName);
+            _logger.CreatingIndexesFor(streamProcessorStates.CollectionNamespace.CollectionName);
             await streamProcessorStates.Indexes.CreateOneAsync(
                 new CreateIndexModel<AbstractStreamProcessorState>(
                     Builders<AbstractStreamProcessorState>.IndexKeys

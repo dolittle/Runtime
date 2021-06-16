@@ -3,11 +3,11 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.DependencyInversion;
-using Dolittle.Logging;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
 {
@@ -20,7 +20,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     {
         readonly IWriteEventsToStreams _eventsToStreamsWriter;
         readonly ILogger _logger;
-        readonly string _logMessagePrefix;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractFilterProcessor{T}"/> class.
@@ -39,7 +38,6 @@ namespace Dolittle.Runtime.Events.Processing.Filters
             Definition = filterDefinition;
             _eventsToStreamsWriter = eventsToStreamsWriter;
             _logger = logger;
-            _logMessagePrefix = $"Filter Processor '{Identifier}' in scope '{Scope}' with source stream '{Definition.SourceStream}'";
         }
 
         /// <inheritdoc/>
@@ -60,10 +58,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc />
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
-                "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}'",
-                _logMessagePrefix,
-                @event.Type.Id.Value,
+            _logger.FilteringEvent(
+                Identifier,
+                Scope,
+                @event.Type.Id,
                 partitionId);
             var result = await Filter(@event, partitionId, Identifier, cancellationToken).ConfigureAwait(false);
 
@@ -75,11 +73,11 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <inheritdoc/>
         public async Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            _logger.Debug(
-                "{LogMessagePrefix} is filtering event '{EventTypeId}' for partition '{PartitionId}' again for the {RetryCount}. time because: {FailureReason}",
-                _logMessagePrefix,
-                @event.Type.Id.Value,
-                partitionId.Value,
+            _logger.FilteringEventAgain(
+                Identifier,
+                Scope,
+                @event.Type.Id,
+                partitionId,
                 retryCount,
                 failureReason);
             var result = await Filter(@event, partitionId, Identifier, failureReason, retryCount, cancellationToken).ConfigureAwait(false);
@@ -91,19 +89,19 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
         Task HandleResult(IFilterResult result, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
         {
-            _logger.Debug(
-                "{LogMessagePrefix} filtered event '{EventTypeId}' for partition '{PartitionId}'  with result 'Succeeded' = {result.Succeeded}",
-                _logMessagePrefix,
-                @event.Type.Id.Value,
-                result.Succeeded);
+            _logger.HandleFilterResult(
+                Identifier,
+                Scope,
+                @event.Type.Id,
+                partitionId);
             if (result.Succeeded && result.IsIncluded)
             {
-                _logger.Debug(
-                    "{LogMessagePrefix} writing event '{EventTypeId}' to stream '{TargetStream}' in partition '{PartitionId}'",
-                    _logMessagePrefix,
-                    @event.Type.Id.Value,
-                    Definition.TargetStream,
-                    partitionId);
+                _logger.FilteredEventIsIncluded(
+                    Identifier,
+                    Scope,
+                    @event.Type.Id,
+                    partitionId,
+                    Definition.TargetStream);
                 return _eventsToStreamsWriter.Write(@event, Scope, Definition.TargetStream, result.Partition, cancellationToken);
             }
 

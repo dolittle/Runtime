@@ -4,14 +4,14 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
-using Dolittle.Logging;
-using Dolittle.Resilience;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Execution;
+using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Resilience;
 using Dolittle.Runtime.Tenancy;
-using Dolittle.Tenancy;
 using Machine.Specifications;
 using Moq;
 
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given
         protected static StreamProcessorId stream_processor_id;
         protected static IPerformActionOnAllTenants on_all_tenants;
         protected static IStreamDefinition stream_definition;
-        protected static Mock<Func<IEventProcessor>> get_event_processor;
+        protected static Mock<FactoryFor<IEventProcessor>> get_event_processor;
         protected static Mock<FactoryFor<ICreateScopedStreamProcessors>> get_scoped_stream_processors_creator;
         protected static Mock<ICreateScopedStreamProcessors> scoped_stream_processors_creator;
         protected static Mock<IExecutionContextManager> execution_context_manager;
@@ -38,17 +38,19 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.given
             scoped_stream_processors_creator = new Mock<ICreateScopedStreamProcessors>();
             get_scoped_stream_processors_creator = new Mock<FactoryFor<ICreateScopedStreamProcessors>>();
             get_scoped_stream_processors_creator.Setup(_ => _.Invoke()).Returns(scoped_stream_processors_creator.Object);
-            get_event_processor = new Mock<Func<IEventProcessor>>();
+            get_event_processor = new Mock<FactoryFor<IEventProcessor>>();
             on_all_tenants = new PerformActionOnAllTenants(tenants.Object, execution_context_manager.Object);
             scoped_stream_processors_creator
                 .Setup(_ => _.Create(Moq.It.IsAny<IStreamDefinition>(), Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<IEventProcessor>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(new Mock<AbstractScopedStreamProcessor>(
-                    new TenantId { Value = Guid.NewGuid() },
+                    new TenantId(Guid.NewGuid()),
                     Mock.Of<IStreamProcessorId>(),
+                    Mock.Of<IStreamDefinition>(),
                     Mock.Of<IStreamProcessorState>(),
                     Mock.Of<IEventProcessor>(),
                     Mock.Of<ICanFetchEventsFromStream>(),
                     Mock.Of<IAsyncPolicyFor<ICanFetchEventsFromStream>>(),
+                    Mock.Of<IStreamEventWatcher>(),
                     Mock.Of<ILogger>()).Object));
             stream_processor = new StreamProcessor(
                 stream_processor_id,

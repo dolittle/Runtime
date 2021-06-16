@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_ExecutionContext
     public class when_converting_from_store_to_runtime_representation
     {
         static ExecutionContext store_execution_context;
-        static Dolittle.Execution.ExecutionContext result;
+        static Dolittle.Runtime.Execution.ExecutionContext result;
 
         Establish context = () =>
         {

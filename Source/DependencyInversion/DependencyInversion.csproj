@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.DependencyInversion</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Assemblies/Assemblies.csproj" />
+    <ProjectReference Include="../Collections/Collections.csproj" />
+    <ProjectReference Include="../Lifecycle/Lifecycle.csproj" />
+    <ProjectReference Include="../Reflection/Reflection.csproj" />
+  </ItemGroup>
+
+</Project>

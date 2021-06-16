@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Services;
-using Dolittle.Services.Clients;
+using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Services.Clients;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer
 {

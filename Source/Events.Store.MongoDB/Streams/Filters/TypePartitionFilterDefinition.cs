@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
             new TypeFilterWithEventSourcePartitionDefinition(
                 StreamId.EventLog,
                 streamId,
-                Types.Select(_ => new ArtifactId { Value = _ }),
+                Types.Select(_ => new ArtifactId(_)),
                 partitioned);
     }
 }

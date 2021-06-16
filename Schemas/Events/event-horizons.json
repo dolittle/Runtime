@@ -8,7 +8,7 @@
         "$ref": "#/definitions/eventHorizonConfiguration"
     },
     "definitions": {
-       "eventHorizonConfiguration": {
+        "eventHorizonConfiguration": {
             "description": "The configuration of an event horizon",
             "type": "object",
             "properties": {
@@ -28,7 +28,9 @@
                 "events": {
                     "description": "An array of event artifacts that this bounded context is interested in",
                     "type": "array",
-                    "items": {"$ref": "#/definitions/artifact"}
+                    "items": {
+                        "$ref": "#/definitions/artifact"
+                    }
                 }
             },
             "required": [
@@ -37,9 +39,9 @@
                 "url",
                 "events"
             ]
-       },
-       "artifact": {
-           "$comment": "Should become it's own schema file'",
+        },
+        "artifact": {
+            "$comment": "Should become it's own schema file'",
             "description": "The configuration of an artifact",
             "properties": {
                 "id": {
@@ -51,7 +53,10 @@
                     "type": "number"
                 }
             },
-            "required": ["id", "generation"]
-       }
+            "required": [
+                "id",
+                "generation"
+            ]
+        }
     }
 }

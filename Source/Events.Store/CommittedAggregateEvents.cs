@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -47,17 +47,17 @@ namespace Dolittle.Runtime.Events.Store
 
         void ThrowIfEventWasAppliedToOtherEventSource(CommittedAggregateEvent @event)
         {
-            if (@event.EventSource != EventSource) throw new EventWasAppliedToOtherEventSource(@event.EventSource, EventSource);
+            if (@event.EventSource != EventSource) throw new EventWasAppliedToOtherEventSource(AggregateRoot, @event.EventSource, EventSource);
         }
 
         void ThrowIfEventWasAppliedByOtherAggregateRoot(CommittedAggregateEvent @event)
         {
-            if (@event.AggregateRoot.Id != AggregateRoot) throw new EventWasAppliedByOtherAggregateRoot(@event.AggregateRoot.Id, AggregateRoot);
+            if (@event.AggregateRoot.Id != AggregateRoot) throw new EventWasAppliedByOtherAggregateRoot(EventSource, @event.AggregateRoot.Id, AggregateRoot);
         }
 
         void ThrowIfAggreggateRootVersionIsOutOfOrder(CommittedAggregateEvent @event)
         {
-            if (@event.AggregateRootVersion != _currentCheckedVersion) throw new AggregateRootVersionIsOutOfOrder(@event.AggregateRootVersion, _currentCheckedVersion);
+            if (@event.AggregateRootVersion != _currentCheckedVersion) throw new AggregateRootVersionIsOutOfOrder(EventSource, AggregateRoot, @event.AggregateRootVersion, _currentCheckedVersion);
         }
     }
 }

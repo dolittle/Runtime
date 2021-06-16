@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Services;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -20,10 +20,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// Initializes a new instance of the <see cref="MicroserviceServices"/> class.
         /// </summary>
         /// <param name="consumerService">The <see cref="ConsumerService" />.</param>
-        public MicroserviceServices(ConsumerService consumerService)
-        {
-            _consumerService = consumerService;
-        }
+        public MicroserviceServices(ConsumerService consumerService) => _consumerService = consumerService;
 
         /// <inheritdoc/>
         public ServiceAspect Aspect => "EventHorizon";

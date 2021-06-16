@@ -4,7 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -36,13 +36,11 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             UncommittedEvent @event,
             CancellationToken cancellationToken)
         {
-            var eventSource = EventSourceId.NotSet;
-
             await InsertEvent(
                 transaction,
                 sequenceNumber,
                 occurred,
-                eventSource,
+                @event.EventSource,
                 @event,
                 new AggregateMetadata(),
                 executionContext,
@@ -51,7 +49,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
             return new CommittedEvent(
                 sequenceNumber,
                 occurred,
-                eventSource,
+                @event.EventSource,
                 executionContext,
                 @event.Type,
                 @event.Public,

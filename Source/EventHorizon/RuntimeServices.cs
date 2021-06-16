@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Services;
-using Dolittle.Services;
 
 namespace Dolittle.Runtime.EventHorizon
 {
@@ -20,10 +19,7 @@ namespace Dolittle.Runtime.EventHorizon
         /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
         /// </summary>
         /// <param name="subscriptions">The <see cref="SubscriptionsService" />.</param>
-        public RuntimeServices(SubscriptionsService subscriptions)
-        {
-            _subscriptions = subscriptions;
-        }
+        public RuntimeServices(SubscriptionsService subscriptions) => _subscriptions = subscriptions;
 
         /// <inheritdoc/>
         public ServiceAspect Aspect => "EventHorizon";

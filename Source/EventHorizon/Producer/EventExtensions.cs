@@ -1,10 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Protobuf;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
-using Dolittle.Security;
+using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Security;
 
 namespace Dolittle.Runtime.EventHorizon.Producer
 {
@@ -32,10 +32,10 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         /// <param name="event">The <see cref="StreamEvent" />.</param>
         /// <returns>The <see cref="Contracts.EventHorizonEvent" />.</returns>
         public static Contracts.EventHorizonEvent ToEventHorizonEvent(this StreamEvent @event) =>
-            new Contracts.EventHorizonEvent
-                {
-                    Event = @event.Event.ToCommittedEventHorizonEvent(),
-                    StreamSequenceNumber = @event.Position
-                };
+            new()
+            {
+                Event = @event.Event.ToCommittedEventHorizonEvent(),
+                StreamSequenceNumber = @event.Position
+            };
     }
 }

@@ -6,6 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Dolittle.Services" Version="$(FundamentalsVersion)"/>
+    <ProjectReference Include="../Services/Services.csproj" />
   </ItemGroup>
 </Project>

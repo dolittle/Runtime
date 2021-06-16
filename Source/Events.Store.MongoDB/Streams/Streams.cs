@@ -3,9 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Lifecycle;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public Streams(DatabaseConnection connection, ILogger<Streams> logger)
+        public Streams(DatabaseConnection connection, ILogger logger)
             : base(connection)
         {
             _logger = logger;
@@ -61,15 +61,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         public Task<IMongoCollection<MongoDB.Events.Event>> GetEventLog(ScopeId scopeId, CancellationToken token) =>
             scopeId == ScopeId.Default ? Task.FromResult(DefaultEventLog) : GetScopedEventLog(scopeId, token);
 
-        static string CollectionNameForStream(StreamId streamId) => $"stream-{streamId}";
+        static string CollectionNameForStream(StreamId streamId) => $"stream-{streamId.Value}";
 
-        static string CollectionNameForPublicStream(StreamId streamId) => $"public-stream-{streamId}";
+        static string CollectionNameForPublicStream(StreamId streamId) => $"public-stream-{streamId.Value}";
 
-        static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope}-{EventLogCollectionName}";
+        static string CollectionNameForScopedEventLog(ScopeId scope) => $"x-{scope.Value}-{EventLogCollectionName}";
 
-        static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope}-{StreamDefinitionCollectionName}";
+        static string CollectionNameForScopedStreamDefinitions(ScopeId scope) => $"x-{scope.Value}-{StreamDefinitionCollectionName}";
 
-        static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-{scope}-stream-{stream}";
+        static string CollectionNameForScopedStream(ScopeId scope, StreamId stream) => $"x-{scope.Value}-stream-{stream.Value}";
 
         Task<IMongoCollection<MongoDB.Events.StreamEvent>> GetStreamCollection(ScopeId scope, StreamId stream, CancellationToken cancellationToken) =>
             scope == ScopeId.Default ? GetStreamCollection(stream, cancellationToken) : GetScopedStreamCollection(scope, stream, cancellationToken);
@@ -111,7 +111,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         void CreateCollectionsAndIndexesForEventLog()
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", EventLogCollectionName);
+            _logger.CreatingIndexesFor(EventLogCollectionName);
             DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
                 Builders<MongoDB.Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)));
@@ -124,7 +124,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         void CreateCollectionsAndIndexesForStreamDefinitions()
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", StreamDefinitionCollectionName);
+            _logger.CreatingIndexesFor(StreamDefinitionCollectionName);
             _streamDefinitions.Indexes.CreateOne(new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
                 Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
                     .Ascending(_ => _.StreamId)));
@@ -132,7 +132,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         async Task CreateCollectionsIndexesForEventLogAsync(IMongoCollection<MongoDB.Events.Event> eventLog, CancellationToken cancellationToken)
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", eventLog.CollectionNamespace.CollectionName);
+            _logger.CreatingIndexesFor(eventLog.CollectionNamespace.CollectionName);
             await eventLog.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Events.Event>(
                 Builders<MongoDB.Events.Event>.IndexKeys
@@ -149,7 +149,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         async Task CreateCollectionsAndIndexesForStreamEventsAsync(IMongoCollection<Events.StreamEvent> stream, CancellationToken cancellationToken)
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", stream.CollectionNamespace.CollectionName);
+            _logger.CreatingIndexesFor(stream.CollectionNamespace.CollectionName);
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Events.StreamEvent>(
                     Builders<MongoDB.Events.StreamEvent>.IndexKeys
@@ -179,7 +179,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         async Task CreateCollectionsIndexesForStreamDefinitionsAsync(IMongoCollection<MongoDB.Streams.StreamDefinition> streamDefinitions, CancellationToken cancellationToken)
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", streamDefinitions.CollectionNamespace.CollectionName);
+            _logger.CreatingIndexesFor(streamDefinitions.CollectionNamespace.CollectionName);
             await streamDefinitions.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
                     Builders<MongoDB.Streams.StreamDefinition>.IndexKeys

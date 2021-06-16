@@ -4,8 +4,7 @@
 using System;
 using System.Globalization;
 using Dolittle.Runtime.Events.Store.MongoDB.Events;
-using Dolittle.Security;
-using Claim = Dolittle.Security.Claim;
+using Dolittle.Runtime.Security;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {
@@ -20,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 new Versioning.Version(873112588, 241520971, 367002811, 1885758720, "something very random"),
                 "somethign also very random",
                 Guid.Parse("2fd440e7-84c6-4f88-a5f3-f8b5a038464f"),
-                new Claims(new[] { new Claim("some very random name", "some very random value", "some very random value type") }),
+                new Claims(new[] { new Security.Claim("some very random name", "some very random value", "some very random value type") }),
                 CultureInfo.InvariantCulture);
     }
 }

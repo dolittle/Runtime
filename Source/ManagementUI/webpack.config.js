@@ -13,6 +13,6 @@ module.exports = () => {
     config.devServer = {
         historyApiFallback: true,
         port: 8081
-      };
-    return config;    
+    };
+    return config;
 };

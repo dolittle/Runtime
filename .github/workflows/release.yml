@@ -1,0 +1,132 @@
+name: Release
+
+env:
+  PRERELEASE_BRANCHES: alpha,beta,rc,turbo,projections,embeddings,timeout # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  setup:
+    name: Setup
+    runs-on: ubuntu-latest
+    outputs:
+      should-publish: ${{ steps.context.outputs.should-publish }}
+      release-type: ${{ steps.context.outputs.release-type }}
+      next-version: ${{ steps.increment-version.outputs.next-version }}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Establish context
+        id: context
+        uses: dolittle/establish-context-action@v2
+        with:
+          prerelease-branches: ${{ env.PRERELEASE_BRANCHES }}
+      - name: Increment version
+        id: increment-version
+        if: ${{ steps.context.outputs.should-publish == 'true' }}
+        uses: dolittle/increment-version-action@v2
+        with:
+          version: ${{ steps.context.outputs.current-version }}
+          release-type: ${{ steps.context.outputs.release-type }}
+      - name: Prepend to Changelog
+        if: ${{ steps.context.outputs.should-publish == 'true' && steps.context.outputs.release-type != 'prerelease' }}
+        uses: dolittle/add-to-changelog-action@v2
+        with:
+          version: ${{ steps.increment-version.outputs.next-version }}
+          body: ${{ steps.context.outputs.pr-body }}
+          pr-url: ${{ steps.context.outputs.pr-url }}
+          changelog-path: CHANGELOG.md
+          user-email: build@dolittle.com
+          user-name: dolittle-build
+      - name: Create GitHub Release
+        uses: dolittle/github-release-action@v2
+        if: ${{ steps.context.outputs.should-publish == 'true' }}
+        with:
+          version: ${{ steps.increment-version.outputs.next-version }}
+          body: ${{ steps.context.outputs.pr-body }}
+
+  release-runtime-production-image:
+    name: Release Runtime Production Image
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push Production Image to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Docker/Production/Dockerfile
+          tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}
+      - name: Push Latest Tag Of Production Image to Docker Hub
+        uses: docker/build-push-action@v2
+        if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
+        with:
+          push: true
+          context: .
+          file: ./Docker/Production/Dockerfile
+          tags: dolittle/runtime:latest
+
+  release-runtime-debug-image:
+    name: Release Runtime Debug Image
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push Debug Image to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          build-args: CONFIGURATION="Debug"
+          file: ./Docker/Production/Dockerfile
+          tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-debug
+      - name: Push Latest Tag Of Debug Image to Docker Hub
+        uses: docker/build-push-action@v2
+        if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
+        with:
+          push: true
+          context: .
+          file: ./Docker/Production/Dockerfile
+          tags: dolittle/runtime:latest-debug
+
+  release-runtime-development-image:
+    name: Release Runtime Development Image
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push Development Image to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Docker/Development/Dockerfile
+          tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development
+      - name: Push Latest Tag Of Development Image to Docker Hub
+        uses: docker/build-push-action@v2
+        if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
+        with:
+          push: true
+          context: .
+          file: ./Docker/Development/Dockerfile
+          tags: dolittle/runtime:latest-development

@@ -1,0 +1,21 @@
+{
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "**/bin/**/*": true,
+        "**/obj/**/*": true
+    },
+    "git.ignoreLimitWarning": true,
+    "dotnet-test-explorer.testProjectPath":"Specifications/**/*.csproj",
+    "dotnet-test-explorer.treeMode": "full",
+    "dotnet-test-explorer.runInParallel": true,
+    "dotnet-test-explorer.showCodeLens": true,
+    "dotnet-test-explorer.autoExpandTree": true,
+    "cSpell.words": [
+        "Grpc",
+        "Protobuf"
+    ]
+}

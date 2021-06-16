@@ -2,10 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Logging;
-using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Resilience;
 using Polly;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 .Handle<EventStoreUnavailable>(
                     _ =>
                     {
-                        _logger.Debug(_, "Event Store is unavailable");
+                        _logger.LogDebug(_, "Event Store is unavailable");
                         return true;
                     })
                 .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));

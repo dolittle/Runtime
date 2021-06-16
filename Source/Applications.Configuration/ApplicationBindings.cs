@@ -1,10 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.DependencyInversion;
-using Dolittle.Execution;
+using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Execution;
 
-namespace Dolittle.ApplicationModel.Configuration
+namespace Dolittle.Runtime.Applications.Configuration
 {
     /// <summary>
     /// Binds up the bindings related to the running application. The<see cref="Application"/>, the <see cref="Microservice"/> and the <see cref="Environment"/>.

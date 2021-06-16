@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Artifacts;
+using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// </summary>
         /// <param name="range">The <see cref="StreamPositionRange" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="IEnumerable{Artifact}" /> event types.</returns>
-        Task<IEnumerable<Artifact>> FetchInRange(StreamPositionRange range, CancellationToken cancellationToken);
+        /// <returns>The <see cref="ISet{Artifact}" /> event types.</returns>
+        Task<ISet<Artifact>> FetchInRange(StreamPositionRange range, CancellationToken cancellationToken);
     }
 }

@@ -92,16 +92,18 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),
                 Builders<MongoDB.Events.Event>.Filter,
                 _ => _.EventLogSequenceNumber,
-                Builders<MongoDB.Events.Event>.Projection.Expression(_ => _eventConverter.ToRuntimeStreamEvent(_)),
-                Builders<MongoDB.Events.Event>.Projection.Expression(_ => new Artifacts.Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)));
+                _ => _eventConverter.ToRuntimeStreamEvent(_),
+                _ => _.Metadata.TypeId,
+                _ => _.Metadata.TypeGeneration);
 
-        StreamFetcher<MongoDB.Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<MongoDB.Events.StreamEvent> collection, StreamId streamId, bool partitioned) =>
-            new StreamFetcher<MongoDB.Events.StreamEvent>(
+        StreamFetcher<MongoDB.Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<Events.StreamEvent> collection, StreamId streamId, bool partitioned) =>
+            new(
                 collection,
-                Builders<MongoDB.Events.StreamEvent>.Filter,
+                Builders<Events.StreamEvent>.Filter,
                 _ => _.StreamPosition,
-                Builders<MongoDB.Events.StreamEvent>.Projection.Expression(_ => _eventConverter.ToRuntimeStreamEvent(_, streamId, partitioned)),
-                Builders<MongoDB.Events.StreamEvent>.Projection.Expression(_ => new Artifacts.Artifact(_.Metadata.TypeId, _.Metadata.TypeGeneration)),
+                _ => _eventConverter.ToRuntimeStreamEvent(_, streamId, partitioned),
+                _ => _.Metadata.TypeId,
+                _ => _.Metadata.TypeGeneration,
                 _ => _.Partition);
     }
 }

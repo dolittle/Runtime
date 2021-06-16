@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Resilience.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Resilience/Resilience.csproj" />
+    <ProjectReference Include="../../Source/Types.Testing/Types.Testing.csproj" />
+  </ItemGroup>
+</Project>

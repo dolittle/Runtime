@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Logging;
+using Microsoft.Extensions.Logging;
 using Prometheus;
 
 #pragma warning disable CA2213
@@ -49,14 +49,15 @@ namespace Dolittle.Runtime.Metrics
         {
             _server?.Stop();
             _server = null;
+            GC.SuppressFinalize(this);
         }
 
         /// <inheritdoc/>
         public void Start()
         {
             const string path = "metrics/";
-            _logger.Debug(
-                "Starting metric server on port '{Port}' on path '{Path}'",
+            _logger.LogInformation(
+                "Starting metrics server on port {Port} on path '{Path}'",
                 _configuration.Port,
                 path);
             _server = new MetricServer(hostname: "*", port: _configuration.Port, url: path, registry: _collectorRegistry);

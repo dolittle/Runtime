@@ -3,8 +3,8 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
+using Dolittle.Runtime.Lifecycle;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// </summary>
         /// <param name="connection">The <see cref="DatabaseConnection" />.</param>
         /// <param name="logger">The <see cref="ILogger" />.</param>
-        public SubscriptionStates(DatabaseConnection connection, ILogger<SubscriptionStates> logger)
+        public SubscriptionStates(DatabaseConnection connection, ILogger logger)
             : base(connection)
         {
             _logger = logger;
@@ -36,13 +36,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             return collection;
         }
 
-        static string CollectionNameForScopedSubscriptionStates(ScopeId scope) => $"x-{scope}-subscription-states";
+        static string CollectionNameForScopedSubscriptionStates(ScopeId scope) => $"x-{scope.Value}-subscription-states";
 
         async Task CreateCollectionsAndIndexesForSubscriptionStatesAsync(
             IMongoCollection<MongoDB.Processing.Streams.EventHorizon.SubscriptionState> subscriptionStates,
             CancellationToken cancellationToken)
         {
-            _logger.Trace("Creating indexes for {CollectionName}' collection in Event Store", subscriptionStates.CollectionNamespace.CollectionName);
+            _logger.CreatingIndexesFor(subscriptionStates.CollectionNamespace.CollectionName);
             await subscriptionStates.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>(
                     Builders<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>.IndexKeys

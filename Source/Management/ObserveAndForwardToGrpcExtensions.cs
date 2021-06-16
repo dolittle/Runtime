@@ -8,7 +8,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Reflection;
+using Dolittle.Runtime.Reflection;
 using Google.Protobuf.Collections;
 using Grpc.Core;
 

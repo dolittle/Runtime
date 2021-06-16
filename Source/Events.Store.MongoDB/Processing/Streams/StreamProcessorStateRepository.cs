@@ -4,12 +4,14 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
-using Dolittle.Runtime.Async;
-using Dolittle.Runtime.EventHorizon;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using Dolittle.Runtime.EventHorizon.Consumer;
+
+using MongoSubscriptionState = Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon.SubscriptionState;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
@@ -19,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     public class StreamProcessorStateRepository : IStreamProcessorStateRepository
     {
         readonly FilterDefinitionBuilder<AbstractStreamProcessorState> _streamProcessorFilter;
-        readonly FilterDefinitionBuilder<SubscriptionState> _subscriptionFilter;
+        readonly FilterDefinitionBuilder<MongoSubscriptionState> _subscriptionFilter;
         readonly IStreamProcessorStates _streamProcessorStates;
         readonly ISubscriptionStates _subscriptionStates;
         readonly ILogger _logger;
@@ -38,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             _streamProcessorStates = streamProcessorStates;
             _subscriptionStates = subscriptionStates;
             _streamProcessorFilter = Builders<AbstractStreamProcessorState>.Filter;
-            _subscriptionFilter = Builders<SubscriptionState>.Filter;
+            _subscriptionFilter = Builders<MongoSubscriptionState>.Filter;
             _logger = logger;
         }
 
@@ -52,7 +54,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" />.</returns>
         public async Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId id, CancellationToken cancellationToken)
         {
-            _logger.Trace("Trying to get Stream Processor State for {StreamProcessorId}", id);
+            _logger.GettingStreamProcessorState(id);
             try
             {
                 if (id is SubscriptionId subscriptionId)
@@ -93,14 +95,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
         public async Task Persist(IStreamProcessorId id, IStreamProcessorState baseStreamProcessorState, CancellationToken cancellationToken)
         {
-            _logger.Trace("Persisting Stream Processor State for {StreamProcessorId}", id);
+            _logger.PersistingStreamProcessorState(id);
             try
             {
                 if (id is SubscriptionId subscriptionId)
                 {
                     if (baseStreamProcessorState is Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState)
                     {
-                        var replacementState = new SubscriptionState(
+                        var replacementState = new MongoSubscriptionState(
                             subscriptionId.ProducerMicroserviceId,
                             subscriptionId.ProducerTenantId,
                             subscriptionId.StreamId,
@@ -178,7 +180,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             _streamProcessorFilter.Eq(_ => _.EventProcessor, id.EventProcessorId.Value)
                 & _streamProcessorFilter.Eq(_ => _.SourceStream, id.SourceStreamId.Value);
 
-        FilterDefinition<SubscriptionState> CreateFilter(SubscriptionId id) =>
+        FilterDefinition<MongoSubscriptionState> CreateFilter(SubscriptionId id) =>
             _subscriptionFilter.Eq(_ => _.Microservice, id.ProducerMicroserviceId.Value)
                 & _subscriptionFilter.Eq(_ => _.Tenant, id.ProducerTenantId.Value)
                 & _subscriptionFilter.Eq(_ => _.Stream, id.StreamId.Value)

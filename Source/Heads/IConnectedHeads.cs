@@ -2,7 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.ObjectModel;
-using Dolittle.Services;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Heads
 {

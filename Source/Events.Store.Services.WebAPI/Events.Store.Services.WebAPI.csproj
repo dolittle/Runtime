@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Events.Store.Services.WebAPI</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Events.Store.Services.WebAPI</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Artifacts/Artifacts.csproj" />
+    <ProjectReference Include="../Events.Store.Services/Events.Store.Services.csproj" />
+    <ProjectReference Include="../Protobuf/Protobuf.csproj" />
+  </ItemGroup>
+
+</Project>

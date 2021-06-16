@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Logging;
-using Dolittle.Resilience;
+using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Resilience;
 using Polly;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 .Handle<Exception>(
                     _ =>
                     {
-                        _logger.Error(_, "Could not persist stream processor state to the event store, will retry in one second.");
+                        _logger.LogError(_, "Could not persist stream processor state to the event store, will retry in one second.");
                         return true;
                     })
                 .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(1));

@@ -6,10 +6,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Logging;
-using Dolittle.Resilience;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Resilience;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
 {
@@ -22,7 +22,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         readonly IEventProcessor _eventProcessor;
         readonly ICanFetchEventsFromPartitionedStream _eventsFromStreamsFetcher;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FailingPartitions"/> class.
@@ -31,19 +30,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <param name="eventProcessor">The <see cref="IEventProcessor" />.</param>
         /// <param name="eventsFromStreamsFetcher">The <see cref="ICanFetchEventsFromPartitionedStream" />.</param>
         /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
         public FailingPartitions(
             IResilientStreamProcessorStateRepository streamProcessorStates,
             IEventProcessor eventProcessor,
             ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
-            IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
-            ILogger<FailingPartitions> logger)
+            IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy)
         {
             _streamProcessorStates = streamProcessorStates;
             _eventProcessor = eventProcessor;
             _eventsFromStreamsFetcher = eventsFromStreamsFetcher;
             _eventsFetcherPolicy = eventsFetcherPolicy;
-            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -58,9 +54,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         {
             var failingPartition = new FailingPartitionState(failedPosition, retryTime, reason, 1, DateTimeOffset.UtcNow);
             var failingPartitions = new Dictionary<PartitionId, FailingPartitionState>(oldState.FailingPartitions)
-                {
-                    [partition] = failingPartition
-                };
+            {
+                [partition] = failingPartition
+            };
             var newState = new StreamProcessorState(failedPosition + 1, failingPartitions, oldState.LastSuccessfullyProcessed);
             await PersistNewState(streamProcessorId, newState, cancellationToken).ConfigureAwait(false);
             return newState;

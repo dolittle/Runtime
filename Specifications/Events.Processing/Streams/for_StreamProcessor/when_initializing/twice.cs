@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.ObjectModel;
-using Dolittle.Tenancy;
+using Dolittle.Runtime.ApplicationModel;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_initializing
@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessor.when_in
 
         Establish context = () =>
         {
-            tenants.SetupGet(_ => _.All).Returns(new ObservableCollection<TenantId>(new[] { new TenantId { Value = Guid.NewGuid() } }));
+            tenants.SetupGet(_ => _.All).Returns(new ObservableCollection<TenantId>(new[] { new TenantId(Guid.NewGuid()) }));
             stream_processor.Initialize().GetAwaiter().GetResult();
         };
 

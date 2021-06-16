@@ -3,10 +3,9 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Lifecycle;
-using Dolittle.Logging;
-using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
+using Dolittle.Runtime.Lifecycle;
 
 namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
 {
@@ -17,23 +16,18 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
     public class PublicFilterValidator : ICanValidateFilterFor<PublicFilterDefinition>
     {
         readonly IValidateFilterByComparingStreams _byComparingStreams;
-        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PublicFilterValidator"/> class.
         /// </summary>
         /// <param name="byComparingStreams">The <see cref="IValidateFilterByComparingStreams" />.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public PublicFilterValidator(
-            IValidateFilterByComparingStreams byComparingStreams,
-            ILogger logger)
+        public PublicFilterValidator(IValidateFilterByComparingStreams byComparingStreams)
         {
             _byComparingStreams = byComparingStreams;
-            _logger = logger;
         }
 
         /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate(IFilterDefinition persistedDefinition, IFilterProcessor<PublicFilterDefinition> filter, CancellationToken cancellationToken) =>
-            _byComparingStreams.Validate(persistedDefinition, filter, cancellationToken);
+        public Task<FilterValidationResult> Validate(PublicFilterDefinition persistedDefinition, IFilterProcessor<PublicFilterDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken) =>
+            _byComparingStreams.Validate(persistedDefinition, filter, lastUnprocessedEvent, cancellationToken);
     }
 }
