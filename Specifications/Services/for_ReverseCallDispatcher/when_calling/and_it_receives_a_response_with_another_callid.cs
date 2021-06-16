@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
                         return;
                     }
 
-                    response_from_client.Context = new () { CallId = ReverseCallId.New().ToProtobuf() };
+                    response_from_client.Context = new() { CallId = ReverseCallId.New().ToProtobuf() };
 
                     stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_from_client });
                 })

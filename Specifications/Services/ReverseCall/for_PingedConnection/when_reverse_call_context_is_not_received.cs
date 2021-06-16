@@ -20,7 +20,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
                 .Setup(_ => _.GetConnectArguments(first_message))
                 .Returns(null);
 
-            scenario = Scenario.New(_ => {
+            scenario = Scenario.New(_ =>
+            {
                 _.Receive.Message(first_message).AtTime(10);
             });
         };

@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _totalFirstMessageWaitTime = metricFactory.Counter(
                 "dolittle_system_runtime_services_reversecalls_first_message_wait_seconds_total",
                 "ReverseCall total time spent waiting for first message");
- 
+
             return new Collector[]
             {
                 _currentPendingStreamWrites,

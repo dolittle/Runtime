@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.Serialization.Protobuf
         {
             using var memoryStream = new MemoryStream(bytes);
             return FromProtobuf<T>(memoryStream, includesLength);
-            }
+        }
 
         /// <inheritdoc/>
         public void ToProtobuf<T>(T instance, Stream stream, bool includeLength = false)
@@ -91,10 +91,10 @@ namespace Dolittle.Runtime.Serialization.Protobuf
             var messageDescription = _messageDescriptions.GetFor<T>();
 
             if (includeLength)
-                {
+            {
                 var length = GetLengthOf(instance, messageDescription);
                 outputStream.WriteLength(length);
-                }
+            }
 
             messageDescription.Properties.ForEach(property =>
             {
@@ -103,16 +103,16 @@ namespace Dolittle.Runtime.Serialization.Protobuf
                 var value = property.Property.GetValue(instance);
 
                 if (_valueConverters.CanConvert(type))
-                    {
+                {
                     var converter = _valueConverters.GetConverterFor(type);
                     type = converter.SerializedAs(type);
                     value = converter.ConvertTo(value);
-                    }
+                }
 
                 WriteValue(outputStream, type, number, value);
             });
             outputStream.Flush();
-            }
+        }
 
         /// <inheritdoc/>
         public byte[] ToProtobuf<T>(T instance, bool includeLength = false)

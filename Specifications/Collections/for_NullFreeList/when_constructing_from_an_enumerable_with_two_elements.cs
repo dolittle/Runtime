@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Collections.for_NullFreeList
 
         Because of = () =>
         {
-            list = new NullFreeList<string>(new string[] { "a", "b" });
+            list = new NullFreeList<string>(new string[] { "a", "b" });
         };
 
         It should_not_contain_two_elements = () => list.Count.ShouldEqual(2);

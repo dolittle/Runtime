@@ -9,21 +9,21 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling
 {
-	public class and_connection_was_not_established : given.a_reverse_call_client
-	{
-		static Execution.ExecutionContext execution_context;
-		static Exception exception;
+    public class and_connection_was_not_established : given.a_reverse_call_client
+    {
+        static Execution.ExecutionContext execution_context;
+        static Exception exception;
 
-		Establish context = () =>
-		{
-			execution_context = given.execution_contexts.create();
-			execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
-			server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
-			reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
-		};
+        Establish context = () =>
+        {
+            execution_context = given.execution_contexts.create();
+            execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
+            server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
+            reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
+        };
 
-		Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => reverse_call_client.Handle((request, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult());
 
-		It should_fail_because_no_connection_was_established = () => exception.ShouldBeOfExactType<ReverseCallClientNotConnected>();
-	}
+        It should_fail_because_no_connection_was_established = () => exception.ShouldBeOfExactType<ReverseCallClientNotConnected>();
+    }
 }

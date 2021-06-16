@@ -47,7 +47,7 @@ namespace Dolittle.Runtime.Applications.Configuration
             var resourceTypes = new Dictionary<ResourceType, ResourceTypeImplementation>();
             foreach (var (resourceType, resourceImplementation) in _boundedContextConfiguration.Resources)
             {
-                resourceTypes.Add(resourceType, environment == Environment.Production? resourceImplementation.Production : resourceImplementation.Development);
+                resourceTypes.Add(resourceType, environment == Environment.Production ? resourceImplementation.Production : resourceImplementation.Development);
             }
             _resourceConfiguration.ConfigureResourceTypes(resourceTypes);
         }

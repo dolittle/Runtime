@@ -34,13 +34,13 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
                 {
                     if (server_message.Request == first_request)
                     {
-                        response_to_first_from_client.Context = new () { CallId = server_message.Request.Context.CallId };
+                        response_to_first_from_client.Context = new() { CallId = server_message.Request.Context.CallId };
                         return;
                     }
 
                     if (server_message.Request == second_request)
                     {
-                        response_to_second_from_client.Context = new () { CallId = server_message.Request.Context.CallId };
+                        response_to_second_from_client.Context = new() { CallId = server_message.Request.Context.CallId };
 
                         stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_to_second_from_client });
                         stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_to_first_from_client });

@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 {
     internal static class Logging
     {
-#region WrappedAsyncStreamWriter
+        #region WrappedAsyncStreamWriter
         static readonly Action<ILogger, RequestId, Type, Exception> _writingMessage = LoggerMessage.Define<RequestId, Type>(
             LogLevel.Debug,
             new EventId(629413668, nameof(WritingMessage)),
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             "Writing message {Type} for {Request} was unblocked after {BlockedTime}");
         internal static void WritingMessageUnblockedAfter(this ILogger logger, RequestId requestId, Type messageType, TimeSpan blockedTime)
             => _writingMessageUnblockedAfter(logger, requestId, messageType, blockedTime, null);
-        
+
         static readonly Action<ILogger, RequestId, Exception> _writingPing = LoggerMessage.Define<RequestId>(
             LogLevel.Trace,
             new EventId(629413668, nameof(WritingPing)),
@@ -71,9 +71,9 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             "Disposed of WrappedAsyncStreamWriter for {Request}");
         internal static void DisposedWrappedAsyncStreamWriter(this ILogger logger, RequestId requestId)
             => _disposedWrappedAsyncStreamWriter(logger, requestId, null);
-#endregion
+        #endregion
 
-#region WrappedAsyncStreamReader
+        #region WrappedAsyncStreamReader
         static readonly Action<ILogger, RequestId, Exception> _readingMessage = LoggerMessage.Define<RequestId>(
             LogLevel.Debug,
             new EventId(001299866, nameof(ReadingMessage)),
@@ -122,9 +122,9 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             "Reverse call arguments context {Request} because there was no context in the connect arguments");
         internal static void ReverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments(this ILogger logger, RequestId requestId)
             => _reverseCallArgumentsNotReceivedBecauseNoContextOnConnectArguments(logger, requestId, null);
-#endregion
+        #endregion
 
-#region PingedReverseCallConnection
+        #region PingedReverseCallConnection
 
         static readonly Action<ILogger, RequestId, Exception> _waitingForReverseCallContext = LoggerMessage.Define<RequestId>(
             LogLevel.Trace,
@@ -216,6 +216,6 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             "Disposed of PingedConnection for {Request}");
         internal static void DisposedPingedConnection(this ILogger logger, RequestId requestId)
             => _disposedPingedConnection(logger, requestId, null);
-#endregion
+        #endregion
     }
 }

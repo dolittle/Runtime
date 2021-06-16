@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.DependencyInversion.Strategies
         /// <summary>
         /// Gets the constant target.
         /// </summary>
-        public object Target { get; }
+        public object Target { get; }
 
         /// <inheritdoc/>
         public System.Type GetTargetType() => Target.GetType();

@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
                     }
 
                     execution_context_in_request = server_message.Request.Context.ExecutionContext.ToExecutionContext();
-                    response_from_client.Context = new () { CallId = server_message.Request.Context.CallId };
+                    response_from_client.Context = new() { CallId = server_message.Request.Context.CallId };
 
                     stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_from_client });
                 })

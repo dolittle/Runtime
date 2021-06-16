@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
 
         Establish context = () =>
         {
-            scenario = Scenario.New(_ => {});
+            scenario = Scenario.New(_ => { });
         };
 
         Because of = () => scenario.Simulate(

@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
 
             types_fetcher
                 .Setup(_ => _.FetchInRange(new StreamPositionRange(0, 10), cancellation_token))
-                .Returns(Task.FromResult<ISet<Artifact>>(new HashSet<Artifact>(new[] { filter_definition_event_type_one, event_type_four })));
+                .Returns(Task.FromResult<ISet<Artifact>>(new HashSet<Artifact>(new[] { filter_definition_event_type_one, event_type_four })));
         };
 
         static FilterValidationResult result;

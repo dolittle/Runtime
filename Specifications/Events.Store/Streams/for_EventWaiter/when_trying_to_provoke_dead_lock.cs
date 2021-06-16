@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter
             catch (Exception)
             {
             }
-            
+
         };
 
         It should_not_be_a_dead_lock = () => token_source.IsCancellationRequested.ShouldBeFalse();
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter
             {
                 event_waiter.Notify(1);
             });
-            second_wait.Wait();        
+            second_wait.Wait();
         }
     }
 }

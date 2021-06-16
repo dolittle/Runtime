@@ -55,7 +55,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
                     filter_definition_event_type_three.Id,
                 },
                 false);
-            
+
             var filter_processor_mock = mocks.Create<IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition>>();
             filter_processor_mock.SetupGet(_ => _.Definition).Returns(filter_definition);
             filter_processor_mock.SetupGet(_ => _.Identifier).Returns(event_processor_id);

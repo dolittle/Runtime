@@ -17,7 +17,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
             first_message_to_send = new();
             second_message_to_send = new();
 
-            scenario = Scenario.New(_ => {
+            scenario = Scenario.New(_ =>
+            {
                 _.Receive.Message(first_message_with_5_second_pings).AtTime(5);
                 _.Receive.Message(new()).AtTime(10);
                 _.Send.Message(first_message_to_send).AtTime(12);

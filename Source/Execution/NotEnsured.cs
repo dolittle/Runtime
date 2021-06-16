@@ -23,6 +23,6 @@ namespace Dolittle.Runtime.Execution
         /// <summary>
         /// Gets the property that failed ensure test.
         /// </summary>
-        public string Property { get; }
+        public string Property { get; }
     }
 }

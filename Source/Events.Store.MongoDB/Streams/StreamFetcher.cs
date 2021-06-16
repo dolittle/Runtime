@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             Expression<Func<TEvent, Guid>> eventToArtifactId,
             Expression<Func<TEvent, uint>> eventToArtifactGeneration,
             Expression<Func<TEvent, Guid>> partitionIdExpression)
-            :this(stream, filter, sequenceNumberExpression, eventToStreamEvent, eventToArtifactId, eventToArtifactGeneration)
+            : this(stream, filter, sequenceNumberExpression, eventToStreamEvent, eventToArtifactId, eventToArtifactGeneration)
         {
             _partitionIdExpression = partitionIdExpression;
         }
@@ -196,7 +196,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
             public Guid Id { get; set; }
 
-            public IEnumerable<uint> Generations { get; set; }
+            public IEnumerable<uint> Generations { get; set; }
         }
 
         void ThrowIfNotConstructedWithPartitionIdExpression()
