@@ -1,3 +1,13 @@
+# [6.0.1] - 2021-6-16 [PR: #548](https://github.com/dolittle/Runtime/pull/548)
+## Summary
+
+Fix some of the configuration files under Server/.dolittle to their original intended 
+
+### Changed
+
+- Changed back configuration files
+
+
 # [6.0.0] - 2021-6-16 [PR: #532](https://github.com/dolittle/Runtime/pull/532)
 ## Summary
 
