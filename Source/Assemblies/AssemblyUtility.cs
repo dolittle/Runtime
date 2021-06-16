@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Assemblies
             // Borrowed from : http://stackoverflow.com/questions/8593264/determining-if-a-dll-is-a-valid-clr-dll-by-reading-the-pe-directly-64bit-issue
             using var fs = new FileStream(library.Path, FileMode.Open, FileAccess.Read);
             try
-                {
+            {
                 using var reader = new BinaryReader(fs);
                 // PE Header starts @ 0x3C (60). Its a 4 byte header.
                 fs.Position = 0x3C;
@@ -50,10 +50,10 @@ namespace Dolittle.Runtime.Assemblies
 
                 // 0x20b == PE32+ (64Bit), 0x10b == PE32 (32Bit)
                 if (magic == 0x20b)
-                    {
+                {
                     // Offset to data directories for 64Bit PE images
                     off = 0x70;
-                    }
+                }
 
                 fs.Position = posEndOfHeader;
 
@@ -62,18 +62,18 @@ namespace Dolittle.Runtime.Assemblies
                 fs.Position = Convert.ToUInt16(Convert.ToUInt16(fs.Position) + off);
 
                 for (var i = 0; i < 15; i++)
-                    {
+                {
                     dataDictionaryRVA[i] = reader.ReadUInt32();
                     dataDictionarySize[i] = reader.ReadUInt32();
-                    }
+                }
 
                 return dataDictionaryRVA[14] != 0;
-                }
-            catch (Exception)
-                {
-                return false;
-                }
             }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
 
         /// <inheritdoc/>
         public bool IsDynamic(Assembly assembly)

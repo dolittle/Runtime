@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ClientManager.when_getting
                 Invoker = callInvoker;
             }
 
-            public CallInvoker Invoker { get; }
+            public CallInvoker Invoker { get; }
         }
 
         static MyClient result;

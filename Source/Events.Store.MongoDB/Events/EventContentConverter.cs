@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public class EventContentConverter : IEventContentConverter
     {
-        static readonly JsonWriterSettings ToJsonSettings = new JsonWriterSettings
+        static readonly JsonWriterSettings _jsonSettings = new JsonWriterSettings
         {
             OutputMode = JsonOutputMode.Strict,
             Indent = false,
@@ -23,6 +23,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 
         /// <inheritdoc/>
         public string ToJson(BsonDocument bson)
-            => bson.ToJson(ToJsonSettings);
+            => bson.ToJson(_jsonSettings);
     }
 }

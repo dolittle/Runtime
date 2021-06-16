@@ -10,8 +10,8 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             ScopeId scopeId,
             EventProcessorId eventProcessorId,
             IStreamDefinition sourceStreamDefinition,
-            Func<IEventProcessor> getEventProcessor,
+            FactoryFor<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken)
         {
             try
@@ -94,8 +94,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         void Unregister(StreamProcessorId id)
         {
+            StreamProcessor existing;
+            do
+            {
+                _streamProcessors.TryRemove(id, out existing);
+            }
+            while (existing != default);
             _logger.StreamProcessorUnregistered(id);
-            _streamProcessors.TryRemove(id, out var _);
         }
     }
 }

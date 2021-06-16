@@ -2,9 +2,10 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Services.ReverseCalls;
 using Google.Protobuf;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services
 {
@@ -13,18 +14,28 @@ namespace Dolittle.Runtime.Services
     /// </summary>
     public class ReverseCallDispatchers : IReverseCallDispatchers
     {
+        readonly IIdentifyRequests _requestIdentifier;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILoggerFactory _loggerFactory;
+        readonly IKeepConnectionsAlive _pingedConnectionFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReverseCallDispatchers"/> class.
         /// </summary>
+        /// <param name="requestIdentifier">The <see cref="IIdentifyRequests"/> for identifying requests.</param>
         /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use.</param>
         /// <param name="loggerFactory">The <see cref="ILoggerFactory"/> to use for creating instances of <see cref="ILogger"/>.</param>
-        public ReverseCallDispatchers(IExecutionContextManager executionContextManager, ILoggerFactory loggerFactory)
+        /// <param name="pingedConnectionFactory">The <see cref="IKeepConnectionsAlive"/> for creating pinged connections.</param>
+        public ReverseCallDispatchers(
+            IIdentifyRequests requestIdentifier,
+            IExecutionContextManager executionContextManager,
+            ILoggerFactory loggerFactory,
+            IKeepConnectionsAlive pingedConnectionFactory)
         {
+            _requestIdentifier = requestIdentifier;
             _executionContextManager = executionContextManager;
             _loggerFactory = loggerFactory;
+            _pingedConnectionFactory = pingedConnectionFactory;
         }
 
         /// <inheritdoc/>
@@ -40,8 +51,7 @@ namespace Dolittle.Runtime.Services
             where TRequest : class
             where TResponse : class
             => new ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
-                clientStream,
-                serverStream,
+                _pingedConnectionFactory.CreatePingedReverseCallConnection(_requestIdentifier.GetRequestIdFor(context), clientStream, serverStream, context, messageConverter),
                 messageConverter,
                 _executionContextManager,
                 _loggerFactory.CreateLogger<ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>());

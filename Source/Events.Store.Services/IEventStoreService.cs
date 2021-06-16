@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.Services
         /// <param name="token"><see cref="CancellationToken" /> for cancelling the task.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of the <see cref="CommittedAggregateEvents" />.</returns>
         Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, DolittleExecutionContext context, CancellationToken token);
-        
+
         /// <summary>
         /// Try to fetch events for a specific aggregate.
         /// </summary>

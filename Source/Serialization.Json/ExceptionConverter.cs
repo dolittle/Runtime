@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Serialization.Json
         public override bool CanConvert(Type objectType) => typeof(Exception).GetTypeInfo().IsAssignableFrom(objectType);
 
         /// <inheritdoc/>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) => new Exception(); 
+        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer) => new Exception();
 
         /// <inheritdoc/>
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)

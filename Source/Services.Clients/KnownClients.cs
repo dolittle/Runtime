@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Services.Clients
     /// </summary>
     public class KnownClients : IKnownClients
     {
-        readonly Dictionary<Type, Client> _clientsByType = new Dictionary<Type, Client>();
+        readonly Dictionary<Type, Client> _clientsByType = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KnownClients"/> class.

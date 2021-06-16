@@ -22,11 +22,11 @@ namespace Dolittle.Runtime.Services
         /// <summary>
         /// Gets the visibility of the <see cref="Endpoint"/>.
         /// </summary>
-        public EndpointVisibility Visibility { get; }
+        public EndpointVisibility Visibility { get; }
 
         /// <summary>
         /// Gets the actual <see cref="EndpointConfiguration">configuration</see> for the <see cref="Endpoint"/>.
         /// </summary>
-        public EndpointConfiguration Configuration { get; }
+        public EndpointConfiguration Configuration { get; }
     }
 }

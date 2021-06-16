@@ -59,6 +59,6 @@ namespace Dolittle.Runtime.Serialization.Protobuf
             var data = hasher.ComputeHash(Encoding.UTF8.GetBytes(Property.Name));
             return BitConverter.ToInt16(data, 0);
 #pragma warning restore CA5351
-            }
+        }
     }
 }

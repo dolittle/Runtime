@@ -42,11 +42,11 @@ ARG CONFIGURATION=Release
 RUN echo Configuration = $CONFIGURATION
 
 RUN if [ "$CONFIGURATION" = "Debug" ] ; then apt-get update && \
-    apt-get install -y --no-install-recommends unzip procps && \
+    apt-get install -y --no-install-recommends unzip procps curl && \
     rm -rf /var/lib/apt/lists/* \
     ; fi
 
-RUN if [ "$CONFIGURATION" = "debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
+RUN if [ "$CONFIGURATION" = "Debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
 RUN apt-get update && apt-get install -y libc-dev
 
 WORKDIR /app

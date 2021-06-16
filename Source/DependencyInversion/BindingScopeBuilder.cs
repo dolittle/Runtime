@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.DependencyInversion
 
         /// <inheritdoc/>
         public void Singleton()
-            =>  _binding = new Binding(
+            => _binding = new Binding(
                     _binding.Service,
                     _binding.Strategy,
                     new Scopes.Singleton());

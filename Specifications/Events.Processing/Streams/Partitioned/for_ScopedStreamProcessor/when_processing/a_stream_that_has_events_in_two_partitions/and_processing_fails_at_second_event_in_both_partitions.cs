@@ -30,10 +30,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
             third_event = new StreamEvent(committed_events.single(), 2u, Guid.NewGuid(), first_partition_id, true);
             fourth_event = new StreamEvent(committed_events.single(), 3u, Guid.NewGuid(), second_partition_id, true);
             event_processor
-                .Setup(_ => _.Process(Moq.It.Is<CommittedEvent>(_ => _ == first_event.Event || _ == second_event.Event), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.Process(Moq.It.Is<CommittedEvent>(_ => _ == first_event.Event || _ == second_event.Event), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
             event_processor
-                .Setup(_ => _.Process(Moq.It.Is<CommittedEvent>(_ => _ == third_event.Event || _ == fourth_event.Event), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.Process(Moq.It.Is<CommittedEvent>(_ => _ == third_event.Event || _ == fourth_event.Event), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
             events_fetcher
                 .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
