@@ -1,35 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Prometheus;
-
 namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
-    /// Defines the metrics related to the <see cref="IEventStore"/>.
+    /// Defines a system for collecting metrics about event store.
     /// </summary>
-    public interface IMetrics
+    public interface IMetricsCollector
     {
-        /// <summary>
-        /// Gets the counter used for counting number of committed events.
-        /// </summary>
-        Counter CommittedEvents { get; }
-
-        /// <summary>
-        /// Gets the counter used for counting number of committed aggregate events and committed events.
-        /// </summary>
-        Counter CommittedAggregateEvents { get; }
-
-        /// <summary>
-        /// Gets the counter used for counting number of failed committed events.
-        /// </summary>
-        Counter FailedEvents { get; }
-
-        /// <summary>
-        /// Gets the counter used for counting number of failed committed aggregate events.
-        /// </summary>
-        Counter FailedAggregateEvents { get; }
-
         /// <summary>
         /// Increment number of failed uncommitted events based on an event for labelling.
         /// </summary>
@@ -46,13 +24,13 @@ namespace Dolittle.Runtime.Events.Store
         /// Increment number of committed events based on an event for labelling.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvents"/> used for labelling.</param>
-        void IncrementCommittedEvents(CommittedEvents @event);
+        void IncrementCommittedEvents(CommittedEvents events);
 
         /// <summary>
         /// Increment number of committed aggregate events and committed events based on an
         /// event for labelling.
         /// </summary>
-        /// <param name="event">The <see cref="CommittedAggregateEvents"/> used for labelling.</param>
-        void IncrementCommittedAggregateEvents(CommittedAggregateEvents @event);
+        /// <param name="events">The <see cref="CommittedAggregateEvents"/> used for labelling.</param>
+        void IncrementCommittedAggregateEvents(CommittedAggregateEvents events);
     }
 }
