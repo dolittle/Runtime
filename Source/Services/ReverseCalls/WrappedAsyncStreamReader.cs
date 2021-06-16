@@ -101,7 +101,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                     FetchReverseCallArgumentsContextFromFirstMessage(_originalStream.Current);
                     return true;
                 }
-                
+
                 ReverseCallArgumentsNotReceivedBecauseNoFirstMessage();
                 return false;
             }

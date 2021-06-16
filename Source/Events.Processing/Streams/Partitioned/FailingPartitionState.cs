@@ -6,7 +6,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
 {
-     /// <summary>
+    /// <summary>
     /// Represents the state of a failing partition.
     /// </summary>
     /// <param name="Position">The <see cref="StreamPosition" />.</param>

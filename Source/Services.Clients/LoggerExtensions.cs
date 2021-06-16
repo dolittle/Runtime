@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Services.Clients
 {
     internal static class LoggerExtensions
     {
-#region ReverseCallClient
+        #region ReverseCallClient
 
         static readonly Action<ILogger, Exception> _startingConnection = LoggerMessage.Define(
             LogLevel.Debug,
@@ -184,6 +184,6 @@ namespace Dolittle.Runtime.Services.Clients
             "Wrote message of {Type}, it took {WriteTime} and was {MessageSize} bytes");
         internal static void WroteMessage(this ILogger logger, Type messageType, TimeSpan writeTime, int messageSize)
             => _wroteMessage(logger, messageType, writeTime, messageSize, null);
-#endregion
+        #endregion
     }
 }

@@ -3,20 +3,20 @@ name: Documentation
 on:
   push:
     branches:
-    - master
-    - main
+      - master
+      - main
     paths:
-    - 'Documentation/**'
+      - "Documentation/**"
 
 jobs:
   trigger-documentation:
     name: Trigger Documentation
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Repository Dispatch
-      uses: peter-evans/repository-dispatch@v1.1.3
-      with:
-        token: ${{ secrets.BUILD_PAT }}
-        repository: dolittle/Documentation
-        event-type: runtime-documentation
+      - uses: actions/checkout@v2
+      - name: Repository Dispatch
+        uses: peter-evans/repository-dispatch@v1.1.3
+        with:
+          token: ${{ secrets.BUILD_PAT }}
+          repository: dolittle/Documentation
+          event-type: runtime-documentation

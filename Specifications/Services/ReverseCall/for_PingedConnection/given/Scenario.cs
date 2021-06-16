@@ -171,7 +171,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
                     _steps[currentStepIndex].Execute(this);
                     currentStepIndex++;
                 }
-                time ++;
+                time++;
             }
             _nextPendingMessage.SetResult(new(false, null));
 

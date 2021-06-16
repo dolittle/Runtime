@@ -14,5 +14,5 @@ namespace Dolittle.Runtime.Services.Clients
     /// <typeparam name="TRequest">The type of the requests.</typeparam>
     /// <typeparam name="TResponse">The expected type of the responses.</typeparam>
     /// <returns>A task that, when resolved returns the result of the request.</returns>
-    public delegate Task<TResponse> ReverseCallHandler<TRequest,TResponse>(TRequest request, CancellationToken cancellationToken);
+    public delegate Task<TResponse> ReverseCallHandler<TRequest, TResponse>(TRequest request, CancellationToken cancellationToken);
 }

@@ -11,7 +11,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
     {
         Establish context = () =>
         {
-            scenario = Scenario.New(_ => {
+            scenario = Scenario.New(_ =>
+            {
                 _.Receive.Message(first_message_with_5_second_pings).AtTime(6);
             });
         };

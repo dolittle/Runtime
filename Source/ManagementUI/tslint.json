@@ -1,17 +1,27 @@
 {
-  "defaultSeverity": "error",
-  "extends": [
-      "tslint:recommended"
-  ],
-  "jsRules": {},
-  "rules": {
-    "member-access": [true, "no-public"],
-    "variable-name": [true, "check-format", "allow-leading-underscore"],
-    "trailing-comma": false,
-    "quotemark": [true, "single"],
-    "interface-name":false,
-    "object-literal-sort-keys": false,
-    "max-line-length": false
-  },
-  "rulesDirectory": []
+    "defaultSeverity": "error",
+    "extends": [
+        "tslint:recommended"
+    ],
+    "jsRules": {},
+    "rules": {
+        "member-access": [
+            true,
+            "no-public"
+        ],
+        "variable-name": [
+            true,
+            "check-format",
+            "allow-leading-underscore"
+        ],
+        "trailing-comma": false,
+        "quotemark": [
+            true,
+            "single"
+        ],
+        "interface-name": false,
+        "object-literal-sort-keys": false,
+        "max-line-length": false
+    },
+    "rulesDirectory": []
 }

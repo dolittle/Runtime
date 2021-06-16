@@ -38,6 +38,6 @@ namespace Dolittle.Runtime.Services.Clients
         /// <param name="callback">The <see cref="ReverseCallHandler{TRequest, TResponse}"/> for requests coming from server.</param>
         /// <param name="token">Optional. A <see cref="CancellationToken" /> to cancel the operation.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task Handle(ReverseCallHandler<TRequest,TResponse> callback, CancellationToken token);
+        Task Handle(ReverseCallHandler<TRequest, TResponse> callback, CancellationToken token);
     }
 }

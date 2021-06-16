@@ -13,16 +13,16 @@ namespace Dolittle.Runtime.Services
         /// <summary>
         /// Gets the identifier of the <see cref="ServiceType"/>.
         /// </summary>
-        ServiceType Identifier { get; }
+        ServiceType Identifier { get; }
 
         /// <summary>
         /// Gets the binding interface, must implement <see cref="ICanBindServices"/>.
         /// </summary>
-        Type BindingInterface { get; }
+        Type BindingInterface { get; }
 
         /// <summary>
         /// Gets the <see cref="EndpointVisibility">type of endpoint</see> this is.
         /// </summary>
-        EndpointVisibility Visibility { get; }
+        EndpointVisibility Visibility { get; }
     }
 }

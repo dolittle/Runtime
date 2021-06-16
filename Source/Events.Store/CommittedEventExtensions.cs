@@ -23,19 +23,19 @@ namespace Dolittle.Runtime.Events.Store
             @event is CommittedExternalEvent externalEvent ?
                 externalEvent.ToProtobuf()
                 : new()
+                {
+                    EventLogSequenceNumber = @event.EventLogSequenceNumber,
+                    Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
+                    EventSourceId = @event.EventSource.ToProtobuf(),
+                    ExecutionContext = @event.ExecutionContext.ToProtobuf(),
+                    Type = new ArtifactsContracts.Artifact
                     {
-                        EventLogSequenceNumber = @event.EventLogSequenceNumber,
-                        Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-                        EventSourceId = @event.EventSource.ToProtobuf(),
-                        ExecutionContext = @event.ExecutionContext.ToProtobuf(),
-                        Type = new ArtifactsContracts.Artifact
-                        {
-                            Id = @event.Type.Id.ToProtobuf(),
-                            Generation = @event.Type.Generation
-                        },
-                        Content = @event.Content,
-                        Public = @event.Public
-                    };
+                        Id = @event.Type.Id.ToProtobuf(),
+                        Generation = @event.Type.Generation
+                    },
+                    Content = @event.Content,
+                    Public = @event.Public
+                };
 
         /// <summary>
         /// Convert to from <see cref="Contracts.CommittedEvent"/> to <see cref="CommittedEvent"/>.

@@ -97,7 +97,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
                 _ => _.Metadata.TypeGeneration);
 
         StreamFetcher<MongoDB.Events.StreamEvent> CreateStreamFetcherForStreamEventCollection(IMongoCollection<Events.StreamEvent> collection, StreamId streamId, bool partitioned) =>
-            new (
+            new(
                 collection,
                 Builders<Events.StreamEvent>.Filter,
                 _ => _.StreamPosition,

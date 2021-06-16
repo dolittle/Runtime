@@ -65,11 +65,11 @@ namespace Dolittle.Runtime.Booting
             while (_stages.Count > 0)
             {
                 var stage = _stages.Dequeue();
-                
+
                 SetupLoggerIfAssociated(aggregatedAssociations);
 
                 var interfaces = stage.GetType().GetInterfaces();
-                
+
                 var isBefore = interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanRunBeforeBootStage<>));
                 var isAfter = interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanRunAfterBootStage<>));
 

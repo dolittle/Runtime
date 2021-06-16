@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvent
 
         Because of = () =>
             @event = new CommittedAggregateEvent(
-                new Artifact(aggregate_root_id,  aggregate_root_generation),
+                new Artifact(aggregate_root_id, aggregate_root_generation),
                 aggregate_root_version,
                 event_log_sequence_number,
                 occurred,

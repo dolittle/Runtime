@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client
                 Task.FromResult(new Metadata()),
                 () => Status.DefaultSuccess,
                 () => new Metadata(),
-                () => {});
+                () => { });
         }
     }
 }

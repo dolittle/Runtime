@@ -43,10 +43,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
             var request = new FilterEventRequest
-                {
-                    Event = @event.ToProtobuf(),
-                    ScopeId = Scope.ToProtobuf()
-                };
+            {
+                Event = @event.ToProtobuf(),
+                ScopeId = Scope.ToProtobuf()
+            };
 
             return Filter(request, cancellationToken);
         }

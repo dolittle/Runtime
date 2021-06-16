@@ -5,7 +5,9 @@
 
 <head>
     <meta charset="utf-8">
-    <title><%- htmlWebpackPlugin.options.metadata.title %></title>
+    <title>
+        <%- htmlWebpackPlugin.options.metadata.title %>
+    </title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="icon" type="image/png" href="${require('./assets/icons/16x16_favicon_darkblue.png')}" sizes="16x16">
     <link rel="icon" type="image/png" href="${require('./assets/icons/32x32_favicon_darkblue.png')}" sizes="32x32">
@@ -21,9 +23,9 @@
 
 <body aurelia-app="main" class="ms-Fabric">
     <% if (htmlWebpackPlugin.options.metadata.server) { %>
-    <!-- Webpack Dev Server reload -->
-    <script src="/webpack-dev-server.js"></script>
-    <% } %>
+        <!-- Webpack Dev Server reload -->
+        <script src="/webpack-dev-server.js"></script>
+        <% } %>
 </body>
 
 </html>
