@@ -14,23 +14,21 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
 {
     public class and_connection_response_changes_once : given.all_dependencies
     {
-        static int connection_calls;
-        static int start_and_wait_calls;
         static ConsentId first_consent;
         static ConsentId second_consent;
         Establish context = () =>
         {
-            connection_calls = 0;
-            start_and_wait_calls = 0;
+            var connect_called = false;
+            var start_and_wait_called = false;
             first_consent = Guid.Parse("1202cfa1-d856-433c-926e-edeab3cb73ab");
             second_consent = Guid.Parse("54a7d0f1-aba1-4f9d-8d10-a795c705c6a6");
             event_horizon_connection
                 .Setup(_ => _.Connect(subscription_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(() =>
                 {
-                    if (connection_calls == 0)
+                    if (!connect_called)
                     {
-                        connection_calls++;
+                        connect_called = true;
                         return Task.FromResult(SubscriptionResponse.Succeeded(first_consent));
                     }
                     return Task.FromResult(SubscriptionResponse.Succeeded(second_consent));
@@ -41,9 +39,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscription.when_starting.
                 .Setup(_ => _.StartAndWait(Moq.It.IsAny<CancellationToken>()))
                 .Returns<CancellationToken>(cancellationToken => Task.Run(async () =>
                 {
-                    if (start_and_wait_calls == 0)
+                    if (!start_and_wait_called)
                     {
-                        start_and_wait_calls++;
+                        start_and_wait_called = true;
                         throw new Exception();
 
                     }
