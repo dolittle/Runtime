@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
@@ -174,21 +175,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <returns>Async <see cref="Task"/>.</returns>
         public async Task RegisterAndStart()
         {
-            if (await RejectIfNonWriteableStream().ConfigureAwait(false))
-            {
-                return;
-            }
-
             _logger.LogDebug($"Connecting Event Handler '{EventProcessor.Value}'");
+            if (await RejectIfNonWriteableStream().ConfigureAwait(false)
+                || !await RegisterFilterStreamProcessor().ConfigureAwait(false)
+                || !await RegisterEventProcessorStreamProcessor().ConfigureAwait(false))
+            {
+                return;
+            }
 
-            if (!await RegisterFilterStreamProcessor().ConfigureAwait(false))
-            {
-                return;
-            }
-            if (!await RegisterEventProcessorStreamProcessor().ConfigureAwait(false))
-            {
-                return;
-            }
             await Start().ConfigureAwait(false);
         }
 
@@ -212,10 +206,25 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             return await RegisterStreamProcessor(
                 new EventLogStreamDefinition(),
                 GetFilterProcessor,
-                () => (FiltersFailures.FailedToRegisterFilter, $"Failed to register Event Handler: {EventProcessor.Value}. Filter already registered."),
-                (ex) => _logger.ErrorWhileRegisteringStreamProcessorForFilter(ex, EventProcessor),
+                HandleFailedToRegisterFilter,
                 (streamProcessor) => FilterStreamProcessor = streamProcessor
             ).ConfigureAwait(false);
+        }
+
+        Failure HandleFailedToRegisterFilter(Exception exception)
+        {
+            _logger.ErrorWhileRegisteringStreamProcessorForFilter(exception, EventProcessor);
+
+            if (exception is StreamProcessorAlreadyRegistered)
+            {
+                _logger.EventHandlerAlreadyRegistered(EventProcessor);
+                return new(
+                    EventHandlersFailures.FailedToRegisterEventHandler,
+                    $"Failed to register Event Handler: {EventProcessor.Value}. Filter already registered");
+            }
+            return new(
+                    EventHandlersFailures.FailedToRegisterEventHandler,
+                    $"Failed to register Event Handler: {EventProcessor.Value}. An error occurred. {exception.Message}");
         }
 
         async Task<bool> RegisterEventProcessorStreamProcessor()
@@ -224,50 +233,48 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             return await RegisterStreamProcessor(
                 FilteredStreamDefinition,
                 GetEventProcessor,
-                () => (FiltersFailures.FailedToRegisterFilter, $"Failed to register Event Handler: {EventProcessor.Value}. Event Processor already registered on Source Stream: '{EventProcessor.Value}'"),
-                (ex) => _logger.ErrorWhileRegisteringStreamProcessorForFilter(ex, EventProcessor),
+                HandleFailedToRegisterEventProcessor,
                 (streamProcessor) => EventProcessorStreamProcessor = streamProcessor
             ).ConfigureAwait(false);
         }
 
-        async Task<bool> RegisterStreamProcessor(IStreamDefinition streamDefinition, FactoryFor<IEventProcessor> getProcessor, Func<(FailureId, string)> onFailure, Action<Exception> onException, Action<StreamProcessor> onStreamProcessor)
+        Failure HandleFailedToRegisterEventProcessor(Exception exception)
         {
-            _logger.RegisteringStreamProcessorForFilter(EventProcessor);
-            try
+            _logger.ErrorWhileRegisteringStreamProcessorForEventProcessor(exception, EventProcessor);
+
+            if (exception is StreamProcessorAlreadyRegistered)
             {
-                var success = _streamProcessors.TryRegister(
-                    Scope,
-                    EventProcessor,
-                    streamDefinition,
-                    getProcessor,
-                    _cancellationTokenSource.Token,
-                    out var streamProcessor);
-
-                onStreamProcessor(streamProcessor);
-
-                if (!success)
-                {
-                    _logger.EventHandlerAlreadyRegistered(EventProcessor);
-                    var (failure, message) = onFailure();
-                    await Fail(
-                        failure,
-                        message).ConfigureAwait(false);
-                }
-
-                return success;
+                _logger.EventHandlerAlreadyRegisteredOnSourceStream(EventProcessor);
+                return new(
+                    EventHandlersFailures.FailedToRegisterEventHandler,
+                    $"Failed to register Event Handler: {EventProcessor.Value}. Event Processor already registered on Source Stream: '{EventProcessor.Value}'");
             }
-            catch (Exception ex)
+            return new(
+                    EventHandlersFailures.FailedToRegisterEventHandler,
+                    $"Failed to register Event Handler: {EventProcessor.Value}. An error occurred. {exception.Message}");
+        }
+
+        async Task<bool> RegisterStreamProcessor(
+            IStreamDefinition streamDefinition,
+            FactoryFor<IEventProcessor> getProcessor,
+            Func<Exception, Failure> onException,
+            Action<StreamProcessor> onStreamProcessor)
+        {
+            var streamProcessor = _streamProcessors.TryCreateAndRegister(
+                Scope,
+                EventProcessor,
+                streamDefinition,
+                getProcessor,
+                _cancellationTokenSource.Token);
+
+            onStreamProcessor(streamProcessor);
+
+            if (!streamProcessor.Success)
             {
-                if (!_cancellationTokenSource.Token.IsCancellationRequested)
-                {
-                    onException(ex);
-                }
-
-                _logger.ErrorWhileRegisteringEventHandler(ex, EventProcessor);
-                ExceptionDispatchInfo.Capture(ex).Throw();
-
-                return false;
+                await Fail(onException(streamProcessor.Exception)).ConfigureAwait(false);
             }
+
+            return streamProcessor.Success;
         }
 
         async Task Start()
@@ -314,9 +321,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _logger.ValidatingFilter(FilterDefinition.TargetStream);
             var filterValidationResults = await _filterValidator.Validate(GetFilterProcessor, _cancellationTokenSource.Token).ConfigureAwait(false);
 
-            if (filterValidationResults.Any(_ => !_.Value.Succeeded))
+            if (filterValidationResults.Any(_ => !_.Value.Success))
             {
-                var firstFailedValidation = filterValidationResults.First(_ => !_.Value.Succeeded).Value;
+                var firstFailedValidation = filterValidationResults.First(_ => !_.Value.Success).Value;
                 _logger.FilterValidationFailed(FilterDefinition.TargetStream, firstFailedValidation.FailureReason);
                 throw new FilterValidationFailed(FilterDefinition.TargetStream, firstFailedValidation.FailureReason);
             }
@@ -327,27 +334,23 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         }
 
         IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> GetFilterProcessor()
-        {
-            return new TypeFilterWithEventSourcePartition(
+            => new TypeFilterWithEventSourcePartition(
                     Scope,
                     FilterDefinition,
                     _getEventsToStreamsWriter(),
                     _loggerFactory.CreateLogger<TypeFilterWithEventSourcePartition>());
-        }
 
         IEventProcessor GetEventProcessor()
-        {
-            return new EventProcessor(
+            => new EventProcessor(
                     Scope,
                     EventProcessor,
                     _dispatcher,
                     _loggerFactory.CreateLogger<EventProcessor>());
-        }
 
-        async Task Fail(FailureId failureId, string message)
-        {
-            var failure = new Failure(failureId, message);
-            await _dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, _cancellationTokenSource.Token).ConfigureAwait(false);
-        }
+        Task Fail(FailureId failureId, string message)
+            => Fail(new Failure(failureId, message));
+
+        Task Fail(Failure failure)
+            => _dispatcher.Reject(new EventHandlerRegistrationResponse { Failure = failure }, _cancellationTokenSource.Token);
     }
 }
