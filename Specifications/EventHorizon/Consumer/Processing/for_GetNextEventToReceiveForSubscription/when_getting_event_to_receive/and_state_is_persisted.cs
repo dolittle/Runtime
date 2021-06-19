@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_GetNextEventToRe
             subscription_state = new StreamProcessorState(4, DateTimeOffset.UtcNow);
             stream_processor_states
                 .Setup(_ => _.TryGetFor(subscription_id, cancellation_token))
-                .Returns(Task.FromResult(new Try<IStreamProcessorState>(true, subscription_state)));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(subscription_state)));
         };
         static StreamPosition result;
         Because of = () => result = get_next_event.GetNextEventToReceiveFor(subscription_id, cancellation_token).GetAwaiter().GetResult();

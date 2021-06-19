@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
                 reverse_call_dispatcher.Object,
                 arguments,
                 factory_for_stream_writer,
-                logger_factory.Object,
+                logger_factory,
                 cancellation_token
             );
         };
