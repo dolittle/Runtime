@@ -36,5 +36,8 @@
             }
         }
     },
-    "required": ["interaction", "management"]
+    "required": [
+        "interaction",
+        "management"
+    ]
 }

@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Protobuf
         /// </summary>
         /// <param name="failureReason"><see cref="string" /> to convert.</param>
         public static implicit operator FailureReason(string failureReason) => new(failureReason);
-        
+
         /// <summary>
         /// Implicitly converts <see cref="FailureReason" /> to <see cref="string" />.
         /// </summary>

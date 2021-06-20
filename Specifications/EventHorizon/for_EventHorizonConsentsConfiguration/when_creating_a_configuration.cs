@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.EventHorizon.for_EventHorizonConsentsConfiguration
 
         Because of = () => result = new EventHorizonConsentsConfiguration(new Dictionary<Guid, IEnumerable<EventHorizonConsentConfiguration>>()
             {
-                
+
                 {
                     producer_tenant,
                     new[]

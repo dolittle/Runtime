@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Initializes a new instance of the <see cref="SubscriptionResponse"/> class.
         /// </summary>
         /// <param name="consentId">The <see cref="ConsentId" />.</param>
-        protected SubscriptionResponse(ConsentId consentId)
+        SubscriptionResponse(ConsentId consentId)
         {
             Success = true;
             ConsentId = consentId;
@@ -25,7 +25,22 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         /// Initializes a new instance of the <see cref="SubscriptionResponse"/> class.
         /// </summary>
         /// <param name="failure">The <see cref="Failure"/>.</param>
-        protected SubscriptionResponse(Failure failure) => Failure = failure;
+        SubscriptionResponse(Failure failure) => Failure = failure;
+
+
+        /// <summary>
+        /// Creates a succeeded <see cref="SubscriptionResponse" />.
+        /// </summary>
+        /// <param name="consent">The <see cref="ConsentId" />.</param>
+        /// <returns>The <see cref="SubscriptionResponse" />.</returns>
+        public static SubscriptionResponse Succeeded(ConsentId consent) => new(consent);
+
+        /// <summary>
+        /// Creates a failed <see cref="SubscriptionResponse" />.
+        /// </summary>
+        /// <param name="failure">The <see cref="Failure" />.</param>
+        /// <returns>The <see cref="SubscriptionResponse" />.</returns>
+        public static SubscriptionResponse Failed(Failure failure) => new(failure);
 
         /// <summary>
         /// Gets a value indicating whether the subscription is fine.

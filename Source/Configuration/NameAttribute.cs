@@ -27,6 +27,6 @@ namespace Dolittle.Runtime.Configuration
         /// <summary>
         /// Gets the name to be associated with the <see cref="IConfigurationObject"/>.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; }
     }
 }

@@ -62,15 +62,15 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
 
         object InstantiateBinding(IActivationStrategy strategy, Type type)
             => strategy switch
-                {
-                    Strategies.Constant constant => constant.Target,
-                    Strategies.Callback callback => callback.Target(),
-                    Strategies.CallbackWithBindingContext callback => callback.Target(new BindingContext(type)),
-                    Strategies.Type typeConstant => Get(typeConstant.Target),
-                    Strategies.TypeCallback typeCallback => Get(typeCallback.Target()),
-                    Strategies.TypeCallbackWithBindingContext typeCallback => Get(typeCallback.Target(new BindingContext(type))),
-                    _ => null
-                };
+            {
+                Strategies.Constant constant => constant.Target,
+                Strategies.Callback callback => callback.Target(),
+                Strategies.CallbackWithBindingContext callback => callback.Target(new BindingContext(type)),
+                Strategies.Type typeConstant => Get(typeConstant.Target),
+                Strategies.TypeCallback typeCallback => Get(typeCallback.Target()),
+                Strategies.TypeCallbackWithBindingContext typeCallback => Get(typeCallback.Target(new BindingContext(type))),
+                _ => null
+            };
 
         object Create(Type type)
         {

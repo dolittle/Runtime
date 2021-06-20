@@ -36,14 +36,14 @@ namespace Dolittle.Runtime.Services
         /// Sets the <typeparamref name="TConnectResponse"/> in a <typeparamref name="TServerMessage"/>.
         /// </summary>
         /// <param name="arguments">The <typeparamref name="TConnectResponse"/> to set.</param>
-        /// <param name="message">The <typeparamref name="TServerMessage"/> to set the arguments in.</param>
+        /// <param name="message">The <typeparamref name="TServerMessage"/> to set the response in.</param>
         void SetConnectResponse(TConnectResponse arguments, TServerMessage message);
 
         /// <summary>
         /// Sets the <typeparamref name="TRequest"/> in a <typeparamref name="TServerMessage"/>.
         /// </summary>
-        /// <param name="request">The <typeparamref name="TRequest"/>.</param>
-        /// <param name="message">The <typeparamref name="TServerMessage"/>.</param>
+        /// <param name="request">The <typeparamref name="TRequest"/> to set.</param>
+        /// <param name="message">The <typeparamref name="TServerMessage"/> to set the request in.</param>
         void SetRequest(TRequest request, TServerMessage message);
 
         /// <summary>

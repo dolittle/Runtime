@@ -13,16 +13,16 @@ using RuntimeArtifact = Dolittle.Runtime.Artifacts.Artifact;
 
 namespace Dolittle.Runtime.Events.Store.Services.WebAPI
 {
-     public record ExecutionContext(
-        Guid Microservice,
-        Guid Tenant,
-        Versioning.Version Version,
-        string Environment,
-        Guid CorrelationId,
-        Claim[] Claims)
+    public record ExecutionContext(
+       Guid Microservice,
+       Guid Tenant,
+       Versioning.Version Version,
+       string Environment,
+       Guid CorrelationId,
+       Claim[] Claims)
     {
         public RuntimeExecutionContext ToExecutionContext()
-            => new (
+            => new(
                 Microservice,
                 Tenant,
                 Version,
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
                 new Claims(Claims),
                 CultureInfo.InvariantCulture);
         public static ExecutionContext From(RuntimeExecutionContext executionContext)
-            => new (
+            => new(
                 executionContext.Microservice,
                 executionContext.Tenant,
                 executionContext.Version,
@@ -45,22 +45,22 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
     public record Artifact(Guid Id, uint Generation)
     {
         public RuntimeArtifact ToArtifact()
-            => new (Id, Generation);
-        
+            => new(Id, Generation);
+
         public static Artifact From(RuntimeArtifact artifact)
-            => new (artifact.Id, artifact.Generation);
+            => new(artifact.Id, artifact.Generation);
     }
 
     public record JsonRequestUncommittedEvent(Guid EventSource, Artifact Type, bool Public, string Content)
     {
         public UncommittedEvent ToUncommittedEvent()
-            => new (EventSource, Type.ToArtifact(), Public, Content);
+            => new(EventSource, Type.ToArtifact(), Public, Content);
     }
 
     public record JsonRequestUncommittedAggregateEvent(Artifact Type, bool Public, string Content)
     {
         public UncommittedEvent ToUncommittedEvent(EventSourceId eventSource)
-            => new (eventSource, Type.ToArtifact(), Public, Content);
+            => new(eventSource, Type.ToArtifact(), Public, Content);
     }
 
     public record JsonRequestUncommittedAggregateEvents(
@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
         JsonRequestUncommittedAggregateEvent[] Events)
     {
         public UncommittedAggregateEvents ToUncommittedAggregateEvents()
-            => new (
+            => new(
                 EventSource,
                 new RuntimeArtifact(AggregateRoot, ArtifactGeneration.First),
                 AggregateRootVersion,

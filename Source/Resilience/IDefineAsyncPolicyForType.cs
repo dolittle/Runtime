@@ -13,6 +13,6 @@ namespace Dolittle.Runtime.Resilience
         /// <summary>
         /// Gets the type it can define for.
         /// </summary>
-        Type Type { get; }
+        Type Type { get; }
     }
 }

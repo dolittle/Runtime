@@ -19,7 +19,7 @@
         <NitoAsyncVersion>5.1.0</NitoAsyncVersion>
         <ProtobufVersion>3.14.0</ProtobufVersion>
         <PollyVersion>7.2.0</PollyVersion>
-        <PrometheusVersion>3.3.0</PrometheusVersion>
+        <PrometheusVersion>4.1.1</PrometheusVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
         <SystemReactiveVersion>4.4.1</SystemReactiveVersion>

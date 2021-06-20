@@ -16,6 +16,6 @@ namespace Dolittle.Runtime.Metrics
         /// </summary>
         /// <param name="metricFactory"><see cref="IMetricFactory"/> for creating collectors.</param>
         /// <returns>Collection of <see cref="Collector">collectors</see>.</returns>
-        IEnumerable<Collector> Provide(IMetricFactory metricFactory);
+        IEnumerable<Collector> Provide(Metrics.IMetricFactory metricFactory);
     }
 }
