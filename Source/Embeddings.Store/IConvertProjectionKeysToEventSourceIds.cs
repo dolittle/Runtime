@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Embeddings.Store
     public interface IConvertProjectionKeysToEventSourceIds
     {
         /// <summary>
-        /// Gets the correspoing event source id for the given projection key.
+        /// Gets the corresponding event source id for the given projection key.
         /// </summary>
         /// <param name="key">The <see cref="ProjectionKey"/> to convert.</param>
         /// <returns>The <see cref="EventSourceId"/> that corresponds to the provided key.</returns>

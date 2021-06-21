@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Embeddings.Store
         /// <param name="version">The <see cref="AggregateRootVersion"/> corresponding to this state.</param>
         /// <param name="state">The new projection state.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// /// <returns>A <see cref="Task" /> that, when resolved, returns value indicating whether the state was successfully replaced.</returns>
+        /// <returns>A <see cref="Task" /> that, when resolved, returns value indicating whether the state was successfully replaced.</returns>
         Task<Try> TryReplace(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, ProjectionState state, CancellationToken cancellationToken);
 
         /// <summary>
