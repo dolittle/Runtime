@@ -59,6 +59,6 @@ namespace Dolittle.Runtime.Embeddings.Store.State
         /// <param name="embedding">The embedding id.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns value indicating whether the embedding collection was successfully dropped.</returns>
-        Task<bool> TryDrop(EmbeddingId embedding, CancellationToken token);
+        Task<Try> TryDrop(EmbeddingId embedding, CancellationToken token);
     }
 }

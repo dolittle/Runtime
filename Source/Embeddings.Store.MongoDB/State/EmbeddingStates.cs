@@ -146,7 +146,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                         var updateDefinition = Builders<Embedding>
                                                 .Update
                                                 .Set(_ => _.Content, BsonDocument.Parse(state.State))
-                                                .Set(_ => _.ContentRaw, state.State)
+                                                .Set(_ => _.ContentRaw, state.State.Value)
                                                 .Set(_ => _.Version, state.Version.Value);
                         var updateResult = await collection
                             .UpdateOneAsync(
@@ -170,7 +170,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryDrop(EmbeddingId embedding, CancellationToken token)
+        public async Task<Try> TryDrop(EmbeddingId embedding, CancellationToken token)
         {
             try
             {
@@ -184,11 +184,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                         return deleteResult.IsAcknowledged;
                     },
                     token).ConfigureAwait(false);
-                return true;
-            }
-            catch (MongoWaitQueueFullException)
-            {
-                return false;
+                return Try.Succeeded();
             }
             catch (Exception ex)
             {

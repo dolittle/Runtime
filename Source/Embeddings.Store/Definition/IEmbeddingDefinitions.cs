@@ -26,6 +26,6 @@ namespace Dolittle.Runtime.Embeddings.Store.Definition
         /// <param name="definition">The <see cref="EmbeddingDefinition" />.</param>
         /// <param name="token">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns a value indicating whether the new state was persisted.</returns>
-        Task<bool> TryPersist(EmbeddingDefinition definition, CancellationToken token);
+        Task<Try<bool>> TryPersist(EmbeddingDefinition definition, CancellationToken token);
     }
 }

@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
         }
 
         /// <inheritdoc/>
-        public async Task<bool> TryPersist(Store.Definition.EmbeddingDefinition definition, CancellationToken token)
+        public async Task<Try<bool>> TryPersist(Store.Definition.EmbeddingDefinition definition, CancellationToken token)
         {
             try
             {
@@ -73,10 +73,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                         return updateResult.IsAcknowledged;
                     },
                     token).ConfigureAwait(false);
-            }
-            catch (MongoWaitQueueFullException)
-            {
-                return false;
             }
             catch (Exception ex)
             {
