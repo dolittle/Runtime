@@ -37,6 +37,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
         protected static Mock<IEmbeddingProcessorFactory> embedding_processor_factory;
         protected static Mock<IEmbeddingProcessors> embedding_processors;
         protected static Mock<IEmbeddingProcessor> embedding_processor;
+        protected static Mock<IEmbeddingRequestFactory> embedding_request_factory;
         protected static ILoggerFactory logger_factory;
         protected static EmbeddingsService embedding_service;
         protected static IEmbeddingsProtocol protocol;
@@ -87,7 +88,15 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
             embedding_processors = new Mock<IEmbeddingProcessors>();
             embedding_processor = new Mock<IEmbeddingProcessor>();
             protocol = new EmbeddingsProtocol();
-            embedding_service = new EmbeddingsService(application_lifetime.Object, execution_context_manager.Object, reverse_call_services.Object, protocol, embedding_processor_factory.Object, embedding_processors.Object, Mock.Of<ILogger<EmbeddingsService>>());
+            embedding_request_factory = new Mock<IEmbeddingRequestFactory>();
+            embedding_service = new EmbeddingsService(
+                application_lifetime.Object,
+                execution_context_manager.Object,
+                reverse_call_services.Object, protocol,
+                embedding_processor_factory.Object,
+                embedding_processors.Object,
+                embedding_request_factory.Object,
+                Mock.Of<ILogger<EmbeddingsService>>());
             dispatcher = new Mock<IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>>();
             runtime_stream = new Mock<IAsyncStreamReader<EmbeddingClientToRuntimeMessage>>();
             client_stream = new Mock<IServerStreamWriter<EmbeddingRuntimeToClientMessage>>();

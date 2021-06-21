@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Assemblies
     /// </remarks>
     public class PackageRuntimeShareAssemblyResolver : ICompilationAssemblyResolver
     {
-        static readonly VersionConverter _versionConverter = new VersionConverter();
+        static readonly VersionConverter _versionConverter = new();
 
         /// <inheritdoc/>
         public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)
