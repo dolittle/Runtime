@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Reflection
         /// <summary>
         /// Gets a singleton instance of the TypeInfo.
         /// </summary>
-        public static readonly TypeInfo<T> Instance = new TypeInfo<T>();
+        public static readonly TypeInfo<T> Instance = new();
 
         TypeInfo()
         {

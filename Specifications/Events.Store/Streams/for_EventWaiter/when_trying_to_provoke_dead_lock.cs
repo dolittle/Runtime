@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter
 
         Because of = () =>
         {
-            // while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(50);
             token_source.CancelAfter(TimeSpan.FromSeconds(3));
             try
             {

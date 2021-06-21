@@ -3,6 +3,7 @@
 
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Projections.Store.State;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -15,8 +16,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// Creates an <see cref="IEmbeddingProcessor" />.
         /// </summary>
         /// <param name="tenant">The tenant identifier.</param>
-        /// <param name="embedding">The embedding identifier.</param>
+        /// <param name="embeddingId">The embedding identifier.</param>
+        /// <param name="embedding">The embedding.</param>
         /// <returns>The created <see cref="IEmbeddingProcessor" />.</returns>
-        IEmbeddingProcessor Create(TenantId tenant, EmbeddingId embedding);
+        IEmbeddingProcessor Create(TenantId tenant, EmbeddingId embeddingId, IEmbedding embedding, ProjectionState initialState);
     }
 }

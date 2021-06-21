@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly IEmbeddingsProtocol _protocol;
         readonly IEmbeddingProcessorFactory _embeddingProcessorFactory;
         readonly IEmbeddingProcessors _embeddingProcessors;
+        readonly IEmbeddingRequestFactory _embeddingRequestFactory;
         readonly ILogger _logger;
         readonly IHostApplicationLifetime _hostApplicationLifetime;
 
@@ -51,6 +52,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             IEmbeddingsProtocol protocol,
             IEmbeddingProcessorFactory embeddingProcessorFactory,
             IEmbeddingProcessors embeddingProcessors,
+            IEmbeddingRequestFactory embeddingRequestFactory,
             ILogger<EmbeddingsService> logger)
         {
             _hostApplicationLifetime = hostApplicationLifetime;
@@ -59,6 +61,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _protocol = protocol;
             _embeddingProcessorFactory = embeddingProcessorFactory;
             _embeddingProcessors = embeddingProcessors;
+            _embeddingRequestFactory = embeddingRequestFactory;
             _logger = logger;
         }
 
@@ -89,7 +92,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
             var dispatcherTask = dispatcher.Accept(new EmbeddingRegistrationResponse(), cts.Token);
             var processorTask = _embeddingProcessors.TryStartEmbeddingProcessorForAllTenants(
                 arguments.EmbeddingId,
-                tenant => _embeddingProcessorFactory.Create(tenant, arguments.EmbeddingId),
+                tenant => _embeddingProcessorFactory.Create(
+                    tenant,
+                    arguments.EmbeddingId,
+                    new Embedding(arguments.EmbeddingId, dispatcher, _embeddingRequestFactory),
+                arguments.InitialState),
                 cts.Token);
             var tasks = new[] { dispatcherTask, processorTask };
 

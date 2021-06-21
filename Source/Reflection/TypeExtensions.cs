@@ -13,22 +13,29 @@ namespace Dolittle.Runtime.Reflection
     /// </summary>
     public static class TypeExtensions
     {
-        static readonly HashSet<Type> _additionalPrimitiveTypes = new HashSet<Type>
-            {
-                typeof(decimal),
-                typeof(string),
-                typeof(Guid),
-                typeof(DateTime),
-                typeof(DateTimeOffset),
-                typeof(TimeSpan)
-            };
-
-        static readonly HashSet<Type> _numericTypes = new HashSet<Type>
+        static readonly HashSet<Type> _additionalPrimitiveTypes = new()
         {
-            typeof(byte), typeof(sbyte),
-            typeof(short), typeof(int), typeof(long),
-            typeof(ushort), typeof(uint), typeof(ulong),
-            typeof(double), typeof(decimal), typeof(float)
+            typeof(decimal),
+            typeof(string),
+            typeof(Guid),
+            typeof(DateTime),
+            typeof(DateTimeOffset),
+            typeof(TimeSpan)
+        };
+
+        static readonly HashSet<Type> _numericTypes = new()
+        {
+            typeof(byte),
+            typeof(sbyte),
+            typeof(short),
+            typeof(int),
+            typeof(long),
+            typeof(ushort),
+            typeof(uint),
+            typeof(ulong),
+            typeof(double),
+            typeof(decimal),
+            typeof(float)
         };
 
         /// <summary>
@@ -144,7 +151,10 @@ namespace Dolittle.Runtime.Reflection
         /// <returns>Settable <see cref="PropertyInfo">properties</see>.</returns>
         public static PropertyInfo[] GetSettableProperties(this Type type)
         {
-            return type.GetProperties(BindingFlags.Public | BindingFlags.Instance).Where(p => p.CanWrite).ToArray();
+            return type
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .Where(p => p.CanWrite)
+                .ToArray();
         }
 
         /// <summary>
@@ -194,7 +204,10 @@ namespace Dolittle.Runtime.Reflection
         /// <returns>True if the type implements the interface, false if not.</returns>
         public static bool HasInterface(this Type type, Type interfaceType)
         {
-            return type.GetTypeInfo().ImplementedInterfaces.Count(t => $"{t.Namespace}.{t.Name}" == $"{interfaceType.Namespace}.{interfaceType.Name}") == 1;
+            return type
+                    .GetTypeInfo()
+                    .ImplementedInterfaces
+                    .Count(t => $"{t.Namespace}.{t.Name}" == $"{interfaceType.Namespace}.{interfaceType.Name}") == 1;
         }
 
         /// <summary>
