@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
     [Singleton]
     public class ConvertEmbeddingDefinition : IConvertEmbeddingDefinition
     {
+        /// <inheritdoc/>
         public Store.Definition.EmbeddingDefinition ToRuntime(EmbeddingDefinition definition)
             => new(
                 definition.Embedding,
@@ -22,6 +23,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                     _.EventKeySelectorType,
                     _.EventKeySelectorExpression)),
                 definition.InitialStateRaw);
+
+        /// <inheritdoc/>
         public EmbeddingDefinition ToStored(Store.Definition.EmbeddingDefinition definition)
             => new()
             {

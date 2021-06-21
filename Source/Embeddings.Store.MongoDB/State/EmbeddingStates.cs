@@ -124,6 +124,10 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
             {
                 return false;
             }
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
         /// <inheritdoc/>
@@ -159,6 +163,10 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
             {
                 return false;
             }
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
         /// <inheritdoc/>
@@ -181,6 +189,10 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
             catch (MongoWaitQueueFullException)
             {
                 return false;
+            }
+            catch (Exception ex)
+            {
+                return ex;
             }
         }
 

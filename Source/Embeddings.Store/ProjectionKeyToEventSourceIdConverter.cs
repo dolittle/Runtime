@@ -15,11 +15,14 @@ namespace Dolittle.Runtime.Embeddings.Store
     /// </summary>
     public class ProjectionKeyToEventSourceIdConverter : IConvertProjectionKeysToEventSourceIds
     {
-        const int _eventSourceIdBitLength = 128; 
+        const int _eventSourceIdBitLength = 128;
 
         readonly Encoding _encoding;
         readonly ICityHash _hasher;
 
+        /// <summary>
+        /// Initializes an instance of the <see cref="ProjectionKeyToEventSourceIdConverter" /> class.
+        /// </summary>
         public ProjectionKeyToEventSourceIdConverter()
         {
             _encoding = Encoding.Unicode;

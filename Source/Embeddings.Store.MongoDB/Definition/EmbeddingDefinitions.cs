@@ -20,12 +20,18 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
         readonly IEmbeddings _embeddings;
         readonly IConvertEmbeddingDefinition _definitionConverter;
 
+        /// <summary>
+        /// Initializes an instance of the <see cref="EmbeddingDefinitions" /> class.
+        /// </summary>
+        /// <param name="embeddings">The embeddings.</param>
+        /// <param name="definitionConverter">The embedding definition converter.</param>
         public EmbeddingDefinitions(IEmbeddings embeddings, IConvertEmbeddingDefinition definitionConverter)
         {
             _embeddings = embeddings;
             _definitionConverter = definitionConverter;
         }
 
+        /// <inheritdoc/>
         public async Task<Try<Store.Definition.EmbeddingDefinition>> TryGet(EmbeddingId embedding, CancellationToken token)
         {
             try
@@ -48,6 +54,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                 return ex;
             }
         }
+
+        /// <inheritdoc/>
         public async Task<bool> TryPersist(Store.Definition.EmbeddingDefinition definition, CancellationToken token)
         {
             try
@@ -69,6 +77,10 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
             catch (MongoWaitQueueFullException)
             {
                 return false;
+            }
+            catch (Exception ex)
+            {
+                return ex;
             }
         }
 

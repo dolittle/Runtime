@@ -26,6 +26,12 @@ namespace Dolittle.Runtime.Embeddings.Store
         readonly IEmbeddingDefinitions _embeddingDefinitions;
         readonly ILogger _logger;
 
+        /// <summary>
+        /// Initializes an instance of the <see cref="EmbeddingStore" /> class.
+        /// </summary>
+        /// <param name="embeddingStates">The embedding states.</param>
+        /// <param name="embeddingDefinitions">The embedding definitions.</param>
+        /// <param name="logger">The logger for logging messages.</param>
         public EmbeddingStore(
             IEmbeddingStates embeddingStates,
             IEmbeddingDefinitions embeddingDefinitions,
@@ -63,14 +69,14 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Error getting embedding {Embedding} and key {Key}", embedding, key);
+                _logger.LogWarning(ex, "Error getting embedding {Embedding} and key {Key}", embedding.Value, key.Value);
                 return ex;
             }
         }
 
         /// <inheritdoc/>
-        public async Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
-            => await TryGetAll(embedding, false, token).ConfigureAwait(false);
+        public Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
+            => TryGetAll(embedding, false, token);
 
 
         /// <inheritdoc/>
@@ -103,8 +109,8 @@ namespace Dolittle.Runtime.Embeddings.Store
         }
 
         /// <inheritdoc/>
-        public async Task<Try<IEnumerable<ProjectionKey>>> TryGetKeys(EmbeddingId embedding, CancellationToken token)
-            => await TryGetKeys(embedding, false, token).ConfigureAwait(false);
+        public Task<Try<IEnumerable<ProjectionKey>>> TryGetKeys(EmbeddingId embedding, CancellationToken token)
+            => TryGetKeys(embedding, false, token);
 
 
         /// <inheritdoc/>
@@ -167,8 +173,7 @@ namespace Dolittle.Runtime.Embeddings.Store
                 _logger.ReplacingEmbedding(embedding, key, version, state);
                 var embeddingState = new EmbeddingState(state, version, false);
 
-                var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token)
-                    .ConfigureAwait(false);
+                var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token).ConfigureAwait(false);
                 return tryReplace.Success ? Try.Succeeded() : tryReplace.Exception;
             }
             catch (Exception ex)
@@ -184,11 +189,11 @@ namespace Dolittle.Runtime.Embeddings.Store
             }
         }
 
-        async Task<Try<EmbeddingCurrentState>> TryGetInitialState(
+        Task<Try<EmbeddingCurrentState>> TryGetInitialState(
             EmbeddingId embedding,
             ProjectionKey key,
             CancellationToken token)
-            => await TryGetInitialState(embedding, key, AggregateRootVersion.Initial, token).ConfigureAwait(false);
+            => TryGetInitialState(embedding, key, AggregateRootVersion.Initial, token);
 
         async Task<Try<EmbeddingCurrentState>> TryGetInitialState(
             EmbeddingId embedding,

@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB
         /// <param name="options">The <see cref="ClientSessionOptions" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>The <see cref="IClientSessionHandle" />.</returns>
-        public IClientSessionHandle StartSession(ClientSessionOptions options = default, CancellationToken cancellationToken = default) => MongoClient.StartSession(options, cancellationToken);
+        public IClientSessionHandle StartSession(ClientSessionOptions options = default, CancellationToken cancellationToken) => MongoClient.StartSession(options, cancellationToken);
 
         /// <summary>
         /// Starts a client session.
@@ -48,6 +48,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB
         /// <param name="options">The <see cref="ClientSessionOptions" />.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="IClientSessionHandle" />.</returns>
-        public Task<IClientSessionHandle> StartSessionAsync(ClientSessionOptions options = default, CancellationToken cancellationToken = default) => MongoClient.StartSessionAsync(options, cancellationToken);
+        public Task<IClientSessionHandle> StartSessionAsync(ClientSessionOptions options = default, CancellationToken cancellationToken) => MongoClient.StartSessionAsync(options, cancellationToken);
     }
 }

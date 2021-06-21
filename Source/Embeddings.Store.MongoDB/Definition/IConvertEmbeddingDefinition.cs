@@ -8,7 +8,18 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
     /// </summary>
     public interface IConvertEmbeddingDefinition
     {
+        /// <summary>
+        /// Converts a runtime representation of an embedding definition to a the persisted mongodb representation.
+        /// </summary>
+        /// <param name="definition">The runtime representation of the embedding definition.</param>
+        /// <returns>The persisted mongodb representation of the embedding definition.</returns>
         EmbeddingDefinition ToStored(Store.Definition.EmbeddingDefinition definition);
+
+        /// <summary>
+        /// Converts a persisted mongodb representation of an embedding definition to the runtime representation.
+        /// </summary>
+        /// <param name="definition">The persisted mongodb representation of the embedding definition.</param>
+        /// <returns>The runtime representation of the embedding definition.</returns>
         Store.Definition.EmbeddingDefinition ToRuntime(EmbeddingDefinition definition);
     }
 }
