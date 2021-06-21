@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
         static a_message second_message;
         static WrappedAsyncStreamReader<a_message, a_message, object, object, object, object> wrapped_reader;
 
-        Establish context = () => 
+        Establish context = () =>
         {
             first_message = new();
             second_message = new();

@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.given
             }
 
             var result = await _messages_to_receive[_message_pointer].ConfigureAwait(false);
-            _message_pointer ++;
+            _message_pointer++;
             Current = result.Item2;
 
             return result.Item1;

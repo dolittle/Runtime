@@ -10,16 +10,16 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
 {
     public class an_event_handler_with_non_writeable_target_stream : all_dependencies
     {
-         protected static EventHandler event_handler;
+        protected static EventHandler event_handler;
 
         Establish context = () =>
         {
-           arguments = new(
-                execution_context,
-                StreamId.EventLog.Value,
-                Array.Empty<ArtifactId>(),
-                false,
-                scope);
+            arguments = new(
+                 execution_context,
+                 StreamId.EventLog.Value,
+                 Array.Empty<ArtifactId>(),
+                 false,
+                 scope);
 
             event_handler = new EventHandler(
                 stream_processors.Object,

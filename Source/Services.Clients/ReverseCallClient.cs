@@ -2,16 +2,16 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Google.Protobuf;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
-using System.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services.Clients
 {
@@ -34,6 +34,11 @@ namespace Dolittle.Runtime.Services.Clients
         where TRequest : class
         where TResponse : class
     {
+        /// <summary>
+        /// The amount of ping intervals to wait until it times out. 
+        /// </summary>
+        public static readonly int PingThreshold = 3;
+
         readonly IReverseCallClientProtocol<TClient, TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> _protocol;
         readonly TClient _client;
         readonly TimeSpan _pingInterval;
@@ -100,7 +105,7 @@ namespace Dolittle.Runtime.Services.Clients
             using var keepalive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
-                keepalive.CancelAfter(_pingInterval.Multiply(3));
+                keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
 
                 while (await ReadMessageFromServerWhileRespondingToPings(keepalive).ConfigureAwait(false))
                 {
@@ -117,7 +122,7 @@ namespace Dolittle.Runtime.Services.Clients
                         _logger.ReceivedEmptyMessage();
                     }
 
-                    keepalive.CancelAfter(_pingInterval.Multiply(3));
+                    keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
                 }
             }
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
@@ -198,7 +203,7 @@ namespace Dolittle.Runtime.Services.Clients
             using var keepalive = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
-                keepalive.CancelAfter(_pingInterval.Multiply(3));
+                keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
 
                 var stopwatch = Stopwatch.StartNew();
                 _logger.ReceivingConnectResponse(typeof(TConnectResponse));
@@ -226,7 +231,6 @@ namespace Dolittle.Runtime.Services.Clients
             }
             catch (RpcException ex) when (ex.StatusCode == StatusCode.Cancelled)
             {
-
                 if (cancellationToken.IsCancellationRequested)
                 {
                     _metrics.IncrementTotalCancelledConnections();
@@ -264,19 +268,20 @@ namespace Dolittle.Runtime.Services.Clients
 
                 if (await _serverToClient.MoveNext(keepalive.Token).ConfigureAwait(false))
                 {
-                    var messageSize = _serverToClient.Current.CalculateSize();
+                    var message = _serverToClient.Current;
+                    var messageSize = message.CalculateSize();
                     _logger.ReadMessage(typeof(TClientMessage), messageSize);
-                    _metrics.IncrementTotalWrites();
+                    _metrics.IncrementTotalReceivedMessages();
                     _metrics.AddToTotalReceivedBytes(messageSize);
 
-                    if (CurrentMessageIsPing())
+                    if (MessageIsPing(message))
                     {
                         _logger.ReceivedPing();
                         _metrics.IncrementTotalPingsReceived();
 
                         await MaybeRespondWithPong().ConfigureAwait(false);
 
-                        keepalive.CancelAfter(_pingInterval.Multiply(3));
+                        keepalive.CancelAfter(_pingInterval.Multiply(PingThreshold));
                         continue;
                     }
 
@@ -289,8 +294,8 @@ namespace Dolittle.Runtime.Services.Clients
             return false;
         }
 
-        bool CurrentMessageIsPing()
-            => _protocol.GetPing(_serverToClient.Current) != default;
+        bool MessageIsPing(TServerMessage message)
+            => _protocol.GetPing(message) != default;
 
         async Task MaybeRespondWithPong()
         {
@@ -336,7 +341,7 @@ namespace Dolittle.Runtime.Services.Clients
                     _logger.HandlingRequest(typeof(TRequest), callId);
                     var stopwatch = Stopwatch.StartNew();
 
-                    _executionContextManager.CurrentFor(requestContext.ExecutionContext);
+                    _executionContextManager.CurrentFor(requestContext.ExecutionContext.ToExecutionContext());
                     var response = await _callback(request, cancellationToken).ConfigureAwait(false);
 
                     stopwatch.Stop();
@@ -399,8 +404,7 @@ namespace Dolittle.Runtime.Services.Clients
                     _logger.WritingMessageUnblockedAfter(typeof(TServerMessage), stopwatch.Elapsed);
                 }
                 catch
-                {
-                }
+                { }
             }
 
             try
@@ -432,11 +436,19 @@ namespace Dolittle.Runtime.Services.Clients
         void EnsureOnlyConnectingOnce()
         {
 
-            if (_connecting) throw new ReverseCallClientAlreadyCalledConnect();
+            ThrowIfAlreadyConnecting();
             lock (_acceptHandleLock)
             {
-                if (_connecting) throw new ReverseCallClientAlreadyCalledConnect();
+                ThrowIfAlreadyConnecting();
                 _connecting = true;
+            }
+        }
+
+        void ThrowIfAlreadyConnecting()
+        {
+            if (_connecting)
+            {
+                throw new ReverseCallClientAlreadyCalledConnect();
             }
         }
 
@@ -450,11 +462,20 @@ namespace Dolittle.Runtime.Services.Clients
 
         void EnsureOnlyHandlingOnce()
         {
-            if (_startedHandling) throw new ReverseCallClientAlreadyStartedHandling();
+
+            ThrowIfAlreadyStartedHandling();
             lock (_acceptHandleLock)
             {
-                if (_startedHandling) throw new ReverseCallClientAlreadyStartedHandling();
+                ThrowIfAlreadyStartedHandling();
                 _startedHandling = true;
+            }
+        }
+
+        void ThrowIfAlreadyStartedHandling()
+        {
+            if (_startedHandling)
+            {
+                throw new ReverseCallClientAlreadyStartedHandling();
             }
         }
     }

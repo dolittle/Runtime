@@ -164,14 +164,14 @@ namespace Dolittle.Runtime.Services
 
                 var message = new TServerMessage();
                 _messageConverter.SetRequest(request, message);
-                _logger.LogTrace("Writing request with CallId: {CallId}", callId);
                 _logger.WritingRequest(callId);
                 await _reverseCallConnection.ClientStream.WriteAsync(message).ConfigureAwait(false);
 
                 return await completionSource.Task.ConfigureAwait(false);
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.CallFailed(ex);
                 _calls.TryRemove(callId, out _);
                 throw;
             }
@@ -210,7 +210,7 @@ namespace Dolittle.Runtime.Services
                 while (!jointCts.IsCancellationRequested && await clientToRuntimeStream.MoveNext(jointCts.Token).ConfigureAwait(false))
                 {
                     var message = clientToRuntimeStream.Current;
-                    var response = _messageConverter.GetResponse(clientToRuntimeStream.Current);
+                    var response = _messageConverter.GetResponse(message);
                     if (response != null)
                     {
                         _logger.LogTrace("Received response");

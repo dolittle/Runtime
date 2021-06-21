@@ -97,8 +97,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
                     _logger.WritingMessageUnblockedAfter(_requestId, typeof(TServerMessage), stopwatch.Elapsed);
                 }
                 catch
-                {
-                }
+                { }
             }
 
             try
@@ -169,7 +168,10 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
 
             if (disposing)
             {

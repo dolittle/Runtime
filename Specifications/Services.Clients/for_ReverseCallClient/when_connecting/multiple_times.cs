@@ -22,8 +22,8 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connectin
             connect_response = new MyConnectResponse();
             execution_context = given.execution_contexts.create();
             execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
-            server_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
-            server_stream.SetupGet(_ => _.Current).Returns(new MyServerMessage { ConnectResponse = connect_response });
+            server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(true));
+            server_to_client_stream.SetupGet(_ => _.Current).Returns(new MyServerMessage { ConnectResponse = connect_response });
 
             reverse_call_client.Connect(connect_arguments, CancellationToken.None).GetAwaiter().GetResult();
         };

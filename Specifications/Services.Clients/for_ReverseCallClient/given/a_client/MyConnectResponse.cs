@@ -7,6 +7,6 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client
 {
     public class MyConnectResponse
     {
-        public Failure Failure { get; set; }
+        public Failure Failure { get; set; }
     }
 }

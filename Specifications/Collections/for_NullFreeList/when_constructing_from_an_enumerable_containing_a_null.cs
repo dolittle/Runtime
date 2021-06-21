@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Collections.for_NullFreeList
 
         Because of = () => exception = Catch.Exception(() =>
         {
-            new NullFreeList<string>(new string[] { "a", null, "b" });
+            new NullFreeList<string>(new string[] { "a", null, "b" });
         });
 
         It should_fail = () => exception.ShouldBeOfExactType<ArgumentNullException>();

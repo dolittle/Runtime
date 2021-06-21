@@ -112,7 +112,10 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
         protected virtual void Dispose(bool disposing)
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
 
             if (disposing)
             {
@@ -186,7 +189,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
         void ResetKeepaliveTokenCancellation()
         {
-            _cancellationTokenSource.CancelAfter(_keepaliveTimeout);
+            _keepalive.RefreshDeadline(_keepaliveTimeout);
             _metrics.IncrementTotalKeepaliveTokenResets();
             _logger.ResettingKeepaliveToken(_requestId);
         }

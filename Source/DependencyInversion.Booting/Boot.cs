@@ -221,7 +221,7 @@ namespace Dolittle.Runtime.DependencyInversion.Booting
         }
 
         static void ProvideBindingsFromProvider(Type bindingProviderType, IContainer bootContainer, ConcurrentBag<IBindingCollection> bindingCollections)
-        {   
+        {
             var bindingProvider = bootContainer.Get(bindingProviderType) as ICanProvideBindings;
             var bindingProviderBuilder = new BindingProviderBuilder();
             bindingProvider.Provide(bindingProviderBuilder);

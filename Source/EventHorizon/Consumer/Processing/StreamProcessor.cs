@@ -22,6 +22,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
         readonly EventsFromEventHorizonFetcher _eventsFetcher;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
+        readonly IMetricsCollector _metrics;
         readonly ILoggerFactory _loggerFactory;
         readonly ILogger _logger;
         bool _started;
@@ -34,13 +35,15 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <param name="eventsFetcher">The event fetcher that receives fetches events over an event horizon connection.</param>
         /// <param name="streamProcessorStates">The repository to use for getting the subscription state.</param>
         /// <param name="eventsFetcherPolicy">The policy around fetching events.</param>
+        /// <param name="metrics">The system for collecting metrics.</param>
         /// <param name="loggerFactory">The factory for creating loggers.</param>
         public StreamProcessor(
             SubscriptionId subscriptionId,
-            EventProcessor eventProcessor,
+            IEventProcessor eventProcessor,
             EventsFromEventHorizonFetcher eventsFetcher,
             IResilientStreamProcessorStateRepository streamProcessorStates,
             IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+            IMetricsCollector metrics,
             ILoggerFactory loggerFactory)
         {
             _identifier = subscriptionId;
@@ -48,6 +51,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
             _streamProcessorStates = streamProcessorStates;
             _eventsFetcher = eventsFetcher;
             _eventsFetcherPolicy = eventsFetcherPolicy;
+            _metrics = metrics;
             _loggerFactory = loggerFactory;
             _logger = loggerFactory.CreateLogger<StreamProcessor>();
         }
@@ -55,6 +59,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <inheritdoc/>
         public async Task StartAndWait(CancellationToken cancellationToken)
         {
+            _metrics.IncrementTotalStreamProcessorStartAttempts();
             if (cancellationToken.IsCancellationRequested)
             {
                 _logger.StreamProcessorCancellationRequested(_identifier);
@@ -80,6 +85,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
                 _logger.StreamProcessorFetchedState(_identifier, tryGetStreamProcessorState.Result);
             }
 
+            _metrics.IncrementTotalStreamProcessorStarted();
             await new ScopedStreamProcessor(
                 _identifier.ConsumerTenantId,
                 _identifier,

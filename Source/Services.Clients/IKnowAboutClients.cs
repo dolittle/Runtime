@@ -13,6 +13,6 @@ namespace Dolittle.Runtime.Services.Clients
         /// <summary>
         /// Gets the <see cref="IEnumerable{T}">collection</see> of <see cref="Client"/>.
         /// </summary>
-        IEnumerable<Client> Clients { get; }
+        IEnumerable<Client> Clients { get; }
     }
 }

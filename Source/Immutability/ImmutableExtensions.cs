@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Immutability
                 .GetFields(PublicInstancePropertyFlag)
                 .Where(_ => (_.Attributes & FieldAttributes.InitOnly) == 0)
                 .ToArray();
-        
+
         static bool IsInitSetter(PropertyInfo property)
             => property.SetMethod.ReturnParameter
                 .GetRequiredCustomModifiers()

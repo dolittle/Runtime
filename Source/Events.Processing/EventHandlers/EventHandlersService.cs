@@ -69,7 +69,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                     context,
                     _eventHandlersProtocol,
                     cts.Token).ConfigureAwait(false);
-                if (!connectResult.Success) return;
+                if (!connectResult.Success)
+                {
+                    return;
+                }
                 _logger.SettingExecutionContext(connectResult.Result.arguments.ExecutionContext);
                 _executionContextManager.CurrentFor(connectResult.Result.arguments.ExecutionContext);
 

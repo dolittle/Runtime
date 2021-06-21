@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
 
         Establish context = () =>
         {
-            scenario = Scenario.New(_ => {});
+            scenario = Scenario.New(_ => { });
         };
 
         Because of = () => scenario.Simulate(
@@ -23,6 +23,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
             metrics,
             logger_factory);
 
-        It should_set_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
+        It should_cancel_the_cancellation_token = () => scenario.ConnectionCancellationToken.IsCancellationRequested.ShouldBeTrue();
+        It should_not_schedule_a_ping_callback = () => scenario.ScheduledCallbacks.ShouldBeEmpty();
     }
 }

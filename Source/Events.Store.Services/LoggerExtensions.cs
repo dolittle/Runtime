@@ -15,6 +15,6 @@ namespace Dolittle.Runtime.Events.Store.Services
                 "{NumEvents} {EventType}events received for committing");
 
         internal static void EventsReceivedForCommitting(this ILogger logger, bool isAggregateEvents, int numEvents)
-            => _eventsReceivedForCommitting(logger, numEvents, isAggregateEvents? "aggregate " : "", null);
+            => _eventsReceivedForCommitting(logger, numEvents, isAggregateEvents ? "aggregate " : "", null);
     }
 }
