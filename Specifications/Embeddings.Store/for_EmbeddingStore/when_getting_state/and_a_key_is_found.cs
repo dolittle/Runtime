@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
         Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
 
         It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_get_the_state = () => result.Result.State.Value.ShouldEqual(persisted_state.State);
+        It should_get_the_state = () => result.Result.State.ShouldEqual(persisted_state.State);
         It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
         It should_have_the_same_aggregate_version = () => result.Result.Version.ShouldEqual(persisted_state.Version);
         It should_get_a_persisted_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
