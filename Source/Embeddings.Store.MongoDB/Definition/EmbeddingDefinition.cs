@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
-using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
 
@@ -23,12 +22,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
         /// <summary>
         /// Gets or sets the initial state.
         /// </summary>
-        public BsonDocument InitialState { get; set; }
-
-        /// <summary>
-        /// Gets or sets the raw initial state.
-        /// </summary>
-        public string InitialStateRaw { get; set; }
+        public string InitialState { get; set; }
 
         /// <summary>
         /// Gets or sets the embedding event selectors.

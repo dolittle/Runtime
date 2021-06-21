@@ -4,7 +4,6 @@
 using System.Linq;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
-using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
 {
@@ -22,15 +21,14 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
                     _.EventType,
                     _.EventKeySelectorType,
                     _.EventKeySelectorExpression)),
-                definition.InitialStateRaw);
+                definition.InitialState);
 
         /// <inheritdoc/>
         public EmbeddingDefinition ToStored(Store.Definition.EmbeddingDefinition definition)
             => new()
             {
                 Embedding = definition.Embedding,
-                InitialStateRaw = definition.InititalState,
-                InitialState = BsonDocument.Parse(definition.InititalState),
+                InitialState = definition.InititalState,
                 EventSelectors = definition.Events.Select(_ => new ProjectionEventSelector
                 {
                     EventKeySelectorType = _.KeySelectorType,

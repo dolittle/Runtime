@@ -12,7 +12,6 @@ using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
@@ -52,7 +51,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
 
                 return embedding == default
                     ? Try<EmbeddingState>.Failed(new EmbeddingStateDoesNotExist(embeddingId, key))
-                    : new EmbeddingState(embedding.ContentRaw, embedding.Version, embedding.IsRemoved);
+                    : new EmbeddingState(embedding.Content, embedding.Version, embedding.IsRemoved);
             }
             catch (Exception ex)
             {
@@ -75,7 +74,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     async collection => await collection
                                             .Find(Builders<Embedding>.Filter.Empty)
                                             .Project(_ => Tuple.Create<EmbeddingState, ProjectionKey>(
-                                                new EmbeddingState(_.ContentRaw, _.Version, _.IsRemoved), _.Key))
+                                                new EmbeddingState(_.Content, _.Version, _.IsRemoved), _.Key))
                                             .ToListAsync(token)
                                             .ConfigureAwait(false),
                     token).ConfigureAwait(false);
@@ -145,8 +144,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                     {
                         var updateDefinition = Builders<Embedding>
                                                 .Update
-                                                .Set(_ => _.Content, BsonDocument.Parse(state.State))
-                                                .Set(_ => _.ContentRaw, state.State.Value)
+                                                .Set(_ => _.Content, state.State.Value)
                                                 .Set(_ => _.Version, state.Version.Value);
                         var updateResult = await collection
                             .UpdateOneAsync(

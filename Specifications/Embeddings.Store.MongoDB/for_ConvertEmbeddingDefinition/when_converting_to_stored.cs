@@ -55,6 +55,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.for_ConvertEmbeddingDefiniti
         It should_have_the_event_selectors = () => result_definition.EventSelectors
             .ShouldEachConformTo(_ => event_selectors
                 .Contains(new ProjectionEventSelector(_.EventType, _.EventKeySelectorType, _.EventKeySelectorExpression)));
-        It should_have_the_raw_state = () => result_definition.InitialStateRaw.ShouldEqual(initial_state.Value);
+        It should_have_the_state = () => result_definition.InitialState.ShouldEqual(initial_state.Value);
     }
 }

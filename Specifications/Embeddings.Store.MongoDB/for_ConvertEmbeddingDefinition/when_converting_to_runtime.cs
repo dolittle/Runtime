@@ -49,8 +49,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.for_ConvertEmbeddingDefiniti
             stored_definition = new Definition.EmbeddingDefinition
             {
                 Embedding = embedding,
-                InitialState = BsonDocument.Parse(initial_state),
-                InitialStateRaw = initial_state,
+                InitialState = initial_state,
                 EventSelectors = event_selectors
             };
             converter = new ConvertEmbeddingDefinition();
