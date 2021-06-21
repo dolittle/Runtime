@@ -23,6 +23,12 @@ namespace Dolittle.Runtime.ApplicationModel
         public static implicit operator Microservice(Guid microservice) => new(microservice);
 
         /// <summary>
+        /// Implicitly converts from a <see cref="string"/> to a <see cref="Microservice"/>.
+        /// </summary>
+        /// <param name="microservice"><see cref="string"/> representing the microservice.</param>
+        public static implicit operator Microservice(string microservice) => new(Guid.Parse(microservice));
+
+        /// <summary>
         /// Create a new <see cref="Microservice"/> identifier.
         /// </summary>
         /// <returns><see cref="Microservice"/>.</returns>

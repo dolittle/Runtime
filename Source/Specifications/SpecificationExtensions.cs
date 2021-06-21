@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Specifications
         /// <returns>The composed <see cref="Specification{T}"/>.</returns>
         public static Specification<T> Compose<T>(this Specification<T> lhs, Specification<T> rhs, Func<Expression, Expression, Expression> merge)
             => new CompositeRule<T>(lhs, rhs, merge);
-        
+
 
         /// <summary>
         /// Combines two rules in to an "And" rule.

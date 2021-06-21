@@ -14,25 +14,25 @@ namespace Dolittle.Runtime.Reflection
     /// </summary>
     public static class DictionaryTypeExtensions
     {
-        static readonly HashSet<Type> GenericDictionaryInterfaces = new HashSet<Type>
+        static readonly HashSet<Type> _genericDictionaryInterfaces = new HashSet<Type>
         {
             typeof(IDictionary<,>),
             typeof(IReadOnlyDictionary<,>)
         };
 
-        static readonly HashSet<Type> NonGenericDictionaryInterfaces = new HashSet<Type>
+        static readonly HashSet<Type> _nonGenericDictionaryInterfaces = new HashSet<Type>
         {
             typeof(IDictionary),
         };
 
-        static readonly HashSet<Type> DictionaryInterfaces;
+        static readonly HashSet<Type> _dictionaryInterfaces;
 
         static DictionaryTypeExtensions()
         {
             var interfaces = new List<Type>();
-            interfaces.AddRange(NonGenericDictionaryInterfaces);
-            interfaces.AddRange(GenericDictionaryInterfaces);
-            DictionaryInterfaces = new HashSet<Type>(interfaces);
+            interfaces.AddRange(_nonGenericDictionaryInterfaces);
+            interfaces.AddRange(_genericDictionaryInterfaces);
+            _dictionaryInterfaces = new HashSet<Type>(interfaces);
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace Dolittle.Runtime.Reflection
         public static bool IsDictionary(this Type type)
         {
             // https://stackoverflow.com/a/29649496
-            return type.GetInterfaces().Append(type).Any(t => DictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
+            return type.GetInterfaces().Append(type).Any(t => _dictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Reflection
         /// <returns>Type - null if none.</returns>
         public static Type GetDictionaryType(this Type type)
         {
-            return type.GetInterfaces().Append(type).FirstOrDefault(t => DictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
+            return type.GetInterfaces().Append(type).FirstOrDefault(t => _dictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
         }
 
         /// <summary>

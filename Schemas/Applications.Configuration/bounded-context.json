@@ -23,7 +23,9 @@
         "interaction": {
             "description": "A list of configurations for the interaction layers that this bounded context exposes",
             "type": "array",
-            "items": { "$ref": "#/definitions/interactionLayerConfiguration"}
+            "items": {
+                "$ref": "#/definitions/interactionLayerConfiguration"
+            }
         },
         "resources": {
             "description": "A map of describing the resource type implementation mapping of resource types",
@@ -36,7 +38,10 @@
                     "$ref": "#/definitions/resourceTypeImplementationConfiguration"
                 }
             },
-            "required": ["readModels", "eventStore"]
+            "required": [
+                "readModels",
+                "eventStore"
+            ]
         }
     },
     "required": [
@@ -47,7 +52,6 @@
         "interaction",
         "resources"
     ],
-
     "definitions": {
         "coreConfiguration": {
             "description": "A configuration describing the Core of this bounded context",
@@ -57,7 +61,9 @@
                     "$comment": "This schema definition allows only a set of core languages by hard coding it here in the enum property. Can probably be done better",
                     "description": "Describes which programming language the Core is written in",
                     "type": "string",
-                    "enum": ["csharp"]
+                    "enum": [
+                        "csharp"
+                    ]
                 },
                 "entryPoint": {
                     "$comment": "This property is optional. The default value is \"Core\"",
@@ -66,7 +72,9 @@
                     "format": "uri-reference"
                 }
             },
-            "required": ["language"]
+            "required": [
+                "language"
+            ]
         },
         "interactionLayerConfiguration": {
             "description": "The configuration of an interaction layer",
@@ -76,7 +84,9 @@
                     "$comment": "This schema definition allows only a set of types by hard coding it here in the enum property. Can probably be done better",
                     "description": "The type of the interaction layer",
                     "type": "string",
-                    "enum": ["web"]
+                    "enum": [
+                        "web"
+                    ]
                 },
                 "language": {
                     "description": "The programming language of the interaction layer",
@@ -91,10 +101,17 @@
                     "$comment": "This schema definition allows only a set of frameworks by hard coding it here in the enum property. Can probably be done better",
                     "description": "The framework of the interaction layer",
                     "type": "string",
-                    "enum": ["react", "aurelia"]
+                    "enum": [
+                        "react",
+                        "aurelia"
+                    ]
                 }
             },
-            "required": ["type", "language", "entryPoint"]
+            "required": [
+                "type",
+                "language",
+                "entryPoint"
+            ]
         },
         "resourceTypeImplementationConfiguration": {
             "description": "Resource type implementation configuration",
@@ -107,7 +124,10 @@
                     "type": "string"
                 }
             },
-            "required": ["production", "development"]
+            "required": [
+                "production",
+                "development"
+            ]
         }
     }
 }

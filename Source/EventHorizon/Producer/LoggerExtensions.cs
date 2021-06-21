@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace Dolittle.Runtime.EventHorizon.Producer
 {
     internal static class LoggerExtensions
-    {   
+    {
         static readonly Action<ILogger, Guid, Guid, Guid, ulong, Guid, Guid, Exception> _incomingEventHorizonSubscription = LoggerMessage
             .Define<Guid, Guid, Guid, ulong, Guid, Guid>(
                 LogLevel.Debug,

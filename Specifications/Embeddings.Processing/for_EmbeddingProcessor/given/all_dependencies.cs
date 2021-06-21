@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
@@ -17,7 +18,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
     {
         protected static EmbeddingId embedding;
         protected static Mock<IUpdateEmbeddingStates> state_updater;
-        protected static Mock<IWaitForAggregateRootEvents> event_waiter;
+        protected static Mock<IStreamEventWatcher> event_waiter;
         protected static Mock<IEventStore> event_store;
         protected static Mock<IEmbeddingStore> embedding_store;
         protected static Mock<ICalculateStateTransitionEvents> transition_calculator;
@@ -28,7 +29,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
         {
             embedding = "f46237c8-e144-4f29-bdcc-610ba075735b";
             state_updater = new Mock<IUpdateEmbeddingStates>();
-            event_waiter = new Mock<IWaitForAggregateRootEvents>();
+            event_waiter = new Mock<IStreamEventWatcher>();
             event_store = new Mock<IEventStore>();
             embedding_store = new Mock<IEmbeddingStore>();
             transition_calculator = new Mock<ICalculateStateTransitionEvents>();
@@ -42,7 +43,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
             cancellation_token = CancellationToken.None;
 
             state_updater.Setup(_ => _.TryUpdateAll(It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
-            event_waiter.Setup(_ => _.WaitForEvent(embedding.Value, It.IsAny<CancellationToken>())).Returns<ArtifactId, CancellationToken>((_, cancellationToken) => Task.Delay(Timeout.Infinite, cancellationToken));
+            event_waiter.Setup(_ => _.WaitForEvent(ScopeId.Default, StreamId.EventLog, It.IsAny<CancellationToken>())).Returns<ScopeId, StreamId, CancellationToken>((_scope, _stream, cancellationToken) => Task.Delay(Timeout.Infinite, cancellationToken));
         };
     }
 }

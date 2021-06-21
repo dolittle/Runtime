@@ -16,8 +16,10 @@
         <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../Applications.Configuration/Applications.Configuration.csproj" />
         <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
+        <ProjectReference Include="../Execution/Execution.csproj" />
         <ProjectReference Include="../Protobuf/Protobuf.csproj" />
         <ProjectReference Include="../Resilience/Resilience.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
         <ProjectReference Include="../Microservices/Microservices.csproj" />
         <ProjectReference Include="../Services/Services.csproj" />

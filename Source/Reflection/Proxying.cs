@@ -15,16 +15,16 @@ namespace Dolittle.Runtime.Reflection
         const string DynamicAssemblyName = "Dynamic Assembly";
         const string DynamicModuleName = "Dynamic Module";
 
-        static readonly AssemblyBuilder DynamicAssembly;
-        static readonly ModuleBuilder DynamicModule;
+        static readonly AssemblyBuilder _dynamicAssembly;
+        static readonly ModuleBuilder _dynamicModule;
 
         static Proxying()
         {
             var dynamicAssemblyName = CreateUniqueName(DynamicAssemblyName);
             var dynamicModuleName = CreateUniqueName(DynamicModuleName);
             var assemblyName = new AssemblyName(dynamicAssemblyName);
-            DynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
-            DynamicModule = DynamicAssembly.DefineDynamicModule(dynamicModuleName);
+            _dynamicAssembly = AssemblyBuilder.DefineDynamicAssembly(assemblyName, AssemblyBuilderAccess.Run);
+            _dynamicModule = _dynamicAssembly.DefineDynamicModule(dynamicModuleName);
         }
 
         /// <inheritdoc/>
@@ -73,13 +73,13 @@ namespace Dolittle.Runtime.Reflection
         static TypeBuilder DefineInterface(Type type)
         {
             var name = CreateUniqueName(type.Name);
-            return DynamicModule.DefineType(name, TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract | TypeAttributes.Serializable);
+            return _dynamicModule.DefineType(name, TypeAttributes.Public | TypeAttributes.Interface | TypeAttributes.Abstract | TypeAttributes.Serializable);
         }
 
         static TypeBuilder DefineClass(Type type)
         {
             var name = CreateUniqueName(type.Name);
-            return DynamicModule.DefineType(name, TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Serializable);
+            return _dynamicModule.DefineType(name, TypeAttributes.Public | TypeAttributes.Class | TypeAttributes.Serializable);
         }
     }
 }

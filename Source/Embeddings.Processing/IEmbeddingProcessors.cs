@@ -18,10 +18,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// Starts an instance of an <see cref="IEmbeddingProcessor"/> for all tenants for a given embedding.
         /// </summary>
         /// <param name="embedding">The <see cref="EmbeddingId"/> to start processors for.</param>
-        /// <param name="factory">A <see cref="EmbeddingProcessorFactory"/> to use for creating instances of <see cref="IEmbeddingProcessor"/> for each tenant.</param>
+        /// <param name="factory">A <see cref="CreateEmbeddingProcessorForTenant"/> to use for creating instances of <see cref="IEmbeddingProcessor"/> for each tenant.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to signal the started processors to stop.</param>
         /// <returns>A <see cref="Task"/> that is resolved when one or all of the started <see cref="IEmbeddingProcessor"/> complete or fail.</returns>
-        Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, EmbeddingProcessorFactory factory, CancellationToken cancellationToken);
+        Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, CreateEmbeddingProcessorForTenant factory, CancellationToken cancellationToken);
 
         /// <summary>
         /// Checks if there are any instances of <see cref="IEmbeddingProcessor"/> running for the given embedding.

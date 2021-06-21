@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// </summary>
     public abstract class AbstractScopedStreamProcessor
     {
-        static readonly TimeSpan EventWaiterTimeout = TimeSpan.FromMinutes(1);
+        static readonly TimeSpan _eventWaiterTimeout = TimeSpan.FromMinutes(1);
         readonly IStreamDefinition _sourceStreamDefinition;
         readonly TenantId _tenantId;
         readonly IEventProcessor _processor;
@@ -156,7 +156,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <returns>The time to retry <see cref="TimeSpan" />.</returns>
         protected TimeSpan GetTimeToRetryProcessing(IStreamProcessorState state)
         {
-            var result = EventWaiterTimeout;
+            var result = _eventWaiterTimeout;
             if (TryGetTimeToRetry(state, out var timeToRetry))
             {
                 result = new[] { result, timeToRetry }.Min();

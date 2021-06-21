@@ -62,10 +62,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
             var request = new HandleEventRequest
-                {
-                    Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
-                    RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
-                };
+            {
+                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+            };
             return Process(request, cancellationToken);
         }
 
@@ -74,10 +74,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
 
             return response switch
-                {
-                    { Failure: null } => new SuccessfulProcessing(),
-                    _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
-                };
+            {
+                { Failure: null } => new SuccessfulProcessing(),
+                _ => new FailedProcessing(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
+            };
         }
     }
 }

@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Heads
         /// <summary>
         /// Gets the hostname for the <see cref="Head"/>.
         /// </summary>
-        public string Host { get; }
+        public string Host { get; }
 
         /// <summary>
         /// Gets a string with runtime information from the client.
@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Heads
         /// <summary>
         /// Gets the version of the <see cref="Head"/>.
         /// </summary>
-        public string Version { get; }
+        public string Version { get; }
 
         /// <summary>
         /// Gets the time when client was connected.

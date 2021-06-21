@@ -1,3 +1,37 @@
+# [6.0.1] - 2021-6-16 [PR: #548](https://github.com/dolittle/Runtime/pull/548)
+## Summary
+
+Fix some of the configuration files under Server/.dolittle to their original intended 
+
+### Changed
+
+- Changed back configuration files
+
+
+# [6.0.0] - 2021-6-16 [PR: #532](https://github.com/dolittle/Runtime/pull/532)
+## Summary
+
+Changes the behavior of the pinging system to be more reliable and to also start immediately when receiving a connection. This is to deal with a bug that was causing connections between the SDK and the Runtime to be dropped. This is a **breaking behavioral change**, as the pinging behavior now expects the client to be immediately ready to receive pings and write pongs after creating the connection. Older versions of the SDKs wont function correctly with this release of the Runtime. For this we've added a [compatibility table](https://dolittle.io/docs/reference/runtime/compatibility).
+
+We also added a Prometheus metric system into the Runtime, which you can access from `localhost:9700/metrics` to see the full list of all the metrics reported.
+
+Also reworks the reverse call services to be more reliable and fixes an Event Horizon bug logging bug.
+
+### Added
+
+- A Prometheus metrics service exposed on port `9700` and path `/metrics`. It mainly collects metrics related to Event Horizon currently.
+
+### Changed
+
+- The Runtime now starts to ping the client immediately when receiving a connection instead of waiting for the connection to be accepted first. The client needs to be ready to start receiving pings and writing pongs immediately after initiating the connection.
+- Reworked many aspects of the reverse call clients and dispatchers to be more readable and reliable.
+
+### Fixed
+
+- Make pinging more reliable by using a single high priority thread to keep track of the scheduled pings. The old implementation relied on the `ThreadPool`, which was swamped during the startup and other periods of high activity in the Runtime, causing the pings to be delayed and eventually timing out.
+- Fixes a bug in the event horizon subscription that resulted in it not writing a proper log message of what the cause of a failure was if one of the event horizon processing tasks failed with an exception. ([#544](https://github.com/dolittle/Runtime/pull/544))
+
+
 # [5.6.0] - 2021-4-29 [PR: #513](https://github.com/dolittle/Runtime/pull/513)
 ## Summary
 

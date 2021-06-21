@@ -18,13 +18,13 @@ namespace Dolittle.Runtime.Protobuf
         /// <returns>Converted <see cref="VersionContract"/>.</returns>
         public static VersionContract ToProtobuf(this Version version) =>
             new()
-                {
-                    Major = version.Major,
-                    Minor = version.Minor,
-                    Patch = version.Patch,
-                    Build = version.Build,
-                    PreReleaseString = version.PreReleaseString
-                };
+            {
+                Major = version.Major,
+                Minor = version.Minor,
+                Patch = version.Patch,
+                Build = version.Build,
+                PreReleaseString = version.PreReleaseString
+            };
 
         /// <summary>
         /// Convert a <see cref="VersionContract"/> to <see cref="Version"/>.

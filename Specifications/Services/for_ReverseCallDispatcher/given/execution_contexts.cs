@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
     public static class execution_contexts
     {
         public static ExecutionContext create() =>
-            new ExecutionContext(
+            new(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Versioning.Version.NotSet,

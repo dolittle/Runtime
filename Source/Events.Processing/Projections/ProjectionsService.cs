@@ -101,7 +101,10 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 context,
                 _protocol,
                 cts.Token).ConfigureAwait(false);
-            if (!tryConnect.Success) return;
+            if (!tryConnect.Success)
+            {
+                return;
+            }
             var (dispatcher, arguments) = tryConnect.Result;
             _logger.ReceivedProjection(arguments);
             _logger.SettingExecutionContext(arguments.ExecutionContext);
@@ -195,7 +198,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         Try<StreamProcessor> TryRegisterProjection(
             ProjectionRegistrationArguments arguments,
-            Func<IEventProcessor> getEventProcessor,
+            FactoryFor<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken)
         {
             _logger.RegisteringProjection(arguments);
