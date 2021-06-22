@@ -16,9 +16,8 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
     {
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
-            { typeof(IProjections), typeof(Projections) },
+            { typeof(IProjectionStates), typeof(ProjectionStates) },
             { typeof(IProjectionDefinitions), typeof(ProjectionDefinitions) },
-            { typeof(IProjectionStates), typeof(ProjectionStates) }
         };
 
         /// <inheritdoc/>

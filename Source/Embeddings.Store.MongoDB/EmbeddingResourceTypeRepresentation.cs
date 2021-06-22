@@ -18,7 +18,6 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB
     {
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
-            { typeof(IEmbeddings), typeof(Embeddings) },
             { typeof(IEmbeddingDefinitions), typeof(EmbeddingDefinitions) },
             { typeof(IEmbeddingStates), typeof(EmbeddingStates) }
         };
