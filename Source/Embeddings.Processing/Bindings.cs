@@ -16,6 +16,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             builder.Bind<ICalculateStateTransitionEvents>().To<StateTransitionEventsCalculator>();
             builder.Bind<IUpdateEmbeddingStates>().To<EmbeddingStateUpdater>();
             builder.Bind<IDetectEmbeddingLoops>().To<EmbeddingLoopsDetector>();
+            builder.Bind<ICompareStates>().To<CompareProjectionStates>();
         }
     }
 }
