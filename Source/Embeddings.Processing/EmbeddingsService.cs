@@ -17,6 +17,8 @@ using Dolittle.Runtime.Rudimentary;
 using System.Runtime.ExceptionServices;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Embeddings.Store.Definition;
+using System.Linq;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -31,20 +33,24 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly IEmbeddingProcessorFactory _embeddingProcessorFactory;
         readonly IEmbeddingProcessors _embeddingProcessors;
         readonly IEmbeddingRequestFactory _embeddingRequestFactory;
+        readonly ICompareEmbeddingDefinitionsForAllTenants _embeddingDefinitionComparer;
+        readonly IPersistEmbeddingDefinitionForAllTenants _embeddingDefinitionPersister;
         readonly ILogger _logger;
         readonly IHostApplicationLifetime _hostApplicationLifetime;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EmbeddingsService"/> class.
+        /// Initializes an instance of the <see cref="EmbeddingsService" /> class.
         /// </summary>
-        /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
-        /// <param name="protocol">The <see cref="IProjectionsProtocol" />.</param>
-        /// <param name="onAllTenants">The <see cref="IPerformActionOnAllTenants" />.</param>
-        /// <param name="embeddingProcessorFactory">The <see cref="IEmbeddingProcessorFactory" />.</param>
-        /// <param name="embeddingProcessors">The <see cref="IEmbeddingProcessors" />.</param>
-        /// <param name="logger">The <see cref="ILogger"/>.</param>
+        /// <param name="hostApplicationLifetime"></param>
+        /// <param name="executionContextManager"></param>
+        /// <param name="reverseCallServices"></param>
+        /// <param name="protocol"></param>
+        /// <param name="embeddingProcessorFactory"></param>
+        /// <param name="embeddingProcessors"></param>
+        /// <param name="embeddingRequestFactory"></param>
+        /// <param name="embeddingDefinitionComparer"></param>
+        /// <param name="embeddingDefinitionPersister"></param>
+        /// <param name="logger"></param>
         public EmbeddingsService(
             IHostApplicationLifetime hostApplicationLifetime,
             IExecutionContextManager executionContextManager,
@@ -53,6 +59,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
             IEmbeddingProcessorFactory embeddingProcessorFactory,
             IEmbeddingProcessors embeddingProcessors,
             IEmbeddingRequestFactory embeddingRequestFactory,
+            ICompareEmbeddingDefinitionsForAllTenants embeddingDefinitionComparer,
+            IPersistEmbeddingDefinitionForAllTenants embeddingDefinitionPersister,
             ILogger<EmbeddingsService> logger)
         {
             _hostApplicationLifetime = hostApplicationLifetime;
@@ -62,6 +70,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _embeddingProcessorFactory = embeddingProcessorFactory;
             _embeddingProcessors = embeddingProcessors;
             _embeddingRequestFactory = embeddingRequestFactory;
+            _embeddingDefinitionComparer = embeddingDefinitionComparer;
+            _embeddingDefinitionPersister = embeddingDefinitionPersister;
             _logger = logger;
         }
 
@@ -81,22 +91,35 @@ namespace Dolittle.Runtime.Embeddings.Processing
             var (dispatcher, arguments) = connection.Result;
             _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
-            if (_embeddingProcessors.HasEmbeddingProcessors(arguments.EmbeddingId))
+            if (_embeddingProcessors.HasEmbeddingProcessors(arguments.Definition.Embedding))
             {
                 await dispatcher.Reject(
-                    _protocol.CreateFailedConnectResponse($"Failed to register Embedding: {arguments.EmbeddingId.Value}. Embedding already registered with the same id"),
+                    _protocol.CreateFailedConnectResponse($"Failed to register Embedding: {arguments.Definition.Embedding.Value}. Embedding already registered with the same id"),
+                    cts.Token).ConfigureAwait(false);
+                return;
+            }
+
+            if (await RejectIfInvalidDefinition(arguments.Definition, dispatcher, cts.Token).ConfigureAwait(false))
+            {
+                return;
+            }
+            var persistDefinition = await _embeddingDefinitionPersister.TryPersist(arguments.Definition, cts.Token).ConfigureAwait(false);
+            if (!persistDefinition.Success)
+            {
+                await dispatcher.Reject(
+                    _protocol.CreateFailedConnectResponse($"Failed to register Embedding: {arguments.Definition.Embedding.Value}. Failed to persist embedding definition. {persistDefinition.Exception.Message}"),
                     cts.Token).ConfigureAwait(false);
                 return;
             }
 
             var dispatcherTask = dispatcher.Accept(new EmbeddingRegistrationResponse(), cts.Token);
             var processorTask = _embeddingProcessors.TryStartEmbeddingProcessorForAllTenants(
-                arguments.EmbeddingId,
+                arguments.Definition.Embedding,
                 tenant => _embeddingProcessorFactory.Create(
                     tenant,
-                    arguments.EmbeddingId,
-                    new Embedding(arguments.EmbeddingId, dispatcher, _embeddingRequestFactory),
-                arguments.InitialState),
+                    arguments.Definition.Embedding,
+                    new Embedding(arguments.Definition.Embedding, dispatcher, _embeddingRequestFactory),
+                arguments.Definition.InititalState),
                 cts.Token);
             var tasks = new[] { dispatcherTask, processorTask };
 
@@ -116,6 +139,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
         }
 
+        /// <inheritdoc/>
         public override async Task<UpdateResponse> Update(UpdateRequest request, ServerCallContext context)
         {
             using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
@@ -190,6 +214,47 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 return false;
             }
             return true;
+        }
+
+        async Task<bool> RejectIfInvalidDefinition(
+            EmbeddingDefinition definition,
+            IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse> dispatcher,
+            CancellationToken cancellationToken)
+        {
+            _logger.ComparingEmbeddingDefinition(definition);
+            var tenantsAndComparisonResult = await _embeddingDefinitionComparer.DiffersFromPersisted(
+                new EmbeddingDefinition(
+                    definition.Embedding,
+                    definition.Events,
+                    definition.InititalState),
+                cancellationToken).ConfigureAwait(false);
+
+            if (!tenantsAndComparisonResult.Values.Any(_ => !_.Succeeded))
+            {
+                return false;
+            }
+            var unsuccessfulComparisons = tenantsAndComparisonResult
+                .Where(_ => !_.Value.Succeeded)
+                .Select(_ =>
+                {
+                    return (_.Key, _.Value);
+                });
+            _logger.InvalidEmbeddingDefinition(definition, unsuccessfulComparisons);
+
+            await dispatcher.Reject(CreateInvalidValidationResponse(
+                unsuccessfulComparisons,
+                definition.Embedding),
+                cancellationToken).ConfigureAwait(false);
+
+
+            return true;
+        }
+        EmbeddingRegistrationResponse CreateInvalidValidationResponse(
+            System.Collections.Generic.IEnumerable<(TenantId Key, EmbeddingDefinitionComparisonResult Value)> unsuccessfulComparisons,
+            EmbeddingId embedding)
+        {
+            var (_, result) = unsuccessfulComparisons.First();
+            return _protocol.CreateFailedConnectResponse($"Failed to register Embedding: {embedding.Value} for tenant. {result.FailureReason.Value}");
         }
     }
 }

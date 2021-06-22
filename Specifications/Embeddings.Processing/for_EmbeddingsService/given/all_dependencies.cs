@@ -10,9 +10,11 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
+using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
 using Dolittle.Services.Contracts;
 using Grpc.Core;
@@ -37,7 +39,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
         protected static Mock<IEmbeddingProcessorFactory> embedding_processor_factory;
         protected static Mock<IEmbeddingProcessors> embedding_processors;
         protected static Mock<IEmbeddingProcessor> embedding_processor;
-        protected static Mock<IEmbeddingRequestFactory> embedding_request_factory;
+        protected static IEmbeddingRequestFactory embedding_request_factory;
+        protected static Mock<ICompareEmbeddingDefinitionsForAllTenants> embedding_definition_comparer;
+        protected static Mock<IPersistEmbeddingDefinitionForAllTenants> embedding_definition_persister;
         protected static ILoggerFactory logger_factory;
         protected static EmbeddingsService embedding_service;
         protected static IEmbeddingsProtocol protocol;
@@ -49,6 +53,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
         protected static EmbeddingId embedding_id;
         protected static IEnumerable<Artifact> events;
         protected static ProjectionState initial_state;
+        protected static EmbeddingDefinition embedding_definition;
         protected static CallRequestContext call_request_context;
 
         Establish context = () =>
@@ -71,6 +76,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
                 new Artifact("4f8cbf53-ce87-48ee-b24a-a1c0e654282a", 1)
             };
             initial_state = "some initial state";
+            embedding_definition = new EmbeddingDefinition(embedding_id, events, initial_state);
             application_lifetime = new Mock<IHostApplicationLifetime>();
             application_lifetime
                 .SetupGet(_ => _.ApplicationStopping)
@@ -88,14 +94,24 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
             embedding_processors = new Mock<IEmbeddingProcessors>();
             embedding_processor = new Mock<IEmbeddingProcessor>();
             protocol = new EmbeddingsProtocol();
-            embedding_request_factory = new Mock<IEmbeddingRequestFactory>();
+            embedding_request_factory = new EmbeddingRequestFactory();
+            embedding_definition_comparer = new();
+            embedding_definition_comparer
+                .Setup(_ => _.DiffersFromPersisted(Moq.It.IsAny<EmbeddingDefinition>(), Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult<IDictionary<TenantId, EmbeddingDefinitionComparisonResult>>(new Dictionary<TenantId, EmbeddingDefinitionComparisonResult>()));
+            embedding_definition_persister = new();
+            embedding_definition_persister
+                .Setup(_ => _.TryPersist(Moq.It.IsAny<EmbeddingDefinition>(), Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try.Succeeded()));
             embedding_service = new EmbeddingsService(
                 application_lifetime.Object,
                 execution_context_manager.Object,
                 reverse_call_services.Object, protocol,
                 embedding_processor_factory.Object,
                 embedding_processors.Object,
-                embedding_request_factory.Object,
+                embedding_request_factory,
+                embedding_definition_comparer.Object,
+                embedding_definition_persister.Object,
                 Mock.Of<ILogger<EmbeddingsService>>());
             dispatcher = new Mock<IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>>();
             runtime_stream = new Mock<IAsyncStreamReader<EmbeddingClientToRuntimeMessage>>();
