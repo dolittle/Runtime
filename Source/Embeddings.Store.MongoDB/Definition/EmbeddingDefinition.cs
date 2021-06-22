@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 using MongoDB.Bson.Serialization.Attributes;
 
 
@@ -25,8 +24,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
         public string InitialState { get; set; }
 
         /// <summary>
-        /// Gets or sets the embedding event selectors.
+        /// Gets or sets the embedding event types.
         /// </summary>
-        public ProjectionEventSelector[] EventSelectors { get; set; }
+        public Guid[] Events { get; set; }
     }
 }

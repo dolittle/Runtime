@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.Projections.Store;
@@ -30,7 +31,7 @@ namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_stat
             key = new ProjectionKey("test_key");
 
             initial_state = new ProjectionState("being 😑 an ⬅👴 initial 💰 state 🙈 do 👏 be 👨🅱");
-            var events = new List<ProjectionEventSelector>();
+            var events = new List<Artifact>();
             definition = new EmbeddingDefinition(id, events, initial_state);
 
             states

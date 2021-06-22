@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Linq;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 
 namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
 {
@@ -17,10 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
         public Store.Definition.EmbeddingDefinition ToRuntime(EmbeddingDefinition definition)
             => new(
                 definition.Embedding,
-                definition.EventSelectors.Select(_ => new Projections.Store.Definition.ProjectionEventSelector(
-                    _.EventType,
-                    _.EventKeySelectorType,
-                    _.EventKeySelectorExpression)),
+                definition.Events.Select(_ => new Artifact(_, ArtifactGeneration.First)),
                 definition.InitialState);
 
         /// <inheritdoc/>
@@ -29,12 +26,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
             {
                 Embedding = definition.Embedding,
                 InitialState = definition.InititalState,
-                EventSelectors = definition.Events.Select(_ => new ProjectionEventSelector
-                {
-                    EventKeySelectorType = _.KeySelectorType,
-                    EventKeySelectorExpression = _.KeySelectorExpression,
-                    EventType = _.EventType,
-                }).ToArray()
+                Events = definition.Events.Select(_ => _.Id.Value).ToArray()
             };
     }
 }
