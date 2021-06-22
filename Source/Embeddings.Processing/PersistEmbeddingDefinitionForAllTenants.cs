@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store.Definition;
+using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
 using Microsoft.Extensions.Logging;
@@ -17,6 +18,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
     /// <summary>
     /// Represents an implementation of <see cref="IPersistEmbeddingDefinitionForAllTenants" />.
     /// </summary>
+    [Singleton]
     public class PersistEmbeddingDefinitionForAllTenants : IPersistEmbeddingDefinitionForAllTenants
     {
         readonly IPerformActionOnAllTenants _onTenants;
