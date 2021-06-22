@@ -7,41 +7,6 @@ weight: 1
 ## Message types
 <div class="mermaid">
 classDiagram
-    class Uuid{
-        bytes value
-    }
-    class Failure{
-        Uuid id
-        string reason
-    }
-    class Artifact{
-        Uuid id
-        uint32 generation
-    }
-    class CallRequestContext{
-        ExecutionContext executionContext
-        Uuid headId
-    }
-    class ExecutionContext{
-        Uuid microserviceId
-        Uuid tenantId
-        Version version
-        Uuid correlationid
-        Claim[] claims
-        string environment
-    }
-    class Version{
-        int32 major
-        int32 minor
-        int32 patch
-        int32 build
-        string preReleaseString
-    }
-    class Claim{
-        string key
-        string value
-        string valueType
-    }
     class CommitEventsRequest{
         CallRequestContext callContext
         UncommittedEvent[] events
@@ -69,10 +34,11 @@ classDiagram
         DateTime? externalEventReceived
     }
     CallRequestContext *-- CommitEventsRequest
-    ExecutionContext *-- CallRequestContext
     UncommittedEvent "*" o-- CommitEventsRequest
     Artifact o-- UncommittedEvent
+    link Artifact "{{< ref "types" >}}" "IM a link lol"
     Failure *-- CommitEventsResponse
+    link Failure "{{< ref "types" >}}" "IM a link lol"
     CommittedEvent "*" o-- CommitEventsResponse
 </div>
 
