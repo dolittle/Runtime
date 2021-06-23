@@ -102,15 +102,15 @@ namespace Dolittle.Runtime.Embeddings.Processing
                         return CreateUncommittedAggregateEvents(new UncommittedEvents(events.ToArray()), current);
                     }
 
-                    var transitionEvents = await getTransitionEvents(current, cancellationToken).ConfigureAwait(false);
-                    if (!transitionEvents.Success)
+                    var newTransitionEvents = await getTransitionEvents(current, cancellationToken).ConfigureAwait(false);
+                    if (!newTransitionEvents.Success)
                     {
-                        return transitionEvents.Exception;
+                        return newTransitionEvents.Exception;
                     }
 
-                    allTransitionEvents.Add(transitionEvents.Result);
+                    allTransitionEvents.Add(newTransitionEvents.Result);
 
-                    var intermediateState = await _projector.TryProject(current, transitionEvents.Result, cancellationToken).ConfigureAwait(false);
+                    var intermediateState = await _projector.TryProject(current, newTransitionEvents.Result, cancellationToken).ConfigureAwait(false);
                     if (!intermediateState.Success)
                     {
                         return intermediateState.IsPartialResult
