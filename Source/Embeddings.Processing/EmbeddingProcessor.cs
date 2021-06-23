@@ -70,11 +70,19 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         /// <inheritdoc/>
         public async Task<Try<ProjectionState>> Update(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)
-            => (await ScheduleJob(() => DoUpdate(key, state, cancellationToken)).ConfigureAwait(false)).With(state);
+            => (await ScheduleJob(() => DoWork(
+                    key,
+                    currentState => _transitionCalculator.TryConverge(currentState, state, cancellationToken),
+                    aggregateRootVersion => _embeddingStore.TryReplace(_embedding, key, aggregateRootVersion, state, cancellationToken),
+                    cancellationToken)).ConfigureAwait(false)).With(state);
 
         /// <inheritdoc/>
         public Task<Try> Delete(ProjectionKey key, CancellationToken cancellationToken)
-            => ScheduleJob(() => DoDelete(key, cancellationToken));
+            => ScheduleJob(() => DoWork(
+                key,
+                currentState => _transitionCalculator.TryDelete(currentState, cancellationToken),
+                aggregateRootVersion => _embeddingStore.TryRemove(_embedding, key, aggregateRootVersion, cancellationToken),
+                cancellationToken));
 
         async Task<Try> Loop()
         {
@@ -102,20 +110,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             return Try.Succeeded();
         }
-
-        Task<Try> DoUpdate(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)
-            => DoWork(
-                key,
-                currentState => _transitionCalculator.TryConverge(currentState, state, cancellationToken),
-                aggregateRootVersion => _embeddingStore.TryReplace(_embedding, key, aggregateRootVersion, state, cancellationToken),
-                cancellationToken);
-
-        Task<Try> DoDelete(ProjectionKey key, CancellationToken cancellationToken)
-            => DoWork(
-                key,
-                currentState => _transitionCalculator.TryDelete(currentState, cancellationToken),
-                aggregateRootVersion => _embeddingStore.TryRemove(_embedding, key, aggregateRootVersion, cancellationToken),
-                cancellationToken);
 
         async Task<Try> DoWork(
             ProjectionKey key,
