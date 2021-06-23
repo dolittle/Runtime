@@ -6,14 +6,6 @@ weight: 1
 
 <div class="mermaid">
 classDiagram
-    class Failure{
-        Uuid id
-        string reason
-    }
-    class Artifact{
-        Uuid id
-        uint32 generation
-    }
     class CallRequestContext{
         ExecutionContext executionContext
         Uuid headId
@@ -37,6 +29,14 @@ classDiagram
         string key
         string value
         string valueType
+    }
+    class Failure{
+        Uuid id
+        string reason
+    }
+    class Artifact{
+        Uuid id
+        uint32 generation
     }
     ExecutionContext *-- CallRequestContext
     ExecutionContext o-- Version
