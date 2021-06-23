@@ -24,6 +24,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly IProjectManyEvents _projector;
         readonly ICompareStates _stateComparer;
         readonly IDetectEmbeddingLoops _loopDetector;
+        readonly IConvertProjectionKeysToEventSourceIds _keyToEventSourceConverter;
 
         /// <summary>
         /// Initializes an instance of the <see cref="StateTransitionEventsCalculator" /> class.
@@ -33,19 +34,21 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="projector">The <see cref="IProjectManyEvents"/>.</param>
         /// <param name="stateComparer">The <see cref="ICompareStates"/>.</param>
         /// <param name="loopDetector">The <see cref="IDetectEmbeddingLoops"/>.</param>
+        /// <param name="keyToEventSourceConverter">The <see cref="IConvertProjectionKeysToEventSourceIds"/>.</param>
         public StateTransitionEventsCalculator(
             EmbeddingId identifier,
             IEmbedding embedding,
             IProjectManyEvents projector,
             ICompareStates stateComparer,
-            IDetectEmbeddingLoops loopDetector
-        )
+            IDetectEmbeddingLoops loopDetector,
+            IConvertProjectionKeysToEventSourceIds keyToEventSourceConverter)
         {
             _identifier = identifier;
             _embedding = embedding;
             _projector = projector;
             _stateComparer = stateComparer;
             _loopDetector = loopDetector;
+            _keyToEventSourceConverter = keyToEventSourceConverter;
         }
 
         /// <inheritdoc/>
@@ -137,6 +140,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         UncommittedAggregateEvents CreateUncommittedAggregateEvents(UncommittedEvents events, EmbeddingCurrentState currentState)
-            => new(_identifier.Value, new Artifact(_identifier.Value, ArtifactGeneration.First), currentState.Version, events);
+            => new(
+                _keyToEventSourceConverter.GetEventSourceIdFor(currentState.Key),
+                new Artifact(_identifier.Value, ArtifactGeneration.First),
+                currentState.Version,
+                events);
     }
 }

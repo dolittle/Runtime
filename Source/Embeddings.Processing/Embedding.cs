@@ -141,11 +141,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
         UncommittedEvents ToUncommittedEvents(IEnumerable<Events.Contracts.UncommittedEvent> events)
             => new(
                 new ReadOnlyCollection<UncommittedEvent>(events.Select(_ =>
-                    new UncommittedEvent
-                    (_.EventSourceId.ToGuid(),
-                    new Artifact(_.Artifact.Id.ToGuid(),
-                    _.Artifact.Generation),
-                    _.Public,
-                    _.Content)).ToList()));
+                    new UncommittedEvent(
+                        EventSourceId.NotSet,
+                        new Artifact(_.Artifact.Id.ToGuid(),
+                        _.Artifact.Generation),
+                        _.Public,
+                        _.Content)).ToList()));
     }
 }

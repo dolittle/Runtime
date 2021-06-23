@@ -28,7 +28,13 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
             loop_detector = new Mock<IDetectEmbeddingLoops>(MockBehavior.Strict);
             key_to_event_source_converter = new ProjectionKeyToEventSourceIdConverter();
             cancellation = CancellationToken.None;
-            calculator = new StateTransitionEventsCalculator(identifier, embedding.Object, project_many_events.Object, state_comparer.Object, loop_detector.Object);
+            calculator = new StateTransitionEventsCalculator(
+                identifier,
+                embedding.Object,
+                project_many_events.Object,
+                state_comparer.Object,
+                loop_detector.Object,
+                key_to_event_source_converter);
         };
     }
 }
