@@ -60,7 +60,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
             var events = result.Result;
             events.Count.ShouldEqual(1);
             events[0].Content.ShouldEqual(pb_uncommitted_event.Content);
-            events[0].EventSource.Value.ShouldEqual(pb_uncommitted_event.EventSourceId.ToGuid());
+            events[0].EventSource.ShouldEqual(EventSourceId.NotSet);
             events[0].Public.ShouldEqual(pb_uncommitted_event.Public);
             events[0].Type.Id.Value.ShouldEqual(pb_uncommitted_event.Artifact.Id.ToGuid());
             events[0].Type.Generation.Value.ShouldEqual(pb_uncommitted_event.Artifact.Generation);
