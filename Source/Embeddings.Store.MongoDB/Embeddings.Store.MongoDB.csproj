@@ -15,7 +15,6 @@
     <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
     <ProjectReference Include="../Events.Store/Events.Store.csproj" />
     <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
-    <ProjectReference Include="../Projections.Store.MongoDB/Projections.Store.MongoDB.csproj" />
     <ProjectReference Include="../Embeddings.Store/Embeddings.Store.csproj" />
     <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
     <ProjectReference Include="../Tenancy/Tenancy.csproj" />

@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
-using Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
 using MongoDB.Bson;
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.for_ConvertEmbeddingDefiniti
     public class when_converting_to_runtime
     {
         static EmbeddingId embedding;
-        static ProjectionEventSelector[] event_selectors;
+        static Guid[] event_types;
         static ProjectionState initial_state;
         static Definition.EmbeddingDefinition stored_definition;
         static IConvertEmbeddingDefinition converter;
@@ -26,22 +26,11 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.for_ConvertEmbeddingDefiniti
         Establish context = () =>
         {
             embedding = new EmbeddingId(Guid.Parse("2174fa82-de09-4ce5-a411-433203a29370"));
-            var selector_list = new List<ProjectionEventSelector>()
+            event_types = new[]
             {
-                new ProjectionEventSelector
-                {
-                    EventType = Guid.Parse("7dd78147-14fc-4a4c-a42e-2d81bd73a4a4"),
-                    EventKeySelectorType = 0,
-                    EventKeySelectorExpression = "event 👐👐 key 🔑🔑 selector expression"
-                },
-                new ProjectionEventSelector
-                {
-                    EventType = Guid.Parse("c98f03ee-7f44-456e-9f56-07ba5a73764c"),
-                    EventKeySelectorType = 0,
-                    EventKeySelectorExpression = "another 🔁 event 👐👐 key 🔑🔑 🔑🔑 selector expression"
-                }
+                Guid.Parse("7dd78147-14fc-4a4c-a42e-2d81bd73a4a4"),
+                Guid.Parse("c98f03ee-7f44-456e-9f56-07ba5a73764c"),
             };
-            event_selectors = selector_list.ToArray();
             dynamic json = new JObject();
             json.FirstProp = "crazy prop";
             json.SecondProp = "the 🎇🅱 craziest property";
@@ -50,7 +39,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.for_ConvertEmbeddingDefiniti
             {
                 Embedding = embedding,
                 InitialState = initial_state,
-                EventSelectors = event_selectors
+                Events = event_types
             };
             converter = new ConvertEmbeddingDefinition();
         };
@@ -60,13 +49,7 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.for_ConvertEmbeddingDefiniti
         Because of = () => result_definition = converter.ToRuntime(stored_definition);
 
         It should_have_the_embedding = () => result_definition.Embedding.ShouldEqual(embedding);
-        It should_have_the_event_selectors = () => result_definition.Events
-            .ShouldEachConformTo(_ =>
-                event_selectors.Any(selector =>
-                    selector.EventType == _.EventType.Value
-                    && selector.EventKeySelectorType == _.KeySelectorType
-                    && selector.EventKeySelectorExpression == _.KeySelectorExpression
-                ));
+        It should_have_the_event_types = () => result_definition.Events.ShouldContainOnly(event_types.Select(_ => new Artifact(_, ArtifactGeneration.First)));
         It should_have_the_state = () => result_definition.InititalState.ShouldEqual(initial_state);
     }
 }

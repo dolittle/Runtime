@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Embeddings.Store
     /// </summary>
     public class EmbeddingStore : IEmbeddingStore
     {
-
         readonly IEmbeddingStates _embeddingStates;
         readonly IEmbeddingDefinitions _embeddingDefinitions;
         readonly ILogger _logger;

@@ -9,6 +9,8 @@ using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
 using Machine.Specifications;
+using static Moq.It;
+using static Moq.Times;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.when_connecting
 {
@@ -22,7 +24,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.when_conn
                     client_stream.Object,
                     call_context,
                     protocol,
-                    Moq.It.IsAny<CancellationToken>()
+                    IsAny<CancellationToken>()
                 ))
                 .Returns(Task.FromResult<Try<(IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>, EmbeddingRegistrationArguments)>>(new Exception()));
         };
@@ -42,9 +44,10 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.when_conn
                 client_stream.Object,
                 call_context,
                 protocol,
-                Moq.It.IsAny<CancellationToken>()),
-            Moq.Times.Once);
+                IsAny<CancellationToken>()),
+            Once);
 
+        It should_not_persist_definition = () => embedding_definition_persister.Verify(_ => _.TryPersist(embedding_definition, IsAny<CancellationToken>()), Never);
         It should_not_have_registered_the_embedding = () => embedding_processors.VerifyNoOtherCalls();
         It should_not_have_used_dispatcher = () => dispatcher.VerifyNoOtherCalls();
 

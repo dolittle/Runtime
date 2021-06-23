@@ -7,6 +7,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Dolittle.Runtime.Services;
+using Dolittle.Runtime.Embeddings.Store.Definition;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -19,9 +20,10 @@ namespace Dolittle.Runtime.Embeddings.Processing
         public EmbeddingRegistrationArguments ConvertConnectArguments(EmbeddingRegistrationRequest arguments)
             => new(
                 arguments.CallContext.ExecutionContext.ToExecutionContext(),
-                arguments.EmbeddingId.ToGuid(),
-                arguments.Events.Select(_ => _.ToArtifact()),
-                arguments.InitialState);
+                new EmbeddingDefinition(
+                    arguments.EmbeddingId.ToGuid(),
+                    arguments.Events.Select(_ => _.ToArtifact()),
+                    arguments.InitialState));
 
         /// <inheritdoc/>
         public EmbeddingRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
@@ -66,7 +68,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public ConnectArgumentsValidationResult ValidateConnectArguments(EmbeddingRegistrationArguments arguments)
         {
-            foreach (var eventTypeGroup in arguments.Events.GroupBy(_ => _.Id))
+            foreach (var eventTypeGroup in arguments.Definition.Events.GroupBy(_ => _.Id))
             {
                 if (eventTypeGroup.Count() > 1)
                 {
