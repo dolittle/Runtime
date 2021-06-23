@@ -103,56 +103,46 @@ namespace Dolittle.Runtime.Embeddings.Processing
             return Try.Succeeded();
         }
 
-        async Task<Try> DoUpdate(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return new OperationCanceledException();
-            }
+        Task<Try> DoUpdate(ProjectionKey key, ProjectionState state, CancellationToken cancellationToken)
+            => DoWork(
+                key,
+                currentState => _transitionCalculator.TryConverge(currentState, state, cancellationToken),
+                aggregateRootVersion => _embeddingStore.TryReplace(_embedding, key, aggregateRootVersion, state, cancellationToken),
+                cancellationToken);
 
-            var currentState = await _embeddingStore.TryGet(_embedding, key, cancellationToken).ConfigureAwait(false);
-            if (!currentState.Success)
-            {
-                return currentState.Exception;
-            }
-            var uncommittedEvents = await _transitionCalculator.TryConverge(currentState.Result, state, cancellationToken).ConfigureAwait(false);
-            if (!uncommittedEvents.Success)
-            {
-                return uncommittedEvents.Exception;
-            }
+        Task<Try> DoDelete(ProjectionKey key, CancellationToken cancellationToken)
+            => DoWork(
+                key,
+                currentState => _transitionCalculator.TryDelete(currentState, cancellationToken),
+                aggregateRootVersion => _embeddingStore.TryRemove(_embedding, key, aggregateRootVersion, cancellationToken),
+                cancellationToken);
+
+        async Task<Try> DoWork(
+            ProjectionKey key,
+            Func<EmbeddingCurrentState, Task<Try<UncommittedAggregateEvents>>> getUncommittedEvents,
+            Func<AggregateRootVersion, Task<Try>> replaceOrRemoveEmbedding,
+            CancellationToken cancellationToken)
+        {
             try
             {
-                var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-                await _embeddingStore.TryReplace(_embedding, key, committedEvents.Last().AggregateRootVersion + 1, state, cancellationToken).ConfigureAwait(false);
-                return Try.Succeeded();
-            }
-            catch (Exception ex)
-            {
-                return ex;
-            }
-        }
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return new OperationCanceledException();
+                }
 
-        async Task<Try> DoDelete(ProjectionKey key, CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return new OperationCanceledException();
-            }
-
-            var currentState = await _embeddingStore.TryGet(_embedding, key, cancellationToken).ConfigureAwait(false);
-            if (!currentState.Success)
-            {
-                return currentState.Exception;
-            }
-            var uncommittedEvents = await _transitionCalculator.TryDelete(currentState.Result, cancellationToken).ConfigureAwait(false);
-            if (!uncommittedEvents.Success)
-            {
-                return uncommittedEvents.Exception;
-            }
-            try
-            {
+                var currentState = await _embeddingStore.TryGet(_embedding, key, cancellationToken).ConfigureAwait(false);
+                if (!currentState.Success)
+                {
+                    return currentState.Exception;
+                }
+                var uncommittedEvents = await getUncommittedEvents(currentState.Result).ConfigureAwait(false);
+                if (!uncommittedEvents.Success)
+                {
+                    return uncommittedEvents.Exception;
+                }
                 var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-                await _embeddingStore.TryRemove(_embedding, key, committedEvents.Last().AggregateRootVersion + 1, cancellationToken).ConfigureAwait(false);
+                await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
+
                 return Try.Succeeded();
             }
             catch (Exception ex)
