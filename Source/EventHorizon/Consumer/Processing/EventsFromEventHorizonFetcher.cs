@@ -33,9 +33,16 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
         /// <inheritdoc/>
         public async Task<Try<StreamEvent>> Fetch(StreamPosition streamPosition, CancellationToken cancellationToken)
         {
-            _metrics.IncrementTotalEventsFetched();
-            var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
-            return (@event != default, @event);
+            try
+            {
+                var @event = await _events.DequeueAsync(cancellationToken).ConfigureAwait(false);
+                _metrics.IncrementTotalEventsFetched();
+                return @event;
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
         }
 
         /// <inheritdoc/>
@@ -53,6 +60,12 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 
         /// <inheritdoc/>
         public Task WaitForEvent(ScopeId scope, StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
+
+        /// <inheritdoc/>
+        public Task WaitForEvent(ScopeId scope, StreamId stream, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);
+
+        /// <inheritdoc/>
+        public Task WaitForEvent(ScopeId scope, StreamId stream, CancellationToken token) => Task.Delay(60 * 1000, token);
 
         /// <inheritdoc/>
         public Task WaitForEvent(StreamId stream, StreamPosition position, TimeSpan timeout, CancellationToken token) => Task.Delay(60 * 1000, token);

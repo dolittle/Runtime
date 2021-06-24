@@ -14,16 +14,16 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
         {
             filter_definitions
                 .Setup(_ => _.TryGetFromStream(scope_id, filter_target_stream, cancellation_token))
-                .Returns(Task.FromResult(new Try<IFilterDefinition>(true, different_filter_definition)));
+                .Returns(Task.FromResult(Try<IFilterDefinition>.Succeeded(different_filter_definition)));
 
             definition_comparer
                 .Setup(_ => _.DefinitionsAreEqual(different_filter_definition, filter_definition))
-                .Returns(new FilterValidationResult());
+                .Returns(FilterValidationResult.Succeeded());
         };
 
         static FilterValidationResult result;
         Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
-        It should_fail_validation = () => result.Succeeded.ShouldBeFalse();
+        It should_fail_validation = () => result.Success.ShouldBeFalse();
     }
 }

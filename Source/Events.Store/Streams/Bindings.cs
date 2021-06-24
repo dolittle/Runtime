@@ -15,6 +15,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
         {
             // There is a bug where the implementing class is a SingletonPerTenant (and maybe Singleton) that does so that there is one instance of the implementing class for each Bind
             // builder.Bind<IWaitForEventInStream>().To<StreamEventWatcher>();
+            // builder.Bind<IWaitForEventsToBeAppendedToStream>().To<StreamEventWatcher>();
             // builder.Bind<IWaitForEventInPublicStream>().To<StreamEventWatcher>();
             // builder.Bind<INotifyOfStreamEvents>().To<StreamEventWatcher>();
             // builder.Bind<INotifyOfPublicStreamEvents>().To<StreamEventWatcher>();

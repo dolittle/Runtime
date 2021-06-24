@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Events.Store.Streams
     /// <summary>
     /// Defines a system that can watch a stream of events.
     /// </summary>
-    public interface IStreamEventWatcher : INotifyOfStreamEvents, IWaitForEventInStream, INotifyOfPublicStreamEvents, IWaitForEventInPublicStream
+    public interface IStreamEventWatcher : INotifyOfStreamEvents, IWaitForEventInStream, IWaitForEventsToBeAppendedToStream, INotifyOfPublicStreamEvents, IWaitForEventInPublicStream
     {
     }
 }

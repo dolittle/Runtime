@@ -13,22 +13,35 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterValidationResult"/> class.
         /// </summary>
-        public FilterValidationResult() => Succeeded = true;
+        FilterValidationResult() => Success = true;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilterValidationResult"/> class.
         /// </summary>
         /// <param name="reason">The <see cref="FailedFilterValidationReason" />.</param>
-        public FilterValidationResult(FailedFilterValidationReason reason) => FailureReason = reason;
+        FilterValidationResult(FailedFilterValidationReason reason) => FailureReason = reason;
 
         /// <summary>
         /// Gets a value indicating whether the validation succeeded or not.
         /// </summary>
-        public bool Succeeded { get; }
+        public bool Success { get; }
 
         /// <summary>
         /// Gets the <see cref="FailedFilterValidationReason" />.
         /// </summary>
         public FailedFilterValidationReason FailureReason { get; }
+
+        /// <summary>
+        /// Creates a failed <see cref="FilterValidationResult" />.
+        /// </summary>
+        /// <param name="reason">The <see cref="FailedFilterValidationReason" />.</param>
+        /// <returns>The <see cref="FilterValidationResult" />.</returns>
+        public static FilterValidationResult Failed(FailedFilterValidationReason reason) => new(reason);
+
+        /// <summary>
+        /// Creates a succeeded <see cref="FilterValidationResult" />.
+        /// </summary>
+        /// <returns>The <see cref="FilterValidationResult" />.</returns>
+        public static FilterValidationResult Succeeded() => new();
     }
 }

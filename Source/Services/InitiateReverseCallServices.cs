@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Services
             {
                 _logger.LogWarning(_argumentsNotReceived);
                 await dispatcher.Reject(protocol.CreateFailedConnectResponse(_argumentsNotReceived), cancellationToken).ConfigureAwait(false);
-                return false;
+                return new ConnectArgumentsNotReceived();
             }
             _logger.LogTrace("Received connection arguments");
 

@@ -19,5 +19,7 @@
         <PackageReference Include="moq" Version="4.13.*" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftDotNetTestVersion)" />
         <PackageReference Include="Machine.Specifications.Runner.VisualStudio" Version="$(MachineSpecificationsRunnerVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Grpc.Core.Testing" Version="$(GrpcVersion)" />
     </ItemGroup>
 </Project>

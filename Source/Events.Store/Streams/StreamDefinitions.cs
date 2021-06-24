@@ -3,7 +3,6 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Tenancy;
@@ -33,30 +32,5 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// <inheritdoc/>
         public Task Persist(ScopeId scope, IStreamDefinition streamDefinition, CancellationToken cancellationToken) =>
             _onAllTenants.PerformAsync(_ => _getStreamDefinitions().Persist(scope, streamDefinition, cancellationToken));
-
-        /// <inheritdoc/>
-        public async Task<Try<IStreamDefinition>> TryGet(ScopeId scope, StreamId streamId, CancellationToken cancellationToken)
-        {
-            IStreamDefinition result = default;
-
-            await _onAllTenants.PerformAsync(async _ =>
-                {
-                    var tryGetStreamDefinition = await _getStreamDefinitions().TryGet(scope, streamId, cancellationToken).ConfigureAwait(false);
-                    if (tryGetStreamDefinition.Success)
-                    {
-                        var streamDefinition = tryGetStreamDefinition.Result;
-                        if (result == default)
-                        {
-                            result = streamDefinition;
-                        }
-                        else if (tryGetStreamDefinition.Result != result)
-                        {
-                            throw new StreamDefinitionNotTheSameForAllTenants(scope, streamId);
-                        }
-                    }
-                }).ConfigureAwait(false);
-
-            return new Try<IStreamDefinition>(result != default, result);
-        }
     }
 }

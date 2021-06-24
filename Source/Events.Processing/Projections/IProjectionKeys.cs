@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     public interface IProjectionKeys
     {
         /// <summary>
-        /// Try to get the <see cref="ProjectionKey" />.  
+        /// Try to get the <see cref="ProjectionKey" />.
         /// </summary>
         /// <param name="projectionDefinition">The <see cref="ProjectionDefinition" />.</param>
         /// <param name="event">The <see cref="CommittedEvent" /> to map to a projection state.</param>

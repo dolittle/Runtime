@@ -29,6 +29,7 @@ using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatch
 using Version = Dolittle.Runtime.Versioning.Version;
 using static Moq.It;
 using Dolittle.Runtime.Events.Processing.Contracts;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.given
 {
@@ -40,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
         protected static Mock<ReverseCallDispatcherType> reverse_call_dispatcher;
         protected static Mock<IWriteEventsToStreams> stream_writer;
         protected static EventHandlerRegistrationArguments arguments;
-        protected static Mock<ILoggerFactory> logger_factory;
+        protected static ILoggerFactory logger_factory;
         protected static FactoryFor<IWriteEventsToStreams> factory_for_stream_writer;
         protected static CancellationToken cancellation_token;
         protected static ExecutionContext execution_context;
@@ -58,17 +59,16 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
 
         Establish context = () =>
         {
-            stream_processors = new();
-            filter_validation = new();
-            stream_definitions = new();
+            stream_processors = new(MockBehavior.Strict);
+            filter_validation = new(MockBehavior.Strict);
+            stream_definitions = new(MockBehavior.Strict);
             reverse_call_dispatcher = new();
             reverse_call_dispatcher.Setup(
                 _ => _.Reject(IsAny<EventHandlerRegistrationResponse>(), IsAny<CancellationToken>())
             ).Callback((EventHandlerRegistrationResponse e, CancellationToken ct) => failure = e.Failure);
 
-            stream_writer = new();
-            logger_factory = new();
-            logger_factory.Setup(_ => _.CreateLogger(IsAny<string>())).Returns(Mock.Of<ILogger>());
+            stream_writer = new(MockBehavior.Strict);
+            logger_factory = new NullLoggerFactory();
             execution_context = new(
                 microservice,
                 tenant,

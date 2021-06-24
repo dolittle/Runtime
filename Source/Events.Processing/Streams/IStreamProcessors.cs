@@ -1,10 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -27,12 +29,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
         /// <param name="streamProcessor">The registered <see cref="StreamProcessor" />.</param>
         /// <returns>A value indicating whether a new <see cref="StreamProcessor" /> was registered.</returns>
-        bool TryRegister(
+        Try<StreamProcessor> TryCreateAndRegister(
             ScopeId scopeId,
             EventProcessorId eventProcessorId,
             IStreamDefinition sourceStreamDefinition,
             FactoryFor<IEventProcessor> getEventProcessor,
-            CancellationToken cancellationToken,
-            out StreamProcessor streamProcessor);
+            CancellationToken cancellationToken);
     }
 }

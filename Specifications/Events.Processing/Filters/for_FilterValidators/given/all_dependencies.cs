@@ -91,17 +91,17 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.given
             stream_processor_state_repository = mocks.Create<IStreamProcessorStateRepository>();
             stream_processor_state_repository
                 .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
-                .Returns(Task.FromResult(new Try<IStreamProcessorState>(true, stream_processor_state)));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(stream_processor_state)));
 
             filter_definitions = mocks.Create<IFilterDefinitions>();
             filter_definitions
                 .Setup(_ => _.TryGetFromStream(scope_id, filter_target_stream, cancellation_token))
-                .Returns(Task.FromResult(new Try<IFilterDefinition>(true, filter_definition)));
+                .Returns(Task.FromResult(Try<IFilterDefinition>.Succeeded(filter_definition)));
 
             definition_comparer = mocks.Create<ICompareFilterDefinitions>();
             definition_comparer
                 .Setup(_ => _.DefinitionsAreEqual(filter_definition, filter_definition))
-                .Returns(new FilterValidationResult());
+                .Returns(FilterValidationResult.Succeeded());
 
             var execution_context_manager = mocks.Create<IExecutionContextManager>();
             execution_context_manager
