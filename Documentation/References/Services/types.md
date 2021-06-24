@@ -38,7 +38,7 @@ classDiagram
         Uuid id
         uint32 generation
     }
-    ExecutionContext *-- CallRequestContext
-    ExecutionContext o-- Version
-    ExecutionContext o-- Claim
+    CallRequestContext --* ExecutionContext
+    ExecutionContext --o Version
+    ExecutionContext --o Claim
 </div>
