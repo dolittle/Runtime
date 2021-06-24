@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Embeddings.Store;
@@ -98,7 +97,13 @@ namespace Dolittle.Runtime.Embeddings.Processing
             EmbeddingId embeddingId,
             IEmbedding embedding,
             IProjectManyEvents projectManyEvents)
-            => new(embeddingId, embedding, projectManyEvents, _stateComparer, _embeddingLoopDetector);
+            => new(
+                embeddingId,
+                embedding,
+                projectManyEvents,
+                _stateComparer,
+                _embeddingLoopDetector,
+                _projectionKeysConverter);
 
         ProjectManyEvents CreateProjectManyEvents(
             EmbeddingId embeddingId,
