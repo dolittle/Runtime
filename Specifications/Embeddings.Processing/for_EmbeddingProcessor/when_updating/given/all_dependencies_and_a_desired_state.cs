@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
     {
         protected static ProjectionKey key;
         protected static EmbeddingCurrentState current_state;
-        protected static UncommittedAggregateEvents uncommitted_events;
+        protected static UncommittedEvent uncommitted_event;
         protected static AggregateRootVersion aggregate_root_version;
         protected static CommittedAggregateEvent committed_event;
         protected static CommittedAggregateEvents committed_events;
@@ -29,11 +29,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
         {
             key = "projection-key";
             current_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, "{}", key);
-            uncommitted_events = new UncommittedAggregateEvents(
-                Guid.Parse("1d137f3a-b8d0-43a5-a08a-f8eb35b5e932"),
-                new Artifact("5512cda5-5e38-4654-ba86-3a7d917f3eb0", ArtifactGeneration.First),
-                1,
-                new List<UncommittedEvent>());
+            uncommitted_event = new("1f5e6a1b-f187-4060-8dc2-4a93fff4cd1d", new("24eca2e4-dd4b-45d0-8808-e6833d3680ca", 2), false, "content");
             aggregate_root_version = 1;
             committed_event = new CommittedAggregateEvent(
                 new Artifact("5512cda5-5e38-4654-ba86-3a7d917f3eb0", ArtifactGeneration.First),
@@ -58,5 +54,12 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
                 new[] { committed_event });
             desired_state = "{}";
         };
+
+        protected static UncommittedAggregateEvents CreateUncommittedEvents(params UncommittedEvent[] events)
+            => new(
+                Guid.Parse("1d137f3a-b8d0-43a5-a08a-f8eb35b5e932"),
+                new Artifact("5512cda5-5e38-4654-ba86-3a7d917f3eb0", ArtifactGeneration.First),
+                1,
+                events);
     }
 }

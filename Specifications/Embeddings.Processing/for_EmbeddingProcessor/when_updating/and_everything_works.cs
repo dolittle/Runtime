@@ -15,14 +15,23 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
     public class and_everything_works : given.all_dependencies_and_a_desired_state
     {
         static Task task;
-
+        static UncommittedAggregateEvents uncommitted_events;
         Establish context = () =>
         {
+            uncommitted_events = CreateUncommittedEvents(uncommitted_event);
             task = embedding_processor.Start(cancellation_token);
-            embedding_store.Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
-            transition_calculator.Setup(_ => _.TryConverge(current_state, desired_state, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
-            event_store.Setup(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(committed_events));
-            embedding_store.Setup(_ => _.TryReplace(embedding, key, aggregate_root_version, desired_state, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
+            embedding_store
+                .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
+            transition_calculator
+                .Setup(_ => _.TryConverge(current_state, desired_state, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
+            event_store
+                .Setup(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(committed_events));
+            embedding_store
+                .Setup(_ => _.TryReplace(embedding, key, aggregate_root_version, desired_state, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try.Succeeded()));
         };
 
         static Try<ProjectionState> result;

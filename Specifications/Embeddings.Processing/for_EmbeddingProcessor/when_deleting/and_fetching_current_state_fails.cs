@@ -21,7 +21,9 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_del
         {
             exception = new Exception();
             task = embedding_processor.Start(cancellation_token);
-            embedding_store.Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
+            embedding_store
+                .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
         };
 
         static Try result;

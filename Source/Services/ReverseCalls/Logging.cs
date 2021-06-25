@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
     {
         #region WrappedAsyncStreamWriter
         static readonly Action<ILogger, RequestId, Type, Exception> _writingMessage = LoggerMessage.Define<RequestId, Type>(
-            LogLevel.Debug,
+            LogLevel.Trace,
             new EventId(629413668, nameof(WritingMessage)),
             "Writing message {Type} for {Request}");
         internal static void WritingMessage(this ILogger logger, RequestId requestId, Type messageType)
@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
         static readonly Action<ILogger, RequestId, Type, Exception> _writingMessageBlockedByAnotherWrite = LoggerMessage.Define<RequestId, Type>(
             LogLevel.Trace,
             new EventId(825683084, nameof(WritingMessageBlockedByAnotherWrite)),
-            "Writing message {Type} for {Request} is blocked by anoter write operation");
+            "Writing message {Type} for {Request} is blocked by another write operation");
         internal static void WritingMessageBlockedByAnotherWrite(this ILogger logger, RequestId requestId, Type messageType)
             => _writingMessageBlockedByAnotherWrite(logger, requestId, messageType, null);
 
@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls
 
         #region WrappedAsyncStreamReader
         static readonly Action<ILogger, RequestId, Exception> _readingMessage = LoggerMessage.Define<RequestId>(
-            LogLevel.Debug,
+            LogLevel.Trace,
             new EventId(001299866, nameof(ReadingMessage)),
             "Reading message for {Request}");
         internal static void ReadingMessage(this ILogger logger, RequestId requestId)

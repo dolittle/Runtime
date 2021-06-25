@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         static readonly Action<ILogger, Guid, Exception> _persistingDefinition = LoggerMessage
             .Define<Guid>(
-                LogLevel.Warning,
+                LogLevel.Debug,
                 new EventId(220634741, nameof(PersistingDefinition)),
                 "Persisting definition for Embedding {Embedding}");
 
