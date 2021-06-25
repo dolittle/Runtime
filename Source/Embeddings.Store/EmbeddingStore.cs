@@ -92,7 +92,7 @@ namespace Dolittle.Runtime.Embeddings.Store
                 }
                 return tryGetStateTuples
                     .Select(_ =>
-                        _.Where(resultTuple => resultTuple.State.IsRemoved == includeRemoved)
+                        _.Where(resultTuple => includeRemoved || !resultTuple.State.IsRemoved)
                         .Select(resultTuple =>
                             new EmbeddingCurrentState(
                                 resultTuple.State.Version,
@@ -126,7 +126,7 @@ namespace Dolittle.Runtime.Embeddings.Store
                 }
                 return tryGetStateTuples
                     .Select(_ =>
-                        _.Where(resultTuple => resultTuple.State.IsRemoved == includeRemoved)
+                        _.Where(resultTuple => includeRemoved || !resultTuple.State.IsRemoved)
                         .Select(resultTuple => resultTuple.Key));
             }
             catch (Exception ex)
