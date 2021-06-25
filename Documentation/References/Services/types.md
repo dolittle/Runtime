@@ -1,11 +1,25 @@
 ---
 title: Types
 description: The definition of the common types shared between Runtime services
-weight: 1
+weight: 100
 ---
+
+## Fundamental types
 
 <div class="mermaid">
 classDiagram
+    class ReverseCallArgumentsContext{
+        ExecutionContext executionContext
+        Uuid headId
+        Duration pingInterval
+    }
+    class ReverseCallRequestContext{
+        Uuid callId
+        ExecutionContext executionContext
+    }
+    class ReverseCallResponseContext{
+        Uuid callId
+    }
     class CallRequestContext{
         ExecutionContext executionContext
         Uuid headId
@@ -38,7 +52,31 @@ classDiagram
         Uuid id
         uint32 generation
     }
+    ReverseCallArgumentsContext --* ExecutionContext
+    ReverseCallRequestContext --* ExecutionContext
     CallRequestContext --* ExecutionContext
     ExecutionContext --o Version
     ExecutionContext --o Claim
+</div>
+
+## Event processing types
+<div class="mermaid">
+classDiagram
+    class ProcessorFailure {
+        string reason
+        bool retry
+        Duration retryTimeout
+    }
+    class RetryProcessingState {
+        string failureReason
+        uint32 retryCount
+    }
+    class StreamEvent {
+        CommittedEvent event
+        Uuid partitionId
+        Uuid scopeId
+        bool partitioned
+    }
+    %%
+    StreamEvent --* CommittedEvent
 </div>

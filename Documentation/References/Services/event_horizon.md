@@ -1,7 +1,7 @@
 ---
 title: Event Horizon
 description: The definition of the Runtime Event Horizon service
-weight: 5
+weight: 10
 ---
 
 <div class="mermaid">
