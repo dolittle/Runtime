@@ -187,7 +187,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             => new(
                 _keyToEventSourceConverter.GetEventSourceIdFor(currentState.Key),
                 new Artifact(_embeddingId.Value, ArtifactGeneration.First),
-                currentState.Version,
+                currentState.Version.Value - (ulong)events.Count,
                 events);
     }
 }
