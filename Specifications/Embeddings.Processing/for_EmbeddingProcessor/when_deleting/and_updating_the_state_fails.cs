@@ -16,15 +16,25 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_del
     {
         static Task task;
         static Exception exception;
+        static UncommittedAggregateEvents uncommitted_events;
 
         Establish context = () =>
         {
+            uncommitted_events = CreateUncommittedEvents(uncommitted_event);
             exception = new Exception();
             task = embedding_processor.Start(cancellation_token);
-            embedding_store.Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
-            transition_calculator.Setup(_ => _.TryDelete(current_state, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
-            event_store.Setup(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(committed_events));
-            embedding_store.Setup(_ => _.TryRemove(embedding, key, aggregate_root_version, Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Failed(exception)));
+            embedding_store
+                .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Succeeded(current_state)));
+            transition_calculator
+                .Setup(_ => _.TryDelete(current_state, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try<UncommittedAggregateEvents>.Succeeded(uncommitted_events)));
+            event_store
+                .Setup(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(committed_events));
+            embedding_store
+                .Setup(_ => _.TryRemove(embedding, key, aggregate_root_version, Moq.It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(Try.Failed(exception)));
         };
 
         static Try result;
