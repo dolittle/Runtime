@@ -112,7 +112,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
                 embedding_request_factory,
                 embedding_definition_comparer.Object,
                 embedding_definition_persister.Object,
-                Mock.Of<ILogger<EmbeddingsService>>());
+                Mock.Of<ILogger<EmbeddingsService>>(),
+                NullLoggerFactory.Instance);
             dispatcher = new Mock<IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse>>();
             runtime_stream = new Mock<IAsyncStreamReader<EmbeddingClientToRuntimeMessage>>();
             client_stream = new Mock<IServerStreamWriter<EmbeddingRuntimeToClientMessage>>();

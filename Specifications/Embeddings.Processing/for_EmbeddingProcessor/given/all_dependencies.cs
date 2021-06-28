@@ -9,6 +9,7 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
 using Moq;
 using It = Moq.It;
 
@@ -39,7 +40,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.given
                 event_waiter.Object,
                 event_store.Object,
                 embedding_store.Object,
-                transition_calculator.Object);
+                transition_calculator.Object,
+                Mock.Of<ILogger>());
             cancellation_token = CancellationToken.None;
 
             state_updater.Setup(_ => _.TryUpdateAll(It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
