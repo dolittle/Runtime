@@ -15,8 +15,6 @@ namespace Dolittle.Runtime.Embeddings.Store.Services
                 new EventId(359275420, nameof(GettingOneEmbedding)),
                 "Getting state for embedding {Embedding} with key {Key}");
 
-
-
         internal static void GettingOneEmbedding(this ILogger logger, EmbeddingId embedding, ProjectionKey key)
             => _gettingOneEmbedding(logger, embedding, key, null);
 
