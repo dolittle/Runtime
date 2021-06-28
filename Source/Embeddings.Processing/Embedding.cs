@@ -100,7 +100,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/> 
         public async Task<Try<UncommittedEvents>> TryDelete(EmbeddingCurrentState currentState, CancellationToken cancellationToken)
         {
-
             _logger.DeletingStateForEmbedding(_embeddingId, currentState);
             var request = _requestFactory.TryCreate(currentState);
             if (!request.Success)
