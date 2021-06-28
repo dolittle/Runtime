@@ -27,7 +27,9 @@ namespace Dolittle.Runtime.Embeddings.Store.Services
         /// </summary>
         /// <param name="getEmbeddingStore"><see cref="FactoryFor{T}"/><see cref="IEmbeddingStore" />.</param>
         /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
-        public EmbeddingsService(FactoryFor<IEmbeddingStore> getEmbeddingStore, IExecutionContextManager executionContextManager)
+        public EmbeddingsService(
+            FactoryFor<IEmbeddingStore> getEmbeddingStore,
+            IExecutionContextManager executionContextManager)
         {
             _getEmbeddingStore = getEmbeddingStore;
             _executionContextManager = executionContextManager;

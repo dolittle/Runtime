@@ -145,7 +145,8 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
                         var updateDefinition = Builders<Embedding>
                                                 .Update
                                                 .Set(_ => _.Content, state.State.Value)
-                                                .Set(_ => _.Version, state.Version.Value);
+                                                .Set(_ => _.Version, state.Version.Value)
+                                                .Set(_ => _.IsRemoved, state.IsRemoved);
                         var updateResult = await collection
                             .UpdateOneAsync(
                                 CreateKeyFilter(key),

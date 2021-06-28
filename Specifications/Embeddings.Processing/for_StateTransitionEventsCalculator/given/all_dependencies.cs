@@ -4,6 +4,7 @@
 using System.Threading;
 using Dolittle.Runtime.Embeddings.Store;
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalculator.given
@@ -34,7 +35,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 project_many_events.Object,
                 state_comparer.Object,
                 loop_detector.Object,
-                key_to_event_source_converter);
+                key_to_event_source_converter,
+                Mock.Of<ILogger>());
         };
     }
 }

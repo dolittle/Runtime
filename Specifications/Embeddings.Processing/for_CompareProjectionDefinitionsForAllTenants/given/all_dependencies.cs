@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionDefinition
             var builder = new TenantConfigBuilder();
             callback(builder);
             builder.Build();
-            return new(new PerformActionOnAllTenants(tenants, execution_context_manager), get_definitions);
+            return new(new PerformActionOnAllTenants(tenants, execution_context_manager), get_definitions, Mock.Of<ILogger>());
         }
         public class TenantConfigBuilder
         {

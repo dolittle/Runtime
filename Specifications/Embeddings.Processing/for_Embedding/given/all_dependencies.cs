@@ -6,6 +6,7 @@ using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Services;
 using Machine.Specifications;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.given
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.given
             request_factory = new Mock<IEmbeddingRequestFactory>(MockBehavior.Strict);
             embedding_request = new EmbeddingRequest();
             embedding_id = "b0e740b4-dda0-4392-868a-45b5bff7e4c2";
-            embedding = new Embedding(embedding_id, dispatcher.Object, request_factory.Object);
+            embedding = new Embedding(embedding_id, dispatcher.Object, request_factory.Object, Mock.Of<ILogger>());
         };
     }
 }

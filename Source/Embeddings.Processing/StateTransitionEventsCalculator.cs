@@ -11,6 +11,7 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -25,6 +26,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly ICompareStates _stateComparer;
         readonly IDetectEmbeddingLoops _loopDetector;
         readonly IConvertProjectionKeysToEventSourceIds _keyToEventSourceConverter;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes an instance of the <see cref="StateTransitionEventsCalculator" /> class.
@@ -35,13 +37,15 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="stateComparer">The <see cref="ICompareStates"/>.</param>
         /// <param name="loopDetector">The <see cref="IDetectEmbeddingLoops"/>.</param>
         /// <param name="keyToEventSourceConverter">The <see cref="IConvertProjectionKeysToEventSourceIds"/>.</param>
+        /// <param name="logger">The <see cref="ILogger"/>.</param>
         public StateTransitionEventsCalculator(
             EmbeddingId identifier,
             IEmbedding embedding,
             IProjectManyEvents projector,
             ICompareStates stateComparer,
             IDetectEmbeddingLoops loopDetector,
-            IConvertProjectionKeysToEventSourceIds keyToEventSourceConverter)
+            IConvertProjectionKeysToEventSourceIds keyToEventSourceConverter,
+            ILogger logger)
         {
             _embeddingId = identifier;
             _embedding = embedding;
@@ -49,6 +53,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _stateComparer = stateComparer;
             _loopDetector = loopDetector;
             _keyToEventSourceConverter = keyToEventSourceConverter;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -75,6 +80,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         {
             try
             {
+                _logger.CalculatingStateTransitionEvents(_embeddingId, current.Key, current.Version);
                 var allTransitionEvents = new List<UncommittedEvents>();
                 var previousStates = new List<ProjectionState>
                 {
@@ -85,14 +91,22 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 {
                     if (cancellationToken.IsCancellationRequested)
                     {
+                        _logger.CalculatingStateTransitionEventsCancelled(_embeddingId, current.Key, current.Version);
                         return new CalculateStateTransitionEventsCancelled(_embeddingId);
                     }
-                    var getEventsToCommit = TryComplete(current, allTransitionEvents, isDesiredState, out var eventsToCommit);
+                    var getEventsToCommit = TryCheckIfDesiredState(current, allTransitionEvents, isDesiredState, out var eventsToCommit);
                     if (!getEventsToCommit.Success || getEventsToCommit.Result)
                     {
-                        return !getEventsToCommit.Success
-                            ? getEventsToCommit.Exception
-                            : eventsToCommit;
+                        if (getEventsToCommit.Exception != default)
+                        {
+                            _logger.CalculatingStateTransitionEventsFailedCheckingIfDesiredState(
+                                _embeddingId,
+                                current.Key,
+                                current.Version,
+                                getEventsToCommit.Exception);
+                            return getEventsToCommit.Exception;
+                        }
+                        return eventsToCommit;
                     }
                     var addNewTransitionEvents = await TryGetAndAddNewTransitionEventsInto(
                         allTransitionEvents,
@@ -101,12 +115,22 @@ namespace Dolittle.Runtime.Embeddings.Processing
                         cancellationToken).ConfigureAwait(false);
                     if (!addNewTransitionEvents.Success)
                     {
+                        _logger.CalculatingStateTransitionEventsFailedGettingNextTransitionEvents(
+                            _embeddingId,
+                            current.Key,
+                            current.Version,
+                            addNewTransitionEvents.Exception);
                         return addNewTransitionEvents.Exception;
                     }
 
                     var projectIntermediateState = await TryProjectNewState(current, addNewTransitionEvents, previousStates, cancellationToken).ConfigureAwait(false);
                     if (!projectIntermediateState.Success)
                     {
+                        _logger.CalculatingStateTransitionEventsFailedProjectingNewState(
+                            _embeddingId,
+                            current.Key,
+                            current.Version,
+                            addNewTransitionEvents.Exception);
                         return projectIntermediateState.Exception;
                     }
 
@@ -120,13 +144,13 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
         }
 
-        Try<bool> TryComplete(
+        Try<bool> TryCheckIfDesiredState(
             EmbeddingCurrentState current,
             IEnumerable<UncommittedEvents> allTransitionEvents,
             Func<EmbeddingCurrentState, Try<bool>> isDesiredState,
-            out UncommittedAggregateEvents aggregateEvents)
+            out UncommittedAggregateEvents eventsToCommit)
         {
-            aggregateEvents = null;
+            eventsToCommit = null;
             var isDesired = isDesiredState(current);
             if (!isDesired.Success)
             {
@@ -140,7 +164,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                                             from @event in uncommittedEvents
                                             select @event;
 
-            aggregateEvents = CreateUncommittedAggregateEvents(new UncommittedEvents(flattenedTransitionEvents.ToArray()), current);
+            eventsToCommit = CreateUncommittedAggregateEvents(new UncommittedEvents(flattenedTransitionEvents.ToArray()), current);
             return true;
         }
 

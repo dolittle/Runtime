@@ -44,67 +44,56 @@ namespace Dolittle.Runtime.Embeddings.Store
         /// <inheritdoc/>
         public async Task<Try<EmbeddingCurrentState>> TryGet(EmbeddingId embedding, ProjectionKey key, CancellationToken token)
         {
-            try
-            {
-                _logger.GettingOneEmbedding(embedding, key);
+            _logger.GettingOneEmbedding(embedding, key);
 
-                var state = await _embeddingStates.TryGet(embedding, key, token);
-                return state switch
-                {
-                    { Success: true, Result: { IsRemoved: true } } => await TryGetInitialState(
-                        embedding,
-                        key,
-                        state.Result.Version,
-                        token).ConfigureAwait(false),
-                    { Success: true } => new EmbeddingCurrentState(
-                        state.Result.Version,
-                        EmbeddingCurrentStateType.Persisted,
-                        state.Result.State,
-                        key),
-                    { Success: false, Exception: EmbeddingStateDoesNotExist } =>
-                        await TryGetInitialState(embedding, key, token).ConfigureAwait(false),
-                    _ => state.Exception
-                };
-            }
-            catch (Exception ex)
+            var state = await _embeddingStates.TryGet(embedding, key, token);
+            var result = state switch
             {
-                _logger.LogWarning(ex, "Error getting embedding {Embedding} and key {Key}", embedding.Value, key.Value);
-                return ex;
+                { Success: true, Result: { IsRemoved: true } } => await TryGetInitialState(
+                    embedding,
+                    key,
+                    state.Result.Version,
+                    token).ConfigureAwait(false),
+                { Success: true } => Try<EmbeddingCurrentState>.Succeeded(new EmbeddingCurrentState(
+                    state.Result.Version,
+                    EmbeddingCurrentStateType.Persisted,
+                    state.Result.State,
+                    key)),
+                { Success: false, Exception: EmbeddingStateDoesNotExist } =>
+                    await TryGetInitialState(embedding, key, token).ConfigureAwait(false),
+                _ => Try<EmbeddingCurrentState>.Failed(state.Exception)
+            };
+            if (result.Exception != default)
+            {
+                _logger.ErrorGettingOneEmbedding(embedding, key, result.Exception);
             }
+            return result;
         }
 
         /// <inheritdoc/>
         public Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, CancellationToken token)
             => TryGetAll(embedding, false, token);
 
-
         /// <inheritdoc/>
         public async Task<Try<IEnumerable<EmbeddingCurrentState>>> TryGetAll(EmbeddingId embedding, bool includeRemoved, CancellationToken token)
         {
-            try
-            {
-                _logger.GettingAllEmbeddings(embedding);
+            _logger.GettingAllEmbeddings(embedding);
 
-                var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
-                if (!tryGetStateTuples.Success)
-                {
-                    return tryGetStateTuples.Exception;
-                }
-                return tryGetStateTuples
-                    .Select(_ =>
-                        _.Where(resultTuple => resultTuple.State.IsRemoved == includeRemoved)
-                        .Select(resultTuple =>
-                            new EmbeddingCurrentState(
-                                resultTuple.State.Version,
-                                resultTuple.State.IsRemoved ? EmbeddingCurrentStateType.Deleted : EmbeddingCurrentStateType.Persisted,
-                                resultTuple.State.State,
-                                resultTuple.Key)));
-            }
-            catch (Exception ex)
+            var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
+            if (!tryGetStateTuples.Success)
             {
-                _logger.LogWarning(ex, "Error getting all instances of embedding {Embedding}", embedding.Value);
-                return ex;
+                _logger.ErrorGettingAllEmbeddings(embedding, tryGetStateTuples.Exception);
+                return tryGetStateTuples.Exception;
             }
+            return tryGetStateTuples
+                .Select(_ =>
+                    _.Where(resultTuple => includeRemoved || !resultTuple.State.IsRemoved)
+                    .Select(resultTuple =>
+                        new EmbeddingCurrentState(
+                            resultTuple.State.Version,
+                            resultTuple.State.IsRemoved ? EmbeddingCurrentStateType.Deleted : EmbeddingCurrentStateType.Persisted,
+                            resultTuple.State.State,
+                            resultTuple.Key)));
         }
 
         /// <inheritdoc/>
@@ -115,48 +104,32 @@ namespace Dolittle.Runtime.Embeddings.Store
         /// <inheritdoc/>
         public async Task<Try<IEnumerable<ProjectionKey>>> TryGetKeys(EmbeddingId embedding, bool includeRemoved, CancellationToken token)
         {
-            try
-            {
-                _logger.GettingEmbeddingKeys(embedding);
+            _logger.GettingEmbeddingKeys(embedding);
 
-                var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
-                if (!tryGetStateTuples.Success)
-                {
-                    return tryGetStateTuples.Exception;
-                }
-                return tryGetStateTuples
-                    .Select(_ =>
-                        _.Where(resultTuple => resultTuple.State.IsRemoved == includeRemoved)
-                        .Select(resultTuple => resultTuple.Key));
-            }
-            catch (Exception ex)
+            var tryGetStateTuples = await _embeddingStates.TryGetAll(embedding, token).ConfigureAwait(false);
+            if (!tryGetStateTuples.Success)
             {
-                _logger.LogWarning(ex, "Error getting keys for embedding {Embedding}", embedding.Value);
-                return ex;
+                _logger.ErrorGettingEmbeddingKeys(embedding, tryGetStateTuples.Exception);
+                return tryGetStateTuples.Exception;
             }
+            return tryGetStateTuples
+                .Select(_ =>
+                    _.Where(resultTuple => includeRemoved || !resultTuple.State.IsRemoved)
+                    .Select(resultTuple => resultTuple.Key));
         }
 
 
         /// <inheritdoc/>
         public async Task<Try> TryRemove(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version, CancellationToken token)
         {
-            try
+            _logger.RemovingEmbedding(embedding, key, version);
+            var tryMarkAsRemoved = await _embeddingStates.TryMarkAsRemove(embedding, key, version, token).ConfigureAwait(false);
+            if (tryMarkAsRemoved.Exception != default)
             {
-                _logger.RemovingEmbedding(embedding, key, version);
+                _logger.ErrorRemovingEmbedding(embedding, key, version, tryMarkAsRemoved.Exception);
+            }
+            return tryMarkAsRemoved.Success ? Try.Succeeded() : tryMarkAsRemoved.Exception;
 
-                var tryMarkAsRemoved = await _embeddingStates.TryMarkAsRemove(embedding, key, version, token).ConfigureAwait(false);
-                return tryMarkAsRemoved.Success ? Try.Succeeded() : tryMarkAsRemoved.Exception;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(
-                    ex,
-                    "Error removing embedding {Embedding} with key {Key} and version {Version}",
-                    embedding.Value,
-                    key.Value,
-                    version.Value);
-                return ex;
-            }
         }
 
         /// <inheritdoc/>
@@ -167,25 +140,15 @@ namespace Dolittle.Runtime.Embeddings.Store
             ProjectionState state,
             CancellationToken token)
         {
-            try
-            {
-                _logger.ReplacingEmbedding(embedding, key, version, state);
-                var embeddingState = new EmbeddingState(state, version, false);
+            _logger.ReplacingEmbedding(embedding, key, version, state);
+            var embeddingState = new EmbeddingState(state, version, false);
 
-                var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token).ConfigureAwait(false);
-                return tryReplace.Success ? Try.Succeeded() : tryReplace.Exception;
-            }
-            catch (Exception ex)
+            var tryReplace = await _embeddingStates.TryReplace(embedding, key, embeddingState, token).ConfigureAwait(false);
+            if (tryReplace.Exception != default)
             {
-                _logger.LogWarning(
-                    ex,
-                    "Error replacing embedding {Embedding}, key {Key} and version {Version} with state {State}",
-                    embedding.Value,
-                    key.Value,
-                    version.Value,
-                    state.Value);
-                return ex;
+                _logger.ErrorReplacingEmbedding(embedding, key, version, state, tryReplace.Exception);
             }
+            return tryReplace.Success ? Try.Succeeded() : tryReplace.Exception;
         }
 
         Task<Try<EmbeddingCurrentState>> TryGetInitialState(

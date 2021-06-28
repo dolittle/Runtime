@@ -9,7 +9,6 @@ using Dolittle.Runtime.Services;
 using Grpc.Core;
 using Microsoft.Extensions.Hosting;
 using static Dolittle.Runtime.Embeddings.Contracts.Embeddings;
-using Dolittle.Runtime.Tenancy;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Protobuf;
 using System.Threading;
@@ -36,6 +35,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly ICompareEmbeddingDefinitionsForAllTenants _embeddingDefinitionComparer;
         readonly IPersistEmbeddingDefinitionForAllTenants _embeddingDefinitionPersister;
         readonly ILogger _logger;
+        readonly ILoggerFactory _loggerFactory;
         readonly IHostApplicationLifetime _hostApplicationLifetime;
 
         /// <summary>
@@ -61,7 +61,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
             IEmbeddingRequestFactory embeddingRequestFactory,
             ICompareEmbeddingDefinitionsForAllTenants embeddingDefinitionComparer,
             IPersistEmbeddingDefinitionForAllTenants embeddingDefinitionPersister,
-            ILogger<EmbeddingsService> logger)
+            ILogger<EmbeddingsService> logger,
+            ILoggerFactory loggerFactory)
         {
             _hostApplicationLifetime = hostApplicationLifetime;
             _executionContextManager = executionContextManager;
@@ -73,6 +74,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _embeddingDefinitionComparer = embeddingDefinitionComparer;
             _embeddingDefinitionPersister = embeddingDefinitionPersister;
             _logger = logger;
+            _loggerFactory = loggerFactory;
         }
 
         /// <inheritdoc/>
@@ -118,7 +120,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 tenant => _embeddingProcessorFactory.Create(
                     tenant,
                     arguments.Definition.Embedding,
-                    new Embedding(arguments.Definition.Embedding, dispatcher, _embeddingRequestFactory),
+                    new Embedding(arguments.Definition.Embedding, dispatcher, _embeddingRequestFactory, _loggerFactory.CreateLogger<Embedding>()),
                 arguments.Definition.InititalState),
                 cts.Token);
             var tasks = new[] { dispatcherTask, processorTask };

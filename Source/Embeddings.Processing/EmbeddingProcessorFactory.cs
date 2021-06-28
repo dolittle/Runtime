@@ -72,7 +72,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     _streamEventWatcherFactory(),
                     eventStore,
                     embeddingStore,
-                    CreateStateTransitionEventsCalculator(embeddingId, embedding, projectManyEvents));
+                    CreateStateTransitionEventsCalculator(embeddingId, embedding, projectManyEvents),
+                    _loggerFactory.CreateLogger<EmbeddingProcessor>());
             }
             finally
             {
@@ -103,7 +104,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 projectManyEvents,
                 _stateComparer,
                 _embeddingLoopDetector,
-                _projectionKeysConverter);
+                _projectionKeysConverter,
+                _loggerFactory.CreateLogger<StateTransitionEventsCalculator>());
 
         ProjectManyEvents CreateProjectManyEvents(
             EmbeddingId embeddingId,
