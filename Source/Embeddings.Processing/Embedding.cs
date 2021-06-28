@@ -16,6 +16,7 @@ using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -28,6 +29,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly EmbeddingId _embeddingId;
         readonly IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse> _dispatcher;
         readonly IEmbeddingRequestFactory _requestFactory;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes an instance of the <see cref="Embedding" /> class.
@@ -38,11 +40,13 @@ namespace Dolittle.Runtime.Embeddings.Processing
         public Embedding(
             EmbeddingId embeddingId,
             IReverseCallDispatcher<EmbeddingClientToRuntimeMessage, EmbeddingRuntimeToClientMessage, EmbeddingRegistrationRequest, EmbeddingRegistrationResponse, EmbeddingRequest, EmbeddingResponse> dispatcher,
-            IEmbeddingRequestFactory requestFactory)
+            IEmbeddingRequestFactory requestFactory,
+            ILogger logger)
         {
             _embeddingId = embeddingId;
             _dispatcher = dispatcher;
             _requestFactory = requestFactory;
+            _logger = logger;
         }
 
         /// <inheritdoc/> 
@@ -50,6 +54,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         {
             try
             {
+                _logger.ProjectEventThroughDispatcher(_embeddingId, state);
                 var response = await _dispatcher.Call(
                         _requestFactory.Create(state, @event),
                         cancellationToken).ConfigureAwait(false);
@@ -78,6 +83,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/> 
         public async Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken)
         {
+            _logger.CompareStatesForEmbedding(_embeddingId, currentState, desiredState);
             var request = _requestFactory.TryCreate(currentState, desiredState);
             if (!request.Success)
             {
@@ -94,6 +100,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/> 
         public async Task<Try<UncommittedEvents>> TryDelete(EmbeddingCurrentState currentState, CancellationToken cancellationToken)
         {
+
+            _logger.DeletingStateForEmbedding(_embeddingId, currentState);
             var request = _requestFactory.TryCreate(currentState);
             if (!request.Success)
             {

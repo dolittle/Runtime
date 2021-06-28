@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public async Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken)
         {
-            _logger.LogDebug("Trying to project {NumEvents} events on embedding {Embedding} and key {Key}", events.Count, _identifier, currentState.Key);
+            _logger.ProjectingEventsOnEmbedding(_identifier, currentState.Key, events);
             for (var i = 0; i < events.Count; i++)
             {
                 var tryProject = await TryProjectOne(currentState, events[i], cancellationToken).ConfigureAwait(false);

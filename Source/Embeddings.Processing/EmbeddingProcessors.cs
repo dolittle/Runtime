@@ -40,12 +40,17 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public async Task<Try> TryStartEmbeddingProcessorForAllTenants(EmbeddingId embedding, CreateEmbeddingProcessorForTenant factory, CancellationToken cancellationToken)
         {
+            _logger.StartingEmbeddiingProcessorForAllTenants(embedding);
             if (!TryRegisterAndCreateProcessors(embedding, factory, out var processors, out var error))
             {
+                _logger.FailedRegisteringEmbeddingProcessor(embedding, error);
                 return error;
             }
 
-            var tryStartProcessors = await TryStartAndWaitForAllProcessorsToFinish(processors.Select(_ => _.Value), cancellationToken).ConfigureAwait(false);
+            var tryStartProcessors = await TryStartAndWaitForAllProcessorsToFinish(
+                embedding,
+                processors.Select(_ => _.Value),
+                cancellationToken).ConfigureAwait(false);
             _processors.TryRemove(embedding, out var _);
             return tryStartProcessors;
         }
@@ -90,19 +95,23 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
         }
 
-        async Task<Try> TryStartAndWaitForAllProcessorsToFinish(IEnumerable<IEmbeddingProcessor> processors, CancellationToken cancellationToken)
+        async Task<Try> TryStartAndWaitForAllProcessorsToFinish(EmbeddingId embedding, IEnumerable<IEmbeddingProcessor> processors, CancellationToken cancellationToken)
         {
             using var tokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             try
             {
                 var tasks = processors.Select(_ => _.Start(tokenSource.Token)).ToList();
+                _logger.EmbeddingProcessorsStarted(embedding);
                 var finishedTask = await Task.WhenAny(tasks).ConfigureAwait(false);
+                _logger.StoppingAllEmbeddingProcessors(embedding);
                 tokenSource.Cancel();
                 await Task.WhenAll(tasks).ConfigureAwait(false);
+                _logger.AllEmbeddingProcessorsSuccessfullyStopped(embedding);
                 return await finishedTask.ConfigureAwait(false);
             }
             catch (Exception ex)
             {
+                _logger.AnErrorOccurredWhileStartingOrStoppingEmbedding(embedding, ex);
                 return ex;
             }
             finally

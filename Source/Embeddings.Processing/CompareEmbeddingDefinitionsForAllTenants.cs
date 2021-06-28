@@ -11,6 +11,7 @@ using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Tenancy;
 using System;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -22,6 +23,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
     {
         readonly IPerformActionOnAllTenants _onTenants;
         readonly FactoryFor<IEmbeddingDefinitions> _getDefinitions;
+        readonly ILogger _logger;
 
         /// <summary>
         /// Initializes an instance of the <see cref="CompareEmbeddingDefinitionsForAllTenants" /> class.
@@ -30,10 +32,12 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="getDefinitions">The factory for getting Embedding definitions.</param>
         public CompareEmbeddingDefinitionsForAllTenants(
             IPerformActionOnAllTenants onTenants,
-            FactoryFor<IEmbeddingDefinitions> getDefinitions)
+            FactoryFor<IEmbeddingDefinitions> getDefinitions,
+            ILogger logger)
         {
             _onTenants = onTenants;
             _getDefinitions = getDefinitions;
+            _logger = logger;
         }
 
         /// <inheritdoc/>

@@ -52,6 +52,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <inheritdoc/>
         public async Task<Try> TryUpdateAll(CancellationToken cancellationToken)
         {
+            _logger.UpdatingAllEmbeddingStates(_embedding);
             var keys = await _embeddingStore.TryGetKeys(_embedding, cancellationToken).ConfigureAwait(false);
             if (!keys.Success)
             {
@@ -61,14 +62,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
             var result = Try.Succeeded();
             foreach (var key in keys.Result)
             {
+                _logger.UpdatingEmbeddingStateFor(_embedding, key);
                 var updateResult = await TryUpdateEmbedding(key, cancellationToken).ConfigureAwait(false);
                 if (!updateResult.Success)
                 {
-                    _logger.LogWarning(
-                        "Failed to update embedding state for embedding {Embedding} and key {Key}.{}",
-                        _embedding,
-                        key,
-                        $" {updateResult.Exception.Message}");
+                    _logger.FailedUpdatingEmbeddingStateFor(_embedding, key, updateResult.Exception);
                     result = result.Success ? updateResult : result;
                 }
             }

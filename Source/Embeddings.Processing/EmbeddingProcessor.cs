@@ -12,6 +12,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
@@ -27,6 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly IEventStore _eventStore;
         readonly IEmbeddingStore _embeddingStore;
         readonly ICalculateStateTransitionEvents _transitionCalculator;
+        readonly ILogger _logger;
         CancellationToken _cancellationToken;
         CancellationTokenSource _waitForEvent;
         bool _started;
@@ -46,7 +48,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
             IStreamEventWatcher eventWaiter,
             IEventStore eventStore,
             IEmbeddingStore embeddingStore,
-            ICalculateStateTransitionEvents transitionCalculator)
+            ICalculateStateTransitionEvents transitionCalculator,
+            ILogger logger)
         {
             _embedding = embedding;
             _stateUpdater = stateUpdater;
@@ -54,6 +57,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _eventStore = eventStore;
             _embeddingStore = embeddingStore;
             _transitionCalculator = transitionCalculator;
+            _logger = logger;
         }
 
         /// <inheritdoc/>
@@ -121,6 +125,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
             {
                 if (cancellationToken.IsCancellationRequested)
                 {
+                    _logger.EventProcessorWorkWasCancelled(_embedding, key);
                     return new OperationCanceledException();
                 }
 
@@ -136,6 +141,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 }
                 if (uncommittedEvents.Result.Count > 0)
                 {
+                    _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
                     var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
                     await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
                 }
@@ -143,6 +149,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
             catch (Exception ex)
             {
+
+                _logger.EventProcessorWorkFailed(_embedding, key, ex);
                 return ex;
             }
         }
@@ -206,8 +214,15 @@ namespace Dolittle.Runtime.Embeddings.Processing
             }
         }
 
-        Task<Try> EnsureAllStatesAreFresh()
-            => _stateUpdater.TryUpdateAll(_cancellationToken);
+        async Task<Try> EnsureAllStatesAreFresh()
+        {
+            var result = await _stateUpdater.TryUpdateAll(_cancellationToken).ConfigureAwait(false);
+            if (!result.Success)
+            {
+                _logger.FailedEnsuringAllStatesAreFresh(_embedding, result.Exception);
+            }
+            return result;
+        }
 
         bool HasStarted() => _started;
     }
