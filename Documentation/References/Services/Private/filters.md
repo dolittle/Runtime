@@ -83,8 +83,6 @@ classDiagram
 
 Registers a partitioned callback-type filter, to filter events from the (all tenants) event log to a stream. The runtime will call the client with events to decide if they should be in the stream, and in what partition.
 
-# DO THIS PART
-
 <div class="mermaid">
 sequenceDiagram
     participant C as Client (SDK)
@@ -110,7 +108,7 @@ sequenceDiagram
 
 <div class="mermaid">
 classDiagram
-    class FilterRegistrationRequest{
+    class PartitionedFilterRegistrationRequest{
         ReverseCallArgumentsContext callContext
         Uuid scopeId
         Uuid filterId
@@ -119,11 +117,41 @@ classDiagram
         Failure failure
     }
     %%
-    FilterRegistrationRequest --* ReverseCallArgumentsContext
+    PartitionedFilterRegistrationRequest --* ReverseCallArgumentsContext
     FilterRegistrationResponse --o Failure
     %% links
     link ReverseCallArgumentsContext "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
+</div>
+
+### Event message types
+
+<div class="mermaid">
+classDiagram
+    class FilterEventRequest{
+        ReverseCallRequestContext callContext
+        CommittedEvent event
+        Uuid scopeId
+        RetryProcessingState retryProcessingState
+    }
+    class PartitionedFilterResponse{
+        ReverseCallResponseContext callContext
+        bool isIncluded
+        Uuid partition
+        ProcessorFailure failure
+    }
+    %%
+    FilterEventRequest --* ReverseCallRequestContext
+    FilterEventRequest --* CommittedEvent
+    FilterEventRequest --* RetryProcessingState
+    PartitionedFilterResponse --* ReverseCallResponseContext
+    PartitionedFilterResponse --* ProcessorFailure
+    %% links
+    link ReverseCallRequestContext "{{< ref "types" >}}" "Types"
+    link ReverseCallResponseContext "{{< ref "types" >}}" "Types"
+    link RetryProcessingState "{{< ref "types#event-processing-types" >}}" "Types"
+    link ProcessorFailure "{{< ref "types#event-processing-types" >}}" "Types"
+    link CommittedEvent "{{< ref "event_store#message-types" >}}" "Event Store"
 </div>
 
 ## Register Public Filter 
@@ -134,54 +162,67 @@ Registers a partitioned callback-type filter, to filter public events from the (
 sequenceDiagram
     participant C as Client (SDK)
     participant R as Runtime
-    C->>R: FetchForAggregateRequest
+    C->>R: PublicFilterRegistrationRequest
     activate R
-    R->>C: FetchForAggregateResponse
-    deactivate R
+    alt If registration fails
+        R->>C: FilterRegistrationResponse (with Failure)
+    else If registration succeeds
+        R->>C: FilterRegistrationResponse
+        deactivate R
+        loop For each public event in the event log
+            R->>C: FilterEventRequest
+            activate C
+            C->>R: PartitionedFilterResponse
+            deactivate C
+        end
+    end
 </div>
 
-### Message types
+### Registration message types
 
 <div class="mermaid">
 classDiagram
-    class CommittedAggregateEvents{
-        Uuid aggregateRootId
-        Uuid eventSourceId
-        uing64 aggregateRootVersion
-        CommittedAggregateEvent[] events
+    class PublicFilterRegistrationRequest{
+        ReverseCallArgumentsContext callContext
+        Uuid filterId
     }
-    class CommittedAggregateEvent{
-        ulong eventLogSequenceNumber
-        Timestamp occurred
-        ExecutionContext executionContext
-        Artifact type
-        bool public
-        string content
-    }
-    %% fetch aggregate events
-    class FetchForAggregateRequest{
-        CallRequestContext callContext
-        Aggregate aggregate
-    }
-    class Aggregate{
-        Uuid aggregateRootId
-        Uuid eventSourceId
-    }
-    class FetchForAggregateResponse{
-        Failure? failure
-        CommittedAggregateEvents events
+    class FilterRegistrationResponse{
+        Failure failure
     }
     %%
-    FetchForAggregateRequest --* Aggregate
-    CommittedAggregateEvents --* CommittedAggregateEvent
-    FetchForAggregateRequest --* CallRequestContext
-    CommittedAggregateEvent --o Artifact
-    CommittedAggregateEvent --o ExecutionContext
-    FetchForAggregateResponse --* Failure
-    FetchForAggregateResponse --* CommittedAggregateEvents
+    PublicFilterRegistrationRequest --* ReverseCallArgumentsContext
+    FilterRegistrationResponse --o Failure
     %% links
-    link CallRequestContext "{{< ref "types" >}}" "Types"
-    link ExecutionContext "{{< ref "types" >}}" "Types"
-    link Artifact "{{< ref "types" >}}" "Types"
+    link ReverseCallArgumentsContext "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
+</div>
+
+### Event message types
+
+<div class="mermaid">
+classDiagram
+    class FilterEventRequest{
+        ReverseCallRequestContext callContext
+        CommittedEvent event
+        Uuid scopeId
+        RetryProcessingState retryProcessingState
+    }
+    class PartitionedFilterResponse{
+        ReverseCallResponseContext callContext
+        bool isIncluded
+        Uuid partition
+        ProcessorFailure failure
+    }
+    %%
+    FilterEventRequest --* ReverseCallRequestContext
+    FilterEventRequest --* CommittedEvent
+    FilterEventRequest --* RetryProcessingState
+    PartitionedFilterResponse --* ReverseCallResponseContext
+    PartitionedFilterResponse --* ProcessorFailure
+    %% links
+    link ReverseCallRequestContext "{{< ref "types" >}}" "Types"
+    link ReverseCallResponseContext "{{< ref "types" >}}" "Types"
+    link RetryProcessingState "{{< ref "types#event-processing-types" >}}" "Types"
+    link ProcessorFailure "{{< ref "types#event-processing-types" >}}" "Types"
+    link CommittedEvent "{{< ref "event_store#message-types" >}}" "Event Store"
 </div>
