@@ -17,20 +17,20 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_FilterValidators.when_v
         {
             stream_processor_state_repository
                 .Setup(_ => _.TryGetFor(stream_processor_id, cancellation_token))
-                .Returns(Task.FromResult<Try<IStreamProcessorState>>((true, StreamProcessorState.New)));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(StreamProcessorState.New)));
 
             filter_definitions
                 .Setup(_ => _.TryGetFromStream(scope_id, filter_target_stream, cancellation_token))
-                .Returns(Task.FromResult<Try<IFilterDefinition>>((true, different_filter_definition)));
+                .Returns(Task.FromResult(Try<IFilterDefinition>.Succeeded(different_filter_definition)));
 
             filter_validator
                 .Setup(_ => _.Validate(filter_definition, filter_processor, StreamPosition.Start, cancellation_token))
-                .Returns(Task.FromResult(new FilterValidationResult("something went wrong")));
+                .Returns(Task.FromResult(FilterValidationResult.Failed("something went wrong")));
         };
 
         static FilterValidationResult result;
         Because of = () => result = filter_validators().Validate(filter_processor, cancellation_token).GetAwaiter().GetResult();
 
-        It should_not_fail_validation = () => result.Succeeded.ShouldBeTrue();
+        It should_not_fail_validation = () => result.Success.ShouldBeTrue();
     }
 }

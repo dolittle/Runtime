@@ -10,8 +10,8 @@ using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 using Dolittle.Runtime.EventHorizon.Consumer;
-
 using MongoSubscriptionState = Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon.SubscriptionState;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
@@ -63,7 +63,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var persistedState = await states.Find(CreateFilter(subscriptionId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
-                    return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
+
+                    return persistedState == default
+                        ? new StreamProcessorStateDoesNotExist(subscriptionId)
+                        : persistedState.ToRuntimeRepresentation();
                 }
                 else if (id is StreamProcessorId streamProcessorId)
                 {
@@ -71,7 +74,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var persistedState = await states.Find(CreateFilter(streamProcessorId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
-                    return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
+                    return persistedState == default
+                        ? new StreamProcessorStateDoesNotExist(streamProcessorId)
+                        : Try<IStreamProcessorState>.Succeeded(persistedState.ToRuntimeRepresentation());
                 }
                 else
                 {

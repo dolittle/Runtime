@@ -14,13 +14,13 @@ namespace Dolittle.Runtime.Reflection
     /// </summary>
     public static class DictionaryTypeExtensions
     {
-        static readonly HashSet<Type> _genericDictionaryInterfaces = new HashSet<Type>
+        static readonly HashSet<Type> _genericDictionaryInterfaces = new()
         {
             typeof(IDictionary<,>),
             typeof(IReadOnlyDictionary<,>)
         };
 
-        static readonly HashSet<Type> _nonGenericDictionaryInterfaces = new HashSet<Type>
+        static readonly HashSet<Type> _nonGenericDictionaryInterfaces = new()
         {
             typeof(IDictionary),
         };
@@ -32,19 +32,22 @@ namespace Dolittle.Runtime.Reflection
             var interfaces = new List<Type>();
             interfaces.AddRange(_nonGenericDictionaryInterfaces);
             interfaces.AddRange(_genericDictionaryInterfaces);
-            _dictionaryInterfaces = new HashSet<Type>(interfaces);
+            _dictionaryInterfaces = new(interfaces);
         }
 
         /// <summary>
         /// Check if a type is a dictionary.
         /// </summary>
         /// <param name="type"><see cref="Type"/> to get from.</param>
+        /// <remarks>
+        // https://stackoverflow.com/a/29649496
+        /// </remarks>
         /// <returns>True if it is is, false if not.</returns>
         public static bool IsDictionary(this Type type)
-        {
-            // https://stackoverflow.com/a/29649496
-            return type.GetInterfaces().Append(type).Any(t => _dictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
-        }
+            => type
+                .GetInterfaces()
+                .Append(type)
+                .Any(t => _dictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
 
         /// <summary>
         /// Get the dictionary type from a type or its inheritance chain.
@@ -52,9 +55,10 @@ namespace Dolittle.Runtime.Reflection
         /// <param name="type"><see cref="Type"/> to get from.</param>
         /// <returns>Type - null if none.</returns>
         public static Type GetDictionaryType(this Type type)
-        {
-            return type.GetInterfaces().Append(type).FirstOrDefault(t => _dictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
-        }
+            => type
+                .GetInterfaces()
+                .Append(type)
+                .FirstOrDefault(t => _dictionaryInterfaces.Any(i => i == t || (t.GetTypeInfo().IsGenericType && i == t.GetGenericTypeDefinition())));
 
         /// <summary>
         /// Get wether or not a dictionary type is readonly or not.
@@ -82,10 +86,7 @@ namespace Dolittle.Runtime.Reflection
         /// <param name="type"><see cref="Type"/> to get from.</param>
         /// <returns>Type of key.</returns>
         public static Type GetKeyTypeFromDictionary(this Type type)
-        {
-            var keyType = type.GetDictionaryType().GetGenericArguments()[0];
-            return keyType;
-        }
+            => type.GetDictionaryType().GetGenericArguments()[0];
 
         /// <summary>
         /// Get the value type from a dictionary type - this is based on it being a generic dictionary.
@@ -93,9 +94,6 @@ namespace Dolittle.Runtime.Reflection
         /// <param name="type"><see cref="Type"/> to get from.</param>
         /// <returns>Type of key.</returns>
         public static Type GetValueTypeFromDictionary(this Type type)
-        {
-            var keyType = type.GetDictionaryType().GetGenericArguments()[1];
-            return keyType;
-        }
+            => type.GetDictionaryType().GetGenericArguments()[1];
     }
 }

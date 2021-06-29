@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Versioning
     /// </summary>
     public class VersionConverter : IVersionConverter
     {
-        static readonly Regex _versionRegex = new Regex("(\\d+).(\\d+).(\\d+)-*([\\w]+)*[+-.]*(\\d+)*", RegexOptions.Compiled);
+        static readonly Regex _versionRegex = new("(\\d+).(\\d+).(\\d+)-*([\\w]+)*[+-.]*(\\d+)*", RegexOptions.Compiled);
 
         /// <inheritdoc/>
         public Version FromString(string versionAsString)
@@ -26,9 +26,10 @@ namespace Dolittle.Runtime.Versioning
             var isRelease = result.Groups[4].Value?.Length == 0;
 
             if (!isRelease)
+            {
                 return new Version(major, minor, patch, build, result.Groups[4].Value);
-            else
-                return new Version(major, minor, patch, build);
+            }
+            return new Version(major, minor, patch, build);
         }
 
         /// <inheritdoc/>

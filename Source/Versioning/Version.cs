@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Versioning
         /// <inheritdoc/>
         public override string ToString()
         {
-            var result = $"{Major}.${Minor}.${Patch}.${Build}";
+            var result = $"{Major}.{Minor}.{Patch}.{Build}";
             if (IsPreRelease) result += $"-{PreReleaseString}.{Build}";
             return result;
         }

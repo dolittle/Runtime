@@ -3,6 +3,9 @@
 
 using System;
 using System.Collections.Generic;
+using Dolittle.Runtime.Events.Store.EventHorizon;
+using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.ResourceTypes;
 
 namespace Dolittle.Runtime.Events.Store
@@ -16,6 +19,15 @@ namespace Dolittle.Runtime.Events.Store
         public ResourceType Name => "eventStore";
 
         /// <inheritdoc/>
-        public IEnumerable<Type> Services { get; } = new[] { typeof(IEventStore) };
+        public IEnumerable<Type> Services { get; } = new[]
+        {
+            typeof(IEventStore),
+            typeof(IStreamDefinitionRepository),
+            typeof(IStreamProcessorStateRepository),
+            typeof(IEventFetchers),
+            typeof(IWriteEventsToStreams),
+            typeof(IWriteEventHorizonEvents),
+            typeof(IWriteEventsToPublicStreams),
+        };
     }
 }

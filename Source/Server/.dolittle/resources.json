@@ -13,6 +13,13 @@
             ],
             "database": "projections",
             "maxConnectionPoolSize": 1000
+        },
+        "embeddings": {
+            "servers": [
+                "localhost"
+            ],
+            "database": "embeddings",
+            "maxConnectionPoolSize": 1000
         }
     }
 }

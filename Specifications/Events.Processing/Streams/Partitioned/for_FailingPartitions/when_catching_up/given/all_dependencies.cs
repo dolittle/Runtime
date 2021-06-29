@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 
             stream_processor_state_repository
                 .Setup(_ => _.TryGetFor(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(new Try<IStreamProcessorState>(true, stream_processor_state)));
+                .Returns(Task.FromResult(Try<IStreamProcessorState>.Succeeded(stream_processor_state)));
 
             stream_processor_state_repository
                 .Setup(_ => _.Persist(Moq.It.IsAny<IStreamProcessorId>(), Moq.It.IsAny<IStreamProcessorState>(), Moq.It.IsAny<CancellationToken>()))
@@ -41,7 +41,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
                 .Returns<PartitionId, StreamPosition, CancellationToken>((partition, position, _) =>
                 {
                     var @event = events.FirstOrDefault(_ => _.Position >= position && _.Partition == partition);
-                    return Task.FromResult<Try<StreamEvent>>((@event != default, @event));
+                    if (@event != default)
+                    {
+                        return Task.FromResult(Try<StreamEvent>.Succeeded(@event));
+                    }
+                    return Task.FromResult(Try<StreamEvent>.Failed(new Exception()));
                 });
         };
     }

@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
                 if (EventTypesHaveNotChanged(changedEventTypes))
                 {
-                    return new FilterValidationResult();
+                    return FilterValidationResult.Succeeded();
                 }
 
                 var streamTypesFetcher = await _eventFetchers.GetTypeFetcherFor(
@@ -54,14 +54,14 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
                 if (SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes))
                 {
-                    return new FilterValidationResult("The new filter definition has added or removed event types that have already been filtered");
+                    return FilterValidationResult.Failed("The new filter definition has added or removed event types that have already been filtered");
                 }
 
-                return new FilterValidationResult();
+                return FilterValidationResult.Succeeded();
             }
             catch (Exception exception)
             {
-                return new FilterValidationResult(exception.Message);
+                return FilterValidationResult.Failed(exception.Message);
             }
         }
 
