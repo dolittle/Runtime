@@ -1,3 +1,28 @@
+# [6.1.0] - 2021-6-29 [PR: #550](https://github.com/dolittle/Runtime/pull/550)
+## Summary
+
+Adds Embeddings, a special type of event handler used for comparing read models states and generating events to reflect that changes done to the state. The embeddings are saved into their own database, much like Projections.
+
+### Added
+
+- Grpc services for registering, updating and deleting embeddings
+- Grpc services for retrieving embeddings
+- New resource definition for embeddings in `resources.json`. This defines the MongoDB database used by the embeddings, the format is the same as for the other databases.
+```json
+"embeddings": {
+    "servers": [
+        "localhost"
+    ],
+    "database": "embeddings",
+    "maxConnectionPoolSize": 1000
+}
+```
+
+### Changed
+
+- Changed some loggs to `Trace`, as they were just clogging the `Debug` logging too much.
+
+
 # [6.0.1] - 2021-6-16 [PR: #548](https://github.com/dolittle/Runtime/pull/548)
 ## Summary
 
