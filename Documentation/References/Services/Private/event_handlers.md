@@ -1,7 +1,7 @@
 ---
 title: Event Handlers
 description: The definition of the Runtime Event Handlers service
-weight: 12
+weight: 5
 ---
 
 <div class="mermaid">

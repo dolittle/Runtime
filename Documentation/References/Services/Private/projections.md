@@ -1,7 +1,7 @@
 ---
 title: Projections
 description: The definition of the Runtime Projections service
-weight: 10
+weight: 20
 ---
 
 <div class="mermaid">

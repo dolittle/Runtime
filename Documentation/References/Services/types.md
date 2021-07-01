@@ -79,4 +79,6 @@ classDiagram
     }
     %%
     StreamEvent --* CommittedEvent
+    %% links
+    link CommittedEvent "{{< ref "private/event_store#message-types" >}}" "Event Store"
 </div>

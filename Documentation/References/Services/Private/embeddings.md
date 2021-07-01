@@ -1,7 +1,7 @@
 ---
 title: Embeddings
 description: The definition of the Runtime Embedding service
-weight: 20
+weight: 25
 ---
 
 <div class="mermaid">
