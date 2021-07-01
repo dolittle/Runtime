@@ -8,7 +8,7 @@ weight: 1
 
 Appends the provided events to the end of the (a tenant) event log.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (SDK)
     participant R as Runtime
@@ -16,12 +16,12 @@ sequenceDiagram
     activate R
     R->>C: CommitEventsResponse
     deactivate R
-</div>
+```
 
 
 ### Message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     %% commit events
     class CommitEventsRequest{
@@ -63,13 +63,13 @@ classDiagram
     link ExecutionContext "{{< ref "types" >}}" "Types"
     link Artifact "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
-</div>
+```
 
 ## Commit aggregate events
 
 Appends the provided events to the end of the (a tenant) event log - but also checks that no events have been committed to the aggregate root since the corresponding "Fetch Aggregate Events", and increments the aggregate root version
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (SDK)
     participant R as Runtime
@@ -77,12 +77,12 @@ sequenceDiagram
     activate R
     R->>C: CommitAggregateEventsResponse
     deactivate R
-</div>
+```
 
 
 ### Message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     %% commit aggregate event
     class CommitAggregateEventsRequest{
@@ -134,13 +134,13 @@ classDiagram
     link Artifact "{{< ref "types" >}}" "Types"
     link CallRequestContext "{{< ref "types" >}}" "Types"
     link ExecutionContext "{{< ref "types" >}}" "Types"
-</div>
+```
 
 ## Fetch aggregate events
 
 Gets all the events from the (a tenant) event log that have been committed by a specific aggregate root - and the aggregate root version.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (SDK)
     participant R as Runtime
@@ -148,11 +148,11 @@ sequenceDiagram
     activate R
     R->>C: FetchForAggregateResponse
     deactivate R
-</div>
+```
 
 ### Message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class CommittedAggregateEvents{
         Uuid aggregateRootId
@@ -194,4 +194,4 @@ classDiagram
     link ExecutionContext "{{< ref "types" >}}" "Types"
     link Artifact "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
-</div>
+```

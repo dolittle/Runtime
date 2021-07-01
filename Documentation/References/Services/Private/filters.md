@@ -9,7 +9,7 @@ weight: 10
 
 Registers an unpartitioned callback-type filter, to filter events from the (all tenants) event log to a stream. The runtime will call the client with events to decide if they should be in the stream.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (SDK)
     participant R as Runtime
@@ -27,12 +27,12 @@ sequenceDiagram
             deactivate C
         end
     end
-</div>
+```
 
 
 ### Registration message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class FilterRegistrationRequest{
         ReverseCallArgumentsContext callContext
@@ -48,11 +48,11 @@ classDiagram
     %% links
     link ReverseCallArgumentsContext "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
-</div>
+```
 
 ### Event message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class FilterEventRequest{
         ReverseCallRequestContext callContext
@@ -77,13 +77,13 @@ classDiagram
     link RetryProcessingState "{{< ref "types#event-processing-types" >}}" "Types"
     link ProcessorFailure "{{< ref "types#event-processing-types" >}}" "Types"
     link CommittedEvent "{{< ref "event_store#message-types" >}}" "Event Store"
-</div>
+```
 
 ## Register Partitioned Private Filter
 
 Registers a partitioned callback-type filter, to filter events from the (all tenants) event log to a stream. The runtime will call the client with events to decide if they should be in the stream, and in what partition.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (SDK)
     participant R as Runtime
@@ -101,12 +101,12 @@ sequenceDiagram
             deactivate C
         end
     end
-</div>
+```
 
 
 ### Registration message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class PartitionedFilterRegistrationRequest{
         ReverseCallArgumentsContext callContext
@@ -122,11 +122,11 @@ classDiagram
     %% links
     link ReverseCallArgumentsContext "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
-</div>
+```
 
 ### Event message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class FilterEventRequest{
         ReverseCallRequestContext callContext
@@ -152,13 +152,13 @@ classDiagram
     link RetryProcessingState "{{< ref "types#event-processing-types" >}}" "Types"
     link ProcessorFailure "{{< ref "types#event-processing-types" >}}" "Types"
     link CommittedEvent "{{< ref "event_store#message-types" >}}" "Event Store"
-</div>
+```
 
 ## Register Public Filter 
 
 Registers a partitioned callback-type filter, to filter public events from the (all tenants) event log to a public stream. The runtime will call the client with public events to decide if they should be in the stream, and in what partition.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (SDK)
     participant R as Runtime
@@ -176,11 +176,11 @@ sequenceDiagram
             deactivate C
         end
     end
-</div>
+```
 
 ### Registration message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class PublicFilterRegistrationRequest{
         ReverseCallArgumentsContext callContext
@@ -195,11 +195,11 @@ classDiagram
     %% links
     link ReverseCallArgumentsContext "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
-</div>
+```
 
 ### Event message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class FilterEventRequest{
         ReverseCallRequestContext callContext
@@ -225,4 +225,4 @@ classDiagram
     link RetryProcessingState "{{< ref "types#event-processing-types" >}}" "Types"
     link ProcessorFailure "{{< ref "types#event-processing-types" >}}" "Types"
     link CommittedEvent "{{< ref "event_store#message-types" >}}" "Event Store"
-</div>
+```
