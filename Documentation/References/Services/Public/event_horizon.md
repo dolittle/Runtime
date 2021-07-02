@@ -8,7 +8,7 @@ weight: 10
 
 Get all events (can be multiple types) from a partition in a public stream of a tenant. The Runtime will call the client with the events in the specified stream, to store a copy in a scoped event log.
 
-<div class="mermaid">
+```mermaid
 sequenceDiagram
     participant C as Client (Runtime Consumer)
     participant R as Runtime (Producer)
@@ -26,12 +26,12 @@ sequenceDiagram
             deactivate C
         end
     end
-</div>
+```
 
 
 ### Registration message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class ConsumerSubscriptionRequest{
         ReverseCallArgumentsContext callContext
@@ -50,11 +50,11 @@ classDiagram
     %% links
     link ReverseCallArgumentsContext "{{< ref "types" >}}" "Types"
     link Failure "{{< ref "types" >}}" "Types"
-</div>
+```
 
 ### Event message types
 
-<div class="mermaid">
+```mermaid
 classDiagram
     class ConsumerRequest{
         ReverseCallRequestContext callContext
@@ -80,4 +80,4 @@ classDiagram
     link ReverseCallResponseContext "{{< ref "types" >}}" "Types"
     link ProcessorFailure "{{< ref "types#event-processing-types" >}}" "Types"
     link CommittedEvent "{{< ref "../Private/event_store#message-types" >}}" "Event Store"
-</div>
+```
