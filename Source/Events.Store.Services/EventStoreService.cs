@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Store.Services
         }
 
         /// <inheritdoc/>
-        public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events,  DolittleExecutionContext context, CancellationToken token)
+        public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, DolittleExecutionContext context, CancellationToken token)
         {
             try
             {

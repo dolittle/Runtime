@@ -29,9 +29,15 @@ namespace Dolittle.Runtime.Execution
         public static implicit operator CorrelationId(Guid value) => new(value);
 
         /// <summary>
+        /// Implicitly converts a <see cref="string" /> to an instance of <see cref="CorrelationId" />.
+        /// </summary>
+        /// <param name="value">The value to initialize the <see cref="CorrelationId" /> with.</param>
+        public static implicit operator CorrelationId(string value) => new(Guid.Parse(value));
+
+        /// <summary>
         /// Creates a new <see cref="CorrelationId" /> with a generated Guid value.
         /// </summary>
-        /// <returns>A <see cref="CorrelationId" /> initialised with a random Guid value.</returns>
+        /// <returns>A <see cref="CorrelationId" /> initialized with a random Guid value.</returns>
         public static CorrelationId New() => Guid.NewGuid();
     }
 }

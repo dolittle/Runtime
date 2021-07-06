@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 
         Establish context = () =>
             event_processor
-                .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(),  Moq.It.IsAny<CancellationToken>()))
+                .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns<CommittedEvent, PartitionId, string, uint, CancellationToken>((@event, partition, reason, retryCount, _) => Task.FromResult<IProcessingResult>(num_processed++ >= 2 ? new FailedProcessing(new_failing_reason) : new FailedProcessing(new_failing_reason, true, TimeSpan.Zero)));
 
         Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;

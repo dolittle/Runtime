@@ -2,8 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.EventHorizon;
-using Dolittle.Runtime.Events.Processing.Streams;
+using Dolittle.Runtime.EventHorizon.Consumer;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {

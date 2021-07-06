@@ -56,7 +56,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc
             var commitResult = await _eventStoreService.TryCommitForAggregate(
                 new UncommittedAggregateEvents(
                     eventSourceId,
-                    new Artifact(request.Events.AggregateRootId.ToGuid (), ArtifactGeneration.First),
+                    new Artifact(request.Events.AggregateRootId.ToGuid(), ArtifactGeneration.First),
                     request.Events.ExpectedAggregateRootVersion,
                     new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
                 request.CallContext.ExecutionContext.ToExecutionContext(),

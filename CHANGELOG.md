@@ -1,3 +1,100 @@
+# [6.1.0] - 2021-6-29 [PR: #550](https://github.com/dolittle/Runtime/pull/550)
+## Summary
+
+Adds Embeddings, a special type of event handler used for comparing read models states and generating events to reflect that changes done to the state. The embeddings are saved into their own database, much like Projections.
+
+### Added
+
+- Grpc services for registering, updating and deleting embeddings
+- Grpc services for retrieving embeddings
+- New resource definition for embeddings in `resources.json`. This defines the MongoDB database used by the embeddings, the format is the same as for the other databases.
+```json
+"embeddings": {
+    "servers": [
+        "localhost"
+    ],
+    "database": "embeddings",
+    "maxConnectionPoolSize": 1000
+}
+```
+
+### Changed
+
+- Changed some loggs to `Trace`, as they were just clogging the `Debug` logging too much.
+
+
+# [6.0.1] - 2021-6-16 [PR: #548](https://github.com/dolittle/Runtime/pull/548)
+## Summary
+
+Fix some of the configuration files under Server/.dolittle to their original intended 
+
+### Changed
+
+- Changed back configuration files
+
+
+# [6.0.0] - 2021-6-16 [PR: #532](https://github.com/dolittle/Runtime/pull/532)
+## Summary
+
+Changes the behavior of the pinging system to be more reliable and to also start immediately when receiving a connection. This is to deal with a bug that was causing connections between the SDK and the Runtime to be dropped. This is a **breaking behavioral change**, as the pinging behavior now expects the client to be immediately ready to receive pings and write pongs after creating the connection. Older versions of the SDKs wont function correctly with this release of the Runtime. For this we've added a [compatibility table](https://dolittle.io/docs/reference/runtime/compatibility).
+
+We also added a Prometheus metric system into the Runtime, which you can access from `localhost:9700/metrics` to see the full list of all the metrics reported.
+
+Also reworks the reverse call services to be more reliable and fixes an Event Horizon bug logging bug.
+
+### Added
+
+- A Prometheus metrics service exposed on port `9700` and path `/metrics`. It mainly collects metrics related to Event Horizon currently.
+
+### Changed
+
+- The Runtime now starts to ping the client immediately when receiving a connection instead of waiting for the connection to be accepted first. The client needs to be ready to start receiving pings and writing pongs immediately after initiating the connection.
+- Reworked many aspects of the reverse call clients and dispatchers to be more readable and reliable.
+
+### Fixed
+
+- Make pinging more reliable by using a single high priority thread to keep track of the scheduled pings. The old implementation relied on the `ThreadPool`, which was swamped during the startup and other periods of high activity in the Runtime, causing the pings to be delayed and eventually timing out.
+- Fixes a bug in the event horizon subscription that resulted in it not writing a proper log message of what the cause of a failure was if one of the event horizon processing tasks failed with an exception. ([#544](https://github.com/dolittle/Runtime/pull/544))
+
+
+# [5.6.0] - 2021-4-29 [PR: #513](https://github.com/dolittle/Runtime/pull/513)
+## Summary
+
+Adds a new Filter Validation implementation for the kind of filter (event type with eventsource partition) that validates the filter by checking just the types already committed in the event log rather than iterating through all the events.
+
+For most registrations, the Event Handlers have not changed, which is detected by the validator and skips any further analysis. If the events in the filter has changed, the new implementation checks the types of events committed in the event log to determine if the stream would change given the new definition. Initial tests indicate that this process is a lot faster than re-filtering the streams.
+
+### Added
+
+- A new specialised filter validation implementation used for Event Handlers to speed up the registration process that happens during boot. This drastically reduces the CPU utilisation and duration of the initial registration process for Event Handlers.
+
+
+# [5.5.0] - 2021-4-9 [PR: #502](https://github.com/dolittle/Runtime/pull/502)
+## Summary
+
+Adds Projections, that are a special type of event handler dealing with read models. Each Projection deals with one read model and mutates it's properties. The read models are saved into the Runtime's projection store. Any changes to the Projection causes it to be fully replayed.
+
+### Added
+
+- Grpc service for getting projections
+- REST (WebAPI) service for getting projections
+- Grpc service for registering and processing projections
+- A MongoDB store for projections - stores the definitions in `projection-definitions` and the projections in `projection-projectionid` collections. It's defined in the `resources.json`:
+```json
+"projections": {
+    "servers": [
+        "localhost"
+    ],
+    "database": "projections",
+    "maxConnectionPoolSize": 1000
+}
+```
+
+### Changed
+
+- Adhere to latest protobuf contracts
+
+
 # [5.4.2] - 2021-2-4 [PR: #500](https://github.com/dolittle/Runtime/pull/500)
 ## Summary
 

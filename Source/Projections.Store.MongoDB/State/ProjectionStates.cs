@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Store;
@@ -66,7 +67,9 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
                                             .Project(_ => _.ContentRaw)
                                             .SingleOrDefaultAsync(token),
                     token).ConfigureAwait(false);
-                return string.IsNullOrEmpty(projectionState) ? false : new ProjectionState(projectionState);
+                return string.IsNullOrEmpty(projectionState)
+                    ? Try<ProjectionState>.Failed(new ProjectionStateDoesNotExist(projection, key, scope))
+                    : new ProjectionState(projectionState);
             }
             catch (Exception ex)
             {
@@ -75,18 +78,24 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB.State
         }
 
         /// <inheritdoc/>
-        public async Task<Try<IEnumerable<ProjectionState>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token)
+        public async Task<Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token)
         {
             try
             {
-                return await OnProjection(
+                var states = await OnProjection(
                     projection,
                     scope,
                     async collection => await collection
                                             .Find(Builders<Projection>.Filter.Empty)
-                                            .Project(_ => new ProjectionState(_.ContentRaw))
+                                            .Project(_ => new Tuple<ProjectionState, ProjectionKey>(_.ContentRaw, _.Key))
                                             .ToListAsync(token),
                     token).ConfigureAwait(false);
+                var result = states.Select(_ =>
+                {
+                    return (_.Item1, _.Item2);
+                });
+
+                return Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>.Succeeded(result);
             }
             catch (Exception ex)
             {

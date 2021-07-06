@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing
         EventProcessorId Identifier { get; }
 
         /// <summary>
-        /// /// Processes an <see cref="CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.
+        /// Processes an <see cref="CommittedEvent" /> for a <see cref="PartitionId"> partition </see>.
         /// </summary>
         /// <param name="event">The <see cref="CommittedEvent" />.</param>
         /// <param name="partitionId">The <see cref="PartitionId" />.</param>

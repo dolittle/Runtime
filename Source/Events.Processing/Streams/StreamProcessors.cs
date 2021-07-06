@@ -9,8 +9,9 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
+using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Tenancy;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
@@ -49,47 +50,57 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <inheritdoc />
-        public bool TryRegister(
+        public Try<StreamProcessor> TryCreateAndRegister(
             ScopeId scopeId,
             EventProcessorId eventProcessorId,
             IStreamDefinition sourceStreamDefinition,
-            Func<IEventProcessor> getEventProcessor,
-            CancellationToken cancellationToken,
-            out StreamProcessor streamProcessor)
+            FactoryFor<IEventProcessor> getEventProcessor,
+            CancellationToken cancellationToken)
         {
-            streamProcessor = default;
-            var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
-            if (_streamProcessors.ContainsKey(streamProcessorId))
+            try
             {
-                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
-                return false;
+                var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
+                if (_streamProcessors.ContainsKey(streamProcessorId))
+                {
+                    _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
+                    return new StreamProcessorAlreadyRegistered(streamProcessorId);
+                }
+
+                var streamProcessor = new StreamProcessor(
+                    streamProcessorId,
+                    _onAllTenants,
+                    sourceStreamDefinition,
+                    getEventProcessor,
+                    () => Unregister(streamProcessorId),
+                    _getScopedStreamProcessorsCreator,
+                    _executionContextManager,
+                    _loggerFactory.CreateLogger<StreamProcessor>(),
+                    cancellationToken);
+                if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
+                {
+                    _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
+                    return new StreamProcessorAlreadyRegistered(streamProcessorId);
+                }
+
+                _logger.StreamProcessorSuccessfullyRegistered(streamProcessorId);
+                return streamProcessor;
+            }
+            catch (Exception ex)
+            {
+                return ex;
             }
 
-            streamProcessor = new StreamProcessor(
-                streamProcessorId,
-                _onAllTenants,
-                sourceStreamDefinition,
-                getEventProcessor,
-                () => Unregister(streamProcessorId),
-                _getScopedStreamProcessorsCreator,
-                _executionContextManager,
-                _loggerFactory.CreateLogger<StreamProcessor>(),
-                cancellationToken);
-            if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
-            {
-                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
-                streamProcessor = default;
-                return false;
-            }
-
-            _logger.StreamProcessorSuccessfullyRegistered(streamProcessorId);
-            return true;
         }
 
         void Unregister(StreamProcessorId id)
         {
+            StreamProcessor existing;
+            do
+            {
+                _streamProcessors.TryRemove(id, out existing);
+            }
+            while (existing != default);
             _logger.StreamProcessorUnregistered(id);
-            _streamProcessors.TryRemove(id, out var _);
         }
     }
 }

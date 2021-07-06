@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting_for
             }
 
             event_waiter.Notify(last_position.Value + 1);
-            Thread.Sleep(10);
+            Thread.Sleep(100);
         };
 
         It should_be_done_waiting_for_all_events = () => tasks.ShouldEachConformTo(_ => _.IsCompletedSuccessfully);

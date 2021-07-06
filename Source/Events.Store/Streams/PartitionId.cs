@@ -12,6 +12,11 @@ namespace Dolittle.Runtime.Events.Store.Streams
     public record PartitionId(Guid Value) : ConceptAs<Guid>(Value)
     {
         /// <summary>
+        /// Gets the <see cref="PartitionId"/> when no partition is specified.
+        /// </summary>
+        public static PartitionId None => Guid.Empty;
+
+        /// <summary>
         /// Implicitly convert from <see cref="Guid"/> to <see cref="PartitionId"/>.
         /// </summary>
         /// <param name="identifier"><see cref="Guid"/> representation.</param>
@@ -22,5 +27,6 @@ namespace Dolittle.Runtime.Events.Store.Streams
         /// </summary>
         /// <param name="identifier"><see cref="string"/> representation.</param>
         public static implicit operator PartitionId(string identifier) => Guid.Parse(identifier);
+
     }
 }

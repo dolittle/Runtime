@@ -29,12 +29,12 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDe
                 .create(
                     "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",
                     "5e1c13f3-4af4-4335-93ef-7612b67f0f67")
-                .with_selector(new ProjectionEventSelector(Guid.NewGuid(), ProjectEventKeySelectorType.EventSourceId))
+                .with_selector(ProjectionEventSelector.EventSourceId(Guid.NewGuid()))
                 .build();
 
             definitions
                 .Setup(_ => _.TryGet(definition.Projection, definition.Scope, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<ProjectionDefinition>>(false));
+                .Returns(Task.FromResult(Try<ProjectionDefinition>.Failed(new Exception())));
         };
         Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 

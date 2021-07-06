@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Services.Clients
     {
         /// <inheritdoc/>
         public ClientEndpointsConfiguration Provide() =>
-            new (new Dictionary<EndpointVisibility, ClientEndpointConfiguration>
+            new(new Dictionary<EndpointVisibility, ClientEndpointConfiguration>
             {
                 { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPublicPort) },
                 { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPrivatePort) }
