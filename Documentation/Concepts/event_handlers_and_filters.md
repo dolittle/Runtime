@@ -5,7 +5,7 @@ weight: 10
 repository: https://github.com/dolittle/Runtime
 ---
 
-In event-driven systems it is usually not enough to just say that an [Event]({{< ref "events.md" >}}) occurred. You'd expect that something should happen as a result of that event occurring as well.
+In event-sourced systems it is usually not enough to just say that an [Event]({{< ref "events.md" >}}) occurred. You'd expect that something should happen as a result of that event occurring as well.
 
 In the [Runtime]({{< ref "overview.md" >}}) we can register 2 different processors that can process events; [Event Handlers]({{< ref "#event-handlers">}}) and [Filters]({{< ref "#filters">}}).
 They take in a [Stream]({{< ref "streams" >}}) of events as an input and does something to each individual event.
