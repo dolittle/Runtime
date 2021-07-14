@@ -8,6 +8,10 @@ A Projection is a special type of [Event Handler]({{< ref "event_handlers_and_fi
 
 Read models defines the data views that you are interested in presenting, while a projection specifies how to compute this view from the event store. There is a one-to-one relationship between a projection and their corresponding read model. A projection can produce multiple instances of that read model and it will assign each of them a unique _key_. This key is based on the projections [key selectors]({{< ref "#key-selector" >}}).
 
+Example of a projection:
+
+![Diagram of projections](/images/concepts/projections_v2.png)
+
 ## Read model
 
 A read model represents a view into the data in your system, and are used when you want to show data or build a view. It's essentially a [Data transfer object](https://en.wikipedia.org/wiki/Data_transfer_object) (DTO) specialized for reading.
