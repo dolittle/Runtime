@@ -1,13 +1,13 @@
 # DotNet Source - filtered
 
-FROM alpine AS dotnet-source
+FROM arm64v8/alpine AS dotnet-source
 ARG CONFIGURATION=Release
 WORKDIR /app
 COPY Source ./Source/
 RUN rm -rf Source/ManagementUI
 
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/sdk:5.0 AS dotnet-build
+FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-arm64v8 AS dotnet-build
 ARG CONFIGURATION=Release
 WORKDIR /app
 
@@ -36,7 +36,7 @@ RUN dotnet publish -c ${CONFIGURATION} -o out
 # RUN yarn build
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-arm64v8
 ARG CONFIGURATION=Release
 
 RUN echo Configuration = $CONFIGURATION
