@@ -9,6 +9,14 @@ RUN rm -rf Source/ManagementUI
 # DotNet Build
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-arm64v8 AS dotnet-build
 ARG CONFIGURATION=Release
+
+# https://danielstoyanoff.medium.com/apple-silicon-docker-dotnet-grpc-is-that-compatible-8a05f1a71d89
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes \
+      protobuf-compiler-grpc
+ENV PROTOBUF_PROTOC=/usr/bin/protoc
+
 WORKDIR /app
 
 COPY default.props ./
@@ -42,14 +50,21 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-arm64v8
 ARG CONFIGURATION=Release
 
 RUN echo Configuration = $CONFIGURATION
+ENV LD_DEBUG=all
+
+# https://danielstoyanoff.medium.com/apple-silicon-docker-dotnet-grpc-is-that-compatible-8a05f1a71d89
+RUN apt-get update \
+ && DEBIAN_FRONTEND=noninteractive \
+    apt-get install --no-install-recommends --assume-yes \
+      protobuf-compiler-grpc
+ENV PROTOBUF_PROTOC=/usr/bin/protoc
 
 RUN if [ "$CONFIGURATION" = "Debug" ] ; then apt-get update && \
-    apt-get install -y --no-install-recommends unzip procps curl && \
+    apt-get install -y --no-install-recommends unzip procps curl protobuf-compiler-grpc && \
     rm -rf /var/lib/apt/lists/* \
     ; fi
 
 RUN if [ "$CONFIGURATION" = "Debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh | bash /dev/stdin -v latest -l ~/vsdbg ; fi
-RUN apt-get update && apt-get install -y libc-dev
 
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
