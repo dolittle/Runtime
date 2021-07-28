@@ -46,6 +46,25 @@ dotnet run
 
 Configuration files are in `Source/Server/.dolittle/`
 
+
+## Building the Docker image locally
+
+There are 2 different Docker images, the one in _Docker/Production_ is just the Runtime, while the _Docker/Development_ also has a MongoDB built into it on port `27017`.
+
+You build both images from the project root:
+
+**Production**:
+
+```shell
+docker build -t dolittle/runtime -f ./Docker/Production/Dockerfile .
+```
+
+**Development**:
+
+```shell
+docker build -t dolittle/runtime:development -f ./Docker/Development/Dockerfile .
+```
+
 ## Visual Studio
 
 You can open the `.sln` file in the root of the repository and just build directly.
