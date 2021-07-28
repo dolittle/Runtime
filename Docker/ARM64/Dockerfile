@@ -20,7 +20,9 @@ COPY Specifications ./Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c ${CONFIGURATION} -o out
+# Aiming to get dotnet to create the arm binary
+# Reference: https://gist.github.com/alexellis/264ac0fc28b5ae97397039854550c4a9
+RUN dotnet publish -c ${CONFIGURATION} -r linux-arm -o out
 
 # # Web Build
 # FROM node:13.12 AS web-build
