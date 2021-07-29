@@ -10,13 +10,6 @@ RUN rm -rf Source/ManagementUI
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-arm64v8 AS dotnet-build
 ARG CONFIGURATION=Release
 
-# https://danielstoyanoff.medium.com/apple-silicon-docker-dotnet-grpc-is-that-compatible-8a05f1a71d89
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive \
-    apt-get install --no-install-recommends --assume-yes \
-      protobuf-compiler-grpc
-ENV PROTOBUF_PROTOC=/usr/bin/protoc
-
 WORKDIR /app
 
 COPY default.props ./
@@ -30,7 +23,7 @@ WORKDIR /app/Source/Server
 RUN dotnet restore
 # Aiming to get dotnet to create the arm binary
 # Reference: https://gist.github.com/alexellis/264ac0fc28b5ae97397039854550c4a9
-RUN dotnet publish -c ${CONFIGURATION} -r linux-arm -o out
+RUN dotnet publish -c ${CONFIGURATION} -o out
 
 # # Web Build
 # FROM node:13.12 AS web-build
@@ -50,7 +43,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-arm64v8
 ARG CONFIGURATION=Release
 
 RUN echo Configuration = $CONFIGURATION
-ENV LD_DEBUG=all
+# ENV LD_DEBUG=all
 
 # https://danielstoyanoff.medium.com/apple-silicon-docker-dotnet-grpc-is-that-compatible-8a05f1a71d89
 RUN apt-get update \
