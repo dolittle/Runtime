@@ -59,10 +59,21 @@ You build both images from the project root:
 docker build -t dolittle/runtime -f ./Docker/Production/Dockerfile .
 ```
 
+**ARM64 Production**
+```shell
+docker build -t dolittle/runtime:arm64 -f ./Docker/ARM64Production/Dockerfile .
+```
+
+
 **Development**:
 
 ```shell
 docker build -t dolittle/runtime:development -f ./Docker/Development/Dockerfile .
+```
+
+**ARM64 Development**
+```shell
+docker build -t dolittle/runtime:arm64-development -f ./Docker/ARM64Development/Dockerfile .
 ```
 
 ## Visual Studio
