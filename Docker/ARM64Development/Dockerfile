@@ -64,7 +64,7 @@ RUN mkdir -p /data/db /data/configdb \
 VOLUME /data/db /data/configdb
 
 # Add Tini to get a real init process
-ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini /usr/bin/tini
+ADD https://github.com/krallin/tini/releases/download/v0.19.0/tini-arm64 /usr/bin/tini
 RUN chmod +x /usr/bin/tini
 
 # Create entrypoint that runs both MongoDB and Runtime
