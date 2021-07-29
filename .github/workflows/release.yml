@@ -74,6 +74,34 @@ jobs:
           file: ./Docker/Production/Dockerfile
           tags: dolittle/runtime:latest
 
+  release-arm64-runtime-production-image:
+    name: Release Runtime ARM64 Production Image
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push ARM64 Production Image to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Docker/ARM64Production/Dockerfile
+          tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64
+      - name: Push Latest Tag Of ARM64 Production Image to Docker Hub
+        uses: docker/build-push-action@v2
+        if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
+        with:
+          push: true
+          context: .
+          file: ./Docker/ARM64Production/Dockerfile
+          tags: dolittle/runtime:latest-arm64
+
   release-runtime-debug-image:
     name: Release Runtime Debug Image
     needs: setup
@@ -130,3 +158,31 @@ jobs:
           context: .
           file: ./Docker/Development/Dockerfile
           tags: dolittle/runtime:latest-development
+
+  release-runtime-arm64-development-image:
+    name: Release Runtime ARM64 Development Image
+    needs: setup
+    runs-on: ubuntu-latest
+    if: needs.setup.outputs.should-publish == 'true'
+    steps:
+      - uses: actions/checkout@v2
+      - uses: docker/setup-buildx-action@v1
+      - uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Push ARM64 Development Image to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+          push: true
+          context: .
+          file: ./Docker/ARM64Development/Dockerfile
+          tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64-development
+      - name: Push Latest Tag Of ARM64 Development Image to Docker Hub
+        uses: docker/build-push-action@v2
+        if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
+        with:
+          push: true
+          context: .
+          file: ./Docker/ARM64Development/Dockerfile
+          tags: dolittle/runtime:latest-arm64-development
