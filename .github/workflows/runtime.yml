@@ -69,7 +69,6 @@ jobs:
           push: false
           context: .
           file: ./Docker/Development/Dockerfile
-          platforms: linux/arm64
 
   build-arm64-dev-docker-image:
     name: Build ARM64 Development Docker Image
@@ -117,3 +116,4 @@ jobs:
           push: false
           context: .
           file: ./Docker/ARM64Production/Dockerfile
+          platforms: linux/arm64
