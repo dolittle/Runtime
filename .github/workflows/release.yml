@@ -95,6 +95,7 @@ jobs:
           context: .
           file: ./Docker/ARM64Production/Dockerfile
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64
+          platforms: linux/arm64
       - name: Push Latest Tag Of ARM64 Production Image to Docker Hub
         uses: docker/build-push-action@v2
         if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
@@ -183,6 +184,7 @@ jobs:
           context: .
           file: ./Docker/ARM64Development/Dockerfile
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64-development
+          platforms: linux/arm64
       - name: Push Latest Tag Of ARM64 Development Image to Docker Hub
         uses: docker/build-push-action@v2
         if: ${{ needs.setup.outputs.release-type != 'prerelease' }}
