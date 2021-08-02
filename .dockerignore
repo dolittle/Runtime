@@ -2,11 +2,11 @@
 **/obj
 Schemas
 Samples
-Packages
 Documentation
-Build
-Artifacts
-Benchmark
+Benchmarks
+Specifications
 Diagrams
+Docker
 .vscode
 **/node_modules
+.github
