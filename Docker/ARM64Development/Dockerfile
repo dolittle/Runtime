@@ -16,13 +16,11 @@ RUN dotnet publish -c ${CONFIGURATION} -o out
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-arm64v8
 ARG CONFIGURATION=Release
 
-RUN apt-get update && apt-get install -y libc-dev
-
 # https://danielstoyanoff.medium.com/apple-silicon-docker-dotnet-grpc-is-that-compatible-8a05f1a71d89
 RUN apt-get update \
  && DEBIAN_FRONTEND=noninteractive \
     apt-get install --no-install-recommends --assume-yes \
-      protobuf-compiler-grpc
+      protobuf-compiler-grpc libc-dev
 ENV PROTOBUF_PROTOC=/usr/bin/protoc
 
 WORKDIR /app
