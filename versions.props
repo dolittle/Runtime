@@ -5,8 +5,8 @@
         <ContractsVersion>5.4.0</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
-        <GrpcVersion>2.35.0</GrpcVersion>
-        <GrpcAspNetCoreVersion>2.34.0</GrpcAspNetCoreVersion>
+        <GrpcVersion>2.38.1</GrpcVersion>
+        <GrpcAspNetCoreVersion>2.38.0</GrpcAspNetCoreVersion>
         <MachineSpecificationsRunnerVersion>2.9.0</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
