@@ -148,7 +148,9 @@ Filters defined by an [Event Handler]({{< ref "event_handlers_and_filters#event-
 
 ### `stream-processor-states`
 
-This collection keeps track of all [Stream Processors]({{< ref "streams#stream-processor" >}}) and their state. Partitioned streams will have a `FailingPartitions` property for tracking the fail information per partition.
+This collection keeps track of all [Stream Processors]({{< ref "streams#stream-processor" >}}) [Event Processors]({{< ref "stream#event-processor">}}) and their state. Each event processor can be either a [Filter]({{< ref "event_handlers_and_filters#filters" >}}) on an [Event Processor]({{< ref "event_handlers_and_filters#event-handlers" >}}) that handles the events from an event handler.
+
+**Filter**:
 
 ```json
 {
@@ -161,6 +163,31 @@ This collection keeps track of all [Stream Processors]({{< ref "streams#stream-p
     "FailureReason": "string",
     "ProcessingAttempts": "int",
     "IsFailing": "bool
+}
+```
+
+**Event Processor**:
+
+Partitioned streams will have a `FailingPartitions` property for tracking the failing information per partition. It will be empty if there are no failing partitions. The partitions id is the same as the failing events [`EventSourceId`]({{< ref "events#eventsourceid" >}}). As each partition can fail independently, the `"Position"` value can be different for the stream processor at large compared to the failing partitions `"position"`.
+
+```json
+{
+    "Partitioned": true,
+    "SourceStream": "UUID"
+    "EventProcessor": "UUID",
+    "Position": "decimal",
+    "LastSuccessfullyProcessed": "date",
+    "FailingPartitions": {
+        // for each failing partition
+        "<partition-id>": {
+            // the position of the failing event in the stream
+            "Position": "decimal",
+            "RetryTime": "date",
+            "Reason": "string",
+            "ProcessingAttempts": "int",
+            "LastFailed": "date"
+        }
+    }
 }
 ```
 
