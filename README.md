@@ -35,9 +35,9 @@ There are 2 different types of images. The `Production` images contain the Runti
 | Type | Version |
 | ------- | ------- |
 | Production | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest?label=dolittle%2Fruntime&logo=docker)](https://hub.docker.com/r/dolittle/runtime) |
-| Production `arm64` | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-arm64?label=dolittle%2Fruntime%3Aarm64&logo=docker)](https://hub.docker.com/r/dolittle/runtime) |
+| Production `arm64` | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-arm64?label=dolittle%2Fruntime%3Aarm64&logo=docker&arch=arm64)](https://hub.docker.com/r/dolittle/runtime) |
 | Development | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-development?label=dolittle%2Fruntime%3Alatest-development&logo=docker)](https://hub.docker.com/r/dolittle/runtime) |
-| Development `arm64` | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-arm64-development?label=dolittle%2Fruntime%3Alatest-arm64-development&logo=docker)](https://hub.docker.com/r/dolittle/runtime) |
+| Development `arm64` | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-arm64-development?label=dolittle%2Fruntime%3Alatest-arm64-development&logo=docker&arch=arm64)](https://hub.docker.com/r/dolittle/runtime) |
 
 
 # Development
