@@ -20,9 +20,9 @@ sequenceDiagram
         R->>C: ProjectionRegistrationResponse
         deactivate R
         loop For each event of the specified types in the event log
-            R->>C: HandleEventRequest
+            R->>C: ProjectionRequest
             activate C
-            C->>R: EventHandlerResponse
+            C->>R: ProjectionResponse
             deactivate C
         end
     end
@@ -71,21 +71,39 @@ classDiagram
 
 ```mermaid
 classDiagram
-    class HandleEventRequest{
+    class ProjectionRequest{
         ReverseCallRequestContext callContext
+        ProjectionCurrentState currentState
         StreamEvent event
         RetryProcessingState retryProcessingState
     }
-    class EventHandlerResponse{
+    class ProjectionResponse{
         ReverseCallResponseContext callContext
+        ProjectionResponseAction response
         ProcessorFailure failure
     }
+    class ProjectionCurrentState{
+        ProjectionCurrentStateType type
+        string key
+        string state
+    }
+    class ProjectionResponseAction{
+        <<abstract>>
+    }
+    class ProjectionResponseUpdate{
+    }
+    class ProjectionResponseDelete{
+    }
     %%
-    HandleEventRequest --* ReverseCallRequestContext
-    HandleEventRequest --* StreamEvent
-    HandleEventRequest --* RetryProcessingState
-    EventHandlerResponse --* ReverseCallResponseContext
-    EventHandlerResponse --* ProcessorFailure
+    ProjectionRequest --* ReverseCallRequestContext
+    ProjectionRequest --* ProjectionCurrentState
+    ProjectionRequest --* StreamEvent
+    ProjectionRequest --* RetryProcessingState
+    ProjectionResponse --* ReverseCallResponseContext
+    ProjectionResponse --* ProjectionResponseAction
+    ProjectionResponseUpdate ..|> ProjectionResponseAction
+    ProjectionResponseDelete ..|> ProjectionResponseAction
+    ProjectionResponse --* ProcessorFailure
     %% links
     link ReverseCallRequestContext "{{< ref "types" >}}" "Types"
     link ReverseCallResponseContext "{{< ref "types" >}}" "Types"
