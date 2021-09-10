@@ -90,9 +90,10 @@ classDiagram
     class ProjectionResponseAction{
         <<abstract>>
     }
-    class ProjectionResponseUpdate{
+    class ProjectionReplaceResponse{
+        string state
     }
-    class ProjectionResponseDelete{
+    class ProjectionDeleteResponse{
     }
     %%
     ProjectionRequest --* ReverseCallRequestContext
@@ -101,8 +102,8 @@ classDiagram
     ProjectionRequest --* RetryProcessingState
     ProjectionResponse --* ReverseCallResponseContext
     ProjectionResponse --* ProjectionResponseAction
-    ProjectionResponseUpdate ..|> ProjectionResponseAction
-    ProjectionResponseDelete ..|> ProjectionResponseAction
+    ProjectionReplaceResponse ..|> ProjectionResponseAction
+    ProjectionDeleteResponse ..|> ProjectionResponseAction
     ProjectionResponse --* ProcessorFailure
     %% links
     link ReverseCallRequestContext "{{< ref "types" >}}" "Types"
@@ -126,7 +127,29 @@ sequenceDiagram
     deactivate R
 ```
 
-### Event Message types
+### Message types
+
+```mermaid
+classDiagram
+    class GetOneRequest{
+        CallRequestContext callContext
+        Uuid scopeId
+        Uuid projectionId
+        string key
+    }
+    class GetOneResponse{
+        Failure? failure
+        ProjectionCurrentState currentState
+    }
+    %%
+    GetOneRequest --* CallRequestContext
+    GetOneResponse --* ProjectionCurrentState
+    GetOneResponse --* Failure
+    %% links
+    link ProjectionCurrentState "{{< ref "projections#event-message-types" >}}" "Types"
+    link CallRequestContext "{{< ref "types" >}}" "Types"
+    link Failure "{{< ref "types" >}}" "Types"
+```
 
 ## Get all ReadModels
 
@@ -135,10 +158,32 @@ Retrieves all instances of a read model for a specified projection - for one ten
 ```mermaid
 sequenceDiagram
     participant C as Client (SDK)
-    participant as Runtime
+    participant R as Runtime
     C->>R: GetAllRequest
     activate R
     R->>C: GetAllResponse
     deactivate R
 ```
-### Event Message types
+
+### Message types
+
+```mermaid
+classDiagram
+    class GetAllRequest{
+        CallRequestContext callContext
+        Uuid scopeId
+        Uuid projectionId
+    }
+    class GetAllResponse{
+        Failure? failure
+        ProjectionCurrentState[] currentState
+    }
+    %%
+    GetAllRequest --* CallRequestContext
+    GetAllResponse --* ProjectionCurrentState
+    GetAllResponse --* Failure
+    %% links
+    link ProjectionCurrentState "{{< ref "projections#event-message-types" >}}" "Types"
+    link CallRequestContext "{{< ref "types" >}}" "Types"
+    link Failure "{{< ref "types" >}}" "Types"
+```
