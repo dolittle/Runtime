@@ -11,7 +11,7 @@ Dolittle is a decentralized, distributed, event-driven microservice platform bui
 <!-- The Dolittle stack is composed of the SDKs, the Runtime, and the [Event Store]({{< ref "event_store" >}}). -->
 
 - [**Events**]({{< ref "events" >}}) are _"facts that have happened"_ in your system and they form the _truth_ of the system.
-- [**Event Handlers & Filter**]({{< ref "event_handlers_and_filters" >}}) process events.
+- [**Event Handlers & Filters**]({{< ref "event_handlers_and_filters" >}}) process events.
 - The **Runtime** is the core of all Dolittle applications and manages connections from the SDKs and other Runtimes to its [Event Store]({{< ref "event_store" >}}). The Runtime is packaged as a [Docker image](https://hub.docker.com/r/dolittle/runtime)
 - The [**Event Store**]({{< ref "event_store" >}}) is the underlying database where the events are stored.
 - The **Head** is the user code that uses the SDKs, which connect to the Runtime in the same way as a client (SDK) connects to a server (runtime).
