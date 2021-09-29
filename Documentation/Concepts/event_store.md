@@ -148,7 +148,7 @@ Filters defined by an [Event Handler]({{< ref "event_handlers_and_filters#event-
 
 ### `stream-processor-states`
 
-This collection keeps track of all [Stream Processors]({{< ref "streams#stream-processor" >}}) [Event Processors]({{< ref "stream#event-processor">}}) and their state. Each event processor can be either a [Filter]({{< ref "event_handlers_and_filters#filters" >}}) on an [Event Processor]({{< ref "event_handlers_and_filters#event-handlers" >}}) that handles the events from an event handler.
+This collection keeps track of all [Stream Processors]({{< ref "streams#stream-processor" >}}) [Event Processors]({{< ref "streams#event-processor">}}) and their state. Each event processor can be either a [Filter]({{< ref "event_handlers_and_filters#filters" >}}) on an [Event Processor]({{< ref "event_handlers_and_filters#event-handlers" >}}) that handles the events from an event handler.
 
 **Filter**:
 

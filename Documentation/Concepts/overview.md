@@ -31,7 +31,9 @@ The history of events also forms an audit log to help with debugging and auditin
 Dolittle applications are built from microservices that communicate with each other using events. These microservices can scale and fail independently as there is no centralized message bus like in [Kafka](https://kafka.apache.org/). The Runtimes and event stores are independent of other parts of the system.
 
 ## Microservice
-A _microservice_ consists of one or many heads talking to one Runtime. The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like. Each microservice is autonomous and has its own resources and [event store]({{< ref "event_store" >}}).
+A _microservice_ consists of one or many heads talking to one Runtime. Each microservice is autonomous and has its own resources and [event store]({{< ref "event_store" >}}).
+
+The core idea is that a microservice is an independently scalable unit of deployment that can be reused in other parts of the software however you like. You could compose it back in one application running inside a single process, or you could spread it across a cluster. It really is a deployment choice once the software is giving you this freedom. 
 
 This diagram shows the anatomy of a microservice with one head.
 
@@ -41,8 +43,9 @@ This diagram shows the anatomy of a microservice with one head.
 The _Read Cache_ in these pictures is not part of Dolittle. Different [projections]({{< ref "event_sourcing#projections" >}}) call for different solutions depending on the sort of load and data to be stored.
 {{< /alert >}}
 
+
 ### Multi-tenancy
-Multi-tenancy means that a single instance of the software and its supporting infrastructure serves multiple customers. Dolittle supports multi-tenancy by separating the event stores for each tenant so that each tenant only has access to its own data.
+Since computing is the most expensive resource, the Dolittle Runtime and SDK's has been built from the ground up with multi-tenancy in mind. Multi-tenancy means that a single instance of the software and its supporting infrastructure serves multiple customers, making optimal use of resources. Dolittle supports multi-tenancy by separating the event stores for each tenant so that each tenant only has access to its own data.
 
 This diagram shows a microservice with 2 tenants, each of them with their own resources.
 
