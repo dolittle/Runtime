@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
         public bool IsFailing { get; set; }
 
         /// <inheritdoc/>
-        public override runtime.IStreamProcessorState ToRuntimeRepresentation() =>
+        public override IStreamProcessorState ToRuntimeRepresentation() =>
             new runtime.StreamProcessorState(
                 Position,
                 FailureReason,

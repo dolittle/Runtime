@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Google.Protobuf;
@@ -16,7 +17,7 @@ namespace Dolittle.Runtime.Services
     /// <typeparam name="TConnectResponse">Type of the response that is received after the initial Connect call.</typeparam>
     /// <typeparam name="TRequest">Type of the requests sent from the server to the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
     /// <typeparam name="TResponse">Type of the responses received from the client using <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Call"/>.</typeparam>
-    public interface IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>
+    public interface IReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse> : IDisposable
         where TClientMessage : IMessage, new()
         where TServerMessage : IMessage, new()
         where TConnectArguments : class

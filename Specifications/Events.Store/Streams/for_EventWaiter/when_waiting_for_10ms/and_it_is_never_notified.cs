@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting_for
         Because of = () =>
         {
             result = event_waiter.Wait(position, token);
-            Thread.Sleep(10);
+            Thread.Sleep(100);
         };
 
         It should_wait_for_event = () => result.IsCompleted.ShouldBeFalse();

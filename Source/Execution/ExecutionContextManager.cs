@@ -5,9 +5,9 @@ using System.Globalization;
 using System.Threading;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Lifecycle;
-using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Security;
 using Dolittle.Runtime.Versioning;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Execution
 {
@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Execution
     [Singleton]
     public class ExecutionContextManager : IExecutionContextManager
     {
-        static readonly AsyncLocal<ExecutionContext> _executionContext = new AsyncLocal<ExecutionContext>();
+        static readonly AsyncLocal<ExecutionContext> _executionContext = new();
 
         static bool _initialExecutionContextSet = false;
 
@@ -89,11 +89,15 @@ namespace Dolittle.Runtime.Execution
         public void SetConstants(
             Microservice microservice,
             Version version,
-            Environment environment)
+            Environment environment,
+            string filePath,
+            int lineNumber,
+            string member)
         {
             _microservice = microservice;
             _version = version;
             _environment = environment;
+            CurrentFor(new ExecutionContext(microservice, Current.Tenant, version, environment, Current.CorrelationId, Current.Claims, Current.CultureInfo), filePath, lineNumber, member);
         }
 
         /// <inheritdoc/>
@@ -106,7 +110,7 @@ namespace Dolittle.Runtime.Execution
 
         /// <inheritdoc/>
         public ExecutionContext CurrentFor(TenantId tenant, string filePath, int lineNumber, string member) =>
-            CurrentFor(_microservice, tenant, CorrelationId.New(), Claims.Empty, filePath, lineNumber, member);
+            CurrentFor(Current.Microservice, tenant, CorrelationId.New(), Claims.Empty, filePath, lineNumber, member);
 
         /// <inheritdoc/>
         public ExecutionContext CurrentFor(Microservice microservice, TenantId tenant, string filePath, int lineNumber, string member) =>
@@ -114,7 +118,7 @@ namespace Dolittle.Runtime.Execution
 
         /// <inheritdoc/>
         public ExecutionContext CurrentFor(TenantId tenant, CorrelationId correlationId, string filePath, int lineNumber, string member) =>
-            CurrentFor(_microservice, tenant, correlationId, Claims.Empty, filePath, lineNumber, member);
+            CurrentFor(Current.Microservice, tenant, correlationId, Claims.Empty, filePath, lineNumber, member);
 
         /// <inheritdoc/>
         public ExecutionContext CurrentFor(Microservice microservice, TenantId tenant, CorrelationId correlationId, string filePath, int lineNumber, string member) =>
@@ -122,7 +126,7 @@ namespace Dolittle.Runtime.Execution
 
         /// <inheritdoc/>
         public ExecutionContext CurrentFor(TenantId tenant, CorrelationId correlationId, Claims claims, string filePath, int lineNumber, string member) =>
-            CurrentFor(_microservice, tenant, correlationId, claims, filePath, lineNumber, member);
+            CurrentFor(Current.Microservice, tenant, correlationId, claims, filePath, lineNumber, member);
 
         /// <inheritdoc/>
         public ExecutionContext CurrentFor(Microservice microservice, TenantId tenant, CorrelationId correlationId, Claims claims, string filePath, int lineNumber, string member)

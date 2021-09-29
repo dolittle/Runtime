@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                     var processingResult = await filter.Filter(@event, Guid.Empty, filter.Identifier, cancellationToken).ConfigureAwait(false);
                     if (processingResult is FailedFiltering failedResult)
                     {
-                        return new FilterValidationResult(failedResult.FailureReason);
+                        return FilterValidationResult.Failed(failedResult.FailureReason);
                     }
                     if (processingResult.IsIncluded)
                     {
@@ -73,7 +73,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 var oldStreamList = oldStream.ToList();
                 if (newStream.Count != oldStreamList.Count)
                 {
-                    return new FilterValidationResult($"The number of events included in the new stream generated from the filter does not match the old stream.");
+                    return FilterValidationResult.Failed($"The number of events included in the new stream generated from the filter does not match the old stream.");
                 }
 
                 for (var i = 0; i < newStream.Count; i++)
@@ -83,20 +83,20 @@ namespace Dolittle.Runtime.Events.Processing.Filters
 
                     if (newEvent.Event.EventLogSequenceNumber != oldEvent.Event.EventLogSequenceNumber)
                     {
-                        return new FilterValidationResult($"Event in new stream at position {i} is event {newEvent.Event.EventLogSequenceNumber} while the event in the old stream is event {oldEvent.Event.EventLogSequenceNumber}");
+                        return FilterValidationResult.Failed($"Event in new stream at position {i} is event {newEvent.Event.EventLogSequenceNumber} while the event in the old stream is event {oldEvent.Event.EventLogSequenceNumber}");
                     }
 
                     if (filter.Definition.Partitioned && newEvent.Partition != oldEvent.Partition)
                     {
-                        return new FilterValidationResult($"Event in new stream at position {i} has is in partition {newEvent.Partition} while the event in the old stream is in partition {oldEvent.Partition}");
+                        return FilterValidationResult.Failed($"Event in new stream at position {i} has is in partition {newEvent.Partition} while the event in the old stream is in partition {oldEvent.Partition}");
                     }
                 }
 
-                return new FilterValidationResult();
+                return FilterValidationResult.Succeeded();
             }
             catch (Exception exception)
             {
-                return new FilterValidationResult(exception.Message);
+                return FilterValidationResult.Failed(exception.Message);
             }
         }
     }

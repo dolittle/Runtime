@@ -17,13 +17,13 @@ namespace Dolittle.Runtime.Assemblies
     [Singleton]
     public class AssemblyProvider : IAssemblyProvider
     {
-        static readonly object _lockObject = new object();
-        readonly AssemblyComparer comparer = new AssemblyComparer();
+        static readonly object _lockObject = new();
+        readonly AssemblyComparer _comparer = new();
         readonly IEnumerable<ICanProvideAssemblies> _assemblyProviders;
         readonly IAssemblyFilters _assemblyFilters;
         readonly IAssemblyUtility _assemblyUtility;
-        readonly Dictionary<string, Library> _libraries = new Dictionary<string, Library>();
-        readonly List<Assembly> _assemblies = new List<Assembly>();
+        readonly Dictionary<string, Library> _libraries = new();
+        readonly List<Assembly> _assemblies = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AssemblyProvider"/> class.
@@ -85,7 +85,7 @@ namespace Dolittle.Runtime.Assemblies
         {
             lock (_lockObject)
             {
-                if (!_assemblies.Contains(assembly, comparer) &&
+                if (!_assemblies.Contains(assembly, _comparer) &&
                     !_assemblyUtility.IsDynamic(assembly))
                 {
                     _assemblies.Add(assembly);

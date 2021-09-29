@@ -27,24 +27,75 @@ The Runtime is the backend of our system and manages connections from the SDKs a
 - Try our [tutorial](https://dolittle.io/docs/tutorials/)
 - Check out our [documentation](https://dolittle.io)
 
-## Packages
 
-| Platform | Version |
+# Images
+
+There are 2 different types of images. The `Production` images contain the Runtime. The `Development` images have the Runtime and a MongoDB instance running on port `27017` for easier development.
+
+| Type | Version |
 | ------- | ------- |
-| Docker | [![Docker](https://img.shields.io/docker/v/dolittle/runtime?label=dolittle%2Fruntime&logo=docker&sort=semver)](https://hub.docker.com/r/dolittle/runtime) |
+| Production | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest?label=dolittle%2Fruntime&logo=docker)](https://hub.docker.com/r/dolittle/runtime) |
+| Production `arm64` | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-arm64?label=dolittle%2Fruntime%3Aarm64&logo=docker&arch=arm64)](https://hub.docker.com/r/dolittle/runtime) |
+| Development | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-development?label=dolittle%2Fruntime%3Alatest-development&logo=docker)](https://hub.docker.com/r/dolittle/runtime) |
+| Development `arm64` | [![Docker](https://img.shields.io/docker/v/dolittle/runtime/latest-arm64-development?label=dolittle%2Fruntime%3Alatest-arm64-development&logo=docker&arch=arm64)](https://hub.docker.com/r/dolittle/runtime) |
 
-## Building
+
+# Development
+
+**Build**:
+
+From project root:
+
 ```shell
 dotnet build
 ```
 
-## Running
+**Run**:
+
+From project root:
+
 ```shell
 cd Source/Server
 dotnet run
 ```
 
 Configuration files are in `Source/Server/.dolittle/`
+
+**Tests**:
+
+ From project root:
+
+```shell
+dotnet test
+```
+
+## Building the Docker image
+
+You build all images from the project root:
+
+**Production**:
+
+```shell
+docker build -t dolittle/runtime -f ./Docker/Production/Dockerfile .
+```
+
+**ARM64 Production**:
+
+```shell
+docker build -t dolittle/runtime:arm64 -f ./Docker/ARM64Production/Dockerfile .
+```
+
+**Development**:
+
+```shell
+docker build -t dolittle/runtime:development -f ./Docker/Development/Dockerfile .
+```
+
+**ARM64 Development**:
+
+```shell
+docker build -t dolittle/runtime:arm64-development -f ./Docker/ARM64Development/Dockerfile .
+```
 
 ## Visual Studio
 
@@ -55,7 +106,6 @@ You can open the `.sln` file in the root of the repository and just build direct
 We have readymade tasks for VSCode. Press `F1` and type `Run Tasks` and select `Tasks: Run Tasks` to see the tasks.
 They are folder sensitive and will look for the nearest `.csproj` file based on the file you have open.
 If it doesn't find it, it will pick the `.sln` file instead.
-
 
 ## More
 

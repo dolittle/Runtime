@@ -12,7 +12,6 @@ using Dolittle.Runtime.Events.Store.MongoDB.Events;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
@@ -39,7 +38,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         /// <param name="eventConverter">The <see cref="IEventConverter" />.</param>
         /// <param name="aggregateRoots">The <see cref="IAggregateRoots" />.</param>
         /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
-        /// <param name="logger">An <see cref="ILogger"/>.</param>
         public EventStore(
             IExecutionContextManager executionContextManager,
             IStreams streams,
@@ -128,6 +126,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
 
         /// <inheritdoc/>
         public Task<CommittedAggregateEvents> FetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, CancellationToken cancellationToken)
+            => DoFetchForAggregate(eventSource, aggregateRoot, defaultFilter => defaultFilter, cancellationToken);
+
+        /// <inheritdoc/>
+        public Task<CommittedAggregateEvents> FetchForAggregateAfter(EventSourceId eventSource, ArtifactId aggregateRoot, AggregateRootVersion after, CancellationToken cancellationToken)
+            => DoFetchForAggregate(eventSource, aggregateRoot, defaultFilter => defaultFilter & _eventFilter.Gt(_ => _.Aggregate.Version, after.Value), cancellationToken);
+
+        Task<CommittedAggregateEvents> DoFetchForAggregate(EventSourceId eventSource, ArtifactId aggregateRoot, Func<FilterDefinition<MongoDB.Events.Event>,FilterDefinition<MongoDB.Events.Event>> filterCallback, CancellationToken cancellationToken)
             => DoInSession<CommittedAggregateEvents, CommittedAggregateEvent>(async (transaction, cancel) =>
                 {
                     var version = await _aggregateRoots.FetchVersionFor(
@@ -137,10 +142,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                     cancel).ConfigureAwait(false);
                     if (version > AggregateRootVersion.Initial)
                     {
-                        var filter = _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
+                        var defaultFilter = _eventFilter.Eq(_ => _.Aggregate.WasAppliedByAggregate, true)
                             & _eventFilter.Eq(_ => _.Metadata.EventSource, eventSource.Value)
                             & _eventFilter.Eq(_ => _.Aggregate.TypeId, aggregateRoot.Value)
                             & _eventFilter.Lte(_ => _.Aggregate.Version, version.Value);
+
+                        var filter = filterCallback(defaultFilter);
 
                         var events = await _streams.DefaultEventLog
                             .Find(transaction, filter)
@@ -174,8 +181,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             try
             {
                 using var session = await _streams.StartSessionAsync(cancellationToken: cancellationToken).ConfigureAwait(false);
-                var committedEvents = await session.WithTransactionAsync(doTask, cancellationToken: cancellationToken).ConfigureAwait(false);
-                return committedEvents;
+                return await session.WithTransactionAsync(doTask, cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (MongoWaitQueueFullException ex)
             {

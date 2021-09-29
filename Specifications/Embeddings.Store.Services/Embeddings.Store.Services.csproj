@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props"/>
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Embeddings.Store.Services.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/Embeddings.Store.Services/Embeddings.Store.Services.csproj" />
+  </ItemGroup>
+
+</Project>

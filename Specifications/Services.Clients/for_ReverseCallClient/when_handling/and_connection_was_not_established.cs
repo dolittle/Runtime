@@ -4,6 +4,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling
@@ -17,7 +18,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling
         {
             execution_context = given.execution_contexts.create();
             execution_context_manager.SetupGet(_ => _.Current).Returns(execution_context);
-            server_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
+            server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
             reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
         };
 

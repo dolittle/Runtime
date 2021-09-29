@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters
         public async Task<Try<IFilterDefinition>> TryGetFromStream(ScopeId scopeId, StreamId streamId, CancellationToken cancellationToken)
         {
             var tryGetStream = await _streamDefinitions.TryGet(scopeId, streamId, cancellationToken).ConfigureAwait(false);
-            return (tryGetStream.Success, tryGetStream.Result?.FilterDefinition);
+            return tryGetStream.Select(_ => _.FilterDefinition);
         }
 
         /// <inheritdoc/>

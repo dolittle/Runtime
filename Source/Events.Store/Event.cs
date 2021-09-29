@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Gets the <see cref="Artifact"/> representing the type of the Event.
         /// </summary>
-        public Artifact Type { get; }
+        public Artifact Type { get; }
 
         /// <summary>
         /// Gets a value indicating whether the Event is public.
@@ -43,6 +43,6 @@ namespace Dolittle.Runtime.Events.Store
         /// <summary>
         /// Gets the content of the Event represented as a JSON-encoded <see cref="string"/>.
         /// </summary>
-        public string Content { get; }
+        public string Content { get; }
     }
 }

@@ -6,6 +6,7 @@ using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
+using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_registering
@@ -17,8 +18,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_r
         static ScopeId scope_id;
         static IStreamDefinition stream_definition;
         static Moq.Mock<IEventProcessor> event_processor;
-        static StreamProcessor registered_stream_processor;
-        static bool registration_result;
 
         Establish context = () =>
         {
@@ -30,9 +29,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_StreamProcessors.when_r
             event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
         };
 
-        Because of = () => registration_result = stream_processors.TryRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None, out registered_stream_processor);
+        static Try<StreamProcessor> result;
+        Because of = () => result = stream_processors.TryCreateAndRegister(scope_id, event_processor_id, stream_definition, () => event_processor.Object, CancellationToken.None);
 
-        It should_register_stream_processor = () => registration_result.ShouldBeTrue();
-        It should_return_the_registered_stream_processor = () => registered_stream_processor.ShouldNotBeNull();
+        It should_register_stream_processor = () => result.Success.ShouldBeTrue();
+        It should_return_the_registered_stream_processor = () => result.Result.ShouldNotBeNull();
     }
 }

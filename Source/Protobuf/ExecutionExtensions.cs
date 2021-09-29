@@ -21,13 +21,13 @@ namespace Dolittle.Runtime.Protobuf
         public static ExecutionContextContract ToProtobuf(this ExecutionContext executionContext)
         {
             var message = new ExecutionContextContract
-                {
-                    MicroserviceId = executionContext.Microservice.Value.ToProtobuf(),
-                    TenantId = executionContext.Tenant.Value.ToProtobuf(),
-                    CorrelationId = executionContext.CorrelationId.Value.ToProtobuf(),
-                    Environment = executionContext.Environment.Value,
-                    Version = executionContext.Version.ToProtobuf()
-                };
+            {
+                MicroserviceId = executionContext.Microservice.Value.ToProtobuf(),
+                TenantId = executionContext.Tenant.Value.ToProtobuf(),
+                CorrelationId = executionContext.CorrelationId.Value.ToProtobuf(),
+                Environment = executionContext.Environment.Value,
+                Version = executionContext.Version.ToProtobuf()
+            };
             message.Claims.AddRange(executionContext.Claims.ToProtobuf());
 
             return message;

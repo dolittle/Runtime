@@ -4,6 +4,7 @@
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
+using Dolittle.Runtime.ApplicationModel;
 
 namespace Dolittle.Runtime.Execution.for_ExecutionContextManager.given
 {
@@ -16,6 +17,7 @@ namespace Dolittle.Runtime.Execution.for_ExecutionContextManager.given
         {
             logger = Mock.Of<ILogger>();
             execution_context_manager = new ExecutionContextManager(logger);
+            execution_context_manager.CurrentFor(Microservice.NotSet, TenantId.Unknown, CorrelationId.System, "", 0, "");
         };
     }
 }

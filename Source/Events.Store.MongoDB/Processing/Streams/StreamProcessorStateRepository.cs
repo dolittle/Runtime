@@ -5,11 +5,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
-using Dolittle.Runtime.EventHorizon;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon;
 using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using Dolittle.Runtime.EventHorizon.Consumer;
+using MongoSubscriptionState = Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon.SubscriptionState;
+using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
 {
@@ -19,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
     public class StreamProcessorStateRepository : IStreamProcessorStateRepository
     {
         readonly FilterDefinitionBuilder<AbstractStreamProcessorState> _streamProcessorFilter;
-        readonly FilterDefinitionBuilder<SubscriptionState> _subscriptionFilter;
+        readonly FilterDefinitionBuilder<MongoSubscriptionState> _subscriptionFilter;
         readonly IStreamProcessorStates _streamProcessorStates;
         readonly ISubscriptionStates _subscriptionStates;
         readonly ILogger _logger;
@@ -38,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             _streamProcessorStates = streamProcessorStates;
             _subscriptionStates = subscriptionStates;
             _streamProcessorFilter = Builders<AbstractStreamProcessorState>.Filter;
-            _subscriptionFilter = Builders<SubscriptionState>.Filter;
+            _subscriptionFilter = Builders<MongoSubscriptionState>.Filter;
             _logger = logger;
         }
 
@@ -61,7 +63,10 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var persistedState = await states.Find(CreateFilter(subscriptionId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
-                    return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
+
+                    return persistedState == default
+                        ? new StreamProcessorStateDoesNotExist(subscriptionId)
+                        : persistedState.ToRuntimeRepresentation();
                 }
                 else if (id is StreamProcessorId streamProcessorId)
                 {
@@ -69,7 +74,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                     var persistedState = await states.Find(CreateFilter(streamProcessorId))
                         .FirstOrDefaultAsync(cancellationToken)
                         .ConfigureAwait(false);
-                    return (persistedState != null) ? (true, persistedState.ToRuntimeRepresentation()) : (false, null);
+                    return persistedState == default
+                        ? new StreamProcessorStateDoesNotExist(streamProcessorId)
+                        : Try<IStreamProcessorState>.Succeeded(persistedState.ToRuntimeRepresentation());
                 }
                 else
                 {
@@ -100,7 +107,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
                 {
                     if (baseStreamProcessorState is Runtime.Events.Processing.Streams.StreamProcessorState streamProcessorState)
                     {
-                        var replacementState = new SubscriptionState(
+                        var replacementState = new MongoSubscriptionState(
                             subscriptionId.ProducerMicroserviceId,
                             subscriptionId.ProducerTenantId,
                             subscriptionId.StreamId,
@@ -178,7 +185,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
             _streamProcessorFilter.Eq(_ => _.EventProcessor, id.EventProcessorId.Value)
                 & _streamProcessorFilter.Eq(_ => _.SourceStream, id.SourceStreamId.Value);
 
-        FilterDefinition<SubscriptionState> CreateFilter(SubscriptionId id) =>
+        FilterDefinition<MongoSubscriptionState> CreateFilter(SubscriptionId id) =>
             _subscriptionFilter.Eq(_ => _.Microservice, id.ProducerMicroserviceId.Value)
                 & _subscriptionFilter.Eq(_ => _.Tenant, id.ProducerTenantId.Value)
                 & _subscriptionFilter.Eq(_ => _.Stream, id.StreamId.Value)
