@@ -64,7 +64,7 @@ This is a simplified structure of the main parts of an aggregate root.
 ```csharp
 AggregateRoot {
     AggregateRootId Guid
-    EventSourceId Guid
+    EventSourceId string
     Version int
     AggregateEvents AggregateEvent[] {
         EventSourceId Guid
@@ -81,7 +81,7 @@ Identifies this specific type of aggregate root. In the kitchen example this wou
 
 #### `EventSourceId`
 
-`EventSourceId` represents the source of the event like a "primary key" in a traditional database.  In the kitchen example this would be the unique id for each instance of the `Kitchen` aggregate root.
+`EventSourceId` represents the source of the event like a "primary key" in a traditional database. In the kitchen example this would be the unique identifier for each instance of the `Kitchen` aggregate root.
 
 #### `Version`
 
