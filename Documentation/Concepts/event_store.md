@@ -86,7 +86,7 @@ This is the structure of a committed event:
     // the events metadata
     "Metadata": {
         "Occurred": "date",
-        "EventSource": "UUID",
+        "EventSource": "string",
         // EventTypeId and Generation
         "TypeId": "UUID",
         "TypeGeneration": "long",
@@ -101,7 +101,7 @@ This collection keeps track of all instances of [Aggregates]({{< ref "aggregates
 
 ```json
 {
-    "EventSource": "UUID",
+    "EventSource": "string",
     // the AggregateRootId
     "AggregateType": "UUID",
     "Version": "decimal"
@@ -173,7 +173,7 @@ Partitioned streams will have a `FailingPartitions` property for tracking the fa
 ```json
 {
     "Partitioned": true,
-    "SourceStream": "UUID"
+    "SourceStream": "UUID",
     "EventProcessor": "UUID",
     "Position": "decimal",
     "LastSuccessfullyProcessed": "date",
