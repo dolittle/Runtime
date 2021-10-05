@@ -5,7 +5,7 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace CLI.Migrations
 {
-    [Command(Name = "eventstore", Description = "Run migrations of event store between major Runtime versions")]
+    [Command("eventstore", "Run migrations of event store between major Runtime versions")]
     public class MigrateEventStore : Options
     {
         public void OnExecute(CommandLineApplication cli)

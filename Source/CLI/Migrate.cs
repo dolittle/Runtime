@@ -6,7 +6,7 @@ using McMaster.Extensions.CommandLineUtils;
 
 namespace CLI
 {
-    [Command(Name = "migrate", Description = "Run migrations of data stores between major Runtime versions")]
+    [Command("migrate", "Run migrations of data stores between major Runtime versions")]
     [Subcommand(typeof(MigrateEventStore))]
     public class Migrate
     {
