@@ -2,10 +2,12 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using CLI.Options.Parsers.Versioning;
+using Dolittle.Runtime.Migrations;
 using Dolittle.Runtime.Versioning;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using MigrateFrom = Dolittle.Runtime.Migrations;
 
 namespace CLI
 {
@@ -24,6 +26,7 @@ namespace CLI
 
             using var cli = new CommandLineApplication<Program>();
             cli.Conventions.UseDefaultConventions();
+            cli.Conventions.UseConstructorInjection(container);
             AddValueParsers(cli.ValueParsers, container);
 
             return cli.Execute(args);
@@ -33,6 +36,10 @@ namespace CLI
         {
             services.AddTransient<IVersionConverter, VersionConverter>();
             services.AddTransient<IValueParser, VersionParser>();
+            services.AddTransient<IMigrations, MigrateFrom.Migrations>();
+            services.AddTransient<IPerformMigrations, MigrationPerformer>();
+
+            services.AddTransient<ICanMigrateDataStores, MigrateFrom.V6.ToV7>();
         }
 
         static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)

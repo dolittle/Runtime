@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <RootNamespace>Dolittle.Runtime.Events.Store.MongoDB.Migrations</RootNamespace>
+    <AssemblyName>Dolittle.Runtime.Events.Store.MongoDB.Migrations</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Events.Store.MongoDB/Events.Store.MongoDB.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+  </ItemGroup>
+
+</Project>

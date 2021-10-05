@@ -14,7 +14,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="../Migrations/Migrations.csproj" />
+        <ProjectReference Include="../Events.Store.MongoDB.Migrations/Events.Store.MongoDB.Migrations.csproj" />
         <ProjectReference Include="../Versioning/Versioning.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
     </ItemGroup>
 
     <ItemGroup>

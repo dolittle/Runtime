@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="../../default.props"/>
+
+  <PropertyGroup>
+    <RootNamespace>Dolittle.Runtime.Migrations</RootNamespace>
+    <AssemblyName>Dolittle.Runtime.Migrations</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Events.Store.MongoDB.Migrations/Events.Store.MongoDB.Migrations.csproj" />
+    <ProjectReference Include="../Versioning/Versioning.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)" />
+  </ItemGroup>
+
+</Project>
