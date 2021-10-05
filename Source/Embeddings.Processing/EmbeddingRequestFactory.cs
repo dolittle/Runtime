@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     {
                         Artifact = @event.Type.ToProtobuf(),
                         Content = @event.Content,
-                        EventSourceId = @event.EventSource.ToProtobuf(),
+                        EventSourceId = @event.EventSource.Value,
                         Public = @event.Public,
                     }
                 }

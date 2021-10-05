@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         Establish context = () =>
         {
             stream_position = random.stream_position;
-            partition = Guid.Parse("82e94df4-75d8-45e1-9595-bb17552975e8");
+            partition = "82e94df4-75d8-45e1-9595-bb17552975e8 partition";
             stream = Guid.Parse("f61ca65f-29e2-47a8-b51a-2ca35e489860");
             stored_event = events.a_stream_event_not_from_aggregate(stream_position, partition);
             event_converter = new EventConverter(event_content_converter.Object);

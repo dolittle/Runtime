@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 ToRuntimeCommittedEvent(@event),
                 @event.EventLogSequenceNumber,
                 StreamId.EventLog,
-                Guid.Empty,
+                PartitionId.None,
                 false);
 
         /// <inheritdoc/>

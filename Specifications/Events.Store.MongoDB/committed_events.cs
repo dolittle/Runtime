@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             new CommittedEvent(
                 event_log_sequence_number,
                 new DateTimeOffset(2232571935, TimeSpan.Zero),
-                Guid.Parse("914990bd-9c3b-4909-a448-989a2df7951b"),
+                "event source",
                 execution_contexts.create(),
                 new Artifact(Guid.Parse("e61f3f6e-fc31-4e76-9274-c37cacbb74eb"), 2405803362),
                 false,
@@ -34,7 +34,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             new CommittedExternalEvent(
                 event_log_sequence_number,
                 new DateTimeOffset(1242521935, TimeSpan.Zero),
-                Guid.Parse("5538a71c-fc8d-4f93-8e18-a2aadf070175"),
+                "event source 4f93-8e18-a2aadf070175",
                 execution_contexts.create(),
                 new Artifact(Guid.Parse("9e2f39c6-4824-4054-b714-8ccf63921cd9"), 2575047027),
                 false,

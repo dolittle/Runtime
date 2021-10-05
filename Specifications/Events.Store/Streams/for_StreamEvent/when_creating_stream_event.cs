@@ -20,12 +20,12 @@ namespace Dolittle.Runtime.Events.Store.Streams.for_StreamEvent
         {
             stream = Guid.NewGuid();
             stream_position = 0;
-            partition = Guid.NewGuid();
+            partition = "]≈[partitionﬁß";
             execution_context = execution_contexts.create();
             committed_event = new CommittedEvent(
                 0,
                 DateTimeOffset.Now,
-                Guid.NewGuid(),
+                "event source∞§",
                 execution_context,
                 new Artifacts.Artifact(Guid.NewGuid(), 0),
                 false,

@@ -31,12 +31,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.wh
             @event = new CommittedEvent(
                 0,
                 DateTimeOffset.Now,
-                Guid.NewGuid(),
+                "some event source",
                 execution_contexts.create(),
                 new Artifact(Guid.NewGuid(), 0),
                 true,
                 "");
-            partition = Guid.NewGuid();
+            partition = "some partition";
         };
 
         Because of = () => event_processor.Process(@event, partition, default).GetAwaiter().GetResult();

@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public bool IsIncluded => false;
 
         /// <inheritdoc/>
-        public PartitionId Partition => Guid.Empty;
+        public PartitionId Partition => PartitionId.None;
 
         /// <inheritdoc/>
         public bool IsPartitioned { get; }

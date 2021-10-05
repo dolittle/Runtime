@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
         Establish context = () =>
         {
             artifact = given.artifacts.single();
-            partition = Guid.NewGuid();
+            partition = "another partition";
             filter = new TypeFilterWithEventSourcePartition(
                 scope,
                 new TypeFilterWithEventSourcePartitionDefinition(Guid.NewGuid(), Guid.NewGuid(), new ArtifactId[] { artifact.Id }.AsEnumerable(), true),
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
                 Moq.Mock.Of<ILogger<TypeFilterWithEventSourcePartition>>());
         };
 
-        Because of = () => result = filter.Filter(given.committed_events.single_with_artifact(partition.Value, artifact), Guid.NewGuid(), Guid.NewGuid(), default).GetAwaiter().GetResult();
+        Because of = () => result = filter.Filter(given.committed_events.single_with_artifact(partition.Value, artifact), "some partition", Guid.NewGuid(), default).GetAwaiter().GetResult();
 
         It should_have_the_correct_partition = () => result.Partition.ShouldEqual(partition);
         It should_be_successful = () => result.Succeeded.ShouldBeTrue();

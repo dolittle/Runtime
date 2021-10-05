@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
     public record JsonResponseCommittedEvent(
         ulong EventLogSequenceNumber,
         DateTimeOffset Occurred,
-        Guid EventSource,
+        string EventSource,
         ExecutionContext ExecutionContext,
         Artifact Type,
         bool Public,
@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
                 @event.Content);
     }
 
-    public record JsonResponseCommittedAggregateEvents(Guid EventSourceId, Guid AggregateRoot, ulong AggregateRootVersion, JsonResponseCommittedAggregateEvent[] Events)
+    public record JsonResponseCommittedAggregateEvents(string EventSourceId, Guid AggregateRoot, ulong AggregateRootVersion, JsonResponseCommittedAggregateEvent[] Events)
     {
         public static JsonResponseCommittedAggregateEvents From(CommittedAggregateEvents events)
             => new(

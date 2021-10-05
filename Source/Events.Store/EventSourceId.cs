@@ -9,29 +9,17 @@ namespace Dolittle.Runtime.Events.Store
     /// <summary>
     /// Represents the identification of an event source.
     /// </summary>
-    public record EventSourceId(Guid Value) : ConceptAs<Guid>(Value)
+    public record EventSourceId(string Value) : ConceptAs<string>(Value)
     {
         /// <summary>
         /// A static singleton instance to represent a "NotSet" <see cref="EventSourceId" />.
         /// </summary>
-        public static readonly EventSourceId NotSet = Guid.Empty;
-
-        /// <summary>
-        /// Implicitly convert from a <see cref="Guid"/> to an <see cref="EventSourceId"/>.
-        /// </summary>
-        /// <param name="eventSourceId">EventSourceId as <see cref="Guid"/>.</param>
-        public static implicit operator EventSourceId(Guid eventSourceId) => new(eventSourceId);
+        public static readonly EventSourceId NotSet = Guid.Empty.ToString();
 
         /// <summary>
         /// Implicitly convert from a <see cref="string"/> to an <see cref="EventSourceId"/>.
         /// </summary>
         /// <param name="eventSourceId">EventSourceId as <see cref="string"/>.</param>
-        public static implicit operator EventSourceId(string eventSourceId) => new(Guid.Parse(eventSourceId));
-
-        /// <summary>
-        /// Creates a new instance of <see cref="EventSourceId"/> with a unique id.
-        /// </summary>
-        /// <returns>A new <see cref="EventSourceId"/>.</returns>
-        public static EventSourceId New() => Guid.NewGuid();
+        public static implicit operator EventSourceId(string eventSourceId) => new(eventSourceId);
     }
 }

@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store
             var protobuf = new Contracts.CommittedAggregateEvents
             {
                 AggregateRootId = committedAggregateEvents.AggregateRoot.ToProtobuf(),
-                EventSourceId = committedAggregateEvents.EventSource.ToProtobuf(),
+                EventSourceId = committedAggregateEvents.EventSource.Value,
                 AggregateRootVersion = aggregateRootVersion
             };
             protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));

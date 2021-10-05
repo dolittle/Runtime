@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
         Establish context = () =>
         {
             projection_key = "projection-key";
-            event_source = Guid.Parse("f05923c2-561d-4603-97bb-7fc17d808a8a");
+            event_source = "f05923c2-561d-4603-97bb-7fc17d808a8a";
             exception = new Exception();
 
             embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key }));

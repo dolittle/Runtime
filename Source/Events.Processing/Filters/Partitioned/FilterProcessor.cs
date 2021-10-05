@@ -69,7 +69,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
             var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
             return response switch
             {
-                { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.ToGuid()),
+                { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId),
                 _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
             };
         }

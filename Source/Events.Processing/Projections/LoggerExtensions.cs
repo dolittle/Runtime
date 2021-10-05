@@ -87,14 +87,14 @@ namespace Dolittle.Runtime.Events.Processing.Projections
                 new EventId(397656028, nameof(ProjectionDisconnected)),
                 "Projection {Projection} in scope {Scope} disconnected");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Exception> _eventProcessorIsProcessing = LoggerMessage
-            .Define<Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, string, Exception> _eventProcessorIsProcessing = LoggerMessage
+            .Define<Guid, Guid, string>(
                 LogLevel.Trace,
                 new EventId(176851418, nameof(EventProcessorIsProcessing)),
                 "Projection Event processor {EventProcessor} is processing event type {EventTypeId} for partition {PartitionId}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, uint, string, Exception> _eventProcessorIsProcessingAgain = LoggerMessage
-            .Define<Guid, Guid, Guid, uint, string>(
+        static readonly Action<ILogger, Guid, Guid, string, uint, string, Exception> _eventProcessorIsProcessingAgain = LoggerMessage
+            .Define<Guid, Guid, string, uint, string>(
                 LogLevel.Debug,
                 new EventId(828753281, nameof(EventProcessorIsProcessingAgain)),
                 "Projection Event processor {EventProcessor} is processing event type {EventTypeId} for partition {PartitionId} again for the {RetryCount} time, because of {FailureReason}");

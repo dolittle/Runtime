@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             _instance = new StreamEventMetadata(
                 59077,
                 new DateTime(2943653239, DateTimeKind.Utc),
-                Guid.Parse("a61e645e-70e8-4249-ad48-33536a57a139"),
+                "the event sourec",
                 Guid.Parse("a4ca4bbd-21d3-4caf-9e5e-b46ce26b0b2e"),
                 62012,
                 false);
@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
             return this;
         }
 
-        public stream_event_metadata_builder with_event_source(Guid event_source)
+        public stream_event_metadata_builder with_event_source(string event_source)
         {
             _instance.EventSource = event_source;
             return this;
