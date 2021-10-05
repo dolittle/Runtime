@@ -2,17 +2,21 @@
     <Import Project="../../default.props" />
 
     <PropertyGroup>
-        <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
+        <AssemblyName>dolittle</AssemblyName>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <LangVersion>latest</LangVersion>
+
+        <PublishSingleFile>true</PublishSingleFile>
+        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" />
+        <ProjectReference Include="../Versioning/Versioning.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMasterVersion)" />
     </ItemGroup>
 
