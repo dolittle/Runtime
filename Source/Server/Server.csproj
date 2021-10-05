@@ -9,7 +9,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj" />
+        <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" />
     </ItemGroup>
 
     <ItemGroup>

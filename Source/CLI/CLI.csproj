@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" />
+    </ItemGroup>
+
+</Project>
