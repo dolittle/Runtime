@@ -9,6 +9,7 @@
         <GrpcAspNetCoreVersion>2.38.0</GrpcAspNetCoreVersion>
         <MachineSpecificationsRunnerVersion>2.9.0</MachineSpecificationsRunnerVersion>
         <MachineSpecificationsVersion>1.0.0</MachineSpecificationsVersion>
+        <McMasterVersion>3.1.0</McMasterVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <MicrosoftDotNetVersion>3.1.6</MicrosoftDotNetVersion>
         <MicrosoftDotNetTestVersion>16.4.0</MicrosoftDotNetTestVersion>

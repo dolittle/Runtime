@@ -12,4 +12,8 @@
         <ProjectReference Include="../**/*.csproj" Exclude="../Build/Build.csproj;../Server/Server.csproj;../ManagementUI/Server/Server.csproj;../CLI/CLI.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMasterVersion)" />
+    </ItemGroup>
+
 </Project>
