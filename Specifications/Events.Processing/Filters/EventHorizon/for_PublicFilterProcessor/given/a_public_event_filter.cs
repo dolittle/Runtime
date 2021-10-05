@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
             new CommittedEvent(
                 EventLogSequenceNumber.Initial,
                 DateTimeOffset.Now,
-                Guid.NewGuid(),
+                "(/event source  ",
                 execution_contexts.create(),
                 new Artifact(Guid.NewGuid(), 0),
                 true,
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
             new CommittedEvent(
                 EventLogSequenceNumber.Initial,
                 DateTimeOffset.Now,
-                Guid.NewGuid(),
+                "__event_source__",
                 execution_contexts.create(),
                 new Artifact(Guid.NewGuid(), 0),
                 false,

@@ -22,8 +22,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPart
 
         Establish context = () =>
         {
-            first_failing_partition_id = Guid.NewGuid();
-            second_failing_partition_id = Guid.NewGuid();
+            first_failing_partition_id = "first failing partition";
+            second_failing_partition_id = "the second failing partiton";
             first_initial_failing_partition_position = second_initial_failing_partition_position = 0;
             first_initial_failing_partition_reason = second_initial_failing_partition_reason = "some reason";
             first_initial_failing_partition_retry_time = second_initial_failing_partition_retry_time = DateTimeOffset.UtcNow;

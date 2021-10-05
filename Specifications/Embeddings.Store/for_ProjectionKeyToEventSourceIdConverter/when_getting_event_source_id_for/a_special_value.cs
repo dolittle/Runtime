@@ -18,6 +18,6 @@ namespace Dolittle.Runtime.Embeddings.Store.for_ProjectionKeyToEventSourceIdConv
 
         Because of = () => event_source_id = converter.GetEventSourceIdFor(projection_key);
 
-        It should_return_a_special_event_source = () => event_source_id.Value.ShouldEqual(Guid.Parse("f5fffaff-66b4-f316-4b4d-54a435b50d2a"));
+        It should_return_a_special_event_source = () => event_source_id.Value.ShouldEqual(projection_key.Value);
     }
 }

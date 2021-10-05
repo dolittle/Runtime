@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates.for_AggregateRoot
 
         Establish context = () =>
         {
-            event_source = Guid.Parse("a970569d-497e-463d-8174-b608d25d38cb");
+            event_source = "a970569d-event-source-b608d25d38cb";
             aggregate_type = Guid.Parse("4c95bbef-ce78-4ffe-b1aa-36e7ad7fa6c5");
             version = random.aggregate_root_version;
         };

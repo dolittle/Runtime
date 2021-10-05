@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the partition id.
         /// </summary>
-        public Guid Partition { get; set; }
+        public string Partition { get; set; }
 
         /// <summary>
         /// Gets or sets the execution context.

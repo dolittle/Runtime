@@ -33,14 +33,14 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
         Establish context = () =>
         {
             projection_key_a = "key-a";
-            event_source_a = Guid.Parse("f0cbe001-65a4-49d2-adcb-ff4d42e92223");
+            event_source_a = "f0cbe001-65a4-49d2-adcb-ff4d42e92223";
             current_state_a = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, "state-current-a", projection_key_a);
             unprocessed_event_a = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 1, 10, DateTimeOffset.Now, event_source_a, execution_context, event_type, false, "event-one-content");
             unprocessed_events_a = new CommittedAggregateEvents(event_source_a, embedding.Value, new[] { unprocessed_event_a });
             projection_result_a = new EmbeddingCurrentState(current_state_a.Version + 1, EmbeddingCurrentStateType.Deleted, current_state_a.State, current_state_a.Key);
 
             projection_key_b = "key-b";
-            event_source_b = Guid.Parse("760a14d6-639d-4eba-9e7e-48675631bdd2");
+            event_source_b = "760a14d6-639d-4eba-9e7e-48675631bdd2";
             current_state_b = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.CreatedFromInitialState, "state-initial-b", projection_key_b);
             unprocessed_event_b = new CommittedAggregateEvent(new Artifact(embedding.Value, ArtifactGeneration.First), 0, 12, DateTimeOffset.Now, event_source_b, execution_context, event_type, false, "event-two-content");
             unprocessed_events_b = new CommittedAggregateEvents(event_source_b, embedding.Value, new[] { unprocessed_event_b });

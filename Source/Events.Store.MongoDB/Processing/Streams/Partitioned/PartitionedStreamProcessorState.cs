@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
         public override IStreamProcessorState ToRuntimeRepresentation() =>
             new runtime.Partitioned.StreamProcessorState(
                 Position,
-                FailingPartitions.ToDictionary(_ => new PartitionId(Guid.Parse(_.Key)), _ => _.Value.ToRuntimeRepresentation()),
+                FailingPartitions.ToDictionary(_ => new PartitionId(_.Key), _ => _.Value.ToRuntimeRepresentation()),
                 LastSuccessfullyProcessed);
     }
 }

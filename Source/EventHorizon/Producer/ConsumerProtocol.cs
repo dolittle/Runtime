@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
                 executionContext.Tenant,
                 arguments.TenantId.ToGuid(),
                 arguments.StreamId.ToGuid(),
-                arguments.PartitionId.ToGuid(),
+                arguments.PartitionId,
                 arguments.StreamPosition);
         }
 

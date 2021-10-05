@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
     {
         static IFilterResult result;
 
-        Because of = () => result = filter.Filter(a_non_public_event, Guid.NewGuid(), Guid.NewGuid(), default).GetAwaiter().GetResult();
+        Because of = () => result = filter.Filter(a_non_public_event, "the partition id", Guid.NewGuid(), default).GetAwaiter().GetResult();
 
         It should_not_call_the_remote_filter = () => dispatcher.Verify(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
         It should_filter_successfully = () => result.Succeeded.ShouldBeTrue();

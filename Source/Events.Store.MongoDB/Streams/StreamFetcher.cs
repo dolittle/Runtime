@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         readonly Expression<Func<TEvent, StreamEvent>> _eventToStreamEvent;
         readonly Expression<Func<TEvent, Guid>> _eventToArtifactId;
         readonly Expression<Func<TEvent, uint>> _eventToArtifactGeneration;
-        readonly Expression<Func<TEvent, Guid>> _partitionIdExpression = default;
+        readonly Expression<Func<TEvent, string>> _partitionIdExpression = default;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StreamFetcher{T}"/> class.
@@ -82,7 +82,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
             Expression<Func<TEvent, StreamEvent>> eventToStreamEvent,
             Expression<Func<TEvent, Guid>> eventToArtifactId,
             Expression<Func<TEvent, uint>> eventToArtifactGeneration,
-            Expression<Func<TEvent, Guid>> partitionIdExpression)
+            Expression<Func<TEvent, string>> partitionIdExpression)
             : this(stream, scope, collection, filter, sequenceNumberExpression, eventToStreamEvent, eventToArtifactId, eventToArtifactGeneration)
         {
             _partitionIdExpression = partitionIdExpression;

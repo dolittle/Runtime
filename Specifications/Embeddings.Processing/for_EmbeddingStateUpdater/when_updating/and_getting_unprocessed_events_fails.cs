@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
         Establish context = () =>
         {
             projection_key = "projection-key";
-            event_source = Guid.Parse("642ca1f2-c8e1-4e5c-a213-246ce95a8376");
+            event_source = "642ca1f2-c8e1-4e5c-a213-246ce95a8376";
             aggregate_root_type = new Artifact(embedding.Value, ArtifactGeneration.First);
             current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
             exception = new Exception();

@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// <param name="eventSource">The event source id.</param>
         /// <param name="aggregateType">The type of the aggregate root.</param>
         /// <param name="version">The version of the aggregate root.</param>
-        public AggregateRoot(Guid eventSource, Guid aggregateType, ulong version)
+        public AggregateRoot(string eventSource, Guid aggregateType, ulong version)
         {
             EventSource = eventSource;
             AggregateType = aggregateType;
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         /// <summary>
         /// Gets or sets the id of the Event Source.
         /// </summary>
-        public Guid EventSource { get; set; }
+        public string EventSource { get; set; }
 
         /// <summary>
         /// Gets or sets the type of the Aggregate Root.
