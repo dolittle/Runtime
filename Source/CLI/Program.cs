@@ -9,6 +9,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace CLI
 {
+    /// <summary>
+    /// The main entrypoint of the Dolittle CLI tool.
+    /// </summary>
     [Command("dolittle", "The Dolittle CLI tool")]
     [Subcommand(typeof(Migrate))]
     class Program
@@ -29,14 +32,21 @@ namespace CLI
         static void BindServices(ServiceCollection services)
         {
             services.AddTransient<IVersionConverter, VersionConverter>();
-            services.AddTransient<VersionParser>();
+            services.AddTransient<IValueParser, VersionParser>();
         }
 
         static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)
         {
-            parsers.Add(container.GetRequiredService<VersionParser>());
+            foreach (var parser in container.GetServices<IValueParser>())
+            {
+                parsers.Add(parser);
+            }
         }
 
+        /// <summary>
+        /// The main entrypoint of the "dolittle" command.
+        /// </summary>
+        /// <param name="cli">The command line application.</param>
         public void OnExecute(CommandLineApplication cli)
             => cli.ShowHelp();
     }
