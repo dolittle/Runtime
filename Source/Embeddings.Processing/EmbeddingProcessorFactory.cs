@@ -23,7 +23,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly FactoryFor<IEventStore> _eventStoreFactory;
         readonly FactoryFor<IEmbeddingStore> _embeddingStoreFactory;
         readonly FactoryFor<IStreamEventWatcher> _streamEventWatcherFactory;
-        readonly IConvertProjectionKeysToEventSourceIds _projectionKeysConverter;
         readonly IDetectEmbeddingLoops _embeddingLoopDetector;
         readonly ICompareStates _stateComparer;
         readonly ILoggerFactory _loggerFactory;
@@ -36,7 +35,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             FactoryFor<IEventStore> eventStoreFactory,
             FactoryFor<IEmbeddingStore> embeddingStoreFactory,
             FactoryFor<IStreamEventWatcher> streamEventWatcherFactory,
-            IConvertProjectionKeysToEventSourceIds projectionKeysConverter,
             IDetectEmbeddingLoops embeddingLoopDetector,
             ICompareStates stateComparer,
             ILoggerFactory loggerFactory
@@ -46,7 +44,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _eventStoreFactory = eventStoreFactory;
             _embeddingStoreFactory = embeddingStoreFactory;
             _streamEventWatcherFactory = streamEventWatcherFactory;
-            _projectionKeysConverter = projectionKeysConverter;
             _embeddingLoopDetector = embeddingLoopDetector;
             _stateComparer = stateComparer;
             _loggerFactory = loggerFactory;
@@ -90,7 +87,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 embeddingId,
                 eventStore,
                 embeddingStore,
-                _projectionKeysConverter,
                 projectManyEvents,
                 _loggerFactory.CreateLogger<EmbeddingStateUpdater>());
 
@@ -104,7 +100,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 projectManyEvents,
                 _stateComparer,
                 _embeddingLoopDetector,
-                _projectionKeysConverter,
                 _loggerFactory.CreateLogger<StateTransitionEventsCalculator>());
 
         ProjectManyEvents CreateProjectManyEvents(
