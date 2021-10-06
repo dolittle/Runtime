@@ -46,7 +46,7 @@ namespace CLI
             services.AddTransient<IConfigurations, Configurations.Configurations>();
             services.AddTransient<IResources, Resources>();
             services.AddSingleton<ISerializer>(new Serializer(new NoConverterProviders()));
-            
+            services.AddTransient<IMigrationPerformers, MigrationPerformers>();
         }
         
         
