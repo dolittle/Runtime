@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.for_CommittedEvent
         {
             event_log_sequence_number = 0;
             occurred = DateTimeOffset.Now;
-            event_source = Guid.NewGuid();
+            event_source = "a random event source";
             execution_context = execution_contexts.create();
             artifact_id = Guid.NewGuid();
             artifact_generation = 2;

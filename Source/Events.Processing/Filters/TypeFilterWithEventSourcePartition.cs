@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
             var included = Definition.Types.Contains(@event.Type.Id);
-            var outPartitionId = Guid.Empty;
+            var outPartitionId = PartitionId.None;
             if (Definition.Partitioned)
             {
                 outPartitionId = @event.EventSource.Value;

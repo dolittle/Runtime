@@ -106,14 +106,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 new EventId(381357522, nameof(ErrorWhileRegisteringStreamProcessorForEventProcessor)),
                 "Error occurred while trying to register stream processor for Event Processor: {EventProcessor}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Exception> _eventProcessorIsProcessing = LoggerMessage
-            .Define<Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, string, Exception> _eventProcessorIsProcessing = LoggerMessage
+            .Define<Guid, Guid, string>(
                 LogLevel.Debug,
                 new EventId(265113086, nameof(EventProcessorIsProcessing)),
                 "Event processor: {EventProcessor} is processing event type: {EventTypeId} for partition: {PartitionId}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, uint, string, Exception> _eventProcessorIsProcessingAgain = LoggerMessage
-            .Define<Guid, Guid, Guid, uint, string>(
+        static readonly Action<ILogger, Guid, Guid, string, uint, string, Exception> _eventProcessorIsProcessingAgain = LoggerMessage
+            .Define<Guid, Guid, string, uint, string>(
                 LogLevel.Debug,
                 new EventId(250914604, nameof(EventProcessorIsProcessingAgain)),
                 "Event processor: {EventProcessor} is processing event type: {EventTypeId} for partition: {PartitionId} again for the {RetryCount} time, because of: {FailureReason}");

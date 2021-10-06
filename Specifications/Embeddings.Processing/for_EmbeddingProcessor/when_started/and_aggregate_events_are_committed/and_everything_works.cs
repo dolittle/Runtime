@@ -32,7 +32,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_sta
             state_updater.Setup(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(Try.Succeeded()));
         };
 
-        Because of = () => result = embedding_processor.Start(cancellation_token);
+        Because of = () =>
+        {
+            result = embedding_processor.Start(cancellation_token);
+            Thread.Sleep(100);
+        };
 
         It should_be_running = () => result.Status.ShouldEqual(TaskStatus.WaitingForActivation);
         It should_update_embedding_states = () => state_updater.Verify(_ => _.TryUpdateAll(Moq.It.IsAny<CancellationToken>()), Times.Exactly(2));

@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_comparing.an
             pb_uncommitted_event = new Events.Contracts.UncommittedEvent
             {
                 Content = "{}",
-                EventSourceId = Guid.Parse("302c7c8f-b773-44e7-947d-75747ed1a976").ToProtobuf(),
+                EventSourceId = "302c7c8f-b773-44e7-947d-75747ed1a976",
                 Public = true,
                 Artifact = new Dolittle.Artifacts.Contracts.Artifact()
                 {

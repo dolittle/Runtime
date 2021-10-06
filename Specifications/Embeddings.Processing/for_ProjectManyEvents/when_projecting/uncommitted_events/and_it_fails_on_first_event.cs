@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
         Establish context = () =>
         {
             projection_key = "projection-key";
-            event_source = Guid.Parse("642ca1f2-c8e1-4e5c-a213-246ce95a8376");
+            event_source = "642ca1f2-c8e1-4e5c-a213-246ce95a8376";
             current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
             event_one = new UncommittedEvent(event_source, event_type, false, "event-one-content");
             event_two = new UncommittedEvent(event_source, event_type, true, "event-two-content");

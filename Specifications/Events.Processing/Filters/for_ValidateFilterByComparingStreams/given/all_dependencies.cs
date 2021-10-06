@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_event_log.Count + num_events_to_create;
             for (int i = events_in_event_log.Count; i < end; i++)
             {
-                events_in_event_log.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, StreamId.EventLog, Guid.Empty, true));
+                events_in_event_log.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, StreamId.EventLog, PartitionId.None, true));
             }
         }
 
@@ -84,7 +84,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_filtered_stream.Count + num_events_to_create;
             for (int i = events_in_filtered_stream.Count; i < end; i++)
             {
-                events_in_filtered_stream.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, target_stream, partition == default ? new PartitionId(Guid.Empty) : partition, true));
+                events_in_filtered_stream.Add(new StreamEvent(committed_events.single((uint)i), (uint)i, target_stream, partition == default ? PartitionId.None : partition, true));
             }
         }
 
@@ -93,7 +93,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_event_log.Count + 1;
             for (int i = events_in_event_log.Count; i < end; i++)
             {
-                events_in_event_log.Add(new StreamEvent(@event, (uint)i, StreamId.EventLog, Guid.Empty, true));
+                events_in_event_log.Add(new StreamEvent(@event, (uint)i, StreamId.EventLog, PartitionId.None, true));
             }
         }
 
@@ -102,7 +102,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
             var end = events_in_filtered_stream.Count + 1;
             for (int i = events_in_filtered_stream.Count; i < end; i++)
             {
-                events_in_filtered_stream.Add(new StreamEvent(@event, (uint)i, target_stream, partition == default ? new PartitionId(Guid.Empty) : partition, true));
+                events_in_filtered_stream.Add(new StreamEvent(@event, (uint)i, target_stream, partition == default ? PartitionId.None : partition, true));
             }
         }
     }

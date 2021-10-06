@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="$(MicrosoftExtensionsVersion)" />
-    <PackageReference Include="System.Data.HashFunction.CityHash" Version="$(SystemDataHashFunctionVersion)" />
   </ItemGroup>
 
   <ItemGroup>

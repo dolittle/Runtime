@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             Guid producerMicroserviceId,
             Guid producerTenantId,
             Guid streamId,
-            Guid partitionId,
+            string partitionId,
             ulong position,
             DateTime retryTime,
             string failureReason,
@@ -67,9 +67,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         public Guid Stream { get; set; }
 
         /// <summary>
-        /// Gets or setsthe <see cref="Store.Streams.PartitionId" /> in the public stream.
+        /// Gets or sets the <see cref="Store.Streams.PartitionId" /> in the public stream.
         /// </summary>
-        public Guid Partition { get; set; }
+        public string Partition { get; set; }
 
         /// <summary>
         /// Gets or sets the position.

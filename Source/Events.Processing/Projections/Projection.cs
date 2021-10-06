@@ -50,7 +50,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
             request.Event = new Contracts.StreamEvent
             {
                 Event = @event.ToProtobuf(),
-                PartitionId = partitionId.ToProtobuf(),
+                PartitionId = partitionId.Value,
                 ScopeId = _projectionDefinition.Scope.ToProtobuf(),
             };
             request.CurrentState = state.ToProtobuf();

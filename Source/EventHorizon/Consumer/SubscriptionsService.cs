@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
                 subscriptionRequest.TenantId.ToGuid(),
                 subscriptionRequest.ScopeId.ToGuid(),
                 subscriptionRequest.StreamId.ToGuid(),
-                subscriptionRequest.PartitionId.ToGuid());
+                subscriptionRequest.PartitionId);
             try
             {
                 _metrics.IncrementTotalSubscriptionsInitiatedFromHead();

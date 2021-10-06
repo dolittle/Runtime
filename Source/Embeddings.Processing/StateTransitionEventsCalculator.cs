@@ -25,7 +25,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly IProjectManyEvents _projector;
         readonly ICompareStates _stateComparer;
         readonly IDetectEmbeddingLoops _loopDetector;
-        readonly IConvertProjectionKeysToEventSourceIds _keyToEventSourceConverter;
         readonly ILogger _logger;
 
         /// <summary>
@@ -36,7 +35,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="projector">The <see cref="IProjectManyEvents"/>.</param>
         /// <param name="stateComparer">The <see cref="ICompareStates"/>.</param>
         /// <param name="loopDetector">The <see cref="IDetectEmbeddingLoops"/>.</param>
-        /// <param name="keyToEventSourceConverter">The <see cref="IConvertProjectionKeysToEventSourceIds"/>.</param>
         /// <param name="logger">The <see cref="ILogger"/>.</param>
         public StateTransitionEventsCalculator(
             EmbeddingId identifier,
@@ -44,7 +42,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             IProjectManyEvents projector,
             ICompareStates stateComparer,
             IDetectEmbeddingLoops loopDetector,
-            IConvertProjectionKeysToEventSourceIds keyToEventSourceConverter,
             ILogger logger)
         {
             _embeddingId = identifier;
@@ -52,7 +49,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
             _projector = projector;
             _stateComparer = stateComparer;
             _loopDetector = loopDetector;
-            _keyToEventSourceConverter = keyToEventSourceConverter;
             _logger = logger;
         }
 
@@ -209,7 +205,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         UncommittedAggregateEvents CreateUncommittedAggregateEvents(UncommittedEvents events, EmbeddingCurrentState currentState)
             => new(
-                _keyToEventSourceConverter.GetEventSourceIdFor(currentState.Key),
+                currentState.Key.Value,
                 new Artifact(_embeddingId.Value, ArtifactGeneration.First),
                 currentState.Version.Value - (ulong)events.Count,
                 events);

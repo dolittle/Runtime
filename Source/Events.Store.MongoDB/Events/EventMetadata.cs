@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="isPublic">Whether the Event is public.</param>
         public EventMetadata(
             DateTime occurred,
-            Guid eventSource,
+            string eventSource,
             Guid typeId,
             uint typeGeneration,
             bool isPublic)
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <summary>
         /// Gets or sets the event source id.
         /// </summary>
-        public Guid EventSource { get; set; }
+        public string EventSource { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ArtifactId"/> of the <see cref="Artifact"/> identitying the type of the event.

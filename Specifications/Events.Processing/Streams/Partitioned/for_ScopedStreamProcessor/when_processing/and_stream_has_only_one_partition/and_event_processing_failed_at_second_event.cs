@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
     public class and_event_processing_failed_at_second_event : given.all_dependencies
     {
         const string reason = "some reason";
-        static readonly PartitionId partition_id = Guid.NewGuid();
+        static readonly PartitionId partition_id = "a partition";
         static readonly CommittedEvent first_event = committed_events.single();
         static readonly CommittedEvent second_event = committed_events.single();
 

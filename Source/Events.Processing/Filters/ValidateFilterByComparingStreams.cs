@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
                 var streamPosition = 0;
                 foreach (var @event in sourceStreamEvents.Select(_ => _.Event))
                 {
-                    var processingResult = await filter.Filter(@event, Guid.Empty, filter.Identifier, cancellationToken).ConfigureAwait(false);
+                    var processingResult = await filter.Filter(@event, PartitionId.None, filter.Identifier, cancellationToken).ConfigureAwait(false);
                     if (processingResult is FailedFiltering failedResult)
                     {
                         return FilterValidationResult.Failed(failedResult.FailureReason);
