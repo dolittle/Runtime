@@ -1,11 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Linq;
 using Machine.Specifications;
 using Microsoft.Extensions.DependencyInjection;
-using Moq;
 
 namespace Dolittle.Runtime.Migrations.for_Migrations.given
 {
@@ -22,7 +19,7 @@ namespace Dolittle.Runtime.Migrations.for_Migrations.given
         {
             foreach (var migration in migrations)    
             {
-                service_collection.AddTransient<ICanMigrateDataStores>(_ => migration);
+                service_collection.AddSingleton<ICanMigrateDataStores>(migration);
             }
         }
     }

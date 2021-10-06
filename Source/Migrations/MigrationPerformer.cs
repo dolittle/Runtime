@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.MongoDB.Migrations;
+using Dolittle.Runtime.ResourceTypes.Configuration;
 using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.Migrations
@@ -13,6 +14,13 @@ namespace Dolittle.Runtime.Migrations
     /// </summary>
     public class MigrationPerformer : IPerformMigrations
     {
+        readonly ResourceConfigurationsByTenant _resources;
+        
+        public MigrationPerformer(ResourceConfigurationsByTenant resources)
+        {
+            _resources = resources;
+        }
+        
         /// <inheritdoc/>
         public Task<Try> PerformForTenant(ICanMigrateAnEventStore eventStoreMigration, TenantId tenant)
         {
