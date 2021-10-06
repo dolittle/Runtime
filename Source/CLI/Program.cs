@@ -3,6 +3,7 @@
 
 using CLI.Configurations;
 using CLI.Options.Parsers.Versioning;
+using Dolittle.Runtime.Events.Store.MongoDB.Migrations.V6.ToV7;
 using Dolittle.Runtime.Migrations;
 using Dolittle.Runtime.Serialization.Json;
 using Dolittle.Runtime.Versioning;
@@ -11,6 +12,7 @@ using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using MigrateFrom = Dolittle.Runtime.Migrations;
+using EventStore = Dolittle.Runtime.Events.Store.MongoDB.Migrations;
 
 namespace CLI
 {
@@ -41,15 +43,18 @@ namespace CLI
             services.AddTransient<IVersionConverter, VersionConverter>();
             services.AddTransient<IValueParser, VersionParser>();
             services.AddTransient<IMigrations, MigrateFrom.Migrations>();
-            services.AddTransient<IPerformMigrations, MigrationPerformer>();
-            services.AddTransient<ICanMigrateDataStores, MigrateFrom.V6.ToV7>();
             services.AddTransient<IConfigurations, Configurations.Configurations>();
             services.AddTransient<IResources, Resources>();
             services.AddSingleton<ISerializer>(new Serializer(new NoConverterProviders()));
             services.AddTransient<IMigrationPerformers, MigrationPerformers>();
+            services.AddTransient<EventStore.IEventStoreConnections, EventStore.EventStoreConnections>();
+            AddVersionedMigrators(services);
         }
-        
-        
+        static void AddVersionedMigrators(ServiceCollection services)
+        {
+            services.AddTransient<ICanMigrateDataStores, MigrateFrom.V6.ToV7>();
+            services.AddSingleton<Migrator>();
+        }
 
         static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)
         {
