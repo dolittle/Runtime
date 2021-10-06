@@ -24,6 +24,11 @@ namespace CLI.Migrations
         /// </summary>
         [Required]
         [Option("--to <VERSION>", "The Runtime version to migrate to.", CommandOptionType.SingleValue)]
-        public Version To { get; init; }
+        public Version To { get; init; }/// <summary>
+        
+        /// The Runtime resources configuration file name.
+        /// </summary>
+        [Option("--resources <RESOURCES>", "The Runtime resources configuration file name.", CommandOptionType.SingleValue)]
+        public string ResourcesConfigName { get; init; }
     }
 }
