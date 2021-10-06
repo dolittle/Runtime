@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="../../specs.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Migrations.Specs</AssemblyName>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../../Source/Migrations/Migrations.csproj" />
+    </ItemGroup>
+</Project>

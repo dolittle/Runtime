@@ -17,7 +17,6 @@ namespace Dolittle.Runtime.Migrations
     {
         readonly IEnumerable<ICanMigrateDataStores> _migrators;
 
-
         public Migrations(IServiceProvider container)
         {
             _migrators = container.GetServices<ICanMigrateDataStores>();
@@ -27,15 +26,12 @@ namespace Dolittle.Runtime.Migrations
         public Try<ICanMigrateDataStores> GetFor(Version from, Version to)
         {
             var migrators = _migrators.Where(_ => _.CanMigrateFor(from, to));
-            switch (migrators.Count())
+            return migrators.Count() switch
             {
-                case 0:
-                    return new NoMigratorDefinedBetweenVersions(from, to);
-                case 1:
-                    return Try<ICanMigrateDataStores>.Succeeded(migrators.First());
-                default:
-                    return new MultipleMigratorsDefinedBetweenVersions(from, to);
-            }
+                0 => new NoMigratorDefinedBetweenVersions(@from, to),
+                1 => Try<ICanMigrateDataStores>.Succeeded(migrators.First()),
+                _ => new MultipleMigratorsDefinedBetweenVersions(@from, to)
+            };
         }
     }
 }
