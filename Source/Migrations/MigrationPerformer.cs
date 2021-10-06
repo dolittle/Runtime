@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.MongoDB;
@@ -35,9 +36,22 @@ namespace Dolittle.Runtime.Migrations
         }
 
             /// <inheritdoc/>
-        public Task<Try> PerformForAllTenants(ICanMigrateAnEventStore eventStoreMigration)
+        public async Task<Try> PerformForAllTenants(ICanMigrateAnEventStore eventStoreMigration)
         {
-            return Task.FromResult(Try.Succeeded());
+            var configurations = GetAllConfigurations();
+            if (!configurations.Success)
+            {
+                return configurations.Exception;
+            }
+            foreach (var configuration in configurations.Result)
+            {
+                var result = await eventStoreMigration.Migrate(configuration).ConfigureAwait(false);
+                if (!result.Success)
+                {
+                    return result;
+                }
+            }
+            return Try.Succeeded();
         }
 
         Try<EventStoreConfiguration> GetConfiguration(TenantId tenant)
@@ -57,6 +71,20 @@ namespace Dolittle.Runtime.Migrations
             {
                 return ex;
             }
+        }
+        Try<EventStoreConfiguration[]> GetAllConfigurations()
+        {
+            var tenants = _resources.Keys.Select(_ => new TenantId(_));
+            if (!tenants.Any())
+            {
+                return new NoTenantsConfigured();
+            }
+            var configurations = tenants.Select(GetConfiguration);
+            if (configurations.Any(_ => !_.Success))
+            {
+                return configurations.First(_ => !_.Success).Exception;
+            }
+            return configurations.Select(_ => _.Result).ToArray();
         }
     }
 }
