@@ -2,10 +2,14 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
+using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
+using Version = Dolittle.Runtime.Versioning.Version;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
 {
     /// <summary>
@@ -14,12 +18,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
     public class Migrator : ICanMigrateAnEventStore
     {
         readonly IEventStoreConnections _eventStoreConnections;
-        readonly MigrateAggregates _aggregatesMigrator;
+        readonly IMongoCollectionMigrators _collectionMigrators;
+        readonly ICreateCollectionMigratorsBetweenVersions _collectionMigratorsBetweenVersions;
+        readonly ICollectionNamesProvider _collectionNamesProvider;
+        readonly ILogger _logger;
 
-        public Migrator(IEventStoreConnections eventStoreConnections, MigrateAggregates aggregatesMigrator)
+        public Migrator(
+            IEventStoreConnections eventStoreConnections,
+            IMongoCollectionMigrators collectionMigrators,
+            ICreateCollectionMigratorsBetweenVersions collectionMigratorsBetweenVersions,
+            ICollectionNamesProvider collectionNamesProvider,
+            ILogger<Migrator> logger)
         {
             _eventStoreConnections = eventStoreConnections;
-            _aggregatesMigrator = aggregatesMigrator;
+            _collectionMigrators = collectionMigrators;
+            _collectionMigratorsBetweenVersions = collectionMigratorsBetweenVersions;
+            _collectionNamesProvider = collectionNamesProvider;
+            _logger = logger;
         }
 
         /// <inheritdoc />
@@ -30,7 +45,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
                 var connection = _eventStoreConnections.GetFor(configuration);
                 using var session = await connection.MongoClient.StartSessionAsync().ConfigureAwait(false);
                 using var cts = new CancellationTokenSource();
-
                 return await TryDoAllMigrations(session, connection, cts).ConfigureAwait(false);
             }
             catch (Exception ex)
@@ -43,15 +57,27 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
         {
             try
             {
-                var tasks = new[]
-                {
-                    _aggregatesMigrator.Migrate(session, connection, cts.Token)
-                };
+                var emptyVersion = Version.NotSet;
+                var collectionMigrator = _collectionMigrators.Create(session, connection);
+                session.StartTransaction();
+                _logger.LogInformation("Start migrating");
+                var watch = new Stopwatch();
+                watch.Start();
+                var tasks = _collectionMigratorsBetweenVersions
+                    .Create(
+                        emptyVersion with { Major = 1},
+                        emptyVersion with { Major = 7},
+                        await _collectionNamesProvider.Provide(connection, session, cts.Token).ConfigureAwait(false),
+                        collectionMigrator)
+                    .Select(_ => _.Migrate(session, cts.Token));
                 await Task.WhenAll(tasks).ConfigureAwait(false);
+                watch.Stop();
+                _logger.LogInformation("Migration finished after {Time}", watch.Elapsed);
                 return Try.Succeeded();
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "An error occurred while migrating");
                 cts.Cancel();
                 await session.AbortTransactionAsync().ConfigureAwait(false);
                 return ex;

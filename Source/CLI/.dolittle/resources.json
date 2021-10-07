@@ -4,7 +4,7 @@
             "servers": [
                 "localhost"
             ],
-            "database": "event_store",
+            "database": "dev_pricing_eventstore",
             "maxConnectionPoolSize": 1000
         },
         "projections": {

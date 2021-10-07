@@ -9,6 +9,7 @@ using Dolittle.Runtime.Versioning;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using EventStore = Dolittle.Runtime.Events.Store.MongoDB.Migrations;
 
 namespace CLI
@@ -37,6 +38,7 @@ namespace CLI
 
         static void BindServices(CommandLineApplication<Program> cli, ServiceCollection services)
         {
+            services.AddLogging(_ => _.AddConsole());
             services.AddSingleton<RuntimeConfigurationDirectoryPath>(cli.WorkingDirectory);
             services.AddTransient<IVersionConverter, VersionConverter>();
             services.AddTransient<IValueParser, VersionParser>();
@@ -47,15 +49,15 @@ namespace CLI
             services.AddTransient<IMigrationPerformers, MigrationPerformers>();
             services.AddTransient<EventStore.IEventStoreConnections, EventStore.EventStoreConnections>();
             services.AddTransient<EventStore.IMongoCollectionMigrators, EventStore.MongoCollectionMigrators>();
+            services.AddTransient<EventStore.ICreateCollectionMigratorsBetweenVersions, EventStore.CreateCollectionMigratorsBetweenVersions>();
+            services.AddTransient<EventStore.ICollectionNamesProvider, EventStore.CollectionNamesProvider>();
+            
             AddVersionedMigrators(services);
         }
         static void AddVersionedMigrators(ServiceCollection services)
         {
             services.AddTransient<ICanMigrateDataStores, ToV7>();
-            // services.AddTransient<ICanMigrateDataStores, MigrateFrom.V7.ToV8>();
-            
             services.AddSingleton<EventStore.ToV7.Migrator>();
-            services.AddSingleton<EventStore.ToV7.MigrateAggregates>();
         }
 
         static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)
