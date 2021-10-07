@@ -24,7 +24,7 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration file
 ```
 
 ## `resources.json`
-**Required.** Configurations for the [Event Store]({{< ref "docs/concepts/event_store" >}}) per [Tenant]({{< ref "docs/concepts/tenants" >}}).
+**Required.** Configurations for the [Event Store]({{< ref "docs/concepts/event_store" >}}), [Projections]({{< ref "docs/concepts/projections" >}}) and [Embeddings]({{< ref "docs/concepts/embeddings" >}}) per [Tenant]({{< ref "docs/concepts/tenants" >}}). The `"database"` has to be unique for each store.
 ```json
 {
     <tenant-id>: {
@@ -35,7 +35,23 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration file
             "database": <MongoDB database name>,
             // defaults to 1000. MongoDB max connection amount
             "maxConnectionPoolSize": 1000
-        }
+        },
+        "projections": {
+            "servers": [
+                <MongoDB connection URI>
+            ],
+            "database": <MongoDB database name>,
+            // defaults to 1000. MongoDB max connection amount
+            "maxConnectionPoolSize": 1000
+        },
+        "embeddings": {
+            "servers": [
+                <MongoDB connection URI>
+            ],
+            "database": <MongoDB database name>,
+            // defaults to 1000. MongoDB max connection amount
+            "maxConnectionPoolSize": 1000
+        },
     }
 }
 ```
