@@ -9,6 +9,7 @@ using Dolittle.Runtime.Events.Store.MongoDB;
 using Dolittle.Runtime.Events.Store.MongoDB.Migrations;
 using Dolittle.Runtime.ResourceTypes.Configuration;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Serialization.Json;
 
 namespace Dolittle.Runtime.Migrations
 {
@@ -17,22 +18,26 @@ namespace Dolittle.Runtime.Migrations
     /// </summary>
     public class MigrationPerformer : IPerformMigrations
     {
-        readonly ResourceConfigurationsByTenant _resources;
-        
-        public MigrationPerformer(ResourceConfigurationsByTenant resources)
+        readonly ICanProvideResourceConfigurationsByTenant _resourceConfigurationProvider;
+        readonly ResourceConfigurationsByTenant _configuration;
+
+        public MigrationPerformer(ICanProvideResourceConfigurationsByTenant resourceConfigurationProvider, ResourceConfigurationsByTenant configuration)
         {
-            _resources = resources;
+            _resourceConfigurationProvider = resourceConfigurationProvider;
+            _configuration = configuration;
         }
 
         /// <inheritdoc/>
         public Task<Try> PerformForTenant(ICanMigrateAnEventStore eventStoreMigration, TenantId tenant)
         {
-            var configuration = GetConfiguration(tenant);
-            if (!configuration.Success)
+            try
             {
-                return Task.FromResult(Try.Failed(configuration.Exception));
+                return eventStoreMigration.Migrate(_resourceConfigurationProvider.ConfigurationFor<EventStoreConfiguration>(tenant, "eventStore"));
             }
-            return eventStoreMigration.Migrate(configuration.Result);
+            catch (Exception ex)
+            {
+                return Task.FromResult(Try.Failed(ex));
+            }
         }
 
             /// <inheritdoc/>
@@ -54,37 +59,24 @@ namespace Dolittle.Runtime.Migrations
             return Try.Succeeded();
         }
 
-        Try<EventStoreConfiguration> GetConfiguration(TenantId tenant)
+        Try<EventStoreConfiguration[]> GetAllConfigurations()
         {
             try
             {
-                if (!_resources.ContainsKey(tenant))
+                var tenants = _configuration.Keys.Select(_ => new TenantId(_));
+                if (!tenants.Any())
                 {
-                    return new TenantNotConfigured(tenant);
+                    return new NoTenantsConfigured();
                 }
-                var resources = _resources[tenant];
-                return !resources.ContainsKey("eventStore") 
-                    ? new EventStoreNotConfiguredForTenant(tenant)
-                    : Try<EventStoreConfiguration>.Succeeded(resources["eventStore"] as EventStoreConfiguration);
+                return tenants
+                    .Select(_ => _resourceConfigurationProvider.ConfigurationFor<EventStoreConfiguration>(_, "eventStore"))
+                    .ToArray();
             }
             catch (Exception ex)
             {
                 return ex;
             }
-        }
-        Try<EventStoreConfiguration[]> GetAllConfigurations()
-        {
-            var tenants = _resources.Keys.Select(_ => new TenantId(_));
-            if (!tenants.Any())
-            {
-                return new NoTenantsConfigured();
-            }
-            var configurations = tenants.Select(GetConfiguration);
-            if (configurations.Any(_ => !_.Success))
-            {
-                return configurations.First(_ => !_.Success).Exception;
-            }
-            return configurations.Select(_ => _.Result).ToArray();
+            
         }
     }
 }
