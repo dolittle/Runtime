@@ -3,15 +3,12 @@
 
 using CLI.Configurations;
 using CLI.Options.Parsers.Versioning;
-using Dolittle.Runtime.Events.Store.MongoDB.Migrations.V6.ToV7;
 using Dolittle.Runtime.Migrations;
 using Dolittle.Runtime.Serialization.Json;
 using Dolittle.Runtime.Versioning;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using MigrateFrom = Dolittle.Runtime.Migrations;
 using EventStore = Dolittle.Runtime.Events.Store.MongoDB.Migrations;
 
 namespace CLI
@@ -25,6 +22,7 @@ namespace CLI
     {
         static int Main(string[] args)
         {
+            // while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(50);
             using var cli = new CommandLineApplication<Program>();
             var services = new ServiceCollection();
             BindServices(cli, services);
@@ -42,18 +40,22 @@ namespace CLI
             services.AddSingleton<RuntimeConfigurationDirectoryPath>(cli.WorkingDirectory);
             services.AddTransient<IVersionConverter, VersionConverter>();
             services.AddTransient<IValueParser, VersionParser>();
-            services.AddTransient<IMigrations, MigrateFrom.Migrations>();
+            services.AddTransient<IMigrations, Dolittle.Runtime.Migrations.Migrations>();
             services.AddTransient<IConfigurations, Configurations.Configurations>();
             services.AddTransient<IResources, Resources>();
             services.AddSingleton<ISerializer>(new Serializer(new NoConverterProviders()));
             services.AddTransient<IMigrationPerformers, MigrationPerformers>();
             services.AddTransient<EventStore.IEventStoreConnections, EventStore.EventStoreConnections>();
+            services.AddTransient<EventStore.IMongoCollectionMigrators, EventStore.MongoCollectionMigrators>();
             AddVersionedMigrators(services);
         }
         static void AddVersionedMigrators(ServiceCollection services)
         {
-            services.AddTransient<ICanMigrateDataStores, MigrateFrom.V6.ToV7>();
-            services.AddSingleton<Migrator>();
+            services.AddTransient<ICanMigrateDataStores, ToV7>();
+            // services.AddTransient<ICanMigrateDataStores, MigrateFrom.V7.ToV8>();
+            
+            services.AddSingleton<EventStore.ToV7.Migrator>();
+            services.AddSingleton<EventStore.ToV7.MigrateAggregates>();
         }
 
         static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)

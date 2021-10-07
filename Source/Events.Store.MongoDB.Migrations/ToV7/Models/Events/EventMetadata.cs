@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.Artifacts;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.V6.Models.Events
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7.Models.Events
 {
     /// <summary>
     /// Represents the platform generated information about an event that is stored alongside the domain specific data in the event store.

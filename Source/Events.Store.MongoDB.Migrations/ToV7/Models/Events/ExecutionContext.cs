@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Execution;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.V6.Models.Events
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7.Models.Events
 {
     /// <summary>
     /// Represents an execution context.

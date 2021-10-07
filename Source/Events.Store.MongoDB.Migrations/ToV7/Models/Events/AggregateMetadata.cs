@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.Artifacts;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.V6.Models.Events
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7.Models.Events
 {
     /// <summary>
     /// Represents event sourcing specific aggregate root and event source metadata.

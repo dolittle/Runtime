@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.V6.Models.Events
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7.Models.Events
 {
     /// <summary>
     /// Extension methods for <see cref="Claim" />.

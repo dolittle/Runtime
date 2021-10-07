@@ -1,11 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Linq;
 using System.Threading.Tasks;
 using CLI.Configurations;
 using Dolittle.Runtime.Migrations;
-using Dolittle.Runtime.ResourceTypes.Configuration;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace CLI.Migrations
@@ -44,7 +42,7 @@ namespace CLI.Migrations
             var result = await performer.PerformForAllTenants(migrator.EventStore).ConfigureAwait(false);
             if (!result.Success)
             {
-                cli.Error.WriteLine("Failed to perform migration for all tenants from version {0} to {1}. {2}", From, To, result.Exception.Message);
+                cli.Error.WriteLine("Failed to perform migration for all tenants from version {0} to {1}. {2}", From, To, result.Exception);
             }
         }
 

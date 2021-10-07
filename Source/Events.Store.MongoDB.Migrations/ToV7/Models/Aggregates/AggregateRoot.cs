@@ -4,7 +4,7 @@
 using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.V6.Models.Aggregates
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7.Models.Aggregates
 {
     /// <summary>
     /// Represents the state of an Aggregate Root.
