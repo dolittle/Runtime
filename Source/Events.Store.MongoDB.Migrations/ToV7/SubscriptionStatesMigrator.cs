@@ -15,6 +15,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
         }
         protected override IEnumerable<string> GetCollections(ICollectionNames collectionNames)
             => collectionNames.SubscriptionStates;
+
         protected override SubscriptionState Convert(Old.Processing.Streams.EventHorizon.SubscriptionState old)
             => new (
                 old.Microservice,

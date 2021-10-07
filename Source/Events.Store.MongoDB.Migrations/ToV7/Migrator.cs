@@ -17,12 +17,19 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
     /// /// </summary>
     public class Migrator : ICanMigrateAnEventStore
     {
+        static readonly Version _from;
+        static readonly Version _to;
         readonly IEventStoreConnections _eventStoreConnections;
         readonly IMongoCollectionMigrators _collectionMigrators;
         readonly ICreateCollectionMigratorsBetweenVersions _collectionMigratorsBetweenVersions;
         readonly ICollectionNamesProvider _collectionNamesProvider;
         readonly ILogger _logger;
 
+        static Migrator()
+        {
+            _from = Version.NotSet with { Major = 5 };
+            _to = Version.NotSet with { Major = 7 };
+        }
         public Migrator(
             IEventStoreConnections eventStoreConnections,
             IMongoCollectionMigrators collectionMigrators,
@@ -57,7 +64,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
         {
             try
             {
-                var emptyVersion = Version.NotSet;
                 var collectionMigrator = _collectionMigrators.Create(session, connection);
                 session.StartTransaction();
                 _logger.LogInformation("Start migrating");
@@ -65,8 +71,8 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
                 watch.Start();
                 var tasks = _collectionMigratorsBetweenVersions
                     .Create(
-                        emptyVersion with { Major = 1},
-                        emptyVersion with { Major = 7},
+                        _from,
+                        _to,
                         await _collectionNamesProvider.Provide(connection, session, cts.Token).ConfigureAwait(false),
                         collectionMigrator)
                     .Select(_ => _.Migrate(session, cts.Token));
