@@ -6,9 +6,14 @@
     <AssemblyName>Dolittle.Runtime.Events.Store.MongoDB.Migrations</AssemblyName>
   </PropertyGroup>
 
+
+    <ItemGroup>
+        <PackageReference Include="System.Data.HashFunction.CityHash" Version="$(SystemDataHashFunctionVersion)" />
+    </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Events.Store.MongoDB/Events.Store.MongoDB.csproj" />
     <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+    <ProjectReference Include="..\Embeddings.Store.MongoDB\Embeddings.Store.MongoDB.csproj" />
   </ItemGroup>
 
 </Project>

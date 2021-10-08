@@ -48,6 +48,7 @@ namespace CLI
             services.AddSingleton<ISerializer>(new Serializer(new NoConverterProviders()));
             services.AddTransient<IMigrationPerformers, MigrationPerformers>();
             services.AddTransient<EventStore.IEventStoreConnections, EventStore.EventStoreConnections>();
+            services.AddTransient<EventStore.IEmbeddingStoreConnections, EventStore.EmbeddingStoreConnections>();
             services.AddTransient<EventStore.IMongoCollectionMigrator, EventStore.MongoCollectionMigrator>();
 
             AddVersionedMigrators(services);
@@ -56,6 +57,7 @@ namespace CLI
         {
             services.AddTransient<ICanMigrateDataStores, ToV7>();
             services.AddTransient<EventStore.Versions.IPerformMigrationStepsInOrder, EventStore.Versions.MigrationStepsPerformer>();
+            services.AddTransient<EventStore.Versions.ToV7.Old.Embeddings.IConvertOldEventSourceId, EventStore.Versions.ToV7.Old.Embeddings.OldEventSourceIdConverter>();
             services.AddTransient<EventStore.Versions.ToV7.Migrator>();
         }
 

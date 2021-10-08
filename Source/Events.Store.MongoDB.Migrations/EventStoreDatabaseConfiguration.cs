@@ -10,5 +10,4 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations
     {
         public EventStoreConfiguration Instance { get; init; }
     }
-
 }
