@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions
 {
-    public class MigrationStepsPerformer : IPerformMigrationSteps
+    public class MigrationStepsPerformer : IPerformMigrationStepsInOrder
     {
         readonly ILogger<MigrationStepsPerformer> _logger;
 
@@ -29,17 +29,23 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions
                 _logger.LogInformation("Start performing migration steps");
                 var watch = new Stopwatch();
                 watch.Start();
+                session.StartTransaction();
                 var steps = createSteps(session, cts.Token);
-                await Task.WhenAll(steps).ConfigureAwait(false);
+                foreach (var step in steps)
+                {
+                    await step.ConfigureAwait(false);
+                }
+                await session.CommitTransactionAsync(cancellationToken: cts.Token).ConfigureAwait(false);
                 watch.Stop();
-                _logger.LogInformation("Migration finished after {Time}", watch.Elapsed);
+                _logger.LogInformation("Performing migration steps took {Time}", watch.Elapsed);
                 return Try.Succeeded();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An error occurred while performing migration steps");
+                cts.Cancel();
                 if (session == default) return ex;
-                await session.AbortTransactionAsync(cancellationToken: cts.Token).ConfigureAwait(false);
+                await session.AbortTransactionAsync().ConfigureAwait(false);
                 return ex;
             }
             finally

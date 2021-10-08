@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7
         static readonly Version _to;
         readonly IEventStoreConnections _eventStoreConnections;
         readonly IMongoCollectionMigrator _collectionMigrator;
-        readonly IPerformMigrationSteps _migrationStepsPerformer;
+        readonly IPerformMigrationStepsInOrder _migrationStepsPerformer;
         readonly ILogger _logger;
 
         static Migrator()
@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7
         public Migrator(
             IEventStoreConnections eventStoreConnections,
             IMongoCollectionMigrator collectionMigrator,
-            IPerformMigrationSteps migrationStepsPerformer,
+            IPerformMigrationStepsInOrder migrationStepsPerformer,
             ILogger<Migrator> logger)
         {
             _eventStoreConnections = eventStoreConnections;
@@ -54,6 +54,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7
         {
             try
             {
+                _logger.LogInformation("Migrating MongoDB event store to version {Version}", _to);
                 var connection = _eventStoreConnections.GetFor(configuration);
                 var collectionNames = await (await connection.Database.ListCollectionNamesAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false);
                 return await _migrationStepsPerformer.Perform(

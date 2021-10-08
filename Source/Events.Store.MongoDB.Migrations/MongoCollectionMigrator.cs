@@ -35,13 +35,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations
                 _logger.LogDebug("Migrating {Collection}", collectionName);
                 var collection = database.GetCollection<TOld>(collectionName);
                 var bsonCollection = database.GetCollection<TNew>(collectionName);
-                var oldDocuments = await collection.Find(_ => true).ToListAsync(cancellationToken);
+                var oldDocuments = await collection.Find(session, _ => true).ToListAsync(cancellationToken);
                 if (!oldDocuments.Any())
                 {
                     return;
                 }
-                await bsonCollection.DeleteManyAsync(Builders<TNew>.Filter.Empty, cancellationToken).ConfigureAwait(false);
-                await bsonCollection.InsertManyAsync(oldDocuments.Select(converter.Convert), cancellationToken: cancellationToken).ConfigureAwait(false);
+                await bsonCollection.DeleteManyAsync(session, Builders<TNew>.Filter.Empty, cancellationToken: cancellationToken).ConfigureAwait(false);
+                await bsonCollection.InsertManyAsync(session, oldDocuments.Select(converter.Convert), cancellationToken: cancellationToken).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

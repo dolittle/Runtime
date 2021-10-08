@@ -8,7 +8,7 @@ using Dolittle.Runtime.Rudimentary;
 using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions
 {
-    public interface IPerformMigrationSteps
+    public interface IPerformMigrationStepsInOrder
     {
         Task<Try> Perform(IMongoDatabase database, Func<IClientSessionHandle, CancellationToken, IEnumerable<Task>> createSteps);
     }

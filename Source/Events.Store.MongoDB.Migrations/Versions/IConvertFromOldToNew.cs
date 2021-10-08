@@ -6,5 +6,4 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions
     {
         TNew Convert(TOld old);
     }
-
 }
