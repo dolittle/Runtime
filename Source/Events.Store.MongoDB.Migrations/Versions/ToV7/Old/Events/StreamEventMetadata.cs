@@ -4,7 +4,7 @@
 using System;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7.Old.Events
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7.Old.Events
 {
     /// <summary>
     /// Represents the Event metadata for a <see cref="StreamEvent" />.

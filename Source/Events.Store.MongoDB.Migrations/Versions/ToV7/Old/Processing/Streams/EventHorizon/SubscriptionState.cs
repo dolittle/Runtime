@@ -5,7 +5,7 @@ using System;
 using Dolittle.Runtime.ApplicationModel;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7.Old.Processing.Streams.EventHorizon
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7.Old.Processing.Streams.EventHorizon
 {
     /// <summary>
     /// Represents the state of an <see cref="SubscriptionState" />.

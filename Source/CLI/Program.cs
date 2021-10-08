@@ -48,16 +48,15 @@ namespace CLI
             services.AddSingleton<ISerializer>(new Serializer(new NoConverterProviders()));
             services.AddTransient<IMigrationPerformers, MigrationPerformers>();
             services.AddTransient<EventStore.IEventStoreConnections, EventStore.EventStoreConnections>();
-            services.AddTransient<EventStore.IMongoCollectionMigrators, EventStore.MongoCollectionMigrators>();
-            services.AddTransient<EventStore.ICreateCollectionMigratorsBetweenVersions, EventStore.CreateCollectionMigratorsBetweenVersions>();
-            services.AddTransient<EventStore.ICollectionNamesProvider, EventStore.CollectionNamesProvider>();
-            
+            services.AddTransient<EventStore.IMongoCollectionMigrator, EventStore.MongoCollectionMigrator>();
+
             AddVersionedMigrators(services);
         }
         static void AddVersionedMigrators(ServiceCollection services)
         {
             services.AddTransient<ICanMigrateDataStores, ToV7>();
-            services.AddSingleton<EventStore.ToV7.Migrator>();
+            services.AddTransient<EventStore.Versions.IPerformMigrationSteps, EventStore.Versions.MigrationStepsPerformer>();
+            services.AddTransient<EventStore.Versions.ToV7.Migrator>();
         }
 
         static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)

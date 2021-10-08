@@ -1,8 +1,9 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
-using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions;
 using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations
 {
@@ -11,6 +12,17 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations
     /// </summary>
     public interface IMongoCollectionMigrator
     {
-        Task MigrateCollection<TOld, TNew>(string collectionName, Func<TOld, TNew> converter, CancellationToken cancellationToken);
+        Task Migrate<TOld, TNew>(
+            IMongoDatabase database,
+            IClientSessionHandle session,
+            string collectionName,
+            IConvertFromOldToNew<TOld, TNew> converter,
+            CancellationToken cancellationToken);
+        Task Migrate<TOld, TNew>(
+            IMongoDatabase database,
+            IClientSessionHandle session,
+            IEnumerable<string> collectionNames,
+            IConvertFromOldToNew<TOld, TNew> converter,
+            CancellationToken cancellationToken);
     }
 }

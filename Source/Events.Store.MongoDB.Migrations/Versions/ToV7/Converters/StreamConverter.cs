@@ -1,22 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using System.Collections.Generic;
-namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.ToV7
+namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7.Converters
 {
-    /// <summary>
-    /// Represents an implementation of <see cref="EventLogMigrator"/>.
-    /// </summary>
-    public class StreamMigrator : BaseMigrator<Old.Events.StreamEvent, Events.StreamEvent>
+    public class StreamConverter : IConvertFromOldToNew<Old.Events.StreamEvent, Events.StreamEvent>
     {
-        public StreamMigrator(ICollectionNames collectionNames, IMongoCollectionMigrator migrator)
-            : base(collectionNames, migrator)
-        {
-        }
-
-        protected override IEnumerable<string> GetCollections(ICollectionNames collectionNames)
-            => collectionNames.EventStreams;
-
-        protected override Events.StreamEvent Convert(Old.Events.StreamEvent old)
+        public Events.StreamEvent Convert(Old.Events.StreamEvent old)
             => new (
                 old.StreamPosition,
                 old.Partition.ToString(),

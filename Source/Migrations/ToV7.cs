@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7;
 using Dolittle.Runtime.Versioning;
 using EventStore = Dolittle.Runtime.Events.Store.MongoDB.Migrations;
 namespace Dolittle.Runtime.Migrations
@@ -10,9 +11,9 @@ namespace Dolittle.Runtime.Migrations
     /// /// </summary>
     public class ToV7 : ICanMigrateDataStores
     {
-        readonly EventStore.ToV7.Migrator _eventStoreToV7;
+        readonly Migrator _eventStoreToV7;
 
-        public ToV7(EventStore.ToV7.Migrator eventStoreToV7)
+        public ToV7(Migrator eventStoreToV7)
         {
             _eventStoreToV7 = eventStoreToV7;
         }
