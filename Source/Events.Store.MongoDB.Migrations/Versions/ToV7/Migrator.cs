@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7
         readonly IEventStoreConnections _eventStoreConnections;
         readonly IEmbeddingStoreConnections _embeddingStoreConnections;
         readonly IMongoCollectionMigrator _collectionMigrator;
-        readonly IPerformMigrationStepsInOrder _migrationStepsPerformer;
         readonly IConvertOldEventSourceId _oldEventSourceIdConverter;
         readonly ILogger _logger;
 
@@ -47,14 +47,12 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7
             IEventStoreConnections eventStoreConnections,
             IEmbeddingStoreConnections embeddingStoreConnections,
             IMongoCollectionMigrator collectionMigrator,
-            IPerformMigrationStepsInOrder migrationStepsPerformer,
             IConvertOldEventSourceId oldEventSourceIdConverter,
             ILogger<Migrator> logger)
         {
             _eventStoreConnections = eventStoreConnections;
             _embeddingStoreConnections = embeddingStoreConnections;
             _collectionMigrator = collectionMigrator;
-            _migrationStepsPerformer = migrationStepsPerformer;
             _oldEventSourceIdConverter = oldEventSourceIdConverter;
             _logger = logger;
         }
@@ -67,9 +65,15 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7
                 _logger.LogInformation("Migrating MongoDB event store to version {Version}", _to);
                 var eventStoreConnection = _eventStoreConnections.GetFor(eventStoreConfiguration);
                 var collectionNames = await (await eventStoreConnection.Database.ListCollectionNamesAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false);
-                return await _migrationStepsPerformer.Perform(
-                    eventStoreConnection.Database,
-                    (session, cancellationToken) => CreateEventStoreMigrationSteps(eventStoreConnection.Database, session, collectionNames.ToArray(), cancellationToken)).ConfigureAwait(false);
+                return await DoInSession(
+                    eventStoreConnection.Database, 
+                    (database, session, cancellationToken) => Task.WhenAll(
+                        CreateEventStoreMigrationSteps(
+                            database,
+                            session,
+                            collectionNames.ToArray(),
+                            cancellationToken)))
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -82,53 +86,76 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7
         {
             try
             {
+                _logger.LogInformation("Migrating MongoDB event store and embedding events to version {Version}", _to);
                 var eventStoreConnection = _eventStoreConnections.GetFor(eventStoreConfiguration);
                 var embeddingStoreConnection = _embeddingStoreConnections.GetFor(embeddingsConfiguration);
                 
                 var eventStoreCollectionNames = await (await eventStoreConnection.Database.ListCollectionNamesAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false);
                 
                 var embeddings = await GetEmbeddings(embeddingStoreConnection.Database).ConfigureAwait(false);
-                
-                return await _migrationStepsPerformer.Perform(
+
+                return await DoInSession(
                     eventStoreConnection.Database,
-                    (session, cancellationToken) =>
+                    async (database, session, cancellationToken) =>
                     {
-                        var steps = CreateEventStoreMigrationSteps(
-                            eventStoreConnection.Database,
-                            session,
-                            eventStoreCollectionNames.ToArray(),
-                            cancellationToken).ToList();
-                        steps.AddRange(CreateEmbeddingMigrationScripts(
-                            embeddings,    
-                            eventStoreConnection.Database,
-                            session,
-                            eventStoreCollectionNames.ToArray(),
-                            cancellationToken));
-                        return steps;
-                    });
+                        await Task.WhenAll(CreateEventStoreMigrationSteps(database, session, eventStoreCollectionNames.ToArray(), cancellationToken)).ConfigureAwait(false);
+                        if (embeddings.Any())
+                        {
+                            await Task.WhenAll(CreateEmbeddingMigrationScripts(embeddings, database, session, eventStoreCollectionNames.ToArray(), cancellationToken)).ConfigureAwait(false);
+                        }
+                    }).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 return ex;
             }
         }
-        IEnumerable<Task> CreateEmbeddingMigrationScripts(IDictionary<EmbeddingId, IEnumerable<ProjectionKey>> embeddings, IMongoDatabase database, IClientSessionHandle session, string[] collectionNames, CancellationToken cancellationToken)
-        {
-            var steps = new List<Task>();
 
-            foreach (var (embedding, keys) in embeddings)
+        async Task<Try> DoInSession(IMongoDatabase database, Func<IMongoDatabase, IClientSessionHandle, CancellationToken, Task> doTask)
+        {
+            IClientSessionHandle session = default;
+            using var cts = new CancellationTokenSource();
+            try
             {
-                steps.Add(_collectionMigrator.Migrate(database, session, "aggregates", new EmbeddingAggregatesConverter(_oldEventSourceIdConverter, embedding, keys), cancellationToken));
-                steps.Add(_collectionMigrator.Migrate(database, session, "event-log", new EmbeddingEventLogConverter(_oldEventSourceIdConverter, embedding, keys), cancellationToken));
-                steps.Add(_collectionMigrator.Migrate(database, session, GetEventStreams(collectionNames).Where(IsNonScopedEventStream), new EmbeddingStreamConverter(_oldEventSourceIdConverter, embedding, keys), cancellationToken));
+                session = await database.Client.StartSessionAsync(cancellationToken: cts.Token).ConfigureAwait(false);
+                _logger.LogInformation("Start performing migration steps");
+                var watch = new Stopwatch();
+                watch.Start();
+                session.StartTransaction();
+                await doTask(database, session, cts.Token).ConfigureAwait(false);
+                await session.CommitTransactionAsync(cancellationToken: cts.Token).ConfigureAwait(false);
+                watch.Stop();
+                _logger.LogInformation("Performing migration steps took {Time}", watch.Elapsed);
+                return Try.Succeeded();
             }
-            return steps;
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while performing migration steps");
+                cts.Cancel();
+                if (session == default) return ex;
+                await session.AbortTransactionAsync().ConfigureAwait(false);
+                return ex;
+            }
+            finally
+            {
+                session?.Dispose();
+            }
         }
+
+        IEnumerable<Task> CreateEmbeddingMigrationScripts(IDictionary<EmbeddingId, IEnumerable<ProjectionKey>> embeddings, IMongoDatabase database, IClientSessionHandle session, string[] collectionNames, CancellationToken cancellationToken)
+            => new[]
+            {
+                _collectionMigrator.Migrate(database, session, "aggregates", new EmbeddingAggregatesConverter(_oldEventSourceIdConverter, embeddings), cancellationToken),
+                _collectionMigrator.Migrate(database, session, "event-log", new EmbeddingEventLogConverter(_oldEventSourceIdConverter, embeddings), cancellationToken),
+                _collectionMigrator.Migrate(database, session, GetEventStreams(collectionNames).Where(IsNonScopedEventStream), new EmbeddingStreamConverter(_oldEventSourceIdConverter, embeddings), cancellationToken)
+            };
+            
         static async Task<IDictionary<EmbeddingId, IEnumerable<ProjectionKey>>> GetEmbeddings(IMongoDatabase embeddingStore)
         {
             var embeddings = new Dictionary<EmbeddingId, IEnumerable<ProjectionKey>>();
 
             var embeddingStateCollectionNames = await (await embeddingStore.ListCollectionNamesAsync().ConfigureAwait(false)).ToListAsync().ConfigureAwait(false);
+            embeddingStateCollectionNames = embeddingStateCollectionNames.Where(_ => !_.Contains("definitions")).ToList();
             foreach (var embeddingStateCollectionName in embeddingStateCollectionNames)
             {
                 var keys = await embeddingStore

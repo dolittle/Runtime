@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7.Old.Embeddings;
 using Dolittle.Runtime.Projections.Store;
@@ -11,13 +12,13 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7.Convert
     public class EmbeddingStreamConverter : IConvertFromOldToNew<Events.StreamEvent, Events.StreamEvent>
     {
         readonly IConvertOldEventSourceId _oldEventSourceIdConverter;
-        readonly IEnumerable<ProjectionKey> _keys;
+        readonly IDictionary<EmbeddingId, IEnumerable<ProjectionKey>> _embeddings;
 
-        public EmbeddingStreamConverter(IConvertOldEventSourceId oldEventSourceIdConverter, EmbeddingId embedding, IEnumerable<ProjectionKey> keys)
+        public EmbeddingStreamConverter(IConvertOldEventSourceId oldEventSourceIdConverter, IDictionary<EmbeddingId, IEnumerable<ProjectionKey>> embeddings)
         {
             _oldEventSourceIdConverter = oldEventSourceIdConverter;
-            _keys = keys;
-            Filter = Builders<Events.StreamEvent>.Filter.Eq(_ => _.Aggregate.TypeId, embedding.Value);
+            _embeddings = embeddings;
+            Filter = Builders<Events.StreamEvent>.Filter.In(_ => _.Aggregate.TypeId, _embeddings.Keys.Select(_ => _.Value));
         }
 
         public FilterDefinition<Events.StreamEvent> Filter { get; }
@@ -30,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7.Convert
                 new Events.StreamEventMetadata(
                     old.Metadata.EventLogSequenceNumber,
                     old.Metadata.Occurred,
-                    _oldEventSourceIdConverter.Convert(Guid.Parse(old.Metadata.EventSource), _keys),
+                    _oldEventSourceIdConverter.Convert(Guid.Parse(old.Metadata.EventSource), _embeddings[old.Aggregate.TypeId]),
                     old.Metadata.TypeId,
                     old.Metadata.TypeGeneration,
                     old.Metadata.Public),
