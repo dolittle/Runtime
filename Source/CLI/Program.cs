@@ -56,7 +56,6 @@ namespace CLI
         static void AddVersionedMigrators(ServiceCollection services)
         {
             services.AddTransient<ICanMigrateDataStores, ToV7>();
-            services.AddTransient<EventStore.Versions.IPerformMigrationStepsInOrder, EventStore.Versions.MigrationStepsPerformer>();
             services.AddTransient<EventStore.Versions.ToV7.Old.Embeddings.IConvertOldEventSourceId, EventStore.Versions.ToV7.Old.Embeddings.OldEventSourceIdConverter>();
             services.AddTransient<EventStore.Versions.ToV7.Migrator>();
         }
