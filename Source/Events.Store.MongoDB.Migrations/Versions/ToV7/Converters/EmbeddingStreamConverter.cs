@@ -24,19 +24,24 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Migrations.Versions.ToV7.Convert
         public FilterDefinition<Events.StreamEvent> Filter { get; }
 
         public Events.StreamEvent Convert(Events.StreamEvent old)
-            => new (
+        {
+            var key = _oldEventSourceIdConverter.Convert(Guid.Parse(old.Metadata.EventSource), _embeddings[old.Aggregate.TypeId]);
+            return new Events.StreamEvent(
                 old.StreamPosition,
-                old.Partition,
+                old.Partition.Equals(old.Metadata.EventSource)
+                    ? key.Value
+                    : old.Partition,
                 old.ExecutionContext,
                 new Events.StreamEventMetadata(
                     old.Metadata.EventLogSequenceNumber,
                     old.Metadata.Occurred,
-                    _oldEventSourceIdConverter.Convert(Guid.Parse(old.Metadata.EventSource), _embeddings[old.Aggregate.TypeId]),
+                    key.Value,
                     old.Metadata.TypeId,
                     old.Metadata.TypeGeneration,
                     old.Metadata.Public),
                 old.Aggregate,
                 old.EventHorizon,
                 old.Content);
+        }
     }
 }
