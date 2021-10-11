@@ -117,7 +117,7 @@ The streams `StreamId` is added to the collections name, eg. a stream with the i
 ```json
 {
     // same as an Event in the "event-log" + Partition
-    "Partition": "UUID",
+    "Partition": "string",
 }
 ```
 
@@ -201,7 +201,7 @@ This collection keeps track of [Event Horizon Subscriptions]({{< ref "event_hori
     "Microservice": "UUID",
     "Tenant": "UUID",
     "Stream": "UUID",
-    "Partition": "UUID",
+    "Partition": "string",
     "Position": "decimal",
     "LastSuccesfullyProcessed": "date",
     "RetryTime": "date",
