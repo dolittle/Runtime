@@ -8,5 +8,6 @@
 
     <ItemGroup>
         <ProjectReference Include="../../Source/Migrations/Migrations.csproj" />
+        <ProjectReference Include="..\..\Source\Types.Testing\Types.Testing.csproj" />
     </ItemGroup>
 </Project>
