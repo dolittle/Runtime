@@ -52,7 +52,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
             var request = new HandleEventRequest
             {
-                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf() },
             };
             return Process(request, cancellationToken);
         }
@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _logger.EventProcessorIsProcessingAgain(Identifier, @event.Type.Id, partitionId, retryCount, failureReason);
             var request = new HandleEventRequest
             {
-                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.ToProtobuf(), ScopeId = Scope.ToProtobuf() },
+                Event = new Contracts.StreamEvent { Event = @event.ToProtobuf(), PartitionId = partitionId.Value, ScopeId = Scope.ToProtobuf() },
                 RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
             };
             return Process(request, cancellationToken);

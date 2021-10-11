@@ -17,7 +17,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
         protected static Mock<ICompareStates> state_comparer;
         protected static Mock<IDetectEmbeddingLoops> loop_detector;
         protected static StateTransitionEventsCalculator calculator;
-        protected static IConvertProjectionKeysToEventSourceIds key_to_event_source_converter;
         protected static CancellationToken cancellation;
 
         Establish context = () =>
@@ -27,7 +26,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
             project_many_events = new Mock<IProjectManyEvents>(MockBehavior.Strict);
             state_comparer = new Mock<ICompareStates>(MockBehavior.Strict);
             loop_detector = new Mock<IDetectEmbeddingLoops>(MockBehavior.Strict);
-            key_to_event_source_converter = new ProjectionKeyToEventSourceIdConverter();
             cancellation = CancellationToken.None;
             calculator = new StateTransitionEventsCalculator(
                 identifier,
@@ -35,7 +33,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
                 project_many_events.Object,
                 state_comparer.Object,
                 loop_detector.Object,
-                key_to_event_source_converter,
                 Mock.Of<ILogger>());
         };
     }

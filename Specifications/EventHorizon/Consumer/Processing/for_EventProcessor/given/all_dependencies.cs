@@ -36,9 +36,9 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.g
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Guid.NewGuid(),
-                Guid.NewGuid());
+                "partition id");
 
-            partition = Guid.NewGuid();
+            partition = "another partition id";
 
             event_horizon_events_writer = new Mock<IWriteEventHorizonEvents>();
 
@@ -48,7 +48,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.g
             @event = new CommittedEvent(
                 0,
                 DateTimeOffset.Now,
-                Guid.NewGuid(),
+                "event source id",
                 execution_contexts.create(),
                 new Artifacts.Artifact(Guid.NewGuid(), 0),
                 true,

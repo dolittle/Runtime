@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_AbstractFilterProcessor
 
         Establish context = () =>
         {
-            partition = Guid.NewGuid();
+            partition = "   weird partition   ";
             filter_processor
                 .Setup(_ => _.Filter(
                     Moq.It.IsAny<CommittedEvent>(),

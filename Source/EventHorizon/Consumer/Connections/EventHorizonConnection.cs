@@ -113,7 +113,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
                         @event.Event.ToCommittedEvent(),
                         @event.StreamSequenceNumber,
                         StreamId.EventLog,
-                        Guid.Empty,
+                        PartitionId.None,
                         false);
 
                 await connectionToStreamProcessorQueue.EnqueueAsync(streamEvent, cancellationToken).ConfigureAwait(false);
@@ -132,7 +132,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
         ConsumerSubscriptionRequest CreateRequest(SubscriptionId subscription, StreamPosition publicEventsPosition)
             => new()
             {
-                PartitionId = subscription.PartitionId.ToProtobuf(),
+                PartitionId = subscription.PartitionId.Value,
                 StreamId = subscription.StreamId.ToProtobuf(),
                 StreamPosition = publicEventsPosition.Value,
                 TenantId = subscription.ProducerTenantId.ToProtobuf()

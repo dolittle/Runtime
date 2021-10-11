@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Store
                 {
                     EventLogSequenceNumber = @event.EventLogSequenceNumber,
                     Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),
-                    EventSourceId = @event.EventSource.ToProtobuf(),
+                    EventSourceId = @event.EventSource.Value,
                     ExecutionContext = @event.ExecutionContext.ToProtobuf(),
                     Type = new ArtifactsContracts.Artifact
                     {
@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Store
             new(
                 @event.EventLogSequenceNumber,
                 @event.Occurred.ToDateTimeOffset(),
-                @event.EventSourceId.ToGuid(),
+                @event.EventSourceId,
                 @event.ExecutionContext.ToExecutionContext(),
                 new Artifact(@event.Type.Id.ToGuid(), @event.Type.Generation),
                 @event.Public,

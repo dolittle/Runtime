@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
         {
-            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, Guid.Empty));
+            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.None));
             var request = new FilterEventRequest
             {
                 Event = @event.ToProtobuf(),
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
         /// <inheritdoc/>
         public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
         {
-            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, Guid.Empty));
+            if (!@event.Public) return Task.FromResult<IFilterResult>(new SuccessfulFiltering(false, PartitionId.None));
             var request = new FilterEventRequest
             {
                 Event = @event.ToProtobuf(),
@@ -71,7 +71,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
 
             return response switch
             {
-                { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId.ToGuid()),
+                { Failure: null } => new SuccessfulFiltering(response.IsIncluded, response.PartitionId),
                 _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
             };
         }

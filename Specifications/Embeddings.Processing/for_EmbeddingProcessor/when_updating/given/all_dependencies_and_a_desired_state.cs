@@ -36,7 +36,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
                 0,
                 0,
                 DateTimeOffset.Now,
-                Guid.Parse("1d137f3a-b8d0-43a5-a08a-f8eb35b5e932"),
+                "1d137f3a-b8d0-43a5-a08a-f8eb35b5e932",
                 new ExecutionContext(
                     Guid.Parse("4e93a0f0-ddf1-48a3-ab6e-508ed9950ed4"),
                     "63560704-69dd-47bd-a4de-41af2634a190",
@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
                 false,
                 "event-content");
             committed_events = new CommittedAggregateEvents(
-                Guid.Parse("1d137f3a-b8d0-43a5-a08a-f8eb35b5e932"),
+                "1d137f3a-b8d0-43a5-a08a-f8eb35b5e932",
                 "5512cda5-5e38-4654-ba86-3a7d917f3eb0",
                 new[] { committed_event });
             desired_state = "{}";
@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_upd
 
         protected static UncommittedAggregateEvents CreateUncommittedEvents(params UncommittedEvent[] events)
             => new(
-                Guid.Parse("1d137f3a-b8d0-43a5-a08a-f8eb35b5e932"),
+                "1d137f3a-b8d0-43a5-a08a-f8eb35b5e932",
                 new Artifact("5512cda5-5e38-4654-ba86-3a7d917f3eb0", ArtifactGeneration.First),
                 1,
                 events);

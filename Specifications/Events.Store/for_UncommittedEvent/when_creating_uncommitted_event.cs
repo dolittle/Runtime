@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.for_UncommittedEvent
 
         Establish context = () =>
         {
-            event_source_id = Guid.NewGuid();
+            event_source_id = "the event source™";
             artifact_id = Guid.NewGuid();
             artifact_generation = 0;
             is_public = false;

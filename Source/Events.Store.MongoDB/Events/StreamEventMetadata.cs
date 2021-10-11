@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         public StreamEventMetadata(
             ulong eventLogSequenceNumber,
             DateTime occurred,
-            Guid eventSource,
+            string eventSource,
             Guid typeId,
             uint typeGeneration,
             bool isPublic)

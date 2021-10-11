@@ -16,17 +16,14 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.when_
     public class and_getting_current_state_fails : given.all_dependencies
     {
         static ProjectionKey projection_key;
-        static EventSourceId event_source;
         static Exception exception;
 
         Establish context = () =>
         {
             projection_key = "projection-key";
-            event_source = Guid.Parse("f05923c2-561d-4603-97bb-7fc17d808a8a");
             exception = new Exception();
 
             embedding_store.Setup(_ => _.TryGetKeys(embedding, cancellation_token)).Returns(Task.FromResult<Try<IEnumerable<ProjectionKey>>>(new[] { projection_key }));
-            key_converter.Setup(_ => _.GetEventSourceIdFor(projection_key)).Returns(event_source);
             embedding_store.Setup(_ => _.TryGet(embedding, projection_key, cancellation_token)).Returns(Task.FromResult<Try<EmbeddingCurrentState>>(exception));
         };
 
