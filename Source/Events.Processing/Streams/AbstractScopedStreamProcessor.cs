@@ -83,6 +83,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _started = true;
             return BeginProcessing(cancellationToken);
         }
+        
+        /// <summary>
+        /// Sets the <see cref="IStreamProcessorState" /> to be at the given position.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <exception cref="NotImplementedException"></exception>
+        public void SetToPosition(StreamPosition position)
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Catchup on failing Events.

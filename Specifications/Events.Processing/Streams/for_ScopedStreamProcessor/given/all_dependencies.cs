@@ -3,12 +3,14 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
+using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
 
@@ -16,6 +18,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
 {
     public class all_dependencies
     {
+        static ScopedStreamProcessor stream_processor;
         protected static EventProcessorId event_processor_id;
         protected static ScopeId scope_id;
         protected static TenantId tenant_id;
@@ -25,11 +28,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
         protected static Mock<ICanFetchEventsFromStream> events_fetcher;
         protected static Mock<IStreamProcessors> stream_processors;
         protected static Mock<IEventProcessor> event_processor;
-        protected static ScopedStreamProcessor stream_processor;
         protected static Mock<IStreamEventWatcher> event_waiter;
+        protected static CancellationTokenSource cancellation_token_source;
 
         Establish context = () =>
         {
+            
+            cancellation_token_source = new CancellationTokenSource();
             var events_fetcher_policy = new AsyncPolicyFor<ICanFetchEventsFromStream>(new EventFetcherPolicy(Mock.Of<ILogger<ICanFetchEventsFromStream>>()).Define());
             var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
             event_processor_id = Guid.NewGuid();
@@ -38,14 +43,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
             source_stream_id = Guid.NewGuid();
             stream_processor_id = new StreamProcessorId(scope_id, event_processor_id, source_stream_id);
             stream_processor_state_repository = in_memory_stream_processor_state_repository;
-            events_fetcher = new Mock<ICanFetchEventsFromStream>();
-            event_processor = new Mock<IEventProcessor>();
+            events_fetcher = new Mock<ICanFetchEventsFromStream>(MockBehavior.Strict);
+            event_processor = new Mock<IEventProcessor>(MockBehavior.Strict);
             event_processor.SetupGet(_ => _.Identifier).Returns(event_processor_id);
             event_processor.SetupGet(_ => _.Scope).Returns(scope_id);
-            stream_processors = new Mock<IStreamProcessors>();
+            stream_processors = new Mock<IStreamProcessors>(MockBehavior.Strict);
 
-            event_waiter = new Mock<IStreamEventWatcher>();
-            event_waiter.Setup(_ => _.WaitForEvent(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
+            event_waiter = new Mock<IStreamEventWatcher>(MockBehavior.Strict);
+            event_waiter
+                .Setup(_ => _.WaitForEvent(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
             stream_processor = new ScopedStreamProcessor(
                 tenant_id,
                 stream_processor_id,
@@ -59,5 +65,43 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
                 new TimeToRetryForUnpartitionedStreamProcessor(),
                 Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
+        
+        Cleanup clean = () => cancellation_token_source.Dispose();
+
+        protected static Task start_stream_processor_and_cancel_after(TimeSpan cancelAfter)
+        {
+            cancellation_token_source.CancelAfter(cancelAfter);
+            return stream_processor.Start(cancellation_token_source.Token);
+        }
+        protected static StreamProcessorState current_stream_processor_state
+            => stream_processor_state_repository.TryGetFor(
+                stream_processor_id,
+                CancellationToken.None)
+                .GetAwaiter()
+                .GetResult()
+                .Result as StreamProcessorState;
+
+        protected static void setup_event_fetcher(params Try<StreamEvent>[] streamEvents)
+        {
+            for (var i = 0; i <= streamEvents.Length; i++)
+            {
+                if (i == streamEvents.Length)
+                {
+                    events_fetcher
+                        .Setup(_ => _.Fetch((ulong)i, Moq.It.IsAny<CancellationToken>()))
+                        .Returns(Task.FromResult(Try<StreamEvent>.Failed(new Exception())));
+                    break;
+                }
+                var streamEvent = streamEvents[i];
+                events_fetcher
+                    .Setup(_ => _.Fetch((ulong)i, Moq.It.IsAny<CancellationToken>()))
+                    .Returns(Task.FromResult(streamEvent));
+            }
+        }
+        protected static void should_be_waiting_for_next_event()
+            => should_be_waiting_for_event(current_stream_processor_state.Position);
+        protected static void should_be_waiting_for_event(StreamPosition streamPosition)
+            => event_waiter.Verify(_ => _.WaitForEvent(scope_id, source_stream_id, streamPosition, Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
+
     }
 }
