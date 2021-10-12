@@ -1,18 +1,16 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using CLI.Configurations;
 using CLI.Options.Parsers.Versioning;
-using Dolittle.Runtime.Migrations;
+using Dolittle.Runtime.CLI.Configurations;
 using Dolittle.Runtime.Serialization.Json;
 using Dolittle.Runtime.Versioning;
 using McMaster.Extensions.CommandLineUtils;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using EventStore = Dolittle.Runtime.Events.Store.MongoDB.Migrations;
 
-namespace CLI
+namespace Dolittle.Runtime.CLI
 {
     /// <summary>
     /// The main entrypoint of the Dolittle CLI tool.
@@ -37,26 +35,13 @@ namespace CLI
 
         static void BindServices(CommandLineApplication<Program> cli, ServiceCollection services)
         {
-            services.AddLogging(_ => _.AddConsole());
+            services.AddLogging(_ => _.AddSimpleConsole());
             services.AddSingleton<RuntimeConfigurationDirectoryPath>(cli.WorkingDirectory);
             services.AddTransient<IVersionConverter, VersionConverter>();
             services.AddTransient<IValueParser, VersionParser>();
-            services.AddTransient<IMigrations, Dolittle.Runtime.Migrations.Migrations>();
             services.AddTransient<IConfigurations, Configurations.Configurations>();
             services.AddTransient<IResources, Resources>();
             services.AddSingleton<ISerializer>(new Serializer(new NoConverterProviders()));
-            services.AddTransient<IMigrationPerformers, MigrationPerformers>();
-            services.AddTransient<EventStore.IEventStoreConnections, EventStore.EventStoreConnections>();
-            services.AddTransient<EventStore.IEmbeddingStoreConnections, EventStore.EmbeddingStoreConnections>();
-            services.AddTransient<EventStore.IMongoCollectionMigrator, EventStore.MongoCollectionMigrator>();
-
-            AddVersionedMigrators(services);
-        }
-        static void AddVersionedMigrators(ServiceCollection services)
-        {
-            services.AddTransient<ICanMigrateDataStores, ToV7>();
-            services.AddTransient<EventStore.Versions.ToV7.Old.Embeddings.IConvertOldEventSourceId, EventStore.Versions.ToV7.Old.Embeddings.OldEventSourceIdConverter>();
-            services.AddTransient<EventStore.Versions.ToV7.Migrator>();
         }
 
         static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)

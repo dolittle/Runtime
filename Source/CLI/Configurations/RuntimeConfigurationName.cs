@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using Dolittle.Runtime.Rudimentary;
-namespace CLI.Configurations
+namespace Dolittle.Runtime.CLI.Configurations
 {
     /// <summary>
     /// Represents the name of a Dolittle Runtime configuration file.

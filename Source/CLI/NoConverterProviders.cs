@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Serialization.Json;
 using Dolittle.Runtime.Types;
-namespace CLI
+namespace Dolittle.Runtime.CLI
 {
     /// <summary>
     /// Represents an implementation of <see cref="InstancesOf{T}"/> of <see cref="ICanProvideConverters"/> that has no instances.

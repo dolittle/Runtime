@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Serialization.Json;
-namespace CLI.Configurations
+namespace Dolittle.Runtime.CLI.Configurations
 {
     /// <summary>
     /// Represents an implementation of <see cref="IConfigurations" />.
