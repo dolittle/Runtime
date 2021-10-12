@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Projections.Store
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, Guid, Guid, string, Exception> _gettingOneProjection = LoggerMessage
             .Define<Guid, Guid, string>(

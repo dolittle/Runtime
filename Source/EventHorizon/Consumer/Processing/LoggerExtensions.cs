@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
 
         #region StreamProcessor

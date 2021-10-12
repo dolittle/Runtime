@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, string, Exception> _registeringBoundService = LoggerMessage
             .Define<string>(
