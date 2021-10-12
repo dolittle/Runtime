@@ -18,7 +18,6 @@ namespace CLI
     /// The main entrypoint of the Dolittle CLI tool.
     /// </summary>
     [Command("dolittle", "The Dolittle CLI tool")]
-    [Subcommand(typeof(Migrate))]
     class Program
     {
         static int Main(string[] args)
