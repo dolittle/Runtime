@@ -90,6 +90,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 return request.Exception;
             }
             return await DispatchAndHandleEmbeddingResponse(
+                currentState,
                 request,
                 EmbeddingResponse.ResponseOneofCase.Compare,
                 response => response.Compare.Events,
@@ -107,6 +108,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 return request.Exception;
             }
             return await DispatchAndHandleEmbeddingResponse(
+                currentState,
                 request,
                 EmbeddingResponse.ResponseOneofCase.Delete,
                 response => response.Delete.Events,
@@ -115,6 +117,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
         }
 
         async Task<Try<UncommittedEvents>> DispatchAndHandleEmbeddingResponse(
+            EmbeddingCurrentState currentState,
             EmbeddingRequest request,
             EmbeddingResponse.ResponseOneofCase expectedResponse,
             Func<EmbeddingResponse, IEnumerable<Events.Contracts.UncommittedEvent>> getEvents,
@@ -130,7 +133,7 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 }
 
                 return response.ResponseCase == expectedResponse
-                    ? ToUncommittedEvents(getEvents(response))
+                    ? ToUncommittedEvents(currentState.Key.Value, getEvents(response))
                     : new UnexpectedEmbeddingResponse(_embeddingId, response.ResponseCase);
             }
             catch (Exception ex)
@@ -145,11 +148,11 @@ namespace Dolittle.Runtime.Embeddings.Processing
 
         string GetFailureReason(EmbeddingResponse response) => response.ProcessorFailure?.Reason ?? response.Failure.Reason;
 
-        UncommittedEvents ToUncommittedEvents(IEnumerable<Events.Contracts.UncommittedEvent> events)
+        UncommittedEvents ToUncommittedEvents(EventSourceId eventSourceId, IEnumerable<Events.Contracts.UncommittedEvent> events)
             => new(
                 new ReadOnlyCollection<UncommittedEvent>(events.Select(_ =>
                     new UncommittedEvent(
-                        EventSourceId.NotSet,
+                        eventSourceId,
                         new Artifact(_.EventType.Id.ToGuid(),
                         _.EventType.Generation),
                         _.Public,
