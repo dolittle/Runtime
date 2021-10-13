@@ -115,6 +115,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         protected override bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
             => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
 
+
+        /// <inheritdoc />
+        protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
+        {
+            var newState = new StreamProcessorState(position, ((StreamProcessorState)currentState).LastSuccessfullyProcessed);
+            await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
+            return newState;
+            
+        }
+
         bool CanRetryProcessing(DateTimeOffset retryTime)
             => DateTimeOffset.UtcNow.CompareTo(retryTime) >= 0;
     }

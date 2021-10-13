@@ -25,8 +25,11 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly ICanFetchEventsFromStream _eventsFetcher;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _fetchEventToProcessPolicy;
         readonly IStreamEventWatcher _eventWaiter;
+        CancellationTokenSource _resetStreamProcessor;
         IStreamProcessorState _currentState;
         bool _started;
+        bool _setNewPosition;
+        StreamPosition _newPosition;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractScopedStreamProcessor"/> class.
@@ -91,7 +94,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <exception cref="NotImplementedException"></exception>
         public void SetToPosition(StreamPosition position)
         {
-            throw new NotImplementedException();
+            _newPosition = position;
+            _setNewPosition = true;
+            _resetStreamProcessor?.Cancel();
         }
 
         /// <summary>
@@ -136,6 +141,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="timeToRetry">The <see cref="TimeSpan" /> for when to retry processsing a stream processor.</param>
         /// <returns>A value indicating whether there is a retry time.</returns>
         protected abstract bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry);
+        
+        /// <summary>
+        /// Creates a new <see cref="IStreamProcessorState"/> with the given <see cref="StreamPosition" />.
+        /// </summary>
+        /// <param name="position">The new <see cref="StreamPosition"/>.</param>
+        /// <returns>The new <see cref="IStreamProcessorState"/>.</returns>
+        protected abstract Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position);
 
         /// <summary>
         /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
@@ -191,7 +203,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <summary>
-        /// Handle the <see cref="IProcessingResult" /> from the procssing of a <see cref="StreamEvent" />..
+        /// Handle the <see cref="IProcessingResult" /> from the processing of a <see cref="StreamEvent" />..
         /// </summary>
         /// <param name="processingResult">The <see cref="IProcessingResult" />.</param>
         /// <param name="processedEvent">The processed <see cref="StreamEvent" />.</param>
@@ -220,7 +232,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     Try<StreamEvent> tryGetEvent;
                     do
                     {
-                        _currentState = await Catchup(_currentState, cancellationToken).ConfigureAwait(false);
+                        _resetStreamProcessor = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                        if (_setNewPosition)
+                        {
+                            _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
+                            _setNewPosition = false;
+                        }
+                        _currentState = await Catchup(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
                         tryGetEvent = await FetchNextEventToProcess(_currentState, cancellationToken).ConfigureAwait(false);
                         if (!tryGetEvent.Success)
                         {
@@ -229,7 +247,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                                 _sourceStreamDefinition.StreamId,
                                 _currentState.Position,
                                 GetTimeToRetryProcessing(_currentState),
-                                cancellationToken).ConfigureAwait(false);
+                                _resetStreamProcessor.Token).ConfigureAwait(false);
                         }
                     }
                     while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested);
@@ -245,6 +263,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 {
                     Logger.LogWarning(ex, "{StreamProcessorId} for tenant {TenantId} failed", Identifier, _tenantId);
                 }
+            }
+            finally
+            {
+                _resetStreamProcessor?.Dispose();
             }
         }
     }
