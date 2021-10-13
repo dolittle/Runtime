@@ -38,7 +38,7 @@ Subscription {
     MicroserviceId Guid
     TenantId Guid
     PublicStreamId Guid
-    PartitionId Guid
+    PartitionId string
     // the consumers scoped event log 
     ScopeId Guid
 }

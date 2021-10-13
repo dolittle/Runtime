@@ -1,3 +1,24 @@
+# [7.0.0] - 2021-10-13 [PR: #556](https://github.com/dolittle/Runtime/pull/556)
+## Summary
+
+Implementing the changes introduced by https://github.com/dolittle/Contracts/pull/53. Allowing EventSourceID and PartitionID to be strings, to more easily integrate with events from existing systems.
+
+This is considered a breaking change because it only works with SDKs using the v6 Contracts.
+
+### Added
+
+- EventSourceID is now a string instead of a Guid.
+- PartitionID is now also a string instead of a Guid.
+
+### Fixed
+
+- Aligned names of event type fields throughout messages from Contracts v6.0.0
+
+### Removed
+
+- `EventSourceId.NotSet` is removed, as the value should always be set to something. We had some hacks internally where we used this value since we knew it would be thrown away, but now those values are set to something more sensible just to be sure.
+
+
 # [6.1.0] - 2021-6-29 [PR: #550](https://github.com/dolittle/Runtime/pull/550)
 ## Summary
 

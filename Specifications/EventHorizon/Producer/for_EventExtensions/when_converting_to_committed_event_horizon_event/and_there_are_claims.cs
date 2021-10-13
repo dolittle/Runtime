@@ -34,8 +34,8 @@ namespace Dolittle.Runtime.EventHorizon.Producer.for_EventExtensions.when_conver
         It should_not_have_external_event_received = () => result.ExternalEventReceived.ShouldBeNull();
         It should_have_the_correct_occurred_date_time = () => result.Occurred.ToDateTimeOffset().ShouldEqual(committed_event.Occurred);
         It should_not_be_public = () => result.Public.ShouldBeFalse();
-        It should_have_the_correct_type_generation = () => result.Type.Generation.ShouldEqual(committed_event.Type.Generation.Value);
-        It should_have_the_correct_type_id = () => result.Type.Id.ToGuid().ShouldEqual(committed_event.Type.Id.Value);
+        It should_have_the_correct_type_generation = () => result.EventType.Generation.ShouldEqual(committed_event.Type.Generation.Value);
+        It should_have_the_correct_type_id = () => result.EventType.Id.ToGuid().ShouldEqual(committed_event.Type.Id.Value);
         It should_not_have_any_claims = () => result.ExecutionContext.ToExecutionContext().Claims.ShouldEqual(Claims.Empty);
     }
 }

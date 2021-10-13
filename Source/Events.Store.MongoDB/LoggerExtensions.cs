@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, string, Exception> _creatingIndexesFor = LoggerMessage
             .Define<string>(

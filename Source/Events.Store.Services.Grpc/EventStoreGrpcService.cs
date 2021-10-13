@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc
         public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
         {
             var response = new Contracts.CommitEventsResponse();
-            var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
+            var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
             var commitResult = await _eventStoreService.TryCommit(
                 new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
                 request.CallContext.ExecutionContext.ToExecutionContext(),
@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc
         {
             var response = new Contracts.CommitAggregateEventsResponse();
             EventSourceId eventSourceId = request.Events.EventSourceId;
-            var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
+            var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
 
             var commitResult = await _eventStoreService.TryCommitForAggregate(
                 new UncommittedAggregateEvents(

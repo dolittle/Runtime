@@ -9,8 +9,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.whe
 {
     public class and_everything_works : given.all_dependencies
     {
-        static UncommittedEvent @event;
-
         static Contracts.EmbeddingRequest result;
 
         Because of = () => result = factory.Create(current_state, desired_state);

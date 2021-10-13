@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, Guid, string, Exception> _incrementingVersionForAggregate = LoggerMessage
             .Define<Guid, string>(

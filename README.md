@@ -30,7 +30,7 @@ The Runtime is the backend of our system and manages connections from the SDKs a
 
 # Images
 
-There are 2 different types of images. The `Production` images contain the Runtime. The `Development` images have the Runtime and a MongoDB instance running on port `27017` for easier development.
+There are 2 different types of images. The `Production` images contain the Runtime. The `Development` images have the Runtime and a MongoDB instance running on port `27017` for easier development. We also have arm64 variants of both images.
 
 | Type | Version |
 | ------- | ------- |

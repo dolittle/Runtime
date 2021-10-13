@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// <summary>
     /// Represents a extensions for <see cref="ILogger" />.
     /// </summary>
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, StreamProcessorId, Exception> _initializingStreamProcessor = LoggerMessage
             .Define<StreamProcessorId>(

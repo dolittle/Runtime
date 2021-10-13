@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing
     /// <summary>
     /// Represents a extensions for <see cref="ILogger" />.
     /// </summary>
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, ExecutionContext, Exception> _settingExecutionContext = LoggerMessage
             .Define<ExecutionContext>(

@@ -35,21 +35,21 @@ namespace Dolittle.Runtime.Serialization.Protobuf
         /// </summary>
         /// <param name="name">Name of the property.</param>
         /// <returns>A new <see cref="PropertyDescriptionBuilder"/> for the chain.</returns>
-        public PropertyDescriptionBuilder WithName(string name) => new PropertyDescriptionBuilder(_property, name, _defaultValue, _number);
+        public PropertyDescriptionBuilder WithName(string name) => new(_property, name, _defaultValue, _number);
 
         /// <summary>
         /// Specify a specific default value of the property when a value is not specified.
         /// </summary>
         /// <param name="defaultValue">Default value of the property.</param>
         /// <returns>A new <see cref="PropertyDescriptionBuilder"/> for the chain.</returns>
-        public PropertyDescriptionBuilder WithDefaultValue(object defaultValue) => new PropertyDescriptionBuilder(_property, _name, defaultValue, _number);
+        public PropertyDescriptionBuilder WithDefaultValue(object defaultValue) => new(_property, _name, defaultValue, _number);
 
         /// <summary>
         /// Specify a number representing the property.
         /// </summary>
         /// <param name="number">Number for property.</param>
         /// <returns>A new <see cref="PropertyDescriptionBuilder"/> for the chain.</returns>
-        public PropertyDescriptionBuilder WithNumber(int number) => new PropertyDescriptionBuilder(_property, _name, _defaultValue, number);
+        public PropertyDescriptionBuilder WithNumber(int number) => new(_property, _name, _defaultValue, number);
 
         /// <inheritdoc/>
         public PropertyDescription Build()

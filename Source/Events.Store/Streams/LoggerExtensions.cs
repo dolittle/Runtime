@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.Streams
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, ulong, string, Guid, Guid, Exception> _waitForEventAtPosition = LoggerMessage
             .Define<ulong, string, Guid, Guid>(

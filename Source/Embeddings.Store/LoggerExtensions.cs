@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Store
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, Guid, string, Exception> _gettingOneEmbedding = LoggerMessage
             .Define<Guid, string>(

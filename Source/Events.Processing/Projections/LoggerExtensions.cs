@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
     /// <summary>
     /// Represents a extensions for <see cref="ILogger" />.
     /// </summary>
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, Guid, Guid, Exception> _receivedProjection = LoggerMessage
             .Define<Guid, Guid>(
