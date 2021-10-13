@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.w
                             });
                         return Task.FromResult<IProcessingResult>(new FailedProcessing(failure_reason));
                     });
-            setup_event_fetcher(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, false));
+            setup_event_stream(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, false));
         };
 
         Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();

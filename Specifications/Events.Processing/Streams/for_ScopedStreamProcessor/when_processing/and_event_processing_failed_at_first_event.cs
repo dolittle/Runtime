@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.w
             event_processor
                 .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
-            setup_event_fetcher(event_with_partition);
+            setup_event_stream(event_with_partition);
             
         };
 

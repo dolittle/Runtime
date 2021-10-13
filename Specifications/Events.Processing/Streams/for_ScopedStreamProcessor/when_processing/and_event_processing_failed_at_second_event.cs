@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.w
             event_processor
                 .Setup(_ => _.Process(second_event, partition_id, Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
-            setup_event_fetcher(
+            setup_event_stream(
                 new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true),
                 new StreamEvent(second_event, 1, Guid.NewGuid(), partition_id, false));
         };

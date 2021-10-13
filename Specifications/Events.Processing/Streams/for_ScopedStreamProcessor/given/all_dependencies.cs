@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
         protected static Mock<ICanFetchEventsFromStream> events_fetcher;
         protected static Mock<IStreamProcessors> stream_processors;
         protected static Mock<IEventProcessor> event_processor;
-        protected static Mock<IStreamEventWatcher> event_waiter;
+        static IStreamEventWatcher event_waiter;
         protected static CancellationTokenSource cancellation_token_source;
 
         Establish context = () =>
@@ -49,9 +49,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
             event_processor.SetupGet(_ => _.Scope).Returns(scope_id);
             stream_processors = new Mock<IStreamProcessors>(MockBehavior.Strict);
 
-            event_waiter = new Mock<IStreamEventWatcher>(MockBehavior.Strict);
-            event_waiter
-                .Setup(_ => _.WaitForEvent(Moq.It.IsAny<ScopeId>(), Moq.It.IsAny<StreamId>(), Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
+            event_waiter = new StreamEventWatcher(Mock.Of<ILogger>());
             stream_processor = new ScopedStreamProcessor(
                 tenant_id,
                 stream_processor_id,
@@ -61,7 +59,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
                 stream_processor_state_repository,
                 events_fetcher.Object,
                 events_fetcher_policy,
-                event_waiter.Object,
+                event_waiter,
                 new TimeToRetryForUnpartitionedStreamProcessor(),
                 Mock.Of<ILogger<ScopedStreamProcessor>>());
         };
@@ -73,6 +71,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
             cancellation_token_source.CancelAfter(cancelAfter);
             return stream_processor.Start(cancellation_token_source.Token);
         }
+        protected static Task start_stream_processor_set_position_after_and_cancel_after(TimeSpan setPositionAfter, StreamPosition position, TimeSpan cancelAfter)
+        {
+            var result = stream_processor.Start(cancellation_token_source.Token);
+            Task.Delay(setPositionAfter).GetAwaiter().GetResult();
+            stream_processor.SetToPosition(position);
+            cancellation_token_source.CancelAfter(cancelAfter);
+            return result;
+        }
         protected static StreamProcessorState current_stream_processor_state
             => stream_processor_state_repository.TryGetFor(
                 stream_processor_id,
@@ -81,27 +87,29 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
                 .GetResult()
                 .Result as StreamProcessorState;
 
-        protected static void setup_event_fetcher(params Try<StreamEvent>[] streamEvents)
+        protected static void setup_event_stream(params Try<StreamEvent>[] streamEvents)
         {
             for (var i = 0; i <= streamEvents.Length; i++)
             {
+                var position = new StreamPosition((ulong)i);
                 if (i == streamEvents.Length)
                 {
                     events_fetcher
-                        .Setup(_ => _.Fetch((ulong)i, Moq.It.IsAny<CancellationToken>()))
+                        .Setup(_ => _.Fetch(position, Moq.It.IsAny<CancellationToken>()))
                         .Returns(Task.FromResult(Try<StreamEvent>.Failed(new Exception())));
                     break;
                 }
                 var streamEvent = streamEvents[i];
                 events_fetcher
-                    .Setup(_ => _.Fetch((ulong)i, Moq.It.IsAny<CancellationToken>()))
+                    .Setup(_ => _.Fetch(position, Moq.It.IsAny<CancellationToken>()))
                     .Returns(Task.FromResult(streamEvent));
+                event_waiter.NotifyForEvent(source_stream_id, position);
             }
         }
-        protected static void should_be_waiting_for_next_event()
-            => should_be_waiting_for_event(current_stream_processor_state.Position);
-        protected static void should_be_waiting_for_event(StreamPosition streamPosition)
-            => event_waiter.Verify(_ => _.WaitForEvent(scope_id, source_stream_id, streamPosition, Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
+        // protected static void should_be_waiting_for_next_event()
+        //     => should_be_waiting_for_event(current_stream_processor_state.Position);
+        // protected static void should_be_waiting_for_event(StreamPosition streamPosition)
+        //     => event_waiter.Verify(_ => _.WaitForEvent(scope_id, source_stream_id, streamPosition, Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
 
     }
 }
