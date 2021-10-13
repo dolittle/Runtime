@@ -94,23 +94,30 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="position"></param>
         public Task<Try<StreamPosition>> SetToPosition(StreamPosition position)
         {
-            if (_resetStreamProcessorCompletionSource != default)
-            {
-                return Task.FromResult<Try<StreamPosition>>(new AlreadySettingNewStreamProcessorPosition(Identifier));
-            }
-            var tcs = new TaskCompletionSource<Try<StreamPosition>>(TaskCreationOptions.RunContinuationsAsynchronously);
-            lock (_setPositionLock)
+            try
             {
                 if (_resetStreamProcessorCompletionSource != default)
                 {
                     return Task.FromResult<Try<StreamPosition>>(new AlreadySettingNewStreamProcessorPosition(Identifier));
                 }
-                _newPosition = position;
-                _resetStreamProcessorCompletionSource = tcs;
-            }
+                var tcs = new TaskCompletionSource<Try<StreamPosition>>(TaskCreationOptions.RunContinuationsAsynchronously);
+                lock (_setPositionLock)
+                {
+                    if (_resetStreamProcessorCompletionSource != default)
+                    {
+                        return Task.FromResult<Try<StreamPosition>>(new AlreadySettingNewStreamProcessorPosition(Identifier));
+                    }
+                    _newPosition = position;
+                    _resetStreamProcessorCompletionSource = tcs;
+                }
             
-            _resetStreamProcessor?.Cancel();
-            return tcs.Task;
+                _resetStreamProcessor?.Cancel();
+                return tcs.Task;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult<Try<StreamPosition>>(ex);
+            }
         }
 
         /// <summary>
@@ -251,7 +258,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         {
                             if (_newPosition > _currentState.Position)
                             {
-                                _resetStreamProcessorCompletionSource.SetResult(Try<StreamPosition>.Failed(new CannotSetStreamProcessorPositionHigherThanCurrentPosition(Identifier)));
+                                _resetStreamProcessorCompletionSource.SetResult(Try<StreamPosition>.Failed(new CannotSetStreamProcessorPositionHigherThanCurrentPosition(Identifier, _currentState, _newPosition)));
                             }
                             else
                             {

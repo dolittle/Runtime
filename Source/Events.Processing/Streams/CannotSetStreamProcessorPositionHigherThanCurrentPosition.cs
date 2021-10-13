@@ -13,8 +13,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Initializes a new instance of the <see cref="AlreadySettingNewStreamProcessorPosition"/> class.
         /// </summary>
         /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
-        public CannotSetStreamProcessorPositionHigherThanCurrentPosition(IStreamProcessorId streamProcessorId)
-            : base($"Stream Processor: '{streamProcessorId}' is already being set to a new position")
+        /// <param name="currentState">The current <see cref="IStreamProcessorState"/>.</param>
+        /// <param name="position">The new <see cref="StreamPosition"/>.</param>
+        public CannotSetStreamProcessorPositionHigherThanCurrentPosition(IStreamProcessorId streamProcessorId, IStreamProcessorState currentState, StreamPosition position)
+            : base($"Stream Processor: '{streamProcessorId}' cannot be set to new position {position} because it is already at position {currentState.Position}")
         {
         }
     }
