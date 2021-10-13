@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             => new(
                 arguments.CallContext.ExecutionContext.ToExecutionContext(),
                 arguments.EventHandlerId.ToGuid(),
-                arguments.Types_.Select(_ => new ArtifactId(_.Id.ToGuid())),
+                arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
                 arguments.Partitioned,
                 arguments.ScopeId.ToGuid());
 

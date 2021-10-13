@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
                 Content = "{}",
                 EventSourceId = "302c7c8f-b773-44e7-947d-75747ed1a976",
                 Public = true,
-                Artifact = new Dolittle.Artifacts.Contracts.Artifact()
+                EventType = new Dolittle.Artifacts.Contracts.Artifact()
                 {
                     Id = Guid.Parse("0a4b2ee3-a85f-4d53-a3b9-c87cc326a58b").ToProtobuf(),
                     Generation = 0
@@ -62,8 +62,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and
             events[0].Content.ShouldEqual(pb_uncommitted_event.Content);
             events[0].EventSource.ShouldEqual(EventSourceId.NotSet);
             events[0].Public.ShouldEqual(pb_uncommitted_event.Public);
-            events[0].Type.Id.Value.ShouldEqual(pb_uncommitted_event.Artifact.Id.ToGuid());
-            events[0].Type.Generation.Value.ShouldEqual(pb_uncommitted_event.Artifact.Generation);
+            events[0].Type.Id.Value.ShouldEqual(pb_uncommitted_event.EventType.Id.ToGuid());
+            events[0].Type.Generation.Value.ShouldEqual(pb_uncommitted_event.EventType.Generation);
         };
         It should_have_called_the_request_factory = () => request_factory.Verify(_ => _.TryCreate(current_state));
     }

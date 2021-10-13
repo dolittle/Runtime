@@ -36,8 +36,8 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.whe
         It should_have_the_correct_state = () => result.Result.Projection.CurrentState.State.ShouldEqual(current_state.State.Value);
         It should_have_the_correct_key = () => result.Result.Projection.CurrentState.Key.ShouldEqual(current_state.Key.Value);
         It should_have_the_correct_event_source_id = () => result.Result.Projection.Event.EventSourceId.ShouldEqual(@event.EventSource.Value);
-        It should_have_the_correct_event_artifact_id = () => result.Result.Projection.Event.Artifact.Id.ShouldEqual(@event.Type.Id.Value.ToProtobuf());
-        It should_have_the_correct_event_artifact_generation = () => result.Result.Projection.Event.Artifact.Generation.ShouldEqual(@event.Type.Generation.Value);
+        It should_have_the_correct_event_artifact_id = () => result.Result.Projection.Event.EventType.Id.ShouldEqual(@event.Type.Id.Value.ToProtobuf());
+        It should_have_the_correct_event_artifact_generation = () => result.Result.Projection.Event.EventType.Generation.ShouldEqual(@event.Type.Generation.Value);
         It should_have_the_correct_event_content = () => result.Result.Projection.Event.Content.ShouldEqual(@event.Content);
         It should_have_the_correct_event_public_value = () => result.Result.Projection.Event.Public.ShouldEqual(@event.Public);
 

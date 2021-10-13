@@ -70,7 +70,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonCon
                         ExternalEventReceived = Timestamp.FromDateTimeOffset(DateTimeOffset.Now),
                         Occurred = Timestamp.FromDateTimeOffset(DateTimeOffset.Now),
                         Public = false,
-                        Type = new Artifact
+                        EventType = new Artifact
                         {
                             Generation = 4,
                             Id = Guid.Parse("19ced99f-376e-413c-b368-05edfc2f1067").ToProtobuf()

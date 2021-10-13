@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_comparing.an
                 Content = "{}",
                 EventSourceId = "302c7c8f-b773-44e7-947d-75747ed1a976",
                 Public = true,
-                Artifact = new Dolittle.Artifacts.Contracts.Artifact()
+                EventType = new Dolittle.Artifacts.Contracts.Artifact()
                 {
                     Id = Guid.Parse("0a4b2ee3-a85f-4d53-a3b9-c87cc326a58b").ToProtobuf(),
                     Generation = 0

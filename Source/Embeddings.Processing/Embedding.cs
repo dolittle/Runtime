@@ -150,8 +150,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 new ReadOnlyCollection<UncommittedEvent>(events.Select(_ =>
                     new UncommittedEvent(
                         EventSourceId.NotSet,
-                        new Artifact(_.Artifact.Id.ToGuid(),
-                        _.Artifact.Generation),
+                        new Artifact(_.EventType.Id.ToGuid(),
+                        _.EventType.Generation),
                         _.Public,
                         _.Content)).ToList()));
     }
