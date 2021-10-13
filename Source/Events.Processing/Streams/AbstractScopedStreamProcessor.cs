@@ -262,6 +262,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                             }
                             else
                             {
+                                Logger.ScopedStreamProcessorSetToPosition(Identifier, _newPosition);
                                 _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
                                 _resetStreamProcessorCompletionSource.SetResult(_currentState.Position);
                             }
