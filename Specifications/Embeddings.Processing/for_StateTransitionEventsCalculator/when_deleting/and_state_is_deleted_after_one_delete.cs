@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalcul
         It should_not_project_anything_else = () => project_many_events.VerifyNoOtherCalls();
         It should_return_the_same_events = () => result.Result.ShouldContainOnly(events);
         It should_return_uncommitted_events_with_correct_aggregate_root_id = () => result.Result.AggregateRoot.Id.Value.ShouldEqual(identifier.Value);
-        It should_return_uncommitted_events_with_correct_event_source_id = () => result.Result.EventSource.ShouldEqual(key_to_event_source_converter.GetEventSourceIdFor(current_state.Key));
+        It should_return_uncommitted_events_with_correct_event_source_id = () => result.Result.EventSource.Value.ShouldEqual(current_state.Key.Value);
         It should_return_uncommitted_events_with_correct_aggregate_root_version = () => result.Result.ExpectedAggregateRootVersion.Value.ShouldEqual<ulong>(1);
     }
 }

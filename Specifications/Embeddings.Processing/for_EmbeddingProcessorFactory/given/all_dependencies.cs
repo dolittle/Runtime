@@ -26,7 +26,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessorFactory.g
         protected static Mock<FactoryFor<IEventStore>> factory_for_event_store;
         protected static Mock<FactoryFor<IEmbeddingStore>> factory_for_embedding_store;
         protected static Mock<FactoryFor<IStreamEventWatcher>> factory_for_stream_event_watcher;
-        protected static Mock<IConvertProjectionKeysToEventSourceIds> convert_projections_keys_to_event_source_ids;
         protected static Mock<IDetectEmbeddingLoops> detect_embedding_loops;
         protected static Mock<ICompareStates> compare_states;
         protected static EmbeddingProcessorFactory factory;
@@ -55,7 +54,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessorFactory.g
             factory_for_embedding_store.Setup(_ => _.Invoke()).Returns(Mock.Of<IEmbeddingStore>());
             factory_for_stream_event_watcher = new Mock<FactoryFor<IStreamEventWatcher>>();
             factory_for_stream_event_watcher.Setup(_ => _.Invoke()).Returns(Mock.Of<IStreamEventWatcher>());
-            convert_projections_keys_to_event_source_ids = new Mock<IConvertProjectionKeysToEventSourceIds>();
             detect_embedding_loops = new Mock<IDetectEmbeddingLoops>();
             compare_states = new Mock<ICompareStates>();
             factory = new EmbeddingProcessorFactory(
@@ -63,7 +61,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessorFactory.g
                 factory_for_event_store.Object,
                 factory_for_embedding_store.Object,
                 factory_for_stream_event_watcher.Object,
-                convert_projections_keys_to_event_source_ids.Object,
                 detect_embedding_loops.Object,
                 compare_states.Object,
                 NullLoggerFactory.Instance);

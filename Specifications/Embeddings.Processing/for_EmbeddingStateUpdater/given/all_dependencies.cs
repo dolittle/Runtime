@@ -27,7 +27,6 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.given
         protected static Mock<IProjectManyEvents> project_many_events;
         protected static Mock<IEventStore> event_store;
         protected static Mock<IEmbeddingStore> embedding_store;
-        protected static Mock<IConvertProjectionKeysToEventSourceIds> key_converter;
         protected static ProjectionState initial_state;
         protected static EmbeddingStateUpdater state_updater;
         protected static CancellationToken cancellation_token;
@@ -48,13 +47,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingStateUpdater.given
             project_many_events = new Mock<IProjectManyEvents>();
             event_store = new Mock<IEventStore>();
             embedding_store = new Mock<IEmbeddingStore>();
-            key_converter = new Mock<IConvertProjectionKeysToEventSourceIds>();
             initial_state = "projection-initial-state";
             state_updater = new EmbeddingStateUpdater(
                 embedding,
                 event_store.Object,
                 embedding_store.Object,
-                key_converter.Object,
                 project_many_events.Object,
                 Mock.Of<ILogger>());
             cancellation_token = CancellationToken.None;

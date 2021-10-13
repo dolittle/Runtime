@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.for_CommittedAggregateEvent
             aggregate_root_version = 1;
             event_log_sequence_number = 2;
             occurred = DateTimeOffset.Now;
-            event_source = Guid.NewGuid();
+            event_source = "    event     source    ";
             execution_context = execution_contexts.create();
             artifact_id = Guid.NewGuid();
             artifact_generation = 4;

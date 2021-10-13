@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.for_EventHorizonConsentsConfiguration
             consumer_microservice = Guid.Parse("07b697ed-44e4-4167-805f-ff5a9851cf98");
             consumer_tenant = Guid.Parse("8e18214b-287f-41a1-9fef-dd67ef0cf86f");
             stream = Guid.Parse("82695d13-f7a2-4755-ba24-a473154ab7a3");
-            partition = Guid.Parse("1221f439-7b6c-4f34-b084-856e52974f67");
+            partition = "1221f439-7b6c-4f34-b084-856e52974f67";
             consent = Guid.Parse("b2c2f59c-8172-4134-a9d1-a6288d3baed3");
         };
 

@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc
         public override async Task<Contracts.CommitEventsResponse> Commit(Contracts.CommitEventsRequest request, ServerCallContext context)
         {
             var response = new Contracts.CommitEventsResponse();
-            var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId.ToGuid(), new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
+            var events = request.Events.Select(_ => new UncommittedEvent(_.EventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
             var commitResult = await _eventStoreService.TryCommit(
                 new UncommittedEvents(new ReadOnlyCollection<UncommittedEvent>(events.ToList())),
                 request.CallContext.ExecutionContext.ToExecutionContext(),
@@ -50,8 +50,8 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc
         public override async Task<Contracts.CommitAggregateEventsResponse> CommitForAggregate(Contracts.CommitAggregateEventsRequest request, ServerCallContext context)
         {
             var response = new Contracts.CommitAggregateEventsResponse();
-            EventSourceId eventSourceId = request.Events.EventSourceId.ToGuid();
-            var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.Artifact.Id.ToGuid(), _.Artifact.Generation), _.Public, _.Content));
+            EventSourceId eventSourceId = request.Events.EventSourceId;
+            var events = request.Events.Events.Select(_ => new UncommittedEvent(eventSourceId, new Artifact(_.EventType.Id.ToGuid(), _.EventType.Generation), _.Public, _.Content));
 
             var commitResult = await _eventStoreService.TryCommitForAggregate(
                 new UncommittedAggregateEvents(
@@ -75,7 +75,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc
             var response = new Contracts.FetchForAggregateResponse();
             var fetchResult = await _eventStoreService.TryFetchForAggregate(
                 request.Aggregate.AggregateRootId.ToGuid(),
-                request.Aggregate.EventSourceId.ToGuid(),
+                request.Aggregate.EventSourceId,
                 request.CallContext.ExecutionContext.ToExecutionContext(),
                 context.CancellationToken).ConfigureAwait(false);
             if (fetchResult.Success)

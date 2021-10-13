@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Embeddings.Processing
         readonly EmbeddingId _embedding;
         readonly IEventStore _eventStore;
         readonly IEmbeddingStore _embeddingStore;
-        readonly IConvertProjectionKeysToEventSourceIds _keyToEventSourceConverter;
         readonly IProjectManyEvents _projectManyEvents;
         readonly ILogger _logger;
 
@@ -31,20 +30,17 @@ namespace Dolittle.Runtime.Embeddings.Processing
         /// <param name="embedding">The <see cref="EmbeddingId"/> that identifies the embedding.</param>
         /// <param name="eventStore">The <see cref="IEventStore"/> that is used to fetch aggregate events.</param>
         /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> that is used to persist the states.</param>
-        /// <param name="keyToEventSourceConverter">The <see cref="IConvertProjectionKeysToEventSourceIds"/> to use for converting projection keys to event source ids.</param>
         /// <param name="logger">The <see cref="ILogger"/>.</param>
         public EmbeddingStateUpdater(
             EmbeddingId embedding,
             IEventStore eventStore,
             IEmbeddingStore embeddingStore,
-            IConvertProjectionKeysToEventSourceIds keyToEventSourceConverter,
             IProjectManyEvents projectManyEvents,
             ILogger logger)
         {
             _embedding = embedding;
             _eventStore = eventStore;
             _embeddingStore = embeddingStore;
-            _keyToEventSourceConverter = keyToEventSourceConverter;
             _projectManyEvents = projectManyEvents;
             _logger = logger;
         }
@@ -124,9 +120,8 @@ namespace Dolittle.Runtime.Embeddings.Processing
         {
             try
             {
-                var eventSource = _keyToEventSourceConverter.GetEventSourceIdFor(key);
                 return await _eventStore.FetchForAggregateAfter(
-                    eventSource,
+                    key.Value,
                     _embedding.Value,
                     aggregateRootVersion,
                     cancellationToken).ConfigureAwait(false);

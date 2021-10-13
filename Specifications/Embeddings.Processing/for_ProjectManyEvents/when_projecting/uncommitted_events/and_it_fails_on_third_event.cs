@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_ProjectManyEvents.when_proj
         Establish context = () =>
         {
             projection_key = "projection-key-ZSF";
-            event_source = Guid.Parse("ed882f2f-9974-4334-ad43-e662d6db3396");
+            event_source = "ed882f2f-9974-4334-ad43-e662d6db3396";
             current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "state-current", projection_key);
             event_one = new UncommittedEvent(event_source, event_type, false, "event-one-content");
             event_two = new UncommittedEvent(event_source, event_type, true, "event-two-content");

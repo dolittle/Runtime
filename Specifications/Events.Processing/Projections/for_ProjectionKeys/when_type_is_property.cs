@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys
         Establish context = () =>
         {
             committed_event = committed_events.single("{\"property\": \"value\"}");
-            partition = Guid.Parse("8fe25727-b922-4907-aeaa-06497b0ba80e");
+            partition = "/(partition!";
             definition = given.projection_definition_builder.create()
                             .with_selector(new ProjectionEventSelector(committed_event.Type.Id, ProjectEventKeySelectorType.Property, "property"))
                             .Build();

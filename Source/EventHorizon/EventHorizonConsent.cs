@@ -41,7 +41,7 @@ namespace Dolittle.Runtime.EventHorizon
     /// <summary>
     /// Represents the consent configuration for an event horizon.
     /// </summary>
-    public record EventHorizonConsentConfiguration(Guid Microservice, Guid Tenant, Guid Stream, Guid Partition, Guid Consent)
+    public record EventHorizonConsentConfiguration(Guid Microservice, Guid Tenant, Guid Stream, string Partition, Guid Consent)
     {
         public static implicit operator EventHorizonConsent(EventHorizonConsentConfiguration config)
             => new()

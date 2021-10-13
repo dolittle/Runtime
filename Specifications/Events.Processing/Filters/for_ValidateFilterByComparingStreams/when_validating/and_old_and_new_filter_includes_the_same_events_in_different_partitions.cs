@@ -15,10 +15,10 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByCompari
         {
             var @event = committed_events.single(0);
             add_event_to_event_log(1);
-            add_event_to_filtered_stream(1, Guid.NewGuid());
+            add_event_to_filtered_stream(1, "partition");
             filter_processor
                 .Setup(_ => _.Filter(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), event_processor_id, cancellation_token))
-                .Returns(Task.FromResult<IFilterResult>(new SuccessfulFiltering(true, Guid.NewGuid())));
+                .Returns(Task.FromResult<IFilterResult>(new SuccessfulFiltering(true, "a partition")));
         };
 
         static FilterValidationResult result;

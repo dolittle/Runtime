@@ -45,7 +45,6 @@ The event handler's filter is filtering events based on the [`EventType`]({{< re
 
 Event handlers can be either partitioned or unpartitioned. Partitioned event handlers uses, by default, the [`EventSourceId`]({{< ref "event_sourcing#event-source-id" >}}) of each event as the partition id. The filter follows the same rules [for streams]({{< ref "streams#rules" >}}) as other filters.
 
-
 ## Changes to event handlers
 
 As event handlers create a stream based on the types of events they handles, they have to uphold the [rules of streams]({{< ref "streams#rules" >}}). Every time an event handler is registered the Runtime will check that these rules are upheld and that the event handlers definition wouldn't invalidate the already existing stream. Most common ways of breaking the rules are:

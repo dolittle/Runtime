@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents.given
     public abstract class events_and_an_artifact
     {
         public const bool is_public = false;
-        public static EventSourceId event_source_id = Guid.Parse("a96d181c-cf8b-4bc9-a576-20be48166101");
+        public static EventSourceId event_source_id = "another-event source-id";
         public static Artifact aggregate_artifact = new Artifact(Guid.Parse("28238ebc-6454-4229-8891-5798ecb1875f"), ArtifactGeneration.First);
         public static AggregateRootVersion aggregate_version_before = 0;
         public static AggregateRootVersion aggregate_version_after = 3;
