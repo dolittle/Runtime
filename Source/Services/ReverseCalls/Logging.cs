@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services.ReverseCalls
 {
-    internal static class Logging
+    static class Logging
     {
         #region WrappedAsyncStreamWriter
         static readonly Action<ILogger, RequestId, Type, Exception> _writingMessage = LoggerMessage.Define<RequestId, Type>(
