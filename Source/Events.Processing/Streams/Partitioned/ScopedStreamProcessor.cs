@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
@@ -112,10 +113,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <inheritdoc />
         protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
         {
-            throw new NotImplementedException();
-            // var newState = new StreamProcessorState(currentState.Position, new Dictionary<PartitionId, FailingPartitionState>(), DateTimeOffset.Now);
-            // await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
-            // return newState;
+            var state = (StreamProcessorState)currentState;
+            var newState = new StreamProcessorState(
+                position, 
+                new Dictionary<PartitionId, FailingPartitionState>(state.FailingPartitions.Where(_ => _.Value.Position < position)),
+                DateTimeOffset.Now);
+            await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
+            return newState;
 
         }
     }
