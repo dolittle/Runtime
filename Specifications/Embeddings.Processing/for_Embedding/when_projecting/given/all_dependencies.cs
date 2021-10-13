@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.g
         Establish context = () =>
         {
             @event = new UncommittedEvent(
-                Guid.Parse("1a477367-3404-45e6-a2af-6cbf19693b56"),
+                "1a477367-3404-45e6-a2af-6cbf19693b56",
                 new Artifact(Guid.Parse("fe570d85-2619-49e4-bc72-9a8b2b2f149d"), ArtifactGeneration.First),
                 true,
                 "beautiful 😍 event to 🙅 be tested 🤓🤓");

@@ -21,12 +21,12 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
         Establish context = () =>
         {
             is_included = true;
-            partition_id = Guid.NewGuid();
-            filter_response = new PartitionedFilterResponse { IsIncluded = is_included, PartitionId = partition_id.ToProtobuf() };
+            partition_id = "partition";
+            filter_response = new PartitionedFilterResponse { IsIncluded = is_included, PartitionId = partition_id.Value };
             dispatcher.Setup(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(filter_response));
         };
 
-        Because of = () => result = filter.Filter(a_public_event, Guid.NewGuid(), Guid.NewGuid(), default).GetAwaiter().GetResult();
+        Because of = () => result = filter.Filter(a_public_event, "a partition", Guid.NewGuid(), default).GetAwaiter().GetResult();
 
         It should_call_the_remote_filter = () => dispatcher.Verify(_ => _.Call(Moq.It.IsAny<FilterEventRequest>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
         It should_filter_successfully = () => result.Succeeded.ShouldBeTrue();

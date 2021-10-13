@@ -9,14 +9,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 {
     static class LoggerExtensions
     {
-        static readonly Action<ILogger, Guid, Guid, Exception> _incrementingVersionForAggregate = LoggerMessage
-            .Define<Guid, Guid>(
+        static readonly Action<ILogger, Guid, string, Exception> _incrementingVersionForAggregate = LoggerMessage
+            .Define<Guid, string>(
                 LogLevel.Trace,
                 new EventId(422590197, nameof(IncrementingVersionForAggregate)),
                 "Incrementing version for aggregate root: {AggregateRoot} and event source: {EventSource}");
 
-        static readonly Action<ILogger, Guid, Guid, Exception> _fetchingVersionFor = LoggerMessage
-            .Define<Guid, Guid>(
+        static readonly Action<ILogger, Guid, string, Exception> _fetchingVersionFor = LoggerMessage
+            .Define<Guid, string>(
                 LogLevel.Trace,
                 new EventId(422590197, nameof(FetchingVersionFor)),
                 "Fetching version for aggregate root: {AggregateRoot} and event source: {EventSource}");

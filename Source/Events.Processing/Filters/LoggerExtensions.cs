@@ -18,26 +18,26 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// </summary>
     static class LoggerExtensions
     {
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Exception> _filteringEvent = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, string, Exception> _filteringEvent = LoggerMessage
+            .Define<Guid, Guid, Guid, string>(
                 LogLevel.Debug,
                 new EventId(568531282, nameof(FilteringEvent)),
                 "Filter: {Filter} in scope: {Scope} is filtering event type: {EventTypeId} for partition: {PartitionId}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, uint, string, Exception> _filteringEventAgain = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid, uint, string>(
+        static readonly Action<ILogger, Guid, Guid, Guid, string, uint, string, Exception> _filteringEventAgain = LoggerMessage
+            .Define<Guid, Guid, Guid, string, uint, string>(
                 LogLevel.Debug,
                 new EventId(391135754, nameof(FilteringEventAgain)),
                 "Filter: {Filter} in scope: {Scope} is filtering event type: {EventTypeId} for partition: {PartitionId} again for the {RetryCount}. time because: \"{FailureReason}\"");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Exception> _handleFilterResult = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, string, Exception> _handleFilterResult = LoggerMessage
+            .Define<Guid, Guid, Guid, string>(
                 LogLevel.Debug,
                 new EventId(1502330189, nameof(HandleFilterResult)),
                 "Filter: {Filter} in scope: {Scope} is handling filtering result for event type: {EventTypeId} in partition: {PartitionId}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Guid, Exception> _filteredEventIsIncluded = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, string, Guid, Exception> _filteredEventIsIncluded = LoggerMessage
+            .Define<Guid, Guid, Guid, string, Guid>(
                 LogLevel.Debug,
                 new EventId(1603417156, nameof(FilteredEventIsIncluded)),
                 "Filter: {Filter} in scope: {Scope} is writing event type: {EventTypeId} to partition: {PartitionId} in stream: {Stream}");

@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.w
     {
         const string failure_reason = "some reason";
         const string retry_reason = "retry reason";
-        static readonly PartitionId partition_id = Guid.NewGuid();
+        static readonly PartitionId partition_id = "<12partition>";
         static readonly CommittedEvent first_event = committed_events.single();
         static CancellationTokenSource cancellation_token_source;
 

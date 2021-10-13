@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventMetadata
     public class when_creating
     {
         static DateTime occurred;
-        static Guid event_source;
+        static string event_source;
         static Guid type_id;
         static uint type_generation;
         static bool is_public;
@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventMetadata
         Establish context = () =>
         {
             occurred = new DateTime(2852152428, DateTimeKind.Utc);
-            event_source = Guid.Parse("bfbfb1aa-b6c1-4bc3-9269-23d5e4205231");
+            event_source = "event source";
             type_id = Guid.Parse("5b92f887-a986-4cde-a375-cb868c50eee2");
             type_generation = 678275961;
             is_public = true;

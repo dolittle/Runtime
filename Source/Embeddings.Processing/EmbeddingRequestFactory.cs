@@ -26,9 +26,9 @@ namespace Dolittle.Runtime.Embeddings.Processing
                     CurrentState = current.ToProtobuf(),
                     Event = new Events.Contracts.UncommittedEvent
                     {
-                        Artifact = @event.Type.ToProtobuf(),
+                        EventType = @event.Type.ToProtobuf(),
                         Content = @event.Content,
-                        EventSourceId = @event.EventSource.ToProtobuf(),
+                        EventSourceId = @event.EventSource.Value,
                         Public = @event.Public,
                     }
                 }

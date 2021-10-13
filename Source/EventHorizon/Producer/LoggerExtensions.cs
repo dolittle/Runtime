@@ -10,32 +10,32 @@ namespace Dolittle.Runtime.EventHorizon.Producer
 {
     static class LoggerExtensions
     {
-        static readonly Action<ILogger, Guid, Guid, Guid, ulong, Guid, Guid, Exception> _incomingEventHorizonSubscription = LoggerMessage
-            .Define<Guid, Guid, Guid, ulong, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, ulong, string, Guid, Exception> _incomingEventHorizonSubscription = LoggerMessage
+            .Define<Guid, Guid, Guid, ulong, string, Guid>(
                 LogLevel.Debug,
                 new EventId(1404825474, nameof(IncomingEventHorizonSubscription)),
                 "Incoming event horizon subscription from microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, ulong, Guid, Guid, Exception> _successfullySubscribed = LoggerMessage
-            .Define<Guid, Guid, Guid, ulong, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, ulong, string, Guid, Exception> _successfullySubscribed = LoggerMessage
+            .Define<Guid, Guid, Guid, ulong, string, Guid>(
                 LogLevel.Information,
                 new EventId(399974883, nameof(SuccessfullySubscribed)),
                 "Microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} successfully subscribed to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Guid, Exception> _errorOccurredInEventHorizon = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, string, Guid, Exception> _errorOccurredInEventHorizon = LoggerMessage
+            .Define<Guid, Guid, Guid, string, Guid>(
                 LogLevel.Warning,
                 new EventId(255540672, nameof(ErrorOccurredInEventHorizon)),
                 "An error occurred in event horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Guid, Exception> _eventHorizonStopped = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, string, Guid, Exception> _eventHorizonStopped = LoggerMessage
+            .Define<Guid, Guid, Guid, string, Guid>(
                 LogLevel.Warning,
                 new EventId(271973941, nameof(EventHorizonStopped)),
                 "Event horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream} stopped");
 
-        static readonly Action<ILogger, Guid, Guid, Guid, Guid, Guid, Exception> _eventHorizonDisconnecting = LoggerMessage
-            .Define<Guid, Guid, Guid, Guid, Guid>(
+        static readonly Action<ILogger, Guid, Guid, Guid, string, Guid, Exception> _eventHorizonDisconnecting = LoggerMessage
+            .Define<Guid, Guid, Guid, string, Guid>(
                 LogLevel.Warning,
                 new EventId(271973941, nameof(EventHorizonDisconnecting)),
                 "Disconnecting Event Horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}");

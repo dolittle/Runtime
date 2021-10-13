@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing
         public static CommittedEvent single(EventLogSequenceNumber event_log_sequence_number, string content) => new(
                 event_log_sequence_number,
                 DateTimeOffset.UtcNow,
-                EventSourceId.New(),
+                "event source///",
                 execution_contexts.create(),
                 new Artifact(ArtifactId.New(), ArtifactGeneration.First),
                 false,

@@ -23,8 +23,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
 
         Establish context = () =>
         {
-            first_partition_id = Guid.NewGuid();
-            second_partition_id = Guid.NewGuid();
+            first_partition_id = "first partition";
+            second_partition_id = "second partition";
             first_event = new StreamEvent(committed_events.single(), StreamPosition.Start, Guid.NewGuid(), first_partition_id, true);
             second_event = new StreamEvent(committed_events.single(), 1u, Guid.NewGuid(), second_partition_id, true);
             third_event = new StreamEvent(committed_events.single(), 2u, Guid.NewGuid(), second_partition_id, true);

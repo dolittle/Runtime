@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
             committed_event = committed_events.a_committed_event(random.event_log_sequence_number);
             event_converter = new EventConverter(event_content_converter.Object);
             stream_position = random.stream_position;
-            partition = Guid.Parse("9b63adc5-e09b-4fec-9a30-29c220b0dd79");
+            partition = "9b63adc5-e09b-4fec-9a30-29c220b0dd79 partition";
         };
 
         Because of = () => result = event_converter.ToStoreStreamEvent(committed_event, stream_position, partition);

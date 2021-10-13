@@ -51,7 +51,7 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
             => new(artifact.Id, artifact.Generation);
     }
 
-    public record JsonRequestUncommittedEvent(Guid EventSource, Artifact Type, bool Public, string Content)
+    public record JsonRequestUncommittedEvent(string EventSource, Artifact Type, bool Public, string Content)
     {
         public UncommittedEvent ToUncommittedEvent()
             => new(EventSource, Type.ToArtifact(), Public, Content);
@@ -64,7 +64,7 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
     }
 
     public record JsonRequestUncommittedAggregateEvents(
-        Guid EventSource,
+        string EventSource,
         Guid AggregateRoot,
         ulong AggregateRootVersion,
         JsonRequestUncommittedAggregateEvent[] Events)
@@ -79,5 +79,5 @@ namespace Dolittle.Runtime.Events.Store.Services.WebAPI
 
     public record CommitRequest(JsonRequestUncommittedEvent[] Events, CallRequestContext CallContext);
     public record CommitForAggregateRequest(JsonRequestUncommittedAggregateEvents AggregateEvents, CallRequestContext CallContext);
-    public record FetchForAggregateRequest(Guid AggregateRoot, Guid EventSource, CallRequestContext CallContext);
+    public record FetchForAggregateRequest(Guid AggregateRoot, string EventSource, CallRequestContext CallContext);
 }

@@ -20,9 +20,8 @@ The read model instances are managed by the [Runtime]({{< ref "overview" >}}) in
 
 ### Key
 
-Each read model has its own unique key, which is defined in the update call to the embedding. 
-
-Unlike projections, embeddings don't need [`KeySelectors`]({{< ref "projections#keys-elector" >}}). The Runtime will automatically calculate a unique [`EventSourceId`]({{< ref "events#eventsourceid" >}}) for the committed [events]({{< ref "#embedding-events" >}}) based on the key. This `EventSourceId` is then used to uniquely identify which read model should be handling the event.
+Each read model has its own unique key, which is defined in the update call to the embedding. This key is also the [`EventSourceId`]({{< ref "events#eventsourceid" >}}) for the committed [events]({{< ref "#embedding-events" >}}).
+This `EventSourceId` is then used to uniquely identify which read model should be handling the event.
 
 ## Embedding events
 

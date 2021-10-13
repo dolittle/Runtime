@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventConverter.when_c
         {
             stream_position = random.stream_position;
             stream = Guid.Parse("48ab3ce1-b7bd-486a-a21f-54b1ce5c42fa");
-            stored_event = events.an_external_stream_event(stream_position, Guid.Empty);
+            stored_event = events.an_external_stream_event(stream_position, PartitionId.None);
             event_converter = new EventConverter(event_content_converter.Object);
         };
 

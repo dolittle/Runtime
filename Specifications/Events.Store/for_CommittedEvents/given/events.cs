@@ -22,9 +22,9 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents.given
 
         Establish context = () =>
         {
-            event_one = new CommittedEvent(0, DateTimeOffset.UtcNow, EventSourceId.NotSet, execution_context, event_a_artifact, is_public, "one");
-            event_two = new CommittedEvent(1, DateTimeOffset.UtcNow, EventSourceId.NotSet, execution_context, event_a_artifact, is_public, "two");
-            event_three = new CommittedEvent(2, DateTimeOffset.UtcNow, EventSourceId.NotSet, execution_context, event_b_artifact, is_public, "three");
+            event_one = new CommittedEvent(0, DateTimeOffset.UtcNow, "event-one-event-source", execution_context, event_a_artifact, is_public, "one");
+            event_two = new CommittedEvent(1, DateTimeOffset.UtcNow, "event-two-event-source", execution_context, event_a_artifact, is_public, "two");
+            event_three = new CommittedEvent(2, DateTimeOffset.UtcNow, "event-three-event-source", execution_context, event_b_artifact, is_public, "three");
         };
     }
 }

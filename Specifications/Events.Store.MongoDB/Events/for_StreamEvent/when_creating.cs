@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEvent
     public class when_creating
     {
         static ulong stream_position;
-        static Guid partition;
+        static string partition;
         static ExecutionContext execution_context;
         static StreamEventMetadata stream_event_metadata;
         static AggregateMetadata aggregate_metadata;
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_StreamEvent
         Establish context = () =>
         {
             stream_position = random.stream_position;
-            partition = Guid.Parse("c485009f-397f-48b1-bf8c-6040f0efe523");
+            partition = "   partition   ˝";
             execution_context = execution_contexts.create_store();
             stream_event_metadata = metadata.random_stream_event_metadata;
             aggregate_metadata = metadata.aggregate_metadata_from_non_aggregate_event;
