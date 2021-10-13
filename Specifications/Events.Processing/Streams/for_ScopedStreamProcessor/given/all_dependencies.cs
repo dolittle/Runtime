@@ -33,7 +33,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
 
         Establish context = () =>
         {
-            
             cancellation_token_source = new CancellationTokenSource();
             var events_fetcher_policy = new AsyncPolicyFor<ICanFetchEventsFromStream>(new EventFetcherPolicy(Mock.Of<ILogger<ICanFetchEventsFromStream>>()).Define());
             var in_memory_stream_processor_state_repository = new in_memory_stream_processor_state_repository();
@@ -106,10 +105,5 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
                 event_waiter.NotifyForEvent(source_stream_id, position);
             }
         }
-        // protected static void should_be_waiting_for_next_event()
-        //     => should_be_waiting_for_event(current_stream_processor_state.Position);
-        // protected static void should_be_waiting_for_event(StreamPosition streamPosition)
-        //     => event_waiter.Verify(_ => _.WaitForEvent(scope_id, source_stream_id, streamPosition, Moq.It.IsAny<TimeSpan>(), Moq.It.IsAny<CancellationToken>()));
-
     }
 }
