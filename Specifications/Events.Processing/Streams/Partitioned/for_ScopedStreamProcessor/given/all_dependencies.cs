@@ -80,7 +80,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
         {
             var result = stream_processor.Start(cancellation_token_source.Token);
             Task.Delay(setPositionAfter).GetAwaiter().GetResult();
-            stream_processor.SetToPosition(position);
+            stream_processor.SetToPosition(position).GetAwaiter().GetResult();
             cancellation_token_source.CancelAfter(cancelAfter);
             return result;
         }

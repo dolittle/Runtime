@@ -122,7 +122,6 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             var newState = new StreamProcessorState(position, ((StreamProcessorState)currentState).LastSuccessfullyProcessed);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
-            
         }
 
         bool CanRetryProcessing(DateTimeOffset retryTime)
