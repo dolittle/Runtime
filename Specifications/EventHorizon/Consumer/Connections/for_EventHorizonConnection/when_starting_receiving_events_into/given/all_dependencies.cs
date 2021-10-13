@@ -63,7 +63,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonCon
                     {
                         Content = "content",
                         EventLogSequenceNumber = 4,
-                        EventSourceId = Guid.Parse("0d2b2e6a-10ec-4be6-a745-09de09b9809c").ToString(),
+                        EventSourceId = "some event source",
                         External = true,
                         ExecutionContext = execution_context,
                         ExternalEventLogSequenceNumber = 6,

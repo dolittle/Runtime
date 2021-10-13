@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 {
     public class when_creating_with_a_wrong_event_source : given.events_and_an_artifact
     {
-        static EventSourceId wrong_event_source_id = Guid.Parse("d695855e-9702-44f6-90bf-64cbc68cf5e1").ToString();
+        static EventSourceId wrong_event_source_id = "wrong event source id";
         static CommittedAggregateEvent wrong_event_source_event;
         static CommittedAggregateEvents events;
         static Exception exception;
