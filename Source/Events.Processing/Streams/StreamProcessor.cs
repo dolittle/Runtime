@@ -10,7 +10,6 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
-using Dolittle.Runtime.Reflection;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
@@ -196,7 +195,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         IEnumerable<Task> StartScopedStreamProcessors(CancellationToken cancellationToken) => _streamProcessors.Select(
             _ => Task.Run(async () =>
                 {
-                    (var tenant, var streamProcessor) = _;
+                    var (tenant, streamProcessor) = _;
                     _executionContextManager.CurrentFor(tenant);
                     await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
                 }, cancellationToken)).ToList();
