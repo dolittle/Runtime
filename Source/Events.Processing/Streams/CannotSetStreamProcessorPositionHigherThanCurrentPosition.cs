@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     public class CannotSetStreamProcessorPositionHigherThanCurrentPosition : Exception
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AlreadySettingNewStreamProcessorPosition"/> class.
+        /// Initializes a new instance of the <see cref="CannotSetStreamProcessorPositionHigherThanCurrentPosition"/> class.
         /// </summary>
         /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
         /// <param name="currentState">The current <see cref="IStreamProcessorState"/>.</param>
