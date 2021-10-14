@@ -74,9 +74,10 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 _getEventsToStreamsWriter,
                 _loggerFactory,
                 cancellationToken);
-            if (!_eventHandlers.TryAdd(eventHandler.EventProcessor.Value, eventHandler))
+            var eventHandlerId = new EventHandlerId(eventHandler.Scope, eventHandler.EventProcessor.Value);
+            if (!_eventHandlers.TryAdd(eventHandlerId, eventHandler))
             {
-                throw new EventHandlerAlreadyRegistered(eventHandler.EventProcessor.Value);
+                throw new EventHandlerAlreadyRegistered(eventHandlerId);
             }
             await eventHandler.RegisterAndStart().ConfigureAwait(false);
         }

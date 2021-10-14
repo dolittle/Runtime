@@ -264,16 +264,17 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             _logger.ErrorWhileRegisteringStreamProcessorForEventProcessor(exception, EventProcessor);
 
-            if (exception is StreamProcessorAlreadyRegistered)
+            if (exception is not StreamProcessorAlreadyRegistered)
             {
-                _logger.EventHandlerAlreadyRegisteredOnSourceStream(EventProcessor);
-                return new(
-                    EventHandlersFailures.FailedToRegisterEventHandler,
-                    $"Failed to register Event Handler: {EventProcessor.Value}. Event Processor already registered on Source Stream: '{EventProcessor.Value}'");
-            }
-            return new(
+                return new Failure(
                     EventHandlersFailures.FailedToRegisterEventHandler,
                     $"Failed to register Event Handler: {EventProcessor.Value}. An error occurred. {exception.Message}");
+            }
+
+            _logger.EventHandlerAlreadyRegisteredOnSourceStream(EventProcessor);
+            return new Failure(
+                EventHandlersFailures.FailedToRegisterEventHandler,
+                $"Failed to register Event Handler: {EventProcessor.Value}. Event Processor already registered on Source Stream: '{EventProcessor.Value}'");
         }
 
         async Task<bool> RegisterStreamProcessor(

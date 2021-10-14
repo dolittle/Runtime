@@ -141,7 +141,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
         public Task<Try<StreamPosition>> SetToPosition(TenantId tenant, StreamPosition position)
             => _streamProcessors.TryGetValue(tenant, out var streamProcessor)
-                ? streamProcessor.SetToPosition(position)
+                ? streamProcessor.ReprocessEventsFrom(position)
                 : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegisteredForTenant(_identifier, tenant));
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         public async Task<IDictionary<TenantId, Try<StreamPosition>>> SetToInitialPositionForAllTenants()
         {
             var tasks = _streamProcessors
-                .ToDictionary(_ => _.Key, _ => _.Value.SetToPosition(StreamPosition.Start));
+                .ToDictionary(_ => _.Key, _ => _.Value.ReprocessEventsFrom(StreamPosition.Start));
 
             var result = new Dictionary<TenantId, Try<StreamPosition>>();
 
