@@ -5,7 +5,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 namespace Dolittle.Runtime.Events.Processing.Streams
 {
     /// <summary>
-    /// Exception that gets thrown when attempting to set a stream processor position that is higher than the current . 
+    /// Exception that gets thrown when attempting to set a stream processor position that is higher than the last processed position. 
     /// </summary>
     public class CannotSetStreamProcessorPositionHigherThanCurrentPosition : Exception
     {
