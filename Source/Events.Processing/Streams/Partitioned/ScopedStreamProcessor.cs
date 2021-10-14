@@ -116,11 +116,14 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
             var state = (StreamProcessorState)currentState;
             var newState = new StreamProcessorState(
                 position, 
-                new Dictionary<PartitionId, FailingPartitionState>(state.FailingPartitions.Where(_ => _.Value.Position < position)),
+                FailuresAfter(state, position),
                 state.LastSuccessfullyProcessed);
             await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
             return newState;
-
         }
+        static IDictionary<PartitionId, FailingPartitionState> FailuresAfter(StreamProcessorState state, StreamPosition position)
+            => state.FailingPartitions
+                .Where(_ => _.Value.Position < position)
+                .ToDictionary(_ => _.Key, _ => _.Value);
     }
 }

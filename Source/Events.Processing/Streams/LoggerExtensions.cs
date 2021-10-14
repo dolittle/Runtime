@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Processing.Streams
@@ -29,6 +30,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 new EventId(146285673, nameof(ScopedStreamProcessorFailed)),
                 "A failure ocurred in a scoped stream processor with id: {StreamProcessorId}");
 
+        static readonly Action<ILogger, IStreamProcessorId, ulong, Exception> _scopedStreamProcessorSetToPosition = LoggerMessage
+            .Define<IStreamProcessorId, ulong>(
+                LogLevel.Information,
+                new EventId(16542673, nameof(ScopedStreamProcessorSetToPosition)),
+                "Stream Processor: {StreamProcessorId} position has been set to {Position}");
+
         static readonly Action<ILogger, StreamProcessorId, Exception> _streamProcessorAlreadyRegistered = LoggerMessage
             .Define<StreamProcessorId>(
                 LogLevel.Warning,
@@ -55,6 +62,8 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         internal static void ScopedStreamProcessorFailed(this ILogger logger, Exception ex, StreamProcessorId streamProcessorId)
             => _scopedStreamProcessorFailed(logger, streamProcessorId, ex);
+        internal static void ScopedStreamProcessorSetToPosition(this ILogger logger, IStreamProcessorId streamProcessorId, StreamPosition position)
+            => _scopedStreamProcessorSetToPosition(logger, streamProcessorId, position, null);
 
         internal static void StreamProcessorAlreadyRegistered(this ILogger logger, StreamProcessorId streamProcessorId)
             => _streamProcessorAlreadyRegistered(logger, streamProcessorId, null);
