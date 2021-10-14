@@ -12,7 +12,7 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStreamProcessor.when_setting_position.and_stream_has_only_one_partition
 {
-    public class and_stream_processor_must_retry_processing_an_event_three_times : all_dependencies
+    public class and_setting_position_to_failing_event : all_dependencies
     {
         const string failure_reason = "some reason";
         const string retry_reason = "retry reason";

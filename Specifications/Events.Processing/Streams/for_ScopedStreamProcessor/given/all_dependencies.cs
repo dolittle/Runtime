@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.for_ScopedStreamProcessor.g
         {
             var result = stream_processor.Start(cancellation_token_source.Token);
             Task.Delay(setPositionAfter).GetAwaiter().GetResult();
-            stream_processor.SetToPosition(position).GetAwaiter().GetResult();
+            stream_processor.ReprocessEventsFrom(position).GetAwaiter().GetResult();
             cancellation_token_source.CancelAfter(cancelAfter);
             return result;
         }

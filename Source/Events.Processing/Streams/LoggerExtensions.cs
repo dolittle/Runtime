@@ -29,8 +29,9 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 LogLevel.Warning,
                 new EventId(146285673, nameof(ScopedStreamProcessorFailed)),
                 "A failure ocurred in a scoped stream processor with id: {StreamProcessorId}");
-        static readonly Action<ILogger, IStreamProcessorId, StreamPosition, Exception> _scopedStreamProcessorSetToPosition = LoggerMessage
-            .Define<IStreamProcessorId, StreamPosition>(
+
+        static readonly Action<ILogger, IStreamProcessorId, ulong, Exception> _scopedStreamProcessorSetToPosition = LoggerMessage
+            .Define<IStreamProcessorId, ulong>(
                 LogLevel.Information,
                 new EventId(16542673, nameof(ScopedStreamProcessorSetToPosition)),
                 "Stream Processor: {StreamProcessorId} position has been set to {Position}");

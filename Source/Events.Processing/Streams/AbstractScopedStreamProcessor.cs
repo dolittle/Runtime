@@ -91,8 +91,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <summary>
         /// Sets the <see cref="IStreamProcessorState" /> to be at the given position.
         /// </summary>
-        /// <param name="position"></param>
-        public Task<Try<StreamPosition>> SetToPosition(StreamPosition position)
+        /// <remarks>
+        /// This method fails with a <see cref="CannotSetStreamProcessorPositionHigherThanCurrentPosition"/> if trying to reprocess events
+        /// from a <see cref="StreamPosition"/> that is higher than the current <see cref="StreamPosition"/>.
+        /// </remarks>
+        /// <param name="position">The <see cref="StreamPosition"/> to start processing events from.</param>
+        /// <returns>A <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with a <see cref="StreamPosition"/>.</returns>
+        public Task<Try<StreamPosition>> ReprocessEventsFrom(StreamPosition position)
         {
             try
             {
@@ -250,7 +255,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 do
                 {
-                    Try<StreamEvent> tryGetEvent = null;
+                    Try<StreamEvent> tryGetEvent;
                     do
                     {
                         _resetStreamProcessor = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -282,11 +287,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                                     _resetStreamProcessor.Token).ConfigureAwait(false);
                             }
                         }
-                        catch (TaskCanceledException)
+                        catch (TaskCanceledException ex)
                         {
+                            tryGetEvent = ex;
                         }
                     }
-                    while (tryGetEvent is { Success: false } && !cancellationToken.IsCancellationRequested);
+                    while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested);
 
                     if (cancellationToken.IsCancellationRequested) break;
                     _currentState = await ProcessEvent(tryGetEvent, _currentState, cancellationToken).ConfigureAwait(false);
