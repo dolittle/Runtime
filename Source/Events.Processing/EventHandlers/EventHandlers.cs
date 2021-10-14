@@ -79,7 +79,14 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             {
                 throw new EventHandlerAlreadyRegistered(eventHandlerId);
             }
-            await eventHandler.RegisterAndStart().ConfigureAwait(false);
+            try
+            {
+                await eventHandler.RegisterAndStart().ConfigureAwait(false);
+            }
+            finally
+            {
+                _eventHandlers.Remove(eventHandlerId, out _);
+            }
         }
 
         /// <inheritdoc />
