@@ -243,7 +243,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             {
                 do
                 {
-                    Try<StreamEvent> tryGetEvent = null;
+                    var tryGetEvent = Try<StreamEvent>.Failed(null);
                     do
                     {
                         _resetStreamProcessor = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
@@ -278,7 +278,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                         {
                         }
                     }
-                    while (tryGetEvent is { Success: false } && !cancellationToken.IsCancellationRequested);
+                    while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested);
 
                     if (cancellationToken.IsCancellationRequested) break;
                     _currentState = await ProcessEvent(tryGetEvent, _currentState, cancellationToken).ConfigureAwait(false);
