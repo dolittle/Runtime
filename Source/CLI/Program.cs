@@ -1,12 +1,11 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using CLI.Options.Parsers.Versioning;
-using Dolittle.Runtime.CLI.Configurations;
-using Dolittle.Runtime.Serialization.Json;
-using Dolittle.Runtime.Versioning;
+using Dolittle.Runtime.CLI.Configuration.Files;
+using Dolittle.Runtime.CLI.Configuration.Runtime;
+using Dolittle.Runtime.CLI.Options.Parsers;
+using Dolittle.Runtime.CLI.Serialization;
 using McMaster.Extensions.CommandLineUtils;
-using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -20,36 +19,30 @@ namespace Dolittle.Runtime.CLI
     {
         static int Main(string[] args)
         {
-            // while (!System.Diagnostics.Debugger.IsAttached) System.Threading.Thread.Sleep(50);
             using var cli = new CommandLineApplication<Program>();
             var services = new ServiceCollection();
-            BindServices(cli, services);
+            
+            services.AddSingleton<CommandLineApplication>(cli);
+            
+            AddServices(services);
+            
             var container = services.BuildServiceProvider();
-
+            
             cli.Conventions.UseDefaultConventions();
             cli.Conventions.UseConstructorInjection(container);
-            AddValueParsers(cli.ValueParsers, container);
+            cli.ValueParsers.UseAllValueParsers(container);
 
             return cli.Execute(args);
         }
 
-        static void BindServices(CommandLineApplication<Program> cli, ServiceCollection services)
+        static void AddServices(ServiceCollection services)
         {
             services.AddLogging(_ => _.AddSimpleConsole());
-            services.AddSingleton<RuntimeConfigurationDirectoryPath>(cli.WorkingDirectory);
-            services.AddTransient<IVersionConverter, VersionConverter>();
-            services.AddTransient<IValueParser, VersionParser>();
-            services.AddTransient<IConfigurations, Configurations.Configurations>();
-            services.AddTransient<IResources, Resources>();
-            services.AddSingleton<ISerializer>(new Serializer(new NoConverterProviders()));
-        }
-
-        static void AddValueParsers(ValueParserProvider parsers, ServiceProvider container)
-        {
-            foreach (var parser in container.GetServices<IValueParser>())
-            {
-                parsers.Add(parser);
-            }
+            services.AddValueParsers();
+            services.AddSerializers();
+            
+            services.AddConfigurationFiles();
+            services.AddRuntimeConfiguration();
         }
 
         /// <summary>
