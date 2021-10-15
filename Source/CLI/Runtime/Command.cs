@@ -9,9 +9,18 @@ namespace Dolittle.Runtime.CLI.Runtime
     /// The "dolittle runtime" command.
     /// </summary>
     [Command("runtime", "Manage a Runtime")]
-    [Subcommand(typeof(EventHandlers.RootCommand))]
-    public class RootCommand : CommandBase
+    [Subcommand(typeof(EventHandlers.Command))]
+    public class Command : CommandBase
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Command"/> class.
+        /// </summary>
+        /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
+        public Command(ICanLocateRuntimes runtimes)
+            : base(runtimes)
+        {
+        }
+        
         /// <summary>
         /// The entrypoint for the "dolittle runtime" command.
         /// </summary>

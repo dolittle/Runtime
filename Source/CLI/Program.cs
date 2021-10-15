@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.CLI
     /// The main entrypoint of the Dolittle CLI tool.
     /// </summary>
     [Command("dolittle", "The Dolittle CLI tool")]
-    [Subcommand(typeof(Runtime.RootCommand))]
+    [Subcommand(typeof(Runtime.Command))]
     class Program
     {
         static int Main(string[] args)
