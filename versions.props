@@ -5,6 +5,7 @@
         <ContractsVersion>6.0.0</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
+        <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
         <GrpcVersion>2.38.1</GrpcVersion>
         <GrpcAspNetCoreVersion>2.38.0</GrpcAspNetCoreVersion>
         <MachineSpecificationsRunnerVersion>2.9.0</MachineSpecificationsRunnerVersion>

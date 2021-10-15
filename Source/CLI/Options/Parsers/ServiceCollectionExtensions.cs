@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using CLI.Options.Parsers.Versioning;
+using Dolittle.Runtime.CLI.Options.Parsers.Microservices;
 using Dolittle.Runtime.Versioning;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,6 +17,7 @@ namespace Dolittle.Runtime.CLI.Options.Parsers
         /// <param name="services">The service collection to add value parsers in.</param>
         public static void AddValueParsers(this ServiceCollection services)
         {
+            services.AddTransient<IValueParser, MicroserviceAddressParser>();
             services.AddTransient<IVersionConverter, VersionConverter>();
             services.AddTransient<IValueParser, VersionParser>();
         }
