@@ -35,30 +35,16 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
             event_processor
                 .Setup(_ => _.Process(Moq.It.Is<CommittedEvent>(_ => _ == third_event.Event || _ == fourth_event.Event), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(reason)));
-            events_fetcher
-                .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<StreamEvent>>(first_event));
-            events_fetcher
-                .Setup(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<StreamEvent>>(second_event));
-            events_fetcher
-                .Setup(_ => _.Fetch(2, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<StreamEvent>>(third_event));
-            events_fetcher
-                .Setup(_ => _.Fetch(3, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult<Try<StreamEvent>>(fourth_event));
+            setup_event_stream(first_event, second_event, third_event, fourth_event);
             events_fetcher
                 .Setup(_ => _.FetchInPartition(first_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<Try<StreamEvent>>(third_event));
             events_fetcher
                 .Setup(_ => _.FetchInPartition(second_partition_id, Moq.It.IsAny<StreamPosition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<Try<StreamEvent>>(fourth_event));
-            events_fetcher
-                .Setup(_ => _.Fetch(4, Moq.It.IsAny<CancellationToken>()))
-                .Throws(new Exception());
         };
 
-        Because of = () => stream_processor.Start(CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
 
         It should_process_two_events_in_first_partition = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), first_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
         It should_process_two_events_in_second_partition = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), second_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(2));
@@ -68,17 +54,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
         It should_process_fourth_event = () => event_processor.Verify(_ => _.Process(fourth_event.Event, second_partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
         It should_not_retry_processing = () => event_processor.Verify(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()), Moq.Times.Never);
 
-        It should_have_persisted_the_correct_position = () => current_state.Position.ShouldEqual(new StreamPosition(4));
-        It should_have_persisted_state_with_two_failing_partitions = () => current_state.FailingPartitions.Count.ShouldEqual(2);
-        It should_have_persisted_state_with_correct_first_failing_partition = () => current_state.FailingPartitions.ContainsKey(first_partition_id).ShouldBeTrue();
-        It should_have_persisted_state_with_correct_second_failing_partition = () => current_state.FailingPartitions.ContainsKey(second_partition_id).ShouldBeTrue();
-        It should_have_persisted_correct_position_on_the_first_failing_partition = () => current_state.FailingPartitions[first_partition_id].Position.ShouldEqual(new StreamPosition(2));
-        It should_have_persisted_correct_position_on_the_second_failing_partition = () => current_state.FailingPartitions[second_partition_id].Position.ShouldEqual(new StreamPosition(3));
-        It should_have_persisted_correct_retry_time_on_the_first_failing_partition = () => current_state.FailingPartitions[first_partition_id].RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
-        It should_have_persisted_correct_retry_time_on_the_second_failing_partition = () => current_state.FailingPartitions[second_partition_id].RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
-        It should_have_persisted_correct_reason_on_the_first_failing_partition = () => current_state.FailingPartitions[first_partition_id].Reason.ShouldEqual(reason);
-        It should_have_persisted_correct_reason_on_the_first_second_partition = () => current_state.FailingPartitions[second_partition_id].Reason.ShouldEqual(reason);
-
-        static StreamProcessorState current_state => stream_processor_state_repository.TryGetFor(stream_processor_id, CancellationToken.None).GetAwaiter().GetResult().Result as StreamProcessorState;
+        It should_have_persisted_the_correct_position = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(4));
+        It should_have_persisted_state_with_two_failing_partitions = () => current_stream_processor_state.FailingPartitions.Count.ShouldEqual(2);
+        It should_have_persisted_state_with_correct_first_failing_partition = () => current_stream_processor_state.FailingPartitions.ContainsKey(first_partition_id).ShouldBeTrue();
+        It should_have_persisted_state_with_correct_second_failing_partition = () => current_stream_processor_state.FailingPartitions.ContainsKey(second_partition_id).ShouldBeTrue();
+        It should_have_persisted_correct_position_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].Position.ShouldEqual(new StreamPosition(2));
+        It should_have_persisted_correct_position_on_the_second_failing_partition = () => current_stream_processor_state.FailingPartitions[second_partition_id].Position.ShouldEqual(new StreamPosition(3));
+        It should_have_persisted_correct_retry_time_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
+        It should_have_persisted_correct_retry_time_on_the_second_failing_partition = () => current_stream_processor_state.FailingPartitions[second_partition_id].RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
+        It should_have_persisted_correct_reason_on_the_first_failing_partition = () => current_stream_processor_state.FailingPartitions[first_partition_id].Reason.ShouldEqual(reason);
+        It should_have_persisted_correct_reason_on_the_first_second_partition = () => current_stream_processor_state.FailingPartitions[second_partition_id].Reason.ShouldEqual(reason);
     }
 }
