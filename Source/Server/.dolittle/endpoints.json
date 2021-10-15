@@ -4,5 +4,8 @@
     },
     "private": {
         "port": 50053
+    },
+    "management": {
+        "port": 50054
     }
 }

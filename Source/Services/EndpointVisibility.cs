@@ -9,13 +9,18 @@ namespace Dolittle.Runtime.Services
     public enum EndpointVisibility
     {
         /// <summary>
-        /// Represents public endpoints
+        /// Represents public endpoints.
         /// </summary>
         Public = 1,
 
         /// <summary>
-        /// Represents private endpoints
+        /// Represents private endpoints.
         /// </summary>
-        Private
+        Private = 2,
+        
+        /// <summary>
+        /// Represents management endpoints.
+        /// </summary>
+        Management = 3,
     }
 }

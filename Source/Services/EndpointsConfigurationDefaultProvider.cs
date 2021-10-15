@@ -25,12 +25,18 @@ namespace Dolittle.Runtime.Services
         /// The default private port.
         /// </summary>
         public const int DefaultPrivatePort = 50053;
+        
+        /// <summary>
+        /// The default management port.
+        /// </summary>
+        public const int DefaultManagementPort = 50054;
 
         /// <inheritdoc/>
         public EndpointsConfiguration Provide()
         {
             Configurations[EndpointVisibility.Public] = new EndpointConfiguration() { Port = DefaultPublicPort };
             Configurations[EndpointVisibility.Private] = new EndpointConfiguration() { Port = DefaultPrivatePort };
+            Configurations[EndpointVisibility.Management] = new EndpointConfiguration() { Port = DefaultManagementPort };
             return new EndpointsConfiguration(Configurations);
         }
     }

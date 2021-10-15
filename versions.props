@@ -2,7 +2,7 @@
     <PropertyGroup>
         <AutofacVersion>5.0.0</AutofacVersion>
         <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
-        <ContractsVersion>6.1.0-eventhandlermanagement.0</ContractsVersion>
+        <ContractsVersion>6.1.0-eventhandlermanagement.2</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <GrpcVersion>2.38.1</GrpcVersion>

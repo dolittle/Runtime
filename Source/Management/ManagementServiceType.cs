@@ -26,6 +26,6 @@ namespace Dolittle.Runtime.Management
         public Type BindingInterface => typeof(ICanBindManagementServices);
 
         /// <inheritdoc/>
-        public EndpointVisibility Visibility => EndpointVisibility.Public;
+        public EndpointVisibility Visibility => EndpointVisibility.Management;
     }
 }
