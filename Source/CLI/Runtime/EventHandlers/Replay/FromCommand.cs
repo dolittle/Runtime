@@ -32,7 +32,6 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
         [Argument(0, Description = "The position to start replaying events from.")]
         StreamPosition Position { get; init; }
         
-        [Required]
         [Option("--tenant", CommandOptionType.SingleValue, Description = "The tenant to replay events for. Defaults to the development tenant.")]
         TenantId Tenant { get; init; }
 
@@ -48,7 +47,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
                 return;
             }
 
-            await _client.ReprocessEventsFrom(SpecifiedScopeOrDefault, Identifier, Tenant, Position, address);
+            await _client.ReprocessEventsFrom(SpecifiedScopeOrDefault, Identifier, Tenant ?? TenantId.Development, Position, address);
         }
     }
 }
