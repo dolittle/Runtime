@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
     public class and_everything_is_ok : all_dependencies
     {
         const string reason = "some reason";
-        static readonly PartitionId partition_id = Guid.NewGuid();
+        static readonly PartitionId partition_id = "paritition id";
         static readonly CommittedEvent first_event = committed_events.single();
 
         Establish context = () =>
