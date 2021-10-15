@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <param name="tenant">The <see cref="TenantId"/>.</param>
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
-        Task<Try<StreamPosition>> SetToPosition(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position);
+        Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position);
         
         /// <summary>
         /// Sets the position of an event handler for all tenant to be the initial <see cref="StreamPosition"/>.

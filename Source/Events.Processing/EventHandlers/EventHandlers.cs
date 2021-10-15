@@ -90,9 +90,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         }
 
         /// <inheritdoc />
-        public Task<Try<StreamPosition>> SetToPosition(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position)
+        public Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position)
             => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
-                ? eventHandler.SetToPosition(tenant, position)
+                ? eventHandler.ReprocessEventsFrom(tenant, position)
                 : Task.FromResult<Try<StreamPosition>>(new EventHandlerNotRegistered(eventHandlerId));
 
         /// <inheritdoc />

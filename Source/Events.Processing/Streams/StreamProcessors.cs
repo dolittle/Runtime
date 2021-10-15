@@ -95,7 +95,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
 
         }
         /// <inheritdoc />
-        public Task<Try<StreamPosition>> SetToPosition(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position)
+        public Task<Try<StreamPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position)
             => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
                 ? streamProcessor.SetToPosition(tenant, position)
                 : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegistered(streamProcessorId));

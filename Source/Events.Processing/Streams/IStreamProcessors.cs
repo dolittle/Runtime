@@ -46,7 +46,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="tenant">The <see cref="TenantId"/>.</param>
         /// <param name="position">The <see cref="StreamPosition" />.</param>
         /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
-        Task<Try<StreamPosition>> SetToPosition(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position);
+        Task<Try<StreamPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position);
         
         
         /// <summary>
