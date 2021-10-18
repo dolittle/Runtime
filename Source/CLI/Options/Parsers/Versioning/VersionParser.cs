@@ -10,7 +10,7 @@ using Version = Dolittle.Runtime.Versioning.Version;
 namespace CLI.Options.Parsers.Versioning
 {
     /// <summary>
-    /// An implementation of <see cref="IValueParser"/> that 
+    /// An implementation of <see cref="IValueParser"/> that parses semantic version values as <see cref="Version"/>.
     /// </summary>
     public class VersionParser : IValueParser
     {
