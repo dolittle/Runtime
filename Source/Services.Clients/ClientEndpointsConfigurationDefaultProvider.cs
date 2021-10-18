@@ -16,7 +16,8 @@ namespace Dolittle.Runtime.Services.Clients
             new(new Dictionary<EndpointVisibility, ClientEndpointConfiguration>
             {
                 { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPublicPort) },
-                { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPrivatePort) }
+                { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPrivatePort) },
+                { EndpointVisibility.Management, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultManagementPort) },
             });
     }
 }
