@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         Task RegisterAndStart(ReverseCallDispatcherType dispatcher, EventHandlerRegistrationArguments arguments, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Sets the position of an event handler for a tenant.
+        /// Reprocesses all events for an event handler from a <see cref="StreamPosition" /> for a tenant.
         /// </summary>
         /// <param name="eventHandlerId">The <see cref="EventHandlerId"/> of the identifying the event handler.</param>
         /// <param name="tenant">The <see cref="TenantId"/>.</param>
@@ -40,11 +40,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position);
         
         /// <summary>
-        /// Sets the position of an event handler for all tenant to be the initial <see cref="StreamPosition"/>.
+        /// Reprocesses all the events for an event handler for all tenants.
         /// </summary>
         /// <param name="eventHandlerId">The <see cref="EventHandlerId"/> of the identifying the event handler.</param>
         /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
-        Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> SetToInitialForAllTenants(EventHandlerId eventHandlerId);
+        Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId);
         
     }
 }

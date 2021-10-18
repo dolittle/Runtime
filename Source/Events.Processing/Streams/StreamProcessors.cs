@@ -101,7 +101,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegistered(streamProcessorId));
 
         /// <inheritdoc />
-        public async Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> SetToInitialPositionForAllTenants(StreamProcessorId streamProcessorId)
+        public async Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId)
             => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
                 ? Try<IDictionary<TenantId, Try<StreamPosition>>>.Succeeded(await streamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false))
                 : new StreamProcessorNotRegistered(streamProcessorId); 

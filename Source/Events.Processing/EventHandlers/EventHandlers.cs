@@ -96,9 +96,9 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                 : Task.FromResult<Try<StreamPosition>>(new EventHandlerNotRegistered(eventHandlerId));
 
         /// <inheritdoc />
-        public Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> SetToInitialForAllTenants(EventHandlerId eventHandlerId)
+        public Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId)
             => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
-                ? eventHandler.SetToInitialForAllTenants()
+                ? eventHandler.ReprocessAllEvents()
                 : Task.FromResult<Try<IDictionary<TenantId, Try<StreamPosition>>>>(new EventHandlerNotRegistered(eventHandlerId));
     }
 }
