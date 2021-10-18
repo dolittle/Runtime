@@ -3,7 +3,6 @@
 
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;

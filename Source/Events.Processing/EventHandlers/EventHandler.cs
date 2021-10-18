@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.ExceptionServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Processing.Contracts;
@@ -143,6 +144,32 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// </summary>
         public StreamProcessor EventProcessorStreamProcessor { get; private set; }
 
+
+        /// <summary>
+        /// Reprocesses all events from a <see cref="StreamPosition" /> for a tenant.
+        /// </summary>
+        /// <param name="tenant">The <see cref="TenantId"/>.</param>
+        /// <param name="position">The <see cref="StreamPosition" />.</param>
+        /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
+        public Task<Try<StreamPosition>> ReprocessEventsFrom(TenantId tenant, StreamPosition position)
+            => EventProcessorStreamProcessor.SetToPosition(tenant, position);
+
+        /// <summary>
+        /// Reprocesses all the events for all tenants.
+        /// </summary>
+        /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
+        public async Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents()
+        {
+            try
+            {
+                return Try<IDictionary<TenantId, Try<StreamPosition>>>.Succeeded(await EventProcessorStreamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false));
+            }
+            catch (Exception ex)
+            {
+                return ex;
+            }
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -156,17 +183,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <param name="disposing">Whether to dispose managed resources.</param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposed)
+            if (_disposed) return;
+            if (disposing)
             {
-                if (disposing)
-                {
-                    FilterStreamProcessor?.Dispose();
-                    EventProcessorStreamProcessor?.Dispose();
-                    _cancellationTokenSource.Dispose();
-                }
-
-                _disposed = true;
+                FilterStreamProcessor?.Dispose();
+                EventProcessorStreamProcessor?.Dispose();
+                _cancellationTokenSource.Dispose();
             }
+
+            _disposed = true;
         }
 
         /// <summary>
@@ -188,16 +213,13 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
 
         async Task<bool> RejectIfNonWriteableStream()
         {
-            if (TargetStream.IsNonWriteable)
-            {
-                _logger.EventHandlerIsInvalid(EventProcessor);
-                await Fail(
-                    EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
-                    $"Cannot register Event Handler: '{EventProcessor.Value}' because it is an invalid Stream Id").ConfigureAwait(false);
+            if (!TargetStream.IsNonWriteable) return false;
+            _logger.EventHandlerIsInvalid(EventProcessor);
+            await Fail(
+                EventHandlersFailures.CannotRegisterEventHandlerOnNonWriteableStream,
+                $"Cannot register Event Handler: '{EventProcessor.Value}' because it is an invalid Stream Id").ConfigureAwait(false);
 
-                return true;
-            }
-            return false;
+            return true;
         }
 
         async Task<bool> RegisterFilterStreamProcessor()
@@ -242,16 +264,17 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         {
             _logger.ErrorWhileRegisteringStreamProcessorForEventProcessor(exception, EventProcessor);
 
-            if (exception is StreamProcessorAlreadyRegistered)
+            if (exception is not StreamProcessorAlreadyRegistered)
             {
-                _logger.EventHandlerAlreadyRegisteredOnSourceStream(EventProcessor);
-                return new(
-                    EventHandlersFailures.FailedToRegisterEventHandler,
-                    $"Failed to register Event Handler: {EventProcessor.Value}. Event Processor already registered on Source Stream: '{EventProcessor.Value}'");
-            }
-            return new(
+                return new Failure(
                     EventHandlersFailures.FailedToRegisterEventHandler,
                     $"Failed to register Event Handler: {EventProcessor.Value}. An error occurred. {exception.Message}");
+            }
+
+            _logger.EventHandlerAlreadyRegisteredOnSourceStream(EventProcessor);
+            return new Failure(
+                EventHandlersFailures.FailedToRegisterEventHandler,
+                $"Failed to register Event Handler: {EventProcessor.Value}. Event Processor already registered on Source Stream: '{EventProcessor.Value}'");
         }
 
         async Task<bool> RegisterStreamProcessor(
