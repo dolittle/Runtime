@@ -3,6 +3,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -36,5 +37,10 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
         /// The "--scope" argument used to provide the scope of the Event Handler to replay, or <see cref="ScopeId.Default"/>.
         /// </summary>
         protected ScopeId SpecifiedScopeOrDefault => Scope ?? ScopeId.Default;
+
+        /// <summary>
+        /// The identifier for the Event Handler to replay, using "--id" and "--scope".
+        /// </summary>
+        protected EventHandlerId EventHandler => new EventHandlerId(SpecifiedScopeOrDefault, Identifier);
     }
 }

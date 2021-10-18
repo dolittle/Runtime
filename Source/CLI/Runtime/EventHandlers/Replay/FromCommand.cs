@@ -4,6 +4,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store.Streams;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -47,7 +48,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
                 return;
             }
 
-            await _client.ReprocessEventsFrom(SpecifiedScopeOrDefault, Identifier, Tenant ?? TenantId.Development, Position, address);
+            await _client.ReprocessEventsFrom(EventHandler, Tenant ?? TenantId.Development, Position, address);
         }
     }
 }

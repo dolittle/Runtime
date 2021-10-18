@@ -37,7 +37,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
                 return;
             }
 
-            await _client.ReprocessAllEvents(SpecifiedScopeOrDefault, Identifier, address);
+            await _client.ReprocessAllEvents(EventHandler, address);
         }
     }
 }

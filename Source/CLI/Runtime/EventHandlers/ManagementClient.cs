@@ -4,6 +4,7 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Processing;
+using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -30,14 +31,14 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         }
 
         /// <inheritdoc />
-        public async Task ReprocessEventsFrom(ScopeId scope, EventProcessorId eventHandler, TenantId tenant, StreamPosition position, MicroserviceAddress runtime)
+        public async Task ReprocessEventsFrom(EventHandlerId eventHandler, TenantId tenant, StreamPosition position, MicroserviceAddress runtime)
         {
             var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
 
             var request = new ReprocessEventsFromRequest
             {
-                ScopeId = scope.ToProtobuf(),
-                EventHandlerId = eventHandler.ToProtobuf(),
+                ScopeId = eventHandler.Scope.ToProtobuf(),
+                EventHandlerId = eventHandler.EventHandler.ToProtobuf(),
                 TenantId = tenant.ToProtobuf(),
                 StreamPosition = position,
             };
@@ -50,14 +51,14 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         }
 
         /// <inheritdoc />
-        public async Task ReprocessAllEvents(ScopeId scope, EventProcessorId eventHandler, MicroserviceAddress runtime)
+        public async Task ReprocessAllEvents(EventHandlerId eventHandler, MicroserviceAddress runtime)
         {
             var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
 
             var request = new ReprocessAllEventsRequest
             {
-                ScopeId = scope.ToProtobuf(),
-                EventHandlerId = eventHandler.ToProtobuf(),
+                ScopeId = eventHandler.Scope.ToProtobuf(),
+                EventHandlerId = eventHandler.EventHandler.ToProtobuf(),
             };
             
             var response = await client.ReprocessAllEventsAsync(request);
