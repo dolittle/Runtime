@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.Events.Processing.Management</AssemblyName>
+        <RootNamespace>Dolittle.Runtime.Events.Processing.Management</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Dolittle.Contracts" Version="$(ContractsVersion)" />
+        <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
+        <ProjectReference Include="../Management/Management.csproj" />
+    </ItemGroup>
+</Project>

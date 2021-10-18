@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -91,6 +94,17 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
 
         }
+        /// <inheritdoc />
+        public Task<Try<StreamPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position)
+            => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
+                ? streamProcessor.SetToPosition(tenant, position)
+                : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegistered(streamProcessorId));
+
+        /// <inheritdoc />
+        public async Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId)
+            => _streamProcessors.TryGetValue(streamProcessorId, out var streamProcessor)
+                ? Try<IDictionary<TenantId, Try<StreamPosition>>>.Succeeded(await streamProcessor.SetToInitialPositionForAllTenants().ConfigureAwait(false))
+                : new StreamProcessorNotRegistered(streamProcessorId); 
 
         void Unregister(StreamProcessorId id)
         {

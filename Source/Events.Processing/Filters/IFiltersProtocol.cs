@@ -2,9 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
-using Dolittle.Services.Contracts;
 using Google.Protobuf;
 
 namespace Dolittle.Runtime.Events.Processing.Filters
