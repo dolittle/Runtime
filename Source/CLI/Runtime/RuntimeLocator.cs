@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.CLI.Runtime
 {
@@ -36,7 +37,7 @@ namespace Dolittle.Runtime.CLI.Runtime
             
             var address = new MicroserviceAddress(
                 string.IsNullOrWhiteSpace(argument.Host) ? DefaultRuntimeHost : argument.Host,
-                argument.Port == 0 ? 50054 : argument.Port); //TODO: Change to the property somewhere when management service port PR is pulled in 
+                argument.Port == 0 ? EndpointsConfigurationDefaultProvider.DefaultManagementPort : argument.Port);
                 
             return new[] {address};
         }

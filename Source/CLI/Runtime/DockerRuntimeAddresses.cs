@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Dolittle.Runtime.Microservices;
+using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.CLI.Runtime
 {
@@ -55,6 +56,6 @@ namespace Dolittle.Runtime.CLI.Runtime
             => new MicroserviceAddress("localhost", container.Ports.First(IsManagementPort).PublicPort);
 
         static bool IsManagementPort(Port port)
-            => port.Type == "tcp" && port.PrivatePort == 50054; //TODO: Change public port to default
+            => port.Type == "tcp" && port.PrivatePort == EndpointsConfigurationDefaultProvider.DefaultManagementPort;
     }
 }
