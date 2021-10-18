@@ -6,6 +6,6 @@
         "port": 50053
     },
     "management": {
-        "port": 50054
+        "port": 51052
     }
 }

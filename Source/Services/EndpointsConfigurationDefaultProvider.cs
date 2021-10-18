@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Services
         /// <summary>
         /// The default management port.
         /// </summary>
-        public const int DefaultManagementPort = 50054;
+        public const int DefaultManagementPort = 51052;
 
         /// <inheritdoc/>
         public EndpointsConfiguration Provide()
