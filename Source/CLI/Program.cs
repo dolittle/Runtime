@@ -4,6 +4,7 @@
 using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Configuration.Runtime;
 using Dolittle.Runtime.CLI.Options.Parsers;
+using Dolittle.Runtime.CLI.Runtime;
 using Dolittle.Runtime.CLI.Serialization;
 using McMaster.Extensions.CommandLineUtils;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,6 +16,7 @@ namespace Dolittle.Runtime.CLI
     /// The main entrypoint of the Dolittle CLI tool.
     /// </summary>
     [Command("dolittle", "The Dolittle CLI tool")]
+    [Subcommand(typeof(Runtime.Command))]
     class Program
     {
         static int Main(string[] args)
@@ -43,6 +45,7 @@ namespace Dolittle.Runtime.CLI
             
             services.AddConfigurationFiles();
             services.AddRuntimeConfiguration();
+            services.AddRuntimeServices();
         }
 
         /// <summary>
