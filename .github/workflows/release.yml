@@ -242,7 +242,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/osx-x64/publish/dolittle
+          asset_path: ./Source/CLI/bin/Release/net5.0/osx-x64/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-macos-x64
           asset_content_type: application/octet-stream
 #      - name: Publish for macOS arm64
@@ -254,7 +254,7 @@ jobs:
 #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #        with:
 #          upload_url: ${{ needs.setup.outputs.release-upload-url }}
-#          asset_path: ./Source/CLI/bin/Release/net5.0/osx.11.0-arm64/publish/dolittle
+#          asset_path: ./Source/CLI/bin/Release/net5.0/osx.11.0-arm64/publish/Dolittle.Runtime.CLI
 #          asset_name: dolittle-macos-arm64
 #          asset_content_type: application/octet-stream
       - name: Publish for Windows x64
@@ -266,7 +266,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-x64/publish/dolittle.exe
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-x64/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-x64.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows x86
@@ -278,7 +278,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-x86/publish/dolittle.exe
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-x86/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-x86.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows arm64
@@ -290,7 +290,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm64/publish/dolittle.exe
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm64/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-arm64.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows arm
@@ -302,7 +302,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm/publish/dolittle.exe
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-arm.exe
           asset_content_type: application/octet-stream
       - name: Publish for Linux x64
@@ -314,7 +314,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/linux-x64/publish/dolittle
+          asset_path: ./Source/CLI/bin/Release/net5.0/linux-x64/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-linux-x64
           asset_content_type: application/octet-stream
       - name: Publish for Linux arm64
@@ -326,7 +326,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/linux-arm64/publish/dolittle
+          asset_path: ./Source/CLI/bin/Release/net5.0/linux-arm64/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-linux-arm64
           asset_content_type: application/octet-stream
       - name: Publish for Linux arm
@@ -338,6 +338,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/linux-arm/publish/dolittle
+          asset_path: ./Source/CLI/bin/Release/net5.0/linux-arm/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-linux-arm
           asset_content_type: application/octet-stream
