@@ -34,8 +34,4 @@
         <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsVersion)" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Runtime\EventHandlers\List" />
-    </ItemGroup>
-
 </Project>

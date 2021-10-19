@@ -106,6 +106,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
             var status = new TenantScopedStreamProcessorStatus
             {
                 StreamPosition = state.Position,
+                TenantId = tenant.ToProtobuf()
             };
             if (state.Partitioned)
             {

@@ -4,7 +4,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store.Streams;
 using McMaster.Extensions.CommandLineUtils;
 

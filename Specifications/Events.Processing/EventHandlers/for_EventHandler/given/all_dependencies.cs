@@ -81,6 +81,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
             arguments = new(
                 execution_context,
                 event_handler_id,
+                "alias",
                 Array.Empty<ArtifactId>(),
                 false,
                 scope);

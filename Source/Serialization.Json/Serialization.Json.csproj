@@ -1,5 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+  <Import Project="../../default.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Serialization.Json</AssemblyName>
@@ -14,6 +14,7 @@
     <ProjectReference Include="../Assemblies/Assemblies.csproj" />
     <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
     <ProjectReference Include="../Types/Types.csproj" />
+    <ProjectReference Include="..\Rudimentary\Rudimentary.csproj" />
   </ItemGroup>
 
 </Project>
