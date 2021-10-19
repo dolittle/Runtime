@@ -1,5 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,7 @@ using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatch
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerRegistrationResponse,
                                     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
+
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
     /// <summary>
@@ -35,7 +37,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         readonly IStreamDefinitions _streamDefinitions;
         readonly ILoggerFactory _loggerFactory;
         readonly IValidateFilterForAllTenants _filterValidator;
-        readonly ILogger<EventHandlers> _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="EventHandlers"/> class.
@@ -60,7 +61,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _streamDefinitions = streamDefinitions;
             _streamProcessors = streamProcessors;
-            _logger = loggerFactory.CreateLogger<EventHandlers>();
         }
         
         /// <inheritdoc />
