@@ -18,13 +18,22 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     {
         /// <inheritdoc/>
         public EventHandlerRegistrationArguments ConvertConnectArguments(EventHandlerRegistrationRequest arguments)
-            => new(
-                arguments.CallContext.ExecutionContext.ToExecutionContext(),
-                arguments.EventHandlerId.ToGuid(),
-                arguments.Alias ?? "",
-                arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
-                arguments.Partitioned,
-                arguments.ScopeId.ToGuid());
+            => arguments.HasAlias switch
+            {
+                true => new EventHandlerRegistrationArguments(
+                    arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                    arguments.EventHandlerId.ToGuid(),
+                    arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
+                    arguments.Partitioned,
+                    arguments.ScopeId.ToGuid(),
+                    arguments.Alias),
+                false => new EventHandlerRegistrationArguments(
+                    arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                    arguments.EventHandlerId.ToGuid(),
+                    arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
+                    arguments.Partitioned,
+                    arguments.ScopeId.ToGuid()),
+            };
 
         /// <inheritdoc/>
         public EventHandlerRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
