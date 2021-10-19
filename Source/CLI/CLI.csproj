@@ -2,7 +2,7 @@
     <Import Project="../../default.props" />
 
     <PropertyGroup>
-        <AssemblyName>dolittle</AssemblyName>
+        <AssemblyName>Dolittle.Runtime.CLI</AssemblyName>
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <LangVersion>latest</LangVersion>
