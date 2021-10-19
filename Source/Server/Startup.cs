@@ -19,15 +19,6 @@ namespace Dolittle.Runtime.Server
         /// <param name="services"><see cref="IServiceCollection"/> to configure.</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddGrpc();
-            services.AddCors(_ => _.AddPolicy("AllowAll", builder =>
-            {
-                builder.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader()
-                        .WithExposedHeaders("Grpc-Status", "Grpc-Message");
-            }));
-
             services.AddControllers();
             services.AddMvc();
             services.AddSwaggerGen();
@@ -52,8 +43,6 @@ namespace Dolittle.Runtime.Server
 
             app.UseStaticFiles();
 
-            app.UseGrpcWeb();
-            app.UseCors();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {
