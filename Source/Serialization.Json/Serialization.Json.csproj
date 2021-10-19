@@ -14,7 +14,7 @@
     <ProjectReference Include="../Assemblies/Assemblies.csproj" />
     <ProjectReference Include="../DependencyInversion/DependencyInversion.csproj" />
     <ProjectReference Include="../Types/Types.csproj" />
-    <ProjectReference Include="..\Rudimentary\Rudimentary.csproj" />
+    <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
   </ItemGroup>
 
 </Project>
