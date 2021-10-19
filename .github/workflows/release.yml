@@ -228,6 +228,11 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "5.0.x"
+      - name: Package as DotNET tool
+        working-directory: ./Source/CLI
+        run: dotnet pack --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PackageVersion=${{ needs.setup.outputs.next-version }}
+      - name: Push DotNET tool to NuGet
+        run: dotnet nuget push --skip-duplicate './Source/CLI/bin/Release/*.nupkg' --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
       - name: Publish for macOS x64
         working-directory: ./Source/CLI
         run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx-x64
