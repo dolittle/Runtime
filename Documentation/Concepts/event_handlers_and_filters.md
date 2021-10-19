@@ -58,16 +58,20 @@ As event handlers create a stream based on the types of events they handles, the
 
 It is possible to add a new type of event into the handler if it doesn't invalidate the stream. For example, you can add a new event type to the handler if it hasn't ever been committed _before_ any of the other types of events into the [event log]({{< ref "event_store#event-log" >}}).
 
-### _"Replay"_
+### Replaying events
 
-There is no way to tell an event handler to "replay" or "rehandle" it's events from its stream. An event handler is meant to handle an event only once.
+An event handler is meant to handle each events only once, however if you for some reason need to "replay" or "re-handle" all or some of the events for an event handler, you can use the [Dolittle CLI]({{< ref "cli" >}}) to initiate this while the microservice is running.
 
-If you want to "replay" the events through the same event handler, you can change the event handlers `EventHandlerId`. This registers a completely new event handler with the Runtime, and a completely new stream is created. This way no old streams are invalidated.
+The replay does not allow you to change what event types the event handler handles. To do this, you need to change the event handlers `EventHandlerId`. This registers a completely new event handler with the Runtime, and a completely new stream is created. This way no old streams are invalidated.
 
-If you want to have an event handler for read models which replays all of its events whenever it changes, try using [Projections]({{< ref "projections" >}}) instead, as they don't create streams.
+If you want to have an event handler for read models which replays all of its events whenever it changes, try using [Projections]({{< ref "projections" >}}) instead, as they are designed to allow frequent changes.
 
 {{< alert title="Idempotence" color="warning" >}}
 As creating a new event handler will handle all of its events, it's very important to take care of the handle methods side effects. For example, if the handler sends out emails those emails would be resent.
+{{< /alert >}}
+
+{{< alert title="New functionality" color="info" >}}
+The replay functionality was added in version 7.1.0 of the Runtime, so you'll need a version newer than that to replay Event Handler events.
 {{< /alert >}}
 
 ## Multi-tenancy
