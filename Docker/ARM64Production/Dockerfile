@@ -1,49 +1,27 @@
-# DotNet Source - filtered
-
-FROM arm64v8/alpine AS dotnet-source
-ARG CONFIGURATION=Release
-WORKDIR /app
-COPY Source ./Source/
-RUN rm -rf Source/ManagementUI
-
 # DotNet Build
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-arm64v8 AS dotnet-build
 ARG CONFIGURATION=Release
+ARG VERSION
 
-WORKDIR /app
-
-COPY default.props ./
-COPY versions.props ./
-COPY Runtime.sln ./
-COPY --from=dotnet-source /app/Source ./Source/
-
-COPY Specifications ./Specifications/
+COPY default.props /app/
+COPY versions.props /app/
+COPY Runtime.sln /app/
+COPY Source /app/Source/
+COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
 # Aiming to get dotnet to create the arm binary
 # Reference: https://gist.github.com/alexellis/264ac0fc28b5ae97397039854550c4a9
-RUN dotnet publish -c ${CONFIGURATION} -o out
-
-# # Web Build
-# FROM node:13.12 AS web-build
-# WORKDIR /app
-
-# COPY tslint.json ./
-# COPY tsconfig.settings.json ./
-# COPY Source/ManagementUI ./Source/ManagementUI
-
-# WORKDIR /app/Source/ManagementUI
-
-# RUN yarn
-# RUN yarn build
+RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-arm64v8
 ARG CONFIGURATION=Release
+ARG VERSION
 
-RUN echo Configuration = $CONFIGURATION
-# ENV LD_DEBUG=all
+RUN echo Configuration = ${CONFIGURATION}
+RUN echo Version = ${VERSION}
 
 # https://danielstoyanoff.medium.com/apple-silicon-docker-dotnet-grpc-is-that-compatible-8a05f1a71d89
 RUN apt-get update \
@@ -62,9 +40,7 @@ RUN if [ "$CONFIGURATION" = "Debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
 COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
-#COPY --from=web-build /app/Source/ManagementUI/wwwroot ./wwwroot
 
-EXPOSE 81
-EXPOSE 9700
+EXPOSE 9700 50052 50053 51052
 
 ENTRYPOINT ["dotnet", "Dolittle.Runtime.Server.dll"]

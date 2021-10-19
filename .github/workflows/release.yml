@@ -66,6 +66,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}
       - name: Push Latest Tag Of Production Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -74,6 +76,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest
 
   release-arm64-runtime-production-image:
@@ -96,6 +100,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64
           platforms: linux/arm64
       - name: Push Latest Tag Of ARM64 Production Image to Docker Hub
@@ -105,6 +111,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-arm64
           platforms: linux/arm64
 
@@ -125,8 +133,10 @@ jobs:
         with:
           push: true
           context: .
-          build-args: CONFIGURATION="Debug"
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            CONFIGURATION=Debug
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-debug
       - name: Push Latest Tag Of Debug Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -135,6 +145,9 @@ jobs:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            CONFIGURATION=Debug
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-debug
 
   release-runtime-development-image:
@@ -155,6 +168,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development
       - name: Push Latest Tag Of Development Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -163,6 +178,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-development
 
   release-runtime-arm64-development-image:
@@ -185,6 +202,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64-development
           platforms: linux/arm64
       - name: Push Latest Tag Of ARM64 Development Image to Docker Hub
@@ -194,6 +213,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-arm64-development
           platforms: linux/arm64
 
@@ -207,9 +228,14 @@ jobs:
       - uses: actions/setup-dotnet@v1
         with:
           dotnet-version: "5.0.x"
+      - name: Package as DotNET tool
+        working-directory: ./Source/CLI
+        run: dotnet pack --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PackageVersion=${{ needs.setup.outputs.next-version }}
+      - name: Push DotNET tool to NuGet
+        run: dotnet nuget push --skip-duplicate './Source/CLI/bin/Release/*.nupkg' --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
       - name: Publish for macOS x64
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx-x64
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx-x64
       - name: Upload macOS x64
         uses: actions/upload-release-asset@v1
         env:
@@ -221,7 +247,7 @@ jobs:
           asset_content_type: application/octet-stream
 #      - name: Publish for macOS arm64
 #        working-directory: ./Source/CLI
-#        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx.11.0-arm64
+#        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx.11.0-arm64
 #      - name: Upload macOS arm64
 #        uses: actions/upload-release-asset@v1
 #        env:
@@ -233,55 +259,55 @@ jobs:
 #          asset_content_type: application/octet-stream
       - name: Publish for Windows x64
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x64
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x64
       - name: Upload Windows x64
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-x64/publish/dolittle
-          asset_name: dolittle-win-x64
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-x64/publish/dolittle.exe
+          asset_name: dolittle-win-x64.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows x86
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x86
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x86
       - name: Upload Windows x86
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-x86/publish/dolittle
-          asset_name: dolittle-win-x86
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-x86/publish/dolittle.exe
+          asset_name: dolittle-win-x86.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows arm64
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-arm64
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-arm64
       - name: Upload Windows arm64
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm64/publish/dolittle
-          asset_name: dolittle-win-arm64
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm64/publish/dolittle.exe
+          asset_name: dolittle-win-arm64.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows arm
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-arm
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-arm
       - name: Upload Windows arm
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm/publish/dolittle
-          asset_name: dolittle-win-arm
+          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm/publish/dolittle.exe
+          asset_name: dolittle-win-arm.exe
           asset_content_type: application/octet-stream
       - name: Publish for Linux x64
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-x64
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-x64
       - name: Upload Linux x64
         uses: actions/upload-release-asset@v1
         env:
@@ -293,7 +319,7 @@ jobs:
           asset_content_type: application/octet-stream
       - name: Publish for Linux arm64
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-arm64
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-arm64
       - name: Upload Linux arm64
         uses: actions/upload-release-asset@v1
         env:
@@ -305,7 +331,7 @@ jobs:
           asset_content_type: application/octet-stream
       - name: Publish for Linux arm
         working-directory: ./Source/CLI
-        run: dotnet publish --configuration Release -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-arm
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=linux-arm
       - name: Upload Linux arm
         uses: actions/upload-release-asset@v1
         env:

@@ -6,11 +6,9 @@
         <OutputType>Exe</OutputType>
         <TargetFramework>net5.0</TargetFramework>
         <LangVersion>latest</LangVersion>
-
-        <!--
-        <PublishSingleFile>true</PublishSingleFile>
-        <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
-        -->
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>dolittle</ToolCommandName>
+        <Description>The Dolittle CLI tool.</Description>
     </PropertyGroup>
 
     <ItemGroup>
