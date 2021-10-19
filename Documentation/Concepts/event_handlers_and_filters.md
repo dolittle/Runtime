@@ -60,7 +60,7 @@ It is possible to add a new type of event into the handler if it doesn't invalid
 
 ### Replaying events
 
-An event handler is meant to handle each events only once, however if you for some reason need to "replay" or "re-handle" all or some of the events for an event handler, you can use the [Dolittle CLI]({{< ref "cli" >}}) to initiate this while the microservice is running.
+An event handler is meant to handle each events only once, however if you for some reason need to "replay" or "re-handle" all or some of the events for an event handler, you can use the [Dolittle CLI]({{< ref "docs/reference/cli" >}}) to initiate this while the microservice is running.
 
 The replay does not allow you to change what event types the event handler handles. To do this, you need to change the event handlers `EventHandlerId`. This registers a completely new event handler with the Runtime, and a completely new stream is created. This way no old streams are invalidated.
 
