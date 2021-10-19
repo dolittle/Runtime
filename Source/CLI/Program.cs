@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.CLI.Configuration.Runtime;
 using Dolittle.Runtime.CLI.Options.Parsers;
@@ -21,20 +22,28 @@ namespace Dolittle.Runtime.CLI
     {
         static int Main(string[] args)
         {
-            using var cli = new CommandLineApplication<Program>();
-            var services = new ServiceCollection();
-            
-            services.AddSingleton<CommandLineApplication>(cli);
-            
-            AddServices(services);
-            
-            var container = services.BuildServiceProvider();
-            
-            cli.Conventions.UseDefaultConventions();
-            cli.Conventions.UseConstructorInjection(container);
-            cli.ValueParsers.UseAllValueParsers(container);
+            try
+            {
+                using var cli = new CommandLineApplication<Program>();
+                var services = new ServiceCollection();
+                
+                services.AddSingleton<CommandLineApplication>(cli);
+                
+                AddServices(services);
+                
+                var container = services.BuildServiceProvider();
+                
+                cli.Conventions.UseDefaultConventions();
+                cli.Conventions.UseConstructorInjection(container);
+                cli.ValueParsers.UseAllValueParsers(container);
 
-            return cli.Execute(args);
+                return cli.Execute(args);
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
+                return 1;
+            }
         }
 
         static void AddServices(ServiceCollection services)
