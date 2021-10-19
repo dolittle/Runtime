@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
     /// <summary>
     /// The "dolittle runtime eventhandlers list" command.
     /// </summary>
-    [Command("list", "ls",  "List all running Event Handlers")]
+    [Command("list", "ls", Description = "List all running Event Handlers")]
     public class ListCommand : CommandBase
     {
         readonly IManagementClient _client;

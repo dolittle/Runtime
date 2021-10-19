@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
     /// <summary>
     /// The "dolittle runtime eventhandlers replay from" command.
     /// </summary>
-    [Command("from", "Make an Event Handler reprocess events from a specific position for a tenant")]
+    [Command("from", Description = "Make an Event Handler reprocess events from a specific position for a tenant")]
     public class FromCommand : CommandBase
     {
         readonly IManagementClient _client;

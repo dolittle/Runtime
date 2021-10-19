@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
     /// <summary>
     /// The "dolittle runtime eventhandlers" command.
     /// </summary>
-    [Command("eventhandlers", "Manage Event Handlers")]
+    [Command("eventhandlers", Description = "Manage Event Handlers")]
     [Subcommand(typeof(Replay.Command))]
     [Subcommand(typeof(ListCommand))]
     public class Command : CommandBase

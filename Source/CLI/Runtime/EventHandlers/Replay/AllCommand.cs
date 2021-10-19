@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
     /// <summary>
     /// The "dolittle runtime eventhandlers replay all" command.
     /// </summary>
-    [Command("all", "Make an Event Handler reprocess all events")]
+    [Command("all", Description = "Make an Event Handler reprocess all events")]
     public class AllCommand : CommandBase
     {
         readonly IManagementClient _client;
