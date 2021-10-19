@@ -1,11 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 
@@ -33,5 +33,12 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         /// <param name="runtime">The address of the Runtime to connect to.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task ReprocessAllEvents(EventHandlerId eventHandler, MicroserviceAddress runtime);
+        
+        /// <summary>
+        /// Gets all running Event Handlers.
+        /// </summary>
+        /// <param name="runtime">The address of the Runtime to connect to.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime);
     }
 }

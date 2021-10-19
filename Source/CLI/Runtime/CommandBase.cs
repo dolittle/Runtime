@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.CLI.Runtime
             if (!addresses.Any())
             {
                 await cli.Error.WriteLineAsync("Could not find any Runtimes to connect to locally, please ensure you have one running and if so specify the address manually using --runtime <host[:port]>.");
-                Try.Failed(new CouldNotFindRuntimeAddress());
+                return new CouldNotFindRuntimeAddress();
             }
 
             if (addresses.Count == 1)

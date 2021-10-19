@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// </summary>
     public class StreamProcessor : IDisposable
     {
-        readonly IDictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new Dictionary<TenantId, AbstractScopedStreamProcessor>();
+        readonly Dictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new();
         readonly StreamProcessorId _identifier;
         readonly IPerformActionOnAllTenants _onAllTenants;
         readonly IStreamDefinition _streamDefinition;
@@ -68,6 +68,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _logger = logger;
             _stopAllScopedStreamProcessorsTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         }
+
+        /// <summary>
+        /// Gets all current <see cref="IStreamProcessorState"/> states. 
+        /// </summary>
+        /// <returns>The  <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
+        public Try<IDictionary<TenantId, IStreamProcessorState>> GetCurrentStates()
+            => _initialized
+                ? _streamProcessors.ToDictionary(_ => _.Key, _ => _.Value.GetCurrentState())
+                : new StreamProcessorNotInitialized(_identifier);
 
         /// <summary>
         /// Initializes the stream processor.

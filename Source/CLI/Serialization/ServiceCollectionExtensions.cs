@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.CLI.Serialization
         /// <param name="services">The service collection to add serialization services to.</param>
         public static void AddSerializers(this ServiceCollection services)
         {
-            var converters = new StaticConverterProvider();
+            var converters = new StaticConverterProvider(new ConceptConverter());
             var providers = new StaticConverterProviders(converters);
             var serializer = new Serializer(providers);
             services.AddSingleton<ISerializer>(serializer);

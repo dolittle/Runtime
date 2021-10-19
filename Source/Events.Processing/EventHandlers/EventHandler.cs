@@ -85,6 +85,12 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _loggerFactory = loggerFactory;
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
+            Info = new EventHandlerInfo(
+                new EventHandlerId(arguments.Scope, arguments.EventHandler),
+                arguments.Alias,
+                arguments.EventTypes,
+                arguments.Partitioned);
+
             FilterDefinition = new TypeFilterWithEventSourcePartitionDefinition(
                 StreamId.EventLog,
                 TargetStream,
@@ -99,11 +105,18 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
                                     Partitioned));
         }
 
+        
+        
         /// <summary>
         /// Gets the <see cref="StreamId">target stream</see> for the <see cref="EventHandler"/>.
         /// </summary>
         public StreamId TargetStream => _arguments.EventHandler.Value;
-
+        
+        /// <summary>
+        /// Gets the <see cref="EventHandlerInfo"/> for the <see cref="EventHandler"/>.
+        /// </summary>
+        public EventHandlerInfo Info { get; }
+        
         /// <summary>
         /// Gets the <see cref="Scope"/> for the <see cref="EventHandler"/>.
         /// </summary>
@@ -144,7 +157,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// </summary>
         public StreamProcessor EventProcessorStreamProcessor { get; private set; }
 
-
+        /// <summary>
+        /// Gets the current state of the Event Handler. 
+        /// </summary>
+        /// <returns>The  <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
+        public Try<IDictionary<TenantId, IStreamProcessorState>> GetEventHandlerCurrentState()
+            => EventProcessorStreamProcessor != default
+                ? EventProcessorStreamProcessor.GetCurrentStates()
+                : new EventHandlerNotRegistered(Info.Id);
+        
         /// <summary>
         /// Reprocesses all events from a <see cref="StreamPosition" /> for a tenant.
         /// </summary>

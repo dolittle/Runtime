@@ -8,7 +8,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
     /// <summary>
     /// The "dolittle runtime eventhandlers replay" command.
     /// </summary>
-    [Command("replay", "Make an Event Handler reprocess events")]
+    [Command("replay", Description = "Make an Event Handler reprocess events")]
     [Subcommand(typeof(AllCommand))]
     [Subcommand(typeof(FromCommand))]
     public class Command : Runtime.CommandBase
