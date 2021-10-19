@@ -41,7 +41,7 @@ jobs:
           user-email: build@dolittle.com
           user-name: dolittle-build
       - name: Create GitHub Release
-        id: create-release 
+        id: create-release
         uses: dolittle/github-release-action@v2
         if: ${{ steps.context.outputs.should-publish == 'true' }}
         with:
