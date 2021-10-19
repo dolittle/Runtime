@@ -79,7 +79,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
             var response = await client.GetAllAsync(request);
             if (response.Failure != null)
             {
-                throw new GetAllEventHandlers(response.Failure.Reason);
+                throw new GetAllEventHandlersFailed(response.Failure.Reason);
             }
             return response.EventHandlers.Select(CreateEventHandlerStatus);
         }
