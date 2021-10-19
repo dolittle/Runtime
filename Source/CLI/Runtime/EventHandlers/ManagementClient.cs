@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,7 +11,7 @@ using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
-using Google.Protobuf.Collections;
+using Contracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
@@ -83,44 +82,42 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
             }
             return response.EventHandlers.Select(CreateEventHandlerStatus);
         }
-        static EventHandlerStatus CreateEventHandlerStatus(Events.Processing.Management.Contracts.EventHandlerStatus status)
+        
+        static EventHandlerStatus CreateEventHandlerStatus(Contracts.EventHandlerStatus status)
             => new(
                 new EventHandlerId(status.ScopeId.ToGuid(), status.EventHandlerId.ToGuid()),
                 status.EventTypes.Select(_ => new Artifact(_.Id.ToGuid(), _.Generation)),
                 status.Partitioned,
                 status.Alias,
                 GetStates(status));
-            static IDictionary<TenantId, IStreamProcessorState> GetStates(Events.Processing.Management.Contracts.EventHandlerStatus status)
-            => status.Tenants.ToDictionary(
-                _ => new TenantId(_.TenantId.ToGuid()),
-                _ =>
+
+        static IEnumerable<TenantScopedStreamProcessorStatus> GetStates(Contracts.EventHandlerStatus status)
+            => status.Tenants.Select(_ => _.StatusCase switch
             {
-                IStreamProcessorState state = status.Partitioned
-                    ? CreatePartitionedState(_, _.StreamPosition, _.LastSuccessfullyProcessed.ToDateTimeOffset())
-                    : CreateUnpartitionedState(_);
-                return state;
+               Contracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Partitioned => CreatePartitionedState(_, _.Partitioned) as TenantScopedStreamProcessorStatus,
+               Contracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Unpartitioned => CreateUnpartitionedState(_, _.Unpartitioned) as TenantScopedStreamProcessorStatus,
+               _ => throw new InvalidTenantScopedStreamProcessorStatusTypeReceived(_.StatusCase),
             });
 
-        static Events.Processing.Streams.Partitioned.StreamProcessorState CreatePartitionedState(Events.Processing.Management.Contracts.TenantScopedStreamProcessorStatus status, StreamPosition streamPosition, DateTimeOffset lastSuccessfullyProcessed)
+        static PartitionedTenantScopedStreamProcessorStatus CreatePartitionedState(Contracts.TenantScopedStreamProcessorStatus status, Contracts.PartitionedTenantScopedStreamProcessorStatus partitionedStatus)
             => new(
-                streamPosition,
-                status.Partitioned.FailingPartitions.ToDictionary(
-                    _ => new PartitionId(_.Key),
-                    _ => new Events.Processing.Streams.Partitioned.FailingPartitionState(
-                        _.Value.StreamPosition,
-                        _.Value.RetryTime.ToDateTimeOffset(),
-                        _.Value.FailureReason,
-                        _.Value.RetryCount,
-                        _.Value.LastFailed.ToDateTimeOffset())),
-                lastSuccessfullyProcessed);
-
-        static Events.Processing.Streams.StreamProcessorState CreateUnpartitionedState(Events.Processing.Management.Contracts.TenantScopedStreamProcessorStatus status)
-            => new(
+                status.TenantId.ToGuid(),
                 status.StreamPosition,
-                status.Unpartitioned.FailureReason,
-                status.Unpartitioned.RetryTime.ToDateTimeOffset(),
-                status.Unpartitioned.RetryCount,
-                status.LastSuccessfullyProcessed.ToDateTimeOffset(),
-                status.Unpartitioned.IsFailing);
+                partitionedStatus.FailingPartitions.Select(_ => new FailingPartition(
+                    _.PartitionId,
+                    _.StreamPosition,
+                    _.FailureReason,
+                    _.RetryCount,
+                    _.RetryTime.ToDateTimeOffset(),
+                    _.LastFailed.ToDateTimeOffset())));
+
+        static UnpartitionedTenantScopedStreamProcessorStatus CreateUnpartitionedState(Contracts.TenantScopedStreamProcessorStatus status, Contracts.UnpartitionedTenantScopedStreamProcessorStatus unpartitionedStatus)
+            => new(
+                status.TenantId.ToGuid(),
+                status.StreamPosition,
+                unpartitionedStatus.IsFailing,
+                unpartitionedStatus.FailureReason,
+                unpartitionedStatus.RetryCount,
+                unpartitionedStatus.RetryTime.ToDateTimeOffset());
     }
 }
