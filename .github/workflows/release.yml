@@ -66,6 +66,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}
       - name: Push Latest Tag Of Production Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -74,6 +76,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest
 
   release-arm64-runtime-production-image:
@@ -96,6 +100,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64
           platforms: linux/arm64
       - name: Push Latest Tag Of ARM64 Production Image to Docker Hub
@@ -105,6 +111,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Production/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-arm64
           platforms: linux/arm64
 
@@ -125,8 +133,10 @@ jobs:
         with:
           push: true
           context: .
-          build-args: CONFIGURATION="Debug"
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            CONFIGURATION=Debug
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-debug
       - name: Push Latest Tag Of Debug Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -135,6 +145,9 @@ jobs:
           push: true
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            CONFIGURATION=Debug
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-debug
 
   release-runtime-development-image:
@@ -155,6 +168,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-development
       - name: Push Latest Tag Of Development Image to Docker Hub
         uses: docker/build-push-action@v2
@@ -163,6 +178,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-development
 
   release-runtime-arm64-development-image:
@@ -185,6 +202,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:${{ needs.setup.outputs.next-version }}-arm64-development
           platforms: linux/arm64
       - name: Push Latest Tag Of ARM64 Development Image to Docker Hub
@@ -194,6 +213,8 @@ jobs:
           push: true
           context: .
           file: ./Docker/ARM64Development/Dockerfile
+          build-args: |
+            VERSION=${{ needs.setup.outputs.next-version }}
           tags: dolittle/runtime:latest-arm64-development
           platforms: linux/arm64
 
