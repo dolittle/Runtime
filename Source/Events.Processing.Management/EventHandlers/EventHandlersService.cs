@@ -5,15 +5,18 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Protobuf;
 using Google.Protobuf.Collections;
 using Google.Protobuf.WellKnownTypes;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
+using Artifact = Dolittle.Artifacts.Contracts.Artifact;
 
 namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
 {
@@ -65,7 +68,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
         }
 
         /// <inheritdoc />
-        public override async Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
+        public override Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
         {
             var response = new GetAllResponse();
             _logger.GetAll();
@@ -80,24 +83,31 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
                     ScopeId = info.Id.Scope.ToProtobuf(),
                     EventHandlerId = info.Id.EventHandler.ToProtobuf()
                 };
+                status.EventTypes.AddRange(CreateEventTypes(info));
                 status.Tenants.AddRange(CreateScopedStreamProcessorStatus(info));
+                
                 response.EventHandlers.Add(status);
             }
 
-            return response;
+            return Task.FromResult(response);
         }
+
+        IEnumerable<Artifact> CreateEventTypes(EventHandlerInfo info)
+            => info.EventTypes.Select(_ => new Artifact()
+            {
+                Id = _.ToProtobuf(),
+                Generation = ArtifactGeneration.First,
+            });
+        
         IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(EventHandlerInfo info)
         {
-            var statuses = new List<TenantScopedStreamProcessorStatus>();
-
             var state = _eventHandlers.CurrentStateFor(info.Id);
             if (!state.Success)
             {
                 throw state.Exception;
             }
-            statuses.AddRange(state.Result.Select(CreateStatusFromState));
 
-            return statuses;
+            return state.Result.Select(CreateStatusFromState);
         }
 
         static TenantScopedStreamProcessorStatus CreateStatusFromState(KeyValuePair<TenantId, IStreamProcessorState> tenantAndState)
@@ -106,40 +116,43 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
             var status = new TenantScopedStreamProcessorStatus
             {
                 StreamPosition = state.Position,
-                TenantId = tenant.ToProtobuf()
+                TenantId = tenant.ToProtobuf(),
             };
-            if (state.Partitioned)
-            {
-                var partitionedState = (Streams.Partitioned.StreamProcessorState)state;
-                status.LastSuccessfullyProcessed = partitionedState.LastSuccessfullyProcessed.ToTimestamp();
-                status.Partitioned = new PartitionedTenantScopedStreamProcessorStatus();
-                foreach (var (partition, failure) in partitionedState.FailingPartitions)
-                {
-                    status.Partitioned.FailingPartitions.Add(
-                        partition.Value,
-                        new FailingPartition
-                        {
-                            FailureReason = failure.Reason,
-                            LastFailed = failure.LastFailed.ToTimestamp(),
-                            RetryCount = failure.ProcessingAttempts,
-                            RetryTime = failure.RetryTime.ToTimestamp(),
-                            StreamPosition = failure.Position
-                        });
-                }
-            }
-            else
-            {
-                var unpartitionedState = (Streams.StreamProcessorState)state;
-                status.LastSuccessfullyProcessed = unpartitionedState.LastSuccessfullyProcessed.ToTimestamp();
-                status.Unpartitioned = new UnpartitionedTenantScopedStreamProcessorStatus
-                {
-                    FailureReason = unpartitionedState.FailureReason,
-                    IsFailing = unpartitionedState.IsFailing,
-                    RetryCount = unpartitionedState.ProcessingAttempts,
-                    RetryTime = unpartitionedState.RetryTime.ToTimestamp()
-                };
-            }
 
+            switch (state)
+            {
+                case Streams.Partitioned.StreamProcessorState partitionedState:
+                {
+                    status.LastSuccessfullyProcessed = partitionedState.LastSuccessfullyProcessed.ToTimestamp();
+                    status.Partitioned = new PartitionedTenantScopedStreamProcessorStatus();
+                    foreach (var (partition, failure) in partitionedState.FailingPartitions)
+                    {
+                        status.Partitioned.FailingPartitions.Add(
+                            new FailingPartition
+                            {
+                                PartitionId = partition,
+                                FailureReason = failure.Reason,
+                                LastFailed = failure.LastFailed.ToTimestamp(),
+                                RetryCount = failure.ProcessingAttempts,
+                                RetryTime = failure.RetryTime.ToTimestamp(),
+                                StreamPosition = failure.Position
+                            });
+                    }
+
+                    break;
+                }
+                case Streams.StreamProcessorState unpartitionedState:
+                    status.LastSuccessfullyProcessed = unpartitionedState.LastSuccessfullyProcessed.ToTimestamp();
+                    status.Unpartitioned = new UnpartitionedTenantScopedStreamProcessorStatus
+                    {
+                        FailureReason = unpartitionedState.FailureReason,
+                        IsFailing = unpartitionedState.IsFailing,
+                        RetryCount = unpartitionedState.ProcessingAttempts,
+                        RetryTime = unpartitionedState.RetryTime.ToTimestamp()
+                    };
+                    break;
+            }
+            
             return status;
         }
     }
