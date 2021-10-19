@@ -58,20 +58,25 @@ namespace Dolittle.Runtime.Types
         /// <inheritdoc/>
         public Type FindTypeByFullName(string fullName)
         {
-            var typeFound = _contractToImplementorsMap.All.Where(t => t.FullName == fullName).SingleOrDefault();
+            var typeFound = _contractToImplementorsMap.All.SingleOrDefault(t => t.FullName == fullName);
             ThrowIfTypeNotFound(fullName, typeFound);
             return typeFound;
         }
 
-        void ThrowIfMultipleTypesFound(Type type, IEnumerable<Type> typesFound)
+        static void ThrowIfMultipleTypesFound(Type type, IEnumerable<Type> typesFound)
         {
             if (typesFound.Count() > 1)
+            {
                 throw new MultipleTypesFound(type, typesFound);
+            }
         }
 
-        void ThrowIfTypeNotFound(string fullName, Type typeFound)
+        static void ThrowIfTypeNotFound(string fullName, Type typeFound)
         {
-            if (typeFound == null) throw new UnableToResolveTypeByName(fullName);
+            if (typeFound == null)
+            {
+                throw new UnableToResolveTypeByName(fullName);
+            }
         }
     }
 }

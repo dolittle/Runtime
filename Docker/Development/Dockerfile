@@ -65,6 +65,6 @@ COPY Docker/Development/docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
 # Expose all the ports that are usefull
-EXPOSE 1880 27017 9007 50052 50053
+EXPOSE 1880 27017 9007 50052 50053 51052
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/usr/bin/docker-entrypoint.sh"]

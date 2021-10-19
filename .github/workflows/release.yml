@@ -15,7 +15,7 @@ jobs:
       should-publish: ${{ steps.context.outputs.should-publish }}
       release-type: ${{ steps.context.outputs.release-type }}
       next-version: ${{ steps.increment-version.outputs.next-version }}
-      release-output-url: ${{ steps.create-release.outputs.upload_url }}
+      release-upload-url: ${{ steps.create-release.outputs.upload_url }}
     steps:
       - uses: actions/checkout@v2
       - name: Establish context

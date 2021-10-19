@@ -139,12 +139,13 @@ namespace Dolittle.Runtime.Embeddings.Processing
                 {
                     return uncommittedEvents.Exception;
                 }
-                if (uncommittedEvents.Result.Count > 0)
+                if (uncommittedEvents.Result.Count <= 0)
                 {
-                    _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
-                    var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-                    await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
+                    return Try.Succeeded();
                 }
+                _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
+                var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
+                await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
                 return Try.Succeeded();
             }
             catch (Exception ex)
