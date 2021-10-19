@@ -67,5 +67,17 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
                 throw new ReprocessAllEventsFailed(response.Failure.Reason);
             }
         }
+
+        /// <inheritdoc />
+        public async Task GetAll(MicroserviceAddress runtime)
+        {
+            var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
+            var request = new GetAllRequest();
+            var response = await client.GetAllAsync(request);
+            if (response.Failure != null)
+            {
+                throw new GetAllEventHandlers(response.Failure.Reason);
+            }
+        }
     }
 }

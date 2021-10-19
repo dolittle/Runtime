@@ -33,5 +33,12 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         /// <param name="runtime">The address of the Runtime to connect to.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task ReprocessAllEvents(EventHandlerId eventHandler, MicroserviceAddress runtime);
+        
+        /// <summary>
+        /// Gets all running Event Handlers.
+        /// </summary>
+        /// <param name="runtime">The address of the Runtime to connect to.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task GetAll(MicroserviceAddress runtime);
     }
 }
