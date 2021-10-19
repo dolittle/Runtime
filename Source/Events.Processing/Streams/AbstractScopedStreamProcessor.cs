@@ -70,11 +70,17 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="AbstractScopedStreamProcessor"/>.
         /// </summary>
         public IStreamProcessorId Identifier { get; }
-
+        
         /// <summary>
         /// Gets the <see cref="ILogger" />.
         /// </summary>
         protected ILogger Logger { get; }
+        
+        /// <summary>
+        /// Gets the current <see cref="IStreamProcessorState"/>.
+        /// </summary>
+        /// <returns>Current <see cref="IStreamProcessorState"/>.</returns>
+        public IStreamProcessorState GetCurrentState() => _currentState;
 
         /// <summary>
         /// Starts the stream processing.

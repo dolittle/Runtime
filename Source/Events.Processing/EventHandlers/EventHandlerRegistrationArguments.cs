@@ -11,6 +11,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     public record EventHandlerRegistrationArguments(
         ExecutionContext ExecutionContext,
         EventProcessorId EventHandler,
+        EventHandlerAlias Alias,
         IEnumerable<ArtifactId> EventTypes,
         bool Partitioned,
         ScopeId Scope);

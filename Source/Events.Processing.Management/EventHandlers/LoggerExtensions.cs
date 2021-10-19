@@ -25,11 +25,19 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
                 LogLevel.Information,
                 new EventId(4233, nameof(ReprocessAllEvents)),
                 "Reprocessing all events for event handler {EventHandler} for all tenants in scope {Scope}");
+        
+        static readonly Action<ILogger, Exception> _getAllEventHandlers = LoggerMessage
+            .Define(
+                LogLevel.Information,
+                new EventId(414912821, nameof(GetAll)),
+                "Getting all running event handlers");
 
         internal static void ReprocessEventsFrom(this ILogger logger, EventHandlerId eventHandler, TenantId tenant, StreamPosition position)
             => _reprocessEventsFrom(logger, position, eventHandler.EventHandler, tenant, eventHandler.Scope, null);
 
         internal static void ReprocessAllEvents(this ILogger logger, EventHandlerId eventHandler)
             => _reprocessAllEvents(logger, eventHandler.EventHandler, eventHandler.Scope, null);
+        internal static void GetAll(this ILogger logger)
+            => _getAllEventHandlers(logger, null);
     }
 }

@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
@@ -61,6 +62,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _streamProcessors = streamProcessors;
             _logger = loggerFactory.CreateLogger<EventHandlers>();
         }
+        
+        /// <inheritdoc />
+        public IEnumerable<EventHandlerInfo> All => _eventHandlers.Select(_ => _.Value.Info);
+
+        /// <inheritdoc />
+        public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId)
+            => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
+                ? eventHandler.GetEventHandlerCurrentState()
+                : new EventHandlerNotRegistered(eventHandlerId);
         
         /// <inheritdoc />
         public async Task RegisterAndStart(ReverseCallDispatcherType dispatcher, EventHandlerRegistrationArguments arguments, CancellationToken cancellationToken)
