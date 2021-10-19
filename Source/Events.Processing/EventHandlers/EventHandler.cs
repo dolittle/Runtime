@@ -84,25 +84,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             _getEventsToStreamsWriter = getEventsToStreamsWriter;
             _loggerFactory = loggerFactory;
             _cancellationTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-
-            Info = new EventHandlerInfo(
-                new EventHandlerId(arguments.Scope, arguments.EventHandler),
-                arguments.Alias,
-                arguments.EventTypes,
-                arguments.Partitioned);
-
-            FilterDefinition = new TypeFilterWithEventSourcePartitionDefinition(
-                StreamId.EventLog,
-                TargetStream,
-                EventTypes,
-                Partitioned);
-
-            FilteredStreamDefinition = new StreamDefinition(
-                            new TypeFilterWithEventSourcePartitionDefinition(
-                                    TargetStream,
-                                    TargetStream,
-                                    EventTypes,
-                                    Partitioned));
         }
 
         
@@ -111,11 +92,16 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// Gets the <see cref="StreamId">target stream</see> for the <see cref="EventHandler"/>.
         /// </summary>
         public StreamId TargetStream => _arguments.EventHandler.Value;
-        
+
         /// <summary>
         /// Gets the <see cref="EventHandlerInfo"/> for the <see cref="EventHandler"/>.
         /// </summary>
-        public EventHandlerInfo Info { get; }
+        public EventHandlerInfo Info => new(
+            new EventHandlerId(_arguments.Scope, _arguments.EventHandler),
+            _arguments.HasAlias,
+            _arguments.Alias,
+            _arguments.EventTypes,
+            _arguments.Partitioned);
         
         /// <summary>
         /// Gets the <see cref="Scope"/> for the <see cref="EventHandler"/>.
@@ -140,12 +126,21 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// <summary>
         /// Gets the <see cref="StreamDefinition"/> for the filtered stream.
         /// </summary>
-        public StreamDefinition FilteredStreamDefinition { get; }
+        public StreamDefinition FilteredStreamDefinition => new(
+            new TypeFilterWithEventSourcePartitionDefinition(
+                TargetStream,
+                TargetStream,
+                EventTypes,
+                Partitioned));
 
         /// <summary>
         /// Gets the <see cref="TypeFilterWithEventSourcePartitionDefinition"/> for the filter.
         /// </summary>
-        public TypeFilterWithEventSourcePartitionDefinition FilterDefinition { get; }
+        public TypeFilterWithEventSourcePartitionDefinition FilterDefinition => new(
+            StreamId.EventLog,
+            TargetStream,
+            EventTypes,
+            Partitioned);
 
         /// <summary>
         /// Gets the <see cref="StreamProcessor"/> for the filter.
