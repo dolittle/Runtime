@@ -1,10 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System;
 using System.Reflection;
 using Dolittle.Runtime.Reflection;
 using Dolittle.Runtime.Rudimentary;
 using Newtonsoft.Json;
+
 namespace Dolittle.Runtime.Serialization.Json
 {
     /// <summary>
@@ -20,9 +22,9 @@ namespace Dolittle.Runtime.Serialization.Json
         {
             var valueType = objectType.GetTypeInfo().BaseType?.GetGenericArguments()[0];
             var value = serializer.Deserialize(reader, valueType);
-            var constructor = objectType.GetConstructor(new[] {valueType});
-            
-            return constructor.Invoke(new object[] {value});
+            var constructor = objectType.GetConstructor(new[] { valueType });
+
+            return constructor.Invoke(new object[] { value });
         }
 
         /// <inheritdoc/>
@@ -31,4 +33,5 @@ namespace Dolittle.Runtime.Serialization.Json
             serializer.Serialize(writer, value.GetType().GetProperty(nameof(ConceptAs<object>.Value))?.GetValue(value));
         }
     }
+
 }
