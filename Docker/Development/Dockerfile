@@ -15,7 +15,7 @@ RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0
-ARG CONFIGURATION=Releas
+ARG CONFIGURATION=Release
 ARG VERSION
 
 RUN echo Configuration = ${CONFIGURATION}
