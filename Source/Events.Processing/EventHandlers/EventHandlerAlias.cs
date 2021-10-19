@@ -10,6 +10,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     public record EventHandlerAlias(string Value) : ConceptAs<string>(Value)
     {
         /// <summary>
+        /// Gets the <see cref="EventHandlerAlias"/> to use when none is provided by the Client.
+        /// </summary>
+        public static EventHandlerAlias NotSet => "No alias";
+        
+        /// <summary>
         /// Implicitly convert from <see cref="string"/> to <see cref="EventHandlerAlias"/>.
         /// </summary>
         /// <param name="alias"><see cref="string"/> representation.</param>

@@ -12,15 +12,15 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
     {
         protected static EventHandler event_handler;
 
-        Establish context = () =>
+        private Establish context = () =>
         {
             arguments = new(
-                 execution_context,
-                 StreamId.EventLog.Value,
-                 "alias",
-                 Array.Empty<ArtifactId>(),
-                 false,
-                 scope);
+                execution_context,
+                StreamId.EventLog.Value,
+                Array.Empty<ArtifactId>(),
+                false,
+                scope,
+                "alias");
 
             event_handler = new EventHandler(
                 stream_processors.Object,

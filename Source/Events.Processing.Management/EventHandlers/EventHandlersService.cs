@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
             {
                 var status = new EventHandlerStatus
                 {   
-                    Alias = info.HasAlias ? info.Alias.Value : "",
+                    Alias = info.Alias,
                     Partitioned = info.Partitioned,
                     ScopeId = info.Id.Scope.ToProtobuf(),
                     EventHandlerId = info.Id.EventHandler.ToProtobuf()
