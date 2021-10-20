@@ -109,7 +109,8 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
                     _.FailureReason,
                     _.RetryCount,
                     _.RetryTime.ToDateTimeOffset(),
-                    _.LastFailed.ToDateTimeOffset())));
+                    _.LastFailed.ToDateTimeOffset())),
+                status.LastSuccessfullyProcessed.ToDateTimeOffset());
 
         static UnpartitionedTenantScopedStreamProcessorStatus CreateUnpartitionedState(Contracts.TenantScopedStreamProcessorStatus status, Contracts.UnpartitionedTenantScopedStreamProcessorStatus unpartitionedStatus)
             => new(
@@ -118,6 +119,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
                 unpartitionedStatus.IsFailing,
                 unpartitionedStatus.FailureReason,
                 unpartitionedStatus.RetryCount,
-                unpartitionedStatus.RetryTime.ToDateTimeOffset());
+                unpartitionedStatus.RetryTime.ToDateTimeOffset(),
+                status.LastSuccessfullyProcessed.ToDateTimeOffset());
     }
 }
