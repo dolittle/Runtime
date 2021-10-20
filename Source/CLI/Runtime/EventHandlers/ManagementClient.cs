@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -71,10 +72,14 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime)
+        public async Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime, TenantId tenant = null)
         {
             var client = _clients.CreateClientFor<EventHandlersClient>(runtime);
-            var request = new GetAllRequest();
+            var request = new GetAllRequest
+            {
+                TenantId = tenant?.ToProtobuf()
+            };
+
             var response = await client.GetAllAsync(request);
             if (response.Failure != null)
             {

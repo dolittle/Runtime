@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Rudimentary;
 using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatcher<
@@ -25,7 +24,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// Gets information about all Event Handlers
         /// </summary>
         IEnumerable<EventHandlerInfo> All { get; }
-        
+
         /// <summary>
         /// Gets the current state of an Event Handler.
         /// </summary>

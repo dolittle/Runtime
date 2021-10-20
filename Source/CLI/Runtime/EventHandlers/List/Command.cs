@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
@@ -29,6 +30,12 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
         {
             _client = client;
         }
+        
+        /// <summary>
+        /// The "--tenant" argument used to provide a Tenant Id.
+        /// </summary>
+        [Option("--tenant", CommandOptionType.SingleValue, Description = "The Tenant Id of the Event Handler states to include")]
+        TenantId Tenant { get; init; }
 
         /// <summary>
         /// The entrypoint for the "dolittle runtime eventhandlers list" command.
@@ -41,7 +48,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
             {
                 return;
             }
-            var eventHandlerStatuses = await _client.GetAll(runtimeAddress).ConfigureAwait(false);
+            var eventHandlerStatuses = await _client.GetAll(runtimeAddress, Tenant).ConfigureAwait(false);
             
             if (Output == OutputType.Json)
             {
