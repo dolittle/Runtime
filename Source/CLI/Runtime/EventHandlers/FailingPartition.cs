@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Events.Store.Streams;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
 {
@@ -16,8 +15,8 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
     /// <param name="RetryTime">The next time to process the failed Event.</param>
     /// <param name="LastFailed">The last time processing the failed Event was attempted.</param>
     public record FailingPartition(
-        PartitionId Id,
-        StreamPosition Position,
+        string Id,
+        ulong Position,
         string FailureReason,
         uint ProcessingAttempts,
         DateTimeOffset RetryTime,

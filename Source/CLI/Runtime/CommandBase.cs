@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Rudimentary;
+using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime
@@ -12,7 +13,7 @@ namespace Dolittle.Runtime.CLI.Runtime
     /// <summary>
     /// A shared command base for the "dolittle runtime" commands that provides shared arguments.
     /// </summary>
-    public abstract class CommandBase
+    public abstract class CommandBase : CLI.CommandBase
     {
         readonly ICanLocateRuntimes _runtimes;
 
@@ -20,7 +21,8 @@ namespace Dolittle.Runtime.CLI.Runtime
         /// Initializes a new instance of the <see cref="CommandBase"/> class.
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
-        protected CommandBase(ICanLocateRuntimes runtimes)
+        protected CommandBase(ICanLocateRuntimes runtimes, ISerializer jsonSerializer)
+            : base(jsonSerializer)
         {
             _runtimes = runtimes;
         }
