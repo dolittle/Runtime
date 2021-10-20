@@ -29,7 +29,6 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
         /// Gets the current state of an Event Handler.
         /// </summary>
         /// <param name="eventHandlerId">The <see cref="EventHandlerId"/>.</param>
-        /// <param name="tenantId">The optional <see cref="TenantId"/>.</param>
         /// <returns>The current state.</returns>
         Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId);
 
