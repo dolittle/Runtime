@@ -24,7 +24,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="ConsoleTables" Version="2.4.2" />
+        <PackageReference Include="ConsoleTables" Version="$(ConsoleTablesVersion)" />
         <PackageReference Include="Docker.DotNet" Version="$(DockerDotNetVersion)" />
         <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)" />
         <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMasterVersion)" />

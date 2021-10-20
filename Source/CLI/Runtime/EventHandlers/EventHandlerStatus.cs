@@ -31,6 +31,6 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         /// <summary>
         /// Gets a value indicating whether the Event Handler is in the default Scope.
         /// </summary>
-        public bool DefaultScope => Id.Scope.Equals(ScopeId.Default);
+        public bool IsInDefaultScope => Id.Scope.Equals(ScopeId.Default);
     }
 }

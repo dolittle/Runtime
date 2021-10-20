@@ -13,12 +13,16 @@ using Newtonsoft.Json;
 namespace Dolittle.Runtime.CLI
 {
     /// <summary>
-    /// A shared command base for the "dolittle runtime" commands that provides shared arguments.
+    /// A shared command base for the "dolittle" commands that provides shared arguments.
     /// </summary>
     public abstract class CommandBase
     {
         readonly ISerializer _jsonSerializer;
         
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CommandBase"/> class.
+        /// </summary>
+        /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
         protected CommandBase(ISerializer jsonSerializer)
         {
             _jsonSerializer = jsonSerializer;
