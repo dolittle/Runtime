@@ -108,8 +108,11 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
                 throw state.Exception;
             }
 
-            return state.Result.Where(_ => tenant == null || _.Key.Equals(tenant)).Select(CreateStatusFromState);
+            return state.Result.Where(_ => IsSpecificTenantOrAny(_, tenant)).Select(CreateStatusFromState);
         }
+
+        static bool IsSpecificTenantOrAny(KeyValuePair<TenantId, IStreamProcessorState> state, TenantId tenant)
+            => tenant == null || state.Key.Equals(tenant);
 
         static TenantScopedStreamProcessorStatus CreateStatusFromState(KeyValuePair<TenantId, IStreamProcessorState> tenantAndState)
         {
