@@ -15,17 +15,17 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
     /// The "dolittle runtime eventhandlers list" command.
     /// </summary>
     [Command("list", "ls", Description = "List all running Event Handlers")]
-    public class ListCommand : CommandBase
+    public class Command : CommandBase
     {
         readonly IManagementClient _client;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListCommand"/> class.
+        /// Initializes a new instance of the <see cref="Command"/> class.
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
         /// <param name="serializer">The json <see cref="ISerializer"/>.</param>
-        public ListCommand(ICanLocateRuntimes runtimes, IManagementClient client, ISerializer serializer)
+        public Command(ICanLocateRuntimes runtimes, IManagementClient client, ISerializer serializer)
             : base(runtimes, serializer)
         {
             _client = client;
@@ -74,7 +74,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
         static EventHandlerSimpleView CreateSimpleView(EventHandlerStatus status, bool isFailing)
             => new(
                 status.HasAlias ? status.Alias : status.Id.EventHandler.Value.ToString(), 
-                status.DefaultScope ? "Default" : status.Id.Scope.Value.ToString(),
+                status.IsInDefaultScope ? "Default" : status.Id.Scope.Value.ToString(),
                 status.Partitioned ? "✅" : "❌", 
                 isFailing  ? "❌" : "✅");
 
@@ -86,7 +86,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
                 return CreateDetailedView(
                     status,
                     states.Any(_ => _.FailingPartitions.Any()),
-                    states.Max(_ => _.LastSuccessfullyProcessed));
+                    states.Any() ? states.Max(_ => _.LastSuccessfullyProcessed) : DateTimeOffset.MinValue);
             }
             else
             {
@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
                 return CreateDetailedView(
                     status,
                     states.Any(_ => _.IsFailing),
-                    states.Max(_ => _.LastSuccessfullyProcessed));
+                    states.Any() ? states.Max(_ => _.LastSuccessfullyProcessed) : DateTimeOffset.MinValue);
             }
         }
 
@@ -102,7 +102,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
             => new(
                 status.Alias,
                 status.Id.EventHandler,
-                status.DefaultScope ? "Default" : status.Id.Scope.Value.ToString(),
+                status.IsInDefaultScope ? "Default" : status.Id.Scope.Value.ToString(),
                 status.Partitioned ? "✅" : "❌", 
                 isFailing  ? "❌" : "✅",
                 lastSuccessfullyProcessed);

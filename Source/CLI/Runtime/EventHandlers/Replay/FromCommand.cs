@@ -23,6 +23,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
+        /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
         public FromCommand(ICanLocateRuntimes runtimes, IManagementClient client, ISerializer jsonSerializer)
             : base(runtimes, jsonSerializer)
         {
