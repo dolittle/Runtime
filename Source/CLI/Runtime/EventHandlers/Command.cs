@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using Dolittle.Runtime.CLI.Runtime.EventHandlers.List;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -13,6 +12,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
     [Command("eventhandlers", Description = "Manage Event Handlers")]
     [Subcommand(typeof(Replay.Command))]
     [Subcommand(typeof(List.Command))]
+    [Subcommand(typeof(Get.Command))]
     public class Command : CommandBase
     {
         /// <summary>

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Rudimentary;
@@ -50,5 +51,15 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         /// <param name="tenant">The Tenant to get Event Handlers for.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null);
+
+        /// <summary>
+        /// Gets the running Event Handler with the given identifier and for a specific Tenant if specified.
+        /// </summary>
+        /// <param name="runtime">The address of the Runtime to connect to.</param>
+        /// <param name="eventHandler">The Event Handler identifier.</param>
+        /// <param name="scope">The Scope identifier.</param>
+        /// <param name="tenant">The Tenant to get Event Handlers for.</param>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerAlias eventHandler, ScopeId scope, TenantId tenant = null);
     }
 }

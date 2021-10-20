@@ -9,14 +9,17 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Processing.Management.Contracts;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
+using Dolittle.Runtime.Rudimentary;
 using Contracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
 {
+
     /// <summary>
     /// Represents an implementation of <see cref="IManagementClient"/>.
     /// </summary>
@@ -87,7 +90,21 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
             }
             return response.EventHandlers.Select(CreateEventHandlerStatus);
         }
-        
+        public Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
+            => Get(runtime, _ => _.Id.Equals(eventHandler), () => new NoEventHandlerWithId(eventHandler), tenant);
+
+        public Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerAlias eventHandler, ScopeId scope, TenantId tenant = null)
+            => eventHandler.Equals(EventHandlerAlias.NotSet)
+                ? Task.FromResult(Try<EventHandlerStatus>.Failed(new CannotGetEventHandlerWhenAliasIsNotSet())) 
+                : Get(runtime, _ => _.Alias.Equals(eventHandler) && _.Id.Scope.Equals(scope), () => new NoEventHandlerWithId(eventHandler, scope), tenant);
+
+        async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, Func<EventHandlerStatus, bool> predicate, Func<NoEventHandlerWithId> createException, TenantId tenant = null)
+        {
+            var statuses = await GetAll(runtime, tenant).ConfigureAwait(false);
+            var result = statuses.SingleOrDefault(predicate);
+            return result == default ? createException() : result;
+        }
+
         static EventHandlerStatus CreateEventHandlerStatus(Contracts.EventHandlerStatus status)
             => new(
                 new EventHandlerId(status.ScopeId.ToGuid(), status.EventHandlerId.ToGuid()),
