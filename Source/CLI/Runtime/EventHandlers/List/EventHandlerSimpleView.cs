@@ -11,6 +11,4 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
     /// <param name="Partitioned">Whether the Event Handler is partitioned.</param>
     /// <param name="Status">The status of the Event Handler.</param>
     public record EventHandlerSimpleView(string EventHandler, string Scope, string Partitioned, string Status);
-
-
 }
