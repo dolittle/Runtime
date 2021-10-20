@@ -84,7 +84,8 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
                     EventHandlerId = info.Id.EventHandler.ToProtobuf()
                 };
                 status.EventTypes.AddRange(CreateEventTypes(info));
-                status.Tenants.AddRange(CreateScopedStreamProcessorStatus(info));
+                
+                status.Tenants.AddRange(CreateScopedStreamProcessorStatus(info, request.TenantId?.ToGuid()));
                 
                 response.EventHandlers.Add(status);
             }
@@ -99,7 +100,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
                 Generation = ArtifactGeneration.First,
             });
         
-        IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(EventHandlerInfo info)
+        IEnumerable<TenantScopedStreamProcessorStatus> CreateScopedStreamProcessorStatus(EventHandlerInfo info, TenantId tenant = null)
         {
             var state = _eventHandlers.CurrentStateFor(info.Id);
             if (!state.Success)
@@ -107,7 +108,7 @@ namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
                 throw state.Exception;
             }
 
-            return state.Result.Select(CreateStatusFromState);
+            return state.Result.Where(_ => tenant == null || _.Key.Equals(tenant)).Select(CreateStatusFromState);
         }
 
         static TenantScopedStreamProcessorStatus CreateStatusFromState(KeyValuePair<TenantId, IStreamProcessorState> tenantAndState)

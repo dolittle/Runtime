@@ -34,10 +34,11 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         Task ReprocessAllEvents(EventHandlerId eventHandler, MicroserviceAddress runtime);
         
         /// <summary>
-        /// Gets all running Event Handlers.
+        /// Gets all running Event Handlers or for a specific Tenant if specified.
         /// </summary>
         /// <param name="runtime">The address of the Runtime to connect to.</param>
+        /// <param name="tenant">The Tenant to get Event Handlers for.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime);
+        Task<IEnumerable<EventHandlerStatus>> GetAll(MicroserviceAddress runtime, TenantId tenant = null);
     }
 }
