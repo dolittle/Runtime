@@ -79,7 +79,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
                 return CreateDetailedView(
                     status,
                     states.Any(_ => _.FailingPartitions.Any()),
-                    states.Max(_ => _.LastSuccessfullyProcessed));
+                    states.Any() ? states.Max(_ => _.LastSuccessfullyProcessed) : DateTimeOffset.MinValue);
             }
             else
             {
@@ -87,7 +87,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
                 return CreateDetailedView(
                     status,
                     states.Any(_ => _.IsFailing),
-                    states.Max(_ => _.LastSuccessfullyProcessed));
+                    states.Any() ? states.Max(_ => _.LastSuccessfullyProcessed) : DateTimeOffset.MinValue);
             }
         }
 
