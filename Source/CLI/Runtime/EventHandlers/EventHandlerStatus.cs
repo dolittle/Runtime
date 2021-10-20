@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
+using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
 {
@@ -20,5 +21,16 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         IEnumerable<Artifact> EventTypes,
         bool Partitioned,
         EventHandlerAlias Alias,
-        IEnumerable<TenantScopedStreamProcessorStatus> States);
+        IEnumerable<TenantScopedStreamProcessorStatus> States)
+    {
+        /// <summary>
+        /// Gets a value indicating whether the Event Handler has an alias.
+        /// </summary>
+        public bool HasAlias => !Alias.Equals(EventHandlerAlias.NotSet);
+        
+        /// <summary>
+        /// Gets a value indicating whether the Event Handler is in the default Scope.
+        /// </summary>
+        public bool IsInDefaultScope => Id.Scope.Equals(ScopeId.Default);
+    }
 }

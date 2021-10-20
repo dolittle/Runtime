@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
@@ -18,8 +19,9 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
         /// Initializes a new instance of the <see cref="CommandBase"/> class.
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
-        protected CommandBase(ICanLocateRuntimes runtimes)
-            : base(runtimes)
+        /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
+        protected CommandBase(ICanLocateRuntimes runtimes, ISerializer jsonSerializer)
+            : base(runtimes, jsonSerializer)
         {
         }
         

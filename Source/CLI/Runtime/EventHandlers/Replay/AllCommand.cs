@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Threading.Tasks;
+using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
@@ -19,8 +20,9 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
-        public AllCommand(ICanLocateRuntimes runtimes, IManagementClient client)
-            : base(runtimes)
+        /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
+        public AllCommand(ICanLocateRuntimes runtimes, IManagementClient client, ISerializer jsonSerializer)
+            : base(runtimes, jsonSerializer)
         {
             _client = client;
         }
