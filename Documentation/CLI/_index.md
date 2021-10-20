@@ -7,7 +7,13 @@ repository: https://github.com/dolittle/Runtime
 
 This section helps you learn about how to use the Dolittle CLI tool. If you're new to the CLI, jump down to the [how to install section]({{< ref "#how-to-install" >}}) to get started.
 
-## Commands
+## Command overview
+
+| Syntax                                  | Description                               |                                                       |
+|-----------------------------------------|-------------------------------------------|-------------------------------------------------------|
+| `dolittle runtime eventhandlers list`   | List all running Event Handlers           | [Details]({{< ref "Runtime/EventHandlers/list" >}})   |
+| `dolittle runtime eventhandlers get`    | Get details about a running Event Handler | [Details]({{< ref "Runtime/EventHandlers/get" >}})    |
+| `dolittle runtime eventhandlers replay` | Replay events for a running Event Handler | [Details]({{< ref "Runtime/EventHandlers/replay" >}}) |
 
 ## How to install
 
@@ -32,3 +38,5 @@ Lastly you will need to make the file executable by running `chomd a+x /usr/loca
 The Dolittle CLI tool does currently not check for new versions by itself.
 So you will need to either download a new binary from the releases page and replace the current one, or run `dotnet tool update --global Dolittle.Runtime.CLI` to get a fresh version with new features.
 {{< /alert >}}
+
+### Subcommands
