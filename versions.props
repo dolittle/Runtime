@@ -3,7 +3,7 @@
         <AutofacVersion>5.0.0</AutofacVersion>
         <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
         <ConsoleTablesVersion>2.4.2</ConsoleTablesVersion>
-        <ContractsVersion>6.1.0-eventhandlermanagement.7</ContractsVersion>
+        <ContractsVersion>6.1.0</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
