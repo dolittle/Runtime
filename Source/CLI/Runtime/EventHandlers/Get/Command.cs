@@ -23,16 +23,20 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
     {
         readonly IManagementClient _client;
 
+        readonly IResolveEventHandlerId _eventHandlerIdResolver;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
+        /// <param name="eventHandlerIdResolver">The Event Handler Id resolver.</param>
         /// <param name="serializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, IManagementClient client, ISerializer serializer)
-            : base(runtimes, serializer)
+        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver,  ISerializer serializer)
+            : base(runtimes, eventHandlerIdResolver, serializer)
         {
             _client = client;
+            _eventHandlerIdResolver = eventHandlerIdResolver;
         }
         
         /// <summary>
@@ -42,19 +46,11 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
         TenantId Tenant { get; init; }
         
         /// <summary>
-        /// The Event Handler argument used to provide a the Event Handler identifier.
+        /// The Event Handler identifier argument used to provide the unique identifier of the Event Handler to replay.
         /// </summary>
         [Required]
-        [Argument(0, Description = "The Event Handler identifier. It can be either the Event Handler alias or the Event Handler Id")]
-        string EventHandler { get; init; }
-        
-        /// <summary>
-        /// The "--scope" argument used to the Scope.
-        /// </summary>
-        [Option("--scope", CommandOptionType.SingleValue, Description = "The Tenant Id of the Event Handler states to include")]
-        ScopeId Scope { get; init; } = ScopeId.Default;
-
-        bool IsAliasIdentifier => !Guid.TryParse(EventHandler, out _);
+        [Argument(0, Description = "The Event Handler identifier of the Event Handler to replay")]
+        EventHandlerIdOrAlias EventHandlerIdentifier { get; init; }
 
         /// <summary>
         /// The entrypoint for the "dolittle runtime eventhandlers list" command.
@@ -67,9 +63,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
             {
                 return;
             }
-            var getStatus = IsAliasIdentifier
-                ? await _client.Get(runtimeAddress, EventHandler, Scope, Tenant).ConfigureAwait(false)
-                : await _client.Get(runtimeAddress, new EventHandlerId(Scope, EventHandler), Tenant).ConfigureAwait(false);
+            var getStatus = await _client.Get(runtimeAddress, await GetEventHandlerId(runtimeAddress, EventHandlerIdentifier).ConfigureAwait(false), Tenant).ConfigureAwait(false);
 
             if (!getStatus.Success)
             {

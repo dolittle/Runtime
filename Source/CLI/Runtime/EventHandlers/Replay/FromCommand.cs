@@ -24,14 +24,14 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
         /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        public FromCommand(ICanLocateRuntimes runtimes, IManagementClient client, ISerializer jsonSerializer)
-            : base(runtimes, jsonSerializer)
+        public FromCommand(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver,  ISerializer jsonSerializer)
+            : base(runtimes, eventHandlerIdResolver, jsonSerializer)
         {
             _client = client;
         }
         
         [Required]
-        [Argument(0, Description = "The position to start replaying events from.")]
+        [Argument(1, Description = "The position to start replaying events from.")]
         StreamPosition Position { get; init; }
         
         [Option("--tenant", CommandOptionType.SingleValue, Description = "The tenant to replay events for. Defaults to the development tenant.")]
@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
                 return;
             }
 
-            await _client.ReprocessEventsFrom(EventHandler, Tenant ?? TenantId.Development, Position, address);
+            await _client.ReprocessEventsFrom(await GetEventHandlerId(address, EventHandlerIdentifier).ConfigureAwait(false), Tenant ?? TenantId.Development, Position, address);
         }
     }
 }

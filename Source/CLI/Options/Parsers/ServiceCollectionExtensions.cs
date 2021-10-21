@@ -4,6 +4,7 @@
 using CLI.Options.Parsers.Versioning;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options.Parsers.Concepts;
+using Dolittle.Runtime.CLI.Options.Parsers.EventHandlers;
 using Dolittle.Runtime.CLI.Options.Parsers.Microservices;
 using Dolittle.Runtime.Events.Processing;
 using Dolittle.Runtime.Events.Store;
@@ -29,6 +30,7 @@ namespace Dolittle.Runtime.CLI.Options.Parsers
             services.AddTransient<IValueParser, GuidConceptParser<ScopeId>>();
             services.AddTransient<IValueParser, GuidConceptParser<TenantId>>();
             services.AddTransient<IValueParser, UlongConceptParser<StreamPosition>>();
+            services.AddTransient<IValueParser, EventHandlerIdOrAliasParser>();
         }
     }
 }

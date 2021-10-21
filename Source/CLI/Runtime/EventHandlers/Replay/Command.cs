@@ -12,15 +12,15 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
     [Command("replay", Description = "Make an Event Handler reprocess events")]
     [Subcommand(typeof(AllCommand))]
     [Subcommand(typeof(FromCommand))]
-    public class Command : Runtime.CommandBase
+    public class Command : EventHandlers.CommandBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, ISerializer jsonSerializer)
-            : base(runtimes, jsonSerializer)
+        public Command(ICanLocateRuntimes runtimes, IResolveEventHandlerId eventHandlerIdResolver,  ISerializer jsonSerializer)
+            : base(runtimes, eventHandlerIdResolver, jsonSerializer)
         {
         }
 
