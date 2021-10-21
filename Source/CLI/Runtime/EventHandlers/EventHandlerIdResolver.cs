@@ -35,12 +35,12 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
             
             if (status == default)
             {
-                throw new NoEventHandlerWithId(idOrAlias.Alias, idOrAlias.Scope);
+                throw new NoEventHandlerWithId(idOrAlias.Alias);
             }
             return status.Id;
         }
 
         static bool WithAlias(EventHandlerStatus status, EventHandlerIdOrAlias idOrAlias)
-            => status.HasAlias && status.Alias.Equals(idOrAlias.Alias) && status.Id.Scope.Equals(idOrAlias.Scope);
+            => status.HasAlias && status.Alias.Equals(idOrAlias.Alias);
     }
 }

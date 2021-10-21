@@ -25,8 +25,8 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         /// </summary>
         /// <param name="alias">The Event Handler alias.</param>
         /// <param name="scope">The Event Handler Scope.</param>
-        public NoEventHandlerWithId(EventHandlerAlias alias, ScopeId scope)
-            : base($"There is no registered Event Handler with Alias '{alias.Value}' in Scope '{scope.Value}'")
+        public NoEventHandlerWithId(EventHandlerAlias alias)
+            : base($"There is no registered Event Handler with Alias '{alias.Value}'")
         { }
     }
 }
