@@ -42,14 +42,14 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
         /// <summary>
         /// The "--tenant" argument used to provide a Tenant Id.
         /// </summary>
-        [Option("--tenant", CommandOptionType.SingleValue, Description = "The Tenant Id of the Event Handler states to include")]
+        [Option("--tenant", CommandOptionType.SingleValue, Description = "Only show Event Handler information for the specified Tenant")]
         TenantId Tenant { get; init; }
         
         /// <summary>
         /// The Event Handler identifier argument used to provide the unique identifier of the Event Handler to replay.
         /// </summary>
         [Required]
-        [Argument(0, Description = "The Event Handler identifier of the Event Handler to replay")]
+        [Argument(0, Description = "The Event Handler identifier of the Event Handler to get details for")]
         EventHandlerIdOrAlias EventHandlerIdentifier { get; init; }
 
         /// <summary>

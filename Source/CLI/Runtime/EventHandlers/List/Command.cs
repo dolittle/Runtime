@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
         /// <summary>
         /// The "--tenant" argument used to provide a Tenant Id.
         /// </summary>
-        [Option("--tenant", CommandOptionType.SingleValue, Description = "The Tenant Id of the Event Handler states to include")]
+        [Option("--tenant", CommandOptionType.SingleValue, Description = "Only show Event Handler information for the specified Tenant")]
         TenantId Tenant { get; init; }
 
         /// <summary>
