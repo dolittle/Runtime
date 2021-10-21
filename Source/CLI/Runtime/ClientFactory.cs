@@ -23,10 +23,10 @@ namespace Dolittle.Runtime.CLI.Runtime
             ThrowIfMissingExpectedConstructorClientType(typeof(T), constructor);
 
             var callInvoker = CreateCallInvoker(address);
-            return constructor.Invoke(new[] {callInvoker}) as T;
+            return constructor!.Invoke(new object[] {callInvoker}) as T;
         }
 
-        CallInvoker CreateCallInvoker(MicroserviceAddress address)
+        static CallInvoker CreateCallInvoker(MicroserviceAddress address)
         {
             var keepAliveTime = new ChannelOption("grpc.keepalive_time", 1000);
             var keepAliveTimeout = new ChannelOption("grpc.keepalive_timeout_ms", 500);
@@ -40,8 +40,8 @@ namespace Dolittle.Runtime.CLI.Runtime
 
             return channel.Intercept(_ => _);
         }
-        
-        void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)
+
+        static void ThrowIfMissingExpectedConstructorClientType(Type type, ConstructorInfo constructor)
         {
             if (constructor == null)
             {

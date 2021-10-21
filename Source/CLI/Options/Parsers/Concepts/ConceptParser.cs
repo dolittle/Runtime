@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.CLI.Options.Parsers.Concepts
             ThrowIfMissingExpectedConstructor(constructor);
 
             var parsed = Parse(value, culture);
-            return constructor.Invoke(new object[] {parsed}) as TConcept;
+            return constructor!.Invoke(new object[] {parsed}) as TConcept;
         }
 
         /// <summary>
@@ -37,8 +37,8 @@ namespace Dolittle.Runtime.CLI.Options.Parsers.Concepts
         /// <param name="culture">The culture that should be used to parse values.</param>
         /// <returns>The parsed <typeparamref name="TBase"/>.</returns>
         protected abstract TBase Parse(string value, CultureInfo culture);
-        
-        void ThrowIfMissingExpectedConstructor(ConstructorInfo constructor)
+
+        static void ThrowIfMissingExpectedConstructor(ConstructorInfo constructor)
         {
             if (constructor == null)
             {

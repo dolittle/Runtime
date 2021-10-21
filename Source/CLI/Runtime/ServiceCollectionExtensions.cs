@@ -9,6 +9,10 @@ namespace Dolittle.Runtime.CLI.Runtime
 {
     public static class ServiceCollectionExtensions
     {
+        /// <summary>
+        /// Adds services related to management of Runtimes.
+        /// </summary>
+        /// <param name="services">The service collection to add services to.</param>
         public static void AddRuntimeServices(this IServiceCollection services)
         {
             services.AddTransient<ICanCreateClients, ClientFactory>();

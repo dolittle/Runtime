@@ -12,6 +12,7 @@ using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
+
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
 {
     /// <summary>
@@ -160,5 +161,4 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
                 failingPartition?.RetryTime ?? default,
                 failingPartition?.ProcessingAttempts ?? 0);
     }
-
 }

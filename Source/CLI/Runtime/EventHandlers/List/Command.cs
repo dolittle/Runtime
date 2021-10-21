@@ -9,6 +9,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
+
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
 {
     /// <summary>
