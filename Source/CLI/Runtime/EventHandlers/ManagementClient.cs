@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         public async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
         {
             var statuses = await GetAll(runtime, tenant).ConfigureAwait(false);
-            var result = statuses.SingleOrDefault(_ => _.Id.Equals(eventHandler));
+            var result = statuses.FirstOrDefault(_ => _.Id.Equals(eventHandler));
             return result == default ? new NoEventHandlerWithId(eventHandler) : result;
         }
 
