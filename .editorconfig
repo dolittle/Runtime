@@ -10,6 +10,7 @@ end_of_line = lf
 indent_style = space
 indent_size = 4
 charset = utf-8
+insert_final_newline = true
 
 [*.yml]
 indent_size = 2
@@ -22,17 +23,18 @@ dotnet_analyzer_diagnostic.severity = warning
 file_header_template = Copyright (c) Dolittle. All rights reserved.\nLicensed under the MIT license. See LICENSE file in the project root for full license information.
 
 #### .NET Conventions ####
-dotnet_sort_system_directives_first = true:error
+dotnet_sort_system_directives_first = true
 
 # Avoid "this." and "Me." if not necessary
-dotnet_style_qualification_for_field = false:warning
+dotnet_style_qualification_for_field    = false:warning
 dotnet_style_qualification_for_property = false:warning
-dotnet_style_qualification_for_method = false:warning
-dotnet_style_qualification_for_event = false:warning
+dotnet_style_qualification_for_method   = false:warning
+dotnet_style_qualification_for_event    = false:warning
 
 # dont prefer ifs over ternary operators
-dotnet_style_prefer_conditional_expression_over_return = true:none
-dotnet_style_prefer_conditional_expression_over_assignment = true:none
+dotnet_style_prefer_conditional_expression_over_return      = true:none
+dotnet_style_prefer_conditional_expression_over_assignment  = true:none
+
 # dont need to declare private
 dotnet_style_require_accessibility_modifiers = never:error
 
@@ -73,7 +75,6 @@ dotnet_naming_style.private_fields.capitalization                               
 dotnet_naming_style.private_fields.required_prefix                              = _
 
 
-
 # upper camelcase for public properties
 dotnet_naming_rule.public_members_must_be_capitalized.style = first_word_upper_case_style
 dotnet_naming_style.first_word_upper_case_style.capitalization = first_word_upper
@@ -111,6 +112,10 @@ dotnet_diagnostic.CA1309.severity = none
 dotnet_diagnostic.CA1000.severity = none
 # RCS1018: Add accessibility modifiers
 dotnet_diagnostic.RCS1018.severity = none
+# IDE0130: Namespace does not correspond to file location
+dotnet_diagnostic.IDE0130.severity = none
+# IDE0058: Remove unnecessary expression value
+dotnet_diagnostic.IDE0058.severity = none
 
 #### C# Coding Conventions ####
 
@@ -128,23 +133,22 @@ csharp_prefer_braces = when_multiline:error
 csharp_style_prefer_switch_expression = true:none
 
 # allow both => and regular blocks {}
-csharp_style_expression_bodied_methods = true:none
-csharp_style_expression_bodied_operators = true:none
-csharp_style_expression_bodied_constructors = true:none
-csharp_style_expression_bodied_local_functions = true:none
-csharp_style_expression_bodied_accessors = true:none
+csharp_style_expression_bodied_methods          = true:none
+csharp_style_expression_bodied_operators        = true:none
+csharp_style_expression_bodied_constructors     = true:none
+csharp_style_expression_bodied_local_functions  = true:none
+csharp_style_expression_bodied_accessors        = true:none
 
 # allow both local and anonymous functions
 csharp_style_pattern_local_over_anonymous_function = false:none
 
 # dont need to save everything to a var
-csharp_style_unused_value_expression_statement_preference = false:none
+csharp_style_unused_value_expression_statement_preference = discard_variable
 
 # not ready for changing everything to pattern matching
 csharp_style_prefer_pattern_matching = false:none
 
 csharp_using_directive_placement = outside_namespace:error
-
 
 csharp_style_prefer_range_operator = false:none
 

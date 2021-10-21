@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Specifications
     /// </summary>
     /// <typeparam name="T">Type that the rule is to be evaluated for.</typeparam>
     /// <remarks>Based on http://bloggingabout.net/blogs/dries/archive/2011/09/29/specification-pattern-continued.aspx.</remarks>
-    internal class And<T> : Specification<T>
+    class And<T> : Specification<T>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="And{T}"/> class.

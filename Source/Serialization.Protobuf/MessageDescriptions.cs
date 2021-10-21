@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Serialization.Protobuf
     [Singleton]
     public class MessageDescriptions : IMessageDescriptions
     {
-        readonly Dictionary<Type, MessageDescription> _descriptions = new Dictionary<Type, MessageDescription>();
+        readonly Dictionary<Type, MessageDescription> _descriptions = new();
 
         /// <inheritdoc/>
         public MessageDescription GetFor<T>()

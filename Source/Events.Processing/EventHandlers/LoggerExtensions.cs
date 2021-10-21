@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     /// <summary>
     /// Represents a extensions for <see cref="ILogger" />.
     /// </summary>
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, Guid, Guid, Guid, string, bool, Exception> _receivedEventHandler = LoggerMessage
             .Define<Guid, Guid, Guid, string, bool>(

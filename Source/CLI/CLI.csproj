@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="../../default.props" />
+
+    <PropertyGroup>
+        <AssemblyName>Dolittle.Runtime.CLI</AssemblyName>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <LangVersion>latest</LangVersion>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>dolittle</ToolCommandName>
+        <Description>The Dolittle CLI tool.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="../Versioning/Versioning.csproj" />
+        <ProjectReference Include="../Rudimentary/Rudimentary.csproj" />
+        <ProjectReference Include="../Microservices/Microservices.csproj" />
+        <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
+        <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj" />
+        <ProjectReference Include="../Types/Types.csproj" />
+        <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
+        <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
+        <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="ConsoleTables" Version="$(ConsoleTablesVersion)" />
+        <PackageReference Include="Docker.DotNet" Version="$(DockerDotNetVersion)" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="McMaster.Extensions.CommandLineUtils" Version="$(McMasterVersion)" />
+        <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Abstractions" Version="$(MicrosoftExtensionsVersion)" />
+        <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="$(MicrosoftExtensionsVersion)" />
+    </ItemGroup>
+
+</Project>

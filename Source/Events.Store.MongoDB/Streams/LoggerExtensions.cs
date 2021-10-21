@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, ulong, Guid, Guid, Exception> _writingEventToStream = LoggerMessage
             .Define<ulong, Guid, Guid>(

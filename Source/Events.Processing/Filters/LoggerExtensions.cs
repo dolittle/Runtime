@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
     /// <summary>
     /// Represents a extensions for <see cref="ILogger" />.
     /// </summary>
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, Guid, Guid, Guid, string, Exception> _filteringEvent = LoggerMessage
             .Define<Guid, Guid, Guid, string>(

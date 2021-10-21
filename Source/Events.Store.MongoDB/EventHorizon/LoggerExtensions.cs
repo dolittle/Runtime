@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.EventHorizon
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         static readonly Action<ILogger, ulong, Guid, Guid, Guid, Exception> _writingEventHorizonEvent = LoggerMessage
             .Define<ulong, Guid, Guid, Guid>(

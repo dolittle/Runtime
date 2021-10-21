@@ -57,7 +57,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
 
         protected static Failure failure;
 
-        Establish context = () =>
+        private Establish context = () =>
         {
             stream_processors = new(MockBehavior.Strict);
             filter_validation = new(MockBehavior.Strict);
@@ -83,7 +83,8 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
                 event_handler_id,
                 Array.Empty<ArtifactId>(),
                 false,
-                scope);
+                scope,
+                "alias");
 
             factory_for_stream_writer = () => stream_writer.Object;
         };

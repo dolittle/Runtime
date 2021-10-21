@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
         #region EmbeddingsService
 

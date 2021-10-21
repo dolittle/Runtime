@@ -1,6 +1,7 @@
 # DotNet Build
 FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-arm64v8 AS dotnet-build
 ARG CONFIGURATION=Release
+ARG VERSION
 
 COPY default.props /app/
 COPY versions.props /app/
@@ -10,11 +11,15 @@ COPY Specifications /app/Specifications/
 
 WORKDIR /app/Source/Server
 RUN dotnet restore
-RUN dotnet publish -c ${CONFIGURATION} -o out
+RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
 
 # Runtime Image
 FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-arm64v8
 ARG CONFIGURATION=Release
+ARG VERSION
+
+RUN echo Configuration = ${CONFIGURATION}
+RUN echo Version = ${VERSION}
 
 # https://danielstoyanoff.medium.com/apple-silicon-docker-dotnet-grpc-is-that-compatible-8a05f1a71d89
 RUN apt-get update \
@@ -70,6 +75,6 @@ COPY Docker/ARM64Development/docker-entrypoint.sh /usr/bin/docker-entrypoint.sh
 RUN chmod +x /usr/bin/docker-entrypoint.sh
 
 # Expose all the ports that are usefull
-EXPOSE 1880 27017 9007 50052 50053 9700 81
+EXPOSE 9700 50052 50053 51052 27017 
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/usr/bin/docker-entrypoint.sh"]

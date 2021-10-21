@@ -4,7 +4,6 @@
 using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Processing.Contracts;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 using Dolittle.Services.Contracts;
@@ -19,12 +18,22 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
     {
         /// <inheritdoc/>
         public EventHandlerRegistrationArguments ConvertConnectArguments(EventHandlerRegistrationRequest arguments)
-            => new(
-                arguments.CallContext.ExecutionContext.ToExecutionContext(),
-                arguments.EventHandlerId.ToGuid(),
-                arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
-                arguments.Partitioned,
-                arguments.ScopeId.ToGuid());
+            => arguments.HasAlias switch
+            {
+                true => new EventHandlerRegistrationArguments(
+                    arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                    arguments.EventHandlerId.ToGuid(),
+                    arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
+                    arguments.Partitioned,
+                    arguments.ScopeId.ToGuid(),
+                    arguments.Alias),
+                false => new EventHandlerRegistrationArguments(
+                    arguments.CallContext.ExecutionContext.ToExecutionContext(),
+                    arguments.EventHandlerId.ToGuid(),
+                    arguments.EventTypes.Select(_ => new ArtifactId(_.Id.ToGuid())),
+                    arguments.Partitioned,
+                    arguments.ScopeId.ToGuid()),
+            };
 
         /// <inheritdoc/>
         public EventHandlerRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)

@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
 {
-    internal static class LoggerExtensions
+    static class LoggerExtensions
     {
 
         #region EventHorizonConnection

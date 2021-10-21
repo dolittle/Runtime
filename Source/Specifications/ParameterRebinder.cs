@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Specifications
     /// Ensures that the combined expression points at the same parameters where these are common.
     /// </summary>
     /// <remarks>Based on http://bloggingabout.net/blogs/dries/archive/2011/09/29/specification-pattern-continued.aspx.</remarks>
-    internal class ParameterRebinder : ExpressionVisitor
+    class ParameterRebinder : ExpressionVisitor
     {
         readonly Dictionary<ParameterExpression, ParameterExpression> _map;
 

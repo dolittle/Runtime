@@ -10,6 +10,7 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Execution;
+using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Tenancy;
 
@@ -20,7 +21,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
     /// </summary>
     public class StreamProcessor : IDisposable
     {
-        readonly IDictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new Dictionary<TenantId, AbstractScopedStreamProcessor>();
+        readonly Dictionary<TenantId, AbstractScopedStreamProcessor> _streamProcessors = new();
         readonly StreamProcessorId _identifier;
         readonly IPerformActionOnAllTenants _onAllTenants;
         readonly IStreamDefinition _streamDefinition;
@@ -67,6 +68,15 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             _logger = logger;
             _stopAllScopedStreamProcessorsTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         }
+
+        /// <summary>
+        /// Gets all current <see cref="IStreamProcessorState"/> states. 
+        /// </summary>
+        /// <returns>The  <see cref="IStreamProcessorState"/> per <see cref="TenantId"/>.</returns>
+        public Try<IDictionary<TenantId, IStreamProcessorState>> GetCurrentStates()
+            => _initialized
+                ? _streamProcessors.ToDictionary(_ => _.Key, _ => _.Value.GetCurrentState())
+                : new StreamProcessorNotInitialized(_identifier);
 
         /// <summary>
         /// Initializes the stream processor.
@@ -132,6 +142,36 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             }
         }
 
+        /// <summary>
+        /// Sets the position of the stream processor for a tenant.
+        /// </summary>
+        /// <param name="tenant">The <see cref="TenantId"/>.</param>
+        /// <param name="position">The <see cref="StreamPosition" />.</param>
+        /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
+        public Task<Try<StreamPosition>> SetToPosition(TenantId tenant, StreamPosition position)
+            => _streamProcessors.TryGetValue(tenant, out var streamProcessor)
+                ? streamProcessor.ReprocessEventsFrom(position)
+                : Task.FromResult<Try<StreamPosition>>(new StreamProcessorNotRegisteredForTenant(_identifier, tenant));
+
+        /// <summary>
+        /// Sets the position of the stream processors for all tenant to be the initial <see cref="StreamPosition"/>.
+        /// </summary>
+        /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
+        public async Task<IDictionary<TenantId, Try<StreamPosition>>> SetToInitialPositionForAllTenants()
+        {
+            var tasks = _streamProcessors
+                .ToDictionary(_ => _.Key, _ => _.Value.ReprocessEventsFrom(StreamPosition.Start));
+
+            var result = new Dictionary<TenantId, Try<StreamPosition>>();
+
+            foreach (var (tenant, task) in tasks)
+            {
+                result.Add(tenant, await task.ConfigureAwait(false));
+            }
+
+            return result;
+        }
+
         /// <inheritdoc/>
         public void Dispose()
         {
@@ -164,7 +204,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         IEnumerable<Task> StartScopedStreamProcessors(CancellationToken cancellationToken) => _streamProcessors.Select(
             _ => Task.Run(async () =>
                 {
-                    (var tenant, var streamProcessor) = _;
+                    var (tenant, streamProcessor) = _;
                     _executionContextManager.CurrentFor(tenant);
                     await streamProcessor.Start(cancellationToken).ConfigureAwait(false);
                 }, cancellationToken)).ToList();

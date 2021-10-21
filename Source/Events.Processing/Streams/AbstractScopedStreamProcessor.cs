@@ -25,8 +25,12 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         readonly ICanFetchEventsFromStream _eventsFetcher;
         readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _fetchEventToProcessPolicy;
         readonly IStreamEventWatcher _eventWaiter;
+        readonly object _setPositionLock = new();
+        CancellationTokenSource _resetStreamProcessor;
+        TaskCompletionSource<Try<StreamPosition>> _resetStreamProcessorCompletionSource;
         IStreamProcessorState _currentState;
         bool _started;
+        StreamPosition _newPosition;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractScopedStreamProcessor"/> class.
@@ -66,11 +70,17 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// Gets the <see cref="StreamProcessorId">identifier</see> for the <see cref="AbstractScopedStreamProcessor"/>.
         /// </summary>
         public IStreamProcessorId Identifier { get; }
-
+        
         /// <summary>
         /// Gets the <see cref="ILogger" />.
         /// </summary>
         protected ILogger Logger { get; }
+        
+        /// <summary>
+        /// Gets the current <see cref="IStreamProcessorState"/>.
+        /// </summary>
+        /// <returns>Current <see cref="IStreamProcessorState"/>.</returns>
+        public IStreamProcessorState GetCurrentState() => _currentState;
 
         /// <summary>
         /// Starts the stream processing.
@@ -82,6 +92,43 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             if (_started) throw new StreamProcessorAlreadyProcessingStream(Identifier);
             _started = true;
             return BeginProcessing(cancellationToken);
+        }
+        
+        /// <summary>
+        /// Sets the <see cref="IStreamProcessorState" /> to be at the given position.
+        /// </summary>
+        /// <remarks>
+        /// This method fails with a <see cref="CannotSetStreamProcessorPositionHigherThanCurrentPosition"/> if trying to reprocess events
+        /// from a <see cref="StreamPosition"/> that is higher than the current <see cref="StreamPosition"/>.
+        /// </remarks>
+        /// <param name="position">The <see cref="StreamPosition"/> to start processing events from.</param>
+        /// <returns>A <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with a <see cref="StreamPosition"/>.</returns>
+        public Task<Try<StreamPosition>> ReprocessEventsFrom(StreamPosition position)
+        {
+            try
+            {
+                if (_resetStreamProcessorCompletionSource != default)
+                {
+                    return Task.FromResult<Try<StreamPosition>>(new AlreadySettingNewStreamProcessorPosition(Identifier));
+                }
+                var tcs = new TaskCompletionSource<Try<StreamPosition>>(TaskCreationOptions.RunContinuationsAsynchronously);
+                lock (_setPositionLock)
+                {
+                    if (_resetStreamProcessorCompletionSource != default)
+                    {
+                        return Task.FromResult<Try<StreamPosition>>(new AlreadySettingNewStreamProcessorPosition(Identifier));
+                    }
+                    _newPosition = position;
+                    _resetStreamProcessorCompletionSource = tcs;
+                }
+            
+                _resetStreamProcessor?.Cancel();
+                return tcs.Task;
+            }
+            catch (Exception ex)
+            {
+                return Task.FromResult<Try<StreamPosition>>(ex);
+            }
         }
 
         /// <summary>
@@ -126,6 +173,13 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         /// <param name="timeToRetry">The <see cref="TimeSpan" /> for when to retry processsing a stream processor.</param>
         /// <returns>A value indicating whether there is a retry time.</returns>
         protected abstract bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry);
+        
+        /// <summary>
+        /// Creates a new <see cref="IStreamProcessorState"/> with the given <see cref="StreamPosition" />.
+        /// </summary>
+        /// <param name="position">The new <see cref="StreamPosition"/>.</param>
+        /// <returns>The new <see cref="IStreamProcessorState"/>.</returns>
+        protected abstract Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position);
 
         /// <summary>
         /// Process the <see cref="StreamEvent" /> and get the new <see cref="IStreamProcessorState" />.
@@ -181,7 +235,7 @@ namespace Dolittle.Runtime.Events.Processing.Streams
         }
 
         /// <summary>
-        /// Handle the <see cref="IProcessingResult" /> from the procssing of a <see cref="StreamEvent" />..
+        /// Handle the <see cref="IProcessingResult" /> from the processing of a <see cref="StreamEvent" />..
         /// </summary>
         /// <param name="processingResult">The <see cref="IProcessingResult" />.</param>
         /// <param name="processedEvent">The processed <see cref="StreamEvent" />.</param>
@@ -210,16 +264,38 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                     Try<StreamEvent> tryGetEvent;
                     do
                     {
-                        _currentState = await Catchup(_currentState, cancellationToken).ConfigureAwait(false);
-                        tryGetEvent = await FetchNextEventToProcess(_currentState, cancellationToken).ConfigureAwait(false);
-                        if (!tryGetEvent.Success)
+                        _resetStreamProcessor = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+                        if (_resetStreamProcessorCompletionSource != default)
                         {
-                            await _eventWaiter.WaitForEvent(
-                                Identifier.ScopeId,
-                                _sourceStreamDefinition.StreamId,
-                                _currentState.Position,
-                                GetTimeToRetryProcessing(_currentState),
-                                cancellationToken).ConfigureAwait(false);
+                            if (_newPosition > _currentState.Position)
+                            {
+                                _resetStreamProcessorCompletionSource.SetResult(Try<StreamPosition>.Failed(new CannotSetStreamProcessorPositionHigherThanCurrentPosition(Identifier, _currentState, _newPosition)));
+                            }
+                            else
+                            {
+                                Logger.ScopedStreamProcessorSetToPosition(Identifier, _newPosition);
+                                _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
+                                _resetStreamProcessorCompletionSource.SetResult(_currentState.Position);
+                            }
+                            _resetStreamProcessorCompletionSource = default;
+                        }
+                        try
+                        {
+                            _currentState = await Catchup(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
+                            tryGetEvent = await FetchNextEventToProcess(_currentState, _resetStreamProcessor.Token).ConfigureAwait(false);
+                            if (!tryGetEvent.Success)
+                            {
+                                await _eventWaiter.WaitForEvent(
+                                    Identifier.ScopeId,
+                                    _sourceStreamDefinition.StreamId,
+                                    _currentState.Position,
+                                    GetTimeToRetryProcessing(_currentState),
+                                    _resetStreamProcessor.Token).ConfigureAwait(false);
+                            }
+                        }
+                        catch (TaskCanceledException ex)
+                        {
+                            tryGetEvent = ex;
                         }
                     }
                     while (!tryGetEvent.Success && !cancellationToken.IsCancellationRequested);
@@ -235,6 +311,10 @@ namespace Dolittle.Runtime.Events.Processing.Streams
                 {
                     Logger.LogWarning(ex, "{StreamProcessorId} for tenant {TenantId} failed", Identifier, _tenantId);
                 }
+            }
+            finally
+            {
+                _resetStreamProcessor?.Dispose();
             }
         }
     }

@@ -1,8 +1,10 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
+using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -35,5 +37,23 @@ namespace Dolittle.Runtime.Events.Processing.Streams
             IStreamDefinition sourceStreamDefinition,
             FactoryFor<IEventProcessor> getEventProcessor,
             CancellationToken cancellationToken);
+
+
+        /// <summary>
+        /// Reprocesses all events for a <see cref="StreamProcessor"/> from a <see cref="StreamPosition" /> for a tenant.
+        /// </summary>
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId"/> of the <see cref="StreamProcessor"/>.</param>
+        /// <param name="tenant">The <see cref="TenantId"/>.</param>
+        /// <param name="position">The <see cref="StreamPosition" />.</param>
+        /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to.</returns>
+        Task<Try<StreamPosition>> ReprocessEventsFrom(StreamProcessorId streamProcessorId, TenantId tenant, StreamPosition position);
+        
+        
+        /// <summary>
+        /// Reprocesses all the events for the <see cref="StreamProcessor"/> for all tenants.
+        /// </summary>
+        /// <param name="streamProcessorId">The <see cref="StreamProcessorId"/> of the <see cref="StreamProcessor"/>.</param>
+        /// <returns>The <see cref="Task"/> that, when resolved, returns a <see cref="Dictionary{TKey,TValue}"/> with a <see cref="Try{TResult}"/> with the <see cref="StreamPosition"/> it was set to for each <see cref="TenantId"/>.</returns>
+        Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(StreamProcessorId streamProcessorId);
     }
 }

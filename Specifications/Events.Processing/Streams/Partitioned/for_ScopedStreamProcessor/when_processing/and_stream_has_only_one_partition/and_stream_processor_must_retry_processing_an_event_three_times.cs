@@ -32,32 +32,26 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_ScopedStrea
             event_processor
                 .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), 2, Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IProcessingResult>(new FailedProcessing(failure_reason)));
-            events_fetcher
-                .Setup(_ => _.Fetch(0, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<StreamEvent>.Succeeded(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true))));
-            events_fetcher
-                .Setup(_ => _.Fetch(1, Moq.It.IsAny<CancellationToken>()))
-                .Throws(new Exception());
+            setup_event_stream(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true));
             events_fetcher
                 .Setup(_ => _.FetchInPartition(partition_id, 0, Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(Try<StreamEvent>.Succeeded(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, true))));
         };
 
-        Because of = () => stream_processor.Start(CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
 
         It should_process_first_event_normally_once = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
         It should_retry_processing_first_event_first_time_with_correct_reason = () => event_processor.Verify(_ => _.Process(first_event, partition_id, retry_reason, 0, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
         It should_retry_processing_first_event_second_time_with_correct_reason = () => event_processor.Verify(_ => _.Process(first_event, partition_id, retry_reason, 1, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
         It should_retry_processing_first_event_third_time_with_correct_reason = () => event_processor.Verify(_ => _.Process(first_event, partition_id, retry_reason, 2, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
 
-        It should_have_current_position_equal_one = () => current_state.Position.ShouldEqual(new StreamPosition(1));
-        It should_have_one_failing_partition = () => current_state.FailingPartitions.Count.ShouldEqual(1);
-        It should_have_the_correct_failing_partition = () => current_state.FailingPartitions.ContainsKey(partition_id).ShouldBeTrue();
-        It should_have_the_correct_position_on_the_failing_partition = () => current_state.FailingPartitions[partition_id].Position.ShouldEqual(new StreamPosition(0));
+        It should_have_current_position_equal_one = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(1));
+        It should_have_one_failing_partition = () => current_stream_processor_state.FailingPartitions.Count.ShouldEqual(1);
+        It should_have_the_correct_failing_partition = () => current_stream_processor_state.FailingPartitions.ContainsKey(partition_id).ShouldBeTrue();
+        It should_have_the_correct_position_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].Position.ShouldEqual(new StreamPosition(0));
 
-        It should_have_the_correct_reason_on_the_failing_partition = () => current_state.FailingPartitions[partition_id].Reason.ShouldEqual(failure_reason);
-        It should_have_the_correct_retry_time_on_the_failing_partition = () => current_state.FailingPartitions[partition_id].RetryTime.ShouldBeGreaterThan(DateTimeOffset.UtcNow);
-
-        static StreamProcessorState current_state => stream_processor_state_repository.TryGetFor(stream_processor_id, CancellationToken.None).GetAwaiter().GetResult().Result as StreamProcessorState;
+        It should_have_the_correct_reason_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].Reason.ShouldEqual(failure_reason);
+        It should_have_the_correct_retry_time_on_the_failing_partition = () => current_stream_processor_state.FailingPartitions[partition_id].RetryTime.ShouldBeGreaterThan(DateTimeOffset.UtcNow);
+        
     }
 }

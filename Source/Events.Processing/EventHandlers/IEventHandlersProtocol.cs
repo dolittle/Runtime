@@ -6,7 +6,6 @@ using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.EventHandlers
 {
-
     /// <summary>
     /// Defines the protocol for event handlers.
     /// </summary>

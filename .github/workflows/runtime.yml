@@ -48,6 +48,8 @@ jobs:
           push: false
           context: .
           file: ./Docker/Production/Dockerfile
+          build-args: |
+            VERSION=0.0.0
 
   build-dev-docker-image:
     name: Build Development Docker Image
@@ -69,6 +71,8 @@ jobs:
           push: false
           context: .
           file: ./Docker/Development/Dockerfile
+          build-args: |
+            VERSION=0.0.0
 
   build-arm64-dev-docker-image:
     name: Build ARM64 Development Docker Image
@@ -92,6 +96,8 @@ jobs:
           push: false
           context: .
           file: ./Docker/ARM64Development/Dockerfile
+          build-args: |
+            VERSION=0.0.0
           platforms: linux/arm64
 
   build-arm64-prod-docker-image:
@@ -116,4 +122,6 @@ jobs:
           push: false
           context: .
           file: ./Docker/ARM64Production/Dockerfile
+          build-args: |
+            VERSION=0.0.0
           platforms: linux/arm64

@@ -2,6 +2,8 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
@@ -107,5 +109,22 @@ namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned
         /// <inheritdoc/>
         protected override bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry)
             => _timeToRetryGetter.TryGetTimespanToRetry(state as StreamProcessorState, out timeToRetry);
+        
+        /// <inheritdoc />
+        protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
+        {
+            var state = (StreamProcessorState)currentState;
+            var newState = new StreamProcessorState(
+                position, 
+                FailingPartitionsIgnoringPartitionsToReprocess(state, position),
+                state.LastSuccessfullyProcessed);
+            await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
+            return newState;
+        }
+        
+        static IDictionary<PartitionId, FailingPartitionState> FailingPartitionsIgnoringPartitionsToReprocess(StreamProcessorState state, StreamPosition position)
+            => state.FailingPartitions
+                .Where(_ => _.Value.Position < position)
+                .ToDictionary(_ => _.Key, _ => _.Value);
     }
 }
