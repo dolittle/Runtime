@@ -42,14 +42,12 @@ namespace Dolittle.Runtime.CLI
             catch (Exception e)
             {
                 Console.Error.WriteLine(e.Message);
-                Console.Error.WriteLine(e);
                 return 1;
             }
         }
 
         static void AddServices(ServiceCollection services)
         {
-            services.AddLogging(_ => _.AddSimpleConsole());
             services.AddValueParsers();
             services.AddSerializers();
             
