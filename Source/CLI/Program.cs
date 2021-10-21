@@ -48,7 +48,6 @@ namespace Dolittle.Runtime.CLI
 
         static void AddServices(ServiceCollection services)
         {
-            services.AddLogging(_ => _.AddSimpleConsole());
             services.AddValueParsers();
             services.AddSerializers();
             

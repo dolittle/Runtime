@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.CLI
         [Option("-o|--output", CommandOptionType.SingleValue, Description = "The output type.")]
         protected OutputType Output { get; } = OutputType.Table;
 
-        [Option("-w|--wide", CommandOptionType.SingleValue, Description = "Whether the table output is wide or not.")]
+        [Option("-w|--wide", CommandOptionType.NoValue, Description = "Whether the table output is wide or not.")]
         protected bool Wide { get; }
 
         protected Task WriteOutput<T>(CommandLineApplication cli, T obj)
