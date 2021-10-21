@@ -6,14 +6,14 @@ repository: https://github.com/dolittle/Runtime
 ---
 
 ```shell
-dolittle runtime eventhandlers get <id> [options]
+dolittle runtime eventhandlers get <identifier> [options]
 ```
 
 ### Arguments
 
 | Argument | Description                                             |
 |----------|---------------------------------------------------------|
-| `<id>`   | The identifier of the Event Handler to get details for. |
+| `<identifier>`   | The identifier of the Event Handler to get details for. Format: id/alias[:scope] |
 
 ### Options
 

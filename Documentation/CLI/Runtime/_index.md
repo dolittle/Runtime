@@ -24,6 +24,6 @@ The `dolittle runtime` commands interacts with a Runtime you can access from you
 You can specify an endpoint using the `--runtime <host[:port]>` option.
 If you don't specify an endpoint, the CLI will try to locate a Runtime it can interact with itself.
 Currently it looks for Docker containers running a `dolittle/runtime:*` image with the management port (51052) exposed.
-If there are more than one available Runtime and you have not specified an endpoint, you'll be presented with an interactiv selector to choose one.
+If there are more than one available Runtime and you have not specified an endpoint, you'll be presented with an interactive selector to choose one.
 
 ### Subcommands
