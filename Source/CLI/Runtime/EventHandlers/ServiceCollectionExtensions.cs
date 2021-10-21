@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
         public static void AddEventHandlerServices(this IServiceCollection services)
         {
             services.AddTransient<IManagementClient, ManagementClient>();
+            services.AddTransient<IResolveEventHandlerId, EventHandlerIdResolver>();
         }
     }
 }

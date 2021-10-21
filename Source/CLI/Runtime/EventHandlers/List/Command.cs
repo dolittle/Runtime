@@ -26,8 +26,8 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
         /// <param name="serializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, IManagementClient client, ISerializer serializer)
-            : base(runtimes, serializer)
+        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver, ISerializer serializer)
+            : base(runtimes, eventHandlerIdResolver, serializer)
         {
             _client = client;
         }

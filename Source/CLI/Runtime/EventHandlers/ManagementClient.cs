@@ -90,19 +90,12 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
             }
             return response.EventHandlers.Select(CreateEventHandlerStatus);
         }
-        public Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
-            => Get(runtime, _ => _.Id.Equals(eventHandler), () => new NoEventHandlerWithId(eventHandler), tenant);
 
-        public Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerAlias eventHandler, ScopeId scope, TenantId tenant = null)
-            => eventHandler.Equals(EventHandlerAlias.NotSet)
-                ? Task.FromResult(Try<EventHandlerStatus>.Failed(new CannotGetEventHandlerWhenAliasIsNotSet())) 
-                : Get(runtime, _ => _.Alias.Equals(eventHandler) && _.Id.Scope.Equals(scope), () => new NoEventHandlerWithId(eventHandler, scope), tenant);
-
-        async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, Func<EventHandlerStatus, bool> predicate, Func<NoEventHandlerWithId> createException, TenantId tenant = null)
+        public async Task<Try<EventHandlerStatus>> Get(MicroserviceAddress runtime, EventHandlerId eventHandler, TenantId tenant = null)
         {
             var statuses = await GetAll(runtime, tenant).ConfigureAwait(false);
-            var result = statuses.SingleOrDefault(predicate);
-            return result == default ? createException() : result;
+            var result = statuses.SingleOrDefault(_ => _.Id.Equals(eventHandler));
+            return result == default ? new NoEventHandlerWithId(eventHandler) : result;
         }
 
         static EventHandlerStatus CreateEventHandlerStatus(Contracts.EventHandlerStatus status)
