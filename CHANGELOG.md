@@ -1,16 +1,17 @@
 # [7.1.0] - 2021-10-21 [PR: #562](https://github.com/dolittle/Runtime/pull/562)
 ## Summary
 
-
 ### Added
 
 - The Dolittle CLI tool with commands for getting information about and reprocessing events for running Event Handlers.
 - The option to register Event Handlers with a named alias that is picked up and used by the Dolittle CLI for easier tracking of Event Handlers
+- [Dolittle CLI Documentation](https://dolittle.io/docs/reference/cli/)
 
 ### Changed
 
 - Updated Contracts versions
 - Updated Grpc and Protobuf versions
+- [Documentation around replaying Event Handlers](https://dolittle.io/docs/concepts/event_handlers_and_filters/#replaying-events)
 
 
 # [7.0.0] - 2021-10-13 [PR: #556](https://github.com/dolittle/Runtime/pull/556)
