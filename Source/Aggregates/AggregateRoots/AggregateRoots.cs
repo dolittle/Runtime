@@ -8,14 +8,19 @@ using Dolittle.Runtime.Lifecycle;
 
 namespace Dolittle.Runtime.Aggregates.AggregateRoots
 {
+    /// <summary>
+    /// Represents an implementation of <see cref="IAggregateRoots"/>.
+    /// </summary>
     [Singleton]
     public class AggregateRoots : IAggregateRoots
     {
         readonly ConcurrentDictionary<Artifact, AggregateRoot> _aggregateRoots = new();
+
+        /// <inheritdoc />
         public IEnumerable<AggregateRoot> All => _aggregateRoots.Values;
 
+        /// <inheritdoc />
         public void Register(AggregateRoot aggregateRoot)
             => _aggregateRoots.AddOrUpdate(aggregateRoot.Type, aggregateRoot, (_, _) => aggregateRoot);
-
     }
 }

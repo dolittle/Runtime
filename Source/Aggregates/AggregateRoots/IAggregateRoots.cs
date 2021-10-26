@@ -5,6 +5,9 @@ using System.Collections.Generic;
 
 namespace Dolittle.Runtime.Aggregates.AggregateRoots
 {
+    /// <summary>
+    /// Defines a system that knows about Aggregate Roots.
+    /// </summary>
     public interface IAggregateRoots
     {
         /// <summary>

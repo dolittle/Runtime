@@ -9,12 +9,20 @@ using Dolittle.Runtime.Lifecycle;
 
 namespace Dolittle.Runtime.Aggregates
 {
+    /// <summary>
+    /// Represents an implementation of <see cref="IAggregates"/>.
+    /// </summary>
     [SingletonPerTenant]
     public class Aggregates : IAggregates
     {
         readonly IAggregateRoots _aggregateRoots;
         readonly IFetchAggregates _aggregatesFetcher;
-
+        
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Aggregates"/> class.
+        /// </summary>
+        /// <param name="aggregateRoots">The Aggregate Roots.</param>
+        /// <param name="aggregatesFetcher">The system that can fetch Aggregates.</param>
         public Aggregates(IAggregateRoots aggregateRoots, IFetchAggregates aggregatesFetcher)
         {
             _aggregateRoots = aggregateRoots;
