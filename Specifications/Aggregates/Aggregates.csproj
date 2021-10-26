@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="../../specs.props" />
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.Aggregates.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\Source\Aggregates\Aggregates.csproj" />
+  </ItemGroup>
+
+</Project>
