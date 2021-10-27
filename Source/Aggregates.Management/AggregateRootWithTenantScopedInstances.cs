@@ -10,5 +10,5 @@ namespace Dolittle.Runtime.Aggregates.Management
     /// </summary>
     /// <param name="AggregateRoot">The Aggregate Root.</param>
     /// <param name="Aggregates">The Tenant Scoped Aggregates.</param>
-    public record AggregateRootWithTenantScopedAggregates(AggregateRoot AggregateRoot, IList<TenantScopedAggregate> Aggregates);
+    public record AggregateRootWithTenantScopedInstances(AggregateRoot AggregateRoot, IEnumerable<TenantScopedAggregateRootInstance> Aggregates);
 }

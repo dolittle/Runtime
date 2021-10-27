@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             }
         }
 
-        static Contracts.AggregateRoot ToProtobuf(AggregateRootWithTenantScopedAggregates aggregateRoot)
+        static Contracts.AggregateRoot ToProtobuf(AggregateRootWithTenantScopedInstances aggregateRoot)
         {
             var result = new Contracts.AggregateRoot
             {
@@ -104,8 +104,8 @@ namespace Dolittle.Runtime.Aggregates.Management
             result.EventSources.AddRange(aggregateRoot.Aggregates.Select(_ => new TenantScopedEventSource
             {
                 TenantId = _.Tenant.ToProtobuf(),
-                AggregateRootVersion = _.Version,
-                EventSourceId = _.EventSource
+                AggregateRootVersion = _.Instance.Version,
+                EventSourceId = _.Instance.EventSource
             }));
             return result;
         }

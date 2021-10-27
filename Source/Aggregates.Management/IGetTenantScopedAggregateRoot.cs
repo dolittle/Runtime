@@ -14,31 +14,31 @@ namespace Dolittle.Runtime.Aggregates.Management
     public interface IGetTenantScopedAggregateRoot
     {
         /// <summary>
-        /// Gets all <see cref="AggregateRootWithTenantScopedAggregates"/> scoped to a specific Tenant.
+        /// Gets all <see cref="AggregateRootWithTenantScopedInstances"/> scoped to a specific Tenant.
         /// </summary>
         /// <param name="tenant">The Tenant.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IEnumerable{T}"/> of <see cref="AggregateRootWithTenantScopedAggregates"/>.</returns>
-        Task<IEnumerable<AggregateRootWithTenantScopedAggregates>> GetFor(TenantId tenant);
+        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IEnumerable{T}"/> of <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
+        Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetFor(TenantId tenant);
         
         /// <summary>
-        /// Gets all <see cref="AggregateRootWithTenantScopedAggregates"/> for all Tenants.
+        /// Gets all <see cref="AggregateRootWithTenantScopedInstances"/> for all Tenants.
         /// </summary>
-        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IEnumerable{T}"/> of <see cref="AggregateRootWithTenantScopedAggregates"/>.</returns>
-        Task<IEnumerable<AggregateRootWithTenantScopedAggregates>> GetForAllTenant();
+        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IEnumerable{T}"/> of <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
+        Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetForAllTenant();
         
         /// <summary>
-        /// Gets a single <see cref="AggregateRootWithTenantScopedAggregates"/> scoped to a specific Tenant.
+        /// Gets a single <see cref="AggregateRootWithTenantScopedInstances"/> scoped to a specific Tenant.
         /// </summary>
         /// <param name="tenant">The Tenant.</param>
-        /// <param name="aggregateRoot">The Aggregate Root.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the <see cref="AggregateRootWithTenantScopedAggregates"/>.</returns>
-        Task<AggregateRootWithTenantScopedAggregates> GetFor(TenantId tenant, ArtifactId aggregateRoot);
+        /// <param name="aggregateRootId">The Aggregate Root.</param>
+        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
+        Task<AggregateRootWithTenantScopedInstances> GetFor(TenantId tenant, ArtifactId aggregateRootId);
         
         /// <summary>
-        /// Gets a single <see cref="AggregateRootWithTenantScopedAggregates"/> for all Tenants.
+        /// Gets a single <see cref="AggregateRootWithTenantScopedInstances"/> for all Tenants.
         /// </summary>
-        /// <param name="aggregateRoot">The Aggregate Root.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the <see cref="AggregateRootWithTenantScopedAggregates"/>.</returns>
-        Task<AggregateRootWithTenantScopedAggregates> GetForAllTenant(ArtifactId aggregateRoot);
+        /// <param name="aggregateRootId">The Aggregate Root.</param>
+        /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
+        Task<AggregateRootWithTenantScopedInstances> GetForAllTenant(ArtifactId aggregateRootId);
     }
 }
