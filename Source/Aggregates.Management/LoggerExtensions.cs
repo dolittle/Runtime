@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using Dolittle.Runtime.Aggregates.AggregateRoots;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store;
 using Microsoft.Extensions.Logging;
@@ -14,6 +13,12 @@ namespace Dolittle.Runtime.Aggregates.Management
     /// </summary>
     static class LoggerExtensions
     {
+        static readonly Action<ILogger, Exception> _failure = LoggerMessage
+            .Define(
+                LogLevel.Warning,
+                new EventId(12141183, nameof(Failure)),
+                "An error occurred");
+        
         static readonly Action<ILogger, Exception> _getAllAggregateRoots = LoggerMessage
             .Define(
                 LogLevel.Information,
@@ -31,6 +36,9 @@ namespace Dolittle.Runtime.Aggregates.Management
                 LogLevel.Information,
                 new EventId(9184121, nameof(GetEvents)),
                 "Getting events committed for Aggregate with Aggregate Root Id {AggregateRootId} and Event Source Id {EventSourceId}");
+
+        internal static void Failure(this ILogger logger, Exception ex)
+            => _getAllAggregateRoots(logger, ex);
 
         internal static void GetAllAggregateRoots(this ILogger logger)
             => _getAllAggregateRoots(logger, null);
