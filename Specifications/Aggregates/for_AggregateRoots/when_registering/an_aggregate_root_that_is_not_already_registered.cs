@@ -3,26 +3,26 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Aggregates.AggregateRoots.for_AggregateRoots.when_registering
+namespace Dolittle.Runtime.Aggregates.for_AggregateRoots.when_registering
 {
     public class an_aggregate_root_that_is_not_already_registered : given.all_dependencies
     {
-        static AggregateRoot old_root;
+        static AggregateRoot _oldRoot;
 
         Establish context = () =>
         {
-            old_root = an_aggregate_root with
+            _oldRoot = AnAggregateRoot with
             {
-                Type = an_aggregate_root.Type with
+                Type = AnAggregateRoot.Type with
                 {
                     Id = "4cd25224-8258-4405-a9db-2e313c9ac4c0"
                 }
             };
-            aggregate_roots.Register(old_root);
+            aggregate_roots.Register(_oldRoot);
         };
         
-        Because of = () => aggregate_roots.Register(an_aggregate_root);
+        Because of = () => aggregate_roots.Register(AnAggregateRoot);
 
-        It should_only_have_the_old_and_new_aggregate_roots = () => aggregate_roots.All.ShouldContainOnly(old_root, an_aggregate_root);
+        It should_only_have_the_old_and_new_aggregate_roots = () => aggregate_roots.All.ShouldContainOnly(_oldRoot, AnAggregateRoot);
     }
 }

@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Aggregates.Specs</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Aggregates</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

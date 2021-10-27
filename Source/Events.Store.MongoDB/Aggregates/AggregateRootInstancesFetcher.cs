@@ -10,31 +10,31 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 {
     /// <summary>
-    /// Represents an implementation of <see cref="IFetchAggregates"/>
+    /// Represents an implementation of <see cref="IFetchAggregateRootInstances"/>
     /// </summary>
-    public class AggregatesFetcher : IFetchAggregates
+    public class AggregateRootInstancesFetcher : IFetchAggregateRootInstances
     {
         readonly FilterDefinitionBuilder<AggregateRoot> _filter = Builders<AggregateRoot>.Filter;
         readonly IAggregatesCollection _aggregates;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AggregatesFetcher"/> class.
+        /// Initializes a new instance of the <see cref="AggregateRootInstancesFetcher"/> class.
         /// </summary>
         /// <param name="aggregates">The <see cref="IAggregatesCollection" />.</param>
-        public AggregatesFetcher(IAggregatesCollection aggregates)
+        public AggregateRootInstancesFetcher(IAggregatesCollection aggregates)
         {
             _aggregates = aggregates;
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Aggregate>> FetchFor(Runtime.Aggregates.AggregateRoot aggregateRoot)
+        public async Task<IEnumerable<AggregateRootInstance>> FetchFor(Runtime.Aggregates.AggregateRoot aggregateRoot)
         {
             var aggregates = await _aggregates
                 .Aggregates
                 .Find(_filter.Eq(_ => _.AggregateType, aggregateRoot.Type.Id.Value))
                 .ToListAsync().ConfigureAwait(false);
 
-            return aggregates.Select(_ => new Aggregate(aggregateRoot, _.EventSource, _.Version));
+            return aggregates.Select(_ => new AggregateRootInstance(_.EventSource, _.Version));
         }
     }
 }

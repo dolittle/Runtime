@@ -4,16 +4,16 @@
 using Dolittle.Runtime.Artifacts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Aggregates.AggregateRoots.for_AggregateRoots.given
+namespace Dolittle.Runtime.Aggregates.for_AggregateRoots.given
 {
     public class all_dependencies
     {
         protected static AggregateRoots aggregate_roots;
-        protected static AggregateRoot an_aggregate_root;
+        protected static AggregateRoot AnAggregateRoot;
         
         Establish context = () =>
         {
-            an_aggregate_root = new AggregateRoot(new Artifact("78c81c44-25ed-489e-a6db-bdc46fe3e026", ArtifactGeneration.First), "some alias");
+            AnAggregateRoot = new AggregateRoot(new Artifact("78c81c44-25ed-489e-a6db-bdc46fe3e026", ArtifactGeneration.First), "some alias");
             aggregate_roots = new AggregateRoots();
         };
     }
