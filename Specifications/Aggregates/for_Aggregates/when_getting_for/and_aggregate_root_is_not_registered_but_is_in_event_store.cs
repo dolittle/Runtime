@@ -8,15 +8,15 @@ namespace Dolittle.Runtime.Aggregates.for_Aggregates.when_getting_for
 {
     public class and_aggregate_root_is_not_registered_but_is_in_event_store : given.all_dependencies
     {
-        static IEnumerable<Aggregate> result;
+        static IEnumerable<AggregateRootInstance> result;
 
         Establish context = () =>
         {
             setup_aggregate_roots();
-            setup_aggregates_fetcher((an_aggregate_root, new []{ an_aggregate }));
+            setup_aggregate_root_instances_fetcher((an_aggregate_root, new []{ an_aggregate_root_instance }));
         };
 
-        Because of = () => result = aggregates.GetFor(an_aggregate_root).GetAwaiter().GetResult();
+        Because of = () => result = aggregate_root_instances.GetFor(an_aggregate_root).GetAwaiter().GetResult();
 
         It should_not_get_any_aggregates = () => result.ShouldBeEmpty();
 

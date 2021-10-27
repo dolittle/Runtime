@@ -6,10 +6,9 @@ using Dolittle.Runtime.Events.Store;
 namespace Dolittle.Runtime.Aggregates
 {
     /// <summary>
-    /// Represents an Aggregate.
+    /// Represents an Aggregate Root.
     /// </summary>
-    /// <param name="Root">The Aggregate Root.</param>
     /// <param name="EventSource">The Event Source Id.</param>
-    /// <param name="Version">The current Aggregate Root Version.</param>
-    public record Aggregate(AggregateRoot Root, EventSourceId EventSource, AggregateRootVersion Version);
+    /// <param name="Version">The Aggregate Root Version.</param>
+    public record AggregateRootInstance(EventSourceId EventSource, AggregateRootVersion Version);
 }

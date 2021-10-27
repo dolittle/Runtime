@@ -7,14 +7,14 @@ using System.Threading.Tasks;
 namespace Dolittle.Runtime.Aggregates
 {
     /// <summary>
-    /// Defines a system that can fetch Aggregates from the Event Store.
+    /// Defines a system that can fetch Aggregate Root Instances from the Event Store.
     /// </summary>
-    public interface IFetchAggregates
+    public interface IFetchAggregateRootInstances
     {
         /// <summary>
         /// Gets all Aggregates for an Aggregate Root.
         /// </summary>
         /// <param name="aggregateRoot">The Aggregate Root to get Aggregates from.</param>
-        public Task<IEnumerable<Aggregate>> FetchFor(AggregateRoot aggregateRoot);
+        public Task<IEnumerable<AggregateRootInstance>> FetchFor(AggregateRoot aggregateRoot);
     }
 }

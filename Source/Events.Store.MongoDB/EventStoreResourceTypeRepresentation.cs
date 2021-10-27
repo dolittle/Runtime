@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
             { typeof(IEventStore), typeof(EventStore) },
-            { typeof(IFetchAggregates), typeof(AggregatesFetcher) },
+            { typeof(IFetchAggregateRootInstances), typeof(AggregateRootInstancesFetcher) },
             { typeof(IStreamDefinitionRepository), typeof(StreamDefinitionRepository) },
             { typeof(IStreamProcessorStateRepository), typeof(StreamProcessorStateRepository) },
             { typeof(IEventFetchers), typeof(EventFetchers) },

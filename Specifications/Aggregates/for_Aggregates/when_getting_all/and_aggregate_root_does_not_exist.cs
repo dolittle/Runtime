@@ -2,7 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
-using Dolittle.Runtime.Aggregates.AggregateRoots;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
@@ -10,15 +9,15 @@ namespace Dolittle.Runtime.Aggregates.for_Aggregates.when_getting_all
 {
     public class and_there_are_no_registered_or_stored_aggregates : given.all_dependencies
     {
-        static IEnumerable<(AggregateRoot, IEnumerable<Aggregate>)> result;
+        static IEnumerable<AggregateRootWithInstances> result;
 
         Establish context = () =>
         {
             setup_aggregate_roots();
-            setup_aggregates_fetcher();
+            setup_aggregate_root_instances_fetcher();
         };
 
-        Because of = () => result = aggregates.GetAll().GetAwaiter().GetResult();
+        Because of = () => result = aggregate_root_instances.GetAll().GetAwaiter().GetResult();
 
         It should_not_get_any_aggregates = () => result.ShouldBeEmpty();
         It should_not_try_fetch_any_aggregates = () => aggregates_fetcher.VerifyNoOtherCalls();
