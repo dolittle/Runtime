@@ -27,14 +27,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<Aggregate>> FetchFor(Runtime.Aggregates.AggregateRoots.AggregateRoot aggregateRoot)
+        public async Task<IEnumerable<Aggregate>> FetchFor(Runtime.Aggregates.AggregateRoot aggregateRoot)
         {
             var aggregates = await _aggregates
                 .Aggregates
                 .Find(_filter.Eq(_ => _.AggregateType, aggregateRoot.Type.Id.Value))
                 .ToListAsync().ConfigureAwait(false);
 
-            return aggregates.Select(_ => new Aggregate(_.EventSource, _.Version));
+            return aggregates.Select(_ => new Aggregate(aggregateRoot, _.EventSource, _.Version));
         }
     }
 }

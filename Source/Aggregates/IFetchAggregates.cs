@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Aggregates.AggregateRoots;
 
 namespace Dolittle.Runtime.Aggregates
 {

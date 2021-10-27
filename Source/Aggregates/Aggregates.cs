@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Aggregates.AggregateRoots;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Lifecycle;
 
 namespace Dolittle.Runtime.Aggregates
@@ -30,23 +30,26 @@ namespace Dolittle.Runtime.Aggregates
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<(AggregateRoot, IEnumerable<Aggregate>)>> GetAll()
+        public async Task<IEnumerable<Aggregate>> GetAll()
         {
             var roots = _aggregateRoots.All;
+            var results = new List<Aggregate>();
 
-            var results = new List<(AggregateRoot, IEnumerable<Aggregate>)>();
             foreach (var root in roots)
             {
                 var aggregates = await _aggregatesFetcher.FetchFor(root).ConfigureAwait(false);
-                results.Add((root, aggregates));
+                results.AddRange(aggregates);
             }
             return results;
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<Aggregate>> GetFor(AggregateRoot aggregateRoot)
-            => !_aggregateRoots.All.Contains(aggregateRoot) 
-                ? Task.FromResult(Enumerable.Empty<Aggregate>())
-                : _aggregatesFetcher.FetchFor(aggregateRoot);
+        public Task<IEnumerable<Aggregate>> GetFor(AggregateRoot aggregateRoot) => GetFor(aggregateRoot.Type.Id);
+
+        /// <inheritdoc />
+        public Task<IEnumerable<Aggregate>> GetFor(ArtifactId aggregateRootId)
+            => _aggregateRoots.TryGet(aggregateRootId, out var aggregateRoot)
+                ? _aggregatesFetcher.FetchFor(aggregateRoot)
+                : Task.FromResult(Enumerable.Empty<Aggregate>());
     }
 }

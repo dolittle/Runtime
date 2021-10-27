@@ -7,7 +7,7 @@ using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Aggregates.Contracts.AggregateRoots;
 
-namespace Dolittle.Runtime.Aggregates.AggregateRoots
+namespace Dolittle.Runtime.Aggregates
 {
     /// <summary>
     /// Represents the implementation of <see cref="AggregateRootsBase"/>.
