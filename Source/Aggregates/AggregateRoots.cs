@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Lifecycle;
 
-namespace Dolittle.Runtime.Aggregates.AggregateRoots
+namespace Dolittle.Runtime.Aggregates
 {
     /// <summary>
     /// Represents an implementation of <see cref="IAggregateRoots"/>.
@@ -14,13 +14,16 @@ namespace Dolittle.Runtime.Aggregates.AggregateRoots
     [Singleton]
     public class AggregateRoots : IAggregateRoots
     {
-        readonly ConcurrentDictionary<Artifact, AggregateRoot> _aggregateRoots = new();
+        readonly ConcurrentDictionary<ArtifactId, AggregateRoot> _aggregateRoots = new();
 
         /// <inheritdoc />
         public IEnumerable<AggregateRoot> All => _aggregateRoots.Values;
 
         /// <inheritdoc />
         public void Register(AggregateRoot aggregateRoot)
-            => _aggregateRoots.AddOrUpdate(aggregateRoot.Type, aggregateRoot, (_, _) => aggregateRoot);
+            => _aggregateRoots.AddOrUpdate(aggregateRoot.Type.Id, aggregateRoot, (_, _) => aggregateRoot);
+
+        public bool TryGet(ArtifactId aggregateRootId, out AggregateRoot aggregateRoot)
+            => _aggregateRoots.TryGetValue(aggregateRootId, out aggregateRoot);
     }
 }

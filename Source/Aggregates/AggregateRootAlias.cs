@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Aggregates.AggregateRoots
+namespace Dolittle.Runtime.Aggregates
 {
     /// <summary>
     /// Represents a name alias of an Aggregate Root

@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Artifacts;
 
-namespace Dolittle.Runtime.Aggregates.AggregateRoots
+namespace Dolittle.Runtime.Aggregates
 {
     /// <summary>
     /// Represents an Aggregate Root.

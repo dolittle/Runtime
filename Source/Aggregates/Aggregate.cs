@@ -8,7 +8,8 @@ namespace Dolittle.Runtime.Aggregates
     /// <summary>
     /// Represents an Aggregate.
     /// </summary>
+    /// <param name="Root">The Aggregate Root.</param>
     /// <param name="EventSource">The Event Source Id.</param>
     /// <param name="Version">The current Aggregate Root Version.</param>
-    public record Aggregate(EventSourceId EventSource, AggregateRootVersion Version);
+    public record Aggregate(AggregateRoot Root, EventSourceId EventSource, AggregateRootVersion Version);
 }

@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Aggregates.AggregateRoots
+namespace Dolittle.Runtime.Aggregates
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
