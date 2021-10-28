@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -74,25 +75,25 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates.Events
             }
             else
             {
-                await WriteTableOutput(cli, events).ConfigureAwait(false);
+                await WriteTableOutput(cli, events.TakeLast(10)).ConfigureAwait(false);
             }
         }
         
-        Task WriteTableOutput(CommandLineApplication cli, CommittedAggregateEvents events)
+        Task WriteTableOutput(CommandLineApplication cli, IEnumerable<CommittedAggregateEvent> events)
             => Wide
                 ? WriteDetailedOutput(cli, events)
                 : WriteSimpleOutput(cli, events);
 
-        Task WriteSimpleOutput(CommandLineApplication cli, CommittedAggregateEvents events)
-            => WriteOutput(cli, CreateSimpleView(events));
+        Task WriteSimpleOutput(CommandLineApplication cli, IEnumerable<CommittedAggregateEvent> events)
+            => WriteOutput(cli, events.Select(CreateSimpleView));
 
-        Task WriteDetailedOutput(CommandLineApplication cli, CommittedAggregateEvents events)
-            => WriteOutput(cli, CreateDetailedView(events));
+        Task WriteDetailedOutput(CommandLineApplication cli, IEnumerable<CommittedAggregateEvent> events)
+            => WriteOutput(cli, events.Select(CreateDetailedView));
 
-        static CommittedAggregateEventsSimpleView CreateSimpleView(CommittedAggregateEvents events)
-            => new((ulong)events.Count);
+        static CommittedAggregateEventsSimpleView CreateSimpleView(CommittedAggregateEvent @event)
+            => new(@event.AggregateRootVersion, @event.EventLogSequenceNumber, @event.Type.Id);
 
-        static CommittedAggregateEventsDetailedView CreateDetailedView(CommittedAggregateEvents events)
-            => new((ulong)events.Count);
+        static CommittedAggregateEventsDetailedView CreateDetailedView(CommittedAggregateEvent @event)
+            => new(@event.AggregateRootVersion, @event.EventLogSequenceNumber, @event.Type.Id, @event.Public, @event.Occurred);
     }
 }
