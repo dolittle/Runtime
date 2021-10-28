@@ -3,7 +3,6 @@
 
 using System;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
 {

@@ -3,7 +3,6 @@
 
 using System;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Events.Store;

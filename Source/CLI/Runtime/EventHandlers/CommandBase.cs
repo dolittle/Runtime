@@ -4,7 +4,6 @@
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Serialization.Json;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers

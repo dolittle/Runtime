@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Docker.DotNet;
+using Dolittle.Runtime.CLI.Runtime.Aggregates;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,7 @@ namespace Dolittle.Runtime.CLI.Runtime
                 new DockerClientConfiguration().CreateClient());
             
             services.AddEventHandlerServices();
+            services.AddAggregatesServices();
         }
     }
 }

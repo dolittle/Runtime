@@ -1,9 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
 {

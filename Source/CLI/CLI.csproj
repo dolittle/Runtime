@@ -19,6 +19,7 @@
         <ProjectReference Include="../Serialization.Json/Serialization.Json.csproj" />
         <ProjectReference Include="../Types/Types.csproj" />
         <ProjectReference Include="../Services.Clients/Services.Clients.csproj" />
+        <ProjectReference Include="..\Aggregates.Management\Aggregates.Management.csproj" />
         <ProjectReference Include="..\Events.Processing\Events.Processing.csproj" />
         <ProjectReference Include="..\Events.Store\Events.Store.csproj" />
     </ItemGroup>
