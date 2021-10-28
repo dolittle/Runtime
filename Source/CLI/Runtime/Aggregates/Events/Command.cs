@@ -4,7 +4,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Aggregates.Management;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
 using Dolittle.Runtime.Events.Store;
@@ -83,21 +82,17 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates.Events
             => Wide
                 ? WriteDetailedOutput(cli, events)
                 : WriteSimpleOutput(cli, events);
-        
+
         Task WriteSimpleOutput(CommandLineApplication cli, CommittedAggregateEvents events)
-        
-            => WriteOutput(cli, events.Select(_ => _.))
+            => WriteOutput(cli, CreateSimpleView(events));
 
         Task WriteDetailedOutput(CommandLineApplication cli, CommittedAggregateEvents events)
-        {
-            
-            // await WriteOutput(cli, MergePartitionedStates(status)).ConfigureAwait(false);
-            
-        }
+            => WriteOutput(cli, CreateDetailedView(events));
 
         static CommittedAggregateEventsSimpleView CreateSimpleView(CommittedAggregateEvents events)
             => new((ulong)events.Count);
-    }
 
-    public record CommittedAggregateEventsSimpleView(ulong NumberOfEvents);
+        static CommittedAggregateEventsDetailedView CreateDetailedView(CommittedAggregateEvents events)
+            => new((ulong)events.Count);
+    }
 }
