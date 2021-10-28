@@ -10,7 +10,11 @@ namespace Dolittle.Runtime.Events
     /// </summary>
     public interface IEventTypes
     {
+        /// <summary>
+        /// Gets all registered Event Types.
+        /// </summary>
         IEnumerable<EventType> All { get; }
+        
         /// <summary>
         /// Registers an Event Type.
         /// </summary>

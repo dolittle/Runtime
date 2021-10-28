@@ -12,13 +12,12 @@ using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Aggregates.Management.Contracts.AggregateRoots;
-using GetAllRequest = Dolittle.Runtime.Aggregates.Management.Contracts.GetAllRequest;
-using GetAllResponse = Dolittle.Runtime.Aggregates.Management.Contracts.GetAllResponse;
-using GetOneRequest = Dolittle.Runtime.Aggregates.Management.Contracts.GetOneRequest;
-using GetOneResponse = Dolittle.Runtime.Aggregates.Management.Contracts.GetOneResponse;
 
 namespace Dolittle.Runtime.Aggregates.Management
 {
+    /// <summary>
+    /// Represents an implementation of <see cref="AggregateRootsBase"/>.
+    /// </summary>
     public class AggregateRootsService : AggregateRootsBase
     {
         readonly IGetTenantScopedAggregateRoot _tenantScopedAggregateRoot;
@@ -38,6 +37,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             _logger = logger;
         }
 
+        /// <inheritdoc />
         public override async Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
         {
             try
@@ -60,6 +60,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             }
         }
 
+        /// <inheritdoc />
         public override async Task<GetOneResponse> GetOne(GetOneRequest request, ServerCallContext context)
         {
             try
@@ -78,6 +79,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             }
         }
 
+        /// <inheritdoc />
         public override async Task<GetEventsResponse> GetEvents(GetEventsRequest request, ServerCallContext context)
         {
             try

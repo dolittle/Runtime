@@ -38,7 +38,7 @@ namespace Dolittle.Runtime.Aggregates.Management
                 "Getting events committed for Aggregate with Aggregate Root Id {AggregateRootId} and Event Source Id {EventSourceId}");
 
         internal static void Failure(this ILogger logger, Exception ex)
-            => _getAllAggregateRoots(logger, ex);
+            => _failure(logger, ex);
 
         internal static void GetAllAggregateRoots(this ILogger logger)
             => _getAllAggregateRoots(logger, null);

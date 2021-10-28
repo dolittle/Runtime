@@ -8,9 +8,9 @@ namespace Dolittle.Runtime.Events
     /// <summary>
     /// Represents the Event Type.
     /// </summary>
-    /// <param name="Type">The Event Type <see cref="Artifact"/>.</param>
+    /// <param name="Identifier">The Event Type <see cref="Artifact"/>.</param>
     /// <param name="Alias">The Alias of the Event Type.</param>
-    public record EventType(Artifact Type, EventTypeAlias Alias)
+    public record EventType(Artifact Identifier, EventTypeAlias Alias)
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EventType"/> record.
