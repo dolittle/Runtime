@@ -19,8 +19,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
     public class Command : CommandBase
     {
         readonly IManagementClient _client;
-
-        readonly IResolveEventHandlerId _eventHandlerIdResolver;
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
@@ -33,7 +32,6 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
             : base(runtimes, eventHandlerIdResolver, serializer)
         {
             _client = client;
-            _eventHandlerIdResolver = eventHandlerIdResolver;
         }
         
         /// <summary>
