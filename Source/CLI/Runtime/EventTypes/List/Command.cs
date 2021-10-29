@@ -17,18 +17,15 @@ namespace Dolittle.Runtime.CLI.Runtime.EventTypes.List
     [Command("list", Description = "Lists all registered Event Types")]
     public class Command : CommandBase
     {
-        readonly IManagementClient _client;
-        
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
         /// <param name="serializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, IManagementClient client,  ISerializer serializer)
-            : base(runtimes, serializer)
+        public Command(ICanLocateRuntimes runtimes, IDiscoverEventTypes eventTypesDiscoverer,  ISerializer serializer)
+            : base(runtimes, eventTypesDiscoverer, serializer)
         {
-            _client = client;
         }
 
         /// <summary>
@@ -42,15 +39,15 @@ namespace Dolittle.Runtime.CLI.Runtime.EventTypes.List
             {
                 return;
             }
-            var aggregateRoots = await _client.GetAll(runtimeAddress).ConfigureAwait(false);
+            await PopulateEventTypes(runtimeAddress).ConfigureAwait(false);
 
             if (Output == OutputType.Json)
             {
-                await WriteOutput(cli, aggregateRoots).ConfigureAwait(false);
+                await WriteOutput(cli, EventTypes).ConfigureAwait(false);
             }
             else
             {
-                await WriteTableOutput(cli, aggregateRoots).ConfigureAwait(false);
+                await WriteTableOutput(cli, EventTypes).ConfigureAwait(false);
             }
         }
         

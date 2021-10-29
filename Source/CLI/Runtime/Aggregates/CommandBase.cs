@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Serialization.Json;
 
@@ -21,8 +22,8 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="aggregateRootIdResolver">The Aggregate Root Id resolver.</param>
         /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        protected CommandBase(ICanLocateRuntimes runtimes, IResolveAggregateRootId aggregateRootIdResolver, ISerializer jsonSerializer)
-            : base(runtimes, jsonSerializer)
+        protected CommandBase(ICanLocateRuntimes runtimes, IResolveAggregateRootId aggregateRootIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
+            : base(runtimes, eventTypesDiscoverer, jsonSerializer)
         {
             _aggregateRootIdResolver = aggregateRootIdResolver;
         }

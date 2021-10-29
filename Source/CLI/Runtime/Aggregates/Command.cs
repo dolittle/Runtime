@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -21,8 +22,8 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="aggregateRootIdResolver">The <see cref="IResolveAggregateRootId"/>.</param>
         /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, IResolveAggregateRootId aggregateRootIdResolver, ISerializer jsonSerializer)
-            : base(runtimes, aggregateRootIdResolver, jsonSerializer)
+        public Command(ICanLocateRuntimes runtimes, IResolveAggregateRootId aggregateRootIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
+            : base(runtimes, aggregateRootIdResolver, eventTypesDiscoverer, jsonSerializer)
         {
         }
         

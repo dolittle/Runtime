@@ -19,6 +19,5 @@ namespace Dolittle.Runtime.CLI.Runtime.EventTypes
         /// <param name="runtime">The address of the Runtime to connect to.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         Task<IEnumerable<Dolittle.Runtime.Events.EventType>> GetAll(MicroserviceAddress runtime);
-
     }
 }

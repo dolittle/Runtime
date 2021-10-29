@@ -17,7 +17,6 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates
     /// </summary>
     public interface IManagementClient
     {
-        
         /// <summary>
         /// Gets all registered Aggregate Roots or for a specific Tenant if specified.
         /// </summary>

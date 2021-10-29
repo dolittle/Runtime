@@ -8,6 +8,7 @@ using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Aggregates.Management;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -28,8 +29,8 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates.List
         /// <param name="client">The management client to use.</param>
         /// <param name="aggregateRootIdResolver">The Aggregate Root Id resolver.</param>
         /// <param name="serializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveAggregateRootId aggregateRootIdResolver,  ISerializer serializer)
-            : base(runtimes, aggregateRootIdResolver, serializer)
+        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveAggregateRootId aggregateRootIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer serializer)
+            : base(runtimes, aggregateRootIdResolver, eventTypesDiscoverer, serializer)
         {
             _client = client;
         }

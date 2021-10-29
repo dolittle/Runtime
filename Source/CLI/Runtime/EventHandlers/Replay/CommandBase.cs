@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.ComponentModel.DataAnnotations;
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -17,8 +18,8 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        protected CommandBase(ICanLocateRuntimes runtimes, IResolveEventHandlerId eventHandlerIdResolver, ISerializer jsonSerializer)
-            : base(runtimes, eventHandlerIdResolver, jsonSerializer)
+        protected CommandBase(ICanLocateRuntimes runtimes, IResolveEventHandlerId eventHandlerIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
+            : base(runtimes, eventHandlerIdResolver, eventTypesDiscoverer,  jsonSerializer)
         {
         }
         

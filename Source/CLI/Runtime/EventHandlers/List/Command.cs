@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -26,8 +27,8 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.List
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
         /// <param name="client">The management client to use.</param>
         /// <param name="serializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver, ISerializer serializer)
-            : base(runtimes, eventHandlerIdResolver, serializer)
+        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer serializer)
+            : base(runtimes, eventHandlerIdResolver, eventTypesDiscoverer, serializer)
         {
             _client = client;
         }

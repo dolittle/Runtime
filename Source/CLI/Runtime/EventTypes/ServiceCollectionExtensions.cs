@@ -14,6 +14,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventTypes
         public static void AddEventTypesServices(this IServiceCollection services)
         {
             services.AddTransient<IManagementClient, ManagementClient>();
+            services.AddTransient<IDiscoverEventTypes, DiscoverEventTypes>();
         }
     }
 }
