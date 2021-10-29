@@ -1,15 +1,13 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.CLI.Options;
-using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
@@ -22,8 +20,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
     public class Command : CommandBase
     {
         readonly IManagementClient _client;
-
-        readonly IResolveEventHandlerId _eventHandlerIdResolver;
+        
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Command"/> class.
@@ -32,11 +29,10 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Get
         /// <param name="client">The management client to use.</param>
         /// <param name="eventHandlerIdResolver">The Event Handler Id resolver.</param>
         /// <param name="serializer">The json <see cref="ISerializer"/>.</param>
-        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver,  ISerializer serializer)
-            : base(runtimes, eventHandlerIdResolver, serializer)
+        public Command(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer serializer)
+            : base(runtimes, eventHandlerIdResolver, eventTypesDiscoverer, serializer)
         {
             _client = client;
-            _eventHandlerIdResolver = eventHandlerIdResolver;
         }
         
         /// <summary>

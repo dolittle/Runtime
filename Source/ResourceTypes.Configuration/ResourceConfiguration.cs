@@ -18,6 +18,7 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
     [Singleton]
     public class ResourceConfiguration : IResourceConfiguration
     {
+        readonly IEnumerable<IAmAResourceType> _resourceTypes;
         readonly ITypeFinder _typeFinder;
         readonly ILogger _logger;
         readonly IEnumerable<IRepresentAResourceType> _resourceTypeRepresentations;
@@ -26,19 +27,22 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
         /// <summary>
         /// Initializes a new instance of the <see cref="ResourceConfiguration"/> class.
         /// </summary>
+        /// <param name="resourceTypes">All <see cref="IAmAResourceType"/> implementations.</param>
         /// <param name="typeFinder"><see cref="ITypeFinder"/> used for discovering types by the resource system.</param>
         /// <param name="container"><see cref="IContainer"/> to use for getting instances.</param>
         /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public ResourceConfiguration(ITypeFinder typeFinder, IContainer container, ILogger logger)
+        public ResourceConfiguration(IEnumerable<IAmAResourceType> resourceTypes, ITypeFinder typeFinder, IContainer container, ILogger logger)
         {
             logger.LogDebug("ResourceConfiguration() - ctor");
 
+            _resourceTypes = resourceTypes;
             _typeFinder = typeFinder;
             var resourceTypeRepresentationTypes = _typeFinder.FindMultiple<IRepresentAResourceType>();
             resourceTypeRepresentationTypes.ForEach(_ => logger.LogTrace("Discovered resource type representation : '{resourceTypeRepresentationType}'", _.AssemblyQualifiedName));
 
             _resourceTypeRepresentations = resourceTypeRepresentationTypes.Select(_ => container.Get(_) as IRepresentAResourceType);
             ThrowIfMultipleResourcesWithSameTypeAndImplementation(_resourceTypeRepresentations);
+            ThrowIfMissingServiceBindings();
             _logger = logger;
         }
 
@@ -64,10 +68,12 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
                 return resourceTypeImplementation == _resources[resourceType];
             }).ToArray();
             var length = results.Length;
-            if (length == 0) throw new ImplementationForServiceNotFound(service);
-            if (length > 1) throw new MultipleImplementationsFoundForService(service);
-
-            return results[0].Bindings[service];
+            return length switch
+            {
+                0 => throw new ImplementationForServiceNotFound(service),
+                > 1 => throw new MultipleImplementationsFoundForService(service),
+                _ => results[0].Bindings[service]
+            };
         }
 
         /// <inheritdoc/>
@@ -82,7 +88,32 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
             IsConfigured = true;
         }
 
-        void ThrowIfMultipleResourcesWithSameTypeAndImplementation(IEnumerable<IRepresentAResourceType> resourceTypeRepresentations)
+        void ThrowIfMissingServiceBindings()
+        {
+            foreach (var resourceType in _resourceTypes)
+            {
+                var services = resourceType.Services;
+                var resourceTypeRepresentations = _resourceTypeRepresentations.Where(_ => _.Type == resourceType.Name);
+                foreach (var resourceTypeRepresentation in resourceTypeRepresentations)
+                {
+                    ThrowIfResourceTypeRepresentationIsMissingServiceBinding(resourceTypeRepresentation, services);
+                }
+                
+            }
+        }
+
+        static void ThrowIfResourceTypeRepresentationIsMissingServiceBinding(IRepresentAResourceType resourceTypeRepresentation, IEnumerable<Type> services)
+        {
+            foreach (var service in services)
+            {
+                if (!resourceTypeRepresentation.Bindings.Keys.Contains(service))
+                {
+                    throw new ResourceTypeRepresentationIsMissingBindingForService(resourceTypeRepresentation.Type, resourceTypeRepresentation.ImplementationName, service);
+                }
+            }
+        }
+
+        static void ThrowIfMultipleResourcesWithSameTypeAndImplementation(IEnumerable<IRepresentAResourceType> resourceTypeRepresentations)
         {
             var resourcesGroupedByResourceType = resourceTypeRepresentations.GroupBy(_ => _.Type);
             resourcesGroupedByResourceType.ForEach(group =>

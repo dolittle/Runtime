@@ -1,8 +1,12 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
+using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Rudimentary;
 using Dolittle.Runtime.Serialization.Json;
@@ -16,16 +20,20 @@ namespace Dolittle.Runtime.CLI.Runtime
     public abstract class CommandBase : CLI.CommandBase
     {
         readonly ICanLocateRuntimes _runtimes;
+        readonly IDiscoverEventTypes _eventTypesDiscoverer;
+        IEnumerable<EventType> _eventTypes;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CommandBase"/> class.
         /// </summary>
         /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
+        /// <param name="eventTypesDiscoverer">The system that can discover registered event types from the Runtime.</param>
         /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        protected CommandBase(ICanLocateRuntimes runtimes, ISerializer jsonSerializer)
+        protected CommandBase(ICanLocateRuntimes runtimes, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
             : base(jsonSerializer)
         {
             _runtimes = runtimes;
+            _eventTypesDiscoverer = eventTypesDiscoverer;
         }
 
         /// <summary>
@@ -33,6 +41,18 @@ namespace Dolittle.Runtime.CLI.Runtime
         /// </summary>
         [Option("--runtime", CommandOptionType.SingleValue, Description = "The <host[:port]> to use to connect to the management endpoint of a Runtime")]
         MicroserviceAddress Runtime { get; init; }
+        
+        protected IEnumerable<EventType> EventTypes
+        {
+            get
+            {
+                if (_eventTypes == default)
+                {
+                    
+                }
+                return _eventTypes ?? throw new EventTypesNotPopulated();
+            }
+        }
 
         /// <summary>
         /// Prompts the user to select the address of the Runtime to connect to.
@@ -71,6 +91,29 @@ namespace Dolittle.Runtime.CLI.Runtime
                 
                 await cli.Out.WriteLineAsync("Invalid number, please select one of the following:");
             }
+        }
+        
+        /// <summary>
+        /// Populates the <see cref="EventTypes"/> property with event types discovered from the Runtime.
+        /// </summary>
+        protected async Task PopulateEventTypes(MicroserviceAddress runtime)
+        {
+            _eventTypes = await _eventTypesDiscoverer.Discover(runtime).ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        /// Resolves the given event type id to the alias or id of the registered event type.
+        /// </summary>
+        protected string ResolveEventTypeIdentifier(ArtifactId eventTypeId)
+        {
+            var eventType = EventTypes.FirstOrDefault(_ => _.Identifier.Id.Equals(eventTypeId));
+            if (eventType == default)
+            {
+                return eventTypeId.Value.ToString();
+            }
+            return eventType.Alias.Equals(EventTypeAlias.NotSet)
+                ? eventTypeId.Value.ToString()
+                : eventType.Alias;
         }
     }
 }

@@ -46,6 +46,14 @@ namespace Dolittle.Runtime.Protobuf
         /// <returns>Converted <see cref="FailureContract" />.</returns>
         public static FailureContract ToProtobuf(this Failure failure) =>
             new() { Id = failure.Id.Value.ToProtobuf(), Reason = failure.Reason };
+        
+        /// <summary>
+        /// Convert an <see cref="Exception" /> to <see cref="FailureContract" />.
+        /// </summary>
+        /// <param name="exception"><see cref="Exception" /> to convert.</param>
+        /// <returns>Converted <see cref="FailureContract" />.</returns>
+        public static FailureContract ToProtobuf(this Exception exception) =>
+            new() { Id = Failures.Unknown.ToProtobuf(), Reason = exception.Message };
 
         /// <summary>
         /// Convert a <see cref="FailureContract" /> to <see cref="Failure" />.

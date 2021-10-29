@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.Events.Store.EventHorizon;
+using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
@@ -19,6 +20,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
             { typeof(IEventStore), typeof(EventStore) },
+            { typeof(IFetchAggregateRootInstances), typeof(AggregateRootInstancesFetcher) },
             { typeof(IStreamDefinitionRepository), typeof(StreamDefinitionRepository) },
             { typeof(IStreamProcessorStateRepository), typeof(StreamProcessorStateRepository) },
             { typeof(IEventFetchers), typeof(EventFetchers) },
