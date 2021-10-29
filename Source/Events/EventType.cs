@@ -20,5 +20,11 @@ namespace Dolittle.Runtime.Events
             : this(type, EventTypeAlias.NotSet)
         {
         }
+
+        /// <inheritdoc />
+        public override string ToString()
+            => Alias.Equals(EventTypeAlias.NotSet)
+                ? Identifier.Id.Value.ToString()
+                : Alias;
     }
 }
