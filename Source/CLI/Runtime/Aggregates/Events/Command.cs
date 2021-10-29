@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates.Events
     /// <summary>
     /// The "dolittle runtime aggregates events" command.
     /// </summary>
-    [Command("events", Description = "Gets all committed aggregate events for an aggregate root instance")]
+    [Command("events", Description = "Gets all committed aggregate events for an aggregate root instance. When viewing in table mode it will only show the last 10 events")]
     public class Command : CommandBase
     {
         readonly IManagementClient _client;
