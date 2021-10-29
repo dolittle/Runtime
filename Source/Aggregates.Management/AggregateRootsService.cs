@@ -3,8 +3,10 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Aggregates.Management.Contracts;
+using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Execution;
@@ -86,7 +88,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             {
                 _logger.GetEvents(request.Aggregate.AggregateRootId.ToGuid(), request.Aggregate.EventSourceId);
                 _executionContextManager.CurrentFor(request.TenantId.ToGuid());
-                var events = await _getEventStore().FetchForAggregate(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), context.CancellationToken).ConfigureAwait(false);
+                var events = await FetchEventsForAggregateInstance(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), context.CancellationToken);
                 return new GetEventsResponse { Events = events.ToProtobuf() };
             }
             catch (Exception ex)
@@ -110,6 +112,18 @@ namespace Dolittle.Runtime.Aggregates.Management
                 EventSourceId = _.Instance.EventSource
             }));
             return result;
+        }
+
+        async Task<CommittedAggregateEvents> FetchEventsForAggregateInstance(EventSourceId eventSource, ArtifactId aggregateRootId, CancellationToken cancellationToken)
+        {
+            try
+            {
+                return await _getEventStore().FetchForAggregate(eventSource, aggregateRootId, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                return new CommittedAggregateEvents(eventSource, aggregateRootId, Enumerable.Empty<CommittedAggregateEvent>().ToList());
+            }
         }
     }
 }

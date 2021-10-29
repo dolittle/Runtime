@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Events.Store.EventHorizon;
 using Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
 using Dolittle.Runtime.Events.Store.MongoDB.EventHorizon;

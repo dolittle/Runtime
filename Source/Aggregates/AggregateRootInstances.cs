@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Artifacts;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 
 namespace Dolittle.Runtime.Aggregates
@@ -37,8 +38,7 @@ namespace Dolittle.Runtime.Aggregates
 
             foreach (var root in roots)
             {
-                var aggregates = await _aggregateRootInstancesFetcher.FetchFor(root).ConfigureAwait(false);
-                results.Add(new AggregateRootWithInstances(root, aggregates));
+                results.Add(new AggregateRootWithInstances(root, await FetchInstances(root).ConfigureAwait(false)));
             }
             return results;
         }
@@ -49,7 +49,13 @@ namespace Dolittle.Runtime.Aggregates
         /// <inheritdoc />
         public Task<IEnumerable<AggregateRootInstance>> GetFor(ArtifactId aggregateRootId)
             => _aggregateRoots.TryGet(aggregateRootId, out var aggregateRoot)
-                ? _aggregateRootInstancesFetcher.FetchFor(aggregateRoot)
+                ? FetchInstances(aggregateRoot)
                 : Task.FromResult(Enumerable.Empty<AggregateRootInstance>());
+
+        async Task<IEnumerable<AggregateRootInstance>> FetchInstances(AggregateRoot root)
+        {
+            var instances = await _aggregateRootInstancesFetcher.FetchFor(root.Type.Id).ConfigureAwait(false);
+            return instances.Select(_ => new AggregateRootInstance(_.Item1, _.Item2));
+        }
     }
 }

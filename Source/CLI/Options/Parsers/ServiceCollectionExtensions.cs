@@ -30,6 +30,7 @@ namespace Dolittle.Runtime.CLI.Options.Parsers
             services.AddTransient<IValueParser, GuidConceptParser<EventProcessorId>>();
             services.AddTransient<IValueParser, GuidConceptParser<ScopeId>>();
             services.AddTransient<IValueParser, GuidConceptParser<TenantId>>();
+            services.AddTransient<IValueParser, StringConceptParser<EventSourceId>>();
             services.AddTransient<IValueParser, UlongConceptParser<StreamPosition>>();
             services.AddTransient<IValueParser, EventHandlerIdOrAliasParser>();
             services.AddTransient<IValueParser, AggregateRootIdOrAliasParser>();

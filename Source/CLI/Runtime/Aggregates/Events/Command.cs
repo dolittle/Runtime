@@ -49,11 +49,10 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates.Events
         EventSourceId EventSourceId { get; init; }
         
         /// <summary>
-        /// The Tenant Id argument used to provide the tenant to get the committed aggregate events from.
+        /// The "--tenant" argument used to provide a Tenant Id.
         /// </summary>
-        [Required]
-        [Argument(2, Description = "The Tenant Id to get the committed aggregate events from.")]
-        TenantId Tenant { get; init; }
+        [Option("--tenant", CommandOptionType.SingleValue, Description = "Only show committed aggregate events for the specified Tenant. Defaults to the development Tenant")]
+        TenantId Tenant { get; init; } = TenantId.Development;
 
         /// <summary>
         /// The entrypoint for the "dolittle runtime aggregates events" command.

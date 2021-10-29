@@ -40,10 +40,10 @@ namespace Dolittle.Runtime.Aggregates.for_Aggregates.given
 
         protected static void setup_aggregate_root_instances_fetcher(params (AggregateRoot, IEnumerable<AggregateRootInstance>)[] rootsAndAggregates)
         {
-            aggregates_fetcher.Setup(_ => _.FetchFor(Moq.It.IsAny<AggregateRoot>())).Returns(Task.FromResult(Enumerable.Empty<AggregateRootInstance>()));
+            aggregates_fetcher.Setup(_ => _.FetchFor(Moq.It.IsAny<ArtifactId>())).Returns(Task.FromResult(Enumerable.Empty<(EventSourceId, AggregateRootVersion)>()));
             foreach (var (root, aggregates ) in rootsAndAggregates)
             {
-                aggregates_fetcher.Setup(_ => _.FetchFor(root)).Returns(Task.FromResult(aggregates));
+                aggregates_fetcher.Setup(_ => _.FetchFor(root.Type.Id)).Returns(Task.FromResult(aggregates.Select(_ => (_.EventSource, _.Version))));
             }
         } 
     }

@@ -22,14 +22,14 @@ namespace Dolittle.Runtime.Aggregates
         }
 
         /// <inheritdoc/>
-        public override Task<AggregateRootRegistrationResponse> Register(
-            AggregateRootRegistrationRequest request,
+        public override Task<AggregateRootAliasRegistrationResponse> RegisterAlias(
+            AggregateRootAliasRegistrationRequest request,
             ServerCallContext context)
         {
             _aggregateRoots.Register(request.HasAlias 
                 ? new AggregateRoot(request.AggregateRoot.ToArtifact(), request.Alias) 
                 : new AggregateRoot(request.AggregateRoot.ToArtifact()));
-            return Task.FromResult(new AggregateRootRegistrationResponse());
+            return Task.FromResult(new AggregateRootAliasRegistrationResponse());
         }
     }
 }

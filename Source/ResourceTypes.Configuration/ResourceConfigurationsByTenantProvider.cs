@@ -63,13 +63,13 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
             IDictionary<ResourceType, object> configurationObjects = null;
 
             if (_resourceConfigurationsByTenant.ContainsKey(tenantId))
-                configurationObjects = _resourceConfigurationsByTenant[tenantId];
-
-            if (configurationObjects == null)
             {
-                configurationObjects = new Dictionary<ResourceType, object>();
-                _resourceConfigurationsByTenant[tenantId] = configurationObjects;
+                configurationObjects = _resourceConfigurationsByTenant[tenantId];
             }
+
+            if (configurationObjects is not null) return configurationObjects;
+            configurationObjects = new Dictionary<ResourceType, object>();
+            _resourceConfigurationsByTenant[tenantId] = configurationObjects;
 
             return configurationObjects;
         }

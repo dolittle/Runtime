@@ -4,6 +4,7 @@
 using Docker.DotNet;
 using Dolittle.Runtime.CLI.Runtime.Aggregates;
 using Dolittle.Runtime.CLI.Runtime.EventHandlers;
+using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Dolittle.Runtime.CLI.Runtime
@@ -24,6 +25,7 @@ namespace Dolittle.Runtime.CLI.Runtime
             
             services.AddEventHandlerServices();
             services.AddAggregatesServices();
+            services.AddEventTypesServices();
         }
     }
 }

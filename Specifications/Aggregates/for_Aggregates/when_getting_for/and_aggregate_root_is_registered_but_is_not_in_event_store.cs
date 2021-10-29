@@ -22,6 +22,6 @@ namespace Dolittle.Runtime.Aggregates.for_Aggregates.when_getting_for
 
         It should_not_get_any_aggregates = () => result.ShouldBeEmpty();
         
-        It should_fetch_the_aggregates_for_the_correct_root = () => aggregates_fetcher.Verify(_ => _.FetchFor(an_aggregate_root), Times.Once);
+        It should_fetch_the_aggregates_for_the_correct_root = () => aggregates_fetcher.Verify(_ => _.FetchFor(an_aggregate_root.Type.Id), Times.Once);
     }
 }

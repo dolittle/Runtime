@@ -3,8 +3,9 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Dolittle.Runtime.Artifacts;
 
-namespace Dolittle.Runtime.Aggregates
+namespace Dolittle.Runtime.Events.Store
 {
     /// <summary>
     /// Defines a system that can fetch Aggregate Root Instances from the Event Store.
@@ -15,6 +16,6 @@ namespace Dolittle.Runtime.Aggregates
         /// Gets all Aggregates for an Aggregate Root.
         /// </summary>
         /// <param name="aggregateRoot">The Aggregate Root to get Aggregates from.</param>
-        public Task<IEnumerable<AggregateRootInstance>> FetchFor(AggregateRoot aggregateRoot);
+        public Task<IEnumerable<(EventSourceId, AggregateRootVersion)>> FetchFor(ArtifactId aggregateRoot);
     }
 }

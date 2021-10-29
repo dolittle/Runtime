@@ -49,7 +49,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             => EnsureContextIsPreserved(() =>
             {
                 _executionContextManager.CurrentFor(tenant);
-                return GetTenantScopedAggregateRootsForTenant(tenant, () => _getAggregateRootInstances().GetAll());
+                return GetTenantScopedAggregateRootsForTenant(tenant, GetAllAggregateRootInstances);
             });
 
         /// <inheritdoc />
@@ -59,30 +59,21 @@ namespace Dolittle.Runtime.Aggregates.Management
             {
                 throw new AggregateRootIsNotRegistered(aggregateRootId);
             }
-            return await EnsureContextIsPreserved(async () =>
+            var result = await EnsureContextIsPreserved(async () =>
             {
                 _executionContextManager.CurrentFor(tenant);
                 var tenantScopedRoots = await GetTenantScopedAggregateRootsForTenant(
                     tenant,
-                    async () =>
-                    {
-                        var instances = await _getAggregateRootInstances().GetFor(aggregateRoot).ConfigureAwait(false);
-                        return new[]
-                        {
-                            new AggregateRootWithInstances(aggregateRoot, instances)
-                        };
-                    }
-                    ).ConfigureAwait(false);
+                    () => GetAggregateRootInstancesFor(aggregateRoot)).ConfigureAwait(false);
                 return tenantScopedRoots.FirstOrDefault();
             }).ConfigureAwait(false);
+
+            return result;
         }
 
         /// <inheritdoc />
         public Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetForAllTenant()
-            => EnsureContextIsPreserved(() =>
-            {
-                return GetTenantScopedAggregateRootsForAllTenants(() => _getAggregateRootInstances().GetAll());
-            });
+            => EnsureContextIsPreserved(() => GetTenantScopedAggregateRootsForAllTenants(GetAllAggregateRootInstances));
 
 
         /// <inheritdoc />
@@ -95,15 +86,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             return await EnsureContextIsPreserved(async () =>
             {
                 var tenantScopedRoots = await GetTenantScopedAggregateRootsForAllTenants(
-                    async () =>
-                    {
-                        var instances = await _getAggregateRootInstances().GetFor(aggregateRoot).ConfigureAwait(false);
-                        return new[]
-                        {
-                            new AggregateRootWithInstances(aggregateRoot, instances)
-                        };
-                    }
-                ).ConfigureAwait(false);
+                    () => GetAggregateRootInstancesFor(aggregateRoot)).ConfigureAwait(false);
                 return tenantScopedRoots.FirstOrDefault();
             }).ConfigureAwait(false);
         }
@@ -159,6 +142,33 @@ namespace Dolittle.Runtime.Aggregates.Management
             finally
             {
                 _executionContextManager.CurrentFor(oldContext);
+            }
+        }
+
+        async Task<IEnumerable<AggregateRootWithInstances>> GetAllAggregateRootInstances()
+            => TryResolveAggregateRootInstances(out var aggregateRootInstances)
+                ? await aggregateRootInstances.GetAll().ConfigureAwait(false)
+                : _aggregateRoots.All.Select(_ => new AggregateRootWithInstances(_, Enumerable.Empty<AggregateRootInstance>()));
+
+        async Task<IEnumerable<AggregateRootWithInstances>> GetAggregateRootInstancesFor(AggregateRoot root)
+            => TryResolveAggregateRootInstances(out var aggregateRootInstances)
+                ? new[] { new AggregateRootWithInstances(root, await aggregateRootInstances.GetFor(root).ConfigureAwait(false)) }
+                : new[]
+                    {
+                        new AggregateRootWithInstances(root, Enumerable.Empty<AggregateRootInstance>())
+                    };
+
+        bool TryResolveAggregateRootInstances(out IAggregateRootInstances aggregateRootInstances)
+        {
+            aggregateRootInstances = default;
+            try
+            {
+                aggregateRootInstances = _getAggregateRootInstances();
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

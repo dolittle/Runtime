@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventTypes
         /// Adds services related to management of Aggregates.
         /// </summary>
         /// <param name="services">The service collection to add services to.</param>
-        public static void AddAggregatesServices(this IServiceCollection services)
+        public static void AddEventTypesServices(this IServiceCollection services)
         {
             services.AddTransient<IManagementClient, ManagementClient>();
         }
