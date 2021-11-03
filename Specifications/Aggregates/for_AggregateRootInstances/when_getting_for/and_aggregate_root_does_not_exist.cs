@@ -4,6 +4,8 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Events.Store;
 using Machine.Specifications;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Aggregates.for_AggregateRootInstances.when_getting_for
 {
@@ -20,6 +22,6 @@ namespace Dolittle.Runtime.Aggregates.for_AggregateRootInstances.when_getting_fo
         Because of = () => result = aggregate_root_instances.GetFor(an_aggregate_root_id).GetAwaiter().GetResult();
 
         It should_not_get_any_aggregates = () => result.Instances.ShouldBeEmpty();
-        It should_not_try_fetch_any_aggregates = () => aggregates_fetcher.VerifyNoOtherCalls();
+        It should_still_fetch_the_aggregates_for_the_correct_root = () => aggregates_fetcher.Verify(_ => _.FetchFor(an_aggregate_root_id), Times.Once);
     }
 }
