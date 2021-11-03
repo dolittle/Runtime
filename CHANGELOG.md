@@ -1,3 +1,13 @@
+# [7.1.1] - 2021-11-3 [PR: #586](https://github.com/dolittle/Runtime/pull/586)
+## Summary
+
+Fixes the behaviour of default configuration for gRPC Endpoints. The previous implementation used default values for all endpoints together (the whole contents of the `endpoints.json` file). Meaning that if you partially specified this configuration for some endpoints, it would not use default values for the rest. This fixes that by using the default values per endpoint visibility if not provided in the config Gile.
+
+### Changed
+
+- Use default values for each `EndpointConfiguration` per `EndpointVisibility`, instead of defaulting for the whole `EndpointsConfiguration` only when nothing was provided.
+
+
 # [7.1.0] - 2021-10-21 [PR: #562](https://github.com/dolittle/Runtime/pull/562)
 ## Summary
 
