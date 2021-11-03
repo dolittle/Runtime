@@ -20,8 +20,8 @@ namespace Dolittle.Runtime.Tenancy
         void Perform(Action<TenantId> action);
 
         /// <summary>
-        /// Performs a <see cref="Task" /> for <see cref="ITenants.All" /> synchronously meaning that it will for each tenant
-        /// perform the <see cref="Task" /> and then wait for that to finish before perforing for the next Tenant.
+        /// Performs a <see cref="Task" /> for <see cref="ITenants.All" /> sequentially meaning that it will for each tenant
+        /// perform the <see cref="Task" /> and then wait for that to finish before performing for the next Tenant.
         /// </summary>
         /// <param name="action">The <see cref="Func{T1, TReturn}" /> that returns the <see cref="Task" /> to perform on the <see cref="TenantId" />.</param>
         /// <returns>The <see cref="Task" /> representing the asynchronous operation.</returns>
@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.Tenancy
 
         /// <summary>
         /// Performs a <see cref="Task" /> for <see cref="ITenants.All" /> in parallel meaning that it will
-        /// perform the <see cref="Task" /> For all Tenants at the same time.
+        /// perform the <see cref="Task" /> for all Tenants at the same time.
         /// </summary>
         /// <param name="action">The <see cref="Func{T1, TReturn}" /> that returns the <see cref="Task" /> to perform on the <see cref="TenantId" />.</param>
         /// <returns>The <see cref="Task" /> representing the asynchronous operation.</returns>

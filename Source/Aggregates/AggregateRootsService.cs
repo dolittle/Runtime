@@ -27,8 +27,8 @@ namespace Dolittle.Runtime.Aggregates
             ServerCallContext context)
         {
             _aggregateRoots.Register(request.HasAlias 
-                ? new AggregateRoot(request.AggregateRoot.ToArtifact(), request.Alias) 
-                : new AggregateRoot(request.AggregateRoot.ToArtifact()));
+                ? new AggregateRoot(request.AggregateRoot.ToAggregateRootId(), request.Alias) 
+                : new AggregateRoot(request.AggregateRoot.ToAggregateRootId()));
             return Task.FromResult(new AggregateRootAliasRegistrationResponse());
         }
     }

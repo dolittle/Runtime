@@ -3,7 +3,6 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Artifacts;
 
 namespace Dolittle.Runtime.Events.Store
 {
@@ -16,6 +15,6 @@ namespace Dolittle.Runtime.Events.Store
         /// Gets all Aggregates for an Aggregate Root.
         /// </summary>
         /// <param name="aggregateRoot">The Aggregate Root to get Aggregates from.</param>
-        public Task<IEnumerable<(EventSourceId, AggregateRootVersion)>> FetchFor(ArtifactId aggregateRoot);
+        public Task<IEnumerable<AggregateRootInstance>> FetchFor(AggregateRootId aggregateRoot);
     }
 }

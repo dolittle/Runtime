@@ -78,12 +78,12 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates.List
         static AggregateRootSimpleView CreateSimpleView(AggregateRootWithTenantScopedInstances root)
             => new(
                 root.AggregateRoot.Alias.Equals(AggregateRootAlias.NotSet)
-                    ? root.AggregateRoot.Type.Id.Value.ToString()
+                    ? root.AggregateRoot.Identifier.Id.Value.ToString()
                     : root.AggregateRoot.Alias.Value,
                 (ulong)root.Aggregates.LongCount());
 
         static AggregateRootDetailedView CreateDetailedView(AggregateRootWithTenantScopedInstances root)
-            => new(root.AggregateRoot.Alias.Value, root.AggregateRoot.Type.Id.Value, (ulong)root.Aggregates.LongCount());
+            => new(root.AggregateRoot.Alias.Value, root.AggregateRoot.Identifier.Id.Value, (ulong)root.Aggregates.LongCount());
 
     }
 }

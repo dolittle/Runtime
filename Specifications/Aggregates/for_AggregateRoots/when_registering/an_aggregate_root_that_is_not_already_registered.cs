@@ -11,9 +11,9 @@ namespace Dolittle.Runtime.Aggregates.for_AggregateRoots.when_registering
 
         Establish context = () =>
         {
-            _oldRoot = AnAggregateRoot with
+            _oldRoot = an_aggregate_root with
             {
-                Type = AnAggregateRoot.Type with
+                Identifier = an_aggregate_root.Identifier with
                 {
                     Id = "4cd25224-8258-4405-a9db-2e313c9ac4c0"
                 }
@@ -21,8 +21,8 @@ namespace Dolittle.Runtime.Aggregates.for_AggregateRoots.when_registering
             aggregate_roots.Register(_oldRoot);
         };
         
-        Because of = () => aggregate_roots.Register(AnAggregateRoot);
+        Because of = () => aggregate_roots.Register(an_aggregate_root);
 
-        It should_only_have_the_old_and_new_aggregate_roots = () => aggregate_roots.All.ShouldContainOnly(_oldRoot, AnAggregateRoot);
+        It should_only_have_the_old_and_new_aggregate_roots = () => aggregate_roots.All.ShouldContainOnly(_oldRoot, an_aggregate_root);
     }
 }

@@ -101,9 +101,14 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates
         static AggregateRootWithTenantScopedInstances FromProtobuf(AggregateRoot root)
             => new(
                 new Dolittle.Runtime.Aggregates.AggregateRoot(
-                    root.AggregateRoot_.ToArtifact(),
+                    root.AggregateRoot_.ToAggregateRootId(),
                     root.Alias),
-                root.EventSources.Select(_ => new TenantScopedAggregateRootInstance(_.TenantId.ToGuid(), new AggregateRootInstance(_.EventSourceId, _.AggregateRootVersion))));
+                root.EventSources.Select(_ => new TenantScopedAggregateRootInstance(
+                    _.TenantId.ToGuid(),
+                    new AggregateRootInstance(
+                        root.AggregateRoot_.ToAggregateRootId(),
+                        _.EventSourceId,
+                        _.AggregateRootVersion))));
 
         static CommittedAggregateEvents FromProtobuf(Dolittle.Runtime.Events.Contracts.CommittedAggregateEvents events)
             => new(

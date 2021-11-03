@@ -49,8 +49,8 @@ namespace Dolittle.Runtime.Aggregates.Management
 
                 var tenant = request.TenantId?.ToGuid();
                 var aggregatesRoots = tenant is null
-                    ? await _tenantScopedAggregateRoot.GetForAllTenant().ConfigureAwait(false)
-                    : await _tenantScopedAggregateRoot.GetFor(tenant).ConfigureAwait(false);
+                    ? await _tenantScopedAggregateRoot.GetAllAggregateRootsForAllTenants().ConfigureAwait(false)
+                    : await _tenantScopedAggregateRoot.GetAllAggregateRootsFor(tenant).ConfigureAwait(false);
                 response.AggregateRoots.AddRange(aggregatesRoots.Select(ToProtobuf));
 
                 return response;
@@ -70,8 +70,8 @@ namespace Dolittle.Runtime.Aggregates.Management
                 _logger.GetOneAggregateRoot(request.AggregateRootId.ToGuid());
                 var tenant = request.TenantId?.ToGuid();
                 var aggregatesRoot = tenant is null
-                    ? await _tenantScopedAggregateRoot.GetForAllTenant(request.AggregateRootId.ToGuid()).ConfigureAwait(false)
-                    : await _tenantScopedAggregateRoot.GetFor(tenant, request.AggregateRootId.ToGuid()).ConfigureAwait(false);
+                    ? await _tenantScopedAggregateRoot.GetAggregateRootForAllTenants(request.AggregateRootId.ToGuid()).ConfigureAwait(false)
+                    : await _tenantScopedAggregateRoot.GetAggregateRootFor(tenant, request.AggregateRootId.ToGuid()).ConfigureAwait(false);
                 return new GetOneResponse { AggregateRoot = ToProtobuf(aggregatesRoot) };
             }
             catch (Exception ex)
@@ -88,7 +88,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             {
                 _logger.GetEvents(request.Aggregate.AggregateRootId.ToGuid(), request.Aggregate.EventSourceId);
                 _executionContextManager.CurrentFor(request.TenantId.ToGuid());
-                var events = await FetchEventsForAggregateInstance(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), context.CancellationToken).ConfigureAwait(false);
+                var events = await _getEventStore().FetchForAggregate(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), context.CancellationToken).ConfigureAwait(false);
                 return new GetEventsResponse { Events = events.ToProtobuf() };
             }
             catch (Exception ex)
@@ -103,7 +103,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             var result = new Contracts.AggregateRoot
             {
                 Alias = aggregateRoot.AggregateRoot.Alias,
-                AggregateRoot_ = aggregateRoot.AggregateRoot.Type.ToProtobuf(),
+                AggregateRoot_ = aggregateRoot.AggregateRoot.Identifier.ToProtobuf(),
             };
             result.EventSources.AddRange(aggregateRoot.Aggregates.Select(_ => new TenantScopedEventSource
             {
@@ -112,18 +112,6 @@ namespace Dolittle.Runtime.Aggregates.Management
                 EventSourceId = _.Instance.EventSource
             }));
             return result;
-        }
-
-        async Task<CommittedAggregateEvents> FetchEventsForAggregateInstance(EventSourceId eventSource, ArtifactId aggregateRootId, CancellationToken cancellationToken)
-        {
-            try
-            {
-                return await _getEventStore().FetchForAggregate(eventSource, aggregateRootId, cancellationToken).ConfigureAwait(false);
-            }
-            catch
-            {
-                return new CommittedAggregateEvents(eventSource, aggregateRootId, Enumerable.Empty<CommittedAggregateEvent>().ToList());
-            }
         }
     }
 }

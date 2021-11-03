@@ -40,7 +40,7 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates
             {
                 throw new NoAggregateRootWithId(idOrAlias.Alias);
             }
-            return aggregateRoot.AggregateRoot.Type.Id;
+            return aggregateRoot.AggregateRoot.Identifier.Id;
         }
 
         static bool WithAlias(AggregateRootWithTenantScopedInstances root, AggregateRootIdOrAlias idOrAlias)
