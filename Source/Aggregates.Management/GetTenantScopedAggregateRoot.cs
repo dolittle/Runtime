@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Tenancy;
 
@@ -41,35 +42,34 @@ namespace Dolittle.Runtime.Aggregates.Management
 
         /// <inheritdoc />
         public Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetAllAggregateRootsFor(TenantId tenant)
-            => GetFor(_ => true, _ => _ == tenant);
+            => GetFor(_aggregateRoots.All, _ => _ == tenant);
 
         /// <inheritdoc />
         public Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetAllAggregateRootsForAllTenants()
-            => GetFor(_ => true, _ => true);
+            => GetFor(_aggregateRoots.All, _ => true);
 
         /// <inheritdoc />
-        public async Task<AggregateRootWithTenantScopedInstances> GetAggregateRootFor(TenantId tenant, ArtifactId aggregateRootId)
-        {
-            var instances = await GetFor(_ => _ == aggregateRootId, _ => _ == tenant).ConfigureAwait(false);
-            return EnsureAggregateRootExists(instances, aggregateRootId);
-        }
-
+        public Task<AggregateRootWithTenantScopedInstances> GetAggregateRootFor(TenantId tenant, ArtifactId aggregateRootId)
+            => GetByArtifactIdFor(aggregateRootId, _ => _ == tenant);
 
         /// <inheritdoc />
-        public async Task<AggregateRootWithTenantScopedInstances> GetAggregateRootForAllTenants(ArtifactId aggregateRootId)
+        public Task<AggregateRootWithTenantScopedInstances> GetAggregateRootForAllTenants(ArtifactId aggregateRootId)
+            => GetByArtifactIdFor(aggregateRootId, _ => true);
+
+        async Task<AggregateRootWithTenantScopedInstances> GetByArtifactIdFor(ArtifactId aggregateRootId, Func<TenantId, bool> shouldFetchForTenant)
         {
-            var instances = await GetFor(_ => _ == aggregateRootId, _ => true).ConfigureAwait(false);
-            return EnsureAggregateRootExists(instances, aggregateRootId);
+            if (!_aggregateRoots.TryGet(aggregateRootId, out var aggregateRoot))
+            {
+                aggregateRoot = new AggregateRoot(new AggregateRootId(aggregateRootId, ArtifactGeneration.First));
+            }
+            
+            var instances = await GetFor(new[] {aggregateRoot}, shouldFetchForTenant).ConfigureAwait(false);
+            return instances.First();
         }
 
-
-        async Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetFor(
-            Func<ArtifactId, bool> shouldFetchAggregateRoot, Func<TenantId, bool> shouldFetchForTenant)
+        async Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetFor(IEnumerable<AggregateRoot> aggregateRoots, Func<TenantId, bool> shouldFetchForTenant)
         {
             var result = new List<AggregateRootWithTenantScopedInstances>();
-
-            var aggregateRoots =
-                _aggregateRoots.All.Where(aggregateRoot => shouldFetchAggregateRoot(aggregateRoot.Identifier.Id));
 
             foreach (var aggregateRoot in aggregateRoots)
             {
@@ -81,8 +81,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             return result;
         }
 
-        async Task<AggregateRootWithTenantScopedInstances> GetForTenants(Func<TenantId, bool> shouldFetchForTenant,
-            AggregateRoot aggregateRoot)
+        async Task<AggregateRootWithTenantScopedInstances> GetForTenants(Func<TenantId, bool> shouldFetchForTenant, AggregateRoot aggregateRoot)
         {
             var instances = new List<TenantScopedAggregateRootInstance>();
 
@@ -93,25 +92,11 @@ namespace Dolittle.Runtime.Aggregates.Management
                     return;
                 }
 
-                var forTenant = await _getAggregateRootInstances().GetFor(aggregateRoot.Identifier)
-                    .ConfigureAwait(false);
+                var forTenant = await _getAggregateRootInstances().GetFor(aggregateRoot.Identifier).ConfigureAwait(false);
                 instances.AddRange(forTenant.Instances.Select(_ => new TenantScopedAggregateRootInstance(tenantId, _)));
             }).ConfigureAwait(false);
 
             return new AggregateRootWithTenantScopedInstances(aggregateRoot, instances);
-        }
-
-        AggregateRootWithTenantScopedInstances EnsureAggregateRootExists(IEnumerable<AggregateRootWithTenantScopedInstances> instances, ArtifactId aggregateRootId)
-        {
-            foreach (var instance in instances)
-            {
-                if (instance.AggregateRoot.Identifier.Id == aggregateRootId)
-                {
-                    return instance;
-                }
-            }
-            
-            throw new AggregateRootIsNotRegistered(aggregateRootId);
         }
     }
 }
