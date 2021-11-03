@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Aggregates
 
         /// <inheritdoc />
         public void Register(AggregateRoot aggregateRoot)
-            => _aggregateRoots.AddOrUpdate(aggregateRoot.Type.Id, aggregateRoot, (_, _) => aggregateRoot);
+            => _aggregateRoots.AddOrUpdate(aggregateRoot.Identifier.Id, aggregateRoot, (_, _) => aggregateRoot);
 
         public bool TryGet(ArtifactId aggregateRootId, out AggregateRoot aggregateRoot)
             => _aggregateRoots.TryGetValue(aggregateRootId, out aggregateRoot);

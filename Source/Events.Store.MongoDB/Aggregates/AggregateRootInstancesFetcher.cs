@@ -4,8 +4,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Dolittle.Runtime.Aggregates;
-using Dolittle.Runtime.Artifacts;
 using MongoDB.Driver;
 
 namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
@@ -28,14 +26,14 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<(EventSourceId, AggregateRootVersion)>> FetchFor(ArtifactId aggregateRoot)
+        public async Task<IEnumerable<AggregateRootInstance>> FetchFor(AggregateRootId aggregateRoot)
         {
             var aggregates = await _aggregates
                 .Aggregates
-                .Find(_filter.Eq(_ => _.AggregateType, aggregateRoot.Value))
+                .Find(_filter.Eq(_ => _.AggregateType, aggregateRoot.Id.Value))
                 .ToListAsync().ConfigureAwait(false);
 
-            return aggregates.Select(_ => (new EventSourceId(_.EventSource), new AggregateRootVersion(_.Version)));
+            return aggregates.Select(_ => new AggregateRootInstance(aggregateRoot, _.EventSource, _.Version));
         }
     }
 }

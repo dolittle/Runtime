@@ -29,6 +29,5 @@ namespace Dolittle.Runtime.Aggregates
         /// <param name="aggregateRoot">The registered Aggregate Root.</param>
         /// <returns>A value indicating whether an Aggregate Root with the given Id is registered.</returns>
         bool TryGet(ArtifactId aggregateRootId, out AggregateRoot aggregateRoot);
-
     }
 }

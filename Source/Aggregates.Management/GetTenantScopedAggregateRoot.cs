@@ -45,7 +45,7 @@ namespace Dolittle.Runtime.Aggregates.Management
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetFor(TenantId tenant)
+        public Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetAllAggregateRootsFor(TenantId tenant)
             => EnsureContextIsPreserved(() =>
             {
                 _executionContextManager.CurrentFor(tenant);
@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             });
 
         /// <inheritdoc />
-        public async Task<AggregateRootWithTenantScopedInstances> GetFor(TenantId tenant, ArtifactId aggregateRootId)
+        public async Task<AggregateRootWithTenantScopedInstances> GetAggregateRootFor(TenantId tenant, ArtifactId aggregateRootId)
         {
             if (!_aggregateRoots.TryGet(aggregateRootId, out var aggregateRoot))
             {
@@ -72,12 +72,12 @@ namespace Dolittle.Runtime.Aggregates.Management
         }
 
         /// <inheritdoc />
-        public Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetForAllTenant()
+        public Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetAllAggregateRootsForAllTenants()
             => EnsureContextIsPreserved(() => GetTenantScopedAggregateRootsForAllTenants(GetAllAggregateRootInstances));
 
 
         /// <inheritdoc />
-        public async Task<AggregateRootWithTenantScopedInstances> GetForAllTenant(ArtifactId aggregateRootId)
+        public async Task<AggregateRootWithTenantScopedInstances> GetAggregateRootForAllTenants(ArtifactId aggregateRootId)
         {
             if (!_aggregateRoots.TryGet(aggregateRootId, out var aggregateRoot))
             {
@@ -94,6 +94,7 @@ namespace Dolittle.Runtime.Aggregates.Management
         async Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetTenantScopedAggregateRootsForAllTenants(Func<Task<IEnumerable<AggregateRootWithInstances>>> getRootWithInstances)
         {
             var result = new Dictionary<AggregateRoot, List<TenantScopedAggregateRootInstance>>();
+            
             foreach (var tenant in _tenants.All.ToList())
             {
                 _executionContextManager.CurrentFor(tenant);

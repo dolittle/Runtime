@@ -18,13 +18,13 @@ namespace Dolittle.Runtime.Aggregates.Management
         /// </summary>
         /// <param name="tenant">The Tenant.</param>
         /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IEnumerable{T}"/> of <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
-        Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetFor(TenantId tenant);
+        Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetAllAggregateRootsFor(TenantId tenant);
         
         /// <summary>
         /// Gets all <see cref="AggregateRootWithTenantScopedInstances"/> for all Tenants.
         /// </summary>
         /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns an <see cref="IEnumerable{T}"/> of <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
-        Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetForAllTenant();
+        Task<IEnumerable<AggregateRootWithTenantScopedInstances>> GetAllAggregateRootsForAllTenants();
         
         /// <summary>
         /// Gets a single <see cref="AggregateRootWithTenantScopedInstances"/> scoped to a specific Tenant.
@@ -32,13 +32,13 @@ namespace Dolittle.Runtime.Aggregates.Management
         /// <param name="tenant">The Tenant.</param>
         /// <param name="aggregateRootId">The Aggregate Root.</param>
         /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
-        Task<AggregateRootWithTenantScopedInstances> GetFor(TenantId tenant, ArtifactId aggregateRootId);
+        Task<AggregateRootWithTenantScopedInstances> GetAggregateRootFor(TenantId tenant, ArtifactId aggregateRootId);
         
         /// <summary>
         /// Gets a single <see cref="AggregateRootWithTenantScopedInstances"/> for all Tenants.
         /// </summary>
         /// <param name="aggregateRootId">The Aggregate Root.</param>
         /// <returns>A <see cref="Task{TResult}"/> that, when resolved, returns the <see cref="AggregateRootWithTenantScopedInstances"/>.</returns>
-        Task<AggregateRootWithTenantScopedInstances> GetForAllTenant(ArtifactId aggregateRootId);
+        Task<AggregateRootWithTenantScopedInstances> GetAggregateRootForAllTenants(ArtifactId aggregateRootId);
     }
 }
