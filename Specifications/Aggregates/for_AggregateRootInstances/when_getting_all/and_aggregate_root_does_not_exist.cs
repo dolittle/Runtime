@@ -3,23 +3,24 @@
 
 using System.Collections.Generic;
 using Machine.Specifications;
+using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Aggregates.for_Aggregates.when_getting_for
+namespace Dolittle.Runtime.Aggregates.for_AggregateRootInstances.when_getting_all
 {
-    public class and_aggregate_root_is_not_registered_but_is_in_event_store : given.all_dependencies
+    public class and_there_are_no_registered_or_stored_aggregates : given.all_dependencies
     {
-        static IEnumerable<AggregateRootInstance> result;
+        static IEnumerable<AggregateRootWithInstances> result;
 
         Establish context = () =>
         {
             setup_aggregate_roots();
-            setup_aggregate_root_instances_fetcher((an_aggregate_root, new []{ an_aggregate_root_instance }));
+            setup_aggregate_root_instances_fetcher();
         };
 
-        Because of = () => result = aggregate_root_instances.GetFor(an_aggregate_root).GetAwaiter().GetResult();
+        Because of = () => result = aggregate_root_instances.GetAll().GetAwaiter().GetResult();
 
         It should_not_get_any_aggregates = () => result.ShouldBeEmpty();
-
         It should_not_try_fetch_any_aggregates = () => aggregates_fetcher.VerifyNoOtherCalls();
+        
     }
 }

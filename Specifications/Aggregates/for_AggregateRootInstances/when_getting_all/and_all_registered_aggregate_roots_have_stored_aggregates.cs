@@ -7,7 +7,7 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Aggregates.for_Aggregates.when_getting_all
+namespace Dolittle.Runtime.Aggregates.for_AggregateRootInstances.when_getting_all
 {
     public class and_all_registered_aggregate_roots_have_stored_aggregates : given.all_dependencies
     {
@@ -21,10 +21,10 @@ namespace Dolittle.Runtime.Aggregates.for_Aggregates.when_getting_all
 
         Because of = () => result = aggregate_root_instances.GetAll().GetAwaiter().GetResult();
 
-        It should_get_the_correct_aggregate_roots = () => result.Select(_ => _.Root).ShouldContainOnly(an_aggregate_root);
+        It should_get_the_correct_aggregate_roots = () => result.Select(_ => _.Identifier).ShouldContainOnly(an_aggregate_root_id);
 
         It should_have_the_correct_aggregates = () => result.ToArray()[0].Instances.ShouldContainOnly(new []{ an_aggregate_root_instance });
 
-        It should_fetch_the_aggregates_for_the_correct_root = () => aggregates_fetcher.Verify(_ => _.FetchFor(an_aggregate_root.Type.Id), Times.Once);
+        It should_fetch_the_aggregates_for_the_correct_root = () => aggregates_fetcher.Verify(_ => _.FetchFor(an_aggregate_root_id), Times.Once);
     }
 }

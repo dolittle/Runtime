@@ -7,8 +7,8 @@ namespace Dolittle.Runtime.Aggregates.for_AggregateRoots.when_registering
 {
     public class and_there_are_no_other_registrations : given.all_dependencies
     {
-        Because of = () => aggregate_roots.Register(AnAggregateRoot);
+        Because of = () => aggregate_roots.Register(an_aggregate_root);
 
-        It should_only_have_the_registered_aggregate_root = () => aggregate_roots.All.ShouldContainOnly(AnAggregateRoot);
+        It should_only_have_the_registered_aggregate_root = () => aggregate_roots.All.ShouldContainOnly(an_aggregate_root);
     }
 }
