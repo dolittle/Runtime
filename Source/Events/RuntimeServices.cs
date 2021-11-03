@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Events
 
         /// <inheritdoc/>
         public IEnumerable<Service> BindServices() =>
-            new Service[]
+            new[]
             {
                 new Service(_eventTypes, Contracts.EventTypes.BindService(_eventTypes), Contracts.EventTypes.Descriptor)
             };

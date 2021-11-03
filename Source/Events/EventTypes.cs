@@ -21,6 +21,6 @@ namespace Dolittle.Runtime.Events
 
         /// <inheritdoc />
         public void Register(EventType eventType)
-            => _eventTypes.AddOrUpdate(eventType.Identifier.Id, eventType, (key, old) => eventType);
+            => _eventTypes.AddOrUpdate(eventType.Identifier.Id, eventType, (_, _) => eventType);
     }
 }
