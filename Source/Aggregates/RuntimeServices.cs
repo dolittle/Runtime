@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Aggregates
 
         /// <inheritdoc/>
         public IEnumerable<Service> BindServices() =>
-            new Service[]
+            new[]
             {
                 new Service(_aggregateRoots, Contracts.AggregateRoots.BindService(_aggregateRoots), Contracts.AggregateRoots.Descriptor)
             };
