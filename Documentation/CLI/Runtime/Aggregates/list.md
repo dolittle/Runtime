@@ -13,7 +13,7 @@ dolittle runtime aggregates list [options]
 
 | Option                  | Description                                                                                              |
 |-------------------------|----------------------------------------------------------------------------------------------------------|
-| `--tenant <id>`         | Only show Aggregate Root information for the specified Tenant.                                            |
+| `--tenant <id>`         | Only show Aggregate Root information for the specified Tenant.                                           |
 | `--runtime host[:port]` | The address to the management endpoint of a Runtime. See [details]({{< ref "../../Runtime#details" >}}). |
 | `--output table\|json`  | Select the format the output of the subcommand. Defaults to table.                                       |
 | `--wide`                | If set, prints more details in table format for a wider output.                                          |
