@@ -12,7 +12,7 @@ using Moq;
 
 namespace Dolittle.Runtime.Services.for_Endpoints.given
 {
-    public class one_service_type_with_two_binders
+    public class one_service_type_with_two_binders : default_configuration_providers
     {
         protected const string service_type_identifier = "My Service Type";
 

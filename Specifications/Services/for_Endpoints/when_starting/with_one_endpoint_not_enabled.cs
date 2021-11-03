@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Services.for_Endpoints.when_starting
         {
             configuration = configuration with { Enabled = false };
             var endpoints_configuration = CreateEndpointsConfiguration(configuration);
-            endpoints = new Endpoints(service_types, endpoints_configuration, type_finder.Object, container.Object, bound_services.Object, logger);
+            endpoints = new Endpoints(service_types, endpoints_configuration, default_providers, type_finder.Object, container.Object, bound_services.Object, logger);
         };
 
         Because of = () => endpoints.Start();
