@@ -88,7 +88,7 @@ namespace Dolittle.Runtime.Aggregates.Management
             {
                 _logger.GetEvents(request.Aggregate.AggregateRootId.ToGuid(), request.Aggregate.EventSourceId);
                 _executionContextManager.CurrentFor(request.TenantId.ToGuid());
-                var events = await FetchEventsForAggregateInstance(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), context.CancellationToken);
+                var events = await FetchEventsForAggregateInstance(request.Aggregate.EventSourceId, request.Aggregate.AggregateRootId.ToGuid(), context.CancellationToken).ConfigureAwait(false);
                 return new GetEventsResponse { Events = events.ToProtobuf() };
             }
             catch (Exception ex)
