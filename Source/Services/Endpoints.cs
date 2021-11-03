@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Collections;
+using Dolittle.Runtime.Configuration;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,7 @@ namespace Dolittle.Runtime.Services
         /// </summary>
         /// <param name="serviceTypes">Instances of <see cref="IRepresentServiceType"/>.</param>
         /// <param name="configuration"><see cref="EndpointsConfiguration"/> for all endpoints.</param>
+        /// <param name="defaultConfigurationProviders">Instances of <see cref="ICanProvideDefaultConfigurationFor{T}"/> to use for default configurations for endpoints.</param>
         /// <param name="typeFinder"><see cref="ITypeFinder"/> for finding services to host.</param>
         /// <param name="container"><see cref="IContainer"/> for working with instances of host binders.</param>
         /// <param name="boundServices"><see cref="IBoundServices"/> for registering services that gets bound.</param>
@@ -40,12 +42,13 @@ namespace Dolittle.Runtime.Services
         public Endpoints(
             IInstancesOf<IRepresentServiceType> serviceTypes,
             EndpointsConfiguration configuration,
+            IInstancesOf<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>> defaultConfigurationProviders,
             ITypeFinder typeFinder,
             IContainer container,
             IBoundServices boundServices,
             ILogger logger)
         {
-            _configuration = configuration;
+            _configuration = ConsolidateProvidedAndDefaultConfiguration(configuration, defaultConfigurationProviders);
 
             _serviceRepresentersForEndpointVisibility = serviceTypes.GroupBy(_ => _.Visibility)
                 .ToDictionary(_ => _.Key, _ => _.ToList());
@@ -102,6 +105,25 @@ namespace Dolittle.Runtime.Services
 
         /// <inheritdoc/>
         public IEnumerable<EndpointInfo> GetEndpoints() => _endpointInfos;
+
+        EndpointsConfiguration ConsolidateProvidedAndDefaultConfiguration(EndpointsConfiguration provided, IEnumerable<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>> defaultsProviders)
+        {
+            var consolidated = new Dictionary<EndpointVisibility, EndpointConfiguration>(provided);
+
+            foreach (var provider in defaultsProviders)
+            {
+                var defaults = provider.Provide();
+                foreach (var (visibility, configuration) in defaults)
+                {
+                    if (!consolidated.ContainsKey(visibility))
+                    {
+                        consolidated[visibility] = configuration;
+                    }
+                }
+            }
+
+            return new EndpointsConfiguration(consolidated);
+        }
 
         IEndpoint GetEndpointFor(EndpointVisibility type)
         {
