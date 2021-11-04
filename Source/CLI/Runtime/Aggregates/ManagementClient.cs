@@ -18,6 +18,7 @@ using Dolittle.Runtime.Rudimentary;
 using static Dolittle.Runtime.Aggregates.Management.Contracts.AggregateRoots;
 using AggregateRoot = Dolittle.Runtime.Aggregates.Management.Contracts.AggregateRoot;
 using CommittedAggregateEvents = Dolittle.Runtime.Events.Store.CommittedAggregateEvents;
+using Contracts = Dolittle.Runtime.Events.Contracts;
 
 namespace Dolittle.Runtime.CLI.Runtime.Aggregates
 {
@@ -110,19 +111,20 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates
                         _.EventSourceId,
                         _.AggregateRootVersion))));
 
-        static CommittedAggregateEvents FromProtobuf(Dolittle.Runtime.Events.Contracts.CommittedAggregateEvents events)
+        static CommittedAggregateEvents FromProtobuf(Contracts.CommittedAggregateEvents events)
             => new(
                 events.EventSourceId,
                 events.AggregateRootId.ToGuid(),
-                events.Events.Select(_ => new CommittedAggregateEvent(
+                events.Events.Select((@event, i) => new CommittedAggregateEvent(
                     new Artifact(events.AggregateRootId.ToGuid(), ArtifactGeneration.First),
-                    events.AggregateRootVersion,
-                    _.EventLogSequenceNumber,
-                    _.Occurred.ToDateTimeOffset(),
+                    events.AggregateRootVersion + 1u - (ulong)events.Events.Count + (ulong)i,
+                    @event.EventLogSequenceNumber,
+                    @event.Occurred.ToDateTimeOffset(),
                     events.EventSourceId,
-                    _.ExecutionContext.ToExecutionContext(),
-                    _.EventType.ToArtifact(),
-                    _.Public,
-                    _.Content)).ToList());
+                    @event.ExecutionContext.ToExecutionContext(),
+                    @event.EventType.ToArtifact(),
+                    @event.Public,
+                    @event.Content)).ToList());
+        
     }
 }
