@@ -22,6 +22,7 @@ namespace Dolittle.Runtime.Events.Store
         public IEnumerable<Type> Services { get; } = new[]
         {
             typeof(IEventStore),
+            typeof(IFetchAggregateRootInstances),
             typeof(IStreamDefinitionRepository),
             typeof(IStreamProcessorStateRepository),
             typeof(IEventFetchers),

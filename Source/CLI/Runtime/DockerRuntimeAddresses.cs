@@ -53,7 +53,7 @@ namespace Dolittle.Runtime.CLI.Runtime
             => container.Ports.Any(IsManagementPort);
         
         static MicroserviceAddress ManagmentPortAddress(ContainerListResponse container)
-            => new MicroserviceAddress("localhost", container.Ports.First(IsManagementPort).PublicPort);
+            => new("localhost", container.Ports.First(IsManagementPort).PublicPort);
 
         static bool IsManagementPort(Port port)
             => port.Type == "tcp" && port.PrivatePort == EndpointsConfigurationDefaultProvider.DefaultManagementPort;

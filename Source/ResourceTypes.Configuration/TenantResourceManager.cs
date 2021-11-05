@@ -30,19 +30,18 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
         /// <inheritdoc/>
         public T GetConfigurationFor<T>(TenantId tenantId)
             where T : class
-        {
-            var resourceType = RetrieveResourceType<T>();
-            return _resourceConfigurationByTenantProvider.ConfigurationFor<T>(tenantId, resourceType);
-        }
+            => _resourceConfigurationByTenantProvider.ConfigurationFor<T>(tenantId, RetrieveResourceType<T>());
 
         ResourceType RetrieveResourceType<T>()
         {
-            var resourceTypesMatchingType = _resourceDefinitions.Where(_ => _.ConfigurationObjectType.Equals(typeof(T))).ToArray();
+            var resourceTypesMatchingType = _resourceDefinitions.Where(_ => _.ConfigurationObjectType == typeof(T)).ToArray();
             var length = resourceTypesMatchingType.Length;
-            if (length == 0) throw new NoResourceTypeMatchingConfigurationType(typeof(T));
-            if (length > 1) throw new ConfigurationTypeMappedToMultipleResourceTypes(typeof(T));
-
-            return resourceTypesMatchingType[0].Type;
+            return length switch
+            {
+                0 => throw new NoResourceTypeMatchingConfigurationType(typeof(T)),
+                > 1 => throw new ConfigurationTypeMappedToMultipleResourceTypes(typeof(T)),
+                _ => resourceTypesMatchingType[0].Type
+            };
         }
     }
 }

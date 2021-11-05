@@ -9,11 +9,15 @@ This section helps you learn about how to use the Dolittle CLI tool. If you're n
 
 ## Command overview
 
-| Syntax                                  | Description                               |                                                       |
-|-----------------------------------------|-------------------------------------------|-------------------------------------------------------|
-| `dolittle runtime eventhandlers list`   | List all running Event Handlers           | [Details]({{< ref "Runtime/EventHandlers/list" >}})   |
-| `dolittle runtime eventhandlers get`    | Get details about a running Event Handler | [Details]({{< ref "Runtime/EventHandlers/get" >}})    |
-| `dolittle runtime eventhandlers replay` | Replay events for a running Event Handler | [Details]({{< ref "Runtime/EventHandlers/replay" >}}) |
+| Syntax                                  | Description                                         |                                                       |
+|-----------------------------------------|-----------------------------------------------------|-------------------------------------------------------|
+| `dolittle runtime aggregates list`      | List all running Aggregate Roots                    | [Details]({{< ref "Runtime/Aggregates/list" >}})      |
+| `dolittle runtime aggregates get`       | Get details about a running Aggregate Root          | [Details]({{< ref "Runtime/Aggregates/get" >}})       |
+| `dolittle runtime aggregates events`    | Get committed events for an Aggregate Root Instance | [Details]({{< ref "Runtime/Aggregates/events" >}})    |
+| `dolittle runtime eventhandlers list`   | List all running Event Handlers                     | [Details]({{< ref "Runtime/EventHandlers/list" >}})   |
+| `dolittle runtime eventhandlers get`    | Get details about a running Event Handler           | [Details]({{< ref "Runtime/EventHandlers/get" >}})    |
+| `dolittle runtime eventhandlers replay` | Replay events for a running Event Handler           | [Details]({{< ref "Runtime/EventHandlers/replay" >}}) |
+| `dolittle runtime eventtypes list`      | List all registered Event Types                     | [Details]({{< ref "Runtime/EventTypes/list" >}})      |
 
 ## How to install
 

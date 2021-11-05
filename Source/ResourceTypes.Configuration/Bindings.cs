@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Collections;
 using Dolittle.Runtime.DependencyInversion;
@@ -35,13 +36,21 @@ namespace Dolittle.Runtime.ResourceTypes.Configuration
         public void Provide(IBindingProviderBuilder builder)
         {
             builder.Bind<ICanProvideResourceConfigurationsByTenant>().To<ResourceConfigurationsByTenantProvider>();
-            var resourceConfiguration = new ResourceConfiguration(_typeFinder, _container, _logger);
+            var resourceTypes = GetAllResourceTypes();
+            var resourceConfiguration = new ResourceConfiguration(resourceTypes, _typeFinder, _container, _logger);
             builder.Bind<IResourceConfiguration>().To(resourceConfiguration);
 
-            var resourceTypeTypes = _typeFinder.FindMultiple<IAmAResourceType>();
-
-            var resourceTypeServices = resourceTypeTypes.Select(_ => _container.Get(_) as IAmAResourceType).SelectMany(_ => _.Services);
-            resourceTypeServices.ForEach(_ => builder.Bind(_).To(() => resourceConfiguration.GetImplementationFor(_)));
+            CreateBindingsForAllResourceTypeServices(builder, resourceTypes, resourceConfiguration);
         }
+
+        IEnumerable<IAmAResourceType> GetAllResourceTypes()
+            => _typeFinder
+                .FindMultiple<IAmAResourceType>()
+                .Select(_ => _container.Get(_) as IAmAResourceType);
+
+        static void CreateBindingsForAllResourceTypeServices(IBindingProviderBuilder builder, IEnumerable<IAmAResourceType> resourceTypes, ResourceConfiguration resourceConfiguration)
+            => resourceTypes
+                .SelectMany(_ => _.Services)
+                .ForEach(_ => builder.Bind(_).To(() => resourceConfiguration.GetImplementationFor(_)));
     }
 }

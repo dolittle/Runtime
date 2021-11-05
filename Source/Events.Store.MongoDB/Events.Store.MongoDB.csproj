@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-    <Import Project="../../default.props"/>
+    <Import Project="../../default.props" />
 
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Events.Store.MongoDB</AssemblyName>
@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)"/>
+        <PackageReference Include="MongoDB.Driver" Version="$(MongoDBDriverVersion)" />
         <PackageReference Include="Dolittle.Runtime.Contracts" Version="$(ContractsVersion)" />
     </ItemGroup>
 
@@ -19,5 +19,6 @@
         <ProjectReference Include="../Events.Store/Events.Store.csproj" />
         <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
         <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
+        <ProjectReference Include="../Aggregates/Aggregates.csproj" />
     </ItemGroup>
 </Project>

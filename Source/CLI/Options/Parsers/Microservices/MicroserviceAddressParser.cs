@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.CLI.Options.Parsers.Microservices
     /// </summary>
     public class MicroserviceAddressParser : IValueParser
     {
-        static readonly Regex _hostPortExpression = new Regex(@"^(?<host>(?>[^:]*)|(?>\[[^\]]*\])|(?>(?>[a-fA-F0-9]{0,4}:){7}(?>[a-fA-F0-9]{0,4})))(?<port>:\d*)?$", RegexOptions.Compiled | RegexOptions.Singleline);
+        static readonly Regex _hostPortExpression = new(@"^(?<host>(?>[^:]*)|(?>\[[^\]]*\])|(?>(?>[a-fA-F0-9]{0,4}:){7}(?>[a-fA-F0-9]{0,4})))(?<port>:\d*)?$", RegexOptions.Compiled | RegexOptions.Singleline);
         
         /// <inheritdoc />
         public Type TargetType => typeof(MicroserviceAddress);

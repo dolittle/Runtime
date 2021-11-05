@@ -1,9 +1,10 @@
+// Copyright (c) Dolittle. All rights reserved.
+// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
-using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Microservices;
-using Dolittle.Runtime.Rudimentary;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
 {
