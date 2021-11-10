@@ -14,6 +14,10 @@
         "embeddings": {
             "production": "MongoDB",
             "development": "MongoDB"
+        },
+        "readModels": {
+            "development": "n/a",
+            "development": "n/a"
         }
     },
     "core": {
