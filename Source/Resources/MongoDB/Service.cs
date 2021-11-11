@@ -15,14 +15,14 @@ namespace Dolittle.Runtime.Resources.MongoDB
     /// </summary>
     public class Service : IService
     {
-        readonly FactoryFor<Resource> _getMongoDbResource;
+        readonly FactoryFor<IResource> _getMongoDbResource;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Service"/> class.
         /// </summary>
-        public Service(FactoryFor<Resource> getMongoDbResource, IExecutionContextManager executionContextManager, ILogger logger)
+        public Service(FactoryFor<IResource> getMongoDbResource, IExecutionContextManager executionContextManager, ILogger logger)
         {
             _getMongoDbResource = getMongoDbResource;
             _executionContextManager = executionContextManager;
@@ -36,11 +36,9 @@ namespace Dolittle.Runtime.Resources.MongoDB
             try
             {
                 _executionContextManager.CurrentFor(executionContext);
-                var (mongoUrl, databaseName) = _getMongoDbResource().GetConnectionDetails();
                 return new GetMongoDbResponse(new GetMongoDbResponse
                 {
-                    ConnectionString = mongoUrl.ToString(),
-                    DatabaseName = databaseName
+                    ConnectionString = _getMongoDbResource().GetConnectionString().ToString()
                 });
             }
             catch (Exception ex)

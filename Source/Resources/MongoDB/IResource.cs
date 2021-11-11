@@ -1,6 +1,8 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using MongoDB.Driver;
+
 namespace Dolittle.Runtime.Resources.MongoDB
 {
     /// <summary>
@@ -9,9 +11,9 @@ namespace Dolittle.Runtime.Resources.MongoDB
     public interface IResource
     {
         /// <summary>
-        /// Gets the <see cref="ConnectionDetails"/> for the MongoDB resource.
+        /// Gets the <see cref="MongoUrl"/> for the MongoDB resource.
         /// </summary>
-        /// <returns></returns>
-        ConnectionDetails GetConnectionDetails();
+        /// <returns>The <see cref="MongoUrl"/> connection string.</returns>
+        MongoUrl GetConnectionString();
     }
 }
