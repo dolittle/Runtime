@@ -25,13 +25,13 @@ namespace Dolittle.Runtime.Resources.MongoDB
         }
 
         /// <inheritdoc />
-        public ConnectionDetails GetConnectionDetails()
+        public MongoUrl GetConnectionString()
         {
             var config = _configuration.Instance;
             var builder = new MongoUrlBuilder(config.Host);
             builder.UseTls = config.UseSSL;
             builder.DatabaseName = config.Database;
-            return new ConnectionDetails(builder.ToMongoUrl(), builder.DatabaseName);
+            return builder.ToMongoUrl();
         }
     }
 }
