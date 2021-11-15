@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Resources
         }
 
         /// <inheritdoc />
-        public override Task<GetMongoDbResponse> GetMongoDb(GetRequest request, ServerCallContext context)
+        public override Task<GetMongoDBResponse> GetMongoDB(GetRequest request, ServerCallContext context)
             => Task.FromResult(_mongodbService.GetResource(request.CallContext.ExecutionContext.ToExecutionContext()));
     }
 }

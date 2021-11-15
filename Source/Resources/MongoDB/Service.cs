@@ -30,13 +30,13 @@ namespace Dolittle.Runtime.Resources.MongoDB
         }
 
         /// <inheritdoc />
-        public GetMongoDbResponse GetResource(ExecutionContext executionContext)
+        public GetMongoDBResponse GetResource(ExecutionContext executionContext)
         {
             _logger.LogDebug("Getting MongoDB resource for tenant {Tenant}", executionContext.Tenant.Value);
             try
             {
                 _executionContextManager.CurrentFor(executionContext);
-                return new GetMongoDbResponse(new GetMongoDbResponse
+                return new GetMongoDBResponse(new GetMongoDBResponse
                 {
                     ConnectionString = _getMongoDbResource().GetConnectionString().ToString()
                 });
@@ -44,7 +44,7 @@ namespace Dolittle.Runtime.Resources.MongoDB
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to get MongoDb resource for tenant {Tenant}", executionContext.Tenant.Value);
-                return new GetMongoDbResponse {Failure = new Failure(ex.Message) };
+                return new GetMongoDBResponse {Failure = new Failure(ex.Message) };
             }
         }
     }

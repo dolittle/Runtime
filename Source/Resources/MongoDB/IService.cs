@@ -16,6 +16,6 @@ namespace Dolittle.Runtime.Resources.MongoDB
         /// </summary>
         /// <param name="executionContext">The execution context.</param>
         /// <returns>The <see cref="GetMongoDbResponse"/> response.</returns>
-        GetMongoDbResponse GetResource(ExecutionContext executionContext);
+        GetMongoDBResponse GetResource(ExecutionContext executionContext);
     }
 }
