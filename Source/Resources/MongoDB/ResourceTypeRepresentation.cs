@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Resources.MongoDB
         public ResourceTypes.ResourceType Type => ResourceType.ResourceTypeName;
 
         /// <inheritdoc/>
-        public ResourceTypeImplementation ImplementationName => "n/a";
+        public ResourceTypeImplementation ImplementationName => "MongoDB";
 
         /// <inheritdoc/>
         public Type ConfigurationObjectType => typeof(Configuration);
