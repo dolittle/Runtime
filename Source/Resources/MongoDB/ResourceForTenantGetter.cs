@@ -11,20 +11,24 @@ using Microsoft.Extensions.Logging;
 namespace Dolittle.Runtime.Resources.MongoDB
 {
     /// <summary>
-    /// Represents the implementation of <see cref="IService"/>.
+    /// Represents the implementation of <see cref="ICanGetResourceForTenant"/>.
     /// </summary>
-    public class Service : IService
+    public class ResourceForTenantGetter : ICanGetResourceForTenant
     {
-        readonly FactoryFor<IResource> _getMongoDbResource;
+        readonly FactoryFor<IKnowTheConnectionString> _getConnectionString;
         readonly IExecutionContextManager _executionContextManager;
         readonly ILogger _logger;
 
+        
         /// <summary>
-        /// Initializes a new instance of the <see cref="Service"/> class.
+        /// Initializes a new instance of the <see cref="ResourceForTenantGetter"/> class.
         /// </summary>
-        public Service(FactoryFor<IResource> getMongoDbResource, IExecutionContextManager executionContextManager, ILogger logger)
+        /// <param name="getConnectionString">The <see cref="FactoryFor{T}"/> of type <see cref="IKnowTheConnectionString"/> to use to get connection strings after setting the execution context.</param>
+        /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use to set the execution context.</param>
+        /// <param name="logger">The <see cref="ILogger"/> to use for logging.</param>
+        public ResourceForTenantGetter(FactoryFor<IKnowTheConnectionString> getConnectionString, IExecutionContextManager executionContextManager, ILogger logger)
         {
-            _getMongoDbResource = getMongoDbResource;
+            _getConnectionString = getConnectionString;
             _executionContextManager = executionContextManager;
             _logger = logger;
         }
@@ -36,10 +40,12 @@ namespace Dolittle.Runtime.Resources.MongoDB
             try
             {
                 _executionContextManager.CurrentFor(executionContext);
-                return new GetMongoDBResponse(new GetMongoDBResponse
+                
+                var mongoUrl = _getConnectionString().ConnectionString;
+                return new GetMongoDBResponse
                 {
-                    ConnectionString = _getMongoDbResource().GetConnectionString().ToString()
-                });
+                    ConnectionString = mongoUrl.ToString(),
+                };
             }
             catch (Exception ex)
             {

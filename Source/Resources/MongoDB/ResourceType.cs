@@ -27,6 +27,6 @@ namespace Dolittle.Runtime.Resources.MongoDB
         public ResourceTypes.ResourceType Name => ResourceTypeName;
 
         /// <inheritdoc/>
-        public IEnumerable<Type> Services { get; } = new[] { typeof(IResource) };
+        public IEnumerable<Type> Services { get; } = new[] { typeof(IKnowTheConnectionString) };
     }
 }

@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Resources.MongoDB
     /// <summary>
     /// Represents the resource configuration for a MongoDB resource.
     /// </summary>
-    public class Configuration
+    public class ResourceConfiguration
     {
         /// <summary>
         /// Gets or sets the MongoDB host.
