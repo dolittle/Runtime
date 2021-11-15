@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Resources.MongoDB
         /// <summary>
         /// Gets or sets the value indicating whether or not to use SSL.
         /// </summary>
-        /// <remarks>This is not used for anything.</remarks>>
         public bool UseSSL { get; set; }
     }
 }
