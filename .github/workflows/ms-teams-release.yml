@@ -1,0 +1,30 @@
+name: Microsoft Teams Release Notification
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  notify:
+    name: Notify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Notify of release
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        if: ${{ github.event.release.prerelease == false }}
+        with:
+          webhook_uri: ${{ secrets.TEAMS_RELEASES_WEBHOOK }}
+          title: Runtime ${{ github.event.release.tag_name }} was just released!
+          text: ${{ github.event.release.body }}
+          actions: '[{ "@type": "OpenUri", "name": "View Release Note", "targets": [{ "os": "default", "uri": "${{ github.event.release.html_url }}" }]}]'
+      - name: Notify of prerelease
+        uses: aliencube/microsoft-teams-actions@v0.8.0
+        if: ${{ github.event.release.prerelease == true }}
+        with:
+          webhook_uri: ${{ secrets.TEAMS_PRERELEASES_WEBHOOK }}
+          title: Runtime ${{ github.event.release.tag_name }} was just released!
+          text: ${{ github.event.release.body }}
+          actions: '[{ "@type": "OpenUri", "name": "View Release Note", "targets": [{ "os": "default", "uri": "${{ github.event.release.html_url }}" }]}]'
