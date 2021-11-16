@@ -16,8 +16,8 @@
             "development": "MongoDB"
         },
         "readModels": {
-            "development": "n/a",
-            "development": "n/a"
+            "production": "MongoDB",
+            "development": "MongoDB"
         }
     },
     "core": {

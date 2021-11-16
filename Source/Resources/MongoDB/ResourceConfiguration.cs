@@ -6,7 +6,7 @@ namespace Dolittle.Runtime.Resources.MongoDB
     /// <summary>
     /// Represents the resource configuration for a MongoDB resource.
     /// </summary>
-    public class Configuration
+    public class ResourceConfiguration
     {
         /// <summary>
         /// Gets or sets the MongoDB host.
@@ -21,7 +21,6 @@ namespace Dolittle.Runtime.Resources.MongoDB
         /// <summary>
         /// Gets or sets the value indicating whether or not to use SSL.
         /// </summary>
-        /// <remarks>This is not used for anything.</remarks>>
         public bool UseSSL { get; set; }
     }
 }

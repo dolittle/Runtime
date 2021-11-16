@@ -6,14 +6,13 @@ using MongoDB.Driver;
 namespace Dolittle.Runtime.Resources.MongoDB
 {
     /// <summary>
-    /// Defines a system that knows about the MongoDb resource.
+    /// Defines a system that knows about the connection string to a MongoDB resource for the current tenant.
     /// </summary>
-    public interface IResource
+    public interface IKnowTheConnectionString
     {
         /// <summary>
-        /// Gets the <see cref="MongoUrl"/> for the MongoDB resource.
+        /// Gets the <see cref="MongoUrl">connection string</see> for the MongoDB resource for the current tenant.
         /// </summary>
-        /// <returns>The <see cref="MongoUrl"/> connection string.</returns>
-        MongoUrl GetConnectionString();
+        MongoUrl ConnectionString { get; }
     }
 }

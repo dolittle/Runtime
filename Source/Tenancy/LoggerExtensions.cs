@@ -11,22 +11,22 @@ namespace Dolittle.Runtime.Tenancy
     /// </summary>
     static class LoggerExtensions
     {
-        static readonly Action<ILogger, Exception> _failure = LoggerMessage
-            .Define(
-                LogLevel.Warning,
-                new EventId(1231141, nameof(Failure)),
-                "An error occurred");
-        
-        static readonly Action<ILogger, Exception> _getAll = LoggerMessage
+        static readonly Action<ILogger, Exception> _getAllCalled = LoggerMessage
             .Define(
                 LogLevel.Information,
-                new EventId(242121231, nameof(GetAll)),
-                "Getting all Tenants");
+                new EventId(242121231, nameof(GetAllCalled)),
+                "Getting all tenants");
         
-        internal static void Failure(this ILogger logger, Exception ex)
-            => _failure(logger, ex);
+        static readonly Action<ILogger, Exception> _failedToGetAll = LoggerMessage
+            .Define(
+                LogLevel.Warning,
+                new EventId(1231141, nameof(FailedToGetAll)),
+                "An error occured while getting all tenants");
 
-        internal static void GetAll(this ILogger logger)
-            => _getAll(logger, null);
+        internal static void GetAllCalled(this ILogger logger)
+            => _getAllCalled(logger, null);
+        
+        internal static void FailedToGetAll(this ILogger logger, Exception ex)
+            => _failedToGetAll(logger, ex);
     }
 }

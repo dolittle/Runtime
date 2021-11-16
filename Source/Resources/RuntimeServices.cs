@@ -7,8 +7,7 @@ using Dolittle.Runtime.Services;
 namespace Dolittle.Runtime.Resources
 {
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
-    /// runtime service implementations for Heads.
+    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing runtime service implementations for Heads.
     /// </summary>
     public class RuntimeServices : ICanBindRuntimeServices
     {
@@ -28,7 +27,7 @@ namespace Dolittle.Runtime.Resources
 
         /// <inheritdoc/>
         public IEnumerable<Service> BindServices() =>
-            new Service[]
+            new[]
             {
                 new Service(_resourcesService, Contracts.Resources.BindService(_resourcesService), Contracts.Resources.Descriptor)
             };

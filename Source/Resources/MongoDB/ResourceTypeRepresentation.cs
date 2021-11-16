@@ -12,17 +12,17 @@ namespace Dolittle.Runtime.Resources.MongoDB
     {
         static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
         {
-            { typeof(IResource), typeof(Resource) }
+            { typeof(IKnowTheConnectionString), typeof(ConnectionStringFromResourceConfiguration) }
         };
 
         /// <inheritdoc/>
         public ResourceTypes.ResourceType Type => ResourceType.ResourceTypeName;
 
         /// <inheritdoc/>
-        public ResourceTypeImplementation ImplementationName => "n/a";
+        public ResourceTypeImplementation ImplementationName => "MongoDB";
 
         /// <inheritdoc/>
-        public Type ConfigurationObjectType => typeof(Configuration);
+        public Type ConfigurationObjectType => typeof(ResourceConfiguration);
 
         /// <inheritdoc/>
         public IDictionary<Type, Type> Bindings => _bindings;

@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Tenancy
         {
             try
             {
-                _logger.GetAll();
+                _logger.GetAllCalled();
                 var response = new Contracts.GetAllResponse();
                 
                 response.Tenants.AddRange(_tenants.All.Select(ToProtobuf));
@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Tenancy
             }
             catch (Exception ex)
             {
-                _logger.Failure(ex);
+                _logger.FailedToGetAll(ex);
                 return Task.FromResult(new Contracts.GetAllResponse { Failure = ex.ToProtobuf() });
             }
         }
