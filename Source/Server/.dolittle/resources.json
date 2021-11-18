@@ -20,6 +20,11 @@
             ],
             "database": "embeddings",
             "maxConnectionPoolSize": 1000
+        },
+        "readModels": {
+            "host": "mongodb://localhost:27017",
+            "database": "readmodels",
+            "useSSL": false
         }
     }
 }

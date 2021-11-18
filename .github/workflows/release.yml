@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: aragorn # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: legolas # Comma separated list of prerelease branch names. 'alpha,rc, ...'
 
 on:
   pull_request:
@@ -45,6 +45,7 @@ jobs:
         uses: dolittle/github-release-action@v2
         if: ${{ steps.context.outputs.should-publish == 'true' }}
         with:
+          token: ${{  secrets.BUILD_PAT  }}
           version: ${{ steps.increment-version.outputs.next-version }}
           body: ${{ steps.context.outputs.pr-body }}
 
