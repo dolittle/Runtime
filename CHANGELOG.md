@@ -1,3 +1,14 @@
+# [7.3.0] - 2021-11-18 [PR: #589](https://github.com/dolittle/Runtime/pull/589)
+## Summary
+
+Implements Contracts 6.3.0, which adds support for getting the configured Tenants, and connection string for a MongoDB resource per tenant. Note: this MongoDB connection string is configured through the "readModels" key in `resources.json` to be backwards compatible with the platform configuration.
+
+### Added
+
+- TenantsService: Getting all tenants through gRPC
+- ResourcesService: Getting a specific resource through gRPC. Currently only the MongoDB is supported through the readModels resource configuration
+
+
 # [7.2.0] - 2021-11-5 [PR: #582](https://github.com/dolittle/Runtime/pull/582)
 ## Summary
 
