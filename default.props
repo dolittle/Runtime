@@ -4,5 +4,6 @@
     <PropertyGroup>
         <TargetFramework>net6.0</TargetFramework>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <NoWarn>$(NoWarn);SYSLIB1002;SYSLIB1006;SYSLIB1007</NoWarn>
     </PropertyGroup>
 </Project>
