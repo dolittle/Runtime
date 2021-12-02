@@ -18,7 +18,7 @@ using Dolittle.Runtime.Rudimentary;
 using static Dolittle.Runtime.Aggregates.Management.Contracts.AggregateRoots;
 using AggregateRoot = Dolittle.Runtime.Aggregates.Management.Contracts.AggregateRoot;
 using CommittedAggregateEvents = Dolittle.Runtime.Events.Store.CommittedAggregateEvents;
-using Contracts = Dolittle.Runtime.Events.Contracts;
+using EventsContracts = Dolittle.Runtime.Events.Contracts;
 
 namespace Dolittle.Runtime.CLI.Runtime.Aggregates
 {
@@ -111,7 +111,7 @@ namespace Dolittle.Runtime.CLI.Runtime.Aggregates
                         _.EventSourceId,
                         _.AggregateRootVersion))));
 
-        static CommittedAggregateEvents FromProtobuf(Contracts.CommittedAggregateEvents events)
+        static CommittedAggregateEvents FromProtobuf(EventsContracts.CommittedAggregateEvents events)
             => new(
                 events.EventSourceId,
                 events.AggregateRootId.ToGuid(),

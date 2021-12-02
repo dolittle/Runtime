@@ -9,7 +9,6 @@ using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;
-using Contracts = Dolittle.Services.Contracts;
 using It = Machine.Specifications.It;
 using ReverseCallClient = Dolittle.Runtime.Services.Clients.ReverseCallClient<
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyClient,
@@ -86,7 +85,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
 
             var connect_response = reverse_call_client.Connect(new MyConnectArguments
             {
-                Context = new Contracts.ReverseCallArgumentsContext
+                Context = new Dolittle.Services.Contracts.ReverseCallArgumentsContext
                 {
                     ExecutionContext = execution_context.ToProtobuf()
                 }
