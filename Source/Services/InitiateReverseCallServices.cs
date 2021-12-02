@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Services;
 /// </summary>
 public class InitiateReverseCallServices : IInitiateReverseCallServices
 {
-    static readonly string _argumentsNotReceived = "Connection arguments were not received";
+    const string ArgumentsNotReceivedResponse = "Connection arguments were not received";
     readonly IReverseCallDispatchers _reverseCallDispatchers;
     readonly ILogger _logger;
 
@@ -46,23 +46,23 @@ public class InitiateReverseCallServices : IInitiateReverseCallServices
         where TRuntimeConnectArguments : class
     {
         var dispatcher = _reverseCallDispatchers.GetFor(runtimeStream, clientStream, context, protocol);
-        _logger.LogTrace("Waiting for connection arguments");
+        Log.WaitingForConnectionArguments(_logger);
         if (!await dispatcher.ReceiveArguments(cancellationToken).ConfigureAwait(false))
         {
-            _logger.LogWarning(_argumentsNotReceived);
-            await dispatcher.Reject(protocol.CreateFailedConnectResponse(_argumentsNotReceived), cancellationToken).ConfigureAwait(false);
+            Log.ConnectionArgumentsNotReceived(_logger);
+            await dispatcher.Reject(protocol.CreateFailedConnectResponse(ArgumentsNotReceivedResponse), cancellationToken).ConfigureAwait(false);
             return new ConnectArgumentsNotReceived();
         }
-        _logger.LogTrace("Received connection arguments");
+        Log.ReceivedConnectionArguments(_logger);
 
         var connectArguments = protocol.ConvertConnectArguments(dispatcher.Arguments);
         var validationResult = protocol.ValidateConnectArguments(connectArguments);
-        if (!validationResult.Success)
+        if (validationResult.Success)
         {
-            _logger.LogTrace("Connection arguments were not valid");
-            return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
+            return (dispatcher, connectArguments);
         }
+        Log.ReceivedInvalidConnectionArguments(_logger);
+        return new ConnectArgumentsValidationFailed(validationResult.FailureReason);
 
-        return (dispatcher, connectArguments);
     }
 }

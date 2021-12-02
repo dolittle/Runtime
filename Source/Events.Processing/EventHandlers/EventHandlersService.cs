@@ -56,7 +56,7 @@ public class EventHandlersService : EventHandlersBase
         IServerStreamWriter<EventHandlerRuntimeToClientMessage> clientStream,
         ServerCallContext context)
     {
-        _logger.LogDebug("Connecting Event Handler");
+        Log.ConnectingEventHandler(_logger);
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
         try
         {

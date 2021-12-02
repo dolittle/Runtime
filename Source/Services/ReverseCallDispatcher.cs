@@ -88,7 +88,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
                 var callContext = _messageConverter.GetArgumentsContext(arguments);
                 if (callContext?.PingInterval == null)
                 {
-                    _logger.LogWarning("Received arguments, but ping interval was not set");
+                    Log.ReceivedArgumentsButPingIntervalNotSet(_logger);
                     return false;
                 }
 
@@ -99,11 +99,11 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
                     return true;
                 }
 
-                _logger.LogWarning("Received arguments, but call execution context was not set.");
+                Log.ReceivedArgumentsButCallExecutionContextNotSet(_logger);
             }
             else
             {
-                _logger.LogWarning("Received initial message from client, but arguments was not set.");
+                Log.ReceivedInitialMessageByArgumentsNotSet(_logger);
             }
         }
 
@@ -213,7 +213,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
                 var response = _messageConverter.GetResponse(message);
                 if (response != null)
                 {
-                    _logger.LogTrace("Received response");
+                    Log.ReceivedResponse(_logger);
                     var callContext = _messageConverter.GetResponseContext(response);
                     if (callContext?.CallId != null)
                     {
@@ -224,17 +224,17 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
                         }
                         else
                         {
-                            _logger.LogWarning("Could not find the call id from the received response from the client. The message will be ignored.");
+                            Log.CouldNotFindCallId(_logger);
                         }
                     }
                     else
                     {
-                        _logger.LogWarning("Received response from reverse call client, but the call context was not set.");
+                        Log.ReceivedResponseButCallContextNotSet(_logger);
                     }
                 }
                 else
                 {
-                    _logger.LogWarning("Received message from reverse call client, but it did not contain a response.");
+                    Log.ReceivedMessageButDidNotContainResponse(_logger);
                 }
             }
         }
@@ -242,7 +242,7 @@ public class ReverseCallDispatcher<TClientMessage, TServerMessage, TConnectArgum
         {
             if (!jointCts.Token.IsCancellationRequested)
             {
-                _logger.LogWarning(ex, "An error occurred during handling of client messages");
+                Log.ErrorWhileHandlingClientMessages(_logger, ex);
             }
         }
         finally

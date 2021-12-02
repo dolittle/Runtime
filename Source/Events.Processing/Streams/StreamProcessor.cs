@@ -84,7 +84,7 @@ public class StreamProcessor : IDisposable
     /// <returns>A <see cref="Task" />that represents the asynchronous operation.</returns>
     public async Task Initialize()
     {
-        _logger.InitializingStreamProcessor(_identifier);
+        Log.InitializingStreamProcessor(_logger, _identifier);
 
         _stopAllScopedStreamProcessorsTokenSource.Token.ThrowIfCancellationRequested();
         if (_initialized)
@@ -111,7 +111,7 @@ public class StreamProcessor : IDisposable
     /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task Start()
     {
-        _logger.StartingStreamProcessor(_identifier);
+        Log.StartingStreamProcessor(_logger, _identifier);
 
         if (!_initialized)
         {
@@ -130,7 +130,7 @@ public class StreamProcessor : IDisposable
             await Task.WhenAny(tasks).ConfigureAwait(false);
             if (TryGetException(tasks, out var ex))
             {
-                _logger.ScopedStreamProcessorFailed(ex, _identifier);
+                Log.ScopedStreamProcessorFailed(_logger, ex, _identifier);
             }
 
             _stopAllScopedStreamProcessorsTokenSource.Cancel();

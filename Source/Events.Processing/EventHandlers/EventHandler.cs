@@ -216,7 +216,7 @@ public class EventHandler : IDisposable
     /// <returns>Async <see cref="Task"/>.</returns>
     public async Task RegisterAndStart()
     {
-        _logger.LogDebug($"Connecting Event Handler '{EventProcessor.Value}'");
+        Log.ConnectingEventHandlerWithId(_logger, EventProcessor);
         if (await RejectIfNonWriteableStream().ConfigureAwait(false)
             || !await RegisterFilterStreamProcessor().ConfigureAwait(false)
             || !await RegisterEventProcessorStreamProcessor().ConfigureAwait(false))

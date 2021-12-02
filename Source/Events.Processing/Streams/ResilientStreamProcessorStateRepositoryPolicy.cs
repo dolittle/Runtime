@@ -31,9 +31,9 @@ public class ResilientStreamProcessorStateRepositoryPolicy : IDefineAsyncPolicyF
     public Polly.IAsyncPolicy Define() =>
         Polly.Policy
             .Handle<Exception>(
-                _ =>
+                ex =>
                 {
-                    _logger.LogError(_, "Could not persist stream processor state to the event store, will retry in one second.");
+                    Log.RetryPersistStreamProcessorState(_logger, ex);
                     return true;
                 })
             .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(1));

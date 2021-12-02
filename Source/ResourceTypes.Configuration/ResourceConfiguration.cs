@@ -33,12 +33,10 @@ public class ResourceConfiguration : IResourceConfiguration
     /// <param name="logger"><see cref="ILogger"/> for logging.</param>
     public ResourceConfiguration(IEnumerable<IAmAResourceType> resourceTypes, ITypeFinder typeFinder, IContainer container, ILogger logger)
     {
-        logger.LogDebug("ResourceConfiguration() - ctor");
-
         _resourceTypes = resourceTypes;
         _typeFinder = typeFinder;
         var resourceTypeRepresentationTypes = _typeFinder.FindMultiple<IRepresentAResourceType>();
-        resourceTypeRepresentationTypes.ForEach(_ => logger.LogTrace("Discovered resource type representation : '{resourceTypeRepresentationType}'", _.AssemblyQualifiedName));
+        resourceTypeRepresentationTypes.ForEach(_ => Log.DiscoveredResourceTypeRepresentation(logger, _.AssemblyQualifiedName));
 
         _resourceTypeRepresentations = resourceTypeRepresentationTypes.Select(_ => container.Get(_) as IRepresentAResourceType);
         ThrowIfMultipleResourcesWithSameTypeAndImplementation(_resourceTypeRepresentations);
@@ -52,13 +50,13 @@ public class ResourceConfiguration : IResourceConfiguration
     /// <inheritdoc/>
     public Type GetImplementationFor(Type service)
     {
-        _logger.LogDebug("Get implementation for {service}", service.AssemblyQualifiedName);
+        Log.GetImplementationForService(_logger, service.AssemblyQualifiedName);
         var resourceTypesRepresentationsWithService = _resourceTypeRepresentations.Where(_ => _.Bindings.ContainsKey(service));
+        
+        resourceTypesRepresentationsWithService.ForEach(_ => Log.ResourceTypeWitServiceBinding(_logger, _.ImplementationName));
 
-        resourceTypesRepresentationsWithService.ForEach(_ => _logger.LogTrace("Resource type with service binding : {serviceBinding}", _.ImplementationName));
-
-        _logger.LogTrace("Current resources : {numResources}", _resources.Count);
-        _resources.ForEach(_ => _logger.LogTrace("Resource : {resourceType} - {resourceImplementation}", _.Key, _.Value));
+        Log.CurrentNumResources(_logger, _resources.Count);
+        _resources.ForEach(_ => Log.ResourceTypeAndImplementation(_logger, _.Key, _.Value));
 
         var results = resourceTypesRepresentationsWithService.Where(_ =>
         {
@@ -79,10 +77,10 @@ public class ResourceConfiguration : IResourceConfiguration
     /// <inheritdoc/>
     public void ConfigureResourceTypes(IDictionary<ResourceType, ResourceTypeImplementation> resourceTypeToImplementationMap)
     {
-        _logger.LogDebug("Resource Types Configured : {resourceTypeToImplementationMap}", resourceTypeToImplementationMap);
+        Log.ResourceTypesConfigured(_logger, resourceTypeToImplementationMap);
         resourceTypeToImplementationMap.ForEach(_ =>
         {
-            _logger.LogTrace("Adding resource type '{resourceType}' with implementation {resourceImplementation}", _.Key, _.Value);
+            Log.AddingResource(_logger, _.Key, _.Value);
             _resources[_.Key] = _.Value;
         });
         IsConfigured = true;
@@ -106,7 +104,7 @@ public class ResourceConfiguration : IResourceConfiguration
     {
         foreach (var service in services)
         {
-            if (!resourceTypeRepresentation.Bindings.Keys.Contains(service))
+            if (!resourceTypeRepresentation.Bindings.ContainsKey(service))
             {
                 throw new ResourceTypeRepresentationIsMissingBindingForService(resourceTypeRepresentation.Type, resourceTypeRepresentation.ImplementationName, service);
             }

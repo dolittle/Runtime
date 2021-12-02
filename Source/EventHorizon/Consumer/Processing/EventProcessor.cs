@@ -63,14 +63,14 @@ public class EventProcessor : IEventProcessor
     /// <inheritdoc/>
     public Task<IProcessingResult> Process(CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)
     {
-        _logger.RetryProcessEvent(_subscriptionId);
+        Log.RetryProcessEvent(_logger, _subscriptionId);
         return Process(@event, cancellationToken);
     }
 
     async Task<IProcessingResult> Process(CommittedEvent @event, CancellationToken cancellationToken)
     {
         _metrics.IncrementTotalEventHorizonEventsProcessed();
-        _logger.ProcessEvent(@event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
+        Log.ProcessEvent(_logger, @event.Type.Id, Scope, _subscriptionId.ProducerMicroserviceId, _subscriptionId.ProducerTenantId);
 
         try
         {

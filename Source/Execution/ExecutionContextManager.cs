@@ -68,7 +68,7 @@ public class ExecutionContextManager : IExecutionContextManager
     /// <returns>An <see cref="ExecutionContext"/> instance.</returns>
     public static ExecutionContext SetInitialExecutionContext(ILogger logger)
     {
-        logger.LogTrace("Setting initial execution context");
+        Log.SettingInitialExecutionContext(logger);
         if (_initialExecutionContextSet) throw new InitialExecutionContextHasAlreadyBeenSet();
 
         _initialExecutionContextSet = true;
@@ -150,7 +150,7 @@ public class ExecutionContextManager : IExecutionContextManager
         int lineNumber,
         string member)
     {
-        _logger.LogTrace("Setting execution context ({context}) - from: ({filePath}, {lineNumber}, {member}) ", context, filePath, lineNumber, member);
+        Log.SettingExecutionContext(_logger, context, filePath, lineNumber, member);
         Current = context;
         return context;
     }

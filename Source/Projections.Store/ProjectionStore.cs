@@ -45,7 +45,7 @@ public class ProjectionStore : IProjectionStore
     {
         try
         {
-            _logger.GettingOneProjection(projection, scope, key);
+            Log.GettingOneProjection(_logger, projection, scope, key);
 
             var state = await _projectionStates.TryGet(projection, scope, key, token).ConfigureAwait(false);
 
@@ -58,7 +58,7 @@ public class ProjectionStore : IProjectionStore
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error getting projection");
+            Log.ErrorGettingOneProjection(_logger, ex);
             return ex;
         }
     }
@@ -68,14 +68,14 @@ public class ProjectionStore : IProjectionStore
     {
         try
         {
-            _logger.GettingAllProjections(projection, scope);
+            Log.GettingAllProjections(_logger, projection, scope);
 
             var tryGetStates = await _projectionStates.TryGetAll(projection, scope, token).ConfigureAwait(false);
             return tryGetStates.Select(_ => _.Select(_ => new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, _.State, _.Key)));
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error getting all projections");
+            Log.ErrorGettingAllProjections(_logger, ex);
             return ex;
         }
     }

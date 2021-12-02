@@ -65,7 +65,7 @@ public class StreamProcessors : IStreamProcessors
             var streamProcessorId = new StreamProcessorId(scopeId, eventProcessorId, sourceStreamDefinition.StreamId);
             if (_streamProcessors.ContainsKey(streamProcessorId))
             {
-                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
+                Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);
                 return new StreamProcessorAlreadyRegistered(streamProcessorId);
             }
 
@@ -81,11 +81,11 @@ public class StreamProcessors : IStreamProcessors
                 cancellationToken);
             if (!_streamProcessors.TryAdd(streamProcessorId, streamProcessor))
             {
-                _logger.StreamProcessorAlreadyRegistered(streamProcessorId);
+                Log.StreamProcessorAlreadyRegistered(_logger, streamProcessorId);
                 return new StreamProcessorAlreadyRegistered(streamProcessorId);
             }
 
-            _logger.StreamProcessorSuccessfullyRegistered(streamProcessorId);
+            Log.StreamProcessorSuccessfullyRegistered(_logger, streamProcessorId);
             return streamProcessor;
         }
         catch (Exception ex)
@@ -114,6 +114,6 @@ public class StreamProcessors : IStreamProcessors
             _streamProcessors.TryRemove(id, out existing);
         }
         while (existing != default);
-        _logger.StreamProcessorUnregistered(id);
+        Log.StreamProcessorUnregistered(_logger, id);
     }
 }

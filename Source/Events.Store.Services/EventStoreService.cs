@@ -48,12 +48,12 @@ public class EventStoreService : IEventStoreService
             _executionContextManager.CurrentFor(context);
             _logger.EventsReceivedForCommitting(false, events.Count);
             var committedEvents = await _eventStoreFactory().CommitEvents(events, token).ConfigureAwait(false);
-            _logger.LogDebug("Events were successfully committed");
+            Log.EventsSuccessfullyCommitted(_logger);
             return committedEvents;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error committing events");
+            Log.ErrorCommittingEvents(_logger, ex);
             return ex;
         }
     }
@@ -66,12 +66,12 @@ public class EventStoreService : IEventStoreService
             _executionContextManager.CurrentFor(context);
             _logger.EventsReceivedForCommitting(true, events.Count);
             var committedEvents = await _eventStoreFactory().CommitAggregateEvents(events, token).ConfigureAwait(false);
-            _logger.LogDebug("Aggregate events were successfully committed");
+            Log.AggregateEventsSuccessfullyCommitted(_logger);
             return committedEvents;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error committing aggregate events");
+            Log.ErrorCommittingAggregateEvents(_logger, ex);
             return ex;
         }
     }
@@ -81,15 +81,15 @@ public class EventStoreService : IEventStoreService
     {
         try
         {
-            _logger.LogDebug("Fetch for aggregate");
+            Log.FetchEventsForAggregate(_logger);
             _executionContextManager.CurrentFor(context);
             var committedEvents = await _eventStoreFactory().FetchForAggregate(eventSource, aggregateRoot, token).ConfigureAwait(false);
-            _logger.LogDebug("Successfully fetched events for aggregate");
+            Log.SuccessfullyFetchedEventsForAggregate(_logger);
             return committedEvents;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Error fetching events from aggregate");
+            Log.ErrorFetchingEventsFromAggregate(_logger, ex);
             return ex;
         }
     }

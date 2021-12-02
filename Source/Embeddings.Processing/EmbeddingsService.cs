@@ -83,7 +83,7 @@ public class EmbeddingsService : EmbeddingsBase
         IServerStreamWriter<EmbeddingRuntimeToClientMessage> clientStream,
         ServerCallContext context)
     {
-        _logger.LogDebug("Connecting Embeddings");
+        Log.ConnectingEmbeddings(_logger);
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
         var connection = await _reverseCallServices.Connect(runtimeStream, clientStream, context, _protocol, context.CancellationToken).ConfigureAwait(false);
         if (!connection.Success)

@@ -61,14 +61,14 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     protected override async Task<IStreamProcessorState> ProcessEvent(StreamEvent @event, IStreamProcessorState currentState, CancellationToken cancellationToken)
     {
         var streamProcessorState = currentState as StreamProcessorState;
-        if (streamProcessorState.FailingPartitions.Keys.Contains(@event.Partition))
+        if (!streamProcessorState.FailingPartitions.ContainsKey(@event.Partition))
         {
-            var newState = new StreamProcessorState(@event.Position + 1, streamProcessorState.FailingPartitions, streamProcessorState.LastSuccessfullyProcessed);
-            await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
-            return newState;
+            return await base.ProcessEvent(@event, streamProcessorState, cancellationToken).ConfigureAwait(false);
         }
+        var newState = new StreamProcessorState(@event.Position + 1, streamProcessorState.FailingPartitions, streamProcessorState.LastSuccessfullyProcessed);
+        await _streamProcessorStates.Persist(Identifier, newState, CancellationToken.None).ConfigureAwait(false);
+        return newState;
 
-        return await base.ProcessEvent(@event, streamProcessorState, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc/>
@@ -113,7 +113,7 @@ public class ScopedStreamProcessor : AbstractScopedStreamProcessor
     /// <inheritdoc />
     protected override async Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position)
     {
-        var state = (StreamProcessorState)currentState;
+        var state = currentState as StreamProcessorState;
         var newState = new StreamProcessorState(
             position, 
             FailingPartitionsIgnoringPartitionsToReprocess(state, position),

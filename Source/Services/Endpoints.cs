@@ -69,7 +69,7 @@ public class Endpoints : IEndpoints
     /// <inheritdoc/>
     public void Start()
     {
-        _logger.LogDebug("Starting all endpoints");
+        Log.StartingAllEndpoints(_logger);
 
         var servicesByVisibility = new Dictionary<EndpointVisibility, List<Service>>();
 
@@ -78,7 +78,7 @@ public class Endpoints : IEndpoints
             var configuration = _configuration[type];
             if (configuration.Enabled)
             {
-                _logger.LogDebug("Preparing endpoint for {type} visibility - running on port {port}", type, configuration.Port);
+                Log.PreparingEndpoint(_logger, type, configuration.Port);
                 var endpoint = GetEndpointFor(type);
 
                 serviceTypeRepresenters.ForEach(representer =>
@@ -92,7 +92,7 @@ public class Endpoints : IEndpoints
             }
             else
             {
-                _logger.LogDebug("{type} endpoint is disabled", type);
+                Log.EndpointDisabled(_logger, type);
             }
         }
 
@@ -140,12 +140,12 @@ public class Endpoints : IEndpoints
         var binders = _typeFinder.FindMultiple(representer.BindingInterface);
         binders.ForEach(_ =>
         {
-            _logger.LogDebug("Bind services from {implementation}", _.AssemblyQualifiedName);
+            Log.BindServicesFromImplementation(_logger, _.AssemblyQualifiedName);
 
             var binder = _container.Get(_) as ICanBindServices;
 
             var boundServices = binder.BindServices();
-            boundServices.ForEach(service => _logger.LogTrace("Service : {serviceName}", service.Descriptor?.FullName ?? "Unknown"));
+            boundServices.ForEach(service => Log.BoundService(_logger, service.Descriptor?.FullName ?? "Unknown"));
 
             services.AddRange(boundServices);
         });

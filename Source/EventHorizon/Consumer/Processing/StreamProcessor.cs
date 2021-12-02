@@ -62,13 +62,13 @@ public class StreamProcessor : IStreamProcessor
         _metrics.IncrementTotalStreamProcessorStartAttempts();
         if (cancellationToken.IsCancellationRequested)
         {
-            _logger.StreamProcessorCancellationRequested(_identifier);
+            Log.StreamProcessorCancellationRequested(_logger, _identifier);
             return;
         }
 
         if (_started)
         {
-            _logger.StreamProcessorAlreadyProcessingStream(_identifier);
+            Log.StreamProcessorAlreadyProcessingStream(_logger, _identifier);
             throw new StreamProcessorAlreadyProcessingStream(_identifier);
         }
         _started = true;
@@ -76,13 +76,13 @@ public class StreamProcessor : IStreamProcessor
         var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(_identifier, cancellationToken).ConfigureAwait(false);
         if (!tryGetStreamProcessorState.Success)
         {
-            _logger.StreamProcessorPersitingNewState(_identifier);
+            Log.StreamProcessorPersistingNewState(_logger, _identifier);
             tryGetStreamProcessorState = StreamProcessorState.New;
             await _streamProcessorStates.Persist(_identifier, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
         }
         else
         {
-            _logger.StreamProcessorFetchedState(_identifier, tryGetStreamProcessorState.Result);
+            Log.StreamProcessorFetchedState(_logger, _identifier, tryGetStreamProcessorState.Result.Position);
         }
 
         _metrics.IncrementTotalStreamProcessorStarted();

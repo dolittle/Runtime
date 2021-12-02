@@ -45,7 +45,7 @@ public class ProjectionsService : ProjectionsBase
     readonly IHostApplicationLifetime _hostApplicationLifetime;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="EventHandlersService"/> class.
+    /// Initializes a new instance of the <see cref="ProjectionsService"/> class.
     /// </summary>
     /// <param name="hostApplicationLifetime">The <see cref="IHostApplicationLifetime" />.</param>
     /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
@@ -93,7 +93,7 @@ public class ProjectionsService : ProjectionsBase
         IServerStreamWriter<ProjectionRuntimeToClientMessage> clientStream,
         ServerCallContext context)
     {
-        _logger.LogDebug("Connecting Projections");
+        Log.ConnectingProjections(_logger);
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(_hostApplicationLifetime.ApplicationStopping, context.CancellationToken);
         var tryConnect = await _reverseCallServices.Connect(
             runtimeStream,

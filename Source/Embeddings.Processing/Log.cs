@@ -14,8 +14,12 @@ using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Embeddings.Processing;
 
-static class LoggerExtensions
+static partial class Log
 {
+    
+    [LoggerMessage(0, LogLevel.Debug, "Connecting Embeddings")]
+    internal static partial void ConnectingEmbeddings(ILogger logger);
+    
     #region EmbeddingsService
 
     static readonly Action<ILogger, Guid, Exception> _comparingEmbeddingDefinition = LoggerMessage
@@ -277,5 +281,4 @@ static class LoggerExtensions
     internal static void DeletingStateForEmbedding(this ILogger logger, EmbeddingId embedding, EmbeddingCurrentState currentState)
         => _deletingStateForEmbedding(logger, embedding, currentState.Key, Enum.GetName(currentState.Type), null);
     #endregion
-
 }

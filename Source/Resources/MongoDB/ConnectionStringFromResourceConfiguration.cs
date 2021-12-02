@@ -25,12 +25,11 @@ public class ConnectionStringFromResourceConfiguration : IKnowTheConnectionStrin
 
     /// <inheritdoc />
     public MongoUrl ConnectionString { get; }
-        
-    MongoUrl BuildConnectionString(ResourceConfiguration configuration)
-    {
-        var builder = new MongoUrlBuilder(configuration.Host);
-        builder.UseTls = configuration.UseSSL;
-        builder.DatabaseName = configuration.Database;
-        return builder.ToMongoUrl();
-    }
+
+    static MongoUrl BuildConnectionString(ResourceConfiguration configuration)
+        => new MongoUrlBuilder(configuration.Host)
+        {
+            UseTls = configuration.UseSSL,
+            DatabaseName = configuration.Database
+        }.ToMongoUrl();
 }

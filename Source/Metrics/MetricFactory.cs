@@ -25,49 +25,33 @@ public class MetricFactory : IMetricFactory
 
     /// <inheritdoc/>
     public Counter Counter(string name, string help, CounterConfiguration configuration = null)
-    {
-        return _innerMetricFactory.CreateCounter(name, help, configuration);
-    }
+        => _innerMetricFactory.CreateCounter(name, help, configuration);
 
     /// <inheritdoc/>
     public Counter Counter(string name, string help, params string[] labelNames)
-    {
-        return _innerMetricFactory.CreateCounter(name, help, labelNames);
-    }
+        => _innerMetricFactory.CreateCounter(name, help, labelNames);
 
     /// <inheritdoc/>
     public Gauge Gauge(string name, string help, GaugeConfiguration configuration = null)
-    {
-        return _innerMetricFactory.CreateGauge(name, help, configuration);
-    }
+        => _innerMetricFactory.CreateGauge(name, help, configuration);
 
     /// <inheritdoc/>
     public Gauge Gauge(string name, string help, params string[] labelNames)
-    {
-        return _innerMetricFactory.CreateGauge(name, help, labelNames);
-    }
+        => _innerMetricFactory.CreateGauge(name, help, labelNames);
 
     /// <inheritdoc/>
     public Histogram Histogram(string name, string help, HistogramConfiguration configuration = null)
-    {
-        return _innerMetricFactory.CreateHistogram(name, help, configuration);
-    }
+        => _innerMetricFactory.CreateHistogram(name, help, configuration);
 
     /// <inheritdoc/>
     public Histogram Histogram(string name, string help, params string[] labelNames)
-    {
-        return _innerMetricFactory.CreateHistogram(name, help, labelNames);
-    }
+        => _innerMetricFactory.CreateHistogram(name, help, labelNames);
 
     /// <inheritdoc/>
     public Summary Summary(string name, string help, SummaryConfiguration configuration = null)
-    {
-        return _innerMetricFactory.CreateSummary(name, help, configuration);
-    }
+        => _innerMetricFactory.CreateSummary(name, help, configuration);
 
     /// <inheritdoc/>
     public Summary Summary(string name, string help, params string[] labelNames)
-    {
-        return _innerMetricFactory.CreateSummary(name, help, labelNames);
-    }
+        => _innerMetricFactory.CreateSummary(name, help, labelNames);
 }

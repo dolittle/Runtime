@@ -56,10 +56,7 @@ public class MetricsSystem : IMetricsSystem, IDisposable
     public void Start()
     {
         const string path = "metrics/";
-        _logger.LogInformation(
-            "Starting metrics server on port {Port} on path '{Path}'",
-            _configuration.Port,
-            path);
+        Log.StartingMetricsServer(_logger, _configuration.Port, path);
         _server = new MetricServer(hostname: "*", port: _configuration.Port, url: path, registry: _collectorRegistry);
         _server.Start();
     }

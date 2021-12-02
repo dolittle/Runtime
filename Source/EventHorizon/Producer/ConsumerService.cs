@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 /// Represents the implementation of <see cref="ConsumerBase"/>.
 /// </summary>
 [Singleton]
-public partial class ConsumerService : ConsumerBase, IDisposable
+public class ConsumerService : ConsumerBase, IDisposable
 {
     readonly Microservice _thisMicroservice;
     readonly IExecutionContextManager _executionContextManager;

@@ -173,10 +173,11 @@ public abstract class AbstractScopedStreamProcessor
     /// <param name="timeToRetry">The <see cref="TimeSpan" /> for when to retry processsing a stream processor.</param>
     /// <returns>A value indicating whether there is a retry time.</returns>
     protected abstract bool TryGetTimeToRetry(IStreamProcessorState state, out TimeSpan timeToRetry);
-        
+
     /// <summary>
     /// Creates a new <see cref="IStreamProcessorState"/> with the given <see cref="StreamPosition" />.
     /// </summary>
+    /// <param name="currentState">The current <see cref="IStreamProcessorState"/>.</param>
     /// <param name="position">The new <see cref="StreamPosition"/>.</param>
     /// <returns>The new <see cref="IStreamProcessorState"/>.</returns>
     protected abstract Task<IStreamProcessorState> SetNewStateWithPosition(IStreamProcessorState currentState, StreamPosition position);
@@ -273,7 +274,7 @@ public abstract class AbstractScopedStreamProcessor
                         }
                         else
                         {
-                            Logger.ScopedStreamProcessorSetToPosition(Identifier, _newPosition);
+                            Log.ScopedStreamProcessorSetToPosition(Logger, Identifier, _newPosition);
                             _currentState = await SetNewStateWithPosition(_currentState, _newPosition).ConfigureAwait(false);
                             _resetStreamProcessorCompletionSource.SetResult(_currentState.Position);
                         }
@@ -309,7 +310,7 @@ public abstract class AbstractScopedStreamProcessor
         {
             if (!cancellationToken.IsCancellationRequested)
             {
-                Logger.LogWarning(ex, "{StreamProcessorId} for tenant {TenantId} failed", Identifier, _tenantId);
+                Log.StreamProcessingForTenantFailed(Logger, ex, Identifier, _tenantId);
             }
         }
         finally

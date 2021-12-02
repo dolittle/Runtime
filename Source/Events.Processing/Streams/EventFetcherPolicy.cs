@@ -33,9 +33,9 @@ public class EventFetcherPolicy : IDefineAsyncPolicyForType
     public Polly.IAsyncPolicy Define() =>
         Polly.Policy
             .Handle<EventStoreUnavailable>(
-                _ =>
+                ex =>
                 {
-                    _logger.LogDebug(_, "Event Store is unavailable");
+                    Log.EventStoreUnavailable(_logger, ex);
                     return true;
                 })
             .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));
