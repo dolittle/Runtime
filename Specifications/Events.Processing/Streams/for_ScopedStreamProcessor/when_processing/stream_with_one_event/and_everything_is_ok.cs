@@ -24,9 +24,9 @@ public class and_everything_is_ok : given.all_dependencies
             .Returns(Task.FromResult<IProcessingResult>(new SuccessfulProcessing()));
         setup_event_stream(event_with_partition);
     };
+    
+    Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(500)).GetAwaiter().GetResult();
 
-    Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(100)).GetAwaiter().GetResult();
-        
     It should_process_first_event = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once());
     It should_have_current_position_equal_one = () => current_stream_processor_state.Position.ShouldEqual(new StreamPosition(1));
     It should_not_be_failing = () => current_stream_processor_state.IsFailing.ShouldBeFalse();

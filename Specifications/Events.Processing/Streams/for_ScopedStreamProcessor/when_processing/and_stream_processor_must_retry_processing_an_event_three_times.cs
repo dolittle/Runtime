@@ -43,7 +43,7 @@ public class and_stream_processor_must_retry_processing_an_event_three_times : g
         setup_event_stream(new StreamEvent(first_event, 0, Guid.NewGuid(), partition_id, false));
     };
 
-    Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(50)).GetAwaiter().GetResult();
+    Because of = () => start_stream_processor_and_cancel_after(TimeSpan.FromMilliseconds(250)).GetAwaiter().GetResult();
 
     It should_process_first_event_normally_once = () => event_processor.Verify(_ => _.Process(first_event, partition_id, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
     It should_retry_processing_first_event_first_time_with_correct_reason = () => event_processor.Verify(_ => _.Process(first_event, partition_id, retry_reason, 0, Moq.It.IsAny<CancellationToken>()), Moq.Times.Once);
