@@ -1,5 +1,5 @@
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS dotnet-build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-alpine AS dotnet-build
 ARG CONFIGURATION=Release
 ARG VERSION
 
@@ -14,7 +14,7 @@ RUN dotnet restore
 RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
 ARG CONFIGURATION=Release
 ARG VERSION
 
