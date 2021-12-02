@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Security
     /// </summary>
     public class SecurityDescriptor : ISecurityDescriptor
     {
-        readonly List<ISecurityAction> _actions = new List<ISecurityAction>();
+        readonly List<ISecurityAction> _actions = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityDescriptor"/> class.

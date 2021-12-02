@@ -31,7 +31,6 @@ namespace Dolittle.Runtime.Assemblies
         /// <param name="assemblyProviders"><see cref="IEnumerable{ICanProvideAssemblies}">Providers</see> to provide assemblies.</param>
         /// <param name="assemblyFilters"><see cref="IAssemblyFilters"/> to use for filtering assemblies through.</param>
         /// <param name="assemblyUtility">An <see cref="IAssemblyUtility"/>.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
         public AssemblyProvider(
             IEnumerable<ICanProvideAssemblies> assemblyProviders,
             IAssemblyFilters assemblyFilters,

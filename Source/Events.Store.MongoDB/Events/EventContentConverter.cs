@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
     /// </summary>
     public class EventContentConverter : IEventContentConverter
     {
-        static readonly JsonWriterSettings _jsonSettings = new JsonWriterSettings
+        static readonly JsonWriterSettings _jsonSettings = new()
         {
             OutputMode = JsonOutputMode.Strict,
             Indent = false,

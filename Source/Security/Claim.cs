@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Security
             if (claim == null)
                 return null;
 
-            return new(claim.Type, claim.Value, claim.ValueType);
+            return new Claim(claim.Type, claim.Value, claim.ValueType);
         }
 
         /// <summary>

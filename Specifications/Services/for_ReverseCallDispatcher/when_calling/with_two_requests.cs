@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
+using Dolittle.Services.Contracts;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
@@ -17,10 +18,10 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
 
         Establish context = () =>
         {
-            first_request = new();
-            second_request = new();
-            response_to_first_from_client = new();
-            response_to_second_from_client = new();
+            first_request = new MyRequest();
+            second_request = new MyRequest();
+            response_to_first_from_client = new MyResponse();
+            response_to_second_from_client = new MyResponse();
 
             var stream_reader = new MockStreamReader();
 
@@ -34,13 +35,15 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
                 {
                     if (server_message.Request == first_request)
                     {
-                        response_to_first_from_client.Context = new() { CallId = server_message.Request.Context.CallId };
+                        response_to_first_from_client.Context = new ReverseCallResponseContext
+                            { CallId = server_message.Request.Context.CallId };
                         return;
                     }
 
                     if (server_message.Request == second_request)
                     {
-                        response_to_second_from_client.Context = new() { CallId = server_message.Request.Context.CallId };
+                        response_to_second_from_client.Context = new ReverseCallResponseContext
+                            { CallId = server_message.Request.Context.CallId };
 
                         stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_to_second_from_client });
                         stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_to_first_from_client });
@@ -49,7 +52,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
                 })
                 .Returns(Task.FromResult(true));
 
-            Task.Run(() => dispatcher.Accept(new(), CancellationToken.None));
+            Task.Run(() => dispatcher.Accept(new MyConnectResponse(), CancellationToken.None));
         };
 
         static MyResponse first_response;

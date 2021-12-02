@@ -98,7 +98,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer
         {
             lock (_responseLock)
             {
-                _connectionResponse = new(TaskCreationOptions.RunContinuationsAsynchronously);
+                _connectionResponse = new TaskCompletionSource<SubscriptionResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             }
         }
 

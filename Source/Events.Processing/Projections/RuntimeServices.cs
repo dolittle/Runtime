@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_projections, Contracts.Projections.BindService(_projections), Contracts.Projections.Descriptor)
+                new(_projections, Contracts.Projections.BindService(_projections), Contracts.Projections.Descriptor)
             };
     }
 }

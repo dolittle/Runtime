@@ -15,6 +15,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.Partitioned
         /// <param name="state">The <see cref="FailingPartitionState" />.</param>
         /// <returns>The converted <see cref="runtime.FailingPartitionState" />.</returns>
         public static runtime.FailingPartitionState ToRuntimeRepresentation(this FailingPartitionState state) =>
-            new runtime.FailingPartitionState(state.Position, state.RetryTime, state.Reason, state.ProcessingAttempts, state.LastFailed);
+            new(state.Position, state.RetryTime, state.Reason, state.ProcessingAttempts, state.LastFailed);
     }
 }

@@ -94,7 +94,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
 
             public override void Execute(Scenario scenario)
             {
-                scenario._nextPendingMessage.SetResult(new(true, Message));
+                scenario._nextPendingMessage.SetResult(new Tuple<bool, a_message>(true, Message));
             }
         }
 
@@ -121,7 +121,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
         AtSetter AddStep(Step step)
         {
             _steps.Add(step);
-            return new(step);
+            return new AtSetter(step);
         }
 
         public void Simulate(
@@ -132,12 +132,12 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
             ILoggerFactory loggerFactory)
         {
             _simulatedTime = 0;
-            _writtenMessages = new();
-            _receivedMessages = new();
-            _nextPendingMessage = new();
-            _readMessageException = new(-1, null);
-            _scheduledCallbacks = new();
-            _refreshedTokenTimes = new();
+            _writtenMessages = new List<Tuple<int, a_message>>();
+            _receivedMessages = new List<Tuple<int, a_message>>();
+            _nextPendingMessage = new TaskCompletionSource<Tuple<bool, a_message>>();
+            _readMessageException = new Tuple<int, Exception>(-1, null);
+            _scheduledCallbacks = new List<Tuple<int, TimeSpan>>();
+            _refreshedTokenTimes = new List<int>();
 
             var fakeKeepaliveDeadline = new SimulatedKeepaliveDeadline(this);
             var fakeCallbackScheduler = new SimulatedCallbackScheduler(this);
@@ -173,7 +173,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
                 }
                 time++;
             }
-            _nextPendingMessage.SetResult(new(false, null));
+            _nextPendingMessage.SetResult(new Tuple<bool, a_message>(false, null));
 
             reader.GetAwaiter().GetResult();
 
@@ -221,7 +221,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
                 }
                 finally
                 {
-                    _scenario._nextPendingMessage = new();
+                    _scenario._nextPendingMessage = new TaskCompletionSource<Tuple<bool, a_message>>();
                 }
             }
         }
@@ -235,7 +235,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
 
             public Task WriteAsync(a_message message)
             {
-                _scenario._writtenMessages.Add(new(_scenario._simulatedTime, message));
+                _scenario._writtenMessages.Add(new Tuple<int, a_message>(_scenario._simulatedTime, message));
                 return Task.CompletedTask;
             }
         }
@@ -274,7 +274,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
             public SimulatedCallbackScheduler(Scenario scenario) => _scenario = scenario;
             public IDisposable ScheduleCallback(Action callback, TimeSpan interval)
             {
-                _scenario._scheduledCallbacks.Add(new(_scenario._simulatedTime, interval));
+                _scenario._scheduledCallbacks.Add(new Tuple<int, TimeSpan>(_scenario._simulatedTime, interval));
                 _callbacks.Add(new ScheduledCallback(callback, interval));
                 SimulateCallbacks();
                 return null;
@@ -323,12 +323,12 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given
             {
                 while (await connection.RuntimeStream.MoveNext(connection.CancellationToken).ConfigureAwait(false))
                 {
-                    _receivedMessages.Add(new(_simulatedTime, connection.RuntimeStream.Current));
+                    _receivedMessages.Add(new Tuple<int, a_message>(_simulatedTime, connection.RuntimeStream.Current));
                 }
             }
             catch (Exception exception)
             {
-                _readMessageException = new(_simulatedTime, exception);
+                _readMessageException = new Tuple<int, Exception>(_simulatedTime, exception);
             }
         }
     }

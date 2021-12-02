@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Projections.Store.Services.Grpc
+namespace Dolittle.Runtime.Server.Handshake
 {
     /// <summary>
     /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
@@ -12,25 +12,25 @@ namespace Dolittle.Runtime.Projections.Store.Services.Grpc
     /// </summary>
     public class RuntimeServices : ICanBindRuntimeServices
     {
-        readonly ProjectionsGrpcService _eventStoreGrpcService;
+        readonly HandshakeService _handshakeService;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
         /// </summary>
-        /// <param name="eventStoreService">The <see cref="ProjectionsService"/>.</param>
-        public RuntimeServices(ProjectionsGrpcService eventStoreService)
+        /// <param name="handshakeService">The <see cref="HandshakeService"/>.</param>
+        public RuntimeServices(HandshakeService handshakeService)
         {
-            _eventStoreGrpcService = eventStoreService;
+            _handshakeService = handshakeService;
         }
 
         /// <inheritdoc/>
-        public ServiceAspect Aspect => "Projections";
+        public ServiceAspect Aspect => "Server";
 
         /// <inheritdoc/>
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new(_eventStoreGrpcService, Contracts.Projections.BindService(_eventStoreGrpcService), Contracts.Projections.Descriptor)
+                new(_handshakeService, Dolittle.Runtime.Handshake.Contracts.Handshake.BindService(_handshakeService), Dolittle.Runtime.Handshake.Contracts.Handshake.Descriptor)
             };
     }
 }

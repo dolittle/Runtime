@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.Booting
         /// Get association by key.
         /// </summary>
         /// <param name="key">Key for the association.</param>
-        /// <typeparam name="T">The <see cref="Type" if the association.></typeparam>
+        /// <typeparam name="T">The <see cref="Type"/> if the association.</typeparam>
         /// <returns>Instance associated.</returns>
         public T GetAssociation<T>(string key)
             where T : class

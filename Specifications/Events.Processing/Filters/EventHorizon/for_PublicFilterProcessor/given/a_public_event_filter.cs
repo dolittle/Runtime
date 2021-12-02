@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
     public class a_public_event_filter
     {
         protected static readonly CommittedEvent a_public_event =
-            new CommittedEvent(
+            new(
                 EventLogSequenceNumber.Initial,
                 DateTimeOffset.Now,
                 "(/event source  ",
@@ -26,7 +26,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilt
                 "");
 
         protected static readonly CommittedEvent a_non_public_event =
-            new CommittedEvent(
+            new(
                 EventLogSequenceNumber.Initial,
                 DateTimeOffset.Now,
                 "__event_source__",

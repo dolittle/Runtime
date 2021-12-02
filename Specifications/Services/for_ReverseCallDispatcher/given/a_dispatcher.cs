@@ -25,11 +25,11 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
 
         Establish context = () =>
         {
-            execution_context_manager = new();
-            pinged_connection = new();
-            client_to_runtime_stream = new();
-            runtime_to_client_stream = new();
-            cancellation_token = new();
+            execution_context_manager = new Mock<IExecutionContextManager>();
+            pinged_connection = new Mock<IPingedConnection<MyClientMessage, MyServerMessage>>();
+            client_to_runtime_stream = new Mock<IAsyncStreamReader<MyClientMessage>>();
+            runtime_to_client_stream = new Mock<IServerStreamWriter<MyServerMessage>>();
+            cancellation_token = new CancellationToken();
 
             pinged_connection.SetupGet(_ => _.RuntimeStream).Returns(client_to_runtime_stream.Object);
             pinged_connection.SetupGet(_ => _.ClientStream).Returns(runtime_to_client_stream.Object);

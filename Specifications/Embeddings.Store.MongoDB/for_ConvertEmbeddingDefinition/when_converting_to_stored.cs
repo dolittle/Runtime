@@ -29,14 +29,14 @@ namespace Dolittle.Runtime.Embeddings.Store.MongoDB.for_ConvertEmbeddingDefiniti
             embedding = new EmbeddingId(Guid.Parse("2174fa82-de09-4ce5-a411-433203a29370"));
             event_types = new List<Artifact>
             {
-                new Artifact("7dd78147-14fc-4a4c-a42e-2d81bd73a4a4", 0),
-                new Artifact("c98f03ee-7f44-456e-9f56-07ba5a73764c", 3)
+                new("7dd78147-14fc-4a4c-a42e-2d81bd73a4a4", 0),
+                new("c98f03ee-7f44-456e-9f56-07ba5a73764c", 3)
             };
             dynamic json = new JObject();
             json.FirstProp = "FirstProp";
             json.SecondProp = "the 👑 cooler ❄❄ second 👆 prop";
             initial_state = new(JsonConvert.SerializeObject(json));
-            runtime_definition = new(embedding, event_types, initial_state);
+            runtime_definition = new Store.Definition.EmbeddingDefinition(embedding, event_types, initial_state);
             converter = new ConvertEmbeddingDefinition();
         };
 

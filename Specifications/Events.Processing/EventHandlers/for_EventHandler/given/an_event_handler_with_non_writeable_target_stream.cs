@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
 
         private Establish context = () =>
         {
-            arguments = new(
+            arguments = new EventHandlerRegistrationArguments(
                 execution_context,
                 StreamId.EventLog.Value,
                 Array.Empty<ArtifactId>(),

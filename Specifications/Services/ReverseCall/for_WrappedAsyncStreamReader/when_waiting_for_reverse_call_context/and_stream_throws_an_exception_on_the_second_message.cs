@@ -20,10 +20,10 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
 
         Establish context = () =>
         {
-            message = new();
-            message_arguments = new();
-            message_arguments_context = new();
-            exception = new();
+            message = new a_message();
+            message_arguments = new object();
+            message_arguments_context = new ReverseCallArgumentsContext();
+            exception = new Exception();
 
             message_converter
                 .Setup(_ => _.GetConnectArguments(message))
@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
                 .Setup(_ => _.GetArgumentsContext(message_arguments))
                 .Returns(message_arguments_context);
 
-            wrapped_reader = new(
+            wrapped_reader = new WrappedAsyncStreamReader<a_message, a_message, object, object, object, object>(
                 request_id,
                 an_async_stream_reader<a_message>
                     .that()

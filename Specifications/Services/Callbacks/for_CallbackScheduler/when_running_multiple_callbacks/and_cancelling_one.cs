@@ -19,8 +19,8 @@ namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler.when_running
 
         Establish context = () =>
         {
-            not_cancelled_callback = new();
-            callback_to_be_cancelled = new();
+            not_cancelled_callback = new Mock<Action>();
+            callback_to_be_cancelled = new Mock<Action>();
             interval = TimeSpan.FromMilliseconds(1000);
             callCount = 3;
             not_cancelled_callback_disposable = scheduler.ScheduleCallback(not_cancelled_callback.Object, interval);

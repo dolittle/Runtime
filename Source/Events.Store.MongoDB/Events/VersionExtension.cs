@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="version"><see cref="Version" />.</param>
         /// <returns>Converted <see cref="Versioning.Version" />.</returns>
         public static Versioning.Version ToVersion(this Version version) =>
-            new Versioning.Version(version.Major, version.Minor, version.Patch, version.Build, version.PreRelease);
+            new(version.Major, version.Minor, version.Patch, version.Build, version.PreRelease);
 
         /// <summary>
         /// Converts <see cref="Versioning.Version" /> to <see cref="Version" />.
@@ -22,6 +22,6 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="version"><see cref="Versioning.Version" />.</param>
         /// <returns>Converted <see cref="Version" />.</returns>
         public static Version ToStoreRepresentation(this Versioning.Version version) =>
-            new Version(version.Major, version.Minor, version.Patch, version.Build, version.PreReleaseString);
+            new(version.Major, version.Minor, version.Patch, version.Build, version.PreReleaseString);
     }
 }

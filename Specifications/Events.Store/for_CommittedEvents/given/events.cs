@@ -13,8 +13,8 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedEvents.given
         public const bool is_public = false;
         public static ExecutionContext execution_context = execution_contexts.create();
 
-        public static Artifact event_a_artifact = new Artifact(Guid.Parse("d26cc060-9153-4988-8f07-3cf67f58bf47"), ArtifactGeneration.First);
-        public static Artifact event_b_artifact = new Artifact(Guid.Parse("cc657c0a-2c81-4338-85a8-507f05d4fc0e"), ArtifactGeneration.First);
+        public static Artifact event_a_artifact = new(Guid.Parse("d26cc060-9153-4988-8f07-3cf67f58bf47"), ArtifactGeneration.First);
+        public static Artifact event_b_artifact = new(Guid.Parse("cc657c0a-2c81-4338-85a8-507f05d4fc0e"), ArtifactGeneration.First);
 
         public static CommittedEvent event_one;
         public static CommittedEvent event_two;

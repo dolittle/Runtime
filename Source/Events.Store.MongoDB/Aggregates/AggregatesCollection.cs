@@ -35,7 +35,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
 
         void CreateCollectionsAndIndexesForAggregates()
         {
-            _logger.CreatingIndexesFor(CollectionName);
+            Log.CreatingIndexesFor(_logger, CollectionName);
             Aggregates.Indexes.CreateOne(new CreateIndexModel<AggregateRoot>(
                 Builders<AggregateRoot>.IndexKeys
                     .Ascending(_ => _.EventSource)

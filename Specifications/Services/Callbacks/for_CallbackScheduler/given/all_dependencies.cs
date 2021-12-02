@@ -16,8 +16,8 @@ namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler.given
         protected static CancellationTokenSource host_application_cts;
         Establish context = () =>
         {
-            host_application_cts = new();
-            host_application_lifetime = new();
+            host_application_cts = new CancellationTokenSource();
+            host_application_lifetime = new Mock<IHostApplicationLifetime>();
             host_application_lifetime.Setup(_ => _.ApplicationStopping).Returns(host_application_cts.Token);
             scheduler = new CallbackScheduler(
                 host_application_lifetime.Object,

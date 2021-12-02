@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_rejecting
     {
         static MyConnectResponse connect_response;
 
-        Establish context = () => connect_response = new();
+        Establish context = () => connect_response = new MyConnectResponse();
 
         Because of = () => dispatcher.Reject(connect_response, CancellationToken.None).GetAwaiter().GetResult();
 

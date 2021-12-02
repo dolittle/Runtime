@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter
 
         Establish context = () =>
         {
-            options = new();
+            options = new WriteOptions();
             original_writer
                 .SetupGet(_ => _.WriteOptions)
                 .Returns(options);

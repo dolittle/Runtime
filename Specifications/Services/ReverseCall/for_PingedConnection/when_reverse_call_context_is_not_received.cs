@@ -14,7 +14,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
 
         Establish context = () =>
         {
-            first_message = new();
+            first_message = new a_message();
 
             message_converter
                 .Setup(_ => _.GetConnectArguments(first_message))

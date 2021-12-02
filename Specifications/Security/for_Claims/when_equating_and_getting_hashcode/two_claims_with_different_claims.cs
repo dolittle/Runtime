@@ -21,13 +21,13 @@ namespace Dolittle.Runtime.Security.for_Claims.when_equating_and_getting_hashcod
         {
             var list_one = new List<Claim>
             {
-                new Claim("4", "4", "4"),
-                new Claim("1", "1", "1")
+                new("4", "4", "4"),
+                new("1", "1", "1")
             };
             var list_two = new List<Claim>
             {
-                new Claim("2", "2", "2"),
-                new Claim("3", "3", "3")
+                new("2", "2", "2"),
+                new("3", "3", "3")
             };
             first = new Claims(list_one.ToArray());
             second = new Claims(list_two.ToArray());

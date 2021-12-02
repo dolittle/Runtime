@@ -15,8 +15,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.wh
 
         Establish context = () =>
         {
-            message = new();
-            exception = new();
+            message = new a_message();
+            exception = new Exception();
 
             original_writer
                 .Setup(_ => _.WriteAsync(message))

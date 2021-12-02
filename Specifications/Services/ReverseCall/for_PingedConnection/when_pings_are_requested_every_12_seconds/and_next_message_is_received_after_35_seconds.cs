@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
+using Dolittle.Runtime.Services.ReverseCalls.given;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings_are_requested_every_12_seconds
@@ -13,7 +14,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
             scenario = Scenario.New(_ =>
             {
                 _.Receive.Message(first_message_with_12_second_pings).AtTime(20);
-                _.Receive.Message(new()).AtTime(55);
+                _.Receive.Message(new a_message()).AtTime(55);
             });
         };
 

@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSour
         public static CommittedEvent single(EventSourceId event_source) => single_with_artifact(event_source, artifacts.single());
 
         public static CommittedEvent single_with_artifact(EventSourceId event_source, Artifact artifact) =>
-            new CommittedEvent(
+            new(
                 0,
                 DateTimeOffset.Now,
                 event_source,

@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Security
     /// </summary>
     public class SecurityAction : ISecurityAction
     {
-        readonly List<ISecurityTarget> _targets = new List<ISecurityTarget>();
+        readonly List<ISecurityTarget> _targets = new();
 
         /// <inheritdoc/>
         public virtual string ActionType => string.Empty;

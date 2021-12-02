@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
         {
             event_handler = new Mock<MessageReceived>();
 
-            wrapped_reader = new(
+            wrapped_reader = new WrappedAsyncStreamReader<a_message, a_message, object, object, object, object>(
                 request_id,
                 an_async_stream_reader<a_message>
                     .that()

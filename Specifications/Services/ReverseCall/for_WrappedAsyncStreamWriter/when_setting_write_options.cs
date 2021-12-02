@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter
     {
         static WriteOptions options;
 
-        Establish context = () => options = new();
+        Establish context = () => options = new WriteOptions();
 
         Because of = () => wrapped_writer.WriteOptions = options;
 

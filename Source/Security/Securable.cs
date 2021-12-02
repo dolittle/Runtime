@@ -10,7 +10,7 @@ namespace Dolittle.Runtime.Security
     /// </summary>
     public class Securable : ISecurable
     {
-        readonly List<ISecurityActor> _actors = new List<ISecurityActor>();
+        readonly List<ISecurityActor> _actors = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Securable"/> class.

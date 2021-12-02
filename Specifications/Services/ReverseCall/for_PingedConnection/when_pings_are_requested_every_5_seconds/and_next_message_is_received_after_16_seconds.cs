@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.given;
+using Dolittle.Runtime.Services.ReverseCalls.given;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings_are_requested_every_5_seconds
@@ -14,7 +15,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
             scenario = Scenario.New(_ =>
             {
                 _.Receive.Message(first_message_with_5_second_pings).AtTime(12);
-                _.Receive.Message(new()).AtTime(28);
+                _.Receive.Message(new a_message()).AtTime(28);
             });
         };
 

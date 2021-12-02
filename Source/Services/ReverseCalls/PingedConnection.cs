@@ -72,14 +72,14 @@ namespace Dolittle.Runtime.Services.ReverseCalls
             _keepalive = keepalive;
             _pingScheduler = pingScheduler;
 
-            _wrappedReader = new(
+            _wrappedReader = new WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
                 requestId,
                 runtimeStream,
                 messageConverter,
                 metrics,
                 loggerFactory.CreateLogger<WrappedAsyncStreamReader<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>>(),
                 _cancellationTokenSource.Token);
-            _wrappedWriter = new(
+            _wrappedWriter = new WrappedAsyncStreamWriter<TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse>(
                 requestId,
                 clientStream,
                 messageConverter,

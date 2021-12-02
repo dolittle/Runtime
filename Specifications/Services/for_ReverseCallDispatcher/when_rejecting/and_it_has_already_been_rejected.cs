@@ -15,11 +15,11 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_rejecting
 
         Establish context = () =>
         {
-            connect_response = new();
+            connect_response = new MyConnectResponse();
             dispatcher.Reject(connect_response, CancellationToken.None).GetAwaiter().GetResult();
         };
 
-        Because of = () => exception = Catch.Exception(() => dispatcher.Reject(new(), CancellationToken.None).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => dispatcher.Reject(new MyConnectResponse(), CancellationToken.None).GetAwaiter().GetResult());
 
         It should_fail_because_dispatcher_has_already_been_rejected = () => exception.ShouldBeOfExactType<ReverseCallDispatcherAlreadyRejected>();
         It should_write_the_first_response = () => runtime_to_client_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyServerMessage>(_ => _.ConnectResponse == connect_response)), Moq.Times.Once);

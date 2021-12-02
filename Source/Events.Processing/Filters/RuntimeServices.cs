@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Processing.Filters
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_filtersService, Contracts.Filters.BindService(_filtersService), Contracts.Filters.Descriptor)
+                new(_filtersService, Contracts.Filters.BindService(_filtersService), Contracts.Filters.Descriptor)
             };
     }
 }

@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
         /// <param name="state">The <see cref="StreamProcessorState" />.</param>
         /// <returns>The converted <see cref="runtime.Partitioned.StreamProcessorState" />.</returns>
         public static runtime.StreamProcessorState ToRuntimeRepresentation(this SubscriptionState state) =>
-            new runtime.StreamProcessorState(
+            new(
                 state.Position,
                 state.FailureReason,
                 state.RetryTime,

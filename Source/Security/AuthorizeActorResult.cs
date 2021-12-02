@@ -12,8 +12,8 @@ namespace Dolittle.Runtime.Security
     /// </summary>
     public class AuthorizeActorResult
     {
-        readonly List<ISecurityRule> _brokenRules = new List<ISecurityRule>();
-        readonly List<RuleEvaluationError> _rulesThatCausedError = new List<RuleEvaluationError>();
+        readonly List<ISecurityRule> _brokenRules = new();
+        readonly List<RuleEvaluationError> _rulesThatCausedError = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthorizeActorResult"/> class.

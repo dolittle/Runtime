@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler
 
         Establish context = () =>
         {
-            callback = new();
+            callback = new Mock<Action>();
             interval = TimeSpan.FromMilliseconds(1000);
         };
 

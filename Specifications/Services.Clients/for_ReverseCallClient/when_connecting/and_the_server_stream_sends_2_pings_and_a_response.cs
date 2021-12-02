@@ -4,6 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using Dolittle.Services.Contracts;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connecting
@@ -23,7 +24,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connectin
             connect_response = new MyConnectResponse();
             var ping_message = new MyServerMessage
             {
-                Ping = new()
+                Ping = new Ping()
             };
             var connect_message = new MyServerMessage
             {
@@ -41,7 +42,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connectin
                 });
         };
 
-        Because of = () => result = reverse_call_client.Connect(new(), CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
 
         It should_return_true = () => result.ShouldBeTrue();
         It should_respond_with_a_pong_twice = () => client_to_server_stream.Verify(_ => _.WriteAsync(Moq.It.Is<MyClientMessage>(_ => _.Pong != default)), Moq.Times.Exactly(2));

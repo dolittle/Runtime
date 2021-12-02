@@ -22,7 +22,7 @@ namespace Dolittle.Runtime.Events.Store
         public static Contracts.CommittedEvent ToProtobuf(this CommittedEvent @event) =>
             @event is CommittedExternalEvent externalEvent ?
                 externalEvent.ToProtobuf()
-                : new()
+                : new Contracts.CommittedEvent
                 {
                     EventLogSequenceNumber = @event.EventLogSequenceNumber,
                     Occurred = Timestamp.FromDateTimeOffset(@event.Occurred),

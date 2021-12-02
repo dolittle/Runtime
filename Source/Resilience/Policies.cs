@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.Resilience
             if (_typedPolicies.ContainsKey(type)) return _typedPolicies[type] as IPolicyFor<T>;
             var policyFor = typeof(PolicyFor<>).MakeGenericType(type);
 
-            var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(IPolicy) }, new ParameterModifier[] { new ParameterModifier(1) });
+            var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(IPolicy) }, new ParameterModifier[] { new(1) });
             var policy = constructor.Invoke(new[] { Default }) as IPolicyFor<T>;
             _typedPolicies[type] = policy;
             return policy;
@@ -109,7 +109,7 @@ namespace Dolittle.Runtime.Resilience
             if (_typedAsyncPolicies.ContainsKey(type)) return _typedAsyncPolicies[type] as IAsyncPolicyFor<T>;
             var policyFor = typeof(AsyncPolicyFor<>).MakeGenericType(type);
 
-            var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(IAsyncPolicy) }, new ParameterModifier[] { new ParameterModifier(1) });
+            var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(IAsyncPolicy) }, new ParameterModifier[] { new(1) });
             var policy = constructor.Invoke(new[] { DefaultAsync }) as IAsyncPolicyFor<T>;
             _typedAsyncPolicies[type] = policy;
             return policy;
@@ -155,7 +155,7 @@ namespace Dolittle.Runtime.Resilience
             {
                 ThrowIfMultiplePolicyForTypeFound(_.Type);
                 var policyFor = typeof(PolicyFor<>).MakeGenericType(_.Type);
-                var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(Polly.ISyncPolicy) }, new ParameterModifier[] { new ParameterModifier(1) });
+                var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(Polly.ISyncPolicy) }, new ParameterModifier[] { new(1) });
 
                 _typedPolicies[_.Type] = constructor.Invoke(new[] { _.Define() }) as IPolicy;
             });
@@ -167,7 +167,7 @@ namespace Dolittle.Runtime.Resilience
             {
                 ThrowIfMultiplePolicyForTypeFound(_.Type);
                 var policyFor = typeof(AsyncPolicyFor<>).MakeGenericType(_.Type);
-                var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(Polly.IAsyncPolicy) }, new ParameterModifier[] { new ParameterModifier(1) });
+                var constructor = policyFor.GetConstructor(BindingFlags.Public | BindingFlags.Instance, null, new Type[] { typeof(Polly.IAsyncPolicy) }, new ParameterModifier[] { new(1) });
 
                 _typedAsyncPolicies[_.Type] = constructor.Invoke(new[] { _.Define() }) as IAsyncPolicy;
             });

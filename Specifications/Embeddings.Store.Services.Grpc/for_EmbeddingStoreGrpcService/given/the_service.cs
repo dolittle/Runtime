@@ -39,7 +39,7 @@ namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc.for_EmbeddingStoreGrpc
                 CultureInfo.InvariantCulture);
             cancellation_token = CancellationToken.None;
             a_current_state = new EmbeddingCurrentState(3, EmbeddingCurrentStateType.Persisted, "some state", "some key");
-            embeddings_service = new();
+            embeddings_service = new Mock<IEmbeddingsService>();
             call_context = TestServerCallContext.Create(
                 "method",
                 null,

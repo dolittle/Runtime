@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
 
         Establish context = () =>
         {
-            first_message_with_12_second_pings = new();
+            first_message_with_12_second_pings = new a_message();
             var first_message_connect_arguments = new object();
             var first_message_arguments_context = new ReverseCallArgumentsContext()
             {

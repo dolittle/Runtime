@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_rejecting
@@ -11,9 +12,9 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_rejecting
     {
         static Exception exception;
 
-        Establish context = () => dispatcher.Accept(new(), CancellationToken.None).GetAwaiter().GetResult();
+        Establish context = () => dispatcher.Accept(new MyConnectResponse(), CancellationToken.None).GetAwaiter().GetResult();
 
-        Because of = () => exception = Catch.Exception(() => dispatcher.Reject(new(), CancellationToken.None).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => dispatcher.Reject(new MyConnectResponse(), CancellationToken.None).GetAwaiter().GetResult());
 
         It should_fail_because_accept_has_already_been_called = () => exception.ShouldBeOfExactType<ReverseCallDispatcherAlreadyAccepted>();
     }

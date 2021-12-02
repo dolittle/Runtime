@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_embeddingStoreGrpcService, Contracts.EmbeddingStore.BindService(_embeddingStoreGrpcService), Contracts.EmbeddingStore.Descriptor)
+                new(_embeddingStoreGrpcService, Contracts.EmbeddingStore.BindService(_embeddingStoreGrpcService), Contracts.EmbeddingStore.Descriptor)
             };
     }
 }

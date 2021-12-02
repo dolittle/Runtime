@@ -93,7 +93,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
         }
 
         async Task<StreamFetcher<MongoDB.Events.Event>> CreateStreamFetcherForEventLog(ScopeId scopeId, CancellationToken cancellationToken) =>
-            new StreamFetcher<MongoDB.Events.Event>(
+            new(
                 StreamId.EventLog,
                 scopeId,
                 await _streams.GetEventLog(scopeId, cancellationToken).ConfigureAwait(false),

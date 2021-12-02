@@ -24,7 +24,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonCon
         Establish context = () =>
         {
             cts = new CancellationTokenSource();
-            event_queue = new();
+            event_queue = new AsyncProducerConsumerQueue<StreamEvent>();
         };
 
         protected static void SetupReverseCallClient(params ConsumerRequest[] requests)
@@ -54,7 +54,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer.Connections.for_EventHorizonCon
                 Version = Versioning.Version.NotSet.ToProtobuf(),
             };
             execution_context.Claims.AddRange(Security.Claims.Empty.ToProtobuf());
-            return new()
+            return new ConsumerRequest
             {
                 Event = new EventHorizonEvent
                 {

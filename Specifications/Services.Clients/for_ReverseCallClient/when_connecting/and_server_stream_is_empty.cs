@@ -20,7 +20,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connectin
             server_to_client_stream.Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>())).Returns(Task.FromResult(false));
         };
 
-        Because of = () => result = reverse_call_client.Connect(new(), CancellationToken.None).GetAwaiter().GetResult();
+        Because of = () => result = reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult();
 
         It should_return_false = () => result.ShouldBeFalse();
         It should_write_to_server_once = () => client_to_server_stream.Verify(_ => _.WriteAsync(Moq.It.IsAny<MyClientMessage>()), Moq.Times.Once);

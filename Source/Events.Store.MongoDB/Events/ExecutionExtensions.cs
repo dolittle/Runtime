@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="executionContext"><see cref="ExecutionContext" />.</param>
         /// <returns>Converted <see cref="Execution.ExecutionContext" />.</returns>
         public static Execution.ExecutionContext ToExecutionContext(this ExecutionContext executionContext) =>
-            new Execution.ExecutionContext(
+            new(
                 executionContext.Microservice,
                 executionContext.Tenant,
                 executionContext.Version.ToVersion(),
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="executionContext"><see cref="Execution.ExecutionContext" />.</param>
         /// <returns>Converted <see cref="ExecutionContext" />.</returns>
         public static ExecutionContext ToStoreRepresentation(this Execution.ExecutionContext executionContext) =>
-            new ExecutionContext(
+            new(
                 executionContext.CorrelationId,
                 executionContext.Microservice,
                 executionContext.Tenant,

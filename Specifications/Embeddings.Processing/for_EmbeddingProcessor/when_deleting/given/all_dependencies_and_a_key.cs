@@ -28,7 +28,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_del
         {
             key = "projection-key";
             current_state = new EmbeddingCurrentState(1, EmbeddingCurrentStateType.Persisted, "{}", key);
-            uncommitted_event = new("1f5e6a1b-f187-4060-8dc2-4a93fff4cd1d", new("24eca2e4-dd4b-45d0-8808-e6833d3680ca", 2), false, "content");
+            uncommitted_event = new UncommittedEvent("1f5e6a1b-f187-4060-8dc2-4a93fff4cd1d", new Artifact("24eca2e4-dd4b-45d0-8808-e6833d3680ca", 2), false, "content");
             aggregate_root_version = 1;
             committed_event = new CommittedAggregateEvent(
                 new Artifact("5512cda5-5e38-4654-ba86-3a7d917f3eb0", ArtifactGeneration.First),

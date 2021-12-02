@@ -111,7 +111,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         void CreateCollectionsAndIndexesForEventLog()
         {
-            _logger.CreatingIndexesFor(EventLogCollectionName);
+            Log.CreatingIndexesFor(_logger, EventLogCollectionName);
             DefaultEventLog.Indexes.CreateOne(new CreateIndexModel<MongoDB.Events.Event>(
                 Builders<MongoDB.Events.Event>.IndexKeys
                     .Ascending(_ => _.Metadata.EventSource)));
@@ -124,7 +124,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         void CreateCollectionsAndIndexesForStreamDefinitions()
         {
-            _logger.CreatingIndexesFor(StreamDefinitionCollectionName);
+            Log.CreatingIndexesFor(_logger, StreamDefinitionCollectionName);
             _streamDefinitions.Indexes.CreateOne(new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
                 Builders<MongoDB.Streams.StreamDefinition>.IndexKeys
                     .Ascending(_ => _.StreamId)));
@@ -132,7 +132,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         async Task CreateCollectionsIndexesForEventLogAsync(IMongoCollection<MongoDB.Events.Event> eventLog, CancellationToken cancellationToken)
         {
-            _logger.CreatingIndexesFor(eventLog.CollectionNamespace.CollectionName);
+            Log.CreatingIndexesFor(_logger, eventLog.CollectionNamespace.CollectionName);
             await eventLog.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Events.Event>(
                 Builders<MongoDB.Events.Event>.IndexKeys
@@ -149,7 +149,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         async Task CreateCollectionsAndIndexesForStreamEventsAsync(IMongoCollection<Events.StreamEvent> stream, CancellationToken cancellationToken)
         {
-            _logger.CreatingIndexesFor(stream.CollectionNamespace.CollectionName);
+            Log.CreatingIndexesFor(_logger, stream.CollectionNamespace.CollectionName);
             await stream.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Events.StreamEvent>(
                     Builders<MongoDB.Events.StreamEvent>.IndexKeys
@@ -179,7 +179,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
 
         async Task CreateCollectionsIndexesForStreamDefinitionsAsync(IMongoCollection<MongoDB.Streams.StreamDefinition> streamDefinitions, CancellationToken cancellationToken)
         {
-            _logger.CreatingIndexesFor(streamDefinitions.CollectionNamespace.CollectionName);
+            Log.CreatingIndexesFor(_logger, streamDefinitions.CollectionNamespace.CollectionName);
             await streamDefinitions.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Streams.StreamDefinition>(
                     Builders<MongoDB.Streams.StreamDefinition>.IndexKeys

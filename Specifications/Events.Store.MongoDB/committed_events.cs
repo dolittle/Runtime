@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
     public static class committed_events
     {
         public static CommittedAggregateEvent a_committed_aggregate_event(EventLogSequenceNumber event_log_sequence_number, ArtifactId aggregate, EventSourceId event_source, AggregateRootVersion aggregate_root_version) =>
-            new CommittedAggregateEvent(
+            new(
                 new Artifact(aggregate, 1266306380),
                 aggregate_root_version,
                 event_log_sequence_number,
@@ -21,7 +21,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 events.some_event_content);
 
         public static CommittedEvent a_committed_event(EventLogSequenceNumber event_log_sequence_number) =>
-            new CommittedEvent(
+            new(
                 event_log_sequence_number,
                 new DateTimeOffset(2232571935, TimeSpan.Zero),
                 "event source",
@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
                 events.some_event_content);
 
         public static CommittedExternalEvent a_committed_external_event(EventLogSequenceNumber event_log_sequence_number, EventLogSequenceNumber external_event_log_sequence_number) =>
-            new CommittedExternalEvent(
+            new(
                 event_log_sequence_number,
                 new DateTimeOffset(1242521935, TimeSpan.Zero),
                 "event source 4f93-8e18-a2aadf070175",

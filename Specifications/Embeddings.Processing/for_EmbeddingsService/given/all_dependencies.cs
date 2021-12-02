@@ -95,11 +95,11 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingsService.given
             embedding_processor = new Mock<IEmbeddingProcessor>();
             protocol = new EmbeddingsProtocol();
             embedding_request_factory = new EmbeddingRequestFactory();
-            embedding_definition_comparer = new();
+            embedding_definition_comparer = new Mock<ICompareEmbeddingDefinitionsForAllTenants>();
             embedding_definition_comparer
                 .Setup(_ => _.DiffersFromPersisted(Moq.It.IsAny<EmbeddingDefinition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult<IDictionary<TenantId, EmbeddingDefinitionComparisonResult>>(new Dictionary<TenantId, EmbeddingDefinitionComparisonResult>()));
-            embedding_definition_persister = new();
+            embedding_definition_persister = new Mock<IPersistEmbeddingDefinitionForAllTenants>();
             embedding_definition_persister
                 .Setup(_ => _.TryPersist(Moq.It.IsAny<EmbeddingDefinition>(), Moq.It.IsAny<CancellationToken>()))
                 .Returns(Task.FromResult(Try.Succeeded()));

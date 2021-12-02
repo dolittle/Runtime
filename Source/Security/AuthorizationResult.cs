@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Security
     /// </summary>
     public class AuthorizationResult
     {
-        readonly List<AuthorizeDescriptorResult> _authorizationFailures = new List<AuthorizeDescriptorResult>();
+        readonly List<AuthorizeDescriptorResult> _authorizationFailures = new();
 
         /// <summary>
         /// Gets any <see cref="AuthorizeDescriptorResult"> results</see> that were not authorized.

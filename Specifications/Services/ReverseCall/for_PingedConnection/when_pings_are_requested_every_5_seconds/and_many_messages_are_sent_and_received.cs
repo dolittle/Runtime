@@ -14,17 +14,17 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection.when_pings
 
         Establish context = () =>
         {
-            first_message_to_send = new();
-            second_message_to_send = new();
+            first_message_to_send = new a_message();
+            second_message_to_send = new a_message();
 
             scenario = Scenario.New(_ =>
             {
                 _.Receive.Message(first_message_with_5_second_pings).AtTime(5);
-                _.Receive.Message(new()).AtTime(10);
+                _.Receive.Message(new a_message()).AtTime(10);
                 _.Send.Message(first_message_to_send).AtTime(12);
-                _.Receive.Message(new()).AtTime(14);
+                _.Receive.Message(new a_message()).AtTime(14);
                 _.Send.Message(second_message_to_send).AtTime(20);
-                _.Receive.Message(new()).AtTime(22);
+                _.Receive.Message(new a_message()).AtTime(22);
             });
         };
 

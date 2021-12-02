@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer
         public ConsumerSubscriptionArguments ConvertConnectArguments(ConsumerSubscriptionRequest arguments)
         {
             var executionContext = arguments.CallContext.ExecutionContext.ToExecutionContext();
-            return new(
+            return new ConsumerSubscriptionArguments(
                 executionContext,
                 executionContext.Microservice,
                 executionContext.Tenant,

@@ -21,13 +21,13 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.wh
 
         Establish context = () =>
         {
-            first_message = new();
-            second_message = new();
-            third_message = new();
+            first_message = new a_message();
+            second_message = new a_message();
+            third_message = new a_message();
 
-            first_message_write = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            second_message_write = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            third_message_write = new(TaskCreationOptions.RunContinuationsAsynchronously);
+            first_message_write = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            second_message_write = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            third_message_write = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 
             call_order = new int[3];
             var current_call = 1;

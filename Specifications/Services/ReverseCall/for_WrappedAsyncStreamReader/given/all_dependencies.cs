@@ -13,8 +13,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.gi
 
         Establish context = () =>
         {
-            reverse_call_context_received = new();
-            reverse_call_context_not_received_in_first_message = new();
+            reverse_call_context_received = new Mock<ReverseCallContextReceived>();
+            reverse_call_context_not_received_in_first_message = new Mock<ReverseCallContextNotReceivedInFirstMessage>();
         };
     }
 }

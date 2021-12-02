@@ -19,7 +19,7 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.given
         public void ReceiveMessage(MyClientMessage messageToReceive)
         {
             var pendingRead = _nextPendingRead;
-            _nextPendingRead = new();
+            _nextPendingRead = new TaskCompletionSource<bool>();
             Current = messageToReceive;
             pendingRead.SetResult(true);
         }

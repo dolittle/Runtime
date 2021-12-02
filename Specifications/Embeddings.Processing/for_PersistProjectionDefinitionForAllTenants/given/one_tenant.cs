@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Embeddings.Processing.for_PersistProjectionDefinition
         Establish context = () =>
         {
             tenant = "2471590e-caa2-4413-9abd-7f0478ad4191";
-            definitions = new();
+            definitions = new Mock<IEmbeddingDefinitions>();
             persister = WithTenants(_ => _.ForTenant(tenant, definitions));
         };
     }

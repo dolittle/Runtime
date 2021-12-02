@@ -30,7 +30,7 @@ namespace Dolittle.Runtime.Events.Store.Services.Grpc
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_eventStoreGrpcService, Contracts.EventStore.BindService(_eventStoreGrpcService), Contracts.EventStore.Descriptor)
+                new(_eventStoreGrpcService, Contracts.EventStore.BindService(_eventStoreGrpcService), Contracts.EventStore.Descriptor)
             };
     }
 }

@@ -28,10 +28,10 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given
 
         Establish context = () =>
         {
-            execution_context_manager = new();
-            server_to_client_stream = new();
-            client_to_server_stream = new();
-            ping_interval = new(0, 0, 0, 0, 500);
+            execution_context_manager = new Mock<IExecutionContextManager>();
+            server_to_client_stream = new Mock<IAsyncStreamReader<MyServerMessage>>();
+            client_to_server_stream = new Mock<IClientStreamWriter<MyClientMessage>>();
+            ping_interval = new TimeSpan(0, 0, 0, 0, 500);
 
             reverse_call_client = new ReverseCallClient(
                 new MyProtocol(),

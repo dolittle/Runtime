@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="claim"><see cref="Claim" />.</param>
         /// <returns>Converted <see cref="Security.Claim" />.</returns>
         public static Security.Claim ToClaim(this Claim claim) =>
-            new Security.Claim(claim.Name, claim.Value, claim.ValueType);
+            new(claim.Name, claim.Value, claim.ValueType);
 
         /// <summary>
         /// Converts <see cref="IEnumerable{T}" /> of <see cref="Claim" /> to <see cref="Security.Claims" />.
@@ -25,7 +25,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="claims">The <see cref="IEnumerable{T}" /> of <see cref="Claim" />.</param>
         /// <returns>Converted <see cref="Security.Claims" />.</returns>
         public static Security.Claims ToClaims(this IEnumerable<Claim> claims) =>
-            new Security.Claims(claims.Select(_ => _.ToClaim()));
+            new(claims.Select(_ => _.ToClaim()));
 
         /// <summary>
         /// Converts <see cref="Security.Claim" /> to <see cref="Claim" />.
@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
         /// <param name="claim"><see cref="Security.Claim" />.</param>
         /// <returns>Converted <see cref="Claim" />.</returns>
         public static Claim ToStoreRepresentation(this Security.Claim claim) =>
-            new Claim(claim.Name, claim.Value, claim.ValueType);
+            new(claim.Name, claim.Value, claim.ValueType);
 
         /// <summary>
         /// Converts <see cref="Security.Claims" /> to <see cref="IEnumerable{T}" /> of <see cref="Claim" />.

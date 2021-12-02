@@ -27,7 +27,7 @@ namespace Dolittle.Runtime.Heads
         }
 
         /// <inheritdoc/>
-        public ObservableCollection<Head> All { get; } = new ObservableCollection<Head>();
+        public ObservableCollection<Head> All { get; } = new();
 
         /// <inheritdoc/>
         public void Connect(Head head)

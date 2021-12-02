@@ -13,10 +13,10 @@ namespace Dolittle.Runtime.Specifications.given
         protected static string[] colors;
         protected static string[] shapes;
 
-        protected static ColoredShape red_square = new ColoredShape() { Color = "Red", Shape = "Square" };
-        protected static ColoredShape red_circle = new ColoredShape() { Color = "Red", Shape = "Circle" };
-        protected static ColoredShape green_circle = new ColoredShape() { Color = "Green", Shape = "Circle" };
-        protected static ColoredShape green_square = new ColoredShape() { Color = "Green", Shape = "Square" };
+        protected static ColoredShape red_square = new() { Color = "Red", Shape = "Square" };
+        protected static ColoredShape red_circle = new() { Color = "Red", Shape = "Circle" };
+        protected static ColoredShape green_circle = new() { Color = "Green", Shape = "Circle" };
+        protected static ColoredShape green_square = new() { Color = "Green", Shape = "Square" };
 
         Establish context = () =>
             {

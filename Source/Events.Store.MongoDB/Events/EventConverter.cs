@@ -1,7 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Events.Store.Streams;
 using mongoDB = Dolittle.Runtime.Events.Store.MongoDB.Events;
@@ -27,7 +26,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 
         /// <inheritdoc/>
         public mongoDB.Event ToEventLogEvent(CommittedExternalEvent committedEvent) =>
-            new mongoDB.Event(
+            new(
                 committedEvent.EventLogSequenceNumber,
                 committedEvent.ExecutionContext.ToStoreRepresentation(),
                 committedEvent.GetEventMetadata(),
@@ -37,7 +36,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 
         /// <inheritdoc/>
         public mongoDB.StreamEvent ToStoreStreamEvent(CommittedEvent committedEvent, StreamPosition streamPosition, PartitionId partition) =>
-            new mongoDB.StreamEvent(
+            new(
                 streamPosition,
                 partition,
                 committedEvent.ExecutionContext.ToStoreRepresentation(),
@@ -48,7 +47,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 
         /// <inheritdoc/>
         public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.Event @event) =>
-            new runtime.Streams.StreamEvent(
+            new(
                 ToRuntimeCommittedEvent(@event),
                 @event.EventLogSequenceNumber,
                 StreamId.EventLog,
@@ -57,7 +56,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
 
         /// <inheritdoc/>
         public runtime.Streams.StreamEvent ToRuntimeStreamEvent(mongoDB.StreamEvent @event, StreamId stream, bool partitioned) =>
-            new runtime.Streams.StreamEvent(
+            new(
                 ToRuntimeCommittedEvent(@event),
                 @event.StreamPosition,
                 stream,
@@ -81,7 +80,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                         _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.Event @event) =>
-            new runtime.CommittedAggregateEvent(
+            new(
                 new Artifact(
                     @event.Aggregate.TypeId,
                     @event.Aggregate.TypeGeneration),
@@ -97,7 +96,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedExternalEvent ToRuntimeCommittedExternalEvent(mongoDB.Event @event) =>
-            new runtime.CommittedExternalEvent(
+            new(
                 @event.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,
@@ -128,7 +127,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                         _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedAggregateEvent ToRuntimeCommittedAggregateEvent(mongoDB.StreamEvent @event) =>
-            new runtime.CommittedAggregateEvent(
+            new(
                 new Artifact(@event.Aggregate.TypeId, @event.Aggregate.TypeGeneration),
                 @event.Aggregate.Version,
                 @event.Metadata.EventLogSequenceNumber,
@@ -142,7 +141,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events
                 _contentConverter.ToJson(@event.Content));
 
         runtime.CommittedExternalEvent ToRuntimeCommittedExternalEvent(mongoDB.StreamEvent @event) =>
-            new runtime.CommittedExternalEvent(
+            new(
                 @event.Metadata.EventLogSequenceNumber,
                 @event.Metadata.Occurred,
                 @event.Metadata.EventSource,

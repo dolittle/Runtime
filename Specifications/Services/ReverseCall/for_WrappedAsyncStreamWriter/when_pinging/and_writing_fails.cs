@@ -16,7 +16,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.wh
 
         Establish context = () =>
         {
-            exception = new();
+            exception = new Exception();
 
             message_converter
                 .Setup(_ => _.SetPing(Moq.It.IsAny<a_message>(), Moq.It.IsAny<Ping>()))

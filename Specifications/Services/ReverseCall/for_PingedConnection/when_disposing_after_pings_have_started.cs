@@ -25,8 +25,8 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
 
         Establish context = () =>
         {
-            message_with_call_arguments = new();
-            call_arguments = new();
+            message_with_call_arguments = new a_message();
+            call_arguments = new object();
             message_converter
                 .Setup(_ => _.GetConnectArguments(message_with_call_arguments))
                 .Returns(call_arguments);
@@ -37,13 +37,13 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
                     PingInterval = Duration.FromTimeSpan(TimeSpan.FromSeconds(20)),
                 });
 
-            callback_scheduler = new();
-            scheduled_callback = new();
+            callback_scheduler = new Mock<ICallbackScheduler>();
+            scheduled_callback = new Mock<IDisposable>();
             callback_scheduler
                 .Setup(_ => _.ScheduleCallback(Moq.It.IsAny<Action>(), Moq.It.IsAny<TimeSpan>()))
                 .Returns(scheduled_callback.Object);
 
-            connection = new(
+            connection = new PingedConnection<a_message, a_message, object, object, object, object>(
                 request_id,
                 an_async_stream_reader<a_message>
                     .that()

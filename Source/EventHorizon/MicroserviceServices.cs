@@ -29,7 +29,7 @@ namespace Dolittle.Runtime.EventHorizon
         public IEnumerable<Service> BindServices() =>
             new Service[]
             {
-                new Service(_consumerService, Contracts.Consumer.BindService(_consumerService), Contracts.Consumer.Descriptor)
+                new(_consumerService, Contracts.Consumer.BindService(_consumerService), Contracts.Consumer.Descriptor)
             };
     }
 }

@@ -59,17 +59,17 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
 
         private Establish context = () =>
         {
-            stream_processors = new(MockBehavior.Strict);
-            filter_validation = new(MockBehavior.Strict);
-            stream_definitions = new(MockBehavior.Strict);
-            reverse_call_dispatcher = new();
+            stream_processors = new Mock<IStreamProcessors>(MockBehavior.Strict);
+            filter_validation = new Mock<IValidateFilterForAllTenants>(MockBehavior.Strict);
+            stream_definitions = new Mock<IStreamDefinitions>(MockBehavior.Strict);
+            reverse_call_dispatcher = new Mock<ReverseCallDispatcherType>();
             reverse_call_dispatcher.Setup(
                 _ => _.Reject(IsAny<EventHandlerRegistrationResponse>(), IsAny<CancellationToken>())
             ).Callback((EventHandlerRegistrationResponse e, CancellationToken ct) => failure = e.Failure);
 
-            stream_writer = new(MockBehavior.Strict);
+            stream_writer = new Mock<IWriteEventsToStreams>(MockBehavior.Strict);
             logger_factory = new NullLoggerFactory();
-            execution_context = new(
+            execution_context = new ExecutionContext(
                 microservice,
                 tenant,
                 version,
@@ -78,7 +78,7 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.give
                 claims,
                 culture_info);
 
-            arguments = new(
+            arguments = new EventHandlerRegistrationArguments(
                 execution_context,
                 event_handler_id,
                 Array.Empty<ArtifactId>(),

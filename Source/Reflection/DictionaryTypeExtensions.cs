@@ -32,7 +32,7 @@ namespace Dolittle.Runtime.Reflection
             var interfaces = new List<Type>();
             interfaces.AddRange(_nonGenericDictionaryInterfaces);
             interfaces.AddRange(_genericDictionaryInterfaces);
-            _dictionaryInterfaces = new(interfaces);
+            _dictionaryInterfaces = new HashSet<Type>(interfaces);
         }
 
         /// <summary>

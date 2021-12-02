@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections
 
         /// <inheritdoc/>
         public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, CancellationToken cancellationToken)
-            => Process(state, @event, partitionId, new(), cancellationToken);
+            => Process(state, @event, partitionId, new ProjectionRequest(), cancellationToken);
 
         /// <inheritdoc/>
         public Task<IProjectionResult> Project(ProjectionCurrentState state, CommittedEvent @event, PartitionId partitionId, string failureReason, uint retryCount, CancellationToken cancellationToken)

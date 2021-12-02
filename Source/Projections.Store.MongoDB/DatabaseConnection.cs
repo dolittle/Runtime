@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
             var config = configuration.Instance;
             var settings = new MongoClientSettings
             {
-                Servers = config.Servers.Select(_ => MongoServerAddress.Parse(_)),
+                Servers = config.Servers.Select(MongoServerAddress.Parse),
                 GuidRepresentation = GuidRepresentation.Standard,
                 MaxConnectionPoolSize = config.MaxConnectionPoolSize,
             };
@@ -56,8 +56,8 @@ namespace Dolittle.Runtime.Projections.Store.MongoDB
         /// Sets our custom <see cref="IDiscriminatorConvention"/>'s.
         /// </summary>
         /// <remarks>
-        /// DiscriminatorConvetions need to be registered before everything else is done with MongoDB, otherwise the classes
-        /// will get assiged a BsonClassMapSerializer implicitly. We can also only register them once, multiple registrations
+        /// DiscriminatorConventions need to be registered before everything else is done with MongoDB, otherwise the classes
+        /// will get assigned a BsonClassMapSerializer implicitly. We can also only register them once, multiple registrations
         /// result in errors.
         /// https://stackoverflow.com/a/30292486/5806412 .
         /// </remarks>

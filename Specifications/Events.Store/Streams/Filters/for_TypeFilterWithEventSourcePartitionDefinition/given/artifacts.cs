@@ -8,6 +8,6 @@ namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_TypeFilterWithEventS
 {
     public static class artifacts
     {
-        public static Artifact single() => new Artifact(Guid.NewGuid(), 1);
+        public static Artifact single() => new(Guid.NewGuid(), 1);
     }
 }

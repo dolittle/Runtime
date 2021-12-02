@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using Dolittle.Services.Contracts;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
@@ -26,7 +27,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
 
         Establish context = () =>
         {
-            cts = new();
+            cts = new CancellationTokenSource();
             execution_context = given.execution_contexts.create();
             execution_context_manager
                 .SetupGet(_ => _.Current)
@@ -41,9 +42,9 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
                 .Returns(new MyServerMessage { ConnectResponse = new MyConnectResponse() });
 
             call_id = Guid.Parse("6e53a922-7207-49f7-b5fd-e8ec159fa4db");
-            request = new()
+            request = new MyRequest
             {
-                Context = new()
+                Context = new ReverseCallRequestContext
                 {
                     ExecutionContext = execution_context.ToProtobuf(),
                     CallId = call_id.ToProtobuf()
@@ -54,7 +55,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
                 Request = request
             };
 
-            response = new();
+            response = new MyResponse();
 
             callback = (request, token) =>
             {

@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using Dolittle.Services.Contracts;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;
@@ -18,6 +19,7 @@ using ReverseCallClient = Dolittle.Runtime.Services.Clients.ReverseCallClient<
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyConnectResponse,
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyRequest,
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyResponse>;
+using Status = Grpc.Core.Status;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established
 {
@@ -35,7 +37,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
 
         Establish context = () =>
         {
-            cts = new();
+            cts = new CancellationTokenSource();
             execution_context = given.execution_contexts.create();
             execution_context_manager
                 .SetupGet(_ => _.Current)
@@ -50,9 +52,9 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
                 .Returns(new MyServerMessage { ConnectResponse = new MyConnectResponse() });
 
             call_id = Guid.Parse("6e53a922-7207-49f7-b5fd-e8ec159fa4db");
-            request = new()
+            request = new MyRequest
             {
-                Context = new()
+                Context = new ReverseCallRequestContext
                 {
                     ExecutionContext = execution_context.ToProtobuf(),
                     CallId = call_id.ToProtobuf()
@@ -63,7 +65,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
                 Request = request
             };
 
-            response = new();
+            response = new MyResponse();
 
             callback = (request, token) =>
             {
@@ -94,7 +96,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
             server_to_client_stream
                 .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
                 // wait for the keepalive to timeout, then throw the exception mimicking a cancelled connection
-                .ThrowsAsync(new RpcException(new(StatusCode.Cancelled, "")), ping_interval.Multiply(ReverseCallClient.PingThreshold + 1));
+                .ThrowsAsync(new RpcException(new Status(StatusCode.Cancelled, "")), ping_interval.Multiply(ReverseCallClient.PingThreshold + 1));
         };
 
         static Exception exception;

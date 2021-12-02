@@ -16,13 +16,13 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamReader.wh
 
         Establish context = () =>
         {
-            first_message = new();
+            first_message = new a_message();
 
             message_converter
                 .Setup(_ => _.GetConnectArguments(first_message))
                 .Returns(null);
 
-            wrapped_reader = new(
+            wrapped_reader = new WrappedAsyncStreamReader<a_message, a_message, object, object, object, object>(
                 request_id,
                 an_async_stream_reader<a_message>
                     .that()

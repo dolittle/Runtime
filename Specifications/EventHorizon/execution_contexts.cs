@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.EventHorizon
     public static class execution_contexts
     {
         public static ExecutionContext create() =>
-            new ExecutionContext(
+            new(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Versioning.Version.NotSet,
@@ -23,7 +23,7 @@ namespace Dolittle.Runtime.EventHorizon
                 CultureInfo.InvariantCulture);
 
         public static ExecutionContext create_with_claims(Claims claims) =>
-            new ExecutionContext(
+            new(
                 Guid.NewGuid(),
                 Guid.NewGuid(),
                 Versioning.Version.NotSet,

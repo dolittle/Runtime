@@ -42,7 +42,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams.EventHorizon
             IMongoCollection<MongoDB.Processing.Streams.EventHorizon.SubscriptionState> subscriptionStates,
             CancellationToken cancellationToken)
         {
-            _logger.CreatingIndexesFor(subscriptionStates.CollectionNamespace.CollectionName);
+            Log.CreatingIndexesFor(_logger, subscriptionStates.CollectionNamespace.CollectionName);
             await subscriptionStates.Indexes.CreateOneAsync(
                 new CreateIndexModel<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>(
                     Builders<MongoDB.Processing.Streams.EventHorizon.SubscriptionState>.IndexKeys

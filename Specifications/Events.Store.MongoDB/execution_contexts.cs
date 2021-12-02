@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.Events.Store.MongoDB
         public static ExecutionContext create_store() => create().ToStoreRepresentation();
 
         public static Execution.ExecutionContext create() =>
-            new Execution.ExecutionContext(
+            new(
                 Guid.Parse("1cec3f3c-1752-4210-bcd0-5add96e7172d"),
                 Guid.Parse("86e7a8fc-b0e9-4709-bf59-10b33005497e"),
                 new Versioning.Version(873112588, 241520971, 367002811, 1885758720, "something very random"),

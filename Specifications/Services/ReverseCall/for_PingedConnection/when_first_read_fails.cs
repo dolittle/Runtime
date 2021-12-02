@@ -15,7 +15,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_PingedConnection
 
         Establish context = () =>
         {
-            exception = new();
+            exception = new Exception();
 
             scenario = Scenario.New(_ =>
             {

@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Security
     /// </summary>
     public class SecurityTarget : ISecurityTarget
     {
-        readonly List<ISecurable> _securables = new List<ISecurable>();
+        readonly List<ISecurable> _securables = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SecurityTarget"/> class.

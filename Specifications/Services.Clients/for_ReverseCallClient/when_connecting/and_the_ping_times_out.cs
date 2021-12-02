@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;
@@ -15,6 +16,7 @@ using ReverseCallClient = Dolittle.Runtime.Services.Clients.ReverseCallClient<
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyConnectResponse,
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyRequest,
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyResponse>;
+using Status = Grpc.Core.Status;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connecting
 {
@@ -30,10 +32,10 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_connectin
             server_to_client_stream
                 .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
                 // wait for the keepalive to timeout, then throw the exception mimicking a cancelled connection
-                .ThrowsAsync(new RpcException(new(StatusCode.Cancelled, "")), ping_interval.Multiply(ReverseCallClient.PingThreshold + 1));
+                .ThrowsAsync(new RpcException(new Status(StatusCode.Cancelled, "")), ping_interval.Multiply(ReverseCallClient.PingThreshold + 1));
         };
 
-        Because of = () => exception = Catch.Exception(() => reverse_call_client.Connect(new(), CancellationToken.None).GetAwaiter().GetResult());
+        Because of = () => exception = Catch.Exception(() => reverse_call_client.Connect(new MyConnectArguments(), CancellationToken.None).GetAwaiter().GetResult());
 
         It should_throw_an_exception = () =>
             exception.ShouldBeOfExactType<PingTimedOut>();

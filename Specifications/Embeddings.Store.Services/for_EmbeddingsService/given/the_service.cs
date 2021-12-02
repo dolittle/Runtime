@@ -26,8 +26,8 @@ namespace Dolittle.Runtime.Embeddings.Store.Services.for_EmbeddingsService.given
 
         Establish context = () =>
         {
-            execution_context_manager = new();
-            embedding_store = new();
+            execution_context_manager = new Mock<IExecutionContextManager>();
+            embedding_store = new Mock<IEmbeddingStore>();
             get_embedding_store = () => embedding_store.Object;
             embedding = "d6f99bc8-2430-4131-95d5-ea1540b260c3";
             key = "some key";

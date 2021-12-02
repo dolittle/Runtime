@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.gi
         {
             original_writer = new Mock<IAsyncStreamWriter<a_message>>();
 
-            wrapped_writer = new(
+            wrapped_writer = new WrappedAsyncStreamWriter<a_message, a_message, object, object, object, object>(
                 request_id,
                 original_writer.Object,
                 message_converter.Object,

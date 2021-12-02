@@ -9,7 +9,7 @@ namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
 {
     public class when_creating_with_a_wrong_artifact : given.events_and_an_artifact
     {
-        static Artifact wrong_aggregate_artifact = new Artifact(Guid.Parse("29ca4005-a03b-4461-a93b-10260ca374ae"), ArtifactGeneration.First);
+        static Artifact wrong_aggregate_artifact = new(Guid.Parse("29ca4005-a03b-4461-a93b-10260ca374ae"), ArtifactGeneration.First);
         static CommittedAggregateEvent wrong_aggregate_event;
         static CommittedAggregateEvents events;
         static Exception exception;

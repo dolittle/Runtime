@@ -18,12 +18,12 @@ namespace Dolittle.Runtime.Security.for_ClaimsPrincipalExtensions.given
         {
             dotnet_claims = new List<System.Security.Claims.Claim>
             {
-                new System.Security.Claims.Claim(ClaimTypes.Name, "Michael"),
-                new System.Security.Claims.Claim(ClaimTypes.Country, "Norway"),
-                new System.Security.Claims.Claim(ClaimTypes.Gender, "M"),
-                new System.Security.Claims.Claim(ClaimTypes.Surname, "Smith"),
-                new System.Security.Claims.Claim(ClaimTypes.Email, "michael@dolittle.com"),
-                new System.Security.Claims.Claim(ClaimTypes.Role, "Coffee Maker")
+                new(ClaimTypes.Name, "Michael"),
+                new(ClaimTypes.Country, "Norway"),
+                new(ClaimTypes.Gender, "M"),
+                new(ClaimTypes.Surname, "Smith"),
+                new(ClaimTypes.Email, "michael@dolittle.com"),
+                new(ClaimTypes.Role, "Coffee Maker")
             };
 
             dolittle_claims = dotnet_claims.Select(Claim.FromDotnetClaim);

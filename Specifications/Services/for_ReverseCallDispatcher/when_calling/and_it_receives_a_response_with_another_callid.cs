@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
+using Dolittle.Services.Contracts;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
@@ -16,8 +17,8 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
 
         Establish context = () =>
         {
-            request = new();
-            response_from_client = new();
+            request = new MyRequest();
+            response_from_client = new MyResponse();
 
             var stream_reader = new MockStreamReader();
 
@@ -34,13 +35,14 @@ namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
                         return;
                     }
 
-                    response_from_client.Context = new() { CallId = ReverseCallId.New().ToProtobuf() };
+                    response_from_client.Context = new ReverseCallResponseContext
+                        { CallId = ReverseCallId.New().ToProtobuf() };
 
                     stream_reader.ReceiveMessage(new MyClientMessage() { Response = response_from_client });
                 })
                 .Returns(Task.FromResult(true));
 
-            Task.Run(() => dispatcher.Accept(new(), CancellationToken.None));
+            Task.Run(() => dispatcher.Accept(new MyConnectResponse(), CancellationToken.None));
         };
 
         static Task<MyResponse> response;

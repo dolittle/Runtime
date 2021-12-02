@@ -256,11 +256,11 @@ namespace Dolittle.Runtime.Events.Processing.EventHandlers
             if (exception is StreamProcessorAlreadyRegistered)
             {
                 _logger.EventHandlerAlreadyRegistered(EventProcessor);
-                return new(
+                return new Failure(
                     EventHandlersFailures.FailedToRegisterEventHandler,
                     $"Failed to register Event Handler: {EventProcessor.Value}. Filter already registered");
             }
-            return new(
+            return new Failure(
                     EventHandlersFailures.FailedToRegisterEventHandler,
                     $"Failed to register Event Handler: {EventProcessor.Value}. An error occurred. {exception.Message}");
         }

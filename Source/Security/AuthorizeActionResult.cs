@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Security
     /// </summary>
     public class AuthorizeActionResult
     {
-        readonly List<AuthorizeTargetResult> _authorizationFailures = new List<AuthorizeTargetResult>();
+        readonly List<AuthorizeTargetResult> _authorizationFailures = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthorizeActionResult"/> class.
