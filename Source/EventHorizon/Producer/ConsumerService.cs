@@ -31,7 +31,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 /// Represents the implementation of <see cref="ConsumerBase"/>.
 /// </summary>
 [Singleton]
-public class ConsumerService : ConsumerBase, IDisposable
+public partial class ConsumerService : ConsumerBase, IDisposable
 {
     readonly Microservice _thisMicroservice;
     readonly IExecutionContextManager _executionContextManager;
@@ -117,7 +117,8 @@ public class ConsumerService : ConsumerBase, IDisposable
         _executionContextManager.CurrentFor(arguments.ExecutionContext);
 
         _metrics.IncrementTotalIncomingSubscriptions();
-        _logger.IncomingEventHorizonSubscription(
+        Log.IncomingEventHorizonSubscription(
+            _logger,
             arguments.ConsumerMicroservice,
             arguments.ConsumerTenant,
             arguments.ProducerTenant,
@@ -134,7 +135,8 @@ public class ConsumerService : ConsumerBase, IDisposable
         }
 
         _metrics.IncrementTotalAcceptedSubscriptions();
-        _logger.SuccessfullySubscribed(
+        Log.SuccessfullySubscribed(
+            _logger,
             arguments.ConsumerMicroservice,
             arguments.ConsumerTenant,
             arguments.ProducerTenant,
@@ -162,7 +164,8 @@ public class ConsumerService : ConsumerBase, IDisposable
             if (!jointCts.IsCancellationRequested) jointCts.Cancel();
             if (TryGetException(tasks, out var ex))
             {
-                _logger.ErrorOccurredInEventHorizon(
+                Log.ErrorOccurredInEventHorizon(
+                    _logger,
                     ex,
                     arguments.ConsumerMicroservice,
                     arguments.ConsumerTenant,
@@ -176,7 +179,8 @@ public class ConsumerService : ConsumerBase, IDisposable
             await Task.WhenAll(tasks).ConfigureAwait(false);
             if (!context.CancellationToken.IsCancellationRequested)
             {
-                _logger.ErrorOccurredInEventHorizon(
+                Log.ErrorOccurredInEventHorizon(
+                    _logger,
                     ex,
                     arguments.ConsumerMicroservice,
                     arguments.ConsumerTenant,
@@ -185,7 +189,8 @@ public class ConsumerService : ConsumerBase, IDisposable
                     arguments.PublicStream);
             }
 
-            _logger.EventHorizonStopped(
+            Log.EventHorizonStopped(
+                _logger,
                 arguments.ConsumerMicroservice,
                 arguments.ConsumerTenant,
                 arguments.ProducerTenant,
@@ -197,7 +202,8 @@ public class ConsumerService : ConsumerBase, IDisposable
             if (!jointCts.IsCancellationRequested) jointCts.Cancel();
             if (!context.CancellationToken.IsCancellationRequested)
             {
-                _logger.ErrorOccurredInEventHorizon(
+                Log.ErrorOccurredInEventHorizon(
+                    _logger,
                     ex,
                     arguments.ConsumerMicroservice,
                     arguments.ConsumerTenant,
@@ -210,7 +216,8 @@ public class ConsumerService : ConsumerBase, IDisposable
         }
         finally
         {
-            _logger.EventHorizonDisconnecting(
+            Log.EventHorizonDisconnecting(
+                _logger,
                 arguments.ConsumerMicroservice,
                 arguments.ConsumerTenant,
                 arguments.ProducerTenant,
@@ -267,10 +274,7 @@ public class ConsumerService : ConsumerBase, IDisposable
                         cancellationToken).ConfigureAwait(false);
                     if (response.Failure != null)
                     {
-                        _logger.LogWarning(
-                            "An error occurred while handling request. FailureId: {FailureId} Reason: {Reason}",
-                            response.Failure.Id,
-                            response.Failure.Reason);
+                        Log.ErrorOccurredWhileHandlingRequest(_logger, response.Failure.Id.ToGuid(), response.Failure.Reason);
                         return;
                     }
 
@@ -284,44 +288,53 @@ public class ConsumerService : ConsumerBase, IDisposable
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "An error ocurred while writing events to event horizon");
+            Log.ErrorWritingEventToEventHorizon(_logger, ex);
         }
     }
-        
+
     SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
     {
         try
         {
-            _logger.LogTrace("Checking whether Producer Tenant {ProducerTenant} exists", producerTenant);
+            Log.CheckingIfProducerTenantExists(_logger, producerTenant);
             if (!ProducerTenantExists(producerTenant))
             {
-                var message = $"There are no consents configured for Producer Tenant {producerTenant}";
-                _logger.LogDebug(message);
-                return new SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message, } };
+                Log.NoConsentsConfiguredForProducerTenant(_logger, producerTenant);
+                return new SubscriptionResponse { Failure = new ProtobufContracts.Failure
+                {
+                    Id = SubscriptionFailures.MissingConsent.ToProtobuf(),
+                    Reason = $"There are no consents configured for Producer Tenant {producerTenant}",
+                } };
             }
 
             if (!TryGetConsentFor(consumerMicroservice, consumerTenant, producerTenant, publicStream, partition, out var consentId))
             {
-                var message = $"There are no consent configured for Partition {partition} in Public Stream {publicStream} in Tenant {producerTenant} to Consumer Tenant {consumerTenant} in Microservice {consumerMicroservice}";
-                _logger.LogDebug(message);
-                return new SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = SubscriptionFailures.MissingConsent.ToProtobuf(), Reason = message } };
+                Log.NoConsentsConfiguredForConsumer(_logger, partition, publicStream, producerTenant, consumerTenant, consumerMicroservice);
+                return new SubscriptionResponse { Failure = new ProtobufContracts.Failure
+                {
+                    Id = SubscriptionFailures.MissingConsent.ToProtobuf(),
+                    Reason = $"There are no consent configured for Partition {partition} in Public Stream {publicStream} in Tenant {producerTenant} to Consumer Tenant {consumerTenant} in Microservice {consumerMicroservice}"
+                } };
             }
 
             return new SubscriptionResponse { ConsentId = consentId.ToProtobuf() };
         }
         catch (Exception ex)
         {
-            const string message = "Error ocurred while creating subscription response";
-            _logger.LogWarning(ex, message);
-            return new SubscriptionResponse { Failure = new ProtobufContracts.Failure { Id = FailureId.Other.ToProtobuf(), Reason = message } };
+            Log.ErrorCreatingSubscriptionResponse(_logger, ex);
+            return new SubscriptionResponse { Failure = new ProtobufContracts.Failure
+            {
+                Id = FailureId.Other.ToProtobuf(),
+                Reason = "Error occurred while creating subscription response"
+            } };
         }
     }
 
     bool TryGetConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out ConsentId consentId)
     {
         consentId = null;
-        _logger.LogTrace(
-            "Checking consents configured for Partition: {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}",
+        Log.CheckingConsents(
+            _logger,
             partition,
             publicStream,
             producerTenant,
@@ -334,8 +347,8 @@ public class ConsumerService : ConsumerBase, IDisposable
 
         if (consentsForSubscription.Length == 0)
         {
-            _logger.LogDebug(
-                "There are no consent configured for partition '{Partition}' in public stream '{PublicStream}' in tenant '{ProducerTenant}' to consumer tenant '{ConsumerTenant}' in microservice '{ConsumerMicroservice}'",
+            Log.NoConsentsConfiguredForConsumer(
+                _logger,
                 partition,
                 publicStream,
                 producerTenant,
@@ -346,8 +359,8 @@ public class ConsumerService : ConsumerBase, IDisposable
 
         if (consentsForSubscription.Length > 1)
         {
-            _logger.LogWarning(
-                "There are multiple consents configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}",
+            Log.MultipleConsentsConfiguredForConsumer(
+                _logger,
                 partition,
                 publicStream,
                 producerTenant,
@@ -372,4 +385,5 @@ public class ConsumerService : ConsumerBase, IDisposable
 
     bool ProducerTenantExists(TenantId producerTenant) =>
         _tenants.All.Contains(producerTenant);
+
 }

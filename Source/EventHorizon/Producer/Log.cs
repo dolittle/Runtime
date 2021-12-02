@@ -4,88 +4,95 @@
 using System;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.EventHorizon.Producer;
 
 static partial class Log
 {
-    static readonly Action<ILogger, Guid, Guid, Guid, ulong, string, Guid, Exception> _incomingEventHorizonSubscription = LoggerMessage
-        .Define<Guid, Guid, Guid, ulong, string, Guid>(
-            LogLevel.Debug,
-            new EventId(1404825474, nameof(IncomingEventHorizonSubscription)),
-            "Incoming event horizon subscription from microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}");
-
-    static readonly Action<ILogger, Guid, Guid, Guid, ulong, string, Guid, Exception> _successfullySubscribed = LoggerMessage
-        .Define<Guid, Guid, Guid, ulong, string, Guid>(
-            LogLevel.Information,
-            new EventId(399974883, nameof(SuccessfullySubscribed)),
-            "Microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} successfully subscribed to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}");
-
-    static readonly Action<ILogger, Guid, Guid, Guid, string, Guid, Exception> _errorOccurredInEventHorizon = LoggerMessage
-        .Define<Guid, Guid, Guid, string, Guid>(
-            LogLevel.Warning,
-            new EventId(255540672, nameof(ErrorOccurredInEventHorizon)),
-            "An error occurred in event horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}");
-
-    static readonly Action<ILogger, Guid, Guid, Guid, string, Guid, Exception> _eventHorizonStopped = LoggerMessage
-        .Define<Guid, Guid, Guid, string, Guid>(
-            LogLevel.Warning,
-            new EventId(271973941, nameof(EventHorizonStopped)),
-            "Event horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream} stopped");
-
-    static readonly Action<ILogger, Guid, Guid, Guid, string, Guid, Exception> _eventHorizonDisconnecting = LoggerMessage
-        .Define<Guid, Guid, Guid, string, Guid>(
-            LogLevel.Warning,
-            new EventId(271973941, nameof(EventHorizonDisconnecting)),
-            "Disconnecting Event Horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}");
-
-    
-    internal static void IncomingEventHorizonSubscription(
-        this ILogger logger,
+    [LoggerMessage(0, LogLevel.Debug, "Incoming event horizon subscription from microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}")]
+    internal static partial void IncomingEventHorizonSubscription(
+        ILogger logger,
         Microservice consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
-        StreamPosition position,
+        StreamPosition streamPosition,
         PartitionId partition,
-        StreamId publicStream)
-        => _incomingEventHorizonSubscription(logger, consumerMicroservice, consumerTenant, producerTenant, position, partition, publicStream, null);
+        StreamId publicStream);
 
-    internal static void SuccessfullySubscribed(
-        this ILogger logger,
+    [LoggerMessage(0, LogLevel.Information, "Microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} successfully subscribed to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}")]
+    internal static partial void SuccessfullySubscribed(
+        ILogger logger,
         Microservice consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
-        StreamPosition position,
+        StreamPosition streamPosition,
         PartitionId partition,
-        StreamId publicStream)
-        => _successfullySubscribed(logger, consumerMicroservice, consumerTenant, producerTenant, position, partition, publicStream, null);
+        StreamId publicStream);
 
-    internal static void ErrorOccurredInEventHorizon(
-        this ILogger logger,
+    [LoggerMessage(0, LogLevel.Warning, "An error occurred in event horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}")]
+    internal static partial void ErrorOccurredInEventHorizon(
+        ILogger logger,
         Exception exception,
         Microservice consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         PartitionId partition,
-        StreamId publicStream)
-        => _errorOccurredInEventHorizon(logger, consumerMicroservice, consumerTenant, producerTenant, partition, publicStream, exception);
+        StreamId publicStream);
 
-    internal static void EventHorizonStopped(
-        this ILogger logger,
+    [LoggerMessage(0, LogLevel.Warning, "Event horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream} stopped")]
+    internal static partial void EventHorizonStopped(
+        ILogger logger,
         Microservice consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         PartitionId partition,
-        StreamId publicStream)
-        => _eventHorizonStopped(logger, consumerMicroservice, consumerTenant, producerTenant, partition, publicStream, null);
+        StreamId publicStream);
 
-    internal static void EventHorizonDisconnecting(
-        this ILogger logger,
+    [LoggerMessage(0, LogLevel.Warning, "Disconnecting Event Horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}")]
+    internal static partial void EventHorizonDisconnecting(
+        ILogger logger,
         Microservice consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         PartitionId partition,
-        StreamId publicStream)
-        => _eventHorizonDisconnecting(logger, consumerMicroservice, consumerTenant, producerTenant, partition, publicStream, null);
+        StreamId publicStream);
+    
+    
+    [LoggerMessage(0, LogLevel.Warning, "An error occurred while handling request. FailureId: {FailureId} Reason: {FailureReason}")]
+    internal static partial void ErrorOccurredWhileHandlingRequest(ILogger logger, FailureId failureId, string failureReason);
+    
+    [LoggerMessage(0, LogLevel.Warning, "An error occurred while writing events to event horizon")]
+    internal static partial void ErrorWritingEventToEventHorizon(ILogger logger, Exception ex);
+    
+    [LoggerMessage(0, LogLevel.Trace, "Checking whether Producer Tenant {ProducerTenant} exists")]
+    internal static partial void CheckingIfProducerTenantExists(ILogger logger, TenantId producerTenant);
+    
+    [LoggerMessage(0, LogLevel.Debug, "There are no consents configured for Producer Tenant {ProducerTenant}")]
+    internal static partial void NoConsentsConfiguredForProducerTenant(ILogger logger, TenantId producerTenant);
+    
+    [LoggerMessage(0, LogLevel.Debug, "There are no consent configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}")]
+    internal static partial void NoConsentsConfiguredForConsumer(
+        ILogger logger,
+        PartitionId partition,
+        StreamId publicStream,
+        TenantId producerTenant,
+        TenantId consumerTenant,
+        Microservice consumerMicroservice);
+
+    [LoggerMessage(0, LogLevel.Debug, "There are multiple consents configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}")]
+    internal static partial void MultipleConsentsConfiguredForConsumer(
+        ILogger logger,
+        PartitionId partition,
+        StreamId publicStream,
+        TenantId producerTenant,
+        TenantId consumerTenant,
+        Microservice consumerMicroservice);
+    
+    [LoggerMessage(0, LogLevel.Warning, "Error occurred while creating subscription response")]
+    internal static partial void ErrorCreatingSubscriptionResponse(ILogger logger, Exception ex);
+
+    [LoggerMessage(0, LogLevel.Trace, "Checking consents configured for Partition: {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}")]
+    internal static partial void CheckingConsents(ILogger logger, PartitionId partition, StreamId publicStream, TenantId producerTenant, TenantId consumerTenant, Microservice consumerMicroservice);
 }

@@ -11,7 +11,6 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 /// Represents the runtime representation of the consumer subscription arguments.
 /// </summary>
 /// <param name="ExecutionContext">The execution context.</param>
-/// <param name="ProjectionDefinition">The projection definition.</param>
 public record ConsumerSubscriptionArguments(
     ExecutionContext ExecutionContext,
     Microservice ConsumerMicroservice,
