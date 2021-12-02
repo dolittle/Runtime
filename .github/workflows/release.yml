@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: legolas # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: gimli # Comma separated list of prerelease branch names. 'alpha,rc, ...'
 
 on:
   pull_request:
