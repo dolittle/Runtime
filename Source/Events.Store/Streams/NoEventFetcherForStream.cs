@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Exception that gets thrown when there are no instance of <see cref="ICanFetchEventsFromStream" /> for the <see cref="IStreamDefinition" />.
+/// </summary>
+public class NoEventFetcherForStream : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when there are no instance of <see cref="ICanFetchEventsFromStream" /> for the <see cref="IStreamDefinition" />.
+    /// Initializes a new instance of the <see cref="NoEventFetcherForStream"/> class.
     /// </summary>
-    public class NoEventFetcherForStream : Exception
+    /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
+    public NoEventFetcherForStream(IStreamDefinition streamDefinition)
+        : base($"Could not find an events fetcher for Stream: {streamDefinition}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NoEventFetcherForStream"/> class.
-        /// </summary>
-        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
-        public NoEventFetcherForStream(IStreamDefinition streamDefinition)
-            : base($"Could not find an events fetcher for Stream: {streamDefinition}")
-        {
-        }
     }
 }

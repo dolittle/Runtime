@@ -3,9 +3,8 @@
 
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Services.for_Endpoints.given
+namespace Dolittle.Runtime.Services.for_Endpoints.given;
+
+public interface ICanBindMyServiceType : ICanBindServices
 {
-    public interface ICanBindMyServiceType : ICanBindServices
-    {
-    }
 }

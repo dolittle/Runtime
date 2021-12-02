@@ -8,58 +8,57 @@ using Moq;
 using Prometheus;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Metrics.for_MetricProviders
+namespace Dolittle.Runtime.Metrics.for_MetricProviders;
+
+public class when_providing_from_two_providers_with_two_collectors_each
 {
-    public class when_providing_from_two_providers_with_two_collectors_each
+    static MetricProviders providers;
+    static Mock<IMetricFactory> metric_factory;
+    static IEnumerable<Collector> collectors;
+
+    static Collector first_provider_first_collector;
+    static Collector first_provider_second_collector;
+    static Collector second_provider_first_collector;
+    static Collector second_provider_second_collector;
+
+    Establish context = () =>
     {
-        static MetricProviders providers;
-        static Mock<IMetricFactory> metric_factory;
-        static IEnumerable<Collector> collectors;
+        var firstProvider = new Mock<ICanProvideMetrics>();
+        var secondProvider = new Mock<ICanProvideMetrics>();
 
-        static Collector first_provider_first_collector;
-        static Collector first_provider_second_collector;
-        static Collector second_provider_first_collector;
-        static Collector second_provider_second_collector;
+        var providerInstances = new StaticInstancesOf<ICanProvideMetrics>(
+            firstProvider.Object,
+            secondProvider.Object);
 
-        Establish context = () =>
-        {
-            var firstProvider = new Mock<ICanProvideMetrics>();
-            var secondProvider = new Mock<ICanProvideMetrics>();
+        metric_factory = new Mock<IMetricFactory>();
 
-            var providerInstances = new StaticInstancesOf<ICanProvideMetrics>(
-                firstProvider.Object,
-                secondProvider.Object);
+        providers = new MetricProviders(providerInstances, metric_factory.Object);
 
-            metric_factory = new Mock<IMetricFactory>();
+        first_provider_first_collector = Prometheus.Metrics.CreateCounter("FirstFirst", "");
+        first_provider_second_collector = Prometheus.Metrics.CreateCounter("FirstSecond", "");
+        second_provider_first_collector = Prometheus.Metrics.CreateCounter("SecondFirst", "");
+        second_provider_second_collector = Prometheus.Metrics.CreateCounter("SecondSecond", "");
 
-            providers = new MetricProviders(providerInstances, metric_factory.Object);
-
-            first_provider_first_collector = Prometheus.Metrics.CreateCounter("FirstFirst", "");
-            first_provider_second_collector = Prometheus.Metrics.CreateCounter("FirstSecond", "");
-            second_provider_first_collector = Prometheus.Metrics.CreateCounter("SecondFirst", "");
-            second_provider_second_collector = Prometheus.Metrics.CreateCounter("SecondSecond", "");
-
-            firstProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[]
-            {
-                first_provider_first_collector,
-                first_provider_second_collector
-            });
-
-            secondProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[]
-            {
-                second_provider_first_collector,
-                second_provider_second_collector
-            });
-        };
-
-        Because of = () => collectors = providers.Provide();
-
-        It should_return_all_collectors = () => collectors.ShouldContainOnly(new[]
+        firstProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[]
         {
             first_provider_first_collector,
-            first_provider_second_collector,
+            first_provider_second_collector
+        });
+
+        secondProvider.Setup(_ => _.Provide(metric_factory.Object)).Returns(new[]
+        {
             second_provider_first_collector,
             second_provider_second_collector
         });
-    }
+    };
+
+    Because of = () => collectors = providers.Provide();
+
+    It should_return_all_collectors = () => collectors.ShouldContainOnly(new[]
+    {
+        first_provider_first_collector,
+        first_provider_second_collector,
+        second_provider_first_collector,
+        second_provider_second_collector
+    });
 }

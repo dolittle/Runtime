@@ -4,26 +4,25 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_FilterDefinition
+namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_FilterDefinition;
+
+public class when_creating
 {
-    public class when_creating
+    static StreamId source_stream;
+    static StreamId target_stream;
+    static bool partitioned;
+    static FilterDefinition definition;
+
+    Establish context = () =>
     {
-        static StreamId source_stream;
-        static StreamId target_stream;
-        static bool partitioned;
-        static FilterDefinition definition;
+        source_stream = Guid.NewGuid();
+        target_stream = Guid.NewGuid();
+        partitioned = true;
+    };
 
-        Establish context = () =>
-        {
-            source_stream = Guid.NewGuid();
-            target_stream = Guid.NewGuid();
-            partitioned = true;
-        };
+    Because of = () => definition = new FilterDefinition(source_stream, target_stream, partitioned);
 
-        Because of = () => definition = new FilterDefinition(source_stream, target_stream, partitioned);
-
-        It should_have_the_correct_source_stream = () => definition.SourceStream.ShouldEqual(source_stream);
-        It should_have_the_correct_target_stream = () => definition.TargetStream.ShouldEqual(target_stream);
-        It should_have_the_correct_partitioned_value = () => definition.Partitioned.ShouldEqual(partitioned);
-    }
+    It should_have_the_correct_source_stream = () => definition.SourceStream.ShouldEqual(source_stream);
+    It should_have_the_correct_target_stream = () => definition.TargetStream.ShouldEqual(target_stream);
+    It should_have_the_correct_partitioned_value = () => definition.Partitioned.ShouldEqual(partitioned);
 }

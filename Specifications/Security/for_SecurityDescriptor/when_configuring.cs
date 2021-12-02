@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.Specs.for_SecurityDescriptor
+namespace Dolittle.Runtime.Security.Specs.for_SecurityDescriptor;
+
+public class when_configuring
 {
-    public class when_configuring
-    {
-        static SecurityDescriptor descriptor;
+    static SecurityDescriptor descriptor;
 
-        Because of = () => descriptor = new SecurityDescriptor();
+    Because of = () => descriptor = new SecurityDescriptor();
 
-        It should_have_a_when_clause_set = () => descriptor.When.ShouldNotBeNull();
-    }
+    It should_have_a_when_clause_set = () => descriptor.When.ShouldNotBeNull();
 }

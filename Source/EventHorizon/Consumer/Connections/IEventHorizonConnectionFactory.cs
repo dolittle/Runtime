@@ -3,18 +3,17 @@
 
 using Dolittle.Runtime.Microservices;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Connections
+namespace Dolittle.Runtime.EventHorizon.Consumer.Connections;
+
+/// <summary>
+/// Defines a system that can create instances of <see cref="IEventHorizonConnection"/>.
+/// </summary>
+public interface IEventHorizonConnectionFactory
 {
     /// <summary>
-    /// Defines a system that can create instances of <see cref="IEventHorizonConnection"/>.
+    /// Creates a new <see cref="IEventHorizonConnection"/> to another Runtime.
     /// </summary>
-    public interface IEventHorizonConnectionFactory
-    {
-        /// <summary>
-        /// Creates a new <see cref="IEventHorizonConnection"/> to another Runtime.
-        /// </summary>
-        /// <param name="connectionAddress">The address of the other microservices Runtime to connect to.</param>
-        /// <returns>A new <see cref="IEventHorizonConnection"/> that is ready to be connected.</returns>
-        IEventHorizonConnection Create(MicroserviceAddress connectionAddress);
-    }
+    /// <param name="connectionAddress">The address of the other microservices Runtime to connect to.</param>
+    /// <returns>A new <see cref="IEventHorizonConnection"/> that is ready to be connected.</returns>
+    IEventHorizonConnection Create(MicroserviceAddress connectionAddress);
 }

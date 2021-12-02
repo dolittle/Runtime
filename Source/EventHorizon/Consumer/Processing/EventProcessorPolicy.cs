@@ -7,33 +7,32 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Polly;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing;
+
+/// <summary>
+/// Defines the policy for processing an event from an event horizon.
+/// </summary>
+public class EventProcessorPolicy : IDefineAsyncPolicyForType
 {
+    readonly ILogger<EventProcessor> _logger;
+
     /// <summary>
-    /// Defines the policy for processing an event from an event horizon.
+    /// Initializes a new instance of the <see cref="EventProcessorPolicy"/> class.
     /// </summary>
-    public class EventProcessorPolicy : IDefineAsyncPolicyForType
-    {
-        readonly ILogger<EventProcessor> _logger;
+    /// <param name="logger">The <see cref="ILogger"/> to use for logging.</param>
+    public EventProcessorPolicy(ILogger<EventProcessor> logger) => _logger = logger;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventProcessorPolicy"/> class.
-        /// </summary>
-        /// <param name="logger">The <see cref="ILogger"/> to use for logging.</param>
-        public EventProcessorPolicy(ILogger<EventProcessor> logger) => _logger = logger;
+    /// <inheritdoc/>
+    public Type Type => typeof(EventProcessor);
 
-        /// <inheritdoc/>
-        public Type Type => typeof(EventProcessor);
-
-        /// <inheritdoc/>
-        public Polly.IAsyncPolicy Define()
-            => Polly.Policy
-                .Handle<EventStoreUnavailable>(
-                    _ =>
-                    {
-                        _logger.LogDebug(_, "Event Store is unavailable");
-                        return true;
-                    })
-                .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));
-    }
+    /// <inheritdoc/>
+    public Polly.IAsyncPolicy Define()
+        => Polly.Policy
+            .Handle<EventStoreUnavailable>(
+                _ =>
+                {
+                    _logger.LogDebug(_, "Event Store is unavailable");
+                    return true;
+                })
+            .WaitAndRetryForeverAsync(attempt => TimeSpan.FromSeconds(Math.Min(Math.Pow(2, attempt), 10)));
 }

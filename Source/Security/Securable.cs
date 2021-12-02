@@ -3,52 +3,51 @@
 
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Security
+namespace Dolittle.Runtime.Security;
+
+/// <summary>
+/// Represents a base implementation of<see cref="ISecurable"/>.
+/// </summary>
+public class Securable : ISecurable
 {
+    readonly List<ISecurityActor> _actors = new();
+
     /// <summary>
-    /// Represents a base implementation of<see cref="ISecurable"/>.
+    /// Initializes a new instance of the <see cref="Securable"/> class.
     /// </summary>
-    public class Securable : ISecurable
+    /// <param name="securableDescription">Description of the Securable.</param>
+    public Securable(string securableDescription)
     {
-        readonly List<ISecurityActor> _actors = new();
+        Description = securableDescription ?? string.Empty;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Securable"/> class.
-        /// </summary>
-        /// <param name="securableDescription">Description of the Securable.</param>
-        public Securable(string securableDescription)
+    /// <inheritdoc/>
+    public IEnumerable<ISecurityActor> Actors => _actors;
+
+    /// <inheritdoc/>
+    public string Description { get; }
+
+    /// <inheritdoc/>
+    public void AddActor(ISecurityActor actor)
+    {
+        _actors.Add(actor);
+    }
+
+    /// <inheritdoc/>
+    public virtual bool CanAuthorize(object actionToAuthorize)
+    {
+        return false;
+    }
+
+    /// <inheritdoc/>
+    public virtual AuthorizeSecurableResult Authorize(object actionToAuthorize)
+    {
+        var result = new AuthorizeSecurableResult(this);
+        foreach (var actor in _actors)
         {
-            Description = securableDescription ?? string.Empty;
+            result.ProcessAuthorizeActorResult(actor.IsAuthorized(actionToAuthorize));
         }
 
-        /// <inheritdoc/>
-        public IEnumerable<ISecurityActor> Actors => _actors;
-
-        /// <inheritdoc/>
-        public string Description { get; }
-
-        /// <inheritdoc/>
-        public void AddActor(ISecurityActor actor)
-        {
-            _actors.Add(actor);
-        }
-
-        /// <inheritdoc/>
-        public virtual bool CanAuthorize(object actionToAuthorize)
-        {
-            return false;
-        }
-
-        /// <inheritdoc/>
-        public virtual AuthorizeSecurableResult Authorize(object actionToAuthorize)
-        {
-            var result = new AuthorizeSecurableResult(this);
-            foreach (var actor in _actors)
-            {
-                result.ProcessAuthorizeActorResult(actor.IsAuthorized(actionToAuthorize));
-            }
-
-            return result;
-        }
+        return result;
     }
 }

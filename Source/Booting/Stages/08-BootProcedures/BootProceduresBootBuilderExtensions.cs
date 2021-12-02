@@ -3,22 +3,21 @@
 
 using Dolittle.Runtime.Booting.Stages;
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// Extensions for building <see cref="DiscoverySettings"/>.
+/// </summary>
+public static class BootProceduresBootBuilderExtensions
 {
     /// <summary>
-    /// Extensions for building <see cref="DiscoverySettings"/>.
+    /// Skip any <see cref="ICanPerformBootProcedure">boot procedures</see>.
     /// </summary>
-    public static class BootProceduresBootBuilderExtensions
+    /// <param name="bootBuilder"><see cref="BootBuilder"/> to build.</param>
+    /// <returns>Chained <see cref="BootBuilder"/>.</returns>
+    public static IBootBuilder SkipBootprocedures(this IBootBuilder bootBuilder)
     {
-        /// <summary>
-        /// Skip any <see cref="ICanPerformBootProcedure">boot procedures</see>.
-        /// </summary>
-        /// <param name="bootBuilder"><see cref="BootBuilder"/> to build.</param>
-        /// <returns>Chained <see cref="BootBuilder"/>.</returns>
-        public static IBootBuilder SkipBootprocedures(this IBootBuilder bootBuilder)
-        {
-            bootBuilder.Set<BootProceduresSettings>(_ => _.Enabled, false);
-            return bootBuilder;
-        }
+        bootBuilder.Set<BootProceduresSettings>(_ => _.Enabled, false);
+        return bootBuilder;
     }
 }

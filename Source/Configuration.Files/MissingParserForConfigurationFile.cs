@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Configuration.Files
+namespace Dolittle.Runtime.Configuration.Files;
+
+/// <summary>
+/// Exception that gets thrown when there is no parser capable of parsing the configuration file.
+/// </summary>
+public class MissingParserForConfigurationFile : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when there is no parser capable of parsing the configuration file.
+    /// Initializes a new instance of the <see cref="MissingParserForConfigurationFile"/> class.
     /// </summary>
-    public class MissingParserForConfigurationFile : Exception
+    /// <param name="filename">Name of the file.</param>
+    public MissingParserForConfigurationFile(string filename)
+        : base($"Missing parser for configuration file '{filename}'")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingParserForConfigurationFile"/> class.
-        /// </summary>
-        /// <param name="filename">Name of the file.</param>
-        public MissingParserForConfigurationFile(string filename)
-            : base($"Missing parser for configuration file '{filename}'")
-        {
-        }
     }
 }

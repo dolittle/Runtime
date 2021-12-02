@@ -4,14 +4,13 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler
+namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler;
+
+public class and_it_was_invalid : given.an_event_handler_with_non_writeable_target_stream
 {
-    public class and_it_was_invalid : given.an_event_handler_with_non_writeable_target_stream
-    {
-        static Exception result;
+    static Exception result;
 
-        Because of = () => result = Catch.Exception(() => event_handler.Dispose());
+    Because of = () => result = Catch.Exception(() => event_handler.Dispose());
 
-        It should_not_throw_an_exception = () => result.ShouldBeNull();
-    }
+    It should_not_throw_an_exception = () => result.ShouldBeNull();
 }

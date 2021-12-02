@@ -6,15 +6,14 @@ using Dolittle.Runtime.Assemblies;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.Booting
-{
-    /// <summary>
-    /// Represents the result of the <see cref="Bootloader"/> start.
-    /// </summary>
-    public record BootloaderResult(
-        IContainer Container,
-        ITypeFinder TypeFinder,
-        IAssemblies Assemblies,
-        IBindingCollection Bindings,
-        IEnumerable<BootStageResult> BootStageResults);
-}
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// Represents the result of the <see cref="Bootloader"/> start.
+/// </summary>
+public record BootloaderResult(
+    IContainer Container,
+    ITypeFinder TypeFinder,
+    IAssemblies Assemblies,
+    IBindingCollection Bindings,
+    IEnumerable<BootStageResult> BootStageResults);

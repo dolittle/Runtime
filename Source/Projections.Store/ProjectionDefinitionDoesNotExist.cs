@@ -5,21 +5,20 @@ using System;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
 
-namespace Dolittle.Runtime.Projections.Store
+namespace Dolittle.Runtime.Projections.Store;
+
+/// <summary>
+/// Exception that gets thrown when a <see cref="ProjectionDefinition" /> could not be retrieved.
+/// </summary>
+public class ProjectionDefinitionDoesNotExist : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a <see cref="ProjectionDefinition" /> could not be retrieved.
+    /// Initializes an instance of the <see cref="ProjectionDefinitionDoesNotExist" /> class.
     /// </summary>
-    public class ProjectionDefinitionDoesNotExist : Exception
+    /// <param name="projection">The projection id.</param>
+    /// <param name="scope">The scope id.</param>
+    public ProjectionDefinitionDoesNotExist(ProjectionId projection, ScopeId scope)
+        : base($"Projection definition for projection {projection.Value} in scope {scope.Value} does not exist")
     {
-        /// <summary>
-        /// Initializes an instance of the <see cref="ProjectionDefinitionDoesNotExist" /> class.
-        /// </summary>
-        /// <param name="projection">The projection id.</param>
-        /// <param name="scope">The scope id.</param>
-        public ProjectionDefinitionDoesNotExist(ProjectionId projection, ScopeId scope)
-            : base($"Projection definition for projection {projection.Value} in scope {scope.Value} does not exist")
-        {
-        }
     }
 }

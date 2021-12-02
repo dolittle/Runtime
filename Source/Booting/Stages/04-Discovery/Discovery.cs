@@ -9,41 +9,40 @@ using Dolittle.Runtime.Collections;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.Booting.Stages
+namespace Dolittle.Runtime.Booting.Stages;
+
+/// <summary>
+/// Represents the <see cref="BootStage.Discovery"/> stage of booting.
+/// </summary>
+public class Discovery : ICanPerformBootStage<DiscoverySettings>
 {
-    /// <summary>
-    /// Represents the <see cref="BootStage.Discovery"/> stage of booting.
-    /// </summary>
-    public class Discovery : ICanPerformBootStage<DiscoverySettings>
+    /// <inheritdoc/>
+    public BootStage BootStage => BootStage.Discovery;
+
+    /// <inheritdoc/>
+    public void Perform(DiscoverySettings settings, IBootStageBuilder builder)
     {
-        /// <inheritdoc/>
-        public BootStage BootStage => BootStage.Discovery;
+        var entryAssembly = builder.GetAssociation<Assembly>(WellKnownAssociations.EntryAssembly);
+        var loggerFactory = builder.GetAssociation<ILoggerFactory>(WellKnownAssociations.LoggerFactory);
+        var logger = loggerFactory.CreateLogger<Discovery>();
 
-        /// <inheritdoc/>
-        public void Perform(DiscoverySettings settings, IBootStageBuilder builder)
+        logger.LogDebug("  Discovery");
+        var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
         {
-            var entryAssembly = builder.GetAssociation<Assembly>(WellKnownAssociations.EntryAssembly);
-            var loggerFactory = builder.GetAssociation<ILoggerFactory>(WellKnownAssociations.LoggerFactory);
-            var logger = loggerFactory.CreateLogger<Discovery>();
-
-            logger.LogDebug("  Discovery");
-            var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
+            if (settings.IncludeAssembliesStartWith?.Count() > 0)
             {
-                if (settings.IncludeAssembliesStartWith?.Count() > 0)
-                {
-                    settings.IncludeAssembliesStartWith.ForEach(name => logger.LogTrace("Including assemblies starting with '{name}'", name));
-                    _.ExceptAssembliesStartingWith(settings.IncludeAssembliesStartWith.ToArray());
-                }
-            });
-            logger.LogDebug("  Set up type system for discovery");
-            var typeFinder = Types.Bootstrap.Boot.Start(assemblies, logger, entryAssembly);
-            logger.LogDebug("  Type system ready");
+                settings.IncludeAssembliesStartWith.ForEach(name => logger.LogTrace("Including assemblies starting with '{name}'", name));
+                _.ExceptAssembliesStartingWith(settings.IncludeAssembliesStartWith.ToArray());
+            }
+        });
+        logger.LogDebug("  Set up type system for discovery");
+        var typeFinder = Types.Bootstrap.Boot.Start(assemblies, logger, entryAssembly);
+        logger.LogDebug("  Type system ready");
 
-            builder.Bindings.Bind<IAssemblies>().To(assemblies);
-            builder.Bindings.Bind<ITypeFinder>().To(typeFinder);
+        builder.Bindings.Bind<IAssemblies>().To(assemblies);
+        builder.Bindings.Bind<ITypeFinder>().To(typeFinder);
 
-            builder.Associate(WellKnownAssociations.Assemblies, assemblies);
-            builder.Associate(WellKnownAssociations.TypeFinder, typeFinder);
-        }
+        builder.Associate(WellKnownAssociations.Assemblies, assemblies);
+        builder.Associate(WellKnownAssociations.TypeFinder, typeFinder);
     }
 }

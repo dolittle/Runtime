@@ -3,19 +3,18 @@
 
 using System;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Exception that gets thrown when ping timed out.
+/// </summary>
+public class PingTimedOut : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when ping timed out.
+    /// Initializes a new instance of the <see cref="PingTimedOut"/> class.
     /// </summary>
-    public class PingTimedOut : Exception
+    public PingTimedOut()
+        : base("Ping timed out")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PingTimedOut"/> class.
-        /// </summary>
-        public PingTimedOut()
-            : base("Ping timed out")
-        {
-        }
     }
 }

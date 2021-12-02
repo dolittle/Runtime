@@ -7,21 +7,20 @@ using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Embeddings.Store.State;
 using Dolittle.Runtime.ResourceTypes;
 
-namespace Dolittle.Runtime.Embeddings.Store
-{
-    /// <summary>
-    /// Represents a <see cref="IAmAResourceType">resource type</see> for an event store.
-    /// </summary>
-    public class EventStoreResourceType : IAmAResourceType
-    {
-        /// <inheritdoc/>
-        public ResourceType Name => "embeddings";
+namespace Dolittle.Runtime.Embeddings.Store;
 
-        /// <inheritdoc/>
-        public IEnumerable<Type> Services { get; } = new[]
-        {
-            typeof(IEmbeddingStates),
-            typeof(IEmbeddingDefinitions)
-        };
-    }
+/// <summary>
+/// Represents a <see cref="IAmAResourceType">resource type</see> for an event store.
+/// </summary>
+public class EventStoreResourceType : IAmAResourceType
+{
+    /// <inheritdoc/>
+    public ResourceType Name => "embeddings";
+
+    /// <inheritdoc/>
+    public IEnumerable<Type> Services { get; } = new[]
+    {
+        typeof(IEmbeddingStates),
+        typeof(IEmbeddingDefinitions)
+    };
 }

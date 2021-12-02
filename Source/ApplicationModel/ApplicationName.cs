@@ -3,22 +3,21 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.ApplicationModel
+namespace Dolittle.Runtime.ApplicationModel;
+
+/// <summary>
+/// Represents the name of <see cref="Application"/>.
+/// </summary>
+public record ApplicationName(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents the name of <see cref="Application"/>.
+    /// Gets the <see cref="ApplicationName"/> representing an undefined name.
     /// </summary>
-    public record ApplicationName(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Gets the <see cref="ApplicationName"/> representing an undefined name.
-        /// </summary>
-        public static readonly ApplicationName NotSet = "[Not Set]";
+    public static readonly ApplicationName NotSet = "[Not Set]";
 
-        /// <summary>
-        /// Implicitly converts from a <see cref="string"/> to a <see cref="ApplicationName"/>.
-        /// </summary>
-        /// <param name="applicationName">Name of the <see cref="ApplicationName"/>.</param>
-        public static implicit operator ApplicationName(string applicationName) => new(applicationName);
-    }
+    /// <summary>
+    /// Implicitly converts from a <see cref="string"/> to a <see cref="ApplicationName"/>.
+    /// </summary>
+    /// <param name="applicationName">Name of the <see cref="ApplicationName"/>.</param>
+    public static implicit operator ApplicationName(string applicationName) => new(applicationName);
 }

@@ -4,18 +4,17 @@
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Resilience.for_Policy.when_executing_action
+namespace Dolittle.Runtime.Resilience.for_Policy.when_executing_action;
+
+public class with_result_with_underlying_policy
 {
-    public class with_result_with_underlying_policy
-    {
-        const string expected_result = "Fourty Two";
-        static Policy policy;
-        static string result;
+    const string expected_result = "Fourty Two";
+    static Policy policy;
+    static string result;
 
-        Establish context = () => policy = new Policy(Polly.Policy.NoOp());
+    Establish context = () => policy = new Policy(Polly.Policy.NoOp());
 
-        Because of = () => result = policy.Execute(() => expected_result);
+    Because of = () => result = policy.Execute(() => expected_result);
 
-        It should_forward_call_to_delegated_policy_and_return_result = () => result.ShouldEqual(expected_result);
-    }
+    It should_forward_call_to_delegated_policy_and_return_result = () => result.ShouldEqual(expected_result);
 }

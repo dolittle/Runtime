@@ -3,20 +3,19 @@
 
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store;
+
+/// <summary>
+/// Represents a sequence of events that have been committed to the Event Store.
+/// </summary>
+public class CommittedEvents : CommittedEventSequence<CommittedEvent>
 {
     /// <summary>
-    /// Represents a sequence of events that have been committed to the Event Store.
+    /// Initializes a new instance of the <see cref="CommittedEvents"/> class.
     /// </summary>
-    public class CommittedEvents : CommittedEventSequence<CommittedEvent>
+    /// <param name="events">The <see cref="CommittedEvent">events</see>.</param>
+    public CommittedEvents(IReadOnlyList<CommittedEvent> events)
+        : base(events)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CommittedEvents"/> class.
-        /// </summary>
-        /// <param name="events">The <see cref="CommittedEvent">events</see>.</param>
-        public CommittedEvents(IReadOnlyList<CommittedEvent> events)
-            : base(events)
-        {
-        }
     }
 }

@@ -9,92 +9,91 @@ using Dolittle.Runtime.Booting;
 using Dolittle.Runtime.Collections;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.DependencyInversion.Booting
+namespace Dolittle.Runtime.DependencyInversion.Booting;
+
+/// <summary>
+/// Represents a <see cref="IContainer"/> used during booting.
+/// </summary>
+public class BootContainer : IContainer
 {
+    static IContainer _container;
+    readonly IDictionary<Type, IActivationStrategy> _bindings;
+
     /// <summary>
-    /// Represents a <see cref="IContainer"/> used during booting.
+    /// Initializes a new instance of the <see cref="BootContainer"/> class.
     /// </summary>
-    public class BootContainer : IContainer
+    /// <param name="bindings"><see cref="IBindingCollection">Bindings</see> for the <see cref="BootContainer"/>.</param>
+    /// <param name="newBindingsNotifier"><see cref="ICanNotifyForNewBindings">Notifier</see> of new <see cref="Binding">bindings</see>.</param>
+    public BootContainer(IBindingCollection bindings, ICanNotifyForNewBindings newBindingsNotifier)
     {
-        static IContainer _container;
-        readonly IDictionary<Type, IActivationStrategy> _bindings;
+        _bindings = bindings.ToDictionary(_ => _.Service, _ => _.Strategy);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BootContainer"/> class.
-        /// </summary>
-        /// <param name="bindings"><see cref="IBindingCollection">Bindings</see> for the <see cref="BootContainer"/>.</param>
-        /// <param name="newBindingsNotifier"><see cref="ICanNotifyForNewBindings">Notifier</see> of new <see cref="Binding">bindings</see>.</param>
-        public BootContainer(IBindingCollection bindings, ICanNotifyForNewBindings newBindingsNotifier)
+        _bindings[typeof(IContainer)] = new Strategies.Constant(this);
+        _bindings[typeof(GetContainer)] = new Strategies.Constant((GetContainer)(() => this));
+
+        newBindingsNotifier.SubscribeTo(_ => _.ToDictionary(_ => _.Service, _ => _.Strategy).ForEach(_bindings.Add));
+    }
+
+    /// <inheritdoc/>
+    public T Get<T>() => (T)Get(typeof(T));
+
+    /// <inheritdoc/>
+    public object Get(Type type)
+    {
+        if (_container != null && _container.GetType() != typeof(BootContainer)) return _container.Get(type);
+
+        if (_bindings.TryGetValue(type, out var strategyForType))
+            return InstantiateBinding(strategyForType, type);
+
+        if (type.IsGenericType && _bindings.TryGetValue(type.GetGenericTypeDefinition(), out var strategyForOpenGenericType))
+            return InstantiateBinding(strategyForOpenGenericType, type);
+
+        if (type.IsInterface)
+            throw new TypeNotBoundInContainer(type, _bindings.Select(_ => _.Key));
+
+        return Create(type);
+    }
+
+    /// <summary>
+    /// Method that gets called when <see cref="IContainer"/> is ready.
+    /// </summary>
+    /// <param name="container"><see cref="IContainer"/> instance.</param>
+    internal static void ContainerReady(IContainer container) => _container = container;
+
+    object InstantiateBinding(IActivationStrategy strategy, Type type)
+        => strategy switch
         {
-            _bindings = bindings.ToDictionary(_ => _.Service, _ => _.Strategy);
+            Strategies.Constant constant => constant.Target,
+            Strategies.Callback callback => callback.Target(),
+            Strategies.CallbackWithBindingContext callback => callback.Target(new BindingContext(type)),
+            Strategies.Type typeConstant => Get(typeConstant.Target),
+            Strategies.TypeCallback typeCallback => Get(typeCallback.Target()),
+            Strategies.TypeCallbackWithBindingContext typeCallback => Get(typeCallback.Target(new BindingContext(type))),
+            _ => null
+        };
 
-            _bindings[typeof(IContainer)] = new Strategies.Constant(this);
-            _bindings[typeof(GetContainer)] = new Strategies.Constant((GetContainer)(() => this));
+    object Create(Type type)
+    {
+        var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+        if (constructors.Length == 0) return Activator.CreateInstance(type);
+        if (constructors.Length > 1) throw new OnlySingleConstructorSupported(type);
+        var constructor = constructors[0];
 
-            newBindingsNotifier.SubscribeTo(_ => _.ToDictionary(_ => _.Service, _ => _.Strategy).ForEach(_bindings.Add));
-        }
-
-        /// <inheritdoc/>
-        public T Get<T>() => (T)Get(typeof(T));
-
-        /// <inheritdoc/>
-        public object Get(Type type)
+        var parameters = constructor.GetParameters().Select(parameter =>
         {
-            if (_container != null && _container.GetType() != typeof(BootContainer)) return _container.Get(type);
-
-            if (_bindings.TryGetValue(type, out var strategyForType))
-                return InstantiateBinding(strategyForType, type);
-
-            if (type.IsGenericType && _bindings.TryGetValue(type.GetGenericTypeDefinition(), out var strategyForOpenGenericType))
-                return InstantiateBinding(strategyForOpenGenericType, type);
-
-            if (type.IsInterface)
-                throw new TypeNotBoundInContainer(type, _bindings.Select(_ => _.Key));
-
-            return Create(type);
-        }
-
-        /// <summary>
-        /// Method that gets called when <see cref="IContainer"/> is ready.
-        /// </summary>
-        /// <param name="container"><see cref="IContainer"/> instance.</param>
-        internal static void ContainerReady(IContainer container) => _container = container;
-
-        object InstantiateBinding(IActivationStrategy strategy, Type type)
-            => strategy switch
+            try
             {
-                Strategies.Constant constant => constant.Target,
-                Strategies.Callback callback => callback.Target(),
-                Strategies.CallbackWithBindingContext callback => callback.Target(new BindingContext(type)),
-                Strategies.Type typeConstant => Get(typeConstant.Target),
-                Strategies.TypeCallback typeCallback => Get(typeCallback.Target()),
-                Strategies.TypeCallbackWithBindingContext typeCallback => Get(typeCallback.Target(new BindingContext(type))),
-                _ => null
-            };
+                if (parameter.ParameterType == typeof(ILogger))
+                    return Get(typeof(ILogger<>).MakeGenericType(type));
 
-        object Create(Type type)
-        {
-            var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-            if (constructors.Length == 0) return Activator.CreateInstance(type);
-            if (constructors.Length > 1) throw new OnlySingleConstructorSupported(type);
-            var constructor = constructors[0];
-
-            var parameters = constructor.GetParameters().Select(parameter =>
+                return Get(parameter.ParameterType);
+            }
+            catch (TypeNotBoundInContainer)
             {
-                try
-                {
-                    if (parameter.ParameterType == typeof(ILogger))
-                        return Get(typeof(ILogger<>).MakeGenericType(type));
+                throw new ConstructorDependencyNotSupported(type, parameter.ParameterType, _bindings.Select(_ => _.Key));
+            }
+        }).ToArray();
 
-                    return Get(parameter.ParameterType);
-                }
-                catch (TypeNotBoundInContainer)
-                {
-                    throw new ConstructorDependencyNotSupported(type, parameter.ParameterType, _bindings.Select(_ => _.Key));
-                }
-            }).ToArray();
-
-            return constructor.Invoke(parameters);
-        }
+        return constructor.Invoke(parameters);
     }
 }

@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Exception that gets thrown when a stream processor state does not exist.
+/// </summary>
+public class StreamProcessorStateDoesNotExist : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a stream processor state does not exist.
+    /// Initializes a new instance of the <see cref="StreamProcessorStateDoesNotExist" /> class.
     /// </summary>
-    public class StreamProcessorStateDoesNotExist : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessorStateDoesNotExist" /> class.
-        /// </summary>
-        /// <param name="streamProcessor">The stream processor identifier.</param>
-        public StreamProcessorStateDoesNotExist(IStreamProcessorId streamProcessor)
+    /// <param name="streamProcessor">The stream processor identifier.</param>
+    public StreamProcessorStateDoesNotExist(IStreamProcessorId streamProcessor)
         : base($"Stream processor {streamProcessor} does not exist")
-        {
-        }
+    {
     }
 }

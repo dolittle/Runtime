@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
+namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
+
+/// <summary>
+/// Exception that gets thrown when reprocessing events from a position fails.
+/// </summary>
+public class ReprocessEventsFromFailed : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when reprocessing events from a position fails.
+    /// Initializes a new instance of the <see cref="ReprocessEventsFromFailed"/> class.
     /// </summary>
-    public class ReprocessEventsFromFailed : Exception
+    /// <param name="reason">The reason why the reprocessing failed.</param>
+    public ReprocessEventsFromFailed(string reason)
+        : base($"Could not reprocess events from position because {reason}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReprocessEventsFromFailed"/> class.
-        /// </summary>
-        /// <param name="reason">The reason why the reprocessing failed.</param>
-        public ReprocessEventsFromFailed(string reason)
-            : base($"Could not reprocess events from position because {reason}")
-        {
-        }
     }
 }

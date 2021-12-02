@@ -8,29 +8,28 @@ using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Types.for_TypeFinder.given
+namespace Dolittle.Runtime.Types.for_TypeFinder.given;
+
+public class a_type_finder
 {
-    public class a_type_finder
+    protected static TypeFinder type_finder;
+    protected static Type[] types;
+
+    protected static Mock<IContractToImplementorsMap> contract_to_implementors_map_mock;
+
+    Establish context = () =>
     {
-        protected static TypeFinder type_finder;
-        protected static Type[] types;
-
-        protected static Mock<IContractToImplementorsMap> contract_to_implementors_map_mock;
-
-        Establish context = () =>
+        types = new[]
         {
-            types = new[]
-            {
-                typeof(ISingle),
-                typeof(Single),
-                typeof(IMultiple),
-                typeof(FirstMultiple),
-                typeof(SecondMultiple)
-            };
-
-            contract_to_implementors_map_mock = new Mock<IContractToImplementorsMap>();
-            contract_to_implementors_map_mock.SetupGet(c => c.All).Returns(types);
-            type_finder = new TypeFinder(contract_to_implementors_map_mock.Object);
+            typeof(ISingle),
+            typeof(Single),
+            typeof(IMultiple),
+            typeof(FirstMultiple),
+            typeof(SecondMultiple)
         };
-    }
+
+        contract_to_implementors_map_mock = new Mock<IContractToImplementorsMap>();
+        contract_to_implementors_map_mock.SetupGet(c => c.All).Returns(types);
+        type_finder = new TypeFinder(contract_to_implementors_map_mock.Object);
+    };
 }

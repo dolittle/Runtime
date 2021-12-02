@@ -6,26 +6,25 @@ using System.Linq;
 using Dolittle.Runtime.Types;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Represents an implementation of <see cref="IMetadataProviders"/>.
+/// </summary>
+public class MetadataProviders : IMetadataProviders
 {
+    readonly IInstancesOf<ICanProvideClientMetadata> _metadataProviders;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IMetadataProviders"/>.
+    /// Initializes a new instance of the <see cref="MetadataProviders"/> class.
     /// </summary>
-    public class MetadataProviders : IMetadataProviders
+    /// <param name="metadataProviders"><see cref="IInstancesOf{T}"/> of <see cref="ICanProvideClientMetadata"/>.</param>
+    public MetadataProviders(IInstancesOf<ICanProvideClientMetadata> metadataProviders)
     {
-        readonly IInstancesOf<ICanProvideClientMetadata> _metadataProviders;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MetadataProviders"/> class.
-        /// </summary>
-        /// <param name="metadataProviders"><see cref="IInstancesOf{T}"/> of <see cref="ICanProvideClientMetadata"/>.</param>
-        public MetadataProviders(IInstancesOf<ICanProvideClientMetadata> metadataProviders)
-        {
-            _metadataProviders = metadataProviders;
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<Metadata.Entry> Provide() =>
-            _metadataProviders.SelectMany(_ => _.Provide());
+        _metadataProviders = metadataProviders;
     }
+
+    /// <inheritdoc/>
+    public IEnumerable<Metadata.Entry> Provide() =>
+        _metadataProviders.SelectMany(_ => _.Provide());
 }

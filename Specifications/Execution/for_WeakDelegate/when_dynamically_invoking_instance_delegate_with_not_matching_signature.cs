@@ -4,23 +4,22 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Execution.for_WeakDelegate
+namespace Dolittle.Runtime.Execution.for_WeakDelegate;
+
+public class when_dynamically_invoking_instance_delegate_with_not_matching_signature
 {
-    public class when_dynamically_invoking_instance_delegate_with_not_matching_signature
+    static ClassWithMethod target;
+    static WeakDelegate weak_delegate;
+    static Exception exception;
+
+    Establish context = () =>
     {
-        static ClassWithMethod target;
-        static WeakDelegate weak_delegate;
-        static Exception exception;
+        target = new ClassWithMethod();
+        Func<string, double, int> @delegate = target.SomeMethod;
+        weak_delegate = new WeakDelegate(@delegate);
+    };
 
-        Establish context = () =>
-        {
-            target = new ClassWithMethod();
-            Func<string, double, int> @delegate = target.SomeMethod;
-            weak_delegate = new WeakDelegate(@delegate);
-        };
+    Because of = () => exception = Catch.Exception(() => weak_delegate.DynamicInvoke(43, "blah"));
 
-        Because of = () => exception = Catch.Exception(() => weak_delegate.DynamicInvoke(43, "blah"));
-
-        It should_throw_invalid_signature_exception = () => exception.ShouldBeOfExactType<InvalidMethodSignature>();
-    }
+    It should_throw_invalid_signature_exception = () => exception.ShouldBeOfExactType<InvalidMethodSignature>();
 }

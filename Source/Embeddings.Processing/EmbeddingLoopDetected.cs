@@ -5,20 +5,19 @@
 using System;
 using Dolittle.Runtime.Embeddings.Store;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Exception that gets thrown when a loop is detected in an embedding.
+/// </summary>
+public class EmbeddingLoopDetected : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a loop is detected in an embedding.
+    /// Initializes a new instance of the <see cref="EmbeddingLoopDetected"/> class.
     /// </summary>
-    public class EmbeddingLoopDetected : Exception
+    /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
+    public EmbeddingLoopDetected(EmbeddingId embedding)
+        : base($"Embedding loop was detected for embedding {embedding.Value}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmbeddingLoopDetected"/> class.
-        /// </summary>
-        /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
-        public EmbeddingLoopDetected(EmbeddingId embedding)
-            : base($"Embedding loop was detected for embedding {embedding.Value}")
-        {
-        }
     }
 }

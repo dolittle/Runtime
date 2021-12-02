@@ -9,87 +9,86 @@ using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyModel;
 
-namespace Dolittle.Runtime.Assemblies
+namespace Dolittle.Runtime.Assemblies;
+
+/// <summary>
+/// Represents an implementation of <see cref="IAssemblyProvider"/>.
+/// </summary>
+[Singleton]
+public class AssemblyProvider : IAssemblyProvider
 {
+    static readonly object _lockObject = new();
+    readonly AssemblyComparer _comparer = new();
+    readonly IEnumerable<ICanProvideAssemblies> _assemblyProviders;
+    readonly IAssemblyFilters _assemblyFilters;
+    readonly IAssemblyUtility _assemblyUtility;
+    readonly Dictionary<string, Library> _libraries = new();
+    readonly List<Assembly> _assemblies = new();
+
     /// <summary>
-    /// Represents an implementation of <see cref="IAssemblyProvider"/>.
+    /// Initializes a new instance of the <see cref="AssemblyProvider"/> class.
     /// </summary>
-    [Singleton]
-    public class AssemblyProvider : IAssemblyProvider
+    /// <param name="assemblyProviders"><see cref="IEnumerable{ICanProvideAssemblies}">Providers</see> to provide assemblies.</param>
+    /// <param name="assemblyFilters"><see cref="IAssemblyFilters"/> to use for filtering assemblies through.</param>
+    /// <param name="assemblyUtility">An <see cref="IAssemblyUtility"/>.</param>
+    public AssemblyProvider(
+        IEnumerable<ICanProvideAssemblies> assemblyProviders,
+        IAssemblyFilters assemblyFilters,
+        IAssemblyUtility assemblyUtility)
     {
-        static readonly object _lockObject = new();
-        readonly AssemblyComparer _comparer = new();
-        readonly IEnumerable<ICanProvideAssemblies> _assemblyProviders;
-        readonly IAssemblyFilters _assemblyFilters;
-        readonly IAssemblyUtility _assemblyUtility;
-        readonly Dictionary<string, Library> _libraries = new();
-        readonly List<Assembly> _assemblies = new();
+        _assemblyProviders = assemblyProviders;
+        _assemblyFilters = assemblyFilters;
+        _assemblyUtility = assemblyUtility;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AssemblyProvider"/> class.
-        /// </summary>
-        /// <param name="assemblyProviders"><see cref="IEnumerable{ICanProvideAssemblies}">Providers</see> to provide assemblies.</param>
-        /// <param name="assemblyFilters"><see cref="IAssemblyFilters"/> to use for filtering assemblies through.</param>
-        /// <param name="assemblyUtility">An <see cref="IAssemblyUtility"/>.</param>
-        public AssemblyProvider(
-            IEnumerable<ICanProvideAssemblies> assemblyProviders,
-            IAssemblyFilters assemblyFilters,
-            IAssemblyUtility assemblyUtility)
+        Populate();
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<Assembly> GetAll()
+    {
+        return _assemblies;
+    }
+
+    void Populate()
+    {
+        foreach (var provider in _assemblyProviders)
         {
-            _assemblyProviders = assemblyProviders;
-            _assemblyFilters = assemblyFilters;
-            _assemblyUtility = assemblyUtility;
-
-            Populate();
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<Assembly> GetAll()
-        {
-            return _assemblies;
-        }
-
-        void Populate()
-        {
-            foreach (var provider in _assemblyProviders)
+            provider.Libraries.ForEach(library =>
             {
-                provider.Libraries.ForEach(library =>
-                {
-                    if (!_libraries.ContainsKey(library.Name)) _libraries.Add(library.Name, library);
-                });
+                if (!_libraries.ContainsKey(library.Name)) _libraries.Add(library.Name, library);
+            });
 
-                var assembliesToInclude = provider.Libraries.Where(
-                    library =>
-                        _assemblyFilters.ShouldInclude(library) &&
-                        _assemblyUtility.IsAssembly(library));
+            var assembliesToInclude = provider.Libraries.Where(
+                library =>
+                    _assemblyFilters.ShouldInclude(library) &&
+                    _assemblyUtility.IsAssembly(library));
 
-                var filtered = assembliesToInclude.ToArray();
+            var filtered = assembliesToInclude.ToArray();
 
-                assembliesToInclude.Select(provider.GetFrom).ForEach(AddAssembly);
-            }
+            assembliesToInclude.Select(provider.GetFrom).ForEach(AddAssembly);
         }
+    }
 
-        void ReapplyFilter()
+    void ReapplyFilter()
+    {
+        var assembliesToRemove = _assemblies.Where(a =>
         {
-            var assembliesToRemove = _assemblies.Where(a =>
-            {
-                var name = a.GetName().Name;
-                if (!_libraries.ContainsKey(name)) return true;
-                return !_assemblyFilters.ShouldInclude(_libraries[name]);
-            }).ToArray();
-            assembliesToRemove.ForEach((a) => _assemblies.Remove(a));
-        }
+            var name = a.GetName().Name;
+            if (!_libraries.ContainsKey(name)) return true;
+            return !_assemblyFilters.ShouldInclude(_libraries[name]);
+        }).ToArray();
+        assembliesToRemove.ForEach((a) => _assemblies.Remove(a));
+    }
 
-        void AddAssembly(Assembly assembly)
+    void AddAssembly(Assembly assembly)
+    {
+        lock (_lockObject)
         {
-            lock (_lockObject)
+            if (!_assemblies.Contains(assembly, _comparer) &&
+                !_assemblyUtility.IsDynamic(assembly))
             {
-                if (!_assemblies.Contains(assembly, _comparer) &&
-                    !_assemblyUtility.IsDynamic(assembly))
-                {
-                    _assemblies.Add(assembly);
-                    ReapplyFilter();
-                }
+                _assemblies.Add(assembly);
+                ReapplyFilter();
             }
         }
     }

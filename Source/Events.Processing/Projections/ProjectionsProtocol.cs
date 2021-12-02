@@ -9,81 +9,80 @@ using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Defini
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Projections
+namespace Dolittle.Runtime.Events.Processing.Projections;
+
+/// <summary>
+/// Represents the <see cref="IProjectionsProtocol" />.
+/// </summary>
+public class ProjectionsProtocol : IProjectionsProtocol
 {
-    /// <summary>
-    /// Represents the <see cref="IProjectionsProtocol" />.
-    /// </summary>
-    public class ProjectionsProtocol : IProjectionsProtocol
-    {
-        /// <inheritdoc/>
-        public ProjectionRegistrationArguments ConvertConnectArguments(ProjectionRegistrationRequest arguments)
-            => new(
-                arguments.CallContext.ExecutionContext.ToExecutionContext(),
-                new ProjectionDefinition(
-                    arguments.ProjectionId.ToGuid(),
-                    arguments.ScopeId.ToGuid(),
-                    arguments.Events.Select(eventSelector => eventSelector.SelectorCase switch
-                    {
-                        Contracts.ProjectionEventSelector.SelectorOneofCase.EventSourceKeySelector => RuntimeProjectionEventSelector.EventSourceId(eventSelector.EventType.Id.ToGuid()),
-                        Contracts.ProjectionEventSelector.SelectorOneofCase.PartitionKeySelector => RuntimeProjectionEventSelector.PartitionId(eventSelector.EventType.Id.ToGuid()),
-                        Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
-                        _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
-                    }),
-                    arguments.InitialState
-                ));
-
-        /// <inheritdoc/>
-        public ProjectionRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
-            => new() { Failure = new Dolittle.Protobuf.Contracts.Failure { Id = ProjectionFailures.FailedToRegisterProjection.Value.ToProtobuf(), Reason = failureMessage } };
-
-        /// <inheritdoc/>
-        public ReverseCallArgumentsContext GetArgumentsContext(ProjectionRegistrationRequest message)
-            => message.CallContext;
-
-        /// <inheritdoc/>
-        public ProjectionRegistrationRequest GetConnectArguments(ProjectionClientToRuntimeMessage message)
-            => message.RegistrationRequest;
-
-        /// <inheritdoc/>
-        public Pong GetPong(ProjectionClientToRuntimeMessage message)
-            => message.Pong;
-
-        /// <inheritdoc/>
-        public ProjectionResponse GetResponse(ProjectionClientToRuntimeMessage message)
-            => message.HandleResult;
-
-        /// <inheritdoc/>
-        public ReverseCallResponseContext GetResponseContext(ProjectionResponse message)
-            => message.CallContext;
-
-        /// <inheritdoc/>
-        public void SetConnectResponse(ProjectionRegistrationResponse arguments, ProjectionRuntimeToClientMessage message)
-            => message.RegistrationResponse = arguments;
-
-        /// <inheritdoc/>
-        public void SetPing(ProjectionRuntimeToClientMessage message, Ping ping)
-            => message.Ping = ping;
-
-        /// <inheritdoc/>
-        public void SetRequest(ProjectionRequest request, ProjectionRuntimeToClientMessage message)
-            => message.HandleRequest = request;
-
-        /// <inheritdoc/>
-        public void SetRequestContext(ReverseCallRequestContext context, ProjectionRequest request)
-            => request.CallContext = context;
-
-        /// <inheritdoc/>
-        public ConnectArgumentsValidationResult ValidateConnectArguments(ProjectionRegistrationArguments arguments)
-        {
-            foreach (var eventType in arguments.ProjectionDefinition.Events.GroupBy(_ => _.EventType))
-            {
-                if (eventType.Count() > 1)
+    /// <inheritdoc/>
+    public ProjectionRegistrationArguments ConvertConnectArguments(ProjectionRegistrationRequest arguments)
+        => new(
+            arguments.CallContext.ExecutionContext.ToExecutionContext(),
+            new ProjectionDefinition(
+                arguments.ProjectionId.ToGuid(),
+                arguments.ScopeId.ToGuid(),
+                arguments.Events.Select(eventSelector => eventSelector.SelectorCase switch
                 {
-                    return ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
-                }
+                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventSourceKeySelector => RuntimeProjectionEventSelector.EventSourceId(eventSelector.EventType.Id.ToGuid()),
+                    Contracts.ProjectionEventSelector.SelectorOneofCase.PartitionKeySelector => RuntimeProjectionEventSelector.PartitionId(eventSelector.EventType.Id.ToGuid()),
+                    Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
+                    _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
+                }),
+                arguments.InitialState
+            ));
+
+    /// <inheritdoc/>
+    public ProjectionRegistrationResponse CreateFailedConnectResponse(FailureReason failureMessage)
+        => new() { Failure = new Dolittle.Protobuf.Contracts.Failure { Id = ProjectionFailures.FailedToRegisterProjection.Value.ToProtobuf(), Reason = failureMessage } };
+
+    /// <inheritdoc/>
+    public ReverseCallArgumentsContext GetArgumentsContext(ProjectionRegistrationRequest message)
+        => message.CallContext;
+
+    /// <inheritdoc/>
+    public ProjectionRegistrationRequest GetConnectArguments(ProjectionClientToRuntimeMessage message)
+        => message.RegistrationRequest;
+
+    /// <inheritdoc/>
+    public Pong GetPong(ProjectionClientToRuntimeMessage message)
+        => message.Pong;
+
+    /// <inheritdoc/>
+    public ProjectionResponse GetResponse(ProjectionClientToRuntimeMessage message)
+        => message.HandleResult;
+
+    /// <inheritdoc/>
+    public ReverseCallResponseContext GetResponseContext(ProjectionResponse message)
+        => message.CallContext;
+
+    /// <inheritdoc/>
+    public void SetConnectResponse(ProjectionRegistrationResponse arguments, ProjectionRuntimeToClientMessage message)
+        => message.RegistrationResponse = arguments;
+
+    /// <inheritdoc/>
+    public void SetPing(ProjectionRuntimeToClientMessage message, Ping ping)
+        => message.Ping = ping;
+
+    /// <inheritdoc/>
+    public void SetRequest(ProjectionRequest request, ProjectionRuntimeToClientMessage message)
+        => message.HandleRequest = request;
+
+    /// <inheritdoc/>
+    public void SetRequestContext(ReverseCallRequestContext context, ProjectionRequest request)
+        => request.CallContext = context;
+
+    /// <inheritdoc/>
+    public ConnectArgumentsValidationResult ValidateConnectArguments(ProjectionRegistrationArguments arguments)
+    {
+        foreach (var eventType in arguments.ProjectionDefinition.Events.GroupBy(_ => _.EventType))
+        {
+            if (eventType.Count() > 1)
+            {
+                return ConnectArgumentsValidationResult.Failed($"Event {eventType.Key.Value} was specified more than once");
             }
-            return ConnectArgumentsValidationResult.Ok;
         }
+        return ConnectArgumentsValidationResult.Ok;
     }
 }

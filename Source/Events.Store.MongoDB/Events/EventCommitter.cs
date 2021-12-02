@@ -9,117 +9,116 @@ using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Events
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
+
+/// <summary>
+/// Represents an implementation of <see cref="IEventCommitter" />.
+/// </summary>
+public class EventCommitter : IEventCommitter
 {
+    readonly IStreams _streams;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IEventCommitter" />.
+    /// Initializes a new instance of the <see cref="EventCommitter"/> class.
     /// </summary>
-    public class EventCommitter : IEventCommitter
+    /// <param name="streams">The <see cref="IStreams" />.</param>
+    public EventCommitter(IStreams streams)
     {
-        readonly IStreams _streams;
+        _streams = streams;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventCommitter"/> class.
-        /// </summary>
-        /// <param name="streams">The <see cref="IStreams" />.</param>
-        public EventCommitter(IStreams streams)
-        {
-            _streams = streams;
-        }
+    /// <inheritdoc/>
+    public async Task<CommittedEvent> CommitEvent(
+        IClientSessionHandle transaction,
+        EventLogSequenceNumber sequenceNumber,
+        DateTimeOffset occurred,
+        Execution.ExecutionContext executionContext,
+        UncommittedEvent @event,
+        CancellationToken cancellationToken)
+    {
+        await InsertEvent(
+            transaction,
+            sequenceNumber,
+            occurred,
+            @event.EventSource,
+            @event,
+            new AggregateMetadata(),
+            executionContext,
+            cancellationToken).ConfigureAwait(false);
 
-        /// <inheritdoc/>
-        public async Task<CommittedEvent> CommitEvent(
-            IClientSessionHandle transaction,
-            EventLogSequenceNumber sequenceNumber,
-            DateTimeOffset occurred,
-            Execution.ExecutionContext executionContext,
-            UncommittedEvent @event,
-            CancellationToken cancellationToken)
-        {
-            await InsertEvent(
-                transaction,
-                sequenceNumber,
-                occurred,
-                @event.EventSource,
-                @event,
-                new AggregateMetadata(),
-                executionContext,
-                cancellationToken).ConfigureAwait(false);
+        return new CommittedEvent(
+            sequenceNumber,
+            occurred,
+            @event.EventSource,
+            executionContext,
+            @event.Type,
+            @event.Public,
+            @event.Content);
+    }
 
-            return new CommittedEvent(
-                sequenceNumber,
-                occurred,
-                @event.EventSource,
-                executionContext,
-                @event.Type,
-                @event.Public,
-                @event.Content);
-        }
+    /// <inheritdoc/>
+    public async Task<CommittedAggregateEvent> CommitAggregateEvent(
+        IClientSessionHandle transaction,
+        Artifact aggregateRoot,
+        AggregateRootVersion aggregateRootVersion,
+        EventLogSequenceNumber version,
+        DateTimeOffset occurred,
+        EventSourceId eventSource,
+        Execution.ExecutionContext executionContext,
+        UncommittedEvent @event,
+        CancellationToken cancellationToken)
+    {
+        await InsertEvent(
+            transaction,
+            version,
+            occurred,
+            eventSource,
+            @event,
+            new AggregateMetadata
+            {
+                WasAppliedByAggregate = true,
+                TypeId = aggregateRoot.Id,
+                TypeGeneration = aggregateRoot.Generation,
+                Version = aggregateRootVersion
+            },
+            executionContext,
+            cancellationToken).ConfigureAwait(false);
+        return new CommittedAggregateEvent(
+            aggregateRoot,
+            aggregateRootVersion,
+            version,
+            occurred,
+            eventSource,
+            executionContext,
+            @event.Type,
+            @event.Public,
+            @event.Content);
+    }
 
-        /// <inheritdoc/>
-        public async Task<CommittedAggregateEvent> CommitAggregateEvent(
-            IClientSessionHandle transaction,
-            Artifact aggregateRoot,
-            AggregateRootVersion aggregateRootVersion,
-            EventLogSequenceNumber version,
-            DateTimeOffset occurred,
-            EventSourceId eventSource,
-            Execution.ExecutionContext executionContext,
-            UncommittedEvent @event,
-            CancellationToken cancellationToken)
-        {
-            await InsertEvent(
-                transaction,
+    Task InsertEvent(
+        IClientSessionHandle transaction,
+        EventLogSequenceNumber version,
+        DateTimeOffset occurred,
+        EventSourceId eventSource,
+        UncommittedEvent @event,
+        AggregateMetadata aggregate,
+        Execution.ExecutionContext executionContext,
+        CancellationToken cancellationToken)
+    {
+        return _streams.DefaultEventLog.InsertOneAsync(
+            transaction,
+            new Event(
                 version,
-                occurred,
-                eventSource,
-                @event,
-                new AggregateMetadata
-                {
-                    WasAppliedByAggregate = true,
-                    TypeId = aggregateRoot.Id,
-                    TypeGeneration = aggregateRoot.Generation,
-                    Version = aggregateRootVersion
-                },
-                executionContext,
-                cancellationToken).ConfigureAwait(false);
-            return new CommittedAggregateEvent(
-                aggregateRoot,
-                aggregateRootVersion,
-                version,
-                occurred,
-                eventSource,
-                executionContext,
-                @event.Type,
-                @event.Public,
-                @event.Content);
-        }
-
-        Task InsertEvent(
-            IClientSessionHandle transaction,
-            EventLogSequenceNumber version,
-            DateTimeOffset occurred,
-            EventSourceId eventSource,
-            UncommittedEvent @event,
-            AggregateMetadata aggregate,
-            Execution.ExecutionContext executionContext,
-            CancellationToken cancellationToken)
-        {
-            return _streams.DefaultEventLog.InsertOneAsync(
-                transaction,
-                new Event(
-                    version,
-                    executionContext.ToStoreRepresentation(),
-                    new EventMetadata(
-                        occurred.UtcDateTime,
-                        eventSource,
-                        @event.Type.Id,
-                        @event.Type.Generation,
-                        @event.Public),
-                    aggregate,
-                    new EventHorizonMetadata(),
-                    BsonDocument.Parse(@event.Content)),
-                cancellationToken: cancellationToken);
-        }
+                executionContext.ToStoreRepresentation(),
+                new EventMetadata(
+                    occurred.UtcDateTime,
+                    eventSource,
+                    @event.Type.Id,
+                    @event.Type.Generation,
+                    @event.Public),
+                aggregate,
+                new EventHorizonMetadata(),
+                BsonDocument.Parse(@event.Content)),
+            cancellationToken: cancellationToken);
     }
 }

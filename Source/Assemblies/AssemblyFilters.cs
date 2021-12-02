@@ -4,28 +4,27 @@
 using Dolittle.Runtime.Assemblies.Configuration;
 using Microsoft.Extensions.DependencyModel;
 
-namespace Dolittle.Runtime.Assemblies
+namespace Dolittle.Runtime.Assemblies;
+
+/// <summary>
+/// Represents an implementation of <see cref="IAssemblyFilters"/>.
+/// </summary>
+public class AssemblyFilters : IAssemblyFilters
 {
+    readonly AssembliesConfiguration _assembliesConfiguration;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IAssemblyFilters"/>.
+    /// Initializes a new instance of the <see cref="AssemblyFilters"/> class.
     /// </summary>
-    public class AssemblyFilters : IAssemblyFilters
+    /// <param name="assembliesConfiguration">The <see cref="AssembliesConfiguration"/>.</param>
+    public AssemblyFilters(AssembliesConfiguration assembliesConfiguration)
     {
-        readonly AssembliesConfiguration _assembliesConfiguration;
+        _assembliesConfiguration = assembliesConfiguration;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AssemblyFilters"/> class.
-        /// </summary>
-        /// <param name="assembliesConfiguration">The <see cref="AssembliesConfiguration"/>.</param>
-        public AssemblyFilters(AssembliesConfiguration assembliesConfiguration)
-        {
-            _assembliesConfiguration = assembliesConfiguration;
-        }
-
-        /// <inheritdoc/>
-        public bool ShouldInclude(Library library)
-        {
-            return _assembliesConfiguration.Specification.IsSatisfiedBy(library);
-        }
+    /// <inheritdoc/>
+    public bool ShouldInclude(Library library)
+    {
+        return _assembliesConfiguration.Specification.IsSatisfiedBy(library);
     }
 }

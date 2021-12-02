@@ -3,10 +3,9 @@
 
 using Dolittle.Runtime.ResourceTypes;
 
-namespace Dolittle.Runtime.Applications.Configuration
-{
-    /// <summary>
-    /// Represents a configuration that describes which <see cref="ResourceTypeImplementation"/> that's configured for a <see cref="ResourceType"/>. Used in <see cref="BoundedContextConfiguration"/> for serialization .
-    /// </summary>
-    public record ResourceTypeImplementationConfiguration(string Production, string Development);
-}
+namespace Dolittle.Runtime.Applications.Configuration;
+
+/// <summary>
+/// Represents a configuration that describes which <see cref="ResourceTypeImplementation"/> that's configured for a <see cref="ResourceType"/>. Used in <see cref="BoundedContextConfiguration"/> for serialization .
+/// </summary>
+public record ResourceTypeImplementationConfiguration(string Production, string Development);

@@ -3,13 +3,12 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.DependencyInversion.for_BindingProviderBuilder
-{
-    public class when_binding_to_generic_type : given.a_binding_provider_builder
-    {
-        static Binding result;
-        Because of = () => result = builder.Bind<string>().Build();
+namespace Dolittle.Runtime.DependencyInversion.for_BindingProviderBuilder;
 
-        It should_hold_the_service_type_specified = () => result.Service.ShouldEqual(typeof(string));
-    }
+public class when_binding_to_generic_type : given.a_binding_provider_builder
+{
+    static Binding result;
+    Because of = () => result = builder.Bind<string>().Build();
+
+    It should_hold_the_service_type_specified = () => result.Service.ShouldEqual(typeof(string));
 }

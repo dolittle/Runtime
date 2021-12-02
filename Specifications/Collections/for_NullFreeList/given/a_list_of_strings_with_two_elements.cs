@@ -3,12 +3,11 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Collections.for_NullFreeList.given
-{
-    public class a_list_of_strings_with_two_elements
-    {
-        public static NullFreeList<string> list;
+namespace Dolittle.Runtime.Collections.for_NullFreeList.given;
 
-        Establish context = () => list = new NullFreeList<string> { "one", "two" };
-    }
+public class a_list_of_strings_with_two_elements
+{
+    public static NullFreeList<string> list;
+
+    Establish context = () => list = new NullFreeList<string> { "one", "two" };
 }

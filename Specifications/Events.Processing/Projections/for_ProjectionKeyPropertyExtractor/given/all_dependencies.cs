@@ -7,14 +7,13 @@ using Dolittle.Runtime.Types;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.given
+namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.given;
+
+public class all_dependencies : a_serializer
 {
-    public class all_dependencies : a_serializer
+    protected static ProjectionKeyPropertyExtractor extractor;
+    Establish context = () =>
     {
-        protected static ProjectionKeyPropertyExtractor extractor;
-        Establish context = () =>
-        {
-            extractor = new ProjectionKeyPropertyExtractor();
-        };
-    }
+        extractor = new ProjectionKeyPropertyExtractor();
+    };
 }

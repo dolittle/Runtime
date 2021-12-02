@@ -10,27 +10,26 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting;
+
+public class and_fetching_current_state_fails : given.all_dependencies_and_a_key
 {
-    public class and_fetching_current_state_fails : given.all_dependencies_and_a_key
+    static Task task;
+    static Exception exception;
+
+    Establish context = () =>
     {
-        static Task task;
-        static Exception exception;
+        exception = new Exception();
+        task = embedding_processor.Start(cancellation_token);
+        embedding_store
+            .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
+    };
 
-        Establish context = () =>
-        {
-            exception = new Exception();
-            task = embedding_processor.Start(cancellation_token);
-            embedding_store
-                .Setup(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
-        };
+    static Try result;
 
-        static Try result;
+    Because of = () => result = embedding_processor.Delete(key, cancellation_token).GetAwaiter().GetResult();
 
-        Because of = () => result = embedding_processor.Delete(key, cancellation_token).GetAwaiter().GetResult();
-
-        It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
-        It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
-    }
+    It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+    It should_return_the_failure = () => result.Exception.ShouldEqual(exception);
 }

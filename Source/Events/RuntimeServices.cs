@@ -4,33 +4,32 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
+/// runtime service implementations for Heads.
+/// </summary>
+public class RuntimeServices : ICanBindRuntimeServices
 {
+    readonly EventTypesService _eventTypes;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
-    /// runtime service implementations for Heads.
+    /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
     /// </summary>
-    public class RuntimeServices : ICanBindRuntimeServices
+    /// <param name="eventTypes">The <see cref="EventTypesService"/>.</param>
+    public RuntimeServices(EventTypesService eventTypes)
     {
-        readonly EventTypesService _eventTypes;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
-        /// </summary>
-        /// <param name="eventTypes">The <see cref="EventTypesService"/>.</param>
-        public RuntimeServices(EventTypesService eventTypes)
-        {
-            _eventTypes = eventTypes;
-        }
-
-        /// <inheritdoc/>
-        public ServiceAspect Aspect => "Events";
-
-        /// <inheritdoc/>
-        public IEnumerable<Service> BindServices() =>
-            new[]
-            {
-                new Service(_eventTypes, Contracts.EventTypes.BindService(_eventTypes), Contracts.EventTypes.Descriptor)
-            };
+        _eventTypes = eventTypes;
     }
+
+    /// <inheritdoc/>
+    public ServiceAspect Aspect => "Events";
+
+    /// <inheritdoc/>
+    public IEnumerable<Service> BindServices() =>
+        new[]
+        {
+            new Service(_eventTypes, Contracts.EventTypes.BindService(_eventTypes), Contracts.EventTypes.Descriptor)
+        };
 }

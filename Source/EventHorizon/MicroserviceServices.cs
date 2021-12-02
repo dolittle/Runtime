@@ -6,30 +6,29 @@ using Dolittle.Runtime.EventHorizon.Producer;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindMicroserviceServices"/> for exposing
+/// microservice service implementations.
+/// </summary>
+public class MicroserviceServices : ICanBindMicroserviceServices
 {
+    readonly ConsumerService _consumerService;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindMicroserviceServices"/> for exposing
-    /// microservice service implementations.
+    /// Initializes a new instance of the <see cref="MicroserviceServices"/> class.
     /// </summary>
-    public class MicroserviceServices : ICanBindMicroserviceServices
-    {
-        readonly ConsumerService _consumerService;
+    /// <param name="consumerService">The <see cref="ConsumerService" />.</param>
+    public MicroserviceServices(ConsumerService consumerService) => _consumerService = consumerService;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MicroserviceServices"/> class.
-        /// </summary>
-        /// <param name="consumerService">The <see cref="ConsumerService" />.</param>
-        public MicroserviceServices(ConsumerService consumerService) => _consumerService = consumerService;
+    /// <inheritdoc/>
+    public ServiceAspect Aspect => "EventHorizon";
 
-        /// <inheritdoc/>
-        public ServiceAspect Aspect => "EventHorizon";
-
-        /// <inheritdoc/>
-        public IEnumerable<Service> BindServices() =>
-            new Service[]
-            {
-                new(_consumerService, Contracts.Consumer.BindService(_consumerService), Contracts.Consumer.Descriptor)
-            };
-    }
+    /// <inheritdoc/>
+    public IEnumerable<Service> BindServices() =>
+        new Service[]
+        {
+            new(_consumerService, Contracts.Consumer.BindService(_consumerService), Contracts.Consumer.Descriptor)
+        };
 }

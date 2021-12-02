@@ -3,19 +3,18 @@
 
 using Dolittle.Runtime.Assemblies;
 
-namespace Dolittle.Runtime.DependencyInversion
+namespace Dolittle.Runtime.DependencyInversion;
+
+/// <summary>
+/// Defines a system that provide a <see cref="IContainer"/> implementation.
+/// </summary>
+public interface ICanProvideContainer
 {
     /// <summary>
-    /// Defines a system that provide a <see cref="IContainer"/> implementation.
+    /// Provide the container prebuilt with the given bindings.
     /// </summary>
-    public interface ICanProvideContainer
-    {
-        /// <summary>
-        /// Provide the container prebuilt with the given bindings.
-        /// </summary>
-        /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
-        /// <param name="bindings"><see cref="IBindingCollection">Bindings</see> provided.</param>
-        /// <returns>A <see cref="IContainer"/> instance.</returns>
-        IContainer Provide(IAssemblies assemblies, IBindingCollection bindings);
-    }
+    /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
+    /// <param name="bindings"><see cref="IBindingCollection">Bindings</see> provided.</param>
+    /// <returns>A <see cref="IContainer"/> instance.</returns>
+    IContainer Provide(IAssemblies assemblies, IBindingCollection bindings);
 }

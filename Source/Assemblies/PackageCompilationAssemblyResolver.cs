@@ -9,133 +9,132 @@ using System.Runtime.InteropServices;
 using Microsoft.Extensions.DependencyModel;
 using Microsoft.Extensions.DependencyModel.Resolution;
 
-namespace Dolittle.Runtime.Assemblies
+namespace Dolittle.Runtime.Assemblies;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICompilationAssemblyResolver"/>.
+/// </summary>
+/// <remarks>
+/// This is based on https://github.com/dotnet/core-setup/blob/master/src/managed/Microsoft.Extensions.DependencyModel/Resolution/PackageCompilationAssemblyResolver.cs.
+/// We need it to actually find the path to the assembly if its not in the library, so extending the behavior.
+/// </remarks>
+public class PackageCompilationAssemblyResolver : ICompilationAssemblyResolver
 {
+    readonly string[] _nugetPackageDirectories;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICompilationAssemblyResolver"/>.
+    /// Initializes a new instance of the <see cref="PackageCompilationAssemblyResolver"/> class.
     /// </summary>
-    /// <remarks>
-    /// This is based on https://github.com/dotnet/core-setup/blob/master/src/managed/Microsoft.Extensions.DependencyModel/Resolution/PackageCompilationAssemblyResolver.cs.
-    /// We need it to actually find the path to the assembly if its not in the library, so extending the behavior.
-    /// </remarks>
-    public class PackageCompilationAssemblyResolver : ICompilationAssemblyResolver
+    public PackageCompilationAssemblyResolver()
     {
-        readonly string[] _nugetPackageDirectories;
+        _nugetPackageDirectories = GetDefaultProbeDirectories();
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PackageCompilationAssemblyResolver"/> class.
-        /// </summary>
-        public PackageCompilationAssemblyResolver()
+    /// <inheritdoc/>
+    public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)
+    {
+        if (_nugetPackageDirectories == null || _nugetPackageDirectories.Length == 0 ||
+            !string.Equals(library.Type, "package", StringComparison.OrdinalIgnoreCase))
         {
-            _nugetPackageDirectories = GetDefaultProbeDirectories();
-        }
-
-        /// <inheritdoc/>
-        public bool TryResolveAssemblyPaths(CompilationLibrary library, List<string> assemblies)
-        {
-            if (_nugetPackageDirectories == null || _nugetPackageDirectories.Length == 0 ||
-                !string.Equals(library.Type, "package", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            foreach (var directory in _nugetPackageDirectories)
-            {
-                if (TryResolvePackagePath(library, directory, out var packagePath))
-                {
-                    if (TryResolveFromPackagePath(library, packagePath, out var fullPathsFromPackage))
-                    {
-                        if (fullPathsFromPackage.Any())
-                        {
-                            assemblies.AddRange(fullPathsFromPackage);
-                        }
-                        else
-                        {
-                            var libPath = Path.Join(packagePath, "lib");
-                            var dllName = $"{library.Name}.dll";
-                            var paths = Directory.EnumerateFiles(libPath, dllName, SearchOption.AllDirectories);
-                            assemblies.AddRange(paths);
-                        }
-
-                        return true;
-                    }
-                }
-            }
-
             return false;
         }
 
-        static string[] GetDefaultProbeDirectories()
+        foreach (var directory in _nugetPackageDirectories)
         {
-            var probeDirectories = AppDomain.CurrentDomain.GetData("PROBING_DIRECTORIES");
-            var listOfDirectories = probeDirectories as string;
-
-            if (!string.IsNullOrEmpty(listOfDirectories))
+            if (TryResolvePackagePath(library, directory, out var packagePath))
             {
-                return listOfDirectories.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
-            }
-
-            var packageDirectory = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
-
-            if (!string.IsNullOrEmpty(packageDirectory))
-            {
-                return new string[] { packageDirectory };
-            }
-
-            string basePath;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                basePath = Environment.GetEnvironmentVariable("USERPROFILE");
-            }
-            else
-            {
-                basePath = Environment.GetEnvironmentVariable("HOME");
-            }
-
-            if (string.IsNullOrEmpty(basePath))
-            {
-                return new string[] { string.Empty };
-            }
-
-            return new string[] { Path.Combine(basePath, ".nuget", "packages") };
-        }
-
-        static bool TryResolveFromPackagePath(CompilationLibrary library, string basePath, out IEnumerable<string> results)
-        {
-            var paths = new List<string>();
-
-            foreach (var assembly in library.Assemblies)
-            {
-                if (!TryResolveAssemblyFile(basePath, assembly, out var fullName))
+                if (TryResolveFromPackagePath(library, packagePath, out var fullPathsFromPackage))
                 {
-                    results = null;
-                    return false;
+                    if (fullPathsFromPackage.Any())
+                    {
+                        assemblies.AddRange(fullPathsFromPackage);
+                    }
+                    else
+                    {
+                        var libPath = Path.Join(packagePath, "lib");
+                        var dllName = $"{library.Name}.dll";
+                        var paths = Directory.EnumerateFiles(libPath, dllName, SearchOption.AllDirectories);
+                        assemblies.AddRange(paths);
+                    }
+
+                    return true;
                 }
-
-                paths.Add(fullName);
             }
-
-            results = paths;
-            return true;
         }
 
-        static bool TryResolvePackagePath(CompilationLibrary library, string basePath, out string packagePath)
+        return false;
+    }
+
+    static string[] GetDefaultProbeDirectories()
+    {
+        var probeDirectories = AppDomain.CurrentDomain.GetData("PROBING_DIRECTORIES");
+        var listOfDirectories = probeDirectories as string;
+
+        if (!string.IsNullOrEmpty(listOfDirectories))
         {
-            var path = library.Path;
-            if (string.IsNullOrEmpty(path))
+            return listOfDirectories.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        var packageDirectory = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
+
+        if (!string.IsNullOrEmpty(packageDirectory))
+        {
+            return new string[] { packageDirectory };
+        }
+
+        string basePath;
+        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        {
+            basePath = Environment.GetEnvironmentVariable("USERPROFILE");
+        }
+        else
+        {
+            basePath = Environment.GetEnvironmentVariable("HOME");
+        }
+
+        if (string.IsNullOrEmpty(basePath))
+        {
+            return new string[] { string.Empty };
+        }
+
+        return new string[] { Path.Combine(basePath, ".nuget", "packages") };
+    }
+
+    static bool TryResolveFromPackagePath(CompilationLibrary library, string basePath, out IEnumerable<string> results)
+    {
+        var paths = new List<string>();
+
+        foreach (var assembly in library.Assemblies)
+        {
+            if (!TryResolveAssemblyFile(basePath, assembly, out var fullName))
             {
-                path = Path.Combine(library.Name, library.Version);
+                results = null;
+                return false;
             }
 
-            packagePath = Path.Combine(basePath, path);
-
-            return Directory.Exists(packagePath);
+            paths.Add(fullName);
         }
 
-        static bool TryResolveAssemblyFile(string basePath, string assemblyPath, out string fullName)
+        results = paths;
+        return true;
+    }
+
+    static bool TryResolvePackagePath(CompilationLibrary library, string basePath, out string packagePath)
+    {
+        var path = library.Path;
+        if (string.IsNullOrEmpty(path))
         {
-            fullName = Path.Combine(basePath, assemblyPath);
-            return File.Exists(fullName);
+            path = Path.Combine(library.Name, library.Version);
         }
+
+        packagePath = Path.Combine(basePath, path);
+
+        return Directory.Exists(packagePath);
+    }
+
+    static bool TryResolveAssemblyFile(string basePath, string assemblyPath, out string fullName)
+    {
+        fullName = Path.Combine(basePath, assemblyPath);
+        return File.Exists(fullName);
     }
 }

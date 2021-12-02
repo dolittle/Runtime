@@ -4,17 +4,16 @@
 using System.Collections.Generic;
 using Prometheus;
 
-namespace Dolittle.Runtime.Metrics
+namespace Dolittle.Runtime.Metrics;
+
+/// <summary>
+/// Defines a system for providing metric collectors.
+/// </summary>
+public interface IMetricProviders
 {
     /// <summary>
-    /// Defines a system for providing metric collectors.
+    /// Provide all collectors of metrics in the system.
     /// </summary>
-    public interface IMetricProviders
-    {
-        /// <summary>
-        /// Provide all collectors of metrics in the system.
-        /// </summary>
-        /// <returns><see cref="IEnumerable{T}">Collection</see>.</returns>
-        IEnumerable<Collector> Provide();
-    }
+    /// <returns><see cref="IEnumerable{T}">Collection</see>.</returns>
+    IEnumerable<Collector> Provide();
 }

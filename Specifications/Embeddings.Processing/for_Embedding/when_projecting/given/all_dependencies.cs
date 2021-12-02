@@ -7,26 +7,25 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.given
+namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_projecting.given;
+
+public class all_dependencies : for_Embedding.given.all_dependencies
 {
-    public class all_dependencies : for_Embedding.given.all_dependencies
+    protected static UncommittedEvent @event;
+    protected static ProjectionCurrentState current_state;
+
+    Establish context = () =>
     {
-        protected static UncommittedEvent @event;
-        protected static ProjectionCurrentState current_state;
+        @event = new UncommittedEvent(
+            "1a477367-3404-45e6-a2af-6cbf19693b56",
+            new Artifact(Guid.Parse("fe570d85-2619-49e4-bc72-9a8b2b2f149d"), ArtifactGeneration.First),
+            true,
+            "beautiful 😍 event to 🙅 be tested 🤓🤓");
 
-        Establish context = () =>
-        {
-            @event = new UncommittedEvent(
-                "1a477367-3404-45e6-a2af-6cbf19693b56",
-                new Artifact(Guid.Parse("fe570d85-2619-49e4-bc72-9a8b2b2f149d"), ArtifactGeneration.First),
-                true,
-                "beautiful 😍 event to 🙅 be tested 🤓🤓");
+        current_state = new ProjectionCurrentState(
+            ProjectionCurrentStateType.Persisted,
+            "projectionState",
+            "projectionKey");
 
-            current_state = new ProjectionCurrentState(
-                ProjectionCurrentStateType.Persisted,
-                "projectionState",
-                "projectionKey");
-
-        };
-    }
+    };
 }

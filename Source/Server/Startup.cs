@@ -6,48 +6,47 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-namespace Dolittle.Runtime.Server
+namespace Dolittle.Runtime.Server;
+
+/// <summary>
+/// The startup for Asp.Net Core.
+/// </summary>
+public class Startup
 {
     /// <summary>
-    /// The startup for Asp.Net Core.
+    /// Configure all services.
     /// </summary>
-    public class Startup
+    /// <param name="services"><see cref="IServiceCollection"/> to configure.</param>
+    public void ConfigureServices(IServiceCollection services)
     {
-        /// <summary>
-        /// Configure all services.
-        /// </summary>
-        /// <param name="services"><see cref="IServiceCollection"/> to configure.</param>
-        public void ConfigureServices(IServiceCollection services)
+        services.AddControllers();
+        services.AddMvc();
+        services.AddSwaggerGen();
+    }
+
+    /// <summary>
+    /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    /// </summary>
+    /// <param name="app"><see cref="IApplicationBuilder"/>.</param>
+    /// <param name="env"><see cref="IWebHostEnvironment"/>.</param>
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        if (env.IsDevelopment())
         {
-            services.AddControllers();
-            services.AddMvc();
-            services.AddSwaggerGen();
+            app.UseDeveloperExceptionPage();
         }
-
-        /// <summary>
-        /// This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        /// </summary>
-        /// <param name="app"><see cref="IApplicationBuilder"/>.</param>
-        /// <param name="env"><see cref="IWebHostEnvironment"/>.</param>
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            }
-            app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "Runtime API v1");
-            });
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Runtime API v1");
+        });
 
-            app.UseStaticFiles();
+        app.UseStaticFiles();
 
-            app.UseRouting();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
+        app.UseRouting();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
     }
 }

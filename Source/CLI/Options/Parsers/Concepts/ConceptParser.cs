@@ -7,43 +7,42 @@ using System.Reflection;
 using Dolittle.Runtime.Rudimentary;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 
-namespace Dolittle.Runtime.CLI.Options.Parsers.Concepts
+namespace Dolittle.Runtime.CLI.Options.Parsers.Concepts;
+
+/// <summary>
+/// An implementation of <see cref="IValueParser"/> that parses implementations of <see cref="ConceptAs{TValue}"/>.
+/// </summary>
+/// <typeparam name="TConcept">The Concept type.</typeparam>
+/// <typeparam name="TBase">The Concept value type.</typeparam>
+public abstract class ConceptParser<TConcept, TBase> : IValueParser
+    where TConcept: ConceptAs<TBase>
 {
-    /// <summary>
-    /// An implementation of <see cref="IValueParser"/> that parses implementations of <see cref="ConceptAs{TValue}"/>.
-    /// </summary>
-    /// <typeparam name="TConcept">The Concept type.</typeparam>
-    /// <typeparam name="TBase">The Concept value type.</typeparam>
-    public abstract class ConceptParser<TConcept, TBase> : IValueParser
-        where TConcept: ConceptAs<TBase>
+    /// <inheritdoc />
+    public Type TargetType => typeof(TConcept);
+
+    /// <inheritdoc />
+    public object Parse(string argName, string value, CultureInfo culture)
     {
-        /// <inheritdoc />
-        public Type TargetType => typeof(TConcept);
+        var constructor = typeof(TConcept).GetConstructor(new[] {typeof(TBase)});
+        ThrowIfMissingExpectedConstructor(constructor);
 
-        /// <inheritdoc />
-        public object Parse(string argName, string value, CultureInfo culture)
+        var parsed = Parse(value, culture);
+        return constructor!.Invoke(new object[] {parsed}) as TConcept;
+    }
+
+    /// <summary>
+    /// Parses the value of the provided argument as the base type.
+    /// </summary>
+    /// <param name="value">The value of the passed argument.</param>
+    /// <param name="culture">The culture that should be used to parse values.</param>
+    /// <returns>The parsed <typeparamref name="TBase"/>.</returns>
+    protected abstract TBase Parse(string value, CultureInfo culture);
+
+    static void ThrowIfMissingExpectedConstructor(ConstructorInfo constructor)
+    {
+        if (constructor == null)
         {
-            var constructor = typeof(TConcept).GetConstructor(new[] {typeof(TBase)});
-            ThrowIfMissingExpectedConstructor(constructor);
-
-            var parsed = Parse(value, culture);
-            return constructor!.Invoke(new object[] {parsed}) as TConcept;
-        }
-
-        /// <summary>
-        /// Parses the value of the provided argument as the base type.
-        /// </summary>
-        /// <param name="value">The value of the passed argument.</param>
-        /// <param name="culture">The culture that should be used to parse values.</param>
-        /// <returns>The parsed <typeparamref name="TBase"/>.</returns>
-        protected abstract TBase Parse(string value, CultureInfo culture);
-
-        static void ThrowIfMissingExpectedConstructor(ConstructorInfo constructor)
-        {
-            if (constructor == null)
-            {
-                throw new ConceptTypeDoesNotHaveExpectedConstructor(typeof(TConcept), typeof(TBase));
-            }
+            throw new ConceptTypeDoesNotHaveExpectedConstructor(typeof(TConcept), typeof(TBase));
         }
     }
 }

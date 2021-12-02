@@ -7,64 +7,63 @@ using Dolittle.Runtime.Lifecycle;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Heads
+namespace Dolittle.Runtime.Heads;
+
+/// <summary>
+/// Represents an implementation of <see cref="IConnectedHeads"/>.
+/// </summary>
+[Singleton]
+public class ConnectedHeads : IConnectedHeads
 {
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IConnectedHeads"/>.
+    /// Initializes a new instance of the <see cref="ConnectedHeads"/> class.
     /// </summary>
-    [Singleton]
-    public class ConnectedHeads : IConnectedHeads
+    /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+    public ConnectedHeads(ILogger logger)
     {
-        readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectedHeads"/> class.
-        /// </summary>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public ConnectedHeads(ILogger logger)
+    /// <inheritdoc/>
+    public ObservableCollection<Head> All { get; } = new();
+
+    /// <inheritdoc/>
+    public void Connect(Head head)
+    {
+        lock (All) All.Add(head);
+    }
+
+    /// <inheritdoc/>
+    public void Disconnect(HeadId headId)
+    {
+        lock (All)
         {
-            _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public ObservableCollection<Head> All { get; } = new();
-
-        /// <inheritdoc/>
-        public void Connect(Head head)
-        {
-            lock (All) All.Add(head);
-        }
-
-        /// <inheritdoc/>
-        public void Disconnect(HeadId headId)
-        {
-            lock (All)
+            var head = All.SingleOrDefault(_ => _.HeadId == headId);
+            if (head != null)
             {
-                var head = All.SingleOrDefault(_ => _.HeadId == headId);
-                if (head != null)
-                {
-                    _logger.LogDebug("Disconnecting head '{HeadId}'", headId);
-                    All.Remove(head);
-                }
+                _logger.LogDebug("Disconnecting head '{HeadId}'", headId);
+                All.Remove(head);
             }
         }
+    }
 
-        /// <inheritdoc/>
-        public bool IsConnected(HeadId headId)
+    /// <inheritdoc/>
+    public bool IsConnected(HeadId headId)
+    {
+        lock (All)
         {
-            lock (All)
-            {
-                return All.Any(_ => _.HeadId == headId);
-            }
+            return All.Any(_ => _.HeadId == headId);
         }
+    }
 
-        /// <inheritdoc/>
-        public Head GetById(HeadId headId)
+    /// <inheritdoc/>
+    public Head GetById(HeadId headId)
+    {
+        lock (All)
         {
-            lock (All)
-            {
-                return All.SingleOrDefault(_ => _.HeadId == headId);
-            }
+            return All.SingleOrDefault(_ => _.HeadId == headId);
         }
     }
 }

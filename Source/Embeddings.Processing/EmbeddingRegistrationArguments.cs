@@ -4,12 +4,11 @@
 using Dolittle.Runtime.Embeddings.Store.Definition;
 using Dolittle.Runtime.Execution;
 
-namespace Dolittle.Runtime.Embeddings.Processing
-{
-    /// <summary>
-    /// Represents the runtime representation of the embedding registration arguments.
-    /// </summary>
-    /// <param name="ExecutionContext">The execution context.</param>
-    /// <param name="EmbeddingDefinition">The embedding definition.</param>
-    public record EmbeddingRegistrationArguments(ExecutionContext ExecutionContext, EmbeddingDefinition Definition);
-}
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Represents the runtime representation of the embedding registration arguments.
+/// </summary>
+/// <param name="ExecutionContext">The execution context.</param>
+/// <param name="EmbeddingDefinition">The embedding definition.</param>
+public record EmbeddingRegistrationArguments(ExecutionContext ExecutionContext, EmbeddingDefinition Definition);

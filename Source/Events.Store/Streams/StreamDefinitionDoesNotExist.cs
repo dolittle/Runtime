@@ -3,21 +3,20 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Exception that gets thrown when a stream definition does not exist.
+/// </summary>
+public class StreamDefinitionDoesNotExist : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a stream definition does not exist.
+    /// Initializes a new instance of the <see cref="StreamDefinitionDoesNotExist" /> class.
     /// </summary>
-    public class StreamDefinitionDoesNotExist : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamDefinitionDoesNotExist" /> class.
-        /// </summary>
-        /// <param name="stream">The stream id.</param>
-        /// <param name="scope">The scope id.</param>
-        public StreamDefinitionDoesNotExist(StreamId stream, ScopeId scope)
+    /// <param name="stream">The stream id.</param>
+    /// <param name="scope">The scope id.</param>
+    public StreamDefinitionDoesNotExist(StreamId stream, ScopeId scope)
         : base($"Stream definition for stream {stream.Value} in scope {scope.Value} does not exist")
-        {
-        }
+    {
     }
 }

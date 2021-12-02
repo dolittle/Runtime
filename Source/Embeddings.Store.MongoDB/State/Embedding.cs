@@ -3,32 +3,31 @@
 
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State
+namespace Dolittle.Runtime.Embeddings.Store.MongoDB.State;
+
+/// <summary>
+/// Represents the mongodb embedding store representation of an embedding.
+/// </summary>
+public class Embedding
 {
     /// <summary>
-    /// Represents the mongodb embedding store representation of an embedding.
+    /// Gets or sets the projection key of the embedding.
     /// </summary>
-    public class Embedding
-    {
-        /// <summary>
-        /// Gets or sets the projection key of the embedding.
-        /// </summary>
-        [BsonId]
-        public string Key { get; set; }
+    [BsonId]
+    public string Key { get; set; }
 
-        /// <summary>
-        /// Gets or sets the embedding content.
-        /// </summary>
-        public string Content { get; set; }
+    /// <summary>
+    /// Gets or sets the embedding content.
+    /// </summary>
+    public string Content { get; set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether the embedding currently is deleted.
-        /// </summary>
-        public bool IsRemoved { get; set; }
+    /// <summary>
+    /// Gets or sets a value indicating whether the embedding currently is deleted.
+    /// </summary>
+    public bool IsRemoved { get; set; }
 
-        /// <summary>
-        /// Gets or sets the aggregate root version.
-        /// </summary>
-        public ulong Version { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the aggregate root version.
+    /// </summary>
+    public ulong Version { get; set; }
 }

@@ -3,17 +3,16 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Represents an identifier for a service type.
+/// </summary>
+public record ServiceType(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents an identifier for a service type.
+    /// Implicitly convert from <see cref="string"/> to <see cref="ServiceType"/>.
     /// </summary>
-    public record ServiceType(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Implicitly convert from <see cref="string"/> to <see cref="ServiceType"/>.
-        /// </summary>
-        /// <param name="type"><see cref="ServiceType"/> as string.</param>
-        public static implicit operator ServiceType(string type) => new(type);
-    }
+    /// <param name="type"><see cref="ServiceType"/> as string.</param>
+    public static implicit operator ServiceType(string type) => new(type);
 }

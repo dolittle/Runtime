@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Microservices;
 
-namespace Dolittle.Runtime.CLI.Options.Parsers.Microservices
+namespace Dolittle.Runtime.CLI.Options.Parsers.Microservices;
+
+/// <summary>
+/// Exception that gets thrown when parsing of a <see cref="MicroserviceAddress"/> from a <see cref="string"/> fails.
+/// </summary>
+public class InvalidMicroserviceAddress : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when parsing of a <see cref="MicroserviceAddress"/> from a <see cref="string"/> fails.
+    /// Initializes a new instance of the <see cref="InvalidMicroserviceAddress"/> class.
     /// </summary>
-    public class InvalidMicroserviceAddress : Exception
+    /// <param name="address">The address that failed to parse.</param>
+    public InvalidMicroserviceAddress(string address)
+        : base($"The provided address '{address}' is not a valid <host:port> combination.")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InvalidMicroserviceAddress"/> class.
-        /// </summary>
-        /// <param name="address">The address that failed to parse.</param>
-        public InvalidMicroserviceAddress(string address)
-            : base($"The provided address '{address}' is not a valid <host:port> combination.")
-        {
-        }
     }
 }

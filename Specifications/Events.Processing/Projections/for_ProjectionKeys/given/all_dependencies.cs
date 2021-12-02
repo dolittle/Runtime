@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.given
+namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeys.given;
+
+public class all_dependencies : a_serializer
 {
-    public class all_dependencies : a_serializer
+    protected static ProjectionKeys projection_keys;
+    Establish context = () =>
     {
-        protected static ProjectionKeys projection_keys;
-        Establish context = () =>
-        {
-            projection_keys = new ProjectionKeys(new ProjectionKeyPropertyExtractor());
-        };
-    }
+        projection_keys = new ProjectionKeys(new ProjectionKeyPropertyExtractor());
+    };
 }

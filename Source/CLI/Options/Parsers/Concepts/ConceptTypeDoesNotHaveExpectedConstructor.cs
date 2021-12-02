@@ -4,21 +4,20 @@
 using System;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.CLI.Options.Parsers.Concepts
+namespace Dolittle.Runtime.CLI.Options.Parsers.Concepts;
+
+/// <summary>
+/// Exception that gets thrown when trying to initialize an implementation of <see cref="ConceptAs{TValue}"/> of type <see cref="Guid"/> that does not have the expected constructor.
+/// </summary>
+public class ConceptTypeDoesNotHaveExpectedConstructor : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when trying to initialize an implementation of <see cref="ConceptAs{TValue}"/> of type <see cref="Guid"/> that does not have the expected constructor.
+    /// Initializes a new instance of the <see cref="ConceptTypeDoesNotHaveExpectedConstructor"/> class.
     /// </summary>
-    public class ConceptTypeDoesNotHaveExpectedConstructor : Exception
+    /// <param name="concept">The type of the concept.</param>
+    /// <param name="value">The type of the concept value.</param>
+    public ConceptTypeDoesNotHaveExpectedConstructor(Type concept, Type value)
+        : base($"The type {concept.Name} does not have a constructor that accepts a {value.Name} as the only argument.")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConceptTypeDoesNotHaveExpectedConstructor"/> class.
-        /// </summary>
-        /// <param name="concept">The type of the concept.</param>
-        /// <param name="value">The type of the concept value.</param>
-        public ConceptTypeDoesNotHaveExpectedConstructor(Type concept, Type value)
-            : base($"The type {concept.Name} does not have a constructor that accepts a {value.Name} as the only argument.")
-        {
-        }
     }
 }

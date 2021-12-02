@@ -4,12 +4,11 @@
 using Dolittle.Runtime.Types.Testing;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.Clients.for_KnownClients.given
-{
-    public class no_known_clients
-    {
-        protected static KnownClients known_clients;
+namespace Dolittle.Runtime.Services.Clients.for_KnownClients.given;
 
-        Establish context = () => known_clients = new KnownClients(new StaticInstancesOf<IKnowAboutClients>());
-    }
+public class no_known_clients
+{
+    protected static KnownClients known_clients;
+
+    Establish context = () => known_clients = new KnownClients(new StaticInstancesOf<IKnowAboutClients>());
 }

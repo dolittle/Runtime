@@ -3,43 +3,42 @@
 
 using System.Globalization;
 
-namespace Dolittle.Runtime.Security
+namespace Dolittle.Runtime.Security;
+
+/// <summary>
+/// Represents a specific <see cref="ISecurityRule"/> for roles.
+/// </summary>
+public class RoleRule : ISecurityRule
 {
     /// <summary>
-    /// Represents a specific <see cref="ISecurityRule"/> for roles.
+    /// The format string for describing the rule.
     /// </summary>
-    public class RoleRule : ISecurityRule
+    public const string DescriptionFormat = "RequiredRole_{{{0}}}";
+
+    readonly IUserSecurityActor _userToAuthorize;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RoleRule"/> class.
+    /// </summary>
+    /// <param name="userToAuthorize">The <see cref="UserSecurityActor" /> to check the role against.</param>
+    /// <param name="role">The role to check for.</param>
+    public RoleRule(IUserSecurityActor userToAuthorize, string role)
     {
-        /// <summary>
-        /// The format string for describing the rule.
-        /// </summary>
-        public const string DescriptionFormat = "RequiredRole_{{{0}}}";
+        _userToAuthorize = userToAuthorize;
+        Role = role;
+    }
 
-        readonly IUserSecurityActor _userToAuthorize;
+    /// <summary>
+    /// Gets the role for the rule.
+    /// </summary>
+    public string Role { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RoleRule"/> class.
-        /// </summary>
-        /// <param name="userToAuthorize">The <see cref="UserSecurityActor" /> to check the role against.</param>
-        /// <param name="role">The role to check for.</param>
-        public RoleRule(IUserSecurityActor userToAuthorize, string role)
-        {
-            _userToAuthorize = userToAuthorize;
-            Role = role;
-        }
+    /// <inheritdoc/>
+    public string Description => string.Format(CultureInfo.InvariantCulture, DescriptionFormat, Role);
 
-        /// <summary>
-        /// Gets the role for the rule.
-        /// </summary>
-        public string Role { get; }
-
-        /// <inheritdoc/>
-        public string Description => string.Format(CultureInfo.InvariantCulture, DescriptionFormat, Role);
-
-        /// <inheritdoc/>
-        public bool IsAuthorized(object securable)
-        {
-            return string.IsNullOrWhiteSpace(Role) || _userToAuthorize.IsInRole(Role);
-        }
+    /// <inheritdoc/>
+    public bool IsAuthorized(object securable)
+    {
+        return string.IsNullOrWhiteSpace(Role) || _userToAuthorize.IsInRole(Role);
     }
 }

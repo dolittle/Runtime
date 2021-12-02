@@ -3,12 +3,11 @@
 
 using Dolittle.Runtime.ApplicationModel;
 
-namespace Dolittle.Runtime.Tenancy
+namespace Dolittle.Runtime.Tenancy;
+
+/// <summary>
+/// Represents the configuration for a <see cref="Tenant"/>.
+/// </summary>
+public class TenantConfiguration
 {
-    /// <summary>
-    /// Represents the configuration for a <see cref="Tenant"/>.
-    /// </summary>
-    public class TenantConfiguration
-    {
-    }
 }

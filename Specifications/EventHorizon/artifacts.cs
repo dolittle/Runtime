@@ -3,10 +3,9 @@
 
 using Dolittle.Runtime.Artifacts;
 
-namespace Dolittle.Runtime.EventHorizon
+namespace Dolittle.Runtime.EventHorizon;
+
+public static class artifacts
 {
-    public static class artifacts
-    {
-        public static Artifact create() => new(ArtifactId.New(), 1);
-    }
+    public static Artifact create() => new(ArtifactId.New(), 1);
 }

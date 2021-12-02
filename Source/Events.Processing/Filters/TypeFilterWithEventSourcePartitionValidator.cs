@@ -7,28 +7,27 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanValidateFilterFor{T}" /> that can validate a <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
+/// </summary>
+[SingletonPerTenant]
+public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
 {
+    readonly IValidateFilterByComparingEventTypes _byComparingEventTypes;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanValidateFilterFor{T}" /> that can validate a <see cref="TypeFilterWithEventSourcePartitionDefinition" />.
+    /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
     /// </summary>
-    [SingletonPerTenant]
-    public class TypeFilterWithEventSourcePartitionValidator : ICanValidateFilterFor<TypeFilterWithEventSourcePartitionDefinition>
+    /// <param name="byComparingEventTypes">The <see cref="IValidateFilterByComparingEventTypes" />.</param>
+    public TypeFilterWithEventSourcePartitionValidator(
+        IValidateFilterByComparingEventTypes byComparingEventTypes)
     {
-        readonly IValidateFilterByComparingEventTypes _byComparingEventTypes;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TypeFilterWithEventSourcePartitionValidator"/> class.
-        /// </summary>
-        /// <param name="byComparingEventTypes">The <see cref="IValidateFilterByComparingEventTypes" />.</param>
-        public TypeFilterWithEventSourcePartitionValidator(
-            IValidateFilterByComparingEventTypes byComparingEventTypes)
-        {
-            _byComparingEventTypes = byComparingEventTypes;
-        }
-
-        /// <inheritdoc/>
-        public Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken) =>
-            _byComparingEventTypes.Validate(persistedDefinition, filter, lastUnprocessedEvent, cancellationToken);
+        _byComparingEventTypes = byComparingEventTypes;
     }
+
+    /// <inheritdoc/>
+    public Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken) =>
+        _byComparingEventTypes.Validate(persistedDefinition, filter, lastUnprocessedEvent, cancellationToken);
 }

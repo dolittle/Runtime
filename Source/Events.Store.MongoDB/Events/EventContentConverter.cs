@@ -4,25 +4,24 @@
 using MongoDB.Bson;
 using MongoDB.Bson.IO;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Events
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events;
+
+/// <summary>
+/// Represents an implementation of <see cref="IEventContentConverter"/>.
+/// </summary>
+public class EventContentConverter : IEventContentConverter
 {
-    /// <summary>
-    /// Represents an implementation of <see cref="IEventContentConverter"/>.
-    /// </summary>
-    public class EventContentConverter : IEventContentConverter
+    static readonly JsonWriterSettings _jsonSettings = new()
     {
-        static readonly JsonWriterSettings _jsonSettings = new()
-        {
-            OutputMode = JsonOutputMode.Strict,
-            Indent = false,
-        };
+        OutputMode = JsonOutputMode.Strict,
+        Indent = false,
+    };
 
-        /// <inheritdoc/>
-        public BsonDocument ToBson(string json)
-            => BsonDocument.Parse(json);
+    /// <inheritdoc/>
+    public BsonDocument ToBson(string json)
+        => BsonDocument.Parse(json);
 
-        /// <inheritdoc/>
-        public string ToJson(BsonDocument bson)
-            => bson.ToJson(_jsonSettings);
-    }
+    /// <inheritdoc/>
+    public string ToJson(BsonDocument bson)
+        => bson.ToJson(_jsonSettings);
 }

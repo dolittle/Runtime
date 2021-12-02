@@ -14,15 +14,14 @@ using Machine.Specifications;
 using Moq;
 using It = Moq.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.given
-{
-    public class all_dependencies
-    {
-        protected static EmbeddingRequestFactory factory;
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.given;
 
-        Establish context = () =>
-        {
-            factory = new EmbeddingRequestFactory();
-        };
-    }
+public class all_dependencies
+{
+    protected static EmbeddingRequestFactory factory;
+
+    Establish context = () =>
+    {
+        factory = new EmbeddingRequestFactory();
+    };
 }

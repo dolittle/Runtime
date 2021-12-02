@@ -9,50 +9,49 @@ using Autofac.Core.Activators.Delegate;
 using Autofac.Core.Lifetime;
 using Autofac.Core.Registration;
 
-namespace Dolittle.Runtime.DependencyInversion.Autofac
+namespace Dolittle.Runtime.DependencyInversion.Autofac;
+
+/// <summary>
+/// Represents a <see cref="IRegistrationSource"/> that deals with resolving open generic type callbacks.
+/// </summary>
+public class OpenGenericCallbackRegistrationSource : IRegistrationSource
 {
-    /// <summary>
-    /// Represents a <see cref="IRegistrationSource"/> that deals with resolving open generic type callbacks.
-    /// </summary>
-    public class OpenGenericCallbackRegistrationSource : IRegistrationSource
+    static readonly Dictionary<Type, Func<IServiceWithType, object>> _callbackByService = new();
+
+    /// <inheritdoc/>
+    public bool IsAdapterForIndividualComponents => false;
+
+    /// <inheritdoc/>
+    public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
     {
-        static readonly Dictionary<Type, Func<IServiceWithType, object>> _callbackByService = new();
-
-        /// <inheritdoc/>
-        public bool IsAdapterForIndividualComponents => false;
-
-        /// <inheritdoc/>
-        public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
+        if (!(service is IServiceWithType serviceWithType) ||
+            !serviceWithType.ServiceType.IsGenericType ||
+            !_callbackByService.ContainsKey(serviceWithType.ServiceType.GetGenericTypeDefinition()))
         {
-            if (!(service is IServiceWithType serviceWithType) ||
-                !serviceWithType.ServiceType.IsGenericType ||
-                !_callbackByService.ContainsKey(serviceWithType.ServiceType.GetGenericTypeDefinition()))
-            {
-                return Enumerable.Empty<IComponentRegistration>();
-            }
-
-            var serviceOpenGenericType = serviceWithType.ServiceType.GetGenericTypeDefinition();
-            var callback = _callbackByService[serviceOpenGenericType];
-
-#pragma warning disable CA2000
-            var registration = new ComponentRegistration(
-                Guid.NewGuid(),
-                new DelegateActivator(serviceWithType.ServiceType, (c, p) => callback(serviceWithType)),
-                new CurrentScopeLifetime(),
-                InstanceSharing.None,
-                InstanceOwnership.OwnedByLifetimeScope,
-                new[] { service },
-                new Dictionary<string, object>());
-#pragma warning restore CA2000
-
-            return new[] { registration };
+            return Enumerable.Empty<IComponentRegistration>();
         }
 
-        /// <summary>
-        /// Add a binding between a <see cref="Type"/> and a <see cref="Func{T, TResult}"/> for resolving from a <see cref="IServiceWithType"/>.
-        /// </summary>
-        /// <param name="typeCallbackAndServicePair"><see cref="KeyValuePair{TKey, TValue}"/> for the type and resolver.</param>
-        internal static void AddService(KeyValuePair<Type, Func<IServiceWithType, object>> typeCallbackAndServicePair)
-            => _callbackByService.Add(typeCallbackAndServicePair.Key, typeCallbackAndServicePair.Value);
+        var serviceOpenGenericType = serviceWithType.ServiceType.GetGenericTypeDefinition();
+        var callback = _callbackByService[serviceOpenGenericType];
+
+#pragma warning disable CA2000
+        var registration = new ComponentRegistration(
+            Guid.NewGuid(),
+            new DelegateActivator(serviceWithType.ServiceType, (c, p) => callback(serviceWithType)),
+            new CurrentScopeLifetime(),
+            InstanceSharing.None,
+            InstanceOwnership.OwnedByLifetimeScope,
+            new[] { service },
+            new Dictionary<string, object>());
+#pragma warning restore CA2000
+
+        return new[] { registration };
     }
+
+    /// <summary>
+    /// Add a binding between a <see cref="Type"/> and a <see cref="Func{T, TResult}"/> for resolving from a <see cref="IServiceWithType"/>.
+    /// </summary>
+    /// <param name="typeCallbackAndServicePair"><see cref="KeyValuePair{TKey, TValue}"/> for the type and resolver.</param>
+    internal static void AddService(KeyValuePair<Type, Func<IServiceWithType, object>> typeCallbackAndServicePair)
+        => _callbackByService.Add(typeCallbackAndServicePair.Key, typeCallbackAndServicePair.Value);
 }

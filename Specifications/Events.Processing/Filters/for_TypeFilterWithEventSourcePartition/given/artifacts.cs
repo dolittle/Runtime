@@ -4,10 +4,9 @@
 using System;
 using Dolittle.Runtime.Artifacts;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.given
+namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.given;
+
+public static class artifacts
 {
-    public static class artifacts
-    {
-        public static Artifact single() => new(Guid.NewGuid(), 1);
-    }
+    public static Artifact single() => new(Guid.NewGuid(), 1);
 }

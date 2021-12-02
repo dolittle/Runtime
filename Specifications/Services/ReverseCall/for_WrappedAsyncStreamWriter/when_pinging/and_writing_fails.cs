@@ -7,30 +7,29 @@ using Dolittle.Runtime.Services.ReverseCalls.given;
 using Dolittle.Services.Contracts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_pinging
+namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_pinging;
+
+public class and_writing_fails : given.a_wrapped_stream_writer
 {
-    public class and_writing_fails : given.a_wrapped_stream_writer
+    static a_message ping_message;
+    static Exception exception;
+
+    Establish context = () =>
     {
-        static a_message ping_message;
-        static Exception exception;
+        exception = new Exception();
 
-        Establish context = () =>
-        {
-            exception = new Exception();
+        message_converter
+            .Setup(_ => _.SetPing(Moq.It.IsAny<a_message>(), Moq.It.IsAny<Ping>()))
+            .Callback<a_message, Ping>((message, _) => ping_message = message);
 
-            message_converter
-                .Setup(_ => _.SetPing(Moq.It.IsAny<a_message>(), Moq.It.IsAny<Ping>()))
-                .Callback<a_message, Ping>((message, _) => ping_message = message);
+        original_writer
+            .Setup(_ => _.WriteAsync(Moq.It.IsAny<a_message>()))
+            .Returns(Task.FromException(exception));
+    };
 
-            original_writer
-                .Setup(_ => _.WriteAsync(Moq.It.IsAny<a_message>()))
-                .Returns(Task.FromException(exception));
-        };
+    static Exception result;
+    Because of = () => result = Catch.Exception(() => wrapped_writer.MaybeWritePing());
 
-        static Exception result;
-        Because of = () => result = Catch.Exception(() => wrapped_writer.MaybeWritePing());
-
-        It should_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(ping_message));
-        It should_fail_with_the_original_exception = () => result.ShouldEqual(exception);
-    }
+    It should_write_the_ping_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(ping_message));
+    It should_fail_with_the_original_exception = () => result.ShouldEqual(exception);
 }

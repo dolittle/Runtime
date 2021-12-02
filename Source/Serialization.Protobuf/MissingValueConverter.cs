@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Serialization.Protobuf
+namespace Dolittle.Runtime.Serialization.Protobuf;
+
+/// <summary>
+/// Exception that gets thrown when missing a <see cref="IValueConverter"/> for a <see cref="Type"/>.
+/// </summary>
+public class MissingValueConverter : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when missing a <see cref="IValueConverter"/> for a <see cref="Type"/>.
+    /// Initializes a new instance of the <see cref="MissingValueConverter"/> class.
     /// </summary>
-    public class MissingValueConverter : Exception
+    /// <param name="type"><see cref="Type"/> that does not have a <see cref="IValueConverter"/>.</param>
+    public MissingValueConverter(Type type)
+        : base($"Missing value converter for type '{type.AssemblyQualifiedName}'")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingValueConverter"/> class.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> that does not have a <see cref="IValueConverter"/>.</param>
-        public MissingValueConverter(Type type)
-            : base($"Missing value converter for type '{type.AssemblyQualifiedName}'")
-        {
-        }
     }
 }

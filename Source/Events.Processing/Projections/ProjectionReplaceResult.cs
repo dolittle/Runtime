@@ -3,23 +3,22 @@
 
 using Dolittle.Runtime.Projections.Store.State;
 
-namespace Dolittle.Runtime.Events.Processing.Projections
+namespace Dolittle.Runtime.Events.Processing.Projections;
+
+/// <summary>
+/// Represents a the result of a projection operation that resulted in a replace.
+/// </summary>
+public class ProjectionReplaceResult : IProjectionResult
 {
     /// <summary>
-    /// Represents a the result of a projection operation that resulted in a replace.
+    /// Initializes a new instance of the <see cref="ProjectionReplaceResult"/> class.
     /// </summary>
-    public class ProjectionReplaceResult : IProjectionResult
+    /// <param name="state">The new <see cref="ProjectionState"/> to persist.</param>
+    public ProjectionReplaceResult(ProjectionState state)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProjectionReplaceResult"/> class.
-        /// </summary>
-        /// <param name="state">The new <see cref="ProjectionState"/> to persist.</param>
-        public ProjectionReplaceResult(ProjectionState state)
-        {
-            State = state;
-        }
-
-        /// <inheritdoc />
-        public ProjectionState State { get; }
+        State = state;
     }
+
+    /// <inheritdoc />
+    public ProjectionState State { get; }
 }

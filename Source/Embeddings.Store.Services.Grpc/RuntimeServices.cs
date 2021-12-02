@@ -4,33 +4,32 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc
+namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
+/// runtime service implementations for Heads.
+/// </summary>
+public class RuntimeServices : ICanBindRuntimeServices
 {
+    readonly EmbeddingStoreGrpcService _embeddingStoreGrpcService;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
-    /// runtime service implementations for Heads.
+    /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
     /// </summary>
-    public class RuntimeServices : ICanBindRuntimeServices
+    /// <param name="embeddingStore">The <see cref="EmbeddingsService"/>.</param>
+    public RuntimeServices(EmbeddingStoreGrpcService embeddingStore)
     {
-        readonly EmbeddingStoreGrpcService _embeddingStoreGrpcService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
-        /// </summary>
-        /// <param name="embeddingStore">The <see cref="EmbeddingsService"/>.</param>
-        public RuntimeServices(EmbeddingStoreGrpcService embeddingStore)
-        {
-            _embeddingStoreGrpcService = embeddingStore;
-        }
-
-        /// <inheritdoc/>
-        public ServiceAspect Aspect => "Embeddings";
-
-        /// <inheritdoc/>
-        public IEnumerable<Service> BindServices() =>
-            new Service[]
-            {
-                new(_embeddingStoreGrpcService, Contracts.EmbeddingStore.BindService(_embeddingStoreGrpcService), Contracts.EmbeddingStore.Descriptor)
-            };
+        _embeddingStoreGrpcService = embeddingStore;
     }
+
+    /// <inheritdoc/>
+    public ServiceAspect Aspect => "Embeddings";
+
+    /// <inheritdoc/>
+    public IEnumerable<Service> BindServices() =>
+        new Service[]
+        {
+            new(_embeddingStoreGrpcService, Contracts.EmbeddingStore.BindService(_embeddingStoreGrpcService), Contracts.EmbeddingStore.Descriptor)
+        };
 }

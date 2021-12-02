@@ -7,46 +7,45 @@ using Dolittle.Runtime.DependencyInversion;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// Represents well known associations that will be available past the initial system boot stages.
+/// </summary>
+public static class WellKnownAssociations
 {
     /// <summary>
-    /// Represents well known associations that will be available past the initial system boot stages.
+    /// The entry <see cref="Assembly"/> defined.
     /// </summary>
-    public static class WellKnownAssociations
-    {
-        /// <summary>
-        /// The entry <see cref="Assembly"/> defined.
-        /// </summary>
-        public const string EntryAssembly = "EntryAssembly";
+    public const string EntryAssembly = "EntryAssembly";
 
-        /// <summary>
-        /// The <see cref="IAssemblies">assemblies</see> available.
-        /// </summary>
-        public const string Assemblies = "Assemblies";
+    /// <summary>
+    /// The <see cref="IAssemblies">assemblies</see> available.
+    /// </summary>
+    public const string Assemblies = "Assemblies";
 
-        /// <summary>
-        /// The <see cref="ITypeFinder"/>.
-        /// </summary>
-        public const string TypeFinder = "TypeFinder";
+    /// <summary>
+    /// The <see cref="ITypeFinder"/>.
+    /// </summary>
+    public const string TypeFinder = "TypeFinder";
 
-        /// <summary>
-        /// Which <see cref="Execution.Environment"/> we're running in.
-        /// </summary>
-        public const string Environment = "Environment";
+    /// <summary>
+    /// Which <see cref="Execution.Environment"/> we're running in.
+    /// </summary>
+    public const string Environment = "Environment";
 
-        /// <summary>
-        /// The <see cref="ILoggerFactory"/>.
-        /// </summary>
-        public const string LoggerFactory = "LoggerFactory";
+    /// <summary>
+    /// The <see cref="ILoggerFactory"/>.
+    /// </summary>
+    public const string LoggerFactory = "LoggerFactory";
 
-        /// <summary>
-        /// Current <see cref="IBindingCollection">bindings</see>.
-        /// </summary>
-        public const string Bindings = "Bindings";
+    /// <summary>
+    /// Current <see cref="IBindingCollection">bindings</see>.
+    /// </summary>
+    public const string Bindings = "Bindings";
 
-        /// <summary>
-        /// The <see cref="ICanNotifyForNewBindings">notifications hub</see> for new <see cref="Binding">bindings</see>.
-        /// </summary>
-        public const string NewBindingsNotificationHub = "NewBindingsNotificationHub";
-    }
+    /// <summary>
+    /// The <see cref="ICanNotifyForNewBindings">notifications hub</see> for new <see cref="Binding">bindings</see>.
+    /// </summary>
+    public const string NewBindingsNotificationHub = "NewBindingsNotificationHub";
 }

@@ -5,27 +5,26 @@ using Dolittle.Artifacts.Contracts;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Protobuf;
 
-namespace Dolittle.Runtime.Aggregates
+namespace Dolittle.Runtime.Aggregates;
+
+/// <summary>
+/// Represents conversion extensions for the Aggregate Root artifact types.
+/// </summary>
+public static class ArtifactsExtensions
 {
     /// <summary>
-    /// Represents conversion extensions for the Aggregate Root artifact types.
+    /// Convert a <see cref="AggregateRootId"/> to <see cref="Artifact"/>.
     /// </summary>
-    public static class ArtifactsExtensions
-    {
-        /// <summary>
-        /// Convert a <see cref="AggregateRootId"/> to <see cref="Artifact"/>.
-        /// </summary>
-        /// <param name="identifier"><see cref="AggregateRootId"/> to convert from.</param>
-        /// <returns>Converted <see cref="Artifact"/>.</returns>
-        public static Artifact ToProtobuf(this AggregateRootId identifier) =>
-            new() { Id = identifier.Id.Value.ToProtobuf(), Generation = identifier.Generation.Value };
+    /// <param name="identifier"><see cref="AggregateRootId"/> to convert from.</param>
+    /// <returns>Converted <see cref="Artifact"/>.</returns>
+    public static Artifact ToProtobuf(this AggregateRootId identifier) =>
+        new() { Id = identifier.Id.Value.ToProtobuf(), Generation = identifier.Generation.Value };
 
-        /// <summary>
-        /// Convert a <see cref="Artifact"/> to <see cref="AggregateRootId"/>.
-        /// </summary>
-        /// <param name="artifact"><see cref="Artifact"/> to convert from.</param>
-        /// <returns>Converted <see cref="AggregateRootId"/>.</returns>
-        public static AggregateRootId ToAggregateRootId(this Artifact artifact) =>
-            new(artifact.Id.ToGuid(), artifact.Generation);
-    }
+    /// <summary>
+    /// Convert a <see cref="Artifact"/> to <see cref="AggregateRootId"/>.
+    /// </summary>
+    /// <param name="artifact"><see cref="Artifact"/> to convert from.</param>
+    /// <returns>Converted <see cref="AggregateRootId"/>.</returns>
+    public static AggregateRootId ToAggregateRootId(this Artifact artifact) =>
+        new(artifact.Id.ToGuid(), artifact.Generation);
 }

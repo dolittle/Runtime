@@ -6,24 +6,23 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Lifecycle;
 
-namespace Dolittle.Runtime.Aggregates
+namespace Dolittle.Runtime.Aggregates;
+
+/// <summary>
+/// Represents an implementation of <see cref="IAggregateRoots"/>.
+/// </summary>
+[Singleton]
+public class AggregateRoots : IAggregateRoots
 {
-    /// <summary>
-    /// Represents an implementation of <see cref="IAggregateRoots"/>.
-    /// </summary>
-    [Singleton]
-    public class AggregateRoots : IAggregateRoots
-    {
-        readonly ConcurrentDictionary<ArtifactId, AggregateRoot> _aggregateRoots = new();
+    readonly ConcurrentDictionary<ArtifactId, AggregateRoot> _aggregateRoots = new();
 
-        /// <inheritdoc />
-        public IEnumerable<AggregateRoot> All => _aggregateRoots.Values;
+    /// <inheritdoc />
+    public IEnumerable<AggregateRoot> All => _aggregateRoots.Values;
 
-        /// <inheritdoc />
-        public void Register(AggregateRoot aggregateRoot)
-            => _aggregateRoots.AddOrUpdate(aggregateRoot.Identifier.Id, aggregateRoot, (_, _) => aggregateRoot);
+    /// <inheritdoc />
+    public void Register(AggregateRoot aggregateRoot)
+        => _aggregateRoots.AddOrUpdate(aggregateRoot.Identifier.Id, aggregateRoot, (_, _) => aggregateRoot);
 
-        public bool TryGet(ArtifactId aggregateRootId, out AggregateRoot aggregateRoot)
-            => _aggregateRoots.TryGetValue(aggregateRootId, out aggregateRoot);
-    }
+    public bool TryGet(ArtifactId aggregateRootId, out AggregateRoot aggregateRoot)
+        => _aggregateRoots.TryGetValue(aggregateRootId, out aggregateRoot);
 }

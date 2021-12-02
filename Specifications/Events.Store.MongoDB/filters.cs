@@ -3,14 +3,13 @@
 
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB;
+
+public static class filters
 {
-    public static class filters
-    {
-        public static FilterDefinitionBuilder<MongoDB.Events.Event> event_filter => Builders<MongoDB.Events.Event>.Filter;
+    public static FilterDefinitionBuilder<MongoDB.Events.Event> event_filter => Builders<MongoDB.Events.Event>.Filter;
 
-        public static FilterDefinitionBuilder<MongoDB.Events.StreamEvent> stream_event_filter => Builders<MongoDB.Events.StreamEvent>.Filter;
+    public static FilterDefinitionBuilder<MongoDB.Events.StreamEvent> stream_event_filter => Builders<MongoDB.Events.StreamEvent>.Filter;
 
-        public static FilterDefinitionBuilder<MongoDB.Aggregates.AggregateRoot> an_aggregate_filter => Builders<MongoDB.Aggregates.AggregateRoot>.Filter;
-    }
+    public static FilterDefinitionBuilder<MongoDB.Aggregates.AggregateRoot> an_aggregate_filter => Builders<MongoDB.Aggregates.AggregateRoot>.Filter;
 }

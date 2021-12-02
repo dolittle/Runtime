@@ -4,15 +4,14 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Serialization.Protobuf.for_MessageDescription
+namespace Dolittle.Runtime.Serialization.Protobuf.for_MessageDescription;
+
+public class when_creating_with_custom_name
 {
-    public class when_creating_with_custom_name
-    {
-        const string custom_name = "CustomName";
-        static MessageDescription result;
+    const string custom_name = "CustomName";
+    static MessageDescription result;
 
-        Because of = () => result = new MessageDescription(typeof(class_with_properties), Array.Empty<PropertyDescription>(), custom_name);
+    Because of = () => result = new MessageDescription(typeof(class_with_properties), Array.Empty<PropertyDescription>(), custom_name);
 
-        It should_set_custom_name = () => result.Name.ShouldEqual(custom_name);
-    }
+    It should_set_custom_name = () => result.Name.ShouldEqual(custom_name);
 }

@@ -7,29 +7,28 @@ using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using static Dolittle.Runtime.Aggregates.Contracts.AggregateRoots;
 
-namespace Dolittle.Runtime.Aggregates
+namespace Dolittle.Runtime.Aggregates;
+
+/// <summary>
+/// Represents the implementation of <see cref="AggregateRootsBase"/>.
+/// </summary>
+public class AggregateRootsService : AggregateRootsBase
 {
-    /// <summary>
-    /// Represents the implementation of <see cref="AggregateRootsBase"/>.
-    /// </summary>
-    public class AggregateRootsService : AggregateRootsBase
+    readonly IAggregateRoots _aggregateRoots;
+
+    public AggregateRootsService(IAggregateRoots aggregateRoots)
     {
-        readonly IAggregateRoots _aggregateRoots;
+        _aggregateRoots = aggregateRoots;
+    }
 
-        public AggregateRootsService(IAggregateRoots aggregateRoots)
-        {
-            _aggregateRoots = aggregateRoots;
-        }
-
-        /// <inheritdoc/>
-        public override Task<AggregateRootAliasRegistrationResponse> RegisterAlias(
-            AggregateRootAliasRegistrationRequest request,
-            ServerCallContext context)
-        {
-            _aggregateRoots.Register(request.HasAlias 
-                ? new AggregateRoot(request.AggregateRoot.ToAggregateRootId(), request.Alias) 
-                : new AggregateRoot(request.AggregateRoot.ToAggregateRootId()));
-            return Task.FromResult(new AggregateRootAliasRegistrationResponse());
-        }
+    /// <inheritdoc/>
+    public override Task<AggregateRootAliasRegistrationResponse> RegisterAlias(
+        AggregateRootAliasRegistrationRequest request,
+        ServerCallContext context)
+    {
+        _aggregateRoots.Register(request.HasAlias 
+            ? new AggregateRoot(request.AggregateRoot.ToAggregateRootId(), request.Alias) 
+            : new AggregateRoot(request.AggregateRoot.ToAggregateRootId()));
+        return Task.FromResult(new AggregateRootAliasRegistrationResponse());
     }
 }

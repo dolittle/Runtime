@@ -7,20 +7,19 @@ using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.CLI.Runtime.Aggregates;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 
-namespace Dolittle.Runtime.CLI.Options.Parsers.Aggregates
-{
-    /// <summary>
-    /// An implementation of <see cref="IValueParser"/> that parses instances of <see cref="AggregateRootIdOrAlias"/>.
-    /// </summary>
-    public class AggregateRootIdOrAliasParser : IValueParser
-    {
-        /// <inheritdoc />
-        public Type TargetType => typeof(AggregateRootIdOrAlias);
+namespace Dolittle.Runtime.CLI.Options.Parsers.Aggregates;
 
-        /// <inheritdoc />
-        public object Parse(string argName, string value, CultureInfo culture)
-            => Guid.TryParse(value, out var aggregateRootId)
-                ? new AggregateRootIdOrAlias(aggregateRootId)
-                : new AggregateRootIdOrAlias(new AggregateRootAlias(value));
-    }
+/// <summary>
+/// An implementation of <see cref="IValueParser"/> that parses instances of <see cref="AggregateRootIdOrAlias"/>.
+/// </summary>
+public class AggregateRootIdOrAliasParser : IValueParser
+{
+    /// <inheritdoc />
+    public Type TargetType => typeof(AggregateRootIdOrAlias);
+
+    /// <inheritdoc />
+    public object Parse(string argName, string value, CultureInfo culture)
+        => Guid.TryParse(value, out var aggregateRootId)
+            ? new AggregateRootIdOrAlias(aggregateRootId)
+            : new AggregateRootIdOrAlias(new AggregateRootAlias(value));
 }

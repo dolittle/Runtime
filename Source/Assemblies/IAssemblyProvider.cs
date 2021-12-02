@@ -4,17 +4,16 @@
 using System.Collections.Generic;
 using System.Reflection;
 
-namespace Dolittle.Runtime.Assemblies
+namespace Dolittle.Runtime.Assemblies;
+
+/// <summary>
+/// Defines a system that can provide <see cref="Assembly">assemblies</see>.
+/// </summary>
+public interface IAssemblyProvider
 {
     /// <summary>
-    /// Defines a system that can provide <see cref="Assembly">assemblies</see>.
+    /// Get all the <see cref="Assembly">assemblies</see> that can be provided.
     /// </summary>
-    public interface IAssemblyProvider
-    {
-        /// <summary>
-        /// Get all the <see cref="Assembly">assemblies</see> that can be provided.
-        /// </summary>
-        /// <returns><see cref="IEnumerable{Assembly}">Assemblies</see> provided.</returns>
-        IEnumerable<Assembly> GetAll();
-    }
+    /// <returns><see cref="IEnumerable{Assembly}">Assemblies</see> provided.</returns>
+    IEnumerable<Assembly> GetAll();
 }

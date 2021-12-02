@@ -3,28 +3,27 @@
 
 using Dolittle.Runtime.Artifacts;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events;
+
+/// <summary>
+/// Represents the Event Type.
+/// </summary>
+/// <param name="Identifier">The Event Type <see cref="Artifact"/>.</param>
+/// <param name="Alias">The Alias of the Event Type.</param>
+public record EventType(Artifact Identifier, EventTypeAlias Alias)
 {
     /// <summary>
-    /// Represents the Event Type.
+    /// Initializes a new instance of the <see cref="EventType"/> record.
     /// </summary>
-    /// <param name="Identifier">The Event Type <see cref="Artifact"/>.</param>
-    /// <param name="Alias">The Alias of the Event Type.</param>
-    public record EventType(Artifact Identifier, EventTypeAlias Alias)
+    /// <param name="type"></param>
+    public EventType(Artifact type)
+        : this(type, EventTypeAlias.NotSet)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventType"/> record.
-        /// </summary>
-        /// <param name="type"></param>
-        public EventType(Artifact type)
-            : this(type, EventTypeAlias.NotSet)
-        {
-        }
-
-        /// <inheritdoc />
-        public override string ToString()
-            => Alias.Equals(EventTypeAlias.NotSet)
-                ? Identifier.Id.Value.ToString()
-                : Alias;
     }
+
+    /// <inheritdoc />
+    public override string ToString()
+        => Alias.Equals(EventTypeAlias.NotSet)
+            ? Identifier.Id.Value.ToString()
+            : Alias;
 }

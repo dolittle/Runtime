@@ -3,20 +3,19 @@
 
 using Dolittle.Runtime.DependencyInversion;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Represents the bindings for embeddings processing.
+/// </summary>
+public class Bindings : ICanProvideBindings
 {
-    /// <summary>
-    /// Represents the bindings for embeddings processing.
-    /// </summary>
-    public class Bindings : ICanProvideBindings
+    /// <inheritdoc/>
+    public void Provide(IBindingProviderBuilder builder)
     {
-        /// <inheritdoc/>
-        public void Provide(IBindingProviderBuilder builder)
-        {
-            builder.Bind<ICalculateStateTransitionEvents>().To<StateTransitionEventsCalculator>();
-            builder.Bind<IUpdateEmbeddingStates>().To<EmbeddingStateUpdater>();
-            builder.Bind<IDetectEmbeddingLoops>().To<EmbeddingLoopsDetector>();
-            builder.Bind<ICompareStates>().To<CompareProjectionStates>();
-        }
+        builder.Bind<ICalculateStateTransitionEvents>().To<StateTransitionEventsCalculator>();
+        builder.Bind<IUpdateEmbeddingStates>().To<EmbeddingStateUpdater>();
+        builder.Bind<IDetectEmbeddingLoops>().To<EmbeddingLoopsDetector>();
+        builder.Bind<ICompareStates>().To<CompareProjectionStates>();
     }
 }

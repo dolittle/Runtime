@@ -4,33 +4,32 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Server.Handshake
+namespace Dolittle.Runtime.Server.Handshake;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
+/// runtime service implementations for Heads.
+/// </summary>
+public class RuntimeServices : ICanBindRuntimeServices
 {
+    readonly HandshakeService _handshakeService;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
-    /// runtime service implementations for Heads.
+    /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
     /// </summary>
-    public class RuntimeServices : ICanBindRuntimeServices
+    /// <param name="handshakeService">The <see cref="HandshakeService"/>.</param>
+    public RuntimeServices(HandshakeService handshakeService)
     {
-        readonly HandshakeService _handshakeService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
-        /// </summary>
-        /// <param name="handshakeService">The <see cref="HandshakeService"/>.</param>
-        public RuntimeServices(HandshakeService handshakeService)
-        {
-            _handshakeService = handshakeService;
-        }
-
-        /// <inheritdoc/>
-        public ServiceAspect Aspect => "Server";
-
-        /// <inheritdoc/>
-        public IEnumerable<Service> BindServices() =>
-            new Service[]
-            {
-                new(_handshakeService, Dolittle.Runtime.Handshake.Contracts.Handshake.BindService(_handshakeService), Dolittle.Runtime.Handshake.Contracts.Handshake.Descriptor)
-            };
+        _handshakeService = handshakeService;
     }
+
+    /// <inheritdoc/>
+    public ServiceAspect Aspect => "Server";
+
+    /// <inheritdoc/>
+    public IEnumerable<Service> BindServices() =>
+        new Service[]
+        {
+            new(_handshakeService, Dolittle.Runtime.Handshake.Contracts.Handshake.BindService(_handshakeService), Dolittle.Runtime.Handshake.Contracts.Handshake.Descriptor)
+        };
 }

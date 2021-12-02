@@ -3,22 +3,21 @@
 
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Events
+namespace Dolittle.Runtime.Events;
+
+/// <summary>
+/// Defines a system that knows about Event Types.
+/// </summary>
+public interface IEventTypes
 {
     /// <summary>
-    /// Defines a system that knows about Event Types.
+    /// Gets all registered Event Types.
     /// </summary>
-    public interface IEventTypes
-    {
-        /// <summary>
-        /// Gets all registered Event Types.
-        /// </summary>
-        IEnumerable<EventType> All { get; }
+    IEnumerable<EventType> All { get; }
         
-        /// <summary>
-        /// Registers an Event Type.
-        /// </summary>
-        /// <param name="eventType">The Event Type to register.</param>
-        void Register(EventType eventType);
-    }
+    /// <summary>
+    /// Registers an Event Type.
+    /// </summary>
+    /// <param name="eventType">The Event Type to register.</param>
+    void Register(EventType eventType);
 }

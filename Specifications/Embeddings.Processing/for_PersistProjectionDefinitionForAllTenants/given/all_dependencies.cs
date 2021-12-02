@@ -13,61 +13,60 @@ using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_PersistProjectionDefinitionForAllTenants.given
+namespace Dolittle.Runtime.Embeddings.Processing.for_PersistProjectionDefinitionForAllTenants.given;
+
+public class all_dependencies
 {
-    public class all_dependencies
+    protected static IExecutionContextManager execution_context_manager;
+    protected static FactoryFor<IEmbeddingDefinitions> get_definitions;
+    protected static ITenants tenants;
+    protected static Dictionary<TenantId, Mock<IEmbeddingDefinitions>> embedding_definitions_per_tenant;
+
+    Establish context = () =>
     {
-        protected static IExecutionContextManager execution_context_manager;
-        protected static FactoryFor<IEmbeddingDefinitions> get_definitions;
-        protected static ITenants tenants;
-        protected static Dictionary<TenantId, Mock<IEmbeddingDefinitions>> embedding_definitions_per_tenant;
-
-        Establish context = () =>
+        execution_context_manager = new ExecutionContextManager(Mock.Of<ILogger>());
+        execution_context_manager.CurrentFor(new Execution.ExecutionContext(
+            "826fd1b0-c620-4ce3-907e-f159e2f63e02",
+            "63c756bb-6881-4b70-874a-ab1ae0e67d2b",
+            Versioning.Version.NotSet,
+            "env",
+            "d5d48a8c-e638-414d-92da-1b6862c8d0e2",
+            Security.Claims.Empty,
+            System.Globalization.CultureInfo.InvariantCulture));
+        get_definitions = () =>
         {
-            execution_context_manager = new ExecutionContextManager(Mock.Of<ILogger>());
-            execution_context_manager.CurrentFor(new Execution.ExecutionContext(
-                "826fd1b0-c620-4ce3-907e-f159e2f63e02",
-                "63c756bb-6881-4b70-874a-ab1ae0e67d2b",
-                Versioning.Version.NotSet,
-                "env",
-                "d5d48a8c-e638-414d-92da-1b6862c8d0e2",
-                Security.Claims.Empty,
-                System.Globalization.CultureInfo.InvariantCulture));
-            get_definitions = () =>
-            {
-                var tenant = execution_context_manager.Current.Tenant;
-                return embedding_definitions_per_tenant[tenant].Object;
-            };
+            var tenant = execution_context_manager.Current.Tenant;
+            return embedding_definitions_per_tenant[tenant].Object;
         };
+    };
 
-        protected static PersistEmbeddingDefinitionForAllTenants WithTenants(Action<TenantConfigBuilder> callback)
+    protected static PersistEmbeddingDefinitionForAllTenants WithTenants(Action<TenantConfigBuilder> callback)
+    {
+        var builder = new TenantConfigBuilder();
+        callback(builder);
+        builder.Build();
+        return new PersistEmbeddingDefinitionForAllTenants(new PerformActionOnAllTenants(tenants, execution_context_manager), get_definitions, Mock.Of<ILogger>());
+    }
+    public class TenantConfigBuilder
+    {
+        readonly Dictionary<TenantId, Mock<IEmbeddingDefinitions>> definitionsPerTenant = new();
+        public TenantConfigBuilder ForTenant(TenantId tenant, Mock<IEmbeddingDefinitions> definitions)
         {
-            var builder = new TenantConfigBuilder();
-            callback(builder);
-            builder.Build();
-            return new PersistEmbeddingDefinitionForAllTenants(new PerformActionOnAllTenants(tenants, execution_context_manager), get_definitions, Mock.Of<ILogger>());
+            definitionsPerTenant.Add(tenant, definitions);
+            return this;
         }
-        public class TenantConfigBuilder
-        {
-            readonly Dictionary<TenantId, Mock<IEmbeddingDefinitions>> definitionsPerTenant = new();
-            public TenantConfigBuilder ForTenant(TenantId tenant, Mock<IEmbeddingDefinitions> definitions)
-            {
-                definitionsPerTenant.Add(tenant, definitions);
-                return this;
-            }
 
-            public void Build()
-            {
-                tenants = new Tenants(
+        public void Build()
+        {
+            tenants = new Tenants(
                 new TenantsConfiguration(
                     definitionsPerTenant.ToDictionary(_ => _.Key.Value, _ => new TenantConfiguration())));
-                embedding_definitions_per_tenant = new Dictionary<TenantId, Mock<IEmbeddingDefinitions>>();
-                foreach (var (tenant, definitions) in definitionsPerTenant)
-                {
-                    embedding_definitions_per_tenant.Add(tenant, definitions);
-                }
-
+            embedding_definitions_per_tenant = new Dictionary<TenantId, Mock<IEmbeddingDefinitions>>();
+            foreach (var (tenant, definitions) in definitionsPerTenant)
+            {
+                embedding_definitions_per_tenant.Add(tenant, definitions);
             }
+
         }
     }
 }

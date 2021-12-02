@@ -12,225 +12,224 @@ using Dolittle.Runtime.DependencyInversion.Conventions;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.DependencyInversion.Booting
+namespace Dolittle.Runtime.DependencyInversion.Booting;
+
+/// <summary>
+/// The entrypoint for DependencyInversion.
+/// </summary>
+public static class Boot
 {
+    static IContainer _container;
+
     /// <summary>
-    /// The entrypoint for DependencyInversion.
+    /// Initialize the entire DependencyInversion pipeline.
     /// </summary>
-    public static class Boot
+    /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
+    /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
+    /// <param name="bindings">Additional bindings.</param>
+    /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
+    /// <returns>Configured <see cref="IContainer"/> and <see cref="IBindingCollection"/>.</returns>
+    public static BootResult Start(
+        IAssemblies assemblies,
+        ITypeFinder typeFinder,
+        ILoggerFactory loggerFactory,
+        IEnumerable<Binding> bindings = null,
+        BootContainer bootContainer = null)
     {
-        static IContainer _container;
+        var logger = loggerFactory.CreateLogger(typeof(Boot));
+        logger.LogTrace("DependencyInversion start");
+        var initialBindings = GetBootBindings(assemblies, typeFinder, loggerFactory);
+        if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
+        _container = bootContainer;
 
-        /// <summary>
-        /// Initialize the entire DependencyInversion pipeline.
-        /// </summary>
-        /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
-        /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
-        /// <param name="bindings">Additional bindings.</param>
-        /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
-        /// <returns>Configured <see cref="IContainer"/> and <see cref="IBindingCollection"/>.</returns>
-        public static BootResult Start(
-            IAssemblies assemblies,
-            ITypeFinder typeFinder,
-            ILoggerFactory loggerFactory,
-            IEnumerable<Binding> bindings = null,
-            BootContainer bootContainer = null)
+        var otherBindings = new List<Binding>();
+
+        if (bindings != null) otherBindings.AddRange(bindings);
+        otherBindings.Add(Bind(typeof(IContainer), () => _container, false));
+
+        logger.LogTrace("Discover and Build bindings");
+        var bindingCollection = DiscoverAndBuildBuildBindings(
+            bootContainer,
+            typeFinder,
+            logger,
+            initialBindings,
+            otherBindings);
+
+        logger.LogTrace("Discover container");
+        _container = DiscoverAndConfigureContainer(bootContainer, assemblies, typeFinder, bindingCollection);
+        BootContainer.ContainerReady(_container);
+
+        logger.LogTrace("Return boot result");
+        return new BootResult(_container, bindingCollection);
+    }
+
+    /// <summary>
+    /// Initialize the entire DependencyInversion pipeline with a specified <see cref="Type"/> of container.
+    /// </summary>
+    /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
+    /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
+    /// <param name="containerType"><see cref="Type"/>Container type.</param>
+    /// <param name="bindings">Additional bindings.</param>
+    /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
+    /// <returns>Configured <see cref="IContainer"/> and <see cref="IBindingCollection"/>.</returns>
+    public static IBindingCollection Start(
+        IAssemblies assemblies,
+        ITypeFinder typeFinder,
+        ILoggerFactory loggerFactory,
+        Type containerType,
+        IEnumerable<Binding> bindings = null,
+        BootContainer bootContainer = null)
+    {
+        var logger = loggerFactory.CreateLogger(typeof(Boot));
+        logger.LogTrace("DependencyInversion start");
+        var initialBindings = GetBootBindings(assemblies, typeFinder, loggerFactory);
+
+        if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
+        _container = bootContainer;
+
+        var otherBindings = new List<Binding>();
+
+        if (bindings != null) otherBindings.AddRange(bindings);
+        otherBindings.Add(Bind(typeof(IContainer), containerType, true));
+
+        logger.LogTrace("Discover and Build bindings");
+        return DiscoverAndBuildBuildBindings(
+            bootContainer,
+            typeFinder,
+            logger,
+            initialBindings,
+            otherBindings);
+    }
+
+    /// <summary>
+    /// Method that gets called when <see cref="IContainer"/> is ready.
+    /// </summary>
+    /// <param name="container"><see cref="IContainer"/> instance.</param>
+    public static void ContainerReady(IContainer container)
+    {
+        _container = container;
+        BootContainer.ContainerReady(container);
+    }
+
+    static IBindingCollection GetBootBindings(
+        IAssemblies assemblies,
+        ITypeFinder typeFinder,
+        ILoggerFactory loggerFactory)
+    {
+        return new BindingCollection(new[]
         {
-            var logger = loggerFactory.CreateLogger(typeof(Boot));
-            logger.LogTrace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, loggerFactory);
-            if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
-            _container = bootContainer;
+            Bind(typeof(IAssemblies), assemblies),
+            Bind(typeof(ITypeFinder), typeFinder),
+            Bind(typeof(ILoggerFactory), loggerFactory),
+            Bind(typeof(GetContainer), (GetContainer)(() => _container))
+        });
+    }
 
-            var otherBindings = new List<Binding>();
+    static IBindingCollection DiscoverAndBuildBuildBindings(
+        IContainer bootContainer,
+        ITypeFinder typeFinder,
+        ILogger logger,
+        IBindingCollection initialBindings,
+        IEnumerable<Binding> bindings)
+    {
+        logger.LogTrace("Discover bindings");
+        var discoveredBindings = DiscoverBindings(bootContainer, typeFinder, logger);
 
-            if (bindings != null) otherBindings.AddRange(bindings);
-            otherBindings.Add(Bind(typeof(IContainer), () => _container, false));
+        logger.LogTrace("Create a new binding collection");
+        var bindingCollection = new BindingCollection(initialBindings, discoveredBindings, bindings);
 
-            logger.LogTrace("Discover and Build bindings");
-            var bindingCollection = DiscoverAndBuildBuildBindings(
-                bootContainer,
-                typeFinder,
-                logger,
-                initialBindings,
-                otherBindings);
-
-            logger.LogTrace("Discover container");
-            _container = DiscoverAndConfigureContainer(bootContainer, assemblies, typeFinder, bindingCollection);
-            BootContainer.ContainerReady(_container);
-
-            logger.LogTrace("Return boot result");
-            return new BootResult(_container, bindingCollection);
+        foreach (var binding in bindingCollection)
+        {
+            logger.LogTrace("Discovered Binding : {bindingServiceName} - {bindingStrategyTypeName}", binding.Service.AssemblyQualifiedName, binding.Strategy.GetType().Name);
         }
 
-        /// <summary>
-        /// Initialize the entire DependencyInversion pipeline with a specified <see cref="Type"/> of container.
-        /// </summary>
-        /// <param name="assemblies"><see cref="IAssemblies"/> for the application.</param>
-        /// <param name="typeFinder"><see cref="ITypeFinder"/> for doing discovery.</param>
-        /// <param name="containerType"><see cref="Type"/>Container type.</param>
-        /// <param name="bindings">Additional bindings.</param>
-        /// <param name="bootContainer">A <see cref="BootContainer"/> used during booting.</param>
-        /// <returns>Configured <see cref="IContainer"/> and <see cref="IBindingCollection"/>.</returns>
-        public static IBindingCollection Start(
-            IAssemblies assemblies,
-            ITypeFinder typeFinder,
-            ILoggerFactory loggerFactory,
-            Type containerType,
-            IEnumerable<Binding> bindings = null,
-            BootContainer bootContainer = null)
-        {
-            var logger = loggerFactory.CreateLogger(typeof(Boot));
-            logger.LogTrace("DependencyInversion start");
-            var initialBindings = GetBootBindings(assemblies, typeFinder, loggerFactory);
+        var asmBindings = bindingCollection.Where(_ => _.Service == typeof(IAssemblies)).ToArray();
 
-            if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
-            _container = bootContainer;
+        return bindingCollection;
+    }
 
-            var otherBindings = new List<Binding>();
+    static IBindingCollection DiscoverBindings(
+        IContainer bootContainer,
+        ITypeFinder typeFinder,
+        ILogger logger)
+    {
+        logger.LogTrace("Discover Bindings");
+        var bindingConventionManager = new BindingConventionManager(bootContainer, typeFinder, logger);
 
-            if (bindings != null) otherBindings.AddRange(bindings);
-            otherBindings.Add(Bind(typeof(IContainer), containerType, true));
+        logger.LogTrace("Discover and setup bindings");
+        var bindingsFromConventions = bindingConventionManager.DiscoverAndSetupBindings();
 
-            logger.LogTrace("Discover and Build bindings");
-            return DiscoverAndBuildBuildBindings(
-                bootContainer,
-                typeFinder,
-                logger,
-                initialBindings,
-                otherBindings);
-        }
+        logger.LogTrace("Discover binding providers and get bindings");
+        var bindingsFromProviders = DiscoverBindingProvidersAndGetBindings(bootContainer, typeFinder);
 
-        /// <summary>
-        /// Method that gets called when <see cref="IContainer"/> is ready.
-        /// </summary>
-        /// <param name="container"><see cref="IContainer"/> instance.</param>
-        public static void ContainerReady(IContainer container)
-        {
-            _container = container;
-            BootContainer.ContainerReady(container);
-        }
+        logger.LogTrace("Compose bindings in new collection");
+        return new BindingCollection(bindingsFromProviders, bindingsFromConventions);
+    }
 
-        static IBindingCollection GetBootBindings(
-            IAssemblies assemblies,
-            ITypeFinder typeFinder,
-            ILoggerFactory loggerFactory)
-        {
-            return new BindingCollection(new[]
-            {
-                Bind(typeof(IAssemblies), assemblies),
-                Bind(typeof(ITypeFinder), typeFinder),
-                Bind(typeof(ILoggerFactory), loggerFactory),
-                Bind(typeof(GetContainer), (GetContainer)(() => _container))
-            });
-        }
+    static Binding Bind(Type type, Type target, bool singleton = false)
+    {
+        var containerBindingBuilder = new BindingBuilder(Binding.For(type));
+        var scope = containerBindingBuilder.To(target);
+        if (singleton) scope.Singleton();
+        return containerBindingBuilder.Build();
+    }
 
-        static IBindingCollection DiscoverAndBuildBuildBindings(
-            IContainer bootContainer,
-            ITypeFinder typeFinder,
-            ILogger logger,
-            IBindingCollection initialBindings,
-            IEnumerable<Binding> bindings)
-        {
-            logger.LogTrace("Discover bindings");
-            var discoveredBindings = DiscoverBindings(bootContainer, typeFinder, logger);
+    static Binding Bind(Type type, object target)
+    {
+        var containerBindingBuilder = new BindingBuilder(Binding.For(type));
+        var scope = containerBindingBuilder.To(target);
+        scope.Singleton();
+        return containerBindingBuilder.Build();
+    }
 
-            logger.LogTrace("Create a new binding collection");
-            var bindingCollection = new BindingCollection(initialBindings, discoveredBindings, bindings);
+    static Binding Bind(Type type, Func<object> target, bool singleton = false)
+    {
+        var containerBindingBuilder = new BindingBuilder(Binding.For(type));
+        var scope = containerBindingBuilder.To(target);
+        if (singleton) scope.Singleton();
+        return containerBindingBuilder.Build();
+    }
 
-            foreach (var binding in bindingCollection)
-            {
-                logger.LogTrace("Discovered Binding : {bindingServiceName} - {bindingStrategyTypeName}", binding.Service.AssemblyQualifiedName, binding.Strategy.GetType().Name);
-            }
+    static IBindingCollection DiscoverBindingProvidersAndGetBindings(
+        IContainer bootContainer,
+        ITypeFinder typeFinder)
+    {
+        var bindingProviders = typeFinder.FindMultiple<ICanProvideBindings>();
+        var bindingCollections = new ConcurrentBag<IBindingCollection>();
 
-            var asmBindings = bindingCollection.Where(_ => _.Service == typeof(IAssemblies)).ToArray();
+        Parallel.ForEach(
+            bindingProviders,
+            bindingProviderType => ProvideBindingsFromProvider(bindingProviderType, bootContainer, bindingCollections));
 
-            return bindingCollection;
-        }
+        var bindingCollection = new BindingCollection(bindingCollections.ToArray());
+        return bindingCollection;
+    }
 
-        static IBindingCollection DiscoverBindings(
-            IContainer bootContainer,
-            ITypeFinder typeFinder,
-            ILogger logger)
-        {
-            logger.LogTrace("Discover Bindings");
-            var bindingConventionManager = new BindingConventionManager(bootContainer, typeFinder, logger);
+    static IContainer DiscoverAndConfigureContainer(
+        IContainer bootContainer,
+        IAssemblies assemblies,
+        ITypeFinder typeFinder,
+        IBindingCollection bindingCollection)
+    {
+        var containerProviderType = typeFinder.FindSingle<ICanProvideContainer>();
+        ThrowIfMissingContainerProvider(containerProviderType);
 
-            logger.LogTrace("Discover and setup bindings");
-            var bindingsFromConventions = bindingConventionManager.DiscoverAndSetupBindings();
+        var containerProvider = bootContainer.Get(containerProviderType) as ICanProvideContainer;
 
-            logger.LogTrace("Discover binding providers and get bindings");
-            var bindingsFromProviders = DiscoverBindingProvidersAndGetBindings(bootContainer, typeFinder);
+        var container = containerProvider.Provide(assemblies, bindingCollection);
+        return container;
+    }
 
-            logger.LogTrace("Compose bindings in new collection");
-            return new BindingCollection(bindingsFromProviders, bindingsFromConventions);
-        }
+    static void ProvideBindingsFromProvider(Type bindingProviderType, IContainer bootContainer, ConcurrentBag<IBindingCollection> bindingCollections)
+    {
+        var bindingProvider = bootContainer.Get(bindingProviderType) as ICanProvideBindings;
+        var bindingProviderBuilder = new BindingProviderBuilder();
+        bindingProvider.Provide(bindingProviderBuilder);
+        bindingCollections.Add(bindingProviderBuilder.Build());
+    }
 
-        static Binding Bind(Type type, Type target, bool singleton = false)
-        {
-            var containerBindingBuilder = new BindingBuilder(Binding.For(type));
-            var scope = containerBindingBuilder.To(target);
-            if (singleton) scope.Singleton();
-            return containerBindingBuilder.Build();
-        }
-
-        static Binding Bind(Type type, object target)
-        {
-            var containerBindingBuilder = new BindingBuilder(Binding.For(type));
-            var scope = containerBindingBuilder.To(target);
-            scope.Singleton();
-            return containerBindingBuilder.Build();
-        }
-
-        static Binding Bind(Type type, Func<object> target, bool singleton = false)
-        {
-            var containerBindingBuilder = new BindingBuilder(Binding.For(type));
-            var scope = containerBindingBuilder.To(target);
-            if (singleton) scope.Singleton();
-            return containerBindingBuilder.Build();
-        }
-
-        static IBindingCollection DiscoverBindingProvidersAndGetBindings(
-            IContainer bootContainer,
-            ITypeFinder typeFinder)
-        {
-            var bindingProviders = typeFinder.FindMultiple<ICanProvideBindings>();
-            var bindingCollections = new ConcurrentBag<IBindingCollection>();
-
-            Parallel.ForEach(
-                bindingProviders,
-                bindingProviderType => ProvideBindingsFromProvider(bindingProviderType, bootContainer, bindingCollections));
-
-            var bindingCollection = new BindingCollection(bindingCollections.ToArray());
-            return bindingCollection;
-        }
-
-        static IContainer DiscoverAndConfigureContainer(
-            IContainer bootContainer,
-            IAssemblies assemblies,
-            ITypeFinder typeFinder,
-            IBindingCollection bindingCollection)
-        {
-            var containerProviderType = typeFinder.FindSingle<ICanProvideContainer>();
-            ThrowIfMissingContainerProvider(containerProviderType);
-
-            var containerProvider = bootContainer.Get(containerProviderType) as ICanProvideContainer;
-
-            var container = containerProvider.Provide(assemblies, bindingCollection);
-            return container;
-        }
-
-        static void ProvideBindingsFromProvider(Type bindingProviderType, IContainer bootContainer, ConcurrentBag<IBindingCollection> bindingCollections)
-        {
-            var bindingProvider = bootContainer.Get(bindingProviderType) as ICanProvideBindings;
-            var bindingProviderBuilder = new BindingProviderBuilder();
-            bindingProvider.Provide(bindingProviderBuilder);
-            bindingCollections.Add(bindingProviderBuilder.Build());
-        }
-
-        static void ThrowIfMissingContainerProvider(Type containerProvider)
-        {
-            if (containerProvider == null) throw new MissingContainerProvider();
-        }
+    static void ThrowIfMissingContainerProvider(Type containerProvider)
+    {
+        if (containerProvider == null) throw new MissingContainerProvider();
     }
 }

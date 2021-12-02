@@ -5,25 +5,24 @@ using System.Collections.Generic;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager.given
-{
-    public class a_call_invoker_manager
-    {
-        protected static CallInvokerManager manager;
-        protected static ClientEndpointsConfiguration configuration;
-        protected static Mock<IKnownClients> known_clients;
-        protected static Mock<IMetadataProviders> metadata_providers;
+namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager.given;
 
-        Establish context = () =>
+public class a_call_invoker_manager
+{
+    protected static CallInvokerManager manager;
+    protected static ClientEndpointsConfiguration configuration;
+    protected static Mock<IKnownClients> known_clients;
+    protected static Mock<IMetadataProviders> metadata_providers;
+
+    Establish context = () =>
+    {
+        known_clients = new Mock<IKnownClients>();
+        metadata_providers = new Mock<IMetadataProviders>();
+        configuration = new ClientEndpointsConfiguration(new Dictionary<EndpointVisibility, ClientEndpointConfiguration>
         {
-            known_clients = new Mock<IKnownClients>();
-            metadata_providers = new Mock<IMetadataProviders>();
-            configuration = new ClientEndpointsConfiguration(new Dictionary<EndpointVisibility, ClientEndpointConfiguration>
-            {
-                { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", 1) },
-                { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", 1) }
-            });
-            manager = new CallInvokerManager(known_clients.Object, configuration, metadata_providers.Object);
-        };
-    }
+            { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", 1) },
+            { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", 1) }
+        });
+        manager = new CallInvokerManager(known_clients.Object, configuration, metadata_providers.Object);
+    };
 }

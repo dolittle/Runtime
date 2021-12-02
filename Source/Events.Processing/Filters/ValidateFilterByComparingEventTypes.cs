@@ -11,72 +11,71 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Lifecycle;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters;
+
+/// <summary>
+/// Represents an implementation of <see cref="IValidateFilterByComparingEventTypes"/>.
+/// </summary>
+[SingletonPerTenant]
+public class ValidateFilterByComparingEventTypes : IValidateFilterByComparingEventTypes
 {
+    readonly IEventFetchers _eventFetchers;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IValidateFilterByComparingEventTypes"/>.
+    /// Initializes a new instance of the <see cref="ValidateFilterByComparingEventTypes"/> class.
     /// </summary>
-    [SingletonPerTenant]
-    public class ValidateFilterByComparingEventTypes : IValidateFilterByComparingEventTypes
+    /// <param name="eventFetchers">The <see cref="IEventFetchers"/>.</param>
+    public ValidateFilterByComparingEventTypes(
+        IEventFetchers eventFetchers)
     {
-        readonly IEventFetchers _eventFetchers;
+        _eventFetchers = eventFetchers;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValidateFilterByComparingEventTypes"/> class.
-        /// </summary>
-        /// <param name="eventFetchers">The <see cref="IEventFetchers"/>.</param>
-        public ValidateFilterByComparingEventTypes(
-            IEventFetchers eventFetchers)
+    /// <inheritdoc/>
+    public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
+    {
+        try
         {
-            _eventFetchers = eventFetchers;
-        }
+            var changedEventTypes = GetChangedEventTypes(persistedDefinition, filter.Definition);
 
-        /// <inheritdoc/>
-        public async Task<FilterValidationResult> Validate(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, IFilterProcessor<TypeFilterWithEventSourcePartitionDefinition> filter, StreamPosition lastUnprocessedEvent, CancellationToken cancellationToken)
-        {
-            try
+            if (EventTypesHaveNotChanged(changedEventTypes))
             {
-                var changedEventTypes = GetChangedEventTypes(persistedDefinition, filter.Definition);
-
-                if (EventTypesHaveNotChanged(changedEventTypes))
-                {
-                    return FilterValidationResult.Succeeded();
-                }
-
-                var streamTypesFetcher = await _eventFetchers.GetTypeFetcherFor(
-                    filter.Scope,
-                    new EventLogStreamDefinition(),
-                    cancellationToken).ConfigureAwait(false);
-
-                var typesInSourceStream = await streamTypesFetcher.FetchInRange(
-                    new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent),
-                    cancellationToken).ConfigureAwait(false);
-
-                if (SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes))
-                {
-                    return FilterValidationResult.Failed("The new filter definition has added or removed event types that have already been filtered");
-                }
-
                 return FilterValidationResult.Succeeded();
             }
-            catch (Exception exception)
+
+            var streamTypesFetcher = await _eventFetchers.GetTypeFetcherFor(
+                filter.Scope,
+                new EventLogStreamDefinition(),
+                cancellationToken).ConfigureAwait(false);
+
+            var typesInSourceStream = await streamTypesFetcher.FetchInRange(
+                new StreamPositionRange(StreamPosition.Start, lastUnprocessedEvent),
+                cancellationToken).ConfigureAwait(false);
+
+            if (SourceStreamContainsChangedEventTypes(typesInSourceStream, changedEventTypes))
             {
-                return FilterValidationResult.Failed(exception.Message);
+                return FilterValidationResult.Failed("The new filter definition has added or removed event types that have already been filtered");
             }
+
+            return FilterValidationResult.Succeeded();
         }
-
-        bool EventTypesHaveNotChanged(ISet<ArtifactId> changedEventTypes) => !changedEventTypes.Any();
-
-        bool SourceStreamContainsChangedEventTypes(ISet<Artifact> typesInSourceStream, ISet<ArtifactId> changedEventTypes)
-            => typesInSourceStream.Any(_ => changedEventTypes.Contains(_.Id));
-
-        ISet<ArtifactId> GetChangedEventTypes(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, TypeFilterWithEventSourcePartitionDefinition registeredDefinition)
+        catch (Exception exception)
         {
-            var addedEventTypes = registeredDefinition.Types.Where(_ => !persistedDefinition.Types.Contains(_));
-            var removedEventTypes = persistedDefinition.Types.Where(_ => !registeredDefinition.Types.Contains(_));
-
-            var changedEventTypes = addedEventTypes.Concat(removedEventTypes);
-            return new HashSet<ArtifactId>(changedEventTypes);
+            return FilterValidationResult.Failed(exception.Message);
         }
+    }
+
+    bool EventTypesHaveNotChanged(ISet<ArtifactId> changedEventTypes) => !changedEventTypes.Any();
+
+    bool SourceStreamContainsChangedEventTypes(ISet<Artifact> typesInSourceStream, ISet<ArtifactId> changedEventTypes)
+        => typesInSourceStream.Any(_ => changedEventTypes.Contains(_.Id));
+
+    ISet<ArtifactId> GetChangedEventTypes(TypeFilterWithEventSourcePartitionDefinition persistedDefinition, TypeFilterWithEventSourcePartitionDefinition registeredDefinition)
+    {
+        var addedEventTypes = registeredDefinition.Types.Where(_ => !persistedDefinition.Types.Contains(_));
+        var removedEventTypes = persistedDefinition.Types.Where(_ => !registeredDefinition.Types.Contains(_));
+
+        var changedEventTypes = addedEventTypes.Concat(removedEventTypes);
+        return new HashSet<ArtifactId>(changedEventTypes);
     }
 }

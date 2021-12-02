@@ -3,18 +3,17 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.CLI.Configuration.Runtime
+namespace Dolittle.Runtime.CLI.Configuration.Runtime;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Adds services that provide configuration for a Runtime.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    public static void AddRuntimeConfiguration(this ServiceCollection services)
     {
-        /// <summary>
-        /// Adds services that provide configuration for a Runtime.
-        /// </summary>
-        /// <param name="services">The service collection to add services to.</param>
-        public static void AddRuntimeConfiguration(this ServiceCollection services)
-        {
-            services.AddTransient<IRuntimeConfiguration, RuntimeConfiguration>();
-            services.AddTransient(provider => provider.GetRequiredService<IRuntimeConfiguration>().Resources);
-        }
+        services.AddTransient<IRuntimeConfiguration, RuntimeConfiguration>();
+        services.AddTransient(provider => provider.GetRequiredService<IRuntimeConfiguration>().Resources);
     }
 }

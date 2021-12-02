@@ -3,16 +3,15 @@
 
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Resources.MongoDB
+namespace Dolittle.Runtime.Resources.MongoDB;
+
+/// <summary>
+/// Defines a system that knows about the connection string to a MongoDB resource for the current tenant.
+/// </summary>
+public interface IKnowTheConnectionString
 {
     /// <summary>
-    /// Defines a system that knows about the connection string to a MongoDB resource for the current tenant.
+    /// Gets the <see cref="MongoUrl">connection string</see> for the MongoDB resource for the current tenant.
     /// </summary>
-    public interface IKnowTheConnectionString
-    {
-        /// <summary>
-        /// Gets the <see cref="MongoUrl">connection string</see> for the MongoDB resource for the current tenant.
-        /// </summary>
-        MongoUrl ConnectionString { get; }
-    }
+    MongoUrl ConnectionString { get; }
 }

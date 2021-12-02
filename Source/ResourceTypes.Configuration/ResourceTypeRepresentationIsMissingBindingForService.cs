@@ -3,22 +3,21 @@
 
 using System;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration
+namespace Dolittle.Runtime.ResourceTypes.Configuration;
+
+/// <summary>
+/// Exception that gets thrown when a resource type representation is missing a service binding.
+/// </summary>
+public class ResourceTypeRepresentationIsMissingBindingForService : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a resource type representation is missing a service binding.
+    /// Initializes a new instance of the <see cref="ResourceTypeRepresentationIsMissingBindingForService"/> class.
     /// </summary>
-    public class ResourceTypeRepresentationIsMissingBindingForService : Exception
+    /// <param name="type"></param>
+    /// <param name="implementationName"></param>
+    /// <param name="service"></param>
+    public ResourceTypeRepresentationIsMissingBindingForService(ResourceType type, ResourceTypeImplementation implementationName, Type service)
+        : base($"Resource type representation for resource type '{type.Value}' and implementation for '{implementationName.Value}' is missing service binding for {service}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceTypeRepresentationIsMissingBindingForService"/> class.
-        /// </summary>
-        /// <param name="type"></param>
-        /// <param name="implementationName"></param>
-        /// <param name="service"></param>
-        public ResourceTypeRepresentationIsMissingBindingForService(ResourceType type, ResourceTypeImplementation implementationName, Type service)
-            : base($"Resource type representation for resource type '{type.Value}' and implementation for '{implementationName.Value}' is missing service binding for {service}")
-        {
-        }
     }
 }

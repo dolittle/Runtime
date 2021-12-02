@@ -7,30 +7,28 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting;
+
+public class and_previous_states_are_different : given.all_dependencies
 {
+    static ProjectionState current_state;
 
-    public class and_previous_states_are_different : given.all_dependencies
+    Establish context = () =>
     {
-        static ProjectionState current_state;
+        current_state = CreateStateWithKeyValue("ImAUniqueKey", "AndAUniqueValue");
+        comparer
+            .Setup(_ => _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state))
+            .Returns(Try<bool>.Succeeded(false));
+    };
 
-        Establish context = () =>
-        {
-            current_state = CreateStateWithKeyValue("ImAUniqueKey", "AndAUniqueValue");
-            comparer
-                .Setup(_ => _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state))
-                .Returns(Try<bool>.Succeeded(false));
-        };
+    static Try<bool> result;
 
-        static Try<bool> result;
+    Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
 
-        Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
-
-        It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_not_detect_a_loop = () => result.Result.ShouldBeFalse();
-        It should_call_the_comparer_on_the_whole_list = () =>
-            comparer.Verify(_ =>
+    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_not_detect_a_loop = () => result.Result.ShouldBeFalse();
+    It should_call_the_comparer_on_the_whole_list = () =>
+        comparer.Verify(_ =>
                 _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state),
-                Times.Exactly(previous_states.Count));
-    }
+            Times.Exactly(previous_states.Count));
 }

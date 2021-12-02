@@ -6,36 +6,35 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 using Polly;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Processing.Streams;
+
+/// <summary>
+/// Defines an <see cref="AsyncPolicyFor{T}" /> <see cref="ResilientStreamProcessorStateRepository" />.
+/// </summary>
+public class ResilientStreamProcessorStateRepositoryPolicy : IDefineAsyncPolicyForType
 {
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Defines an <see cref="AsyncPolicyFor{T}" /> <see cref="ResilientStreamProcessorStateRepository" />.
+    /// Initializes a new instance of the <see cref="ResilientStreamProcessorStateRepositoryPolicy"/> class.
     /// </summary>
-    public class ResilientStreamProcessorStateRepositoryPolicy : IDefineAsyncPolicyForType
+    /// <param name="logger">The <see cref="ILogger" />.</param>
+    public ResilientStreamProcessorStateRepositoryPolicy(ILogger<ResilientStreamProcessorStateRepository> logger)
     {
-        readonly ILogger _logger;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResilientStreamProcessorStateRepositoryPolicy"/> class.
-        /// </summary>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public ResilientStreamProcessorStateRepositoryPolicy(ILogger<ResilientStreamProcessorStateRepository> logger)
-        {
-            _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public Type Type => typeof(ResilientStreamProcessorStateRepository);
-
-        /// <inheritdoc/>
-        public Polly.IAsyncPolicy Define() =>
-            Polly.Policy
-                .Handle<Exception>(
-                    _ =>
-                    {
-                        _logger.LogError(_, "Could not persist stream processor state to the event store, will retry in one second.");
-                        return true;
-                    })
-                .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(1));
+        _logger = logger;
     }
+
+    /// <inheritdoc/>
+    public Type Type => typeof(ResilientStreamProcessorStateRepository);
+
+    /// <inheritdoc/>
+    public Polly.IAsyncPolicy Define() =>
+        Polly.Policy
+            .Handle<Exception>(
+                _ =>
+                {
+                    _logger.LogError(_, "Could not persist stream processor state to the event store, will retry in one second.");
+                    return true;
+                })
+            .WaitAndRetryForeverAsync(_ => TimeSpan.FromSeconds(1));
 }

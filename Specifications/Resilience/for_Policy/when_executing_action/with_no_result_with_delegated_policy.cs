@@ -6,21 +6,20 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Resilience.for_Policy.when_executing_action
+namespace Dolittle.Runtime.Resilience.for_Policy.when_executing_action;
+
+public class with_no_result_with_delegated_policy
 {
-    public class with_no_result_with_delegated_policy
+    static Policy policy;
+    static Mock<IPolicy> delegated_policy;
+
+    Establish context = () =>
     {
-        static Policy policy;
-        static Mock<IPolicy> delegated_policy;
+        delegated_policy = new Mock<IPolicy>();
+        policy = new Policy(delegated_policy.Object);
+    };
 
-        Establish context = () =>
-        {
-            delegated_policy = new Mock<IPolicy>();
-            policy = new Policy(delegated_policy.Object);
-        };
+    Because of = () => policy.Execute(() => { });
 
-        Because of = () => policy.Execute(() => { });
-
-        It should_forward_call_to_delegated_policy = () => delegated_policy.Verify(_ => _.Execute(Moq.It.IsAny<Action>()), Times.Once);
-    }
+    It should_forward_call_to_delegated_policy = () => delegated_policy.Verify(_ => _.Execute(Moq.It.IsAny<Action>()), Times.Once);
 }

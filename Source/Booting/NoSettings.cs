@@ -1,12 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// If a <see cref="BootStage"/> does not have any settings - this is the representation of it.
+/// </summary>
+public class NoSettings : IRepresentSettingsForBootStage
 {
-    /// <summary>
-    /// If a <see cref="BootStage"/> does not have any settings - this is the representation of it.
-    /// </summary>
-    public class NoSettings : IRepresentSettingsForBootStage
-    {
-    }
 }

@@ -3,10 +3,9 @@
 
 using Dolittle.Runtime.ApplicationModel;
 
-namespace Dolittle.Runtime.Applications.Configuration
-{
-    /// <summary>
-    /// Represents the configuration for an interaction layer of the <see cref="Microservice"/>.
-    /// </summary>
-    public record InteractionLayerConfiguration(string Type, string Language, string EntryPoint, string Framework);
-}
+namespace Dolittle.Runtime.Applications.Configuration;
+
+/// <summary>
+/// Represents the configuration for an interaction layer of the <see cref="Microservice"/>.
+/// </summary>
+public record InteractionLayerConfiguration(string Type, string Language, string EntryPoint, string Framework);

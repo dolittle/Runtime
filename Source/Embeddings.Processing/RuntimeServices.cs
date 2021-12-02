@@ -4,33 +4,32 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
+/// runtime service implementations for Heads.
+/// </summary>
+public class RuntimeServices : ICanBindRuntimeServices
 {
+    readonly EmbeddingsService _embeddings;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
-    /// runtime service implementations for Heads.
+    /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
     /// </summary>
-    public class RuntimeServices : ICanBindRuntimeServices
+    /// <param name="embeddings">The <see cref="EmbeddingsService"/>.</param>
+    public RuntimeServices(EmbeddingsService embeddings)
     {
-        readonly EmbeddingsService _embeddings;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
-        /// </summary>
-        /// <param name="embeddings">The <see cref="EmbeddingsService"/>.</param>
-        public RuntimeServices(EmbeddingsService embeddings)
-        {
-            _embeddings = embeddings;
-        }
-
-        /// <inheritdoc/>
-        public ServiceAspect Aspect => "Embeddings.Processing";
-
-        /// <inheritdoc/>
-        public IEnumerable<Service> BindServices() =>
-            new[]
-            {
-                new Service(_embeddings, Contracts.Embeddings.BindService(_embeddings), Contracts.Embeddings.Descriptor)
-            };
+        _embeddings = embeddings;
     }
+
+    /// <inheritdoc/>
+    public ServiceAspect Aspect => "Embeddings.Processing";
+
+    /// <inheritdoc/>
+    public IEnumerable<Service> BindServices() =>
+        new[]
+        {
+            new Service(_embeddings, Contracts.Embeddings.BindService(_embeddings), Contracts.Embeddings.Descriptor)
+        };
 }

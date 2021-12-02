@@ -3,31 +3,30 @@
 
 using Dolittle.Runtime.Booting;
 
-namespace Dolittle.Runtime.Heads
+namespace Dolittle.Runtime.Heads;
+
+/// <summary>
+/// Represents a <see cref="ICanPerformBootProcedure">boot procedure</see> for application runtime part.
+/// </summary>
+public class BootProcedure : ICanPerformBootProcedure
 {
+    readonly IConnectedHeads _connectedHeads;
+
     /// <summary>
-    /// Represents a <see cref="ICanPerformBootProcedure">boot procedure</see> for application runtime part.
+    /// Initializes a new instance of the <see cref="BootProcedure"/> class.
     /// </summary>
-    public class BootProcedure : ICanPerformBootProcedure
+    /// <param name="connectedHeads"><see cref="IConnectedHeads"/>.</param>
+    public BootProcedure(IConnectedHeads connectedHeads)
     {
-        readonly IConnectedHeads _connectedHeads;
+        _connectedHeads = connectedHeads;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="BootProcedure"/> class.
-        /// </summary>
-        /// <param name="connectedHeads"><see cref="IConnectedHeads"/>.</param>
-        public BootProcedure(IConnectedHeads connectedHeads)
-        {
-            _connectedHeads = connectedHeads;
-        }
+    /// <inheritdoc/>
+    public bool CanPerform() => true;
 
-        /// <inheritdoc/>
-        public bool CanPerform() => true;
-
-        /// <inheritdoc/>
-        public void Perform()
-        {
-            HeadConnectionStateExtensions.ConnectedHeads = _connectedHeads;
-        }
+    /// <inheritdoc/>
+    public void Perform()
+    {
+        HeadConnectionStateExtensions.ConnectedHeads = _connectedHeads;
     }
 }

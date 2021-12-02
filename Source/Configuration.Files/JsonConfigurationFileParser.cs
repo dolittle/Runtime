@@ -8,47 +8,46 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Serialization.Json;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.Configuration.Files
+namespace Dolittle.Runtime.Configuration.Files;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanParseConfigurationFile"/> for JSON.
+/// </summary>
+public class JsonConfigurationFileParser : ICanParseConfigurationFile
 {
+    readonly ISerializationOptions _serializationOptions = SerializationOptions.Custom(callback:
+        serializer => serializer.ContractResolver = new CamelCaseExceptDictionaryKeyResolver());
+
+    readonly ISerializer _serializer;
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanParseConfigurationFile"/> for JSON.
+    /// Initializes a new instance of the <see cref="JsonConfigurationFileParser"/> class.
     /// </summary>
-    public class JsonConfigurationFileParser : ICanParseConfigurationFile
+    /// <param name="typeFinder"><see cref="ITypeFinder"/> for finding types.</param>
+    /// <param name="container"><see cerf="IContainer"/> used to get instances.</param>
+    /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+    public JsonConfigurationFileParser(
+        ITypeFinder typeFinder,
+        IContainer container,
+        ILogger logger)
     {
-        readonly ISerializationOptions _serializationOptions = SerializationOptions.Custom(callback:
-            serializer => serializer.ContractResolver = new CamelCaseExceptDictionaryKeyResolver());
+        var converterInstances = new InstancesOf<ICanProvideConverters>(typeFinder, container);
+        _serializer = new Serializer(converterInstances);
+        _logger = logger;
+    }
 
-        readonly ISerializer _serializer;
-        readonly ILogger _logger;
+    /// <inheritdoc/>
+    public bool CanParse(Type type, string filename, string content)
+    {
+        if (content.StartsWith("{", StringComparison.InvariantCulture)) return true;
+        return Path.GetExtension(filename).Equals(".json", StringComparison.InvariantCultureIgnoreCase);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonConfigurationFileParser"/> class.
-        /// </summary>
-        /// <param name="typeFinder"><see cref="ITypeFinder"/> for finding types.</param>
-        /// <param name="container"><see cerf="IContainer"/> used to get instances.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public JsonConfigurationFileParser(
-            ITypeFinder typeFinder,
-            IContainer container,
-            ILogger logger)
-        {
-            var converterInstances = new InstancesOf<ICanProvideConverters>(typeFinder, container);
-            _serializer = new Serializer(converterInstances);
-            _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public bool CanParse(Type type, string filename, string content)
-        {
-            if (content.StartsWith("{", StringComparison.InvariantCulture)) return true;
-            return Path.GetExtension(filename).Equals(".json", StringComparison.InvariantCultureIgnoreCase);
-        }
-
-        /// <inheritdoc/>
-        public object Parse(Type type, string filename, string content)
-        {
-            _logger.LogTrace("Parsing '{filename}' into '{configurationObjectName} - {configurationObjectType}'", filename, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
-            return _serializer.FromJson(type, content, _serializationOptions);
-        }
+    /// <inheritdoc/>
+    public object Parse(Type type, string filename, string content)
+    {
+        _logger.LogTrace("Parsing '{filename}' into '{configurationObjectName} - {configurationObjectType}'", filename, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
+        return _serializer.FromJson(type, content, _serializationOptions);
     }
 }

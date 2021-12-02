@@ -3,9 +3,8 @@
 
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given
+namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given;
+
+public interface third_service
 {
-    public interface third_service
-    {
-    }
 }

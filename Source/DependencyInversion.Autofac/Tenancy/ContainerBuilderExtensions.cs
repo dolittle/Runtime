@@ -4,23 +4,22 @@
 using Autofac;
 using Autofac.Core;
 
-namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy
+namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy;
+
+/// <summary>
+/// Extensions for <see cref="ContainerBuilder"/> related to <see cref="BindingsPerTenantsRegistrationSource"/>.
+/// </summary>
+public static class ContainerBuilderExtensions
 {
     /// <summary>
-    /// Extensions for <see cref="ContainerBuilder"/> related to <see cref="BindingsPerTenantsRegistrationSource"/>.
+    /// Add <see cref="BindingsPerTenantsRegistrationSource"/> as a <see cref="IRegistrationSource"/>.
     /// </summary>
-    public static class ContainerBuilderExtensions
+    /// <param name="containerBuilder">The <see cref="ContainerBuilder"/>.</param>
+    public static void AddBindingsPerTenantRegistrationSource(this ContainerBuilder containerBuilder)
     {
-        /// <summary>
-        /// Add <see cref="BindingsPerTenantsRegistrationSource"/> as a <see cref="IRegistrationSource"/>.
-        /// </summary>
-        /// <param name="containerBuilder">The <see cref="ContainerBuilder"/>.</param>
-        public static void AddBindingsPerTenantRegistrationSource(this ContainerBuilder containerBuilder)
-        {
-            var tenantKeyCreator = new TenantKeyCreator(containerBuilder);
-            var typeActivator = new TypeActivator(containerBuilder);
-            var instancesPerTenant = new InstancesPerTenant(tenantKeyCreator, typeActivator);
-            containerBuilder.RegisterSource(new BindingsPerTenantsRegistrationSource(instancesPerTenant));
-        }
+        var tenantKeyCreator = new TenantKeyCreator(containerBuilder);
+        var typeActivator = new TypeActivator(containerBuilder);
+        var instancesPerTenant = new InstancesPerTenant(tenantKeyCreator, typeActivator);
+        containerBuilder.RegisterSource(new BindingsPerTenantsRegistrationSource(instancesPerTenant));
     }
 }

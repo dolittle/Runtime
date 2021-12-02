@@ -4,17 +4,16 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Collections.for_NullFreeList
+namespace Dolittle.Runtime.Collections.for_NullFreeList;
+
+public class when_constructing_from_an_enumerable_containing_a_null
 {
-    public class when_constructing_from_an_enumerable_containing_a_null
+    static Exception exception;
+
+    Because of = () => exception = Catch.Exception(() =>
     {
-        static Exception exception;
+        new NullFreeList<string>(new string[] { "a", null, "b" });
+    });
 
-        Because of = () => exception = Catch.Exception(() =>
-        {
-            new NullFreeList<string>(new string[] { "a", null, "b" });
-        });
-
-        It should_fail = () => exception.ShouldBeOfExactType<ArgumentNullException>();
-    }
+    It should_fail = () => exception.ShouldBeOfExactType<ArgumentNullException>();
 }

@@ -8,31 +8,30 @@ using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Types;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Represents a <see cref="ICanProvideBindings">binding provider</see> for services and clients.
+/// </summary>
+public class Bindings : ICanProvideBindings
 {
+    readonly IEnumerable<Type> _clientTypes;
+    readonly GetContainer _getContainer;
+
     /// <summary>
-    /// Represents a <see cref="ICanProvideBindings">binding provider</see> for services and clients.
+    /// Initializes a new instance of the <see cref="Bindings"/> class.
     /// </summary>
-    public class Bindings : ICanProvideBindings
+    /// <param name="typeFinder"><see cref="ITypeFinder"/> for finding implementations of <see cref="ClientBase"/>.</param>
+    /// <param name="getContainer"><see cref="GetContainer"/> for getting the <see cref="IContainer"/>.</param>
+    public Bindings(ITypeFinder typeFinder, GetContainer getContainer)
     {
-        readonly IEnumerable<Type> _clientTypes;
-        readonly GetContainer _getContainer;
+        _clientTypes = typeFinder.FindMultiple<ClientBase>();
+        _getContainer = getContainer;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Bindings"/> class.
-        /// </summary>
-        /// <param name="typeFinder"><see cref="ITypeFinder"/> for finding implementations of <see cref="ClientBase"/>.</param>
-        /// <param name="getContainer"><see cref="GetContainer"/> for getting the <see cref="IContainer"/>.</param>
-        public Bindings(ITypeFinder typeFinder, GetContainer getContainer)
-        {
-            _clientTypes = typeFinder.FindMultiple<ClientBase>();
-            _getContainer = getContainer;
-        }
-
-        /// <inheritdoc/>
-        public void Provide(IBindingProviderBuilder builder)
-        {
-            _clientTypes.ForEach(clientType => builder.Bind(clientType).To(() => _getContainer().Get<IClientManager>().Get(clientType)));
-        }
+    /// <inheritdoc/>
+    public void Provide(IBindingProviderBuilder builder)
+    {
+        _clientTypes.ForEach(clientType => builder.Bind(clientType).To(() => _getContainer().Get<IClientManager>().Get(clientType)));
     }
 }

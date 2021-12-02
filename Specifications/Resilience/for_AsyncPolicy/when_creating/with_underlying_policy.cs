@@ -4,19 +4,18 @@
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Resilience.for_AsyncPolicy.when_creating
+namespace Dolittle.Runtime.Resilience.for_AsyncPolicy.when_creating;
+
+public class with_underlying_policy
 {
-    public class with_underlying_policy
-    {
-        static Polly.IAsyncPolicy underlying_policy;
-        static AsyncPolicy policy;
+    static Polly.IAsyncPolicy underlying_policy;
+    static AsyncPolicy policy;
 
-        Establish context = () => underlying_policy = Polly.Policy.NoOpAsync();
+    Establish context = () => underlying_policy = Polly.Policy.NoOpAsync();
 
-        Because of = () => policy = new AsyncPolicy(underlying_policy);
+    Because of = () => policy = new AsyncPolicy(underlying_policy);
 
-        It should_note_have_delegated_policy = () => policy.DelegatedPolicy.ShouldBeNull();
-        It should_have_underlying_policy = () => policy.UnderlyingPolicy.ShouldNotBeNull();
-        It should_have_the_correct_underlying_policy = () => policy.UnderlyingPolicy.ShouldEqual(underlying_policy);
-    }
+    It should_note_have_delegated_policy = () => policy.DelegatedPolicy.ShouldBeNull();
+    It should_have_underlying_policy = () => policy.UnderlyingPolicy.ShouldNotBeNull();
+    It should_have_the_correct_underlying_policy = () => policy.UnderlyingPolicy.ShouldEqual(underlying_policy);
 }

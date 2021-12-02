@@ -3,28 +3,27 @@
 
 using System;
 
-namespace Dolittle.Runtime.Resilience
-{
-    /// <summary>
-    /// Represents a null implementation of <see cref="IPolicy"/>.
-    /// </summary>
-    /// <remarks>
-    /// This policy does nothing, just passes through the calls.
-    /// If no default policy is defined, this is the policy that typically will be used as the
-    /// default policy.
-    /// </remarks>
-    public class PassThroughPolicy : IPolicy
-    {
-        /// <inheritdoc/>
-        public void Execute(Action action)
-        {
-            action();
-        }
+namespace Dolittle.Runtime.Resilience;
 
-        /// <inheritdoc/>
-        public TResult Execute<TResult>(Func<TResult> action)
-        {
-            return action();
-        }
+/// <summary>
+/// Represents a null implementation of <see cref="IPolicy"/>.
+/// </summary>
+/// <remarks>
+/// This policy does nothing, just passes through the calls.
+/// If no default policy is defined, this is the policy that typically will be used as the
+/// default policy.
+/// </remarks>
+public class PassThroughPolicy : IPolicy
+{
+    /// <inheritdoc/>
+    public void Execute(Action action)
+    {
+        action();
+    }
+
+    /// <inheritdoc/>
+    public TResult Execute<TResult>(Func<TResult> action)
+    {
+        return action();
     }
 }

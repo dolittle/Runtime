@@ -3,9 +3,8 @@
 
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.Clients.for_KnownClients
+namespace Dolittle.Runtime.Services.Clients.for_KnownClients;
+
+public class MySecondClient : ClientBase
 {
-    public class MySecondClient : ClientBase
-    {
-    }
 }

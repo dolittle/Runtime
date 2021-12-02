@@ -3,21 +3,20 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Collections.for_NullFreeList
+namespace Dolittle.Runtime.Collections.for_NullFreeList;
+
+public class when_constructing_by_adding_two_elements
 {
-    public class when_constructing_by_adding_two_elements
+    static NullFreeList<string> list;
+
+    Because of = () =>
     {
-        static NullFreeList<string> list;
+        list = new NullFreeList<string>();
+        list.Add("a");
+        list.Add("b");
+    };
 
-        Because of = () =>
-        {
-            list = new NullFreeList<string>();
-            list.Add("a");
-            list.Add("b");
-        };
-
-        It should_contain_two_elements = () => list.Count.ShouldEqual(2);
-        It should_have_the_right_first_element = () => list[0].ShouldEqual("a");
-        It should_have_the_right_second_element = () => list[1].ShouldEqual("b");
-    }
+    It should_contain_two_elements = () => list.Count.ShouldEqual(2);
+    It should_have_the_right_first_element = () => list[0].ShouldEqual("a");
+    It should_have_the_right_second_element = () => list[1].ShouldEqual("b");
 }

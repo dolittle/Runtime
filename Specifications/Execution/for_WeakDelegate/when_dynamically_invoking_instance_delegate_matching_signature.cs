@@ -4,23 +4,22 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Execution.for_WeakDelegate
+namespace Dolittle.Runtime.Execution.for_WeakDelegate;
+
+public class when_dynamically_invoking_instance_delegate_matching_signature
 {
-    public class when_dynamically_invoking_instance_delegate_matching_signature
+    static ClassWithMethod target;
+    static WeakDelegate weak_delegate;
+    static object result;
+
+    Establish context = () =>
     {
-        static ClassWithMethod target;
-        static WeakDelegate weak_delegate;
-        static object result;
+        target = new ClassWithMethod();
+        Func<string, double, int> @delegate = target.SomeMethod;
+        weak_delegate = new WeakDelegate(@delegate);
+    };
 
-        Establish context = () =>
-        {
-            target = new ClassWithMethod();
-            Func<string, double, int> @delegate = target.SomeMethod;
-            weak_delegate = new WeakDelegate(@delegate);
-        };
+    Because of = () => result = weak_delegate.DynamicInvoke("Something", 42.42);
 
-        Because of = () => result = weak_delegate.DynamicInvoke("Something", 42.42);
-
-        It should_call_delegate_and_return_the_result = () => result.ShouldEqual(ClassWithMethod.ReturnValue);
-    }
+    It should_call_delegate_and_return_the_result = () => result.ShouldEqual(ClassWithMethod.ReturnValue);
 }

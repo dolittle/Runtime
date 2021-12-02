@@ -5,78 +5,77 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dolittle.Runtime.Types
+namespace Dolittle.Runtime.Types;
+
+/// <summary>
+/// Represents an implementation of <see cref="ITypeFinder"/>.
+/// </summary>
+public class TypeFinder : ITypeFinder
 {
+    readonly IContractToImplementorsMap _contractToImplementorsMap;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ITypeFinder"/>.
+    /// Initializes a new instance of the <see cref="TypeFinder"/> class.
     /// </summary>
-    public class TypeFinder : ITypeFinder
+    /// <param name="contractToImplementorsMap"><see cref="IContractToImplementorsMap"/> for keeping track of the relationship between contracts and implementors.</param>
+    public TypeFinder(IContractToImplementorsMap contractToImplementorsMap)
     {
-        readonly IContractToImplementorsMap _contractToImplementorsMap;
+        _contractToImplementorsMap = contractToImplementorsMap;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TypeFinder"/> class.
-        /// </summary>
-        /// <param name="contractToImplementorsMap"><see cref="IContractToImplementorsMap"/> for keeping track of the relationship between contracts and implementors.</param>
-        public TypeFinder(IContractToImplementorsMap contractToImplementorsMap)
+    /// <inheritdoc/>
+    public IEnumerable<Type> All => _contractToImplementorsMap.All;
+
+    /// <inheritdoc/>
+    public Type FindSingle<T>()
+    {
+        var type = FindSingle(typeof(T));
+        return type;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<Type> FindMultiple<T>()
+    {
+        var typesFound = FindMultiple(typeof(T));
+        return typesFound;
+    }
+
+    /// <inheritdoc/>
+    public Type FindSingle(Type type)
+    {
+        var typesFound = _contractToImplementorsMap.GetImplementorsFor(type);
+        ThrowIfMultipleTypesFound(type, typesFound);
+        return typesFound.SingleOrDefault();
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<Type> FindMultiple(Type type)
+    {
+        var typesFound = _contractToImplementorsMap.GetImplementorsFor(type);
+        return typesFound;
+    }
+
+    /// <inheritdoc/>
+    public Type FindTypeByFullName(string fullName)
+    {
+        var typeFound = _contractToImplementorsMap.All.SingleOrDefault(t => t.FullName == fullName);
+        ThrowIfTypeNotFound(fullName, typeFound);
+        return typeFound;
+    }
+
+    static void ThrowIfMultipleTypesFound(Type type, IEnumerable<Type> typesFound)
+    {
+        if (typesFound.Count() > 1)
         {
-            _contractToImplementorsMap = contractToImplementorsMap;
+            throw new MultipleTypesFound(type, typesFound);
         }
+    }
 
-        /// <inheritdoc/>
-        public IEnumerable<Type> All => _contractToImplementorsMap.All;
-
-        /// <inheritdoc/>
-        public Type FindSingle<T>()
+    static void ThrowIfTypeNotFound(string fullName, Type typeFound)
+    {
+        if (typeFound == null)
         {
-            var type = FindSingle(typeof(T));
-            return type;
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<Type> FindMultiple<T>()
-        {
-            var typesFound = FindMultiple(typeof(T));
-            return typesFound;
-        }
-
-        /// <inheritdoc/>
-        public Type FindSingle(Type type)
-        {
-            var typesFound = _contractToImplementorsMap.GetImplementorsFor(type);
-            ThrowIfMultipleTypesFound(type, typesFound);
-            return typesFound.SingleOrDefault();
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<Type> FindMultiple(Type type)
-        {
-            var typesFound = _contractToImplementorsMap.GetImplementorsFor(type);
-            return typesFound;
-        }
-
-        /// <inheritdoc/>
-        public Type FindTypeByFullName(string fullName)
-        {
-            var typeFound = _contractToImplementorsMap.All.SingleOrDefault(t => t.FullName == fullName);
-            ThrowIfTypeNotFound(fullName, typeFound);
-            return typeFound;
-        }
-
-        static void ThrowIfMultipleTypesFound(Type type, IEnumerable<Type> typesFound)
-        {
-            if (typesFound.Count() > 1)
-            {
-                throw new MultipleTypesFound(type, typesFound);
-            }
-        }
-
-        static void ThrowIfTypeNotFound(string fullName, Type typeFound)
-        {
-            if (typeFound == null)
-            {
-                throw new UnableToResolveTypeByName(fullName);
-            }
+            throw new UnableToResolveTypeByName(fullName);
         }
     }
 }

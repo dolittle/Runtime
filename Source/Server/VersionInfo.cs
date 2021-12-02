@@ -3,18 +3,15 @@
 
 using Dolittle.Runtime.Versioning;
 
-namespace Dolittle.Runtime.Server
+namespace Dolittle.Runtime.Server;
+
+/// <summary>
+/// Represents a container for the Dolittle Runtime version.
+/// </summary>
+public static class VersionInfo
 {
     /// <summary>
-    /// Represents a container for the Dolittle Runtime version.
+    /// Gets the current <see cref="Version"/> of the Dolittle Runtime.
     /// </summary>
-    public static class VersionInfo
-    {
-        /// <summary>
-        /// Gets the current <see cref="Version"/> of the Dolittle Runtime.
-        /// </summary>
-        public static Version CurrentVersion => new(377, 389, 368, 0, "PRERELEASE");
-    }
-    
+    public static Version CurrentVersion => new(377, 389, 368, 0, "PRERELEASE");
 }
-

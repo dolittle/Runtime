@@ -6,23 +6,22 @@ using Dolittle.Runtime.Security;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Security.Specs.for_UserSecurityActor.given
+namespace Dolittle.Runtime.Security.Specs.for_UserSecurityActor.given;
+
+public class a_user_security_actor
 {
-    public class a_user_security_actor
+    protected static UserSecurityActor actor;
+    protected static ClaimsIdentity identity;
+    protected static ClaimsPrincipal principal;
+
+    Establish context = () =>
     {
-        protected static UserSecurityActor actor;
-        protected static ClaimsIdentity identity;
-        protected static ClaimsPrincipal principal;
+        identity = new ClaimsIdentity();
+        principal = new ClaimsPrincipal(identity);
 
-        Establish context = () =>
-        {
-            identity = new ClaimsIdentity();
-            principal = new ClaimsPrincipal(identity);
+        var principalResolver = new Mock<ICanResolvePrincipal>();
+        principalResolver.Setup(p => p.Resolve()).Returns(principal);
 
-            var principalResolver = new Mock<ICanResolvePrincipal>();
-            principalResolver.Setup(p => p.Resolve()).Returns(principal);
-
-            actor = new UserSecurityActor(principalResolver.Object);
-        };
-    }
+        actor = new UserSecurityActor(principalResolver.Object);
+    };
 }

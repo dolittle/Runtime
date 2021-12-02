@@ -3,37 +3,36 @@
 
 using Dolittle.Runtime.Booting;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="IEndpoints"/>.
+/// </summary>
+public class EndpointsBootProcedure : ICanPerformBootProcedure
 {
+    readonly IEndpoints _endpoints;
+
     /// <summary>
-    /// Represents the <see cref="ICanPerformBootProcedure">boot procedure</see> for <see cref="IEndpoints"/>.
+    /// Initializes a new instance of the <see cref="EndpointsBootProcedure"/> class.
     /// </summary>
-    public class EndpointsBootProcedure : ICanPerformBootProcedure
+    /// <param name="endpoints">Instance of <see cref="IEndpoints"/> to boot.</param>
+    public EndpointsBootProcedure(IEndpoints endpoints)
     {
-        readonly IEndpoints _endpoints;
+        _endpoints = endpoints;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EndpointsBootProcedure"/> class.
-        /// </summary>
-        /// <param name="endpoints">Instance of <see cref="IEndpoints"/> to boot.</param>
-        public EndpointsBootProcedure(IEndpoints endpoints)
-        {
-            _endpoints = endpoints;
-        }
+    /// <summary>
+    /// Gets a value indicating whether or not all the <see cref="IEndpoint">endpoints</see> are ready.
+    /// </summary>
+    public static bool EndpointsReady { get; private set; } = false;
 
-        /// <summary>
-        /// Gets a value indicating whether or not all the <see cref="IEndpoint">endpoints</see> are ready.
-        /// </summary>
-        public static bool EndpointsReady { get; private set; } = false;
+    /// <inheritdoc/>
+    public bool CanPerform() => true;
 
-        /// <inheritdoc/>
-        public bool CanPerform() => true;
-
-        /// <inheritdoc/>
-        public void Perform()
-        {
-            _endpoints.Start();
-            EndpointsReady = true;
-        }
+    /// <inheritdoc/>
+    public void Perform()
+    {
+        _endpoints.Start();
+        EndpointsReady = true;
     }
 }

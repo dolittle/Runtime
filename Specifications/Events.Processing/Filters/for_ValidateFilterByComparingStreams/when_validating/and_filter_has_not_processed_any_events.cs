@@ -8,13 +8,12 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Machine.Specifications;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating
-{
-    public class and_filter_has_not_processed_any_events : given.all_dependencies
-    {
-        static FilterValidationResult result;
+namespace Dolittle.Runtime.Events.Processing.Filters.for_ValidateFilterByComparingStreams.when_validating;
 
-        Because of = () => result = validator.Validate(filter_definition, filter_processor.Object, 0, CancellationToken.None).GetAwaiter().GetResult();
-        It should_not_fail_validation = () => result.Success.ShouldBeTrue();
-    }
+public class and_filter_has_not_processed_any_events : given.all_dependencies
+{
+    static FilterValidationResult result;
+
+    Because of = () => result = validator.Validate(filter_definition, filter_processor.Object, 0, CancellationToken.None).GetAwaiter().GetResult();
+    It should_not_fail_validation = () => result.Success.ShouldBeTrue();
 }

@@ -5,25 +5,24 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Serialization.Json;
 using Newtonsoft.Json;
 
-namespace Dolittle.Runtime.CLI.Serialization
+namespace Dolittle.Runtime.CLI.Serialization;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanProvideConverters"/> that provides a static set of converters.
+/// </summary>
+public class StaticConverterProvider : ICanProvideConverters
 {
+    readonly JsonConverter[] _converters;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanProvideConverters"/> that provides a static set of converters.
+    /// Initializes a new instance of the <see cref="StaticConverterProvider"/> class.
     /// </summary>
-    public class StaticConverterProvider : ICanProvideConverters
+    /// <param name="converters">The converters that will be provided.</param>
+    public StaticConverterProvider(params JsonConverter[] converters)
     {
-        readonly JsonConverter[] _converters;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StaticConverterProvider"/> class.
-        /// </summary>
-        /// <param name="converters">The converters that will be provided.</param>
-        public StaticConverterProvider(params JsonConverter[] converters)
-        {
-            _converters = converters;
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<JsonConverter> Provide() => _converters;
+        _converters = converters;
     }
+
+    /// <inheritdoc />
+    public IEnumerable<JsonConverter> Provide() => _converters;
 }

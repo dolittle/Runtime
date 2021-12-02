@@ -4,21 +4,20 @@
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.CLI.Options.Parsers
+namespace Dolittle.Runtime.CLI.Options.Parsers;
+
+public static class ValueParserProviderExtensions
 {
-    public static class ValueParserProviderExtensions
+    /// <summary>
+    /// Registers all instances of <see cref="IValueParser"/> in the value parser provider.
+    /// </summary>
+    /// <param name="provider">The value parser provider to register parsers in.</param>
+    /// <param name="container">The service provider to get value parsers from.</param>
+    public static void UseAllValueParsers(this ValueParserProvider provider, ServiceProvider container)
     {
-        /// <summary>
-        /// Registers all instances of <see cref="IValueParser"/> in the value parser provider.
-        /// </summary>
-        /// <param name="provider">The value parser provider to register parsers in.</param>
-        /// <param name="container">The service provider to get value parsers from.</param>
-        public static void UseAllValueParsers(this ValueParserProvider provider, ServiceProvider container)
+        foreach (var parser in container.GetServices<IValueParser>())
         {
-            foreach (var parser in container.GetServices<IValueParser>())
-            {
-                provider.Add(parser);
-            }
+            provider.Add(parser);
         }
     }
 }

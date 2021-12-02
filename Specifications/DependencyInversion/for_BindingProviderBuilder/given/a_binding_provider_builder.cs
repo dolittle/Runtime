@@ -3,12 +3,11 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.DependencyInversion.for_BindingProviderBuilder.given
-{
-    public class a_binding_provider_builder
-    {
-        protected static BindingProviderBuilder builder;
+namespace Dolittle.Runtime.DependencyInversion.for_BindingProviderBuilder.given;
 
-        Establish context = () => builder = new BindingProviderBuilder();
-    }
+public class a_binding_provider_builder
+{
+    protected static BindingProviderBuilder builder;
+
+    Establish context = () => builder = new BindingProviderBuilder();
 }

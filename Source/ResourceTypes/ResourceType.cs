@@ -3,17 +3,16 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.ResourceTypes
+namespace Dolittle.Runtime.ResourceTypes;
+
+/// <summary>
+/// Represents the type of a resource in the system.
+/// </summary>
+public record ResourceType(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents the type of a resource in the system.
+    /// Implicitly converts from a <see cref="string"/> to an <see cref="ResourceType"/>.
     /// </summary>
-    public record ResourceType(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Implicitly converts from a <see cref="string"/> to an <see cref="ResourceType"/>.
-        /// </summary>
-        /// <param name="value">String value to convert from.</param>
-        public static implicit operator ResourceType(string value) => new(value);
-    }
+    /// <param name="value">String value to convert from.</param>
+    public static implicit operator ResourceType(string value) => new(value);
 }

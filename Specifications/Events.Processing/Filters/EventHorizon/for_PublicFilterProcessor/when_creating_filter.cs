@@ -6,25 +6,24 @@ using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilterProcessor
+namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon.for_PublicFilterProcessor;
+
+public class when_creating_filter : given.a_public_event_filter
 {
-    public class when_creating_filter : given.a_public_event_filter
+    static PublicFilterDefinition filter_definition;
+
+    Establish context = () =>
     {
-        static PublicFilterDefinition filter_definition;
+        filter_definition = new PublicFilterDefinition(Guid.NewGuid(), Guid.NewGuid());
+    };
 
-        Establish context = () =>
-        {
-            filter_definition = new PublicFilterDefinition(Guid.NewGuid(), Guid.NewGuid());
-        };
+    Because of = () => filter = new PublicFilterProcessor(
+        filter_definition,
+        dispatcher.Object,
+        Moq.Mock.Of<IWriteEventsToPublicStreams>(),
+        Moq.Mock.Of<ILogger>());
 
-        Because of = () => filter = new PublicFilterProcessor(
-            filter_definition,
-            dispatcher.Object,
-            Moq.Mock.Of<IWriteEventsToPublicStreams>(),
-            Moq.Mock.Of<ILogger>());
-
-        It should_have_the_correct_identifier = () => filter.Identifier.Value.ShouldEqual(filter_definition.TargetStream.Value);
-        It should_have_the_correct_source_stream = () => filter.Definition.SourceStream.ShouldEqual(filter_definition.SourceStream);
-        It should_have_the_correct_target_stream = () => filter.Definition.TargetStream.ShouldEqual(filter_definition.TargetStream);
-    }
+    It should_have_the_correct_identifier = () => filter.Identifier.Value.ShouldEqual(filter_definition.TargetStream.Value);
+    It should_have_the_correct_source_stream = () => filter.Definition.SourceStream.ShouldEqual(filter_definition.SourceStream);
+    It should_have_the_correct_target_stream = () => filter.Definition.TargetStream.ShouldEqual(filter_definition.TargetStream);
 }

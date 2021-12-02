@@ -3,11 +3,10 @@
 
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB;
+
+static partial class Log
 {
-    static partial class Log
-    {
-        [LoggerMessage(0, LogLevel.Trace, "Creating indexes for the {Collection} collection in MongoDB Event Store")]
-        internal static partial void CreatingIndexesFor(ILogger logger, string collection);
-    }
+    [LoggerMessage(0, LogLevel.Trace, "Creating indexes for the {Collection} collection in MongoDB Event Store")]
+    internal static partial void CreatingIndexesFor(ILogger logger, string collection);
 }

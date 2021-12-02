@@ -5,30 +5,29 @@ using System;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitionState
+namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitionState;
+
+public class when_creating_state
 {
-    public class when_creating_state
+    static StreamPosition position;
+    static string reason;
+    static DateTimeOffset retry_time;
+    static FailingPartitionState state;
+    static uint processing_attempts;
+
+    Establish context = () =>
     {
-        static StreamPosition position;
-        static string reason;
-        static DateTimeOffset retry_time;
-        static FailingPartitionState state;
-        static uint processing_attempts;
+        position = 0;
+        reason = "reason";
+        retry_time = DateTimeOffset.Now;
+        processing_attempts = 0;
+    };
 
-        Establish context = () =>
-        {
-            position = 0;
-            reason = "reason";
-            retry_time = DateTimeOffset.Now;
-            processing_attempts = 0;
-        };
+    Because of = () =>
+        state = new FailingPartitionState(position, retry_time, reason, processing_attempts, DateTimeOffset.UtcNow);
 
-        Because of = () =>
-            state = new FailingPartitionState(position, retry_time, reason, processing_attempts, DateTimeOffset.UtcNow);
-
-        It should_have_the_correct_position = () => state.Position.ShouldEqual(position);
-        It should_have_the_correct_reason = () => state.Reason.ShouldEqual(reason);
-        It should_have_the_correct_retry_time = () => state.RetryTime.ShouldEqual(retry_time);
-        It should_have_the_correct_processing_attempts = () => state.ProcessingAttempts.ShouldEqual(processing_attempts);
-    }
+    It should_have_the_correct_position = () => state.Position.ShouldEqual(position);
+    It should_have_the_correct_reason = () => state.Reason.ShouldEqual(reason);
+    It should_have_the_correct_retry_time = () => state.RetryTime.ShouldEqual(retry_time);
+    It should_have_the_correct_processing_attempts = () => state.ProcessingAttempts.ShouldEqual(processing_attempts);
 }

@@ -5,21 +5,20 @@ using System;
 using Dolittle.Runtime.EventHorizon.Consumer;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams
+namespace Dolittle.Runtime.Events.Store.MongoDB.Processing.Streams;
+
+/// <summary>
+/// Exception that gets thrown when trying to use <see cref="SubscriptionId"/> with an unsupported <see cref="IStreamProcessorState"/>.
+/// </summary>
+public class UnsupportedStreamProcessorStatewithSubscriptionId : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when trying to use <see cref="SubscriptionId"/> with an unsupported <see cref="IStreamProcessorState"/>.
+    /// Initializes a new instance of the <see cref="UnsupportedStreamProcessorStatewithSubscriptionId"/> class.
     /// </summary>
-    public class UnsupportedStreamProcessorStatewithSubscriptionId : Exception
+    /// <param name="id">The <see cref="SubscriptionId"/>.</param>
+    /// <param name="state">The given <see cref="IStreamProcessorState"/>.</param>
+    public UnsupportedStreamProcessorStatewithSubscriptionId(SubscriptionId id, IStreamProcessorState state)
+        : base($"StreamProcessorState {state} can't be used with SubscriptionId {id}.")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnsupportedStreamProcessorStatewithSubscriptionId"/> class.
-        /// </summary>
-        /// <param name="id">The <see cref="SubscriptionId"/>.</param>
-        /// <param name="state">The given <see cref="IStreamProcessorState"/>.</param>
-        public UnsupportedStreamProcessorStatewithSubscriptionId(SubscriptionId id, IStreamProcessorState state)
-            : base($"StreamProcessorState {state} can't be used with SubscriptionId {id}.")
-        {
-        }
     }
 }

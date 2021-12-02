@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Projections.Store;
 
-namespace Dolittle.Runtime.Embeddings.Store
+namespace Dolittle.Runtime.Embeddings.Store;
+
+/// <summary>
+/// Exception that gets thrown when the embedding store failed to get the persisted embedding keys for an embedding.
+/// </summary>
+public class FailedToGetEmbeddingKeys : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when the embedding store failed to get the persisted embedding keys for an embedding.
+    /// Initializes an instance of the <see cref="FailedToGetEmbeddingKeys" /> class.
     /// </summary>
-    public class FailedToGetEmbeddingKeys : Exception
+    /// <param name="embedding">The embedding identifier.</param>
+    public FailedToGetEmbeddingKeys(EmbeddingId embedding)
+        : base($"Failed to get embedding's keys, EmbeddingId: {embedding.Value}")
     {
-        /// <summary>
-        /// Initializes an instance of the <see cref="FailedToGetEmbeddingKeys" /> class.
-        /// </summary>
-        /// <param name="embedding">The embedding identifier.</param>
-        public FailedToGetEmbeddingKeys(EmbeddingId embedding)
-            : base($"Failed to get embedding's keys, EmbeddingId: {embedding.Value}")
-        {
-        }
     }
 }

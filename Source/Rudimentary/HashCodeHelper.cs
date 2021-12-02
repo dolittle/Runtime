@@ -4,48 +4,47 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dolittle.Runtime.Rudimentary
+namespace Dolittle.Runtime.Rudimentary;
+
+/// <summary>
+/// Provides useful methods for dealing with HashCodes.
+/// </summary>
+public static class HashCodeHelper
 {
     /// <summary>
-    /// Provides useful methods for dealing with HashCodes.
+    /// Encapsulates an algorithm for generating a hashcode from a series of parameters.
     /// </summary>
-    public static class HashCodeHelper
+    /// <param name="parameters">Properties to generate the HashCode from.</param>
+    /// <returns>The hash code.</returns>
+    /// <remarks>
+    /// Inspired by:
+    /// http://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode.
+    /// </remarks>
+    public static int Generate(params object[] parameters)
     {
-        /// <summary>
-        /// Encapsulates an algorithm for generating a hashcode from a series of parameters.
-        /// </summary>
-        /// <param name="parameters">Properties to generate the HashCode from.</param>
-        /// <returns>The hash code.</returns>
-        /// <remarks>
-        /// Inspired by:
-        /// http://stackoverflow.com/questions/263400/what-is-the-best-algorithm-for-an-overridden-system-object-gethashcode.
-        /// </remarks>
-        public static int Generate(params object[] parameters)
+        unchecked
         {
-            unchecked
-            {
-                return parameters.Where(param => param != null)
-                            .Aggregate(17, (current, param) => (current * 29) + param.GetHashCode());
-            }
+            return parameters.Where(param => param != null)
+                .Aggregate(17, (current, param) => (current * 29) + param.GetHashCode());
         }
+    }
 
-        /// <summary>
-        /// Encapsulates an algorithm for generating a hashcode from an enumerable.
-        /// </summary>
-        /// <param name="enumerable"><see cref="IEnumerable{T}"/> to generate for.</param>
-        /// <returns>The hash code.</returns>
-        public static int GetHashCode(IEnumerable<object> enumerable)
+    /// <summary>
+    /// Encapsulates an algorithm for generating a hashcode from an enumerable.
+    /// </summary>
+    /// <param name="enumerable"><see cref="IEnumerable{T}"/> to generate for.</param>
+    /// <returns>The hash code.</returns>
+    public static int GetHashCode(IEnumerable<object> enumerable)
+    {
+        unchecked
         {
-            unchecked
+            var hash = 17;
+            foreach (var item in enumerable)
             {
-                var hash = 17;
-                foreach (var item in enumerable)
-                {
-                    hash = (hash * 23) + (item?.GetHashCode() ?? 0);
-                }
-
-                return hash;
+                hash = (hash * 23) + (item?.GetHashCode() ?? 0);
             }
+
+            return hash;
         }
     }
 }

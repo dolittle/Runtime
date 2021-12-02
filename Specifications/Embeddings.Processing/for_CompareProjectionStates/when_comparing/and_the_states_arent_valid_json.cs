@@ -6,27 +6,26 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Newtonsoft.Json;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing
+namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing;
+
+public class and_the_states_arent_valid_json
 {
-    public class and_the_states_arent_valid_json
+    static CompareProjectionStates comparer;
+    static ProjectionState left;
+    static ProjectionState right;
+
+    Establish context = () =>
     {
-        static CompareProjectionStates comparer;
-        static ProjectionState left;
-        static ProjectionState right;
+        left = new ProjectionState("Non valid json");
+        right = new ProjectionState("____");
 
-        Establish context = () =>
-        {
-            left = new ProjectionState("Non valid json");
-            right = new ProjectionState("____");
+        comparer = new CompareProjectionStates();
+    };
 
-            comparer = new CompareProjectionStates();
-        };
+    static Try<bool> result;
 
-        static Try<bool> result;
+    Because of = () => result = comparer.TryCheckEquality(left, right);
 
-        Because of = () => result = comparer.TryCheckEquality(left, right);
-
-        It should_fail = () => result.Success.ShouldBeFalse();
-        It should_not_be_equal = () => result.Result.ShouldBeFalse();
-    }
+    It should_fail = () => result.Success.ShouldBeFalse();
+    It should_not_be_equal = () => result.Result.ShouldBeFalse();
 }

@@ -3,15 +3,14 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Specifications.for_Negative
+namespace Dolittle.Runtime.Specifications.for_Negative;
+
+[Subject(typeof(Specification<>))]
+public class when_applying_a_not_rule_against_a_non_satisfying_instance : given.rules_and_colored_shapes
 {
-    [Subject(typeof(Specification<>))]
-    public class when_applying_a_not_rule_against_a_non_satisfying_instance : given.rules_and_colored_shapes
-    {
-        static bool is_satisfied;
+    static bool is_satisfied;
 
-        Because of = () => is_satisfied = Is.Not(squares).IsSatisfiedBy(green_circle);
+    Because of = () => is_satisfied = Is.Not(squares).IsSatisfiedBy(green_circle);
 
-        It should_be_satisfied = () => is_satisfied.ShouldBeTrue();
-    }
+    It should_be_satisfied = () => is_satisfied.ShouldBeTrue();
 }

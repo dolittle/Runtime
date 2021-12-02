@@ -3,10 +3,9 @@
 
 using Dolittle.Runtime.ApplicationModel;
 
-namespace Dolittle.Runtime.Applications.Configuration
-{
-    /// <summary>
-    /// Represents the configuration for the <see cref="Microservice"/> core.
-    /// </summary>
-    public record CoreConfiguration(string Language, string EntryPoint);
-}
+namespace Dolittle.Runtime.Applications.Configuration;
+
+/// <summary>
+/// Represents the configuration for the <see cref="Microservice"/> core.
+/// </summary>
+public record CoreConfiguration(string Language, string EntryPoint);

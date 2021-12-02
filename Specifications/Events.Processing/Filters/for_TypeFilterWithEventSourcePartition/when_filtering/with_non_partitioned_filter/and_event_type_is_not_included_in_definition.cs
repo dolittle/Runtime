@@ -9,27 +9,26 @@ using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.when_filtering.with_non_partitioned_filter
+namespace Dolittle.Runtime.Events.Processing.Filters.for_TypeFilterWithEventSourcePartition.when_filtering.with_non_partitioned_filter;
+
+public class and_event_type_is_not_included_in_definition : given.all_dependencies
 {
-    public class and_event_type_is_not_included_in_definition : given.all_dependencies
+    static TypeFilterWithEventSourcePartition filter;
+    static IFilterResult result;
+
+    Establish context = () =>
     {
-        static TypeFilterWithEventSourcePartition filter;
-        static IFilterResult result;
+        filter = new TypeFilterWithEventSourcePartition(
+            scope,
+            new TypeFilterWithEventSourcePartitionDefinition(Guid.NewGuid(), Guid.NewGuid(), new ArtifactId[] { given.artifacts.single().Id }.AsEnumerable(), false),
+            writer.Object,
+            Moq.Mock.Of<ILogger<TypeFilterWithEventSourcePartition>>());
+    };
 
-        Establish context = () =>
-        {
-            filter = new TypeFilterWithEventSourcePartition(
-                scope,
-                new TypeFilterWithEventSourcePartitionDefinition(Guid.NewGuid(), Guid.NewGuid(), new ArtifactId[] { given.artifacts.single().Id }.AsEnumerable(), false),
-                writer.Object,
-                Moq.Mock.Of<ILogger<TypeFilterWithEventSourcePartition>>());
-        };
+    Because of = () => result = filter.Filter(given.committed_events.single("event source"), "a partition", Guid.NewGuid(), default).GetAwaiter().GetResult();
 
-        Because of = () => result = filter.Filter(given.committed_events.single("event source"), "a partition", Guid.NewGuid(), default).GetAwaiter().GetResult();
-
-        It should_have_none_partition = () => result.Partition.Value.ShouldEqual(PartitionId.None.Value);
-        It should_be_successful = () => result.Succeeded.ShouldBeTrue();
-        It should_not_retry = () => result.Retry.ShouldBeFalse();
-        It should_not_be_included = () => result.IsIncluded.ShouldBeFalse();
-    }
+    It should_have_none_partition = () => result.Partition.Value.ShouldEqual(PartitionId.None.Value);
+    It should_be_successful = () => result.Succeeded.ShouldBeTrue();
+    It should_not_retry = () => result.Retry.ShouldBeFalse();
+    It should_not_be_included = () => result.IsIncluded.ShouldBeFalse();
 }

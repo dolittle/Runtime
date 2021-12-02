@@ -3,16 +3,15 @@
 
 using Dolittle.Runtime.ResourceTypes.Configuration;
 
-namespace Dolittle.Runtime.CLI.Configuration.Runtime
+namespace Dolittle.Runtime.CLI.Configuration.Runtime;
+
+/// <summary>
+/// Defines the configuration for a Runtime.
+/// </summary>
+public interface IRuntimeConfiguration
 {
     /// <summary>
-    /// Defines the configuration for a Runtime.
+    /// Gets the resource configurations for all tenants.
     /// </summary>
-    public interface IRuntimeConfiguration
-    {
-        /// <summary>
-        /// Gets the resource configurations for all tenants.
-        /// </summary>
-        ResourceConfigurationsByTenant Resources { get; }
-    }
+    ResourceConfigurationsByTenant Resources { get; }
 }
