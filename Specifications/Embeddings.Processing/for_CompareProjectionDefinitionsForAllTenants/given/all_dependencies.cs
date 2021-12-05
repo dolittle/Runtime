@@ -45,7 +45,7 @@ public class all_dependencies
         var builder = new TenantConfigBuilder();
         callback(builder);
         builder.Build();
-        return new CompareEmbeddingDefinitionsForAllTenants(new PerformActionOnAllTenants(tenants, execution_context_manager), get_definitions, Mock.Of<ILogger>());
+        return new CompareEmbeddingDefinitionsForAllTenants(new PerformActionOnAllTenants(tenants, execution_context_manager), get_definitions);
     }
     public class TenantConfigBuilder
     {
