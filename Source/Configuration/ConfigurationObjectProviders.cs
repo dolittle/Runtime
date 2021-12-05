@@ -41,7 +41,7 @@ public class ConfigurationObjectProviders : IConfigurationObjectProviders
         _providers = _typeFinder.FindMultiple<ICanProvideConfigurationObjects>()
             .Select(_ =>
             {
-                _logger.LogTrace("Configuration Object provider : {configurationObjectProviderType}", _.AssemblyQualifiedName);
+                Log.ConfigurationObjectProvider(_logger, _.AssemblyQualifiedName);
                 return _container.Get(_) as ICanProvideConfigurationObjects;
             }).ToArray();
     }
@@ -49,15 +49,18 @@ public class ConfigurationObjectProviders : IConfigurationObjectProviders
     /// <inheritdoc/>
     public object Provide(Type type)
     {
-        _logger.LogTrace("Try to provide '{configurationObjectName} - {configurationObjectType}'", type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
+        Log.TryProvide(_logger, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
         var provider = GetProvidersFor(type).SingleOrDefault();
         if (provider == null)
         {
-            if (HasDefaultConfigurationProviderFor(type)) return ProvideDefaultConfigurationFor(type);
+            if (HasDefaultConfigurationProviderFor(type))
+            {
+                return ProvideDefaultConfigurationFor(type);
+            }
             throw new MissingProviderForConfigurationObject(type);
         }
 
-        _logger.LogTrace("Provide '{configurationObjectName} - {configurationObjectType}' using {configurationObjectProviderType}", type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName, provider.GetType().AssemblyQualifiedName);
+        Log.ProvideConfiguration(_logger, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName, provider.GetType().AssemblyQualifiedName);
         return provider.Provide(type);
     }
 
@@ -82,20 +85,26 @@ public class ConfigurationObjectProviders : IConfigurationObjectProviders
     {
         var providers = _providers.Where(_ =>
         {
-            _logger.LogTrace("Ask '{configurationObjectProviderType}' if it can provide the configuration type '{configurationObjectName} - {configurationObjectTypeName}'", _.GetType().AssemblyQualifiedName, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
+            Log.CanProviderProvideConfigurationType(_logger, _.GetType().AssemblyQualifiedName, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
             return _.CanProvide(type);
         });
         ThrowIfMultipleProvidersCanProvide(type, providers);
         return providers;
     }
 
-    void ThrowIfMultipleDefaultProvidersFound(Type type, IEnumerable<Type> actualTypes)
+    static void ThrowIfMultipleDefaultProvidersFound(Type type, IEnumerable<Type> actualTypes)
     {
-        if (actualTypes.Count() > 1) throw new MultipleDefaultConfigurationProvidersFoundForConfigurationObject(type);
+        if (actualTypes.Count() > 1)
+        {
+            throw new MultipleDefaultConfigurationProvidersFoundForConfigurationObject(type);
+        }
     }
 
-    void ThrowIfMultipleProvidersCanProvide(Type type, IEnumerable<ICanProvideConfigurationObjects> providers)
+    static void ThrowIfMultipleProvidersCanProvide(Type type, IEnumerable<ICanProvideConfigurationObjects> providers)
     {
-        if (providers.Count() > 1) throw new MultipleProvidersProvidingConfigurationObject(type);
+        if (providers.Count() > 1)
+        {
+            throw new MultipleProvidersProvidingConfigurationObject(type);
+        }
     }
 }

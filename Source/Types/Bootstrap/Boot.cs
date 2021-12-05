@@ -21,7 +21,7 @@ public static class Boot
     /// <returns><see cref="ITypeFinder"/> that can be used.</returns>
     public static ITypeFinder Start(IAssemblies assemblies, ILogger logger, Assembly entryAssembly = null)
     {
-        if (entryAssembly is null) entryAssembly = Assembly.GetEntryAssembly();
+        entryAssembly ??= Assembly.GetEntryAssembly();
 
         var contractToImplementorsMap = new ContractToImplementorsMap();
 

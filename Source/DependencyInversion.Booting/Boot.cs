@@ -37,17 +37,20 @@ public static class Boot
         BootContainer bootContainer = null)
     {
         var logger = loggerFactory.CreateLogger(typeof(Boot));
-        logger.LogTrace("DependencyInversion start");
+        Log.StartDependencyInversion(logger);
         var initialBindings = GetBootBindings(assemblies, typeFinder, loggerFactory);
-        if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
+        bootContainer ??= new BootContainer(initialBindings, new NewBindingsNotificationHub());
         _container = bootContainer;
 
         var otherBindings = new List<Binding>();
 
-        if (bindings != null) otherBindings.AddRange(bindings);
+        if (bindings != null)
+        {
+            otherBindings.AddRange(bindings);
+        }
         otherBindings.Add(Bind(typeof(IContainer), () => _container, false));
 
-        logger.LogTrace("Discover and Build bindings");
+        Log.DiscoverAndBuildBindings(logger);
         var bindingCollection = DiscoverAndBuildBuildBindings(
             bootContainer,
             typeFinder,
@@ -55,11 +58,11 @@ public static class Boot
             initialBindings,
             otherBindings);
 
-        logger.LogTrace("Discover container");
+        Log.DiscoverContainer(logger);
         _container = DiscoverAndConfigureContainer(bootContainer, assemblies, typeFinder, bindingCollection);
         BootContainer.ContainerReady(_container);
 
-        logger.LogTrace("Return boot result");
+        Log.ReturnBootResult(logger);
         return new BootResult(_container, bindingCollection);
     }
 
@@ -81,18 +84,21 @@ public static class Boot
         BootContainer bootContainer = null)
     {
         var logger = loggerFactory.CreateLogger(typeof(Boot));
-        logger.LogTrace("DependencyInversion start");
+        Log.StartDependencyInversion(logger);
         var initialBindings = GetBootBindings(assemblies, typeFinder, loggerFactory);
 
-        if (bootContainer == null) bootContainer = new BootContainer(initialBindings, new NewBindingsNotificationHub());
+        bootContainer ??= new BootContainer(initialBindings, new NewBindingsNotificationHub());
         _container = bootContainer;
 
         var otherBindings = new List<Binding>();
 
-        if (bindings != null) otherBindings.AddRange(bindings);
+        if (bindings != null)
+        {
+            otherBindings.AddRange(bindings);
+        }
         otherBindings.Add(Bind(typeof(IContainer), containerType, true));
 
-        logger.LogTrace("Discover and Build bindings");
+        Log.DiscoverAndBuildBindings(logger);
         return DiscoverAndBuildBuildBindings(
             bootContainer,
             typeFinder,
@@ -132,15 +138,15 @@ public static class Boot
         IBindingCollection initialBindings,
         IEnumerable<Binding> bindings)
     {
-        logger.LogTrace("Discover bindings");
+        Log.DiscoverBindings(logger);
         var discoveredBindings = DiscoverBindings(bootContainer, typeFinder, logger);
 
-        logger.LogTrace("Create a new binding collection");
+        Log.CreateNewBindingCollection(logger);
         var bindingCollection = new BindingCollection(initialBindings, discoveredBindings, bindings);
 
         foreach (var binding in bindingCollection)
         {
-            logger.LogTrace("Discovered Binding : {bindingServiceName} - {bindingStrategyTypeName}", binding.Service.AssemblyQualifiedName, binding.Strategy.GetType().Name);
+            Log.DiscoveredBinding(logger, binding.Service.AssemblyQualifiedName, binding.Strategy.GetType().Name);
         }
 
         var asmBindings = bindingCollection.Where(_ => _.Service == typeof(IAssemblies)).ToArray();
@@ -153,16 +159,16 @@ public static class Boot
         ITypeFinder typeFinder,
         ILogger logger)
     {
-        logger.LogTrace("Discover Bindings");
+        Log.DiscoverBindings(logger);
         var bindingConventionManager = new BindingConventionManager(bootContainer, typeFinder, logger);
 
-        logger.LogTrace("Discover and setup bindings");
+        Log.DiscoverAndSetupBindings(logger);
         var bindingsFromConventions = bindingConventionManager.DiscoverAndSetupBindings();
 
-        logger.LogTrace("Discover binding providers and get bindings");
+        Log.DiscoverBindingProviders(logger);
         var bindingsFromProviders = DiscoverBindingProvidersAndGetBindings(bootContainer, typeFinder);
 
-        logger.LogTrace("Compose bindings in new collection");
+        Log.ComposeBindings(logger);
         return new BindingCollection(bindingsFromProviders, bindingsFromConventions);
     }
 
@@ -170,7 +176,10 @@ public static class Boot
     {
         var containerBindingBuilder = new BindingBuilder(Binding.For(type));
         var scope = containerBindingBuilder.To(target);
-        if (singleton) scope.Singleton();
+        if (singleton)
+        {
+            scope.Singleton();
+        }
         return containerBindingBuilder.Build();
     }
 
@@ -186,7 +195,10 @@ public static class Boot
     {
         var containerBindingBuilder = new BindingBuilder(Binding.For(type));
         var scope = containerBindingBuilder.To(target);
-        if (singleton) scope.Singleton();
+        if (singleton)
+        {
+            scope.Singleton();
+        }
         return containerBindingBuilder.Build();
     }
 
@@ -230,6 +242,9 @@ public static class Boot
 
     static void ThrowIfMissingContainerProvider(Type containerProvider)
     {
-        if (containerProvider == null) throw new MissingContainerProvider();
+        if (containerProvider == null)
+        {
+            throw new MissingContainerProvider();
+        }
     }
 }

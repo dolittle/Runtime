@@ -74,10 +74,19 @@ public class BootStages : IBootStages
             var isAfter = interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanRunAfterBootStage<>));
 
             var suffix = string.Empty;
-            if (isBefore) suffix = " (before)";
-            if (isAfter) suffix = " (after)";
+            if (isBefore)
+            {
+                suffix = " (before)";
+            }
+            if (isAfter)
+            {
+                suffix = " (after)";
+            }
 
-            _logger?.LogDebug($"<********* BOOTSTAGE : {stage.BootStage}{suffix} *********>");
+            if (_logger is not null)
+            {
+                Log.BootStage(_logger, stage.BootStage, suffix);
+            }
 
             var performer = interfaces.SingleOrDefault(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanPerformPartOfBootStage<>));
             var settingsType = performer.GetGenericArguments()[0];
@@ -103,11 +112,12 @@ public class BootStages : IBootStages
 
     void SetupLoggerIfAssociated(Dictionary<string, object> aggregatedAssociations)
     {
-        if (aggregatedAssociations.ContainsKey(WellKnownAssociations.LoggerFactory))
+        if (!aggregatedAssociations.ContainsKey(WellKnownAssociations.LoggerFactory))
         {
-            var loggerFactory = aggregatedAssociations[WellKnownAssociations.LoggerFactory] as ILoggerFactory;
-            _logger = loggerFactory.CreateLogger<BootStages>();
+            return;
         }
+        var loggerFactory = aggregatedAssociations[WellKnownAssociations.LoggerFactory] as ILoggerFactory;
+        _logger = loggerFactory.CreateLogger<BootStages>();
     }
 
     void DiscoverBootStages(ITypeFinder typeFinder)
@@ -118,7 +128,10 @@ public class BootStages : IBootStages
             .Select(_ =>
             {
                 ThrowIfMissingDefaultConstructorForBootStagePerformer(_);
-                if (_container != null) return _container.Get(_) as ICanPerformPartOfBootStage;
+                if (_container != null)
+                {
+                    return _container.Get(_) as ICanPerformPartOfBootStage;
+                }
                 return Activator.CreateInstance(_) as ICanPerformPartOfBootStage;
             })
             .OrderBy(_ => _.BootStage);
@@ -140,7 +153,10 @@ public class BootStages : IBootStages
 
     static void ThrowIfMissingDefaultConstructorForBootStagePerformer(Type type)
     {
-        if (!type.HasDefaultConstructor()) throw new MissingDefaultConstructorForBootStagePerformer(type);
+        if (!type.HasDefaultConstructor())
+        {
+            throw new MissingDefaultConstructorForBootStagePerformer(type);
+        }
     }
 
     void ThrowIfMissingBootStage(IEnumerable<ICanPerformPartOfBootStage> performers)
@@ -158,10 +174,16 @@ public class BootStages : IBootStages
 
                 var isBefore = interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanRunBeforeBootStage<>));
                 var isAfter = interfaces.Any(_ => _.IsGenericType && _.GetGenericTypeDefinition() == typeof(ICanRunAfterBootStage<>));
-                if (!isBefore && !isAfter) return performer.BootStage == bootStage;
+                if (!isBefore && !isAfter)
+                {
+                    return performer.BootStage == bootStage;
+                }
                 return false;
             });
-            if (!hasPerformer) throw new MissingBootStage(bootStage);
+            if (!hasPerformer)
+            {
+                throw new MissingBootStage(bootStage);
+            }
         });
     }
 

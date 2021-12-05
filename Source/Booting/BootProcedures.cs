@@ -42,22 +42,22 @@ public class BootProcedures : IBootProcedures
     /// <inheritdoc/>
     public void Perform()
     {
-        _logger.LogTrace("Bootstrapper start all procedures");
+        Log.StartAllBootProcedures(_logger);
         _executionContextManager.System(BootProceduresCorrelationId);
         var queue = new Queue<ICanPerformBootProcedure>(_procedures);
 
-        _logger.LogDebug("Starting to perform {numberOfBootProcedures} boot procedures", queue.Count);
+        Log.StartPerformingBootProcedures(_logger, queue.Count);
         while (queue.Count > 0)
         {
             var procedure = queue.Dequeue();
             if (procedure.CanPerform())
             {
-                _logger.LogDebug("Performing boot procedure called '{procedureType}'", procedure.GetType().AssemblyQualifiedName);
+                Log.PerformingBootProcedure(_logger, procedure.GetType().AssemblyQualifiedName);
                 procedure.Perform();
             }
             else
             {
-                _logger.LogDebug("Re-enqueuing boot procedure called '{procedureType}'", procedure.GetType().AssemblyQualifiedName);
+                Log.ReEnqueuingBootProcedure(_logger, procedure.GetType().AssemblyQualifiedName);
                 queue.Enqueue(procedure);
             }
         }

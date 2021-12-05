@@ -21,7 +21,9 @@ public static class IncludeAllExtensions
         var specification = includeAll.Specification;
 
         foreach (var assemblyName in assemblyNames)
+        {
             specification = specification.And(new ExceptAssembliesStartingWith(assemblyName));
+        }
 
         includeAll.Specification = specification;
         return includeAll;

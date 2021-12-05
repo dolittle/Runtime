@@ -11,7 +11,7 @@ namespace Dolittle.Runtime.Assemblies;
 public interface IAssemblyFilters
 {
     /// <summary>
-    /// Method that decides wether or not an assembly should be included.
+    /// Method that decides whether or not an assembly should be included.
     /// </summary>
     /// <param name="library">Library description.</param>
     /// <returns>True if it should be included, false if not.</returns>

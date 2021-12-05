@@ -86,7 +86,10 @@ public class Endpoints : IEndpoints
                     var services = GetServicesForRepresenter(representer);
                     _boundServices.Register(representer.Identifier, services);
 
-                    if (!servicesByVisibility.ContainsKey(type)) servicesByVisibility[type] = new List<Service>();
+                    if (!servicesByVisibility.ContainsKey(type))
+                    {
+                        servicesByVisibility[type] = new List<Service>();
+                    }
                     servicesByVisibility[type].AddRange(services);
                 });
             }
@@ -127,7 +130,10 @@ public class Endpoints : IEndpoints
 
     IEndpoint GetEndpointFor(EndpointVisibility type)
     {
-        if (_endpoints.ContainsKey(type)) return _endpoints[type];
+        if (_endpoints.ContainsKey(type))
+        {
+            return _endpoints[type];
+        }
         var endpoint = _container.Get<IEndpoint>();
         _endpoints[type] = endpoint;
         return endpoint;

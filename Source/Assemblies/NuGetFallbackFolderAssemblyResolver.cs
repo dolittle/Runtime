@@ -38,7 +38,10 @@ public class NuGetFallbackFolderAssemblyResolver : ICompilationAssemblyResolver
             basePath = "/usr/local/share/dotnet/sdk/NuGetFallbackFolder";
         }
 
-        if (!Directory.Exists(basePath)) return false;
+        if (!Directory.Exists(basePath))
+        {
+            return false;
+        }
 
         var found = false;
 
@@ -46,11 +49,12 @@ public class NuGetFallbackFolderAssemblyResolver : ICompilationAssemblyResolver
         foreach (var assembly in library.Assemblies)
         {
             var assemblyPath = Path.Combine(libraryBasePath, assembly);
-            if (File.Exists(assemblyPath))
+            if (!File.Exists(assemblyPath))
             {
-                assemblies.Add(assemblyPath);
-                found = true;
+                continue;
             }
+            assemblies.Add(assemblyPath);
+            found = true;
         }
 
         return found;

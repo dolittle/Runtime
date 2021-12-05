@@ -19,10 +19,9 @@ public class ExecutionContextManager : IExecutionContextManager
 {
     static readonly AsyncLocal<ExecutionContext> _executionContext = new();
 
-    static bool _initialExecutionContextSet = false;
+    static bool _initialExecutionContextSet;
 
     readonly ILogger _logger;
-    Microservice _microservice;
     Version _version;
     Environment _environment;
 
@@ -33,7 +32,6 @@ public class ExecutionContextManager : IExecutionContextManager
     public ExecutionContextManager(ILogger logger)
     {
         _logger = logger;
-        _microservice = Microservice.NotSet;
         _version = Version.NotSet;
         _environment = Environment.Undetermined;
     }
@@ -69,7 +67,10 @@ public class ExecutionContextManager : IExecutionContextManager
     public static ExecutionContext SetInitialExecutionContext(ILogger logger)
     {
         Log.SettingInitialExecutionContext(logger);
-        if (_initialExecutionContextSet) throw new InitialExecutionContextHasAlreadyBeenSet();
+        if (_initialExecutionContextSet)
+        {
+            throw new InitialExecutionContextHasAlreadyBeenSet();
+        }
 
         _initialExecutionContextSet = true;
 
@@ -94,7 +95,6 @@ public class ExecutionContextManager : IExecutionContextManager
         int lineNumber,
         string member)
     {
-        _microservice = microservice;
         _version = version;
         _environment = environment;
         CurrentFor(new ExecutionContext(microservice, Current.Tenant, version, environment, Current.CorrelationId, Current.Claims, Current.CultureInfo), filePath, lineNumber, member);

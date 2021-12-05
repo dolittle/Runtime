@@ -29,7 +29,7 @@ public class BootContainer : IContainer
         _bindings = bindings.ToDictionary(_ => _.Service, _ => _.Strategy);
 
         _bindings[typeof(IContainer)] = new Strategies.Constant(this);
-        _bindings[typeof(GetContainer)] = new Strategies.Constant((GetContainer)(() => this));
+        _bindings[typeof(GetContainer)] = new Strategies.Constant(() => this);
 
         newBindingsNotifier.SubscribeTo(_ => _.ToDictionary(_ => _.Service, _ => _.Strategy).ForEach(_bindings.Add));
     }
@@ -40,16 +40,25 @@ public class BootContainer : IContainer
     /// <inheritdoc/>
     public object Get(Type type)
     {
-        if (_container != null && _container.GetType() != typeof(BootContainer)) return _container.Get(type);
+        if (_container != null && _container.GetType() != typeof(BootContainer))
+        {
+            return _container.Get(type);
+        }
 
         if (_bindings.TryGetValue(type, out var strategyForType))
+        {
             return InstantiateBinding(strategyForType, type);
+        }
 
         if (type.IsGenericType && _bindings.TryGetValue(type.GetGenericTypeDefinition(), out var strategyForOpenGenericType))
+        {
             return InstantiateBinding(strategyForOpenGenericType, type);
+        }
 
         if (type.IsInterface)
+        {
             throw new TypeNotBoundInContainer(type, _bindings.Select(_ => _.Key));
+        }
 
         return Create(type);
     }
@@ -75,18 +84,20 @@ public class BootContainer : IContainer
     object Create(Type type)
     {
         var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
-        if (constructors.Length == 0) return Activator.CreateInstance(type);
-        if (constructors.Length > 1) throw new OnlySingleConstructorSupported(type);
+        switch (constructors.Length)
+        {
+            case 0:
+                return Activator.CreateInstance(type);
+            case > 1:
+                throw new OnlySingleConstructorSupported(type);
+        }
         var constructor = constructors[0];
 
         var parameters = constructor.GetParameters().Select(parameter =>
         {
             try
             {
-                if (parameter.ParameterType == typeof(ILogger))
-                    return Get(typeof(ILogger<>).MakeGenericType(type));
-
-                return Get(parameter.ParameterType);
+                return Get(parameter.ParameterType == typeof(ILogger) ? typeof(ILogger<>).MakeGenericType(type) : parameter.ParameterType);
             }
             catch (TypeNotBoundInContainer)
             {

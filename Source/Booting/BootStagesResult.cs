@@ -47,7 +47,10 @@ public class BootStagesResult
     /// <returns>Instance associated.</returns>
     public object GetAssociation(string key)
     {
-        if (_associations.ContainsKey(key)) return _associations[key];
+        if (_associations.ContainsKey(key))
+        {
+            return _associations[key];
+        }
         throw new MissingAssociation(key);
     }
     /// <summary>

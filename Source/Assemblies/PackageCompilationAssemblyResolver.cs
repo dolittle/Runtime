@@ -41,25 +41,27 @@ public class PackageCompilationAssemblyResolver : ICompilationAssemblyResolver
 
         foreach (var directory in _nugetPackageDirectories)
         {
-            if (TryResolvePackagePath(library, directory, out var packagePath))
+            if (!TryResolvePackagePath(library, directory, out var packagePath))
             {
-                if (TryResolveFromPackagePath(library, packagePath, out var fullPathsFromPackage))
-                {
-                    if (fullPathsFromPackage.Any())
-                    {
-                        assemblies.AddRange(fullPathsFromPackage);
-                    }
-                    else
-                    {
-                        var libPath = Path.Join(packagePath, "lib");
-                        var dllName = $"{library.Name}.dll";
-                        var paths = Directory.EnumerateFiles(libPath, dllName, SearchOption.AllDirectories);
-                        assemblies.AddRange(paths);
-                    }
-
-                    return true;
-                }
+                continue;
             }
+            if (!TryResolveFromPackagePath(library, packagePath, out var fullPathsFromPackage))
+            {
+                continue;
+            }
+            if (fullPathsFromPackage.Any())
+            {
+                assemblies.AddRange(fullPathsFromPackage);
+            }
+            else
+            {
+                var libPath = Path.Join(packagePath, "lib");
+                var dllName = $"{library.Name}.dll";
+                var paths = Directory.EnumerateFiles(libPath, dllName, SearchOption.AllDirectories);
+                assemblies.AddRange(paths);
+            }
+
+            return true;
         }
 
         return false;
@@ -72,32 +74,24 @@ public class PackageCompilationAssemblyResolver : ICompilationAssemblyResolver
 
         if (!string.IsNullOrEmpty(listOfDirectories))
         {
-            return listOfDirectories.Split(new char[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
+            return listOfDirectories.Split(new[] { Path.PathSeparator }, StringSplitOptions.RemoveEmptyEntries);
         }
 
         var packageDirectory = Environment.GetEnvironmentVariable("NUGET_PACKAGES");
 
         if (!string.IsNullOrEmpty(packageDirectory))
         {
-            return new string[] { packageDirectory };
+            return new[] { packageDirectory };
         }
 
         string basePath;
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-        {
-            basePath = Environment.GetEnvironmentVariable("USERPROFILE");
-        }
-        else
-        {
-            basePath = Environment.GetEnvironmentVariable("HOME");
-        }
+        basePath = Environment.GetEnvironmentVariable(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+            ? "USERPROFILE"
+            : "HOME");
 
-        if (string.IsNullOrEmpty(basePath))
-        {
-            return new string[] { string.Empty };
-        }
-
-        return new string[] { Path.Combine(basePath, ".nuget", "packages") };
+        return string.IsNullOrEmpty(basePath)
+            ? new[] { string.Empty }
+            : new[] { Path.Combine(basePath, ".nuget", "packages") };
     }
 
     static bool TryResolveFromPackagePath(CompilationLibrary library, string basePath, out IEnumerable<string> results)

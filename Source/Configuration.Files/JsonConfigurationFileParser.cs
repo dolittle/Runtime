@@ -40,14 +40,14 @@ public class JsonConfigurationFileParser : ICanParseConfigurationFile
     /// <inheritdoc/>
     public bool CanParse(Type type, string filename, string content)
     {
-        if (content.StartsWith("{", StringComparison.InvariantCulture)) return true;
-        return Path.GetExtension(filename).Equals(".json", StringComparison.InvariantCultureIgnoreCase);
+        return content.StartsWith("{", StringComparison.InvariantCulture)
+            || Path.GetExtension(filename).Equals(".json", StringComparison.InvariantCultureIgnoreCase);
     }
 
     /// <inheritdoc/>
     public object Parse(Type type, string filename, string content)
     {
-        _logger.LogTrace("Parsing '{filename}' into '{configurationObjectName} - {configurationObjectType}'", filename, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
+        Log.ParsingFileIntoConfiguration(_logger, filename, type.GetFriendlyConfigurationName(), type.AssemblyQualifiedName);
         return _serializer.FromJson(type, content, _serializationOptions);
     }
 }

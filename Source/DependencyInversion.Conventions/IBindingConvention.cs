@@ -17,7 +17,7 @@ namespace Dolittle.Runtime.DependencyInversion.Conventions;
 public interface IBindingConvention
 {
     /// <summary>
-    /// Checks wether or not a given <see cref="Type">Service</see> can be resolved by the convention.
+    /// Checks whether or not a given <see cref="Type">Service</see> can be resolved by the convention.
     /// </summary>
     /// <param name="service">Service that needs to be resolved.</param>
     /// <returns>True if it can resolve it, false if not.</returns>

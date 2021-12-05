@@ -41,12 +41,12 @@ public class BindingConventionManager : IBindingConventionManager
     /// <inheritdoc/>
     public IBindingCollection DiscoverAndSetupBindings()
     {
-        _logger.LogTrace("Discover and setup bindings");
+        Log.DiscoverAndSetupBindings(_logger);
         var bindingCollections = new ConcurrentBag<IBindingCollection>();
 
         var allTypes = _typeFinder.All;
 
-        _logger.LogTrace("Find all binding conventions");
+        Log.FindAllBindingConventions(_logger);
         var conventionTypes = _typeFinder.FindMultiple<IBindingConvention>();
 
         Parallel.ForEach(conventionTypes, conventionType => HandleConvention(conventionType, allTypes, bindingCollections));
@@ -59,7 +59,7 @@ public class BindingConventionManager : IBindingConventionManager
         IEnumerable<Type> allTypes,
         ConcurrentBag<IBindingCollection> bindingCollections)
     {
-        _logger.LogTrace("Handle convention type {conventionType}", conventionType.AssemblyQualifiedName);
+        Log.HandleConvention(_logger, conventionType.AssemblyQualifiedName);
 
         var convention = _bootContainer.Get(conventionType) as IBindingConvention;
         var servicesToResolve = allTypes.Where(service => convention.CanResolve(service));

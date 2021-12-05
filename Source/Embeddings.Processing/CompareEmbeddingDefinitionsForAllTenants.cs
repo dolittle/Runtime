@@ -23,7 +23,6 @@ public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinit
 {
     readonly IPerformActionOnAllTenants _onTenants;
     readonly FactoryFor<IEmbeddingDefinitions> _getDefinitions;
-    readonly ILogger _logger;
 
     /// <summary>
     /// Initializes an instance of the <see cref="CompareEmbeddingDefinitionsForAllTenants" /> class.
@@ -32,12 +31,10 @@ public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinit
     /// <param name="getDefinitions">The factory for getting Embedding definitions.</param>
     public CompareEmbeddingDefinitionsForAllTenants(
         IPerformActionOnAllTenants onTenants,
-        FactoryFor<IEmbeddingDefinitions> getDefinitions,
-        ILogger logger)
+        FactoryFor<IEmbeddingDefinitions> getDefinitions)
     {
         _onTenants = onTenants;
         _getDefinitions = getDefinitions;
-        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -61,7 +58,7 @@ public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinit
         return results;
     }
 
-    EmbeddingDefinitionComparisonResult DefinitionsAreEqual(
+    static EmbeddingDefinitionComparisonResult DefinitionsAreEqual(
         EmbeddingDefinition newDefinition,
         EmbeddingDefinition oldDefinition)
     {
@@ -69,44 +66,44 @@ public class CompareEmbeddingDefinitionsForAllTenants : ICompareEmbeddingDefinit
         {
             return EmbeddingDefinitionComparisonResult.Unequal($"The new Embedding identifier {newDefinition.Embedding.Value} is not the same as the persisted embedding identifier {oldDefinition.Embedding.Value}");
         }
-        if (!InitialStatesAreEqual(newDefinition, oldDefinition, out var result))
+        if (!InitialStatesAreEqual(newDefinition, oldDefinition, out var failedComparison))
         {
-            return result;
+            return failedComparison;
         }
-        if (!EventsAreEqual(newDefinition, oldDefinition, out result))
-        {
-            return result;
-        }
-        return EmbeddingDefinitionComparisonResult.Equal;
+        return !EventsAreEqual(newDefinition, oldDefinition, out failedComparison)
+            ? failedComparison
+            : EmbeddingDefinitionComparisonResult.Equal;
     }
 
-    bool InitialStatesAreEqual(EmbeddingDefinition newDefinition, EmbeddingDefinition oldDefinition, out EmbeddingDefinitionComparisonResult result)
+    static bool InitialStatesAreEqual(EmbeddingDefinition newDefinition, EmbeddingDefinition oldDefinition, out EmbeddingDefinitionComparisonResult failedComparison)
     {
-        result = null;
-        if (newDefinition.InititalState != oldDefinition.InititalState)
+        failedComparison = null;
+        if (newDefinition.InititalState == oldDefinition.InititalState)
         {
-            result = EmbeddingDefinitionComparisonResult.Unequal("The initial Embedding state is not the same as the persisted definition");
-            return false;
+            return true;
         }
-        return true;
+        failedComparison = EmbeddingDefinitionComparisonResult.Unequal("The initial Embedding state is not the same as the persisted definition");
+        return false;
     }
-    bool EventsAreEqual(EmbeddingDefinition newDefinition, EmbeddingDefinition oldDefinition, out EmbeddingDefinitionComparisonResult result)
+
+    static bool EventsAreEqual(EmbeddingDefinition newDefinition, EmbeddingDefinition oldDefinition, out EmbeddingDefinitionComparisonResult failedComparison)
     {
-        result = null;
+        failedComparison = null;
         if (newDefinition.Events.Count() != oldDefinition.Events.Count())
         {
-            result = EmbeddingDefinitionComparisonResult.Unequal("The definitions does not have the same number of events");
+            failedComparison = EmbeddingDefinitionComparisonResult.Unequal("The definitions does not have the same number of events");
             return false;
         }
 
         foreach (var newEvent in newDefinition.Events)
         {
             var oldEvent = oldDefinition.Events.FirstOrDefault(oldEvent => oldEvent.Id == newEvent.Id);
-            if (oldEvent == default)
+            if (oldEvent != default)
             {
-                result = EmbeddingDefinitionComparisonResult.Unequal($"Event {newEvent.Id.Value} was not in previous Embeddingdefinition");
-                return false;
+                continue;
             }
+            failedComparison = EmbeddingDefinitionComparisonResult.Unequal($"Event {newEvent.Id.Value} was not in previous Embeddingdefinition");
+            return false;
         }
 
         return true;

@@ -51,10 +51,13 @@ public class ContractToImplementorsMap : IContractToImplementorsMap
             .ForEach(contract =>
             {
                 var implementingTypes = GetImplementingTypesFor(contract);
-                if (!implementingTypes.Contains(implementor)) implementingTypes.Add(implementor);
+                if (!implementingTypes.Contains(implementor))
+                {
+                    implementingTypes.Add(implementor);
+                }
             });
 
-    bool IsImplementation(Type type)
+    static bool IsImplementation(Type type)
     {
         var typeInfo = type.GetTypeInfo();
         return !typeInfo.IsInterface && !typeInfo.IsAbstract;

@@ -109,9 +109,9 @@ public class AssemblyContext : IAssemblyContext
     {
         var compilationLibrary = library as CompilationLibrary;
         var libraryPaths = new List<string>();
-        if (compilationLibrary == null && library is RuntimeLibrary)
+        if (compilationLibrary == null && library is RuntimeLibrary runtimeLibrary)
         {
-            compilationLibrary = GetCompilationLibraryFrom(library as RuntimeLibrary);
+            compilationLibrary = GetCompilationLibraryFrom(runtimeLibrary);
             _assemblyResolver.TryResolveAssemblyPaths(compilationLibrary, libraryPaths);
         }
 
@@ -166,12 +166,12 @@ public class AssemblyContext : IAssemblyContext
         }
 
         var runtimeLibrary = DependencyContext.RuntimeLibraries.FirstOrDefault(NamesMatch);
-        if (runtimeLibrary != null) return GetCompilationLibraryFrom(runtimeLibrary);
-
-        return DependencyContext.CompileLibraries.FirstOrDefault(NamesMatch);
+        return runtimeLibrary != null
+            ? GetCompilationLibraryFrom(runtimeLibrary)
+            : DependencyContext.CompileLibraries.FirstOrDefault(NamesMatch);
     }
 
-    IEnumerable<Assembly> LoadAssembliesFrom(IEnumerable<Library> libraries)
+    static IEnumerable<Assembly> LoadAssembliesFrom(IEnumerable<Library> libraries)
     {
         return libraries
             .Select(_ =>
@@ -189,7 +189,7 @@ public class AssemblyContext : IAssemblyContext
             .ToArray();
     }
 
-    CompilationLibrary GetCompilationLibraryFrom(RuntimeLibrary library)
+    static CompilationLibrary GetCompilationLibraryFrom(RuntimeLibrary library)
     {
         return new CompilationLibrary(
             library.Type,

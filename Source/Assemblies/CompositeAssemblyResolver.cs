@@ -33,7 +33,10 @@ public class CompositeAssemblyResolver : ICompilationAssemblyResolver
             try
             {
                 found |= resolver.TryResolveAssemblyPaths(library, assemblies);
-                if (assemblies.Count > 0) break;
+                if (assemblies.Count > 0)
+                {
+                    break;
+                }
             }
             catch { }
         }

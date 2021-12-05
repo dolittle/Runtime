@@ -17,9 +17,9 @@ public interface ITypeFinder
     IEnumerable<Type> All { get; }
 
     /// <summary>
-    /// Find a single implementation of a basetype.
+    /// Find a single implementation of a base type.
     /// </summary>
-    /// <typeparam name="T">Basetype to find for.</typeparam>
+    /// <typeparam name="T">Base type to find for.</typeparam>
     /// <returns>Type found.</returns>
     /// <remarks>
     /// If the base type is an interface, it will look for any types implementing the interface.
@@ -29,10 +29,10 @@ public interface ITypeFinder
     Type FindSingle<T>();
 
     /// <summary>
-    /// Find multiple implementations of a basetype.
+    /// Find multiple implementations of a base type.
     /// </summary>
-    /// <typeparam name="T">Basetype to find for.</typeparam>
-    /// <returns>All types implementing or inheriting from the given basetype.</returns>
+    /// <typeparam name="T">Base type to find for.</typeparam>
+    /// <returns>All types implementing or inheriting from the given base type.</returns>
     /// <remarks>
     /// If the base type is an interface, it will look for any types implementing the interface.
     /// If it is a class, it will find anyone inheriting from that class.
@@ -40,9 +40,9 @@ public interface ITypeFinder
     IEnumerable<Type> FindMultiple<T>();
 
     /// <summary>
-    /// Find a single implementation of a basetype.
+    /// Find a single implementation of a base type.
     /// </summary>
-    /// <param name="type">Basetype to find for.</param>
+    /// <param name="type">Base type to find for.</param>
     /// <returns>Type found.</returns>
     /// <remarks>
     /// If the base type is an interface, it will look for any types implementing the interface.
@@ -52,10 +52,10 @@ public interface ITypeFinder
     Type FindSingle(Type type);
 
     /// <summary>
-    /// Find multiple implementations of a basetype.
+    /// Find multiple implementations of a base type.
     /// </summary>
-    /// <param name="type">Basetype to find for.</param>
-    /// <returns>All types implementing or inheriting from the given basetype.</returns>
+    /// <param name="type">Base type to find for.</param>
+    /// <returns>All types implementing or inheriting from the given base type.</returns>
     /// <remarks>
     /// If the base type is an interface, it will look for any types implementing the interface.
     /// If it is a class, it will find anyone inheriting from that class.

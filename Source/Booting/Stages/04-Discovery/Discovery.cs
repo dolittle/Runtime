@@ -26,18 +26,19 @@ public class Discovery : ICanPerformBootStage<DiscoverySettings>
         var loggerFactory = builder.GetAssociation<ILoggerFactory>(WellKnownAssociations.LoggerFactory);
         var logger = loggerFactory.CreateLogger<Discovery>();
 
-        logger.LogDebug("  Discovery");
+        Log.Discovery(logger);
         var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
         {
-            if (settings.IncludeAssembliesStartWith?.Count() > 0)
+            if (!(settings.IncludeAssembliesStartWith?.Count() > 0))
             {
-                settings.IncludeAssembliesStartWith.ForEach(name => logger.LogTrace("Including assemblies starting with '{name}'", name));
-                _.ExceptAssembliesStartingWith(settings.IncludeAssembliesStartWith.ToArray());
+                return;
             }
+            settings.IncludeAssembliesStartWith.ForEach(name => Log.IncludingAssemblies(logger, name));
+            _.ExceptAssembliesStartingWith(settings.IncludeAssembliesStartWith.ToArray());
         });
-        logger.LogDebug("  Set up type system for discovery");
+        Log.SetupTypeSystem(logger);
         var typeFinder = Types.Bootstrap.Boot.Start(assemblies, logger, entryAssembly);
-        logger.LogDebug("  Type system ready");
+        Log.TypeSystemReady(logger);
 
         builder.Bindings.Bind<IAssemblies>().To(assemblies);
         builder.Bindings.Bind<ITypeFinder>().To(typeFinder);
@@ -45,4 +46,19 @@ public class Discovery : ICanPerformBootStage<DiscoverySettings>
         builder.Associate(WellKnownAssociations.Assemblies, assemblies);
         builder.Associate(WellKnownAssociations.TypeFinder, typeFinder);
     }
+}
+
+static partial class Log
+{
+    [LoggerMessage(0, LogLevel.Debug, "  Type system ready")]
+    internal static partial void TypeSystemReady(ILogger logger);
+    
+    [LoggerMessage(0, LogLevel.Debug, "  Set up type system for discovery")]
+    internal static partial void SetupTypeSystem(ILogger logger);
+    
+    [LoggerMessage(0, LogLevel.Trace, "Including assemblies starting with '{AssemblyName}'")]
+    internal static partial void IncludingAssemblies(ILogger logger, string assemblyName);
+    
+    [LoggerMessage(0, LogLevel.Trace, "  Discovery")]
+    internal static partial void Discovery(ILogger logger);
 }

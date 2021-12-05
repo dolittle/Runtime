@@ -40,7 +40,10 @@ public class BindingsPerTenantsRegistrationSource : IRegistrationSource
     /// <inheritdoc/>
     public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
     {
-        if (!(service is IServiceWithType serviceWithType)) return Enumerable.Empty<IComponentRegistration>();
+        if (service is not IServiceWithType serviceWithType)
+        {
+            return Enumerable.Empty<IComponentRegistration>();
+        }
 
         if (serviceWithType.ServiceType.HasAttribute<SingletonPerTenantAttribute>() &&
             !HasService(serviceWithType.ServiceType) &&
@@ -83,8 +86,14 @@ public class BindingsPerTenantsRegistrationSource : IRegistrationSource
     static Binding GetBindingFor(Type service)
     {
         var binding = _bindings.SingleOrDefault(_ => _.Service == service);
-        if (binding == null && service.IsGenericType) binding = _bindings.Single(_ => _.Service == service.GetGenericTypeDefinition());
-        if (binding == null) throw new UnableToFindBindingForService(service);
+        if (binding == null && service.IsGenericType)
+        {
+            binding = _bindings.Single(_ => _.Service == service.GetGenericTypeDefinition());
+        }
+        if (binding == null)
+        {
+            throw new UnableToFindBindingForService(service);
+        }
         return binding;
     }
 }

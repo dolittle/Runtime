@@ -28,13 +28,13 @@ public class Boot
     /// <returns>Instance of <see cref="IRepresentSettingsForBootStage"/>.</returns>
     public IRepresentSettingsForBootStage GetSettingsByType(Type type)
     {
-        if (!_settings.ContainsKey(type))
+        if (_settings.ContainsKey(type))
         {
-            var settings = Activator.CreateInstance(type) as IRepresentSettingsForBootStage;
-            _settings[type] = settings;
-            return settings;
+            return _settings[type];
         }
+        var settings = Activator.CreateInstance(type) as IRepresentSettingsForBootStage;
+        _settings[type] = settings;
+        return settings;
 
-        return _settings[type];
     }
 }

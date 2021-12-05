@@ -36,7 +36,7 @@ public class Logging : ICanPerformBootStage<LoggingSettings>
         builder.Bindings.Bind<ILogger>().To(() => loggerFactory.CreateLogger("UnknownMessageSource"));
 
         var logger = loggerFactory.CreateLogger<Logging>();
-        logger.LogDebug("<********* BOOTSTAGE : Logging *********>");
+        Log.BootStageLogging(logger);
 
         var executionContextLogger = loggerFactory.CreateLogger<ExecutionContextManager>();
 

@@ -42,6 +42,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
     /// <param name="eventStore">The <see cref="IEventStore"/> to use for fetching and committing aggregate root events.</param>
     /// <param name="embeddingStore">The <see cref="IEmbeddingStore"/> to use for fetching, replacing and removing embedding states.</param>
     /// <param name="transitionCalculator">The <see cref="ICalculateStateTransitionEvents"/> to use for calculating state transition events.</param>
+    /// <param name="logger">The <see cref="ILogger"/>.</param>
     public EmbeddingProcessor(
         EmbeddingId embedding,
         IUpdateEmbeddingStates stateUpdater,
@@ -145,7 +146,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
             }
             _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
             var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-            await replaceOrRemoveEmbedding(committedEvents.Last().AggregateRootVersion + 1).ConfigureAwait(false);
+            await replaceOrRemoveEmbedding(committedEvents[committedEvents.Count - 1].AggregateRootVersion + 1).ConfigureAwait(false);
             return Try.Succeeded();
         }
         catch (Exception ex)
@@ -183,7 +184,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
         }
 
         var completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
-        _jobs.Enqueue(async (shouldRun) =>
+        _jobs.Enqueue(async shouldRun =>
         {
             if (!shouldRun || _cancellationToken.IsCancellationRequested)
             {

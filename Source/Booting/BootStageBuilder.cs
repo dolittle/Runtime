@@ -23,8 +23,9 @@ public class BootStageBuilder : IBootStageBuilder
     public BootStageBuilder(IContainer container = null, IDictionary<string, object> initialAssociations = null)
     {
         _container = container;
-        if (initialAssociations != null) _initialAssociations = new Dictionary<string, object>(initialAssociations);
-        else _initialAssociations = new Dictionary<string, object>();
+        _initialAssociations = initialAssociations != null
+            ? new Dictionary<string, object>(initialAssociations)
+            : new Dictionary<string, object>();
         Bindings = new BindingProviderBuilder();
     }
 
@@ -47,8 +48,14 @@ public class BootStageBuilder : IBootStageBuilder
     /// <inheritdoc/>
     public object GetAssociation(string key)
     {
-        if (_associations.ContainsKey(key)) return _associations[key];
-        if (_initialAssociations.ContainsKey(key)) return _initialAssociations[key];
+        if (_associations.ContainsKey(key))
+        {
+            return _associations[key];
+        }
+        if (_initialAssociations.ContainsKey(key))
+        {
+            return _initialAssociations[key];
+        }
 
         throw new MissingAssociation(key);
     }
@@ -64,6 +71,9 @@ public class BootStageBuilder : IBootStageBuilder
 
     void ThrowIfContainerIsNotSet()
     {
-        if (_container == null) throw new ContainerNotSetYet();
+        if (_container == null)
+        {
+            throw new ContainerNotSetYet();
+        }
     }
 }

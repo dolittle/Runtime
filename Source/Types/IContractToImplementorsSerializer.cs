@@ -27,14 +27,14 @@ public interface IContractToImplementorsSerializer
     string SerializeTypes(IEnumerable<Type> types);
 
     /// <summary>
-    /// Deserializes a map from a string into a dictionary of enumerables.
+    /// Deserializes a map from a string into a dictionary of enumerable.
     /// </summary>
     /// <param name="serializedMap">Serialized string to deserialize.</param>
     /// <returns>Contract map.</returns>
     IDictionary<Type, IEnumerable<Type>> DeserializeMap(string serializedMap);
 
     /// <summary>
-    /// Deserializes a map from a string into a dictionary of enumerables.
+    /// Deserializes a map from a string into a dictionary of enumerable.
     /// </summary>
     /// <param name="serializedTypes">Serialized string to deserialize.</param>
     /// <returns>Types.</returns>

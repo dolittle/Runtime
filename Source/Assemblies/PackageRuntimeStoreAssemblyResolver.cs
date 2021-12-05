@@ -42,7 +42,10 @@ public class PackageRuntimeStoreAssemblyResolver : ICompilationAssemblyResolver
 #pragma warning disable CA1308
         var cpuBasePath = Path.Combine(basePath, RuntimeInformation.ProcessArchitecture.ToString().ToLowerInvariant());
 #pragma warning restore CA1308
-        if (!Directory.Exists(cpuBasePath)) return false;
+        if (!Directory.Exists(cpuBasePath))
+        {
+            return false;
+        }
 
         var found = false;
 
@@ -52,11 +55,12 @@ public class PackageRuntimeStoreAssemblyResolver : ICompilationAssemblyResolver
             foreach (var assembly in library.Assemblies)
             {
                 var assemblyPath = Path.Combine(libraryBasePath, assembly);
-                if (File.Exists(assemblyPath))
+                if (!File.Exists(assemblyPath))
                 {
-                    assemblies.Add(assemblyPath);
-                    found = true;
+                    continue;
                 }
+                assemblies.Add(assemblyPath);
+                found = true;
             }
         }
 

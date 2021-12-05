@@ -66,10 +66,13 @@ public static class ContainerBuilderExtensions
     static void HandleLifeCycleFor(IRegistrationBuilder<object, ConcreteReflectionActivatorData, SingleRegistrationStyle> builder)
     {
         var service = builder.RegistrationData.Services.First();
-        if (service is TypedService)
+        if (service is not TypedService typedService)
         {
-            var typedService = service as TypedService;
-            if (typedService.ServiceType.HasAttribute<SingletonAttribute>()) builder.SingleInstance();
+            return;
+        }
+        if (typedService.ServiceType.HasAttribute<SingletonAttribute>())
+        {
+            builder.SingleInstance();
         }
     }
 
@@ -92,7 +95,10 @@ public static class ContainerBuilderExtensions
                         var registrationBuilder = containerBuilder.RegisterGeneric(type.Target)
                             .AsSelf()
                             .As(binding.Service);
-                        if (binding.Scope is Scopes.Singleton) registrationBuilder = registrationBuilder.SingleInstance();
+                        if (binding.Scope is Scopes.Singleton)
+                        {
+                            registrationBuilder = registrationBuilder.SingleInstance();
+                        }
                     }
 
                         break;
@@ -135,7 +141,10 @@ public static class ContainerBuilderExtensions
                         var registrationBuilder = containerBuilder.RegisterType(type.Target)
                             .AsSelf()
                             .As(binding.Service);
-                        if (binding.Scope is Scopes.Singleton) registrationBuilder = registrationBuilder.SingleInstance();
+                        if (binding.Scope is Scopes.Singleton)
+                        {
+                            registrationBuilder = registrationBuilder.SingleInstance();
+                        }
                     }
 
                         break;
@@ -147,7 +156,10 @@ public static class ContainerBuilderExtensions
                     case Strategies.Callback callback:
                     {
                         var registrationBuilder = containerBuilder.Register(_ => callback.Target()).As(binding.Service);
-                        if (binding.Scope is Scopes.Singleton) registrationBuilder = registrationBuilder.SingleInstance();
+                        if (binding.Scope is Scopes.Singleton)
+                        {
+                            registrationBuilder = registrationBuilder.SingleInstance();
+                        }
                     }
 
                         break;
@@ -155,7 +167,10 @@ public static class ContainerBuilderExtensions
                     case Strategies.CallbackWithBindingContext callback:
                     {
                         var registrationBuilder = containerBuilder.Register(_ => callback.Target(new BindingContext(binding.Service))).As(binding.Service);
-                        if (binding.Scope is Scopes.Singleton) registrationBuilder = registrationBuilder.SingleInstance();
+                        if (binding.Scope is Scopes.Singleton)
+                        {
+                            registrationBuilder = registrationBuilder.SingleInstance();
+                        }
                     }
 
                         break;
@@ -163,7 +178,10 @@ public static class ContainerBuilderExtensions
                     case Strategies.TypeCallback typeCallback:
                     {
                         var registrationBuilder = containerBuilder.Register(_ => _.Resolve(typeCallback.Target())).As(binding.Service);
-                        if (binding.Scope is Scopes.Singleton) registrationBuilder = registrationBuilder.SingleInstance();
+                        if (binding.Scope is Scopes.Singleton)
+                        {
+                            registrationBuilder = registrationBuilder.SingleInstance();
+                        }
                     }
 
                         break;
@@ -171,7 +189,10 @@ public static class ContainerBuilderExtensions
                     case Strategies.TypeCallbackWithBindingContext typeCallback:
                     {
                         var registrationBuilder = containerBuilder.Register(_ => _.Resolve(typeCallback.Target(new BindingContext(binding.Service)))).As(binding.Service);
-                        if (binding.Scope is Scopes.Singleton) registrationBuilder = registrationBuilder.SingleInstance();
+                        if (binding.Scope is Scopes.Singleton)
+                        {
+                            registrationBuilder = registrationBuilder.SingleInstance();
+                        }
                     }
 
                         break;
@@ -197,6 +218,9 @@ public static class ContainerBuilderExtensions
 
     static void ThrowIfRegistrationSourceProviderTypeIsMissingDefaultConstructor(Type type)
     {
-        if (!type.HasDefaultConstructor()) throw new RegistrationSourceProviderMustHaveADefaultConstructor(type);
+        if (!type.HasDefaultConstructor())
+        {
+            throw new RegistrationSourceProviderMustHaveADefaultConstructor(type);
+        }
     }
 }

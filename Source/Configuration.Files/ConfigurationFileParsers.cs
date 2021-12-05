@@ -39,13 +39,19 @@ public class ConfigurationFileParsers : IConfigurationFileParsers
         return parser.Parse(type, filename, content);
     }
 
-    void ThrowIfMultipleParsersForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
+    static void ThrowIfMultipleParsersForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
     {
-        if (parsers.Length > 1) throw new MultipleParsersForConfigurationFile(filename);
+        if (parsers.Length > 1)
+        {
+            throw new MultipleParsersForConfigurationFile(filename);
+        }
     }
 
-    void ThrowIfMissingParserForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
+    static void ThrowIfMissingParserForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
     {
-        if (parsers.Length == 0) throw new MissingParserForConfigurationFile(filename);
+        if (parsers.Length == 0)
+        {
+            throw new MissingParserForConfigurationFile(filename);
+        }
     }
 }

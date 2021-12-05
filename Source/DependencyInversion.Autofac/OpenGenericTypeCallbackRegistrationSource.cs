@@ -24,7 +24,7 @@ public class OpenGenericTypeCallbackRegistrationSource : IRegistrationSource
     /// <inheritdoc/>
     public IEnumerable<IComponentRegistration> RegistrationsFor(Service service, Func<Service, IEnumerable<IComponentRegistration>> registrationAccessor)
     {
-        if (!(service is IServiceWithType serviceWithType) ||
+        if (service is not IServiceWithType serviceWithType ||
             !serviceWithType.ServiceType.IsGenericType ||
             !_typeCallbackByService.ContainsKey(serviceWithType.ServiceType.GetGenericTypeDefinition()))
         {

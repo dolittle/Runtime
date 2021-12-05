@@ -32,7 +32,10 @@ public class ConnectedHeads : IConnectedHeads
     /// <inheritdoc/>
     public void Connect(Head head)
     {
-        lock (All) All.Add(head);
+        lock (All)
+        {
+            All.Add(head);
+        }
     }
 
     /// <inheritdoc/>
@@ -41,11 +44,12 @@ public class ConnectedHeads : IConnectedHeads
         lock (All)
         {
             var head = All.SingleOrDefault(_ => _.HeadId == headId);
-            if (head != null)
+            if (head == null)
             {
-                _logger.LogDebug("Disconnecting head '{HeadId}'", headId);
-                All.Remove(head);
+                return;
             }
+            Log.DisconnectingHead(_logger, headId);
+            All.Remove(head);
         }
     }
 

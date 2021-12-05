@@ -37,29 +37,28 @@ public class ManifestResourceStreamConfigurationObjectsProvider : ICanProvideCon
     /// <inheritdoc/>
     public bool CanProvide(Type type)
     {
-        var filename = GetFilenameFor(type);
-        var resourceNames = _entryAssembly.GetManifestResourceNames().Where(_ => _.EndsWith(filename, StringComparison.InvariantCultureIgnoreCase)).ToArray();
-        if (resourceNames.Length > 1) throw new MultipleFilesAvailableOfSameType(type, resourceNames);
+        var resourceNames = _entryAssembly.GetManifestResourceNames().Where(_ => _.EndsWith(GetFilenameFor(type), StringComparison.InvariantCultureIgnoreCase)).ToArray();
+        if (resourceNames.Length > 1)
+        {
+            throw new MultipleFilesAvailableOfSameType(type, resourceNames);
+        }
         return resourceNames.Length == 1;
     }
 
     /// <inheritdoc/>
     public object Provide(Type type)
     {
-        var filename = GetFilenameFor(type);
-        var resourceName = _entryAssembly.GetManifestResourceNames().SingleOrDefault(_ => _.EndsWith(filename, StringComparison.InvariantCultureIgnoreCase));
-        if (resourceName != null)
+        var resourceName = _entryAssembly.GetManifestResourceNames().SingleOrDefault(_ => _.EndsWith(GetFilenameFor(type), StringComparison.InvariantCultureIgnoreCase));
+        if (resourceName == null)
         {
-            using var reader = new StreamReader(_entryAssembly.GetManifestResourceStream(resourceName));
-            var content = reader.ReadToEnd();
-            return _parsers.Parse(type, resourceName, content);
+            throw new UnableToProvideConfigurationObject<ManifestResourceStreamConfigurationObjectsProvider>(type);
         }
+        using var reader = new StreamReader(_entryAssembly.GetManifestResourceStream(resourceName));
+        var content = reader.ReadToEnd();
+        return _parsers.Parse(type, resourceName, content);
 
-        throw new UnableToProvideConfigurationObject<ManifestResourceStreamConfigurationObjectsProvider>(type);
     }
 
-    string GetFilenameFor(Type type)
-    {
-        return $"{type.GetFriendlyConfigurationName()}.json";
-    }
+    static string GetFilenameFor(Type type)
+        => $"{type.GetFriendlyConfigurationName()}.json";
 }

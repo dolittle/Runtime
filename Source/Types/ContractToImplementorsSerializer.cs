@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Dolittle.Runtime.Collections;
@@ -32,12 +33,16 @@ public class ContractToImplementorsSerializer : IContractToImplementorsSerialize
         var builder = new StringBuilder();
         map.ForEach(keyValue =>
         {
-            var contract = GetAssemblyQualifiedNameFor(keyValue.Key);
-            builder.Append($"{contract}:");
+            var (key, value) = keyValue;
+            var contract = GetAssemblyQualifiedNameFor(key);
+            builder.Append(CultureInfo.InvariantCulture, $"{contract}:");
             var first = true;
-            keyValue.Value.ForEach(implementor =>
+            value.ForEach(implementor =>
             {
-                if (!first) builder.Append(";");
+                if (!first)
+                {
+                    builder.Append(";");
+                }
                 first = false;
                 builder.Append(GetAssemblyQualifiedNameFor(implementor));
             });
@@ -76,7 +81,7 @@ public class ContractToImplementorsSerializer : IContractToImplementorsSerialize
             {
                 var implementors = keyValue[1]
                     .Split(';')
-                    .Select(_ => Type.GetType(_))
+                    .Select(Type.GetType)
                     .Where(_ => _ != null)
                     .ToArray();
                 if (implementors.Length > 0)
@@ -87,16 +92,16 @@ public class ContractToImplementorsSerializer : IContractToImplementorsSerialize
                 }
                 else
                 {
-                    _logger.LogDebug("No implementations of '{contract}'", keyValue[0]);
+                    Log.NoImplementationsOfContract(_logger, keyValue[0]);
                 }
             }
             else
             {
-                _logger.LogDebug("Can't find contract type '{contract}' - {line}", keyValue[0], line);
+                Log.CannotFindContractType(_logger, keyValue[0], line);
             }
         });
 
-        _logger.LogTrace("Using {contractsCount} contracts mapped to {implementorsCount} implementors in total", contractsCount, implementorsCount);
+        Log.UsingContractsMappedToImplementors(_logger, contractsCount, implementorsCount);
 
         return map;
     }
@@ -105,20 +110,17 @@ public class ContractToImplementorsSerializer : IContractToImplementorsSerialize
     public IEnumerable<Type> DeserializeTypes(string serializedTypes)
     {
         var lines = serializedTypes.Split('\n');
-        return lines.Select(_ => Type.GetType(_))
+        return lines.Select(Type.GetType)
             .Where(_ => _ != null)
             .ToArray();
     }
 
-    string GetAssemblyQualifiedNameFor(Type type)
+    static string GetAssemblyQualifiedNameFor(Type type)
     {
         var name = type.AssemblyQualifiedName;
         if (string.IsNullOrEmpty(name))
         {
-            if (type.IsGenericType)
-                name = $"{type.Namespace}.{type.Name}, {type.Assembly.GetName().FullName}";
-            else
-                name = $"{type}, {type.Assembly.GetName().FullName}";
+            name = type.IsGenericType ? $"{type.Namespace}.{type.Name}, {type.Assembly.GetName().FullName}" : $"{type}, {type.Assembly.GetName().FullName}";
         }
 
         return name;

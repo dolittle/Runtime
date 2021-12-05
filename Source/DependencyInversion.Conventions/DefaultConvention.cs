@@ -31,23 +31,25 @@ public class DefaultConvention : IBindingConvention
     {
         var serviceInstanceType = GetServiceInstanceType(service);
         if (serviceInstanceType != null)
+        {
             builder.To(serviceInstanceType);
+        }
     }
 
     static Type GetServiceInstanceType(Type service)
     {
         var serviceName = service.Name;
-        if (serviceName.StartsWith("I", StringComparison.InvariantCulture))
+        if (!serviceName.StartsWith("I", StringComparison.InvariantCulture))
         {
-            var instanceName = $"{service.Namespace}.{serviceName.Substring(1)}";
-            var serviceInstanceType = service.GetTypeInfo().Assembly.GetType(instanceName);
-            if (serviceInstanceType?.GetTypeInfo().GetConstructors().Any(c => c.IsPublic) == true &&
-                IsAssignableFrom(service, serviceInstanceType) &&
-                !HasMultipleImplementationInSameNamespace(service))
-            {
-                if (serviceInstanceType.GetTypeInfo().IsAbstract) return null;
-                return serviceInstanceType;
-            }
+            return null;
+        }
+        var instanceName = $"{service.Namespace}.{serviceName.Substring(1)}";
+        var serviceInstanceType = service.GetTypeInfo().Assembly.GetType(instanceName);
+        if (serviceInstanceType?.GetTypeInfo().GetConstructors().Any(c => c.IsPublic) == true &&
+            IsAssignableFrom(service, serviceInstanceType) &&
+            !HasMultipleImplementationInSameNamespace(service))
+        {
+            return serviceInstanceType.GetTypeInfo().IsAbstract ? null : serviceInstanceType;
         }
 
         return null;
@@ -68,7 +70,9 @@ public class DefaultConvention : IBindingConvention
         var isAssignable = service
             .GetTypeInfo().IsAssignableFrom(serviceInstanceType.GetTypeInfo());
         if (isAssignable)
+        {
             return true;
+        }
 
         return serviceInstanceType
             .GetTypeInfo().ImplementedInterfaces

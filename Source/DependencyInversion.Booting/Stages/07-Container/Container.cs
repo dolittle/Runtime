@@ -29,15 +29,15 @@ public class Container : ICanPerformBootStage<ContainerSettings>
 
         if (settings.ContainerType != null)
         {
-            logger.LogTrace("Starting DependencyInversion with predefined container type '{containerType}'", settings.ContainerType.AssemblyQualifiedName);
+            Log.StartingDependencyInversion(logger, settings.ContainerType.AssemblyQualifiedName);
             resultingBindings = Boot.Start(assemblies, typeFinder, loggerFactory, settings.ContainerType, bindings, builder.Container as BootContainer);
         }
         else
         {
-            var bootResult = Boot.Start(assemblies, typeFinder, loggerFactory, bindings, builder.Container as BootContainer);
-            resultingBindings = bootResult.Bindings;
-            builder.UseContainer(bootResult.Container);
-            logger.LogTrace("Using container of type '{containerType}'", builder.Container.GetType().AssemblyQualifiedName);
+            var (container, bindingCollection) = Boot.Start(assemblies, typeFinder, loggerFactory, bindings, builder.Container as BootContainer);
+            resultingBindings = bindingCollection;
+            builder.UseContainer(container);
+            Log.UsingContainerOfType(logger, builder.Container.GetType().AssemblyQualifiedName);
         }
 
         builder.Associate(WellKnownAssociations.Bindings, resultingBindings);

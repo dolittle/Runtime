@@ -35,7 +35,10 @@ public class SelfBindingRegistrationSource : IRegistrationSource
     /// <param name="predicate">A predicate that selects types the source will register.</param>
     public SelfBindingRegistrationSource(Func<Type, bool> predicate)
     {
-        if (_predicate == null) predicate = (_) => true;
+        if (_predicate == null)
+        {
+            predicate = (_) => true;
+        }
         _predicate = predicate;
     }
 

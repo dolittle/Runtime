@@ -20,7 +20,9 @@ public static class Ensure
     public static void IsNotNull<T>(string parameterName, T argument)
     {
         if (argument == null)
+        {
             ThrowException(parameterName);
+        }
     }
 
     /// <summary>
@@ -28,11 +30,14 @@ public static class Ensure
     /// </summary>
     /// <param name="parameterName">The name of the argument to be used in the exception.</param>
     /// <param name="argument">The instance of the argument.</param>
-    /// <typeparam name="T">The type of the arugment to be checked.</typeparam>
+    /// <typeparam name="T">The type of the argument to be checked.</typeparam>
     [DebuggerStepThrough]
     public static void NullableIsNotNull<T>(string parameterName, T argument)
     {
-        if (argument is null) ThrowException(parameterName);
+        if (argument is null)
+        {
+            ThrowException(parameterName);
+        }
     }
 
     /// <summary>

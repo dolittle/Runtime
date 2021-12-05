@@ -21,7 +21,7 @@ public record Environment(string Value) : ConceptAs<string>(Value)
     public static readonly Environment Production = "Production";
 
     /// <summary>
-    /// Represents a development like environmen.
+    /// Represents a development like environment.
     /// </summary>
     public static readonly Environment Development = "Development";
 

@@ -31,12 +31,12 @@ public class Configuration : ICanPerformBootStage<NoSettings>
         var configurationObjectTypes = typeFinder.FindMultiple<IConfigurationObject>();
         configurationObjectTypes.ForEach(_ =>
         {
-            logger.LogTrace("Bind configuration object '{configurationObjectName} - {configurationObjectType}'", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName);
+            Log.BindConfigurationObject(logger, _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName);
             _.ShouldBeImmutable();
             builder.Bindings.Bind(_).To(() =>
             {
                 var instance = configurationObjectProviders.Provide(_);
-                logger.LogTrace("Providing configuration object '{configurationObjectName} - {configurationTypeName}' - {configurationObjectHash}", _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName, instance.GetHashCode());
+                Log.ProvidingConfigurationObject(logger, _.GetFriendlyConfigurationName(), _.AssemblyQualifiedName, instance.GetHashCode());
                 return instance;
             });
         });

@@ -41,7 +41,10 @@ public class InstancesPerTenant
             var key = _tenantKeyCreator.GetKeyFor(
                 binding,
                 service);
-            if (_instancesPerKey.ContainsKey(key)) return _instancesPerKey[key];
+            if (_instancesPerKey.ContainsKey(key))
+            {
+                return _instancesPerKey[key];
+            }
 
             object instance = null;
             switch (binding.Strategy)

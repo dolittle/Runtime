@@ -46,7 +46,10 @@ public class PackageRuntimeShareAssemblyResolver : ICompilationAssemblyResolver
 
         foreach (var path in Directory.GetDirectories(basePath))
         {
-            if (found) break;
+            if (found)
+            {
+                break;
+            }
 
             var version = _versionConverter.FromString(library.Version);
             var versionDir = Path.Combine(path, $"{version.Major}.");

@@ -36,7 +36,7 @@ public class TypeFeeder : ITypeFeeder
         catch (ReflectionTypeLoadException ex)
         {
             foreach (var loaderException in ex.LoaderExceptions)
-                _logger.LogError("TypeFeed failure for assembly {AssemblyName} : {LoaderExceptionSource} {LoaderExceptionMessage}", assembly.FullName, loaderException.Source, loaderException.Message);
+                Log.TypeFeedFailureForAssembly(_logger, assembly.FullName, loaderException.Source, loaderException.Message);
         }
     }
 }

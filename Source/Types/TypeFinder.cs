@@ -50,10 +50,7 @@ public class TypeFinder : ITypeFinder
 
     /// <inheritdoc/>
     public IEnumerable<Type> FindMultiple(Type type)
-    {
-        var typesFound = _contractToImplementorsMap.GetImplementorsFor(type);
-        return typesFound;
-    }
+        => _contractToImplementorsMap.GetImplementorsFor(type);
 
     /// <inheritdoc/>
     public Type FindTypeByFullName(string fullName)

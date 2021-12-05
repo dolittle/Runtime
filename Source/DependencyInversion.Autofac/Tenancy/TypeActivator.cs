@@ -28,27 +28,23 @@ public class TypeActivator : ITypeActivator
     public object CreateInstanceFor(IComponentContext context, Type service, Type type)
     {
         var constructors = type.GetConstructors().ToArray();
-        if (constructors.Length > 1) throw new AmbiguousConstructor(type);
-        var constructor = constructors[0];
-        var parameterInstances = constructor.GetParameters().Select(_ =>
+        if (constructors.Length > 1)
         {
-            if (_.ParameterType == typeof(ILogger))
-                return _container.Resolve(typeof(ILogger<>).MakeGenericType(type));
-
-            return _container.Resolve(_.ParameterType);
-        }).ToArray();
+            throw new AmbiguousConstructor(type);
+        }
+        var constructor = constructors[0];
+        var parameterInstances = constructor
+            .GetParameters()
+            .Select(_ => _container.Resolve(_.ParameterType == typeof(ILogger) ? typeof(ILogger<>).MakeGenericType(type) : _.ParameterType)).ToArray();
 
         var instanceLookup = context as IInstanceLookup;
 
-        if (service.ContainsGenericParameters)
-        {
-            var genericArguments = instanceLookup.ComponentRegistration.Activator.LimitType.GetGenericArguments();
-            var targetType = type.MakeGenericType(genericArguments);
-            return Activator.CreateInstance(targetType, parameterInstances);
-        }
-        else
+        if (!service.ContainsGenericParameters)
         {
             return Activator.CreateInstance(type, parameterInstances);
         }
+        var genericArguments = instanceLookup.ComponentRegistration.Activator.LimitType.GetGenericArguments();
+        var targetType = type.MakeGenericType(genericArguments);
+        return Activator.CreateInstance(targetType, parameterInstances);
     }
 }

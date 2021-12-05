@@ -45,7 +45,7 @@ public static class Boot
         var assemblyFilters = new AssemblyFilters(assembliesConfiguration);
 
         var assemblyProvider = new AssemblyProvider(
-            new ICanProvideAssemblies[] { defaultAssemblyProvider ?? new DefaultAssemblyProvider(logger, entryAssembly) },
+            new[] { defaultAssemblyProvider ?? new DefaultAssemblyProvider(logger, entryAssembly) },
             assemblyFilters,
             new AssemblyUtility());
 

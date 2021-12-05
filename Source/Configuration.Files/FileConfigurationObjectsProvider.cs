@@ -52,9 +52,15 @@ public class FileConfigurationObjectsProvider : ICanProvideConfigurationObjects
         _searchPaths.ForEach(_ =>
         {
             var filename = GetFilenameFor(type, _);
-            if (File.Exists(filename)) foundPaths.Add(filename);
+            if (File.Exists(filename))
+            {
+                foundPaths.Add(filename);
+            }
         });
-        if (foundPaths.Count > 1) throw new MultipleFilesAvailableOfSameType(type, foundPaths);
+        if (foundPaths.Count > 1)
+        {
+            throw new MultipleFilesAvailableOfSameType(type, foundPaths);
+        }
         return foundPaths.Count > 0;
     }
 
@@ -65,18 +71,22 @@ public class FileConfigurationObjectsProvider : ICanProvideConfigurationObjects
         _searchPaths.ForEach(_ =>
         {
             var filename = GetFilenameFor(type, _);
-            if (File.Exists(filename))
+            if (!File.Exists(filename))
             {
-                var content = File.ReadAllText(filename);
-                instance = _parsers.Parse(type, filename, content);
+                return;
             }
+            var content = File.ReadAllText(filename);
+            instance = _parsers.Parse(type, filename, content);
         });
 
-        if (instance != null) return instance;
+        if (instance != null)
+        {
+            return instance;
+        }
         throw new UnableToProvideConfigurationObject<FileConfigurationObjectsProvider>(type);
     }
 
-    string GetFilenameFor(Type type, string basePath)
+    static string GetFilenameFor(Type type, string basePath)
     {
         return Path.Combine(Directory.GetCurrentDirectory(), basePath, $"{type.GetFriendlyConfigurationName()}.json");
     }
