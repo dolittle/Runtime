@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
 using Machine.Specifications;
-using Contracts = Dolittle.Services.Contracts;
 
 namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established
 {
@@ -37,7 +36,7 @@ namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.
                     return Task.FromResult(false);
                 });
             server_to_client_stream.SetupGet(_ => _.Current).Returns(new MyServerMessage { ConnectResponse = new MyConnectResponse() });
-            reverse_call_client.Connect(new MyConnectArguments { Context = new Contracts.ReverseCallArgumentsContext { ExecutionContext = execution_context.ToProtobuf() } }, CancellationToken.None).GetAwaiter().GetResult();
+            reverse_call_client.Connect(new MyConnectArguments { Context = new Dolittle.Services.Contracts.ReverseCallArgumentsContext { ExecutionContext = execution_context.ToProtobuf() } }, CancellationToken.None).GetAwaiter().GetResult();
             reverse_call_client.Handle((request, token) => Task.FromResult(new MyResponse()), CancellationToken.None).GetAwaiter().GetResult();
         };
 

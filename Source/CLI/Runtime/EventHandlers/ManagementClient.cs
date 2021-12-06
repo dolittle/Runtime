@@ -12,7 +12,7 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Rudimentary;
-using Contracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
+using ManagementContracts = Dolittle.Runtime.Events.Processing.Management.Contracts;
 using static Dolittle.Runtime.Events.Processing.Management.Contracts.EventHandlers;
 
 namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
@@ -96,7 +96,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
             return result == default ? new NoEventHandlerWithId(eventHandler) : result;
         }
 
-        static EventHandlerStatus CreateEventHandlerStatus(Contracts.EventHandlerStatus status)
+        static EventHandlerStatus CreateEventHandlerStatus(ManagementContracts.EventHandlerStatus status)
             => new(
                 new EventHandlerId(status.ScopeId.ToGuid(), status.EventHandlerId.ToGuid()),
                 status.EventTypes.Select(_ => new Artifact(_.Id.ToGuid(), _.Generation)),
@@ -104,15 +104,15 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
                 status.Alias,
                 GetStates(status));
 
-        static IEnumerable<TenantScopedStreamProcessorStatus> GetStates(Contracts.EventHandlerStatus status)
+        static IEnumerable<TenantScopedStreamProcessorStatus> GetStates(ManagementContracts.EventHandlerStatus status)
             => status.Tenants.Select(_ => _.StatusCase switch
             {
-               Contracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Partitioned => CreatePartitionedState(_, _.Partitioned) as TenantScopedStreamProcessorStatus,
-               Contracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Unpartitioned => CreateUnpartitionedState(_, _.Unpartitioned) as TenantScopedStreamProcessorStatus,
-               _ => throw new InvalidTenantScopedStreamProcessorStatusTypeReceived(_.StatusCase),
+                ManagementContracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Partitioned => CreatePartitionedState(_, _.Partitioned),
+                ManagementContracts.TenantScopedStreamProcessorStatus.StatusOneofCase.Unpartitioned => CreateUnpartitionedState(_, _.Unpartitioned) as TenantScopedStreamProcessorStatus,
+                _ => throw new InvalidTenantScopedStreamProcessorStatusTypeReceived(_.StatusCase),
             });
 
-        static PartitionedTenantScopedStreamProcessorStatus CreatePartitionedState(Contracts.TenantScopedStreamProcessorStatus status, Contracts.PartitionedTenantScopedStreamProcessorStatus partitionedStatus)
+        static PartitionedTenantScopedStreamProcessorStatus CreatePartitionedState(ManagementContracts.TenantScopedStreamProcessorStatus status, ManagementContracts.PartitionedTenantScopedStreamProcessorStatus partitionedStatus)
             => new(
                 status.TenantId.ToGuid(),
                 status.StreamPosition,
@@ -125,7 +125,7 @@ namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
                     _.LastFailed.ToDateTimeOffset())),
                 status.LastSuccessfullyProcessed.ToDateTimeOffset());
 
-        static UnpartitionedTenantScopedStreamProcessorStatus CreateUnpartitionedState(Contracts.TenantScopedStreamProcessorStatus status, Contracts.UnpartitionedTenantScopedStreamProcessorStatus unpartitionedStatus)
+        static UnpartitionedTenantScopedStreamProcessorStatus CreateUnpartitionedState(ManagementContracts.TenantScopedStreamProcessorStatus status, ManagementContracts.UnpartitionedTenantScopedStreamProcessorStatus unpartitionedStatus)
             => new(
                 status.TenantId.ToGuid(),
                 status.StreamPosition,

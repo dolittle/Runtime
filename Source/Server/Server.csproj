@@ -4,7 +4,6 @@
     <PropertyGroup>
         <AssemblyName>Dolittle.Runtime.Server</AssemblyName>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
 
