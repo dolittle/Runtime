@@ -5,41 +5,40 @@ using System;
 using System.Linq;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.Serialization.Protobuf
+namespace Dolittle.Runtime.Serialization.Protobuf;
+
+/// <summary>
+/// Represents an implementation of <see cref="IValueConverters"/>.
+/// </summary>
+public class ValueConverters : IValueConverters
 {
+    readonly IInstancesOf<IValueConverter> _converters;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IValueConverters"/>.
+    /// Initializes a new instance of the <see cref="ValueConverters"/> class.
     /// </summary>
-    public class ValueConverters : IValueConverters
+    /// <param name="converters"><see cref="IInstancesOf{T}"/> <see cref="IValueConverter"/>.</param>
+    public ValueConverters(IInstancesOf<IValueConverter> converters)
     {
-        readonly IInstancesOf<IValueConverter> _converters;
+        _converters = converters;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueConverters"/> class.
-        /// </summary>
-        /// <param name="converters"><see cref="IInstancesOf{T}"/> <see cref="IValueConverter"/>.</param>
-        public ValueConverters(IInstancesOf<IValueConverter> converters)
-        {
-            _converters = converters;
-        }
+    /// <inheritdoc/>
+    public bool CanConvert(Type type)
+    {
+        return _converters.Any(_ => _.CanConvert(type));
+    }
 
-        /// <inheritdoc/>
-        public bool CanConvert(Type type)
-        {
-            return _converters.Any(_ => _.CanConvert(type));
-        }
+    /// <inheritdoc/>
+    public IValueConverter GetConverterFor(Type type)
+    {
+        var valueConverter = _converters.FirstOrDefault(_ => _.CanConvert(type));
+        ThrowIfMissingValueConverter(type, valueConverter);
+        return valueConverter;
+    }
 
-        /// <inheritdoc/>
-        public IValueConverter GetConverterFor(Type type)
-        {
-            var valueConverter = _converters.FirstOrDefault(_ => _.CanConvert(type));
-            ThrowIfMissingValueConverter(type, valueConverter);
-            return valueConverter;
-        }
-
-        void ThrowIfMissingValueConverter(Type type, IValueConverter valueConverter)
-        {
-            if (valueConverter == null) throw new MissingValueConverter(type);
-        }
+    void ThrowIfMissingValueConverter(Type type, IValueConverter valueConverter)
+    {
+        if (valueConverter == null) throw new MissingValueConverter(type);
     }
 }

@@ -3,18 +3,17 @@
 
 using Microsoft.Extensions.DependencyModel;
 
-namespace Dolittle.Runtime.Assemblies
+namespace Dolittle.Runtime.Assemblies;
+
+/// <summary>
+/// Defines a system for filtering assemblies.
+/// </summary>
+public interface IAssemblyFilters
 {
     /// <summary>
-    /// Defines a system for filtering assemblies.
+    /// Method that decides whether or not an assembly should be included.
     /// </summary>
-    public interface IAssemblyFilters
-    {
-        /// <summary>
-        /// Method that decides wether or not an assembly should be included.
-        /// </summary>
-        /// <param name="library">Library description.</param>
-        /// <returns>True if it should be included, false if not.</returns>
-        bool ShouldInclude(Library library);
-    }
+    /// <param name="library">Library description.</param>
+    /// <returns>True if it should be included, false if not.</returns>
+    bool ShouldInclude(Library library);
 }

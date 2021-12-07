@@ -4,21 +4,20 @@
 using Dolittle.Runtime.Serialization.Json;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.CLI.Serialization
+namespace Dolittle.Runtime.CLI.Serialization;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Adds the services related to serialization to the provided service collection.
+    /// </summary>
+    /// <param name="services">The service collection to add serialization services to.</param>
+    public static void AddSerializers(this ServiceCollection services)
     {
-        /// <summary>
-        /// Adds the services related to serialization to the provided service collection.
-        /// </summary>
-        /// <param name="services">The service collection to add serialization services to.</param>
-        public static void AddSerializers(this ServiceCollection services)
-        {
-            var converters = new StaticConverterProvider(
-                new ConceptConverter());
-            var providers = new StaticConverterProviders(converters);
-            var serializer = new Serializer(providers);
-            services.AddSingleton<ISerializer>(serializer);
-        }
+        var converters = new StaticConverterProvider(
+            new ConceptConverter());
+        var providers = new StaticConverterProviders(converters);
+        var serializer = new Serializer(providers);
+        services.AddSingleton<ISerializer>(serializer);
     }
 }

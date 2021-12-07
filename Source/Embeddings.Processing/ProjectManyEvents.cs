@@ -12,76 +12,75 @@ using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Represents an implementation of <see cref="IProjectManyEvents" />.
+/// </summary>
+public class ProjectManyEvents : IProjectManyEvents
 {
+    readonly EmbeddingId _identifier;
+    readonly IEmbedding _embedding;
+    readonly ProjectionState _initialState;
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IProjectManyEvents" />.
+    /// Initializes an instance of the <see cref="ProjectManyEvents" /> class.
     /// </summary>
-    public class ProjectManyEvents : IProjectManyEvents
+    /// <param name="embedding">The <see cref="EmbeddingId"/> that identifies the embedding.</param>
+    /// <param name="projection">The <see cref="IProjection"/> that is used to update the state.</param>
+    /// <param name="initialState">The <see cref="ProjectionState"/> that is used to initialize newly created states.</param>
+    /// <param name="logger">The <see cref="ILogger" />.</param>
+    public ProjectManyEvents(EmbeddingId identifier, IEmbedding embedding, ProjectionState initialState, ILogger logger)
     {
-        readonly EmbeddingId _identifier;
-        readonly IEmbedding _embedding;
-        readonly ProjectionState _initialState;
-        readonly ILogger _logger;
+        _identifier = identifier;
+        _embedding = embedding;
+        _initialState = initialState;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes an instance of the <see cref="ProjectManyEvents" /> class.
-        /// </summary>
-        /// <param name="embedding">The <see cref="EmbeddingId"/> that identifies the embedding.</param>
-        /// <param name="projection">The <see cref="IProjection"/> that is used to update the state.</param>
-        /// <param name="initialState">The <see cref="ProjectionState"/> that is used to initialize newly created states.</param>
-        /// <param name="logger">The <see cref="ILogger" />.</param>
-        public ProjectManyEvents(EmbeddingId identifier, IEmbedding embedding, ProjectionState initialState, ILogger logger)
+    /// <inheritdoc/>
+    public Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, CommittedAggregateEvents events, CancellationToken cancellationToken)
+        => TryProject(
+            currentState,
+            new UncommittedEvents(events.Select(_ => new UncommittedEvent(_.EventSource, _.Type, _.Public, _.Content)).ToList()),
+            cancellationToken);
+
+    /// <inheritdoc/>
+    public async Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken)
+    {
+        _logger.ProjectingEventsOnEmbedding(_identifier, currentState.Key, events);
+        for (var i = 0; i < events.Count; i++)
         {
-            _identifier = identifier;
-            _embedding = embedding;
-            _initialState = initialState;
-            _logger = logger;
+            var tryProject = await TryProjectOne(currentState, events[i], cancellationToken).ConfigureAwait(false);
+            if (!tryProject.Success)
+            {
+                return i == 0
+                    ? tryProject.Exception
+                    : Partial<EmbeddingCurrentState>.PartialSuccess(currentState, tryProject.Exception);
+            }
+            currentState = tryProject.Result;
         }
+        return currentState;
+    }
 
-        /// <inheritdoc/>
-        public Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, CommittedAggregateEvents events, CancellationToken cancellationToken)
-            => TryProject(
-                currentState,
-                new UncommittedEvents(events.Select(_ => new UncommittedEvent(_.EventSource, _.Type, _.Public, _.Content)).ToList()),
-                cancellationToken);
-
-        /// <inheritdoc/>
-        public async Task<Partial<EmbeddingCurrentState>> TryProject(EmbeddingCurrentState currentState, UncommittedEvents events, CancellationToken cancellationToken)
+    async Task<Try<EmbeddingCurrentState>> TryProjectOne(EmbeddingCurrentState currentState, UncommittedEvent @event, CancellationToken cancellationToken)
+    {
+        try
         {
-            _logger.ProjectingEventsOnEmbedding(_identifier, currentState.Key, events);
-            for (var i = 0; i < events.Count; i++)
+            var result = await _embedding.Project(currentState, @event, cancellationToken).ConfigureAwait(false);
+            var nextAggregateRootVersion = currentState.Version.Value + 1;
+            return result switch
             {
-                var tryProject = await TryProjectOne(currentState, events[i], cancellationToken).ConfigureAwait(false);
-                if (!tryProject.Success)
-                {
-                    return i == 0
-                        ? tryProject.Exception
-                        : Partial<EmbeddingCurrentState>.PartialSuccess(currentState, tryProject.Exception);
-                }
-                currentState = tryProject.Result;
-            }
-            return currentState;
+                ProjectionFailedResult failedResult => failedResult.Exception,
+                ProjectionReplaceResult replaceResult => new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Persisted, replaceResult.State, currentState.Key),
+                ProjectionDeleteResult => new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Deleted, _initialState, currentState.Key),
+                _ => new UnknownProjectionResultType(result)
+            };
         }
-
-        async Task<Try<EmbeddingCurrentState>> TryProjectOne(EmbeddingCurrentState currentState, UncommittedEvent @event, CancellationToken cancellationToken)
+        catch (Exception ex)
         {
-            try
-            {
-                var result = await _embedding.Project(currentState, @event, cancellationToken).ConfigureAwait(false);
-                var nextAggregateRootVersion = currentState.Version.Value + 1;
-                return result switch
-                {
-                    ProjectionFailedResult failedResult => failedResult.Exception,
-                    ProjectionReplaceResult replaceResult => new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Persisted, replaceResult.State, currentState.Key),
-                    ProjectionDeleteResult => new EmbeddingCurrentState(nextAggregateRootVersion, EmbeddingCurrentStateType.Deleted, _initialState, currentState.Key),
-                    _ => new UnknownProjectionResultType(result)
-                };
-            }
-            catch (Exception ex)
-            {
-                return ex;
-            }
+            return ex;
         }
     }
 }

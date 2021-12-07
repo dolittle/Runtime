@@ -4,16 +4,15 @@
 using System;
 using Dolittle.Runtime.Booting;
 
-namespace Dolittle.Runtime.DependencyInversion.Booting.Stages
+namespace Dolittle.Runtime.DependencyInversion.Booting.Stages;
+
+/// <summary>
+/// Represents the settings for <see cref="BootStage.Container"/> stage.
+/// </summary>
+public class ContainerSettings : IRepresentSettingsForBootStage
 {
     /// <summary>
-    /// Represents the settings for <see cref="BootStage.Container"/> stage.
+    /// Gets the <see cref="IContainer"/> type.
     /// </summary>
-    public class ContainerSettings : IRepresentSettingsForBootStage
-    {
-        /// <summary>
-        /// Gets the <see cref="IContainer"/> type.
-        /// </summary>
-        public Type ContainerType { get; internal set; }
-    }
+    public Type ContainerType { get; internal set; }
 }

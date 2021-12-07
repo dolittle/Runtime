@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given
+namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given;
+
+public class implementation_of_first_service_for_first_implementation_type : first_service
 {
-    public class implementation_of_first_service_for_first_implementation_type : first_service
-    {
-    }
 }

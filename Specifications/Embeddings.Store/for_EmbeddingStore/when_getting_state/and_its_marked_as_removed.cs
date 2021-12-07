@@ -15,45 +15,44 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_state
+namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_state;
+
+public class and_its_marked_as_removed : given.all_dependencies
 {
-    public class and_its_marked_as_removed : given.all_dependencies
+
+    static EmbeddingId id;
+    static ProjectionKey key;
+    static EmbeddingState persisted_state;
+    static ProjectionState initial_state;
+
+    Establish context = () =>
     {
+        id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
+        key = new ProjectionKey("test_key");
 
-        static EmbeddingId id;
-        static ProjectionKey key;
-        static EmbeddingState persisted_state;
-        static ProjectionState initial_state;
+        persisted_state = new EmbeddingState("persisted_state", 10, true);
 
-        Establish context = () =>
-        {
-            id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
-            key = new ProjectionKey("test_key");
+        initial_state = new ProjectionState("im 😂 an 😒🐖 initial 💇 state to 💦📬 a 💰 removed ❌🗑 embedding");
+        var events = new List<Artifact>();
+        var definition = new EmbeddingDefinition(id, events, initial_state);
 
-            persisted_state = new EmbeddingState("persisted_state", 10, true);
+        states
+            .Setup(_ => _.TryGet(id, key, Moq.It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(Try<EmbeddingState>.Succeeded(persisted_state)));
 
-            initial_state = new ProjectionState("im 😂 an 😒🐖 initial 💇 state to 💦📬 a 💰 removed ❌🗑 embedding");
-            var events = new List<Artifact>();
-            var definition = new EmbeddingDefinition(id, events, initial_state);
+        definitions
+            .Setup(_ => _.TryGet(id, Moq.It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(Try<EmbeddingDefinition>.Succeeded(definition)));
+    };
 
-            states
-                .Setup(_ => _.TryGet(id, key, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<EmbeddingState>.Succeeded(persisted_state)));
+    static Try<EmbeddingCurrentState> result;
 
-            definitions
-                .Setup(_ => _.TryGet(id, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<EmbeddingDefinition>.Succeeded(definition)));
-        };
+    Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
 
-        static Try<EmbeddingCurrentState> result;
+    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
+    It should_get_the_state_from_the_definition = () => result.Result.State.Value.ShouldEqual(initial_state.Value);
+    It should_get_the_aggregate_version = () => result.Result.Version.ShouldEqual(persisted_state.Version);
+    It should_get_an_initial_state_type = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.CreatedFromInitialState);
 
-        Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
-
-        It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
-        It should_get_the_state_from_the_definition = () => result.Result.State.Value.ShouldEqual(initial_state.Value);
-        It should_get_the_aggregate_version = () => result.Result.Version.ShouldEqual(persisted_state.Version);
-        It should_get_an_initial_state_type = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.CreatedFromInitialState);
-
-    }
 }

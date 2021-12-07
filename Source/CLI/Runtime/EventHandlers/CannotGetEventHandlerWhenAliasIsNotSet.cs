@@ -4,18 +4,17 @@
 using System;
 using Dolittle.Runtime.Events.Processing.EventHandlers;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
+namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
+
+/// <summary>
+/// Exception that gets thrown when trying to get an Event Handler with the "Not Set" Event Handler alias.
+/// </summary>
+public class CannotGetEventHandlerWhenAliasIsNotSet : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when trying to get an Event Handler with the "Not Set" Event Handler alias.
+    /// Initializes a new instance of the <see cref="CannotGetEventHandlerWhenAliasIsNotSet"/> class.
     /// </summary>
-    public class CannotGetEventHandlerWhenAliasIsNotSet : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CannotGetEventHandlerWhenAliasIsNotSet"/> class.
-        /// </summary>
-        public CannotGetEventHandlerWhenAliasIsNotSet()
-            : base($"Cannot get a registered Event Handler with the '{EventHandlerAlias.NotSet.Value}' Event Handler alias ")
-        { }
-    }
+    public CannotGetEventHandlerWhenAliasIsNotSet()
+        : base($"Cannot get a registered Event Handler with the '{EventHandlerAlias.NotSet.Value}' Event Handler alias ")
+    { }
 }

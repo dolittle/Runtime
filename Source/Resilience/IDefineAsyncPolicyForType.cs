@@ -3,16 +3,15 @@
 
 using System;
 
-namespace Dolittle.Runtime.Resilience
+namespace Dolittle.Runtime.Resilience;
+
+/// <summary>
+/// Defines a system that is capable of defining an async resilience policy for a specific type.
+/// </summary>
+public interface IDefineAsyncPolicyForType : IDefineAsyncPolicy
 {
     /// <summary>
-    /// Defines a system that is capable of defining an async resilience policy for a specific type.
+    /// Gets the type it can define for.
     /// </summary>
-    public interface IDefineAsyncPolicyForType : IDefineAsyncPolicy
-    {
-        /// <summary>
-        /// Gets the type it can define for.
-        /// </summary>
-        Type Type { get; }
-    }
+    Type Type { get; }
 }

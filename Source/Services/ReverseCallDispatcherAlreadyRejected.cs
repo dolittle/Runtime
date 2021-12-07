@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Exception that gets thrown when <see cref="ReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Reject(TConnectResponse, System.Threading.CancellationToken)" />
+/// is called more than once.
+/// </summary>
+public class ReverseCallDispatcherAlreadyRejected : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when <see cref="ReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Reject(TConnectResponse, System.Threading.CancellationToken)" />
-    /// is called more than once.
+    /// Initializes a new instance of the <see cref="ReverseCallDispatcherAlreadyRejected"/> class.
     /// </summary>
-    public class ReverseCallDispatcherAlreadyRejected : Exception
+    public ReverseCallDispatcherAlreadyRejected()
+        : base("Reverse Call Dispatcher can only reject once")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReverseCallDispatcherAlreadyRejected"/> class.
-        /// </summary>
-        public ReverseCallDispatcherAlreadyRejected()
-            : base("Reverse Call Dispatcher can only reject once")
-        {
-        }
     }
 }

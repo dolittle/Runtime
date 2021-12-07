@@ -4,15 +4,14 @@
 using System.Threading.Tasks;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessors;
+
+public static class task_should_extensions
 {
-    public static class task_should_extensions
+    public static object ShouldStillBeRunning(this Task task)
     {
-        public static object ShouldStillBeRunning(this Task task)
-        {
-            task.Status.ShouldNotEqual(TaskStatus.Canceled);
-            task.Status.ShouldNotEqual(TaskStatus.Faulted);
-            return task.Status.ShouldNotEqual(TaskStatus.RanToCompletion);
-        }
+        task.Status.ShouldNotEqual(TaskStatus.Canceled);
+        task.Status.ShouldNotEqual(TaskStatus.Faulted);
+        return task.Status.ShouldNotEqual(TaskStatus.RanToCompletion);
     }
 }

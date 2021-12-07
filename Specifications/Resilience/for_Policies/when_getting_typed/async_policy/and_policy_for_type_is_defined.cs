@@ -7,37 +7,36 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Resilience.for_Policies.when_getting_typed.async_policy
+namespace Dolittle.Runtime.Resilience.for_Policies.when_getting_typed.async_policy;
+
+public class and_policy_for_type_is_defined
 {
-    public class and_policy_for_type_is_defined
+    static Type type = typeof(string);
+    static AsyncPolicyFor<string> typed_policy;
+    static Polly.AsyncPolicy underlying_policy;
+
+    static Policies policies;
+
+    static Mock<IDefineAsyncPolicyForType> typed_policy_definer;
+
+    Establish context = () =>
     {
-        static Type type = typeof(string);
-        static AsyncPolicyFor<string> typed_policy;
-        static Polly.AsyncPolicy underlying_policy;
+        underlying_policy = Polly.Policy.NoOpAsync();
+        typed_policy_definer = new Mock<IDefineAsyncPolicyForType>();
+        typed_policy_definer.SetupGet(_ => _.Type).Returns(type);
+        typed_policy_definer.Setup(_ => _.Define()).Returns(underlying_policy);
 
-        static Policies policies;
+        policies = new Policies(
+            new StaticInstancesOf<IDefineDefaultPolicy>(),
+            new StaticInstancesOf<IDefineDefaultAsyncPolicy>(),
+            new StaticInstancesOf<IDefineNamedPolicy>(),
+            new StaticInstancesOf<IDefineNamedAsyncPolicy>(),
+            new StaticInstancesOf<IDefinePolicyForType>(),
+            new StaticInstancesOf<IDefineAsyncPolicyForType>(typed_policy_definer.Object));
+    };
 
-        static Mock<IDefineAsyncPolicyForType> typed_policy_definer;
+    Because of = () => typed_policy = policies.GetAsyncFor<string>() as AsyncPolicyFor<string>;
 
-        Establish context = () =>
-        {
-            underlying_policy = Polly.Policy.NoOpAsync();
-            typed_policy_definer = new Mock<IDefineAsyncPolicyForType>();
-            typed_policy_definer.SetupGet(_ => _.Type).Returns(type);
-            typed_policy_definer.Setup(_ => _.Define()).Returns(underlying_policy);
-
-            policies = new Policies(
-                new StaticInstancesOf<IDefineDefaultPolicy>(),
-                new StaticInstancesOf<IDefineDefaultAsyncPolicy>(),
-                new StaticInstancesOf<IDefineNamedPolicy>(),
-                new StaticInstancesOf<IDefineNamedAsyncPolicy>(),
-                new StaticInstancesOf<IDefinePolicyForType>(),
-                new StaticInstancesOf<IDefineAsyncPolicyForType>(typed_policy_definer.Object));
-        };
-
-        Because of = () => typed_policy = policies.GetAsyncFor<string>() as AsyncPolicyFor<string>;
-
-        It should_return_a_policy = () => typed_policy.ShouldNotBeNull();
-        It should_pass_the_underlying_policy = () => typed_policy.UnderlyingPolicy.ShouldEqual(underlying_policy);
-    }
+    It should_return_a_policy = () => typed_policy.ShouldNotBeNull();
+    It should_pass_the_underlying_policy = () => typed_policy.UnderlyingPolicy.ShouldEqual(underlying_policy);
 }

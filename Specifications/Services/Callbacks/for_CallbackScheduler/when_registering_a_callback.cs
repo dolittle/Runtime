@@ -7,31 +7,30 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler
+namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler;
+
+public class when_registering_a_callback : given.all_dependencies
 {
-    public class when_registering_a_callback : given.all_dependencies
+    static Mock<Action> callback;
+    static TimeSpan interval;
+
+    Establish context = () =>
     {
-        static Mock<Action> callback;
-        static TimeSpan interval;
+        callback = new Mock<Action>();
+        interval = TimeSpan.FromMilliseconds(1000);
+    };
 
-        Establish context = () =>
+    static int callCount;
+
+    Because of = () =>
+    {
+        callCount = 3;
+        using (var result = scheduler.ScheduleCallback(callback.Object, interval))
         {
-            callback = new();
-            interval = TimeSpan.FromMilliseconds(1000);
-        };
+            Task.Delay(interval * (callCount + 1)).Wait();
+        }
+        host_application_cts.Cancel();
+    };
 
-        static int callCount;
-
-        Because of = () =>
-        {
-            callCount = 3;
-            using (var result = scheduler.ScheduleCallback(callback.Object, interval))
-            {
-                Task.Delay(interval * (callCount + 1)).Wait();
-            }
-            host_application_cts.Cancel();
-        };
-
-        It should_have_been_called_at_least_thrice = () => callback.Verify(_ => _(), Times.AtLeast(callCount));
-    }
+    It should_have_been_called_at_least_thrice = () => callback.Verify(_ => _(), Times.AtLeast(callCount));
 }

@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// Exception that gets thrown when a <see cref="BootStage"/> is missing.
+/// </summary>
+public class MissingBootStage : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a <see cref="BootStage"/> is missing.
+    /// Initializes a new instance of the <see cref="MissingBootStage"/> class.
     /// </summary>
-    public class MissingBootStage : Exception
+    /// <param name="bootStage">The <see cref="BootStage"/> that is missing.</param>
+    public MissingBootStage(BootStage bootStage)
+        : base($"BootStage '{bootStage}' is missing - this could be due to a missing dependency that should be adding the boot stage")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingBootStage"/> class.
-        /// </summary>
-        /// <param name="bootStage">The <see cref="BootStage"/> that is missing.</param>
-        public MissingBootStage(BootStage bootStage)
-            : base($"BootStage '{bootStage}' is missing - this could be due to a missing dependency that should be adding the boot stage")
-        {
-        }
     }
 }

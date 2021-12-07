@@ -3,17 +3,16 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Represents the reason for why the comparison of a <see cref="EmbeddingDefintion" /> failed.
+/// </summary>
+public record FailedEmbeddingDefinitionComparisonReason(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents the reason for why the comparison of a <see cref="EmbeddingDefintion" /> failed.
+    /// Implicitly converts <see cref="string" /> to <see cref="FailedEmbeddingDefinitionComparisonReason" />.
     /// </summary>
-    public record FailedEmbeddingDefinitionComparisonReason(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Implicitly converts <see cref="string" /> to <see cref="FailedEmbeddingDefinitionComparisonReason" />.
-        /// </summary>
-        /// <param name="reason">The value.</param>
-        public static implicit operator FailedEmbeddingDefinitionComparisonReason(string reason) => new(reason);
-    }
+    /// <param name="reason">The value.</param>
+    public static implicit operator FailedEmbeddingDefinitionComparisonReason(string reason) => new(reason);
 }

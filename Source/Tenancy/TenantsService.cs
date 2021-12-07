@@ -10,44 +10,43 @@ using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Tenancy.Contracts.Tenants;
 
-namespace Dolittle.Runtime.Tenancy
+namespace Dolittle.Runtime.Tenancy;
+
+/// <summary>
+/// Represents an implementation of <see cref="TenantsBase"/>.
+/// </summary>
+public class TenantsService : TenantsBase
 {
-    /// <summary>
-    /// Represents an implementation of <see cref="TenantsBase"/>.
-    /// </summary>
-    public class TenantsService : TenantsBase
-    {
-        readonly ITenants _tenants;
-        readonly ILogger _logger;
+    readonly ITenants _tenants;
+    readonly ILogger _logger;
         
-        public TenantsService(ITenants tenants, ILogger logger)
-        {
-            _tenants = tenants;
-            _logger = logger;
-        }
-
-        /// <inheritdoc />
-        public override Task<Contracts.GetAllResponse> GetAll(Contracts.GetAllRequest request, ServerCallContext context)
-        {
-            try
-            {
-                _logger.GetAllCalled();
-                var response = new Contracts.GetAllResponse();
-                
-                response.Tenants.AddRange(_tenants.All.Select(ToProtobuf));
-                return Task.FromResult(response);
-            }
-            catch (Exception ex)
-            {
-                _logger.FailedToGetAll(ex);
-                return Task.FromResult(new Contracts.GetAllResponse { Failure = ex.ToProtobuf() });
-            }
-        }
-
-        static Contracts.Tenant ToProtobuf(TenantId tenantId)
-            => new()
-            {
-                Id = tenantId.ToProtobuf()
-            };
+    public TenantsService(ITenants tenants, ILogger logger)
+    {
+        _tenants = tenants;
+        _logger = logger;
     }
+
+    /// <inheritdoc />
+    public override Task<Contracts.GetAllResponse> GetAll(Contracts.GetAllRequest request, ServerCallContext context)
+    {
+        try
+        {
+            _logger.GetAllCalled();
+            var response = new Contracts.GetAllResponse();
+                
+            response.Tenants.AddRange(_tenants.All.Select(ToProtobuf));
+            return Task.FromResult(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.FailedToGetAll(ex);
+            return Task.FromResult(new Contracts.GetAllResponse { Failure = ex.ToProtobuf() });
+        }
+    }
+
+    static Contracts.Tenant ToProtobuf(TenantId tenantId)
+        => new()
+        {
+            Id = tenantId.ToProtobuf()
+        };
 }

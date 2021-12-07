@@ -3,12 +3,11 @@
 
 using Dolittle.Runtime.Events.Processing.Contracts;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned
+namespace Dolittle.Runtime.Events.Processing.Filters.Partitioned;
+
+/// <summary>
+/// Defines the protocol for partitioned filters.
+/// </summary>
+public interface IPartitionedFiltersProtocol : IFiltersProtocol<PartitionedFilterClientToRuntimeMessage, PartitionedFilterRegistrationRequest, PartitionedFilterResponse, PartitionedFilterRegistrationArguments>
 {
-    /// <summary>
-    /// Defines the protocol for partitioned filters.
-    /// </summary>
-    public interface IPartitionedFiltersProtocol : IFiltersProtocol<PartitionedFilterClientToRuntimeMessage, PartitionedFilterRegistrationRequest, PartitionedFilterResponse, PartitionedFilterRegistrationArguments>
-    {
-    }
 }

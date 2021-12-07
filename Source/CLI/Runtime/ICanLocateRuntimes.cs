@@ -5,18 +5,17 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Microservices;
 
-namespace Dolittle.Runtime.CLI.Runtime
+namespace Dolittle.Runtime.CLI.Runtime;
+
+/// <summary>
+/// Defines a system that can locate Runtimes that are available to connect to.
+/// </summary>
+public interface ICanLocateRuntimes
 {
     /// <summary>
-    /// Defines a system that can locate Runtimes that are available to connect to.
+    /// Gets the addresses of Runtimes that are available to connect to, or the address provided in the argument.
     /// </summary>
-    public interface ICanLocateRuntimes
-    {
-        /// <summary>
-        /// Gets the addresses of Runtimes that are available to connect to, or the address provided in the argument.
-        /// </summary>
-        /// <param name="argument">An optional address provided to the CLI as an argument.</param>
-        /// <returns>An <see cref="IEnumerable{T}"/> of type <see cref="MicroserviceAddress"/> to available Runtimes.</returns>
-        Task<IEnumerable<MicroserviceAddress>> GetAvailableRuntimeAddresses(MicroserviceAddress argument = null);
-    }
+    /// <param name="argument">An optional address provided to the CLI as an argument.</param>
+    /// <returns>An <see cref="IEnumerable{T}"/> of type <see cref="MicroserviceAddress"/> to available Runtimes.</returns>
+    Task<IEnumerable<MicroserviceAddress>> GetAvailableRuntimeAddresses(MicroserviceAddress argument = null);
 }

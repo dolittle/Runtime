@@ -7,33 +7,32 @@ using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalculator.given
-{
-    public class all_dependencies
-    {
-        protected static EmbeddingId identifier;
-        protected static Mock<IEmbedding> embedding;
-        protected static Mock<IProjectManyEvents> project_many_events;
-        protected static Mock<ICompareStates> state_comparer;
-        protected static Mock<IDetectEmbeddingLoops> loop_detector;
-        protected static StateTransitionEventsCalculator calculator;
-        protected static CancellationToken cancellation;
+namespace Dolittle.Runtime.Embeddings.Processing.for_StateTransitionEventsCalculator.given;
 
-        Establish context = () =>
-        {
-            identifier = "b368df07-e5a3-4669-95f1-19e209a7af30";
-            embedding = new Mock<IEmbedding>(MockBehavior.Strict);
-            project_many_events = new Mock<IProjectManyEvents>(MockBehavior.Strict);
-            state_comparer = new Mock<ICompareStates>(MockBehavior.Strict);
-            loop_detector = new Mock<IDetectEmbeddingLoops>(MockBehavior.Strict);
-            cancellation = CancellationToken.None;
-            calculator = new StateTransitionEventsCalculator(
-                identifier,
-                embedding.Object,
-                project_many_events.Object,
-                state_comparer.Object,
-                loop_detector.Object,
-                Mock.Of<ILogger>());
-        };
-    }
+public class all_dependencies
+{
+    protected static EmbeddingId identifier;
+    protected static Mock<IEmbedding> embedding;
+    protected static Mock<IProjectManyEvents> project_many_events;
+    protected static Mock<ICompareStates> state_comparer;
+    protected static Mock<IDetectEmbeddingLoops> loop_detector;
+    protected static StateTransitionEventsCalculator calculator;
+    protected static CancellationToken cancellation;
+
+    Establish context = () =>
+    {
+        identifier = "b368df07-e5a3-4669-95f1-19e209a7af30";
+        embedding = new Mock<IEmbedding>(MockBehavior.Strict);
+        project_many_events = new Mock<IProjectManyEvents>(MockBehavior.Strict);
+        state_comparer = new Mock<ICompareStates>(MockBehavior.Strict);
+        loop_detector = new Mock<IDetectEmbeddingLoops>(MockBehavior.Strict);
+        cancellation = CancellationToken.None;
+        calculator = new StateTransitionEventsCalculator(
+            identifier,
+            embedding.Object,
+            project_many_events.Object,
+            state_comparer.Object,
+            loop_detector.Object,
+            Mock.Of<ILogger>());
+    };
 }

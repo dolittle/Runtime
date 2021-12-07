@@ -15,31 +15,30 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using static Moq.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_PersistProjectionDefinitionForAllTenants.when_persisting_definition.and_there_is_one_tenant
+namespace Dolittle.Runtime.Embeddings.Processing.for_PersistProjectionDefinitionForAllTenants.when_persisting_definition.and_there_is_one_tenant;
+
+public class and_persisting_returns_failure : given.one_tenant
 {
-    public class and_persisting_returns_failure : given.one_tenant
+    static EmbeddingId embedding;
+    static EmbeddingDefinition definition;
+
+    Establish context = () =>
     {
-        static EmbeddingId embedding;
-        static EmbeddingDefinition definition;
+        embedding = "72f234da-6f88-4e78-87a5-bfb34bc51096";
+        dynamic state = new JObject();
+        state.Hello = "world";
+        definition = new EmbeddingDefinition(
+            embedding,
+            new[] { new Artifact("250fefb1-c99b-4d37-98ab-a46621633329", 1) },
+            JsonConvert.SerializeObject(state));
+        definitions
+            .Setup(_ => _.TryPersist(definition, IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
+    };
+    static Try result;
+    Because of = () => result = persister.TryPersist(definition, CancellationToken.None).GetAwaiter().GetResult();
 
-        Establish context = () =>
-        {
-            embedding = "72f234da-6f88-4e78-87a5-bfb34bc51096";
-            dynamic state = new JObject();
-            state.Hello = "world";
-            definition = new EmbeddingDefinition(
-                embedding,
-                new[] { new Artifact("250fefb1-c99b-4d37-98ab-a46621633329", 1) },
-                JsonConvert.SerializeObject(state));
-            definitions
-                .Setup(_ => _.TryPersist(definition, IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<bool>.Succeeded(false)));
-        };
-        static Try result;
-        Because of = () => result = persister.TryPersist(definition, CancellationToken.None).GetAwaiter().GetResult();
+    It should_fail = () => result.Success.ShouldBeFalse();
+    It should_return_the_correct_exception = () => result.Exception.ShouldBeOfExactType<FailedPersistingEmbeddingDefinition>();
 
-        It should_fail = () => result.Success.ShouldBeFalse();
-        It should_return_the_correct_exception = () => result.Exception.ShouldBeOfExactType<FailedPersistingEmbeddingDefinition>();
-
-    }
 }

@@ -4,15 +4,14 @@
 using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.when_creating.a_project_request.given
-{
-    public class all_dependencies : for_EmbeddingRequestFactory.given.all_dependencies
-    {
-        protected static ProjectionCurrentState current_state;
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.when_creating.a_project_request.given;
 
-        Establish context = () =>
-        {
-            current_state = new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, "current state", "key");
-        };
-    }
+public class all_dependencies : for_EmbeddingRequestFactory.given.all_dependencies
+{
+    protected static ProjectionCurrentState current_state;
+
+    Establish context = () =>
+    {
+        current_state = new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, "current state", "key");
+    };
 }

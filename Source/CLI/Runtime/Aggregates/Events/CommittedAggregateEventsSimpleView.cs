@@ -3,13 +3,12 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime.Aggregates.Events
-{
-    /// <summary>
-    /// Represents the simple information for Committed Aggregate Events
-    /// </summary>
-    /// <param name="AggregateRootVersion">The Aggregate Root Version.</param>
-    /// <param name="EventLogSequenceNumber">THe Event Log Sequence Number.</param>
-    /// <param name="EventType">The Event Type.</param>
-    public record CommittedAggregateEventsSimpleView(ulong AggregateRootVersion, ulong EventLogSequenceNumber, string EventType);
-}
+namespace Dolittle.Runtime.CLI.Runtime.Aggregates.Events;
+
+/// <summary>
+/// Represents the simple information for Committed Aggregate Events
+/// </summary>
+/// <param name="AggregateRootVersion">The Aggregate Root Version.</param>
+/// <param name="EventLogSequenceNumber">THe Event Log Sequence Number.</param>
+/// <param name="EventType">The Event Type.</param>
+public record CommittedAggregateEventsSimpleView(ulong AggregateRootVersion, ulong EventLogSequenceNumber, string EventType);

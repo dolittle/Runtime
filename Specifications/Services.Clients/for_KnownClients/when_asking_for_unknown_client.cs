@@ -4,14 +4,13 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.Clients.for_KnownClients
+namespace Dolittle.Runtime.Services.Clients.for_KnownClients;
+
+public class when_asking_for_unknown_client : given.no_known_clients
 {
-    public class when_asking_for_unknown_client : given.no_known_clients
-    {
-        static Exception result;
+    static Exception result;
 
-        Because of = () => result = Catch.Exception(() => known_clients.GetFor(typeof(MyClient)));
+    Because of = () => result = Catch.Exception(() => known_clients.GetFor(typeof(MyClient)));
 
-        It should_throw_unknown_client_type = () => result.ShouldBeOfExactType<UnknownClientType>();
-    }
+    It should_throw_unknown_client_type = () => result.ShouldBeOfExactType<UnknownClientType>();
 }

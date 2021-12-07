@@ -7,25 +7,24 @@ using Dolittle.Runtime.Resources.Contracts;
 using Grpc.Core;
 using static Dolittle.Runtime.Resources.Contracts.Resources;
 
-namespace Dolittle.Runtime.Resources
+namespace Dolittle.Runtime.Resources;
+
+/// <summary>
+/// Represents an implementation of <see cref="ResourcesBase"/>.
+/// </summary>
+public class ResourcesService : ResourcesBase
 {
+    readonly MongoDB.ICanGetResourceForTenant _mongodb;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ResourcesBase"/>.
+    /// Initializes a new instance of the <see cref="ResourcesService"/> class.
     /// </summary>
-    public class ResourcesService : ResourcesBase
+    public ResourcesService(MongoDB.ICanGetResourceForTenant mongodbService)
     {
-        readonly MongoDB.ICanGetResourceForTenant _mongodb;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourcesService"/> class.
-        /// </summary>
-        public ResourcesService(MongoDB.ICanGetResourceForTenant mongodbService)
-        {
-            _mongodb = mongodbService;
-        }
-
-        /// <inheritdoc />
-        public override Task<GetMongoDBResponse> GetMongoDB(GetRequest request, ServerCallContext context)
-            => Task.FromResult(_mongodb.GetResource(request.CallContext.ExecutionContext.ToExecutionContext()));
+        _mongodb = mongodbService;
     }
+
+    /// <inheritdoc />
+    public override Task<GetMongoDBResponse> GetMongoDB(GetRequest request, ServerCallContext context)
+        => Task.FromResult(_mongodb.GetResource(request.CallContext.ExecutionContext.ToExecutionContext()));
 }

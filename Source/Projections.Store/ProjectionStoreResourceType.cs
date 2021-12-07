@@ -7,21 +7,20 @@ using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.ResourceTypes;
 
-namespace Dolittle.Runtime.Projections.Store
-{
-    /// <summary>
-    /// Represents a <see cref="IAmAResourceType">resource type</see> for a projections store.
-    /// </summary>
-    public class ProjectionStoreResourceType : IAmAResourceType
-    {
-        /// <inheritdoc/>
-        public ResourceType Name => "projections";
+namespace Dolittle.Runtime.Projections.Store;
 
-        /// <inheritdoc/>
-        public IEnumerable<Type> Services { get; } = new[]
-        {
-            typeof(IProjectionStates),
-            typeof(IProjectionDefinitions),
-        };
-    }
+/// <summary>
+/// Represents a <see cref="IAmAResourceType">resource type</see> for a projections store.
+/// </summary>
+public class ProjectionStoreResourceType : IAmAResourceType
+{
+    /// <inheritdoc/>
+    public ResourceType Name => "projections";
+
+    /// <inheritdoc/>
+    public IEnumerable<Type> Services { get; } = new[]
+    {
+        typeof(IProjectionStates),
+        typeof(IProjectionDefinitions),
+    };
 }

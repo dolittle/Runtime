@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
+namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
+
+/// <summary>
+/// Exception that gets thrown when getting all Aggregate Roots fails.
+/// </summary>
+public class GetAllFailed : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when getting all Aggregate Roots fails.
+    /// Initializes a new instance of the <see cref="GetAllFailed"/> class.
     /// </summary>
-    public class GetAllFailed : Exception
+    /// <param name="reason">The reason why the getting all Aggregate Roots failed.</param>
+    public GetAllFailed(string reason)
+        : base($"Could not get all aggregate roots because {reason}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetAllFailed"/> class.
-        /// </summary>
-        /// <param name="reason">The reason why the getting all Aggregate Roots failed.</param>
-        public GetAllFailed(string reason)
-            : base($"Could not get all aggregate roots because {reason}")
-        {
-        }
     }
 }

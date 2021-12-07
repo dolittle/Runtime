@@ -7,34 +7,32 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting;
+
+public class and_a_previous_state_is_the_same : given.all_dependencies
 {
 
-    public class and_a_previous_state_is_the_same : given.all_dependencies
+    static ProjectionState current_state;
+
+    Establish context = () =>
     {
+        var (key, value) = ("Duplicate", "Value");
+        current_state = CreateStateWithKeyValue(key, value);
+        previous_states.Add(CreateStateWithKeyValue(key, value));
 
-        static ProjectionState current_state;
+        comparer
+            .Setup(_ => _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state))
+            .Returns(Try<bool>.Succeeded(true));
+    };
 
-        Establish context = () =>
-        {
-            var (key, value) = ("Duplicate", "Value");
-            current_state = CreateStateWithKeyValue(key, value);
-            previous_states.Add(CreateStateWithKeyValue(key, value));
+    static Try<bool> result;
 
-            comparer
-                .Setup(_ => _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state))
-                .Returns(Try<bool>.Succeeded(true));
-        };
+    Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
 
-        static Try<bool> result;
-
-        Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
-
-        It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_detect_a_loop = () => result.Result.ShouldBeTrue();
-        It should_call_the_comparer = () =>
-            comparer.Verify(_ =>
+    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_detect_a_loop = () => result.Result.ShouldBeTrue();
+    It should_call_the_comparer = () =>
+        comparer.Verify(_ =>
                 _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state),
-                Times.AtLeastOnce());
-    }
+            Times.AtLeastOnce());
 }

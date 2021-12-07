@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Resilience.for_Policies.when_getting_named.policy
+namespace Dolittle.Runtime.Resilience.for_Policies.when_getting_named.policy;
+
+public class and_no_policy_for_name_has_been_defined : given.defined_default_policy
 {
-    public class and_no_policy_for_name_has_been_defined : given.defined_default_policy
-    {
-        static NamedPolicy policy;
+    static NamedPolicy policy;
 
-        Because of = () => policy = policies.GetNamed("FourtyTwo") as NamedPolicy;
+    Because of = () => policy = policies.GetNamed("FourtyTwo") as NamedPolicy;
 
-        It should_return_policy_that_delegates_to_default_policy = () => policy.DelegatedPolicy.ShouldEqual(policies.Default);
-    }
+    It should_return_policy_that_delegates_to_default_policy = () => policy.DelegatedPolicy.ShouldEqual(policies.Default);
 }

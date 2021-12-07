@@ -5,22 +5,21 @@ using System.Reflection;
 using Dolittle.Runtime.DependencyInversion;
 using Prometheus;
 
-namespace Dolittle.Runtime.Metrics
+namespace Dolittle.Runtime.Metrics;
+
+/// <summary>
+/// Represents <see cref="ICanProvideBindings">bindings</see> for the metrics system.
+/// </summary>
+public class Bindings : ICanProvideBindings
 {
-    /// <summary>
-    /// Represents <see cref="ICanProvideBindings">bindings</see> for the metrics system.
-    /// </summary>
-    public class Bindings : ICanProvideBindings
+    /// <inheritdoc/>
+    public void Provide(IBindingProviderBuilder builder)
     {
-        /// <inheritdoc/>
-        public void Provide(IBindingProviderBuilder builder)
-        {
-            var collectorRegistry = new CollectorRegistry();
-            var constructors = typeof(Prometheus.MetricFactory).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
-            var constructor = constructors[0];
-            var prometheusFactory = constructor.Invoke(new object[] { collectorRegistry }) as Prometheus.MetricFactory;
-            builder.Bind<Prometheus.MetricFactory>().To(prometheusFactory);
-            builder.Bind<CollectorRegistry>().To(collectorRegistry);
-        }
+        var collectorRegistry = new CollectorRegistry();
+        var constructors = typeof(Prometheus.MetricFactory).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance);
+        var constructor = constructors[0];
+        var prometheusFactory = constructor.Invoke(new object[] { collectorRegistry }) as Prometheus.MetricFactory;
+        builder.Bind<Prometheus.MetricFactory>().To(prometheusFactory);
+        builder.Bind<CollectorRegistry>().To(collectorRegistry);
     }
 }

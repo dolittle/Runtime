@@ -10,127 +10,126 @@ using Newtonsoft.Json;
 #pragma warning disable DL0008
 #pragma warning disable CA2201
 
-namespace Dolittle.Runtime.Serialization.Json
+namespace Dolittle.Runtime.Serialization.Json;
+
+/// <summary>
+/// Represents a <see cref="JsonConverter"/> capable of producing an ExpandoObject with properties
+/// in JSON being Pascal-cased in the end result.
+/// </summary>
+/// <remarks>
+/// Based on http://stackoverflow.com/a/9249592.
+/// </remarks>
+public class CamelCaseToPascalCaseExpandoObjectConverter : JsonConverter
 {
-    /// <summary>
-    /// Represents a <see cref="JsonConverter"/> capable of producing an ExpandoObject with properties
-    /// in JSON being Pascal-cased in the end result.
-    /// </summary>
-    /// <remarks>
-    /// Based on http://stackoverflow.com/a/9249592.
-    /// </remarks>
-    public class CamelCaseToPascalCaseExpandoObjectConverter : JsonConverter
+    /// <inheritdoc/>
+    public override bool CanWrite => false;
+
+    /// <inheritdoc/>
+    public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
     {
-        /// <inheritdoc/>
-        public override bool CanWrite => false;
+        // can write is set to false
+    }
 
-        /// <inheritdoc/>
-        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+    /// <inheritdoc/>
+    public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+    {
+        return ReadValue(reader);
+    }
+
+    /// <inheritdoc/>
+    public override bool CanConvert(Type objectType)
+    {
+        return objectType == typeof(ExpandoObject);
+    }
+
+    static bool IsPrimitiveToken(JsonToken token)
+    {
+        switch (token)
         {
-            // can write is set to false
+            case JsonToken.Integer:
+            case JsonToken.Float:
+            case JsonToken.String:
+            case JsonToken.Boolean:
+            case JsonToken.Null:
+            case JsonToken.Undefined:
+            case JsonToken.Date:
+            case JsonToken.Bytes:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    object ReadValue(JsonReader reader)
+    {
+        while (reader.TokenType == JsonToken.Comment)
+        {
+            if (!reader.Read())
+                throw new Exception("Unexpected end.");
         }
 
-        /// <inheritdoc/>
-        public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+        switch (reader.TokenType)
         {
-            return ReadValue(reader);
+            case JsonToken.StartObject:
+                return ReadObject(reader);
+            case JsonToken.StartArray:
+                return ReadList(reader);
+            default:
+                if (IsPrimitiveToken(reader.TokenType))
+                    return reader.Value;
+
+                throw new Exception(string.Format(CultureInfo.InvariantCulture, "Unexpected token when converting ExpandoObject: {0}", reader.TokenType));
         }
+    }
 
-        /// <inheritdoc/>
-        public override bool CanConvert(Type objectType)
+    object ReadList(JsonReader reader)
+    {
+        IList<object> list = new List<object>();
+
+        while (reader.Read())
         {
-            return objectType == typeof(ExpandoObject);
-        }
-
-        static bool IsPrimitiveToken(JsonToken token)
-        {
-            switch (token)
-            {
-                case JsonToken.Integer:
-                case JsonToken.Float:
-                case JsonToken.String:
-                case JsonToken.Boolean:
-                case JsonToken.Null:
-                case JsonToken.Undefined:
-                case JsonToken.Date:
-                case JsonToken.Bytes:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-
-        object ReadValue(JsonReader reader)
-        {
-            while (reader.TokenType == JsonToken.Comment)
-            {
-                if (!reader.Read())
-                    throw new Exception("Unexpected end.");
-            }
-
             switch (reader.TokenType)
             {
-                case JsonToken.StartObject:
-                    return ReadObject(reader);
-                case JsonToken.StartArray:
-                    return ReadList(reader);
+                case JsonToken.Comment:
+                    break;
                 default:
-                    if (IsPrimitiveToken(reader.TokenType))
-                        return reader.Value;
+                    var v = ReadValue(reader);
 
-                    throw new Exception(string.Format(CultureInfo.InvariantCulture, "Unexpected token when converting ExpandoObject: {0}", reader.TokenType));
+                    list.Add(v);
+                    break;
+                case JsonToken.EndArray:
+                    return list;
             }
         }
 
-        object ReadList(JsonReader reader)
+        throw new Exception("Unexpected end.");
+    }
+
+    object ReadObject(JsonReader reader)
+    {
+        IDictionary<string, object> expandoObject = new ExpandoObject();
+
+        while (reader.Read())
         {
-            IList<object> list = new List<object>();
-
-            while (reader.Read())
+            switch (reader.TokenType)
             {
-                switch (reader.TokenType)
-                {
-                    case JsonToken.Comment:
-                        break;
-                    default:
-                        var v = ReadValue(reader);
+                case JsonToken.PropertyName:
+                    var propertyName = reader.Value.ToString().ToPascalCase();
 
-                        list.Add(v);
-                        break;
-                    case JsonToken.EndArray:
-                        return list;
-                }
+                    if (!reader.Read())
+                        throw new Exception("Unexpected end.");
+
+                    var v = ReadValue(reader);
+
+                    expandoObject[propertyName] = v;
+                    break;
+                case JsonToken.Comment:
+                    break;
+                case JsonToken.EndObject:
+                    return expandoObject;
             }
-
-            throw new Exception("Unexpected end.");
         }
 
-        object ReadObject(JsonReader reader)
-        {
-            IDictionary<string, object> expandoObject = new ExpandoObject();
-
-            while (reader.Read())
-            {
-                switch (reader.TokenType)
-                {
-                    case JsonToken.PropertyName:
-                        var propertyName = reader.Value.ToString().ToPascalCase();
-
-                        if (!reader.Read())
-                            throw new Exception("Unexpected end.");
-
-                        var v = ReadValue(reader);
-
-                        expandoObject[propertyName] = v;
-                        break;
-                    case JsonToken.Comment:
-                        break;
-                    case JsonToken.EndObject:
-                        return expandoObject;
-                }
-            }
-
-            throw new Exception("Unexpected end.");
-        }
+        throw new Exception("Unexpected end.");
     }
 }

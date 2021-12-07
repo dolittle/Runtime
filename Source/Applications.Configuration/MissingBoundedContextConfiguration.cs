@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Applications.Configuration
+namespace Dolittle.Runtime.Applications.Configuration;
+
+/// <summary>
+/// Exception that gets thrown when there is no configuration for the bounded context.
+/// </summary>
+public class MissingBoundedContextConfiguration : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when there is no configuration for the bounded context.
+    /// Initializes a new instance of the <see cref="MissingBoundedContextConfiguration"/> class.
     /// </summary>
-    public class MissingBoundedContextConfiguration : Exception
+    /// <param name="path">Search path.</param>
+    public MissingBoundedContextConfiguration(string path)
+        : base($"Missing configuration for the bounded context - looking for file 'bounded-context.json' at path {path}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingBoundedContextConfiguration"/> class.
-        /// </summary>
-        /// <param name="path">Search path.</param>
-        public MissingBoundedContextConfiguration(string path)
-            : base($"Missing configuration for the bounded context - looking for file 'bounded-context.json' at path {path}")
-        {
-        }
     }
 }

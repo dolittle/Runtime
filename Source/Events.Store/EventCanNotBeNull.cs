@@ -3,19 +3,18 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store;
+
+/// <summary>
+/// Exception that gets thrown when an event is null.
+/// </summary>
+public class EventCanNotBeNull : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when an event is null.
+    /// Initializes a new instance of the <see cref="EventCanNotBeNull"/> class.
     /// </summary>
-    public class EventCanNotBeNull : Exception
+    public EventCanNotBeNull()
+        : base("An event can't be null")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventCanNotBeNull"/> class.
-        /// </summary>
-        public EventCanNotBeNull()
-            : base("An event can't be null")
-        {
-        }
     }
 }

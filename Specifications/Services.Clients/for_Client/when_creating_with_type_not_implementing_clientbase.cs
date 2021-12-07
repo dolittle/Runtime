@@ -4,14 +4,13 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+public class when_creating_with_type_not_implementing_clientbase
 {
-    public class when_creating_with_type_not_implementing_clientbase
-    {
-        static Exception result;
+    static Exception result;
 
-        Because of = () => result = Catch.Exception(() => new Client(EndpointVisibility.Public, typeof(string), null));
+    Because of = () => result = Catch.Exception(() => new Client(EndpointVisibility.Public, typeof(string), null));
 
-        It should_throw_type_does_not_implement_client_base = () => result.ShouldBeOfExactType<TypeDoesNotImplementClientBase>();
-    }
+    It should_throw_type_does_not_implement_client_base = () => result.ShouldBeOfExactType<TypeDoesNotImplementClientBase>();
 }

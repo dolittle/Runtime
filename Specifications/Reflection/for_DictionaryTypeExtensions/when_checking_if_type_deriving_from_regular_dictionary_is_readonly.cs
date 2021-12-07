@@ -4,16 +4,15 @@
 using System.Collections.Generic;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions
+namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions;
+
+public class when_checking_if_type_deriving_from_regular_dictionary_is_readonly
 {
-    public class when_checking_if_type_deriving_from_regular_dictionary_is_readonly
-    {
-        static bool result;
+    static bool result;
 
-        class derived : Dictionary<string, string> { }
+    class derived : Dictionary<string, string> { }
 
-        Because of = () => result = typeof(derived).IsReadOnlyDictionary();
+    Because of = () => result = typeof(derived).IsReadOnlyDictionary();
 
-        It should_not_be_considered_a_readonly_dictionary = () => result.ShouldBeFalse();
-    }
+    It should_not_be_considered_a_readonly_dictionary = () => result.ShouldBeFalse();
 }

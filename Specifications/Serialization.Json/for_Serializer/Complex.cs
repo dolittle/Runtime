@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer
-{
-    public record Complex(Guid Concept, Immutable Immutable, int Primitive, Dictionary<string, object> Content);
-}
+namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer;
+
+public record Complex(Guid Concept, Immutable Immutable, int Primitive, Dictionary<string, object> Content);

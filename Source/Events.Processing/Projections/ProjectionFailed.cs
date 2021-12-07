@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Processing.Projections
+namespace Dolittle.Runtime.Events.Processing.Projections;
+
+/// <summary>
+/// Exception that gets thrown we a projection operation fails.
+/// </summary>
+public class ProjectionFailed : Exception
 {
     /// <summary>
-    /// Exception that gets thrown we a projection operation fails.
+    /// Initializes a new instance of the <see cref="ProjectionFailed"/> class.
     /// </summary>
-    public class ProjectionFailed : Exception
+    /// <param name="reason">The reason for the failure.</param>
+    public ProjectionFailed(string reason)
+        : base($"Projection failed because ${reason}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ProjectionFailed"/> class.
-        /// </summary>
-        /// <param name="reason">The reason for the failure.</param>
-        public ProjectionFailed(string reason)
-            : base($"Projection failed because ${reason}")
-        {
-        }
     }
 }

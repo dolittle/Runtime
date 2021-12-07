@@ -13,47 +13,46 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and_the_embedding_returns
-{
-    public class a_processor_failure : given.all_dependencies
-    {
-        static EmbeddingResponse embedding_response;
-        static string failure_reason;
-        Establish context = () =>
-        {
-            failure_reason = "sometimes 🙅🕒 you 👆😤 do 💕 be 💪🐝 a 😯 failure";
-            embedding_response = new EmbeddingResponse()
-            {
-                ProcessorFailure = new Dolittle.Runtime.Events.Processing.Contracts.ProcessorFailure
-                {
-                    Retry = false,
-                    Reason = failure_reason
-                }
-            };
+namespace Dolittle.Runtime.Embeddings.Processing.for_Embedding.when_deleting.and_the_embedding_returns;
 
-            request_factory
-                .Setup(_ => _.TryCreate(current_state))
-                .Returns(embedding_request);
-            dispatcher
-                .Setup(_ => _.Call(
-                    embedding_request,
-                    cancellation))
-                .Returns(Task.FromResult(embedding_response));
+public class a_processor_failure : given.all_dependencies
+{
+    static EmbeddingResponse embedding_response;
+    static string failure_reason;
+    Establish context = () =>
+    {
+        failure_reason = "sometimes 🙅🕒 you 👆😤 do 💕 be 💪🐝 a 😯 failure";
+        embedding_response = new EmbeddingResponse()
+        {
+            ProcessorFailure = new Dolittle.Runtime.Events.Processing.Contracts.ProcessorFailure
+            {
+                Retry = false,
+                Reason = failure_reason
+            }
         };
 
-        static Try<UncommittedEvents> result;
+        request_factory
+            .Setup(_ => _.TryCreate(current_state))
+            .Returns(embedding_request);
+        dispatcher
+            .Setup(_ => _.Call(
+                embedding_request,
+                cancellation))
+            .Returns(Task.FromResult(embedding_response));
+    };
 
-        Because of = () => result = embedding.TryDelete(current_state, cancellation).GetAwaiter().GetResult();
+    static Try<UncommittedEvents> result;
 
-        It should_have_called_the_request_factory = ()
-            => request_factory.Verify(_ => _.TryCreate(current_state));
+    Because of = () => result = embedding.TryDelete(current_state, cancellation).GetAwaiter().GetResult();
 
-        It should_call_the_dispatcher = ()
-            => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);
+    It should_have_called_the_request_factory = ()
+        => request_factory.Verify(_ => _.TryCreate(current_state));
 
-        It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
-        It should_return_a_failed_result = () => result.Success.ShouldBeFalse();
+    It should_call_the_dispatcher = ()
+        => dispatcher.Verify(_ => _.Call(embedding_request, cancellation), Times.Once);
 
-        It should_fail_because_embedding_delete_failed = () => result.Exception.ShouldBeOfExactType<EmbeddingRemoteDeleteCallFailed>();
-    }
+    It should_not_do_anything_more_with_the_dispatcher = () => dispatcher.VerifyNoOtherCalls();
+    It should_return_a_failed_result = () => result.Success.ShouldBeFalse();
+
+    It should_fail_because_embedding_delete_failed = () => result.Exception.ShouldBeOfExactType<EmbeddingRemoteDeleteCallFailed>();
 }

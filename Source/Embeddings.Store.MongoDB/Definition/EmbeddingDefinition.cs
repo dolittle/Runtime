@@ -5,27 +5,26 @@ using System;
 using MongoDB.Bson.Serialization.Attributes;
 
 
-namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
+namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
+
+/// <summary>
+/// Represents the persisted definition of an embedding.
+/// </summary>
+public class EmbeddingDefinition
 {
     /// <summary>
-    /// Represents the persisted definition of an embedding.
+    /// Gets or sets the embedding id.
     /// </summary>
-    public class EmbeddingDefinition
-    {
-        /// <summary>
-        /// Gets or sets the embedding id.
-        /// </summary>
-        [BsonId]
-        public Guid Embedding { get; set; }
+    [BsonId]
+    public Guid Embedding { get; set; }
 
-        /// <summary>
-        /// Gets or sets the initial state.
-        /// </summary>
-        public string InitialState { get; set; }
+    /// <summary>
+    /// Gets or sets the initial state.
+    /// </summary>
+    public string InitialState { get; set; }
 
-        /// <summary>
-        /// Gets or sets the embedding event types.
-        /// </summary>
-        public Guid[] Events { get; set; }
-    }
+    /// <summary>
+    /// Gets or sets the embedding event types.
+    /// </summary>
+    public Guid[] Events { get; set; }
 }

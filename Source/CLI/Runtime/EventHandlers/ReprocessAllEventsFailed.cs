@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
+namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
+
+/// <summary>
+/// Exception that gets thrown when reprocessing all events fails.
+/// </summary>
+public class ReprocessAllEventsFailed : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when reprocessing all events fails.
+    /// Initializes a new instance of the <see cref="ReprocessAllEventsFailed"/> class.
     /// </summary>
-    public class ReprocessAllEventsFailed : Exception
+    /// <param name="reason">The reason why the reprocessing failed.</param>
+    public ReprocessAllEventsFailed(string reason)
+        : base($"Could not reprocess all events because {reason}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReprocessAllEventsFailed"/> class.
-        /// </summary>
-        /// <param name="reason">The reason why the reprocessing failed.</param>
-        public ReprocessAllEventsFailed(string reason)
-            : base($"Could not reprocess all events because {reason}")
-        {
-        }
     }
 }

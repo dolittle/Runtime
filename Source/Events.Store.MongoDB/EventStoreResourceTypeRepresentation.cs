@@ -12,33 +12,32 @@ using Dolittle.Runtime.Events.Store.Streams;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 using Dolittle.Runtime.ResourceTypes;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB;
+
+/// <inheritdoc/>
+public class EventStoreResourceTypeRepresentation : IRepresentAResourceType
 {
-    /// <inheritdoc/>
-    public class EventStoreResourceTypeRepresentation : IRepresentAResourceType
+    static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
     {
-        static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
-        {
-            { typeof(IEventStore), typeof(EventStore) },
-            { typeof(IFetchAggregateRootInstances), typeof(AggregateRootInstancesFetcher) },
-            { typeof(IStreamDefinitionRepository), typeof(StreamDefinitionRepository) },
-            { typeof(IStreamProcessorStateRepository), typeof(StreamProcessorStateRepository) },
-            { typeof(IEventFetchers), typeof(EventFetchers) },
-            { typeof(IWriteEventsToStreams), typeof(EventsToStreamsWriter) },
-            { typeof(IWriteEventHorizonEvents), typeof(EventHorizonEventsWriter) },
-            { typeof(IWriteEventsToPublicStreams), typeof(EventsToPublicStreamsWriter) }
-        };
+        { typeof(IEventStore), typeof(EventStore) },
+        { typeof(IFetchAggregateRootInstances), typeof(AggregateRootInstancesFetcher) },
+        { typeof(IStreamDefinitionRepository), typeof(StreamDefinitionRepository) },
+        { typeof(IStreamProcessorStateRepository), typeof(StreamProcessorStateRepository) },
+        { typeof(IEventFetchers), typeof(EventFetchers) },
+        { typeof(IWriteEventsToStreams), typeof(EventsToStreamsWriter) },
+        { typeof(IWriteEventHorizonEvents), typeof(EventHorizonEventsWriter) },
+        { typeof(IWriteEventsToPublicStreams), typeof(EventsToPublicStreamsWriter) }
+    };
 
-        /// <inheritdoc/>
-        public ResourceType Type => "eventStore";
+    /// <inheritdoc/>
+    public ResourceType Type => "eventStore";
 
-        /// <inheritdoc/>
-        public ResourceTypeImplementation ImplementationName => "MongoDB";
+    /// <inheritdoc/>
+    public ResourceTypeImplementation ImplementationName => "MongoDB";
 
-        /// <inheritdoc/>
-        public Type ConfigurationObjectType => typeof(EventStoreConfiguration);
+    /// <inheritdoc/>
+    public Type ConfigurationObjectType => typeof(EventStoreConfiguration);
 
-        /// <inheritdoc/>
-        public IDictionary<Type, Type> Bindings => _bindings;
-    }
+    /// <inheritdoc/>
+    public IDictionary<Type, Type> Bindings => _bindings;
 }

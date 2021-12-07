@@ -4,19 +4,18 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedEvents
+namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedEvents;
+
+public class when_creating_with_null : given.events
 {
-    public class when_creating_with_null : given.events
+    static UncommittedEvents events;
+    static Exception exception;
+
+    Because of = () => exception = Catch.Exception(() =>
     {
-        static UncommittedEvents events;
-        static Exception exception;
+        events = new UncommittedEvents(new[] { event_one, null, event_three });
+    });
 
-        Because of = () => exception = Catch.Exception(() =>
-        {
-            events = new UncommittedEvents(new[] { event_one, null, event_three });
-        });
-
-        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
-        It should_not_be_created = () => events.ShouldBeNull();
-    }
+    It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
+    It should_not_be_created = () => events.ShouldBeNull();
 }

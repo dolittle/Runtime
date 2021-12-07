@@ -11,67 +11,66 @@ using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned
+namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned;
+
+/// <summary>
+/// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
+/// </summary>
+public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
 {
+    readonly IReverseCallDispatcher<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
+
     /// <summary>
-    /// Represents a default implementation of <see cref="AbstractFilterProcessor{T}"/> that processes a remote filter.
+    /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
     /// </summary>
-    public class FilterProcessor : AbstractFilterProcessor<FilterDefinition>
+    /// <param name="scope">The <see cref="ScopeId" />.</param>
+    /// <param name="definition">The <see cref="FilterDefinition"/>.</param>
+    /// <param name="dispatcher">The <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
+    /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
+    /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+    public FilterProcessor(
+        ScopeId scope,
+        FilterDefinition definition,
+        IReverseCallDispatcher<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
+        IWriteEventsToStreams eventsToStreamsWriter,
+        ILogger<FilterProcessor> logger)
+        : base(scope, definition, eventsToStreamsWriter, logger)
     {
-        readonly IReverseCallDispatcher<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> _dispatcher;
+        _dispatcher = dispatcher;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilterProcessor"/> class.
-        /// </summary>
-        /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="definition">The <see cref="FilterDefinition"/>.</param>
-        /// <param name="dispatcher">The <see cref="IReverseCallDispatcher{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}" />.</param>
-        /// <param name="eventsToStreamsWriter">The <see cref="IWriteEventsToStreams">writer</see> for writing events.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public FilterProcessor(
-            ScopeId scope,
-            FilterDefinition definition,
-            IReverseCallDispatcher<FilterClientToRuntimeMessage, FilterRuntimeToClientMessage, FilterRegistrationRequest, FilterRegistrationResponse, FilterEventRequest, FilterResponse> dispatcher,
-            IWriteEventsToStreams eventsToStreamsWriter,
-            ILogger<FilterProcessor> logger)
-            : base(scope, definition, eventsToStreamsWriter, logger)
+    /// <inheritdoc/>
+    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
+    {
+        var request = new FilterEventRequest
         {
-            _dispatcher = dispatcher;
-        }
+            Event = @event.ToProtobuf(),
+            ScopeId = Scope.ToProtobuf()
+        };
 
-        /// <inheritdoc/>
-        public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, CancellationToken cancellationToken)
+        return Filter(request, cancellationToken);
+    }
+
+    /// <inheritdoc/>
+    public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+    {
+        var request = new FilterEventRequest
         {
-            var request = new FilterEventRequest
-            {
-                Event = @event.ToProtobuf(),
-                ScopeId = Scope.ToProtobuf()
-            };
+            Event = @event.ToProtobuf(),
+            ScopeId = Scope.ToProtobuf(),
+            RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
+        };
 
-            return Filter(request, cancellationToken);
-        }
+        return Filter(request, cancellationToken);
+    }
 
-        /// <inheritdoc/>
-        public override Task<IFilterResult> Filter(CommittedEvent @event, PartitionId partitionId, EventProcessorId eventProcessorId, string failureReason, uint retryCount, CancellationToken cancellationToken)
+    async Task<IFilterResult> Filter(FilterEventRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
+        return response switch
         {
-            var request = new FilterEventRequest
-            {
-                Event = @event.ToProtobuf(),
-                ScopeId = Scope.ToProtobuf(),
-                RetryProcessingState = new RetryProcessingState { FailureReason = failureReason, RetryCount = retryCount }
-            };
-
-            return Filter(request, cancellationToken);
-        }
-
-        async Task<IFilterResult> Filter(FilterEventRequest request, CancellationToken cancellationToken)
-        {
-            var response = await _dispatcher.Call(request, cancellationToken).ConfigureAwait(false);
-            return response switch
-            {
-                { Failure: null } => new SuccessfulFiltering(response.IsIncluded),
-                _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
-            };
-        }
+            { Failure: null } => new SuccessfulFiltering(response.IsIncluded),
+            _ => new FailedFiltering(response.Failure.Reason, response.Failure.Retry, response.Failure.RetryTimeout.ToTimeSpan())
+        };
     }
 }

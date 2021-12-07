@@ -3,10 +3,9 @@
 
 using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
-{
-    /// <summary>
-    /// Represents a unique identifier for an event handler.
-    /// </summary>
-    public record EventHandlerId(ScopeId Scope, EventProcessorId EventHandler);
-}
+namespace Dolittle.Runtime.Events.Processing.EventHandlers;
+
+/// <summary>
+/// Represents a unique identifier for an event handler.
+/// </summary>
+public record EventHandlerId(ScopeId Scope, EventProcessorId EventHandler);

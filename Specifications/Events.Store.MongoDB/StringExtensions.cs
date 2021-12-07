@@ -3,11 +3,10 @@
 
 using System.Text.Json;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB;
+
+public static class StringExtensions
 {
-    public static class StringExtensions
-    {
-        public static string FormatJson(this string json)
-            => JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement);
-    }
+    public static string FormatJson(this string json)
+        => JsonSerializer.Serialize(JsonDocument.Parse(json).RootElement);
 }

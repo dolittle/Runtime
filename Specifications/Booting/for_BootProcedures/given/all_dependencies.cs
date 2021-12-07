@@ -7,22 +7,21 @@ using Microsoft.Extensions.Logging;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Booting.Specs.for_BootProcedures.given
+namespace Dolittle.Runtime.Booting.Specs.for_BootProcedures.given;
+
+public class all_dependencies
 {
-    public class all_dependencies
+    protected static Mock<IContainer> container;
+    protected static Mock<ILogger> logger;
+
+    protected static Mock<IExecutionContextManager> execution_context_manager;
+
+    Establish context = () =>
     {
-        protected static Mock<IContainer> container;
-        protected static Mock<ILogger> logger;
-
-        protected static Mock<IExecutionContextManager> execution_context_manager;
-
-        Establish context = () =>
-        {
-            logger = new Mock<ILogger>();
-            container = new Mock<IContainer>();
-            container.Setup(_ => _.Get<ILogger>()).Returns(logger.Object);
-            execution_context_manager = new Mock<IExecutionContextManager>();
-            container.Setup(_ => _.Get<IExecutionContextManager>()).Returns(execution_context_manager.Object);
-        };
-    }
+        logger = new Mock<ILogger>();
+        container = new Mock<IContainer>();
+        container.Setup(_ => _.Get<ILogger>()).Returns(logger.Object);
+        execution_context_manager = new Mock<IExecutionContextManager>();
+        container.Setup(_ => _.Get<IExecutionContextManager>()).Returns(execution_context_manager.Object);
+    };
 }

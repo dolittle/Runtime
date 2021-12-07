@@ -5,26 +5,25 @@ using System;
 using System.Collections.Generic;
 using Dolittle.Runtime.ResourceTypes;
 
-namespace Dolittle.Runtime.Resources.MongoDB
+namespace Dolittle.Runtime.Resources.MongoDB;
+
+/// <inheritdoc/>
+public class ResourceTypeRepresentation : IRepresentAResourceType
 {
-    /// <inheritdoc/>
-    public class ResourceTypeRepresentation : IRepresentAResourceType
+    static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
     {
-        static readonly IDictionary<Type, Type> _bindings = new Dictionary<Type, Type>
-        {
-            { typeof(IKnowTheConnectionString), typeof(ConnectionStringFromResourceConfiguration) }
-        };
+        { typeof(IKnowTheConnectionString), typeof(ConnectionStringFromResourceConfiguration) }
+    };
 
-        /// <inheritdoc/>
-        public ResourceTypes.ResourceType Type => ResourceType.ResourceTypeName;
+    /// <inheritdoc/>
+    public ResourceTypes.ResourceType Type => ResourceType.ResourceTypeName;
 
-        /// <inheritdoc/>
-        public ResourceTypeImplementation ImplementationName => "MongoDB";
+    /// <inheritdoc/>
+    public ResourceTypeImplementation ImplementationName => "MongoDB";
 
-        /// <inheritdoc/>
-        public Type ConfigurationObjectType => typeof(ResourceConfiguration);
+    /// <inheritdoc/>
+    public Type ConfigurationObjectType => typeof(ResourceConfiguration);
 
-        /// <inheritdoc/>
-        public IDictionary<Type, Type> Bindings => _bindings;
-    }
+    /// <inheritdoc/>
+    public IDictionary<Type, Type> Bindings => _bindings;
 }

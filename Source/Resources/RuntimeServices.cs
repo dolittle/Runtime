@@ -4,32 +4,31 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Resources
+namespace Dolittle.Runtime.Resources;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing runtime service implementations for Heads.
+/// </summary>
+public class RuntimeServices : ICanBindRuntimeServices
 {
+    readonly ResourcesService _resourcesService;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing runtime service implementations for Heads.
+    /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
     /// </summary>
-    public class RuntimeServices : ICanBindRuntimeServices
+    /// <param name="eventStoreService">The <see cref="ResourcesService"/>.</param>
+    public RuntimeServices(ResourcesService eventStoreService)
     {
-        readonly ResourcesService _resourcesService;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
-        /// </summary>
-        /// <param name="eventStoreService">The <see cref="ResourcesService"/>.</param>
-        public RuntimeServices(ResourcesService eventStoreService)
-        {
-            _resourcesService = eventStoreService;
-        }
-
-        /// <inheritdoc/>
-        public ServiceAspect Aspect => "Resources";
-
-        /// <inheritdoc/>
-        public IEnumerable<Service> BindServices() =>
-            new[]
-            {
-                new Service(_resourcesService, Contracts.Resources.BindService(_resourcesService), Contracts.Resources.Descriptor)
-            };
+        _resourcesService = eventStoreService;
     }
+
+    /// <inheritdoc/>
+    public ServiceAspect Aspect => "Resources";
+
+    /// <inheritdoc/>
+    public IEnumerable<Service> BindServices() =>
+        new[]
+        {
+            new Service(_resourcesService, Contracts.Resources.BindService(_resourcesService), Contracts.Resources.Descriptor)
+        };
 }

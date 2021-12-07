@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Embeddings.Store;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Exception that gets thrown when a failure occurs in the head while handling a delete embedding call.
+/// </summary>
+public class EmbeddingRemoteDeleteCallFailed : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a failure occurs in the head while handling a delete embedding call.
+    /// Initializes a new instance of the <see cref="EmbeddingRemoteDeleteCallFailed"/> class.
     /// </summary>
-    public class EmbeddingRemoteDeleteCallFailed : Exception
+    /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
+    public EmbeddingRemoteDeleteCallFailed(EmbeddingId embedding, string reason)
+        : base($"A failure occurred during the remote Delete call for embedding {embedding.Value}. {reason}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmbeddingRemoteDeleteCallFailed"/> class.
-        /// </summary>
-        /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
-        public EmbeddingRemoteDeleteCallFailed(EmbeddingId embedding, string reason)
-            : base($"A failure occurred during the remote Delete call for embedding {embedding.Value}. {reason}")
-        {
-        }
     }
 }

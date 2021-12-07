@@ -6,41 +6,40 @@ using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Serialization.Json;
 using McMaster.Extensions.CommandLineUtils;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay
+namespace Dolittle.Runtime.CLI.Runtime.EventHandlers.Replay;
+
+/// <summary>
+/// The "dolittle runtime eventhandlers replay all" command.
+/// </summary>
+[Command("all", Description = "Make an Event Handler reprocess all events")]
+public class AllCommand : CommandBase
 {
+    readonly IManagementClient _client;
+
     /// <summary>
-    /// The "dolittle runtime eventhandlers replay all" command.
+    /// Initializes a new instance of the <see cref="AllCommand"/> class.
     /// </summary>
-    [Command("all", Description = "Make an Event Handler reprocess all events")]
-    public class AllCommand : CommandBase
+    /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
+    /// <param name="client">The management client to use.</param>
+    /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
+    public AllCommand(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
+        : base(runtimes, eventHandlerIdResolver, eventTypesDiscoverer, jsonSerializer)
     {
-        readonly IManagementClient _client;
+        _client = client;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AllCommand"/> class.
-        /// </summary>
-        /// <param name="runtimes">The Runtime locator to find a Runtime to connect to.</param>
-        /// <param name="client">The management client to use.</param>
-        /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        public AllCommand(ICanLocateRuntimes runtimes, IManagementClient client, IResolveEventHandlerId eventHandlerIdResolver, IDiscoverEventTypes eventTypesDiscoverer, ISerializer jsonSerializer)
-            : base(runtimes, eventHandlerIdResolver, eventTypesDiscoverer, jsonSerializer)
+    /// <summary>
+    /// The entrypoint for the "dolittle runtime eventhandlers replay all" command.
+    /// </summary>
+    /// <param name="cli">The <see cref="CommandLineApplication"/> that is executed.</param>
+    public async Task OnExecuteAsync(CommandLineApplication cli)
+    {
+        var address = await SelectRuntimeToConnectTo(cli);
+        if (!address.Success)
         {
-            _client = client;
+            return;
         }
 
-        /// <summary>
-        /// The entrypoint for the "dolittle runtime eventhandlers replay all" command.
-        /// </summary>
-        /// <param name="cli">The <see cref="CommandLineApplication"/> that is executed.</param>
-        public async Task OnExecuteAsync(CommandLineApplication cli)
-        {
-            var address = await SelectRuntimeToConnectTo(cli);
-            if (!address.Success)
-            {
-                return;
-            }
-
-            await _client.ReprocessAllEvents(await GetEventHandlerId(address, EventHandlerIdentifier).ConfigureAwait(false), address);
-        }
+        await _client.ReprocessAllEvents(await GetEventHandlerId(address, EventHandlerIdentifier).ConfigureAwait(false), address);
     }
 }

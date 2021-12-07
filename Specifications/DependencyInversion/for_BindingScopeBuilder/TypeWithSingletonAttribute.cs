@@ -3,10 +3,9 @@
 
 using Dolittle.Runtime.Lifecycle;
 
-namespace Dolittle.Runtime.DependencyInversion.for_BindingScopeBuilder
+namespace Dolittle.Runtime.DependencyInversion.for_BindingScopeBuilder;
+
+[Singleton]
+public class TypeWithSingletonAttribute
 {
-    [Singleton]
-    public class TypeWithSingletonAttribute
-    {
-    }
 }

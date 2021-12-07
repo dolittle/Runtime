@@ -4,19 +4,18 @@
 using System;
 using Dolittle.Runtime.DependencyInversion;
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanNotifyForNewBindings"/>.
+/// </summary>
+public class NewBindingsNotificationHub : ICanNotifyForNewBindings
 {
-    /// <summary>
-    /// Represents an implementation of <see cref="ICanNotifyForNewBindings"/>.
-    /// </summary>
-    public class NewBindingsNotificationHub : ICanNotifyForNewBindings
-    {
-        event Action<IBindingCollection> Subscribers = (_) => { };
+    event Action<IBindingCollection> Subscribers = (_) => { };
 
-        /// <inheritdoc/>
-        public void Notify(IBindingCollection bindings) => Subscribers(bindings);
+    /// <inheritdoc/>
+    public void Notify(IBindingCollection bindings) => Subscribers(bindings);
 
-        /// <inheritdoc/>
-        public void SubscribeTo(Action<IBindingCollection> subscriber) => Subscribers += subscriber;
-    }
+    /// <inheritdoc/>
+    public void SubscribeTo(Action<IBindingCollection> subscriber) => Subscribers += subscriber;
 }

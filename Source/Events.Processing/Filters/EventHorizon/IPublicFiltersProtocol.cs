@@ -3,12 +3,11 @@
 
 using Dolittle.Runtime.Events.Processing.Contracts;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
+namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
+
+/// <summary>
+/// Defines the protocol for public filters.
+/// </summary>
+public interface IPublicFiltersProtocol : IFiltersProtocol<PublicFilterClientToRuntimeMessage, PublicFilterRegistrationRequest, PartitionedFilterResponse, PublicFilterRegistrationArguments>
 {
-    /// <summary>
-    /// Defines the protocol for public filters.
-    /// </summary>
-    public interface IPublicFiltersProtocol : IFiltersProtocol<PublicFilterClientToRuntimeMessage, PublicFilterRegistrationRequest, PartitionedFilterResponse, PublicFilterRegistrationArguments>
-    {
-    }
 }

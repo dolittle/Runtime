@@ -5,27 +5,26 @@ using System;
 using Dolittle.Runtime.Aggregates;
 using Dolittle.Runtime.Artifacts;
 
-namespace Dolittle.Runtime.CLI.Runtime.Aggregates
+namespace Dolittle.Runtime.CLI.Runtime.Aggregates;
+
+/// <summary>
+/// Exception that gets thrown when there is no registered Aggregate Root with the given Aggregate Root identifier.
+/// </summary>
+public class NoAggregateRootWithId : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when there is no registered Aggregate Root with the given Aggregate Root identifier.
+    /// Initializes a new instance of the <see cref="NoAggregateRootWithId"/> class.
     /// </summary>
-    public class NoAggregateRootWithId : Exception
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NoAggregateRootWithId"/> class.
-        /// </summary>
-        /// <param name="id">The Aggregate Root Id.</param>
-        public NoAggregateRootWithId(ArtifactId id)
-            : base($"There is no registered Aggregate Root with Id '{id.Value}'")
-        { }
+    /// <param name="id">The Aggregate Root Id.</param>
+    public NoAggregateRootWithId(ArtifactId id)
+        : base($"There is no registered Aggregate Root with Id '{id.Value}'")
+    { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NoAggregateRootWithId"/> class.
-        /// </summary>
-        /// <param name="alias">The Aggregate Root alias.</param>
-        public NoAggregateRootWithId(AggregateRootAlias alias)
-            : base($"There is no registered Aggregate Root with Alias '{alias.Value}'")
-        { }
-    }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="NoAggregateRootWithId"/> class.
+    /// </summary>
+    /// <param name="alias">The Aggregate Root alias.</param>
+    public NoAggregateRootWithId(AggregateRootAlias alias)
+        : base($"There is no registered Aggregate Root with Alias '{alias.Value}'")
+    { }
 }

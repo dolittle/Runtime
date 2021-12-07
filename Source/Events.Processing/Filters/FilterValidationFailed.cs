@@ -4,21 +4,20 @@
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Filters
+namespace Dolittle.Runtime.Events.Processing.Filters;
+
+/// <summary>
+/// Exception that gets thrown when Filter Validation failed and you cannot close a dispatcher that is accepted.
+/// </summary>
+public class FilterValidationFailed : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when Filter Validation failed and you cannot close a dispatcher that is accepted.
+    /// Initializes a new instance of the <see cref="FilterValidationFailed"/> class.
     /// </summary>
-    public class FilterValidationFailed : Exception
+    /// <param name="filterId">The Id of the Filter.</param>
+    /// <param name="reason">The <see cref="FailedFilterValidationReason" />.</param>
+    public FilterValidationFailed(StreamId filterId, FailedFilterValidationReason reason)
+        : base($"The Filter: '{filterId}' failed validation. {reason}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FilterValidationFailed"/> class.
-        /// </summary>
-        /// <param name="filterId">The Id of the Filter.</param>
-        /// <param name="reason">The <see cref="FailedFilterValidationReason" />.</param>
-        public FilterValidationFailed(StreamId filterId, FailedFilterValidationReason reason)
-            : base($"The Filter: '{filterId}' failed validation. {reason}")
-        {
-        }
     }
 }

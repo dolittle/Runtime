@@ -4,21 +4,20 @@
 using System.Linq;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.DependencyInversion.for_BindingProviderBuilder
+namespace Dolittle.Runtime.DependencyInversion.for_BindingProviderBuilder;
+
+public class when_building_with_two_bindings : given.a_binding_provider_builder
 {
-    public class when_building_with_two_bindings : given.a_binding_provider_builder
+    static IBindingCollection result;
+
+    Establish context = () =>
     {
-        static IBindingCollection result;
+        builder.Bind(typeof(string));
+        builder.Bind(typeof(object));
+    };
 
-        Establish context = () =>
-        {
-            builder.Bind(typeof(string));
-            builder.Bind(typeof(object));
-        };
+    Because of = () => result = builder.Build();
 
-        Because of = () => result = builder.Build();
-
-        It should_contain_the_first_binding = () => result.ToArray()[0].Service.ShouldEqual(typeof(string));
-        It should_contain_the_second_binding = () => result.ToArray()[1].Service.ShouldEqual(typeof(object));
-    }
+    It should_contain_the_first_binding = () => result.ToArray()[0].Service.ShouldEqual(typeof(string));
+    It should_contain_the_second_binding = () => result.ToArray()[1].Service.ShouldEqual(typeof(object));
 }

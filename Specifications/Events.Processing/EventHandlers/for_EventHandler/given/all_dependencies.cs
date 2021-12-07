@@ -31,62 +31,61 @@ using static Moq.It;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.given
+namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventHandler.given;
+
+public class all_dependencies
 {
-    public class all_dependencies
+    protected static Mock<IStreamProcessors> stream_processors;
+    protected static Mock<IValidateFilterForAllTenants> filter_validation;
+    protected static Mock<IStreamDefinitions> stream_definitions;
+    protected static Mock<ReverseCallDispatcherType> reverse_call_dispatcher;
+    protected static Mock<IWriteEventsToStreams> stream_writer;
+    protected static EventHandlerRegistrationArguments arguments;
+    protected static ILoggerFactory logger_factory;
+    protected static FactoryFor<IWriteEventsToStreams> factory_for_stream_writer;
+    protected static CancellationToken cancellation_token;
+    protected static ExecutionContext execution_context;
+    protected static EventProcessorId event_handler_id = Guid.Parse("6afafdf6-33e8-4135-b271-2f7634b70a7f");
+    protected static ScopeId scope = Guid.Empty;
+    protected static Microservice microservice = Guid.Parse("cfa85cf2-b463-4e05-8877-211fd3d1237a");
+    protected static TenantId tenant = TenantId.Development;
+    protected static Version version = Version.NotSet;
+    protected static Environment environment = Environment.Production;
+    protected static CorrelationId correlation_id = Guid.Parse("720040db-3a60-4755-8d77-31ba4895be46");
+    protected static Claims claims = Claims.Empty;
+    protected static CultureInfo culture_info = CultureInfo.InvariantCulture;
+
+    protected static Failure failure;
+
+    private Establish context = () =>
     {
-        protected static Mock<IStreamProcessors> stream_processors;
-        protected static Mock<IValidateFilterForAllTenants> filter_validation;
-        protected static Mock<IStreamDefinitions> stream_definitions;
-        protected static Mock<ReverseCallDispatcherType> reverse_call_dispatcher;
-        protected static Mock<IWriteEventsToStreams> stream_writer;
-        protected static EventHandlerRegistrationArguments arguments;
-        protected static ILoggerFactory logger_factory;
-        protected static FactoryFor<IWriteEventsToStreams> factory_for_stream_writer;
-        protected static CancellationToken cancellation_token;
-        protected static ExecutionContext execution_context;
-        protected static EventProcessorId event_handler_id = Guid.Parse("6afafdf6-33e8-4135-b271-2f7634b70a7f");
-        protected static ScopeId scope = Guid.Empty;
-        protected static Microservice microservice = Guid.Parse("cfa85cf2-b463-4e05-8877-211fd3d1237a");
-        protected static TenantId tenant = TenantId.Development;
-        protected static Version version = Version.NotSet;
-        protected static Environment environment = Environment.Production;
-        protected static CorrelationId correlation_id = Guid.Parse("720040db-3a60-4755-8d77-31ba4895be46");
-        protected static Claims claims = Claims.Empty;
-        protected static CultureInfo culture_info = CultureInfo.InvariantCulture;
+        stream_processors = new Mock<IStreamProcessors>(MockBehavior.Strict);
+        filter_validation = new Mock<IValidateFilterForAllTenants>(MockBehavior.Strict);
+        stream_definitions = new Mock<IStreamDefinitions>(MockBehavior.Strict);
+        reverse_call_dispatcher = new Mock<ReverseCallDispatcherType>();
+        reverse_call_dispatcher.Setup(
+            _ => _.Reject(IsAny<EventHandlerRegistrationResponse>(), IsAny<CancellationToken>())
+        ).Callback((EventHandlerRegistrationResponse e, CancellationToken ct) => failure = e.Failure);
 
-        protected static Failure failure;
+        stream_writer = new Mock<IWriteEventsToStreams>(MockBehavior.Strict);
+        logger_factory = new NullLoggerFactory();
+        execution_context = new ExecutionContext(
+            microservice,
+            tenant,
+            version,
+            environment,
+            correlation_id,
+            claims,
+            culture_info);
 
-        private Establish context = () =>
-        {
-            stream_processors = new(MockBehavior.Strict);
-            filter_validation = new(MockBehavior.Strict);
-            stream_definitions = new(MockBehavior.Strict);
-            reverse_call_dispatcher = new();
-            reverse_call_dispatcher.Setup(
-                _ => _.Reject(IsAny<EventHandlerRegistrationResponse>(), IsAny<CancellationToken>())
-            ).Callback((EventHandlerRegistrationResponse e, CancellationToken ct) => failure = e.Failure);
+        arguments = new EventHandlerRegistrationArguments(
+            execution_context,
+            event_handler_id,
+            Array.Empty<ArtifactId>(),
+            false,
+            scope,
+            "alias");
 
-            stream_writer = new(MockBehavior.Strict);
-            logger_factory = new NullLoggerFactory();
-            execution_context = new(
-                microservice,
-                tenant,
-                version,
-                environment,
-                correlation_id,
-                claims,
-                culture_info);
-
-            arguments = new(
-                execution_context,
-                event_handler_id,
-                Array.Empty<ArtifactId>(),
-                false,
-                scope,
-                "alias");
-
-            factory_for_stream_writer = () => stream_writer.Object;
-        };
-    }
+        factory_for_stream_writer = () => stream_writer.Object;
+    };
 }

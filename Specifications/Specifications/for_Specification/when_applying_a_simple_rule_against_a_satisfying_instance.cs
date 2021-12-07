@@ -3,15 +3,14 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Specifications.for_Specification
+namespace Dolittle.Runtime.Specifications.for_Specification;
+
+[Subject(typeof(Specification<>))]
+public class when_applying_a_simple_rule_against_a_satisfying_instance : given.rules_and_colored_shapes
 {
-    [Subject(typeof(Specification<>))]
-    public class when_applying_a_simple_rule_against_a_satisfying_instance : given.rules_and_colored_shapes
-    {
-        static bool is_satisfied;
+    static bool is_satisfied;
 
-        Because of = () => is_satisfied = squares.IsSatisfiedBy(green_square);
+    Because of = () => is_satisfied = squares.IsSatisfiedBy(green_square);
 
-        It should_be_satisfied = () => is_satisfied.ShouldBeTrue();
-    }
+    It should_be_satisfied = () => is_satisfied.ShouldBeTrue();
 }

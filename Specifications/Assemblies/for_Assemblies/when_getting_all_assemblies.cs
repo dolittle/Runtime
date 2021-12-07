@@ -6,17 +6,16 @@ using System.Linq;
 using System.Reflection;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Assemblies.for_Assemblies
+namespace Dolittle.Runtime.Assemblies.for_Assemblies;
+
+public class when_getting_all_assemblies : given.two_assemblies
 {
-    public class when_getting_all_assemblies : given.two_assemblies
-    {
-        static IEnumerable<Assembly> result;
+    static IEnumerable<Assembly> result;
 
-        Because of = () => result = assemblies.GetAll();
+    Because of = () => result = assemblies.GetAll();
 
-        // Comment: ShouldContainOnly() seems to be buggy in MSpec - didn't work here - hence the two assertions instead of one
-        // It should_return_the_loaded_assemblies = () => result.ShouldContainOnly(loaded_assemblies);
-        It should_return_two_loaded_assemblies = () => result.Count().ShouldEqual(2);
-        It should_return_the_loaded_assemblies = () => result.ShouldContain(loaded_assemblies);
-    }
+    // Comment: ShouldContainOnly() seems to be buggy in MSpec - didn't work here - hence the two assertions instead of one
+    // It should_return_the_loaded_assemblies = () => result.ShouldContainOnly(loaded_assemblies);
+    It should_return_two_loaded_assemblies = () => result.Count().ShouldEqual(2);
+    It should_return_the_loaded_assemblies = () => result.ShouldContain(loaded_assemblies);
 }

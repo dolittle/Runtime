@@ -11,37 +11,36 @@ using static Moq.It;
 using static Moq.Times;
 using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 
-namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc.for_EmbeddingStoreGrpcService.when_getting.one
+namespace Dolittle.Runtime.Embeddings.Store.Services.Grpc.for_EmbeddingStoreGrpcService.when_getting.one;
+
+public class and_it_failed : given.the_service
 {
-    public class and_it_failed : given.the_service
+    static Contracts.GetOneRequest request;
+    static Exception exception;
+
+    Establish context = () =>
     {
-        static Contracts.GetOneRequest request;
-        static Exception exception;
-
-        Establish context = () =>
+        request = new Contracts.GetOneRequest()
         {
-            request = new Contracts.GetOneRequest()
+            EmbeddingId = embedding.ToProtobuf(),
+            Key = key,
+            CallContext = new Dolittle.Services.Contracts.CallRequestContext
             {
-                EmbeddingId = embedding.ToProtobuf(),
-                Key = key,
-                CallContext = new Dolittle.Services.Contracts.CallRequestContext
-                {
-                    ExecutionContext = execution_context.ToProtobuf(),
-                    HeadId = Guid.Parse("3acf909e-f696-4bef-a93c-21f995117707").ToProtobuf()
-                }
-            };
-            exception = new Exception("something wrong happened");
-            embeddings_service
-                .Setup(_ => _.TryGetOne(embedding, key, execution_context, cancellation_token))
-                .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
+                ExecutionContext = execution_context.ToProtobuf(),
+                HeadId = Guid.Parse("3acf909e-f696-4bef-a93c-21f995117707").ToProtobuf()
+            }
         };
+        exception = new Exception("something wrong happened");
+        embeddings_service
+            .Setup(_ => _.TryGetOne(embedding, key, execution_context, cancellation_token))
+            .Returns(Task.FromResult(Try<EmbeddingCurrentState>.Failed(exception)));
+    };
 
-        static Contracts.GetOneResponse result;
+    static Contracts.GetOneResponse result;
 
-        Because of = () => result = grpc_service.GetOne(request, call_context).GetAwaiter().GetResult();
+    Because of = () => result = grpc_service.GetOne(request, call_context).GetAwaiter().GetResult();
 
-        It should_call_the_service = () => embeddings_service.Verify(_ => _.TryGetOne(embedding, key, execution_context, cancellation_token), Once);
-        It should_have_a_failure = () => result.Failure.ShouldNotBeNull();
-        It should_have_the_correct_failure = () => result.Failure.ShouldEqual(exception.ToFailure().ToProtobuf());
-    }
+    It should_call_the_service = () => embeddings_service.Verify(_ => _.TryGetOne(embedding, key, execution_context, cancellation_token), Once);
+    It should_have_a_failure = () => result.Failure.ShouldNotBeNull();
+    It should_have_the_correct_failure = () => result.Failure.ShouldEqual(exception.ToFailure().ToProtobuf());
 }

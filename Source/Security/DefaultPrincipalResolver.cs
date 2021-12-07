@@ -3,30 +3,29 @@
 
 using System.Security.Claims;
 
-namespace Dolittle.Runtime.Security
+namespace Dolittle.Runtime.Security;
+
+/// <summary>
+/// Represents a principal resolver that resolves from current thread.
+/// </summary>
+public class DefaultPrincipalResolver : ICanResolvePrincipal
 {
     /// <summary>
-    /// Represents a principal resolver that resolves from current thread.
+    /// The user name when there is no user logged in.
     /// </summary>
-    public class DefaultPrincipalResolver : ICanResolvePrincipal
+    public const string AnonymousUserName = "[Anonymous]";
+
+    /// <inheritdoc/>
+    public ClaimsPrincipal Resolve()
     {
-        /// <summary>
-        /// The user name when there is no user logged in.
-        /// </summary>
-        public const string AnonymousUserName = "[Anonymous]";
-
-        /// <inheritdoc/>
-        public ClaimsPrincipal Resolve()
+        if (ClaimsPrincipal.Current == null)
         {
-            if (ClaimsPrincipal.Current == null)
-            {
-                var identity = new ClaimsIdentity();
-                identity.AddClaim(new System.Security.Claims.Claim(identity.NameClaimType, AnonymousUserName));
-                var principal = new ClaimsPrincipal(identity);
-                return principal;
-            }
-
-            return ClaimsPrincipal.Current;
+            var identity = new ClaimsIdentity();
+            identity.AddClaim(new System.Security.Claims.Claim(identity.NameClaimType, AnonymousUserName));
+            var principal = new ClaimsPrincipal(identity);
+            return principal;
         }
+
+        return ClaimsPrincipal.Current;
     }
 }

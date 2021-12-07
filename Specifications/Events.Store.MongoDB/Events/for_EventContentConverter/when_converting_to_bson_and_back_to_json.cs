@@ -3,20 +3,20 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventContentConverter
+namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventContentConverter;
+
+public class when_converting_to_bson_and_back_to_json
 {
-    public class when_converting_to_bson_and_back_to_json
+    static EventContentConverter content_converter;
+
+    static string original_json;
+    static string recovered_json;
+
+    Establish context = () =>
     {
-        static EventContentConverter content_converter;
+        content_converter = new EventContentConverter();
 
-        static string original_json;
-        static string recovered_json;
-
-        Establish context = () =>
-        {
-            content_converter = new EventContentConverter();
-
-            original_json = @"
+        original_json = @"
             {
                 ""null"": null,
 
@@ -72,10 +72,9 @@ namespace Dolittle.Runtime.Events.Store.MongoDB.Events.for_EventContentConverter
                     ""e"": { ""a"": false }
                 }
             }".FormatJson();
-        };
+    };
 
-        Because of = () => recovered_json = content_converter.ToJson(content_converter.ToBson(original_json)).FormatJson();
+    Because of = () => recovered_json = content_converter.ToJson(content_converter.ToBson(original_json)).FormatJson();
 
-        It should_recover_the_same_contents = () => recovered_json.ShouldEqual(original_json);
-    }
+    It should_recover_the_same_contents = () => recovered_json.ShouldEqual(original_json);
 }

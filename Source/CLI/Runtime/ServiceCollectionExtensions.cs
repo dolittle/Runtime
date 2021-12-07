@@ -7,25 +7,24 @@ using Dolittle.Runtime.CLI.Runtime.EventHandlers;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.CLI.Runtime
+namespace Dolittle.Runtime.CLI.Runtime;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Adds services related to management of Runtimes.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    public static void AddRuntimeServices(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds services related to management of Runtimes.
-        /// </summary>
-        /// <param name="services">The service collection to add services to.</param>
-        public static void AddRuntimeServices(this IServiceCollection services)
-        {
-            services.AddTransient<ICanCreateClients, ClientFactory>();
-            services.AddTransient<ICanLocateRuntimes, RuntimeLocator>();
-            services.AddTransient<ICanDiscoverRuntimeAddresses, DockerRuntimeAddresses>();
-            services.AddSingleton<IDockerClient>(provider =>
-                new DockerClientConfiguration().CreateClient());
+        services.AddTransient<ICanCreateClients, ClientFactory>();
+        services.AddTransient<ICanLocateRuntimes, RuntimeLocator>();
+        services.AddTransient<ICanDiscoverRuntimeAddresses, DockerRuntimeAddresses>();
+        services.AddSingleton<IDockerClient>(provider =>
+            new DockerClientConfiguration().CreateClient());
             
-            services.AddEventHandlerServices();
-            services.AddAggregatesServices();
-            services.AddEventTypesServices();
-        }
+        services.AddEventHandlerServices();
+        services.AddAggregatesServices();
+        services.AddEventTypesServices();
     }
 }

@@ -7,45 +7,44 @@ using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing
+namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing;
+
+public class and_the_states_are_equal
 {
-    public class and_the_states_are_equal
+    static CompareProjectionStates comparer;
+    static ProjectionState left;
+    static ProjectionState right;
+
+    Establish context = () =>
     {
-        static CompareProjectionStates comparer;
-        static ProjectionState left;
-        static ProjectionState right;
+        left = new ProjectionState(JsonConvert.SerializeObject(CreateState()));
+        right = new ProjectionState(JsonConvert.SerializeObject(CreateState()));
 
-        Establish context = () =>
+        comparer = new CompareProjectionStates();
+    };
+
+    static Try<bool> result;
+    Because of = () => result = comparer.TryCheckEquality(left, right);
+
+    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_be_equal = () => result.Result.ShouldBeTrue();
+
+    static JObject CreateState()
+    {
+        dynamic state = new JObject();
+        state.FirstProp = "FirstProp";
+        state.Dictionary = new JObject
         {
-            left = new ProjectionState(JsonConvert.SerializeObject(CreateState()));
-            right = new ProjectionState(JsonConvert.SerializeObject(CreateState()));
-
-            comparer = new CompareProjectionStates();
+            { "first_key", "first_value" },
+            { "second_key", "second_value" },
+            { "third_key", "third_value" }
         };
-
-        static Try<bool> result;
-        Because of = () => result = comparer.TryCheckEquality(left, right);
-
-        It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_be_equal = () => result.Result.ShouldBeTrue();
-
-        static JObject CreateState()
+        state.Array = new JArray
         {
-            dynamic state = new JObject();
-            state.FirstProp = "FirstProp";
-            state.Dictionary = new JObject
-            {
-                { "first_key", "first_value" },
-                { "second_key", "second_value" },
-                { "third_key", "third_value" }
-            };
-            state.Array = new JArray
-            {
-                "First",
-                "Second",
-                "Third"
-            };
-            return state;
-        }
+            "First",
+            "Second",
+            "Third"
+        };
+        return state;
     }
 }

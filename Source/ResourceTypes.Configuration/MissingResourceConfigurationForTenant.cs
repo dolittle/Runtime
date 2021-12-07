@@ -4,21 +4,20 @@
 using System;
 using Dolittle.Runtime.ApplicationModel;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration
+namespace Dolittle.Runtime.ResourceTypes.Configuration;
+
+/// <summary>
+/// Exception that gets thrown when resources for a <see cref="TenantId"/> is not found in the resource file.
+/// </summary>
+public class MissingResourceConfigurationForTenant : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when resources for a <see cref="TenantId"/> is not found in the resource file.
+    /// Initializes a new instance of the <see cref="MissingResourceConfigurationForTenant"/> class.
     /// </summary>
-    public class MissingResourceConfigurationForTenant : Exception
+    /// <param name="tenantId">The <see cref="TenantId"/> that has missing resource configuration.</param>
+    public MissingResourceConfigurationForTenant(
+        TenantId tenantId)
+        : base($"Tenant with id '{tenantId}' does not have a any resource configurations'")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingResourceConfigurationForTenant"/> class.
-        /// </summary>
-        /// <param name="tenantId">The <see cref="TenantId"/> that has missing resource configuration.</param>
-        public MissingResourceConfigurationForTenant(
-            TenantId tenantId)
-            : base($"Tenant with id '{tenantId}' does not have a any resource configurations'")
-        {
-        }
     }
 }

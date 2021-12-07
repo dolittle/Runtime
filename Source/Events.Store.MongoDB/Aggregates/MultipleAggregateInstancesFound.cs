@@ -3,21 +3,20 @@
 
 using Dolittle.Runtime.Artifacts;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
+namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
+
+/// <summary>
+/// Exception that gets thrown when multiple versions of a single aggregate root instance is found in the MongoDB.
+/// </summary>
+public class MultipleAggregateInstancesFound : EventStoreConsistencyError
 {
     /// <summary>
-    /// Exception that gets thrown when multiple versions of a single aggregate root instance is found in the MongoDB.
+    /// Initializes a new instance of the <see cref="MultipleAggregateInstancesFound"/> class.
     /// </summary>
-    public class MultipleAggregateInstancesFound : EventStoreConsistencyError
+    /// <param name="eventSource">The <see cref="EventSourceId"/> of the aggregate root instance.</param>
+    /// <param name="aggregateRoot">The <see cref="ArtifactId"/> of the aggregate root instance.</param>
+    public MultipleAggregateInstancesFound(EventSourceId eventSource, ArtifactId aggregateRoot)
+        : base($"Multiple versions of a single aggregate root instance with event source id '{eventSource}' and aggregate root id '{aggregateRoot}'.", null)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MultipleAggregateInstancesFound"/> class.
-        /// </summary>
-        /// <param name="eventSource">The <see cref="EventSourceId"/> of the aggregate root instance.</param>
-        /// <param name="aggregateRoot">The <see cref="ArtifactId"/> of the aggregate root instance.</param>
-        public MultipleAggregateInstancesFound(EventSourceId eventSource, ArtifactId aggregateRoot)
-            : base($"Multiple versions of a single aggregate root instance with event source id '{eventSource}' and aggregate root id '{aggregateRoot}'.", null)
-        {
-        }
     }
 }

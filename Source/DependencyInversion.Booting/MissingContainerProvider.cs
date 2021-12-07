@@ -3,19 +3,18 @@
 
 using System;
 
-namespace Dolittle.Runtime.DependencyInversion.Booting
+namespace Dolittle.Runtime.DependencyInversion.Booting;
+
+/// <summary>
+/// Exception that gets thrown when there are no implementations of <see cref="ICanProvideContainer"/> loaded.
+/// </summary>
+public class MissingContainerProvider : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when there are no implementations of <see cref="ICanProvideContainer"/> loaded.
+    /// Initializes a new instance of the <see cref="MissingContainerProvider"/> class.
     /// </summary>
-    public class MissingContainerProvider : Exception
+    public MissingContainerProvider()
+        : base("There is no provider for an IOC Container - add a reference to an extension that provides this; http://github.com/Dolittle-extensions")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingContainerProvider"/> class.
-        /// </summary>
-        public MissingContainerProvider()
-            : base("There is no provider for an IOC Container - add a reference to an extension that provides this; http://github.com/Dolittle-extensions")
-        {
-        }
     }
 }

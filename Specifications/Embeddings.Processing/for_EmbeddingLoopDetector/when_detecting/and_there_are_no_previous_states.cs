@@ -7,29 +7,27 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.when_detecting;
+
+public class and_there_are_no_previous_states : given.all_dependencies
 {
+    static ProjectionState current_state;
 
-    public class and_there_are_no_previous_states : given.all_dependencies
+    Establish context = () =>
     {
-        static ProjectionState current_state;
+        current_state = CreateStateWithKeyValue("ImAUniqueKey", "AndAUniqueValue");
+        previous_states.Clear();
+    };
 
-        Establish context = () =>
-        {
-            current_state = CreateStateWithKeyValue("ImAUniqueKey", "AndAUniqueValue");
-            previous_states.Clear();
-        };
+    static Try<bool> result;
 
-        static Try<bool> result;
+    Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
 
-        Because of = () => result = detector.TryCheckForProjectionStateLoop(current_state, previous_states);
+    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_not_detect_a_loop = () => result.Result.ShouldBeFalse();
 
-        It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_not_detect_a_loop = () => result.Result.ShouldBeFalse();
-
-        It should_not_call_the_comparer = () =>
-            comparer.Verify(_ =>
+    It should_not_call_the_comparer = () =>
+        comparer.Verify(_ =>
                 _.TryCheckEquality(Moq.It.IsAny<ProjectionState>(), current_state),
-                Times.Never());
-    }
+            Times.Never());
 }

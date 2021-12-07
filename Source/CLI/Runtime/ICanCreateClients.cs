@@ -4,20 +4,19 @@
 using Dolittle.Runtime.Microservices;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.CLI.Runtime
+namespace Dolittle.Runtime.CLI.Runtime;
+
+/// <summary>
+/// Defines a system that can create gRPC clients.
+/// </summary>
+public interface ICanCreateClients
 {
     /// <summary>
-    /// Defines a system that can create gRPC clients.
+    /// Creates a client for the specified type that connects to the provided Runtime address.
     /// </summary>
-    public interface ICanCreateClients
-    {
-        /// <summary>
-        /// Creates a client for the specified type that connects to the provided Runtime address.
-        /// </summary>
-        /// <param name="address">The address to use to connect to the Runtime.</param>
-        /// <typeparam name="T">The type of the client to create.</typeparam>
-        /// <returns>A new <typeparamref name="T"/>.</returns>
-        T CreateClientFor<T>(MicroserviceAddress address)
-            where T : ClientBase<T>;
-    }
+    /// <param name="address">The address to use to connect to the Runtime.</param>
+    /// <typeparam name="T">The type of the client to create.</typeparam>
+    /// <returns>A new <typeparamref name="T"/>.</returns>
+    T CreateClientFor<T>(MicroserviceAddress address)
+        where T : ClientBase<T>;
 }

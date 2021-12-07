@@ -3,12 +3,11 @@
 
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Management
+namespace Dolittle.Runtime.Management;
+
+/// <summary>
+/// Defines a system that can bind a gRPC service for management purpose.
+/// </summary>
+public interface ICanBindManagementServices : ICanBindServices
 {
-    /// <summary>
-    /// Defines a system that can bind a gRPC service for management purpose.
-    /// </summary>
-    public interface ICanBindManagementServices : ICanBindServices
-    {
-    }
 }

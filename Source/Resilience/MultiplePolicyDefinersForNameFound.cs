@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Resilience
+namespace Dolittle.Runtime.Resilience;
+
+/// <summary>
+/// Exception that gets thrown whenthere are multiple implementations of <see cref="IDefineNamedPolicy"/> in the system.
+/// </summary>
+public class MultiplePolicyDefinersForNameFound : Exception
 {
     /// <summary>
-    /// Exception that gets thrown whenthere are multiple implementations of <see cref="IDefineNamedPolicy"/> in the system.
+    /// Initializes a new instance of the <see cref="MultiplePolicyDefinersForNameFound"/> class.
     /// </summary>
-    public class MultiplePolicyDefinersForNameFound : Exception
+    /// <param name="name">Name of policy not found.</param>
+    public MultiplePolicyDefinersForNameFound(string name)
+        : base($"Multiple implementations of IDefineNamedPolicy found for '{name}' - there can be only one")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MultiplePolicyDefinersForNameFound"/> class.
-        /// </summary>
-        /// <param name="name">Name of policy not found.</param>
-        public MultiplePolicyDefinersForNameFound(string name)
-            : base($"Multiple implementations of IDefineNamedPolicy found for '{name}' - there can be only one")
-        {
-        }
     }
 }

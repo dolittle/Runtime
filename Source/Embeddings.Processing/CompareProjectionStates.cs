@@ -6,27 +6,25 @@ using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 using Newtonsoft.Json.Linq;
 
-namespace Dolittle.Runtime.Embeddings.Processing
-{
+namespace Dolittle.Runtime.Embeddings.Processing;
 
-    /// <summary>
-    /// Represents an implementation of <see cref="ICompareStates" />.
-    /// </summary>
-    public class CompareProjectionStates : ICompareStates
+/// <summary>
+/// Represents an implementation of <see cref="ICompareStates" />.
+/// </summary>
+public class CompareProjectionStates : ICompareStates
+{
+    /// <inheritdoc/>
+    public Try<bool> TryCheckEquality(ProjectionState left, ProjectionState right)
     {
-        /// <inheritdoc/>
-        public Try<bool> TryCheckEquality(ProjectionState left, ProjectionState right)
+        try
         {
-            try
-            {
-                var leftObject = JObject.Parse(left.Value);
-                var rightObject = JObject.Parse(right.Value);
-                return JToken.DeepEquals(leftObject, rightObject);
-            }
-            catch (Exception ex)
-            {
-                return ex;
-            }
+            var leftObject = JObject.Parse(left.Value);
+            var rightObject = JObject.Parse(right.Value);
+            return JToken.DeepEquals(leftObject, rightObject);
+        }
+        catch (Exception ex)
+        {
+            return ex;
         }
     }
 }

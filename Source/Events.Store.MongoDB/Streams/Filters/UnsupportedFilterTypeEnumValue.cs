@@ -3,21 +3,20 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
+
+/// <summary>
+/// Exception that gets thrown when a <see cref="AbstractFilterDefinition"/> document has an unsupported Type field.
+/// </summary>
+public class UnsupportedFilterTypeEnumValue : EventStoreConsistencyError
 {
     /// <summary>
-    /// Exception that gets thrown when a <see cref="AbstractFilterDefinition"/> document has an unsupported Type field.
+    /// Initializes a new instance of the <see cref="UnsupportedFilterTypeEnumValue"/> class.
     /// </summary>
-    public class UnsupportedFilterTypeEnumValue : EventStoreConsistencyError
+    /// <param name="filterType">string of the given FilterType.</param>
+    /// <param name="id">Id of the document.</param>
+    public UnsupportedFilterTypeEnumValue(FilterDefinitionDiscriminatorConvention.FilterType filterType, Guid id)
+        : base($"Filter definition document id: {id} has an unsupported FilterType: {filterType}. Supported types are \"Remote\", \"EventTypeId\".", null)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnsupportedFilterTypeEnumValue"/> class.
-        /// </summary>
-        /// <param name="filterType">string of the given FilterType.</param>
-        /// <param name="id">Id of the document.</param>
-        public UnsupportedFilterTypeEnumValue(FilterDefinitionDiscriminatorConvention.FilterType filterType, Guid id)
-            : base($"Filter definition document id: {id} has an unsupported FilterType: {filterType}. Supported types are \"Remote\", \"EventTypeId\".", null)
-        {
-        }
     }
 }

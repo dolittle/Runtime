@@ -4,15 +4,14 @@
 using Dolittle.Runtime.Security;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.Specs.for_TypeSecurable
+namespace Dolittle.Runtime.Security.Specs.for_TypeSecurable;
+
+[Subject(typeof(NamespaceSecurable))]
+public class when_checking_can_authorize_for_action_of_secured_type : given.a_type_securable
 {
-    [Subject(typeof(NamespaceSecurable))]
-    public class when_checking_can_authorize_for_action_of_secured_type : given.a_type_securable
-    {
-        static bool can_authorize;
+    static bool can_authorize;
 
-        Because of = () => can_authorize = type_securable.CanAuthorize(action_of_secured_type);
+    Because of = () => can_authorize = type_securable.CanAuthorize(action_of_secured_type);
 
-        It should_be_authorizable = () => can_authorize.ShouldBeTrue();
-    }
+    It should_be_authorizable = () => can_authorize.ShouldBeTrue();
 }

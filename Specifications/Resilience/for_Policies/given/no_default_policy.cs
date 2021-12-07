@@ -4,21 +4,20 @@
 using Dolittle.Runtime.Types.Testing;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Resilience.for_Policies.given
-{
-    public class no_default_policy
-    {
-        protected static Policies policies;
+namespace Dolittle.Runtime.Resilience.for_Policies.given;
 
-        Establish context = () =>
-        {
-            policies = new Policies(
-                new StaticInstancesOf<IDefineDefaultPolicy>(),
-                new StaticInstancesOf<IDefineDefaultAsyncPolicy>(),
-                new StaticInstancesOf<IDefineNamedPolicy>(),
-                new StaticInstancesOf<IDefineNamedAsyncPolicy>(),
-                new StaticInstancesOf<IDefinePolicyForType>(),
-                new StaticInstancesOf<IDefineAsyncPolicyForType>());
-        };
-    }
+public class no_default_policy
+{
+    protected static Policies policies;
+
+    Establish context = () =>
+    {
+        policies = new Policies(
+            new StaticInstancesOf<IDefineDefaultPolicy>(),
+            new StaticInstancesOf<IDefineDefaultAsyncPolicy>(),
+            new StaticInstancesOf<IDefineNamedPolicy>(),
+            new StaticInstancesOf<IDefineNamedAsyncPolicy>(),
+            new StaticInstancesOf<IDefinePolicyForType>(),
+            new StaticInstancesOf<IDefineAsyncPolicyForType>());
+    };
 }

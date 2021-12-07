@@ -3,10 +3,9 @@
 
 using Dolittle.Services.Contracts;
 
-namespace Dolittle.Runtime.Services.ReverseCalls
-{
-    /// <summary>
-    /// Defines the signature of a reverse call context received event.
-    /// </summary>
-    public delegate void ReverseCallContextReceived(ReverseCallArgumentsContext context);
-}
+namespace Dolittle.Runtime.Services.ReverseCalls;
+
+/// <summary>
+/// Defines the signature of a reverse call context received event.
+/// </summary>
+public delegate void ReverseCallContextReceived(ReverseCallArgumentsContext context);

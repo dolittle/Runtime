@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Embeddings.Store;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Exception that gets thrown when starting an <see cref="EmbeddingProcessor"/> more than once.
+/// </summary>
+public class EmbeddingProcessorAlreadyStarted : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when starting an <see cref="EmbeddingProcessor"/> more than once.
+    /// Initializes a new instance of the <see cref="EmbeddingProcessorAlreadyStarted"/> class.
     /// </summary>
-    public class EmbeddingProcessorAlreadyStarted : Exception
+    /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
+    public EmbeddingProcessorAlreadyStarted(EmbeddingId embedding)
+        : base($"EmbeddingProcessor for embedding {embedding.Value} is already started")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmbeddingProcessorAlreadyStarted"/> class.
-        /// </summary>
-        /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
-        public EmbeddingProcessorAlreadyStarted(EmbeddingId embedding)
-            : base($"EmbeddingProcessor for embedding {embedding.Value} is already started")
-        {
-        }
     }
 }

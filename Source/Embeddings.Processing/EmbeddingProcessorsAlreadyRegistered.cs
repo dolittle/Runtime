@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Embeddings.Store;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Exception that gets thrown when trying to register an embedding more than once.
+/// </summary>
+public class EmbeddingProcessorsAlreadyRegistered : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when trying to register an embedding more than once.
+    /// Initializes a new instance of the <see cref="EmbeddingProcessorsAlreadyRegistered"/> class.
     /// </summary>
-    public class EmbeddingProcessorsAlreadyRegistered : Exception
+    /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
+    public EmbeddingProcessorsAlreadyRegistered(EmbeddingId embedding)
+        : base($"EmbeddingProcessor for embedding {embedding.Value} is already registered")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmbeddingProcessorsAlreadyRegistered"/> class.
-        /// </summary>
-        /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
-        public EmbeddingProcessorsAlreadyRegistered(EmbeddingId embedding)
-            : base($"EmbeddingProcessor for embedding {embedding.Value} is already registered")
-        {
-        }
     }
 }

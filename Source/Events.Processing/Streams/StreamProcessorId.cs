@@ -4,17 +4,16 @@
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Processing.Streams;
+
+/// <summary>
+/// Represents a unique key for a <see cref="StreamProcessor" />.
+/// </summary>
+/// <param name="scopeId">The <see cref="ScopeId" />.</param>
+/// <param name="eventProcessorId"><see cref="EventProcessorId"/>.</param>
+/// <param name="sourceStreamId">The <see cref="StreamId"/>.</param>
+public record StreamProcessorId(ScopeId ScopeId, EventProcessorId EventProcessorId, StreamId SourceStreamId) : IStreamProcessorId
 {
-    /// <summary>
-    /// Represents a unique key for a <see cref="StreamProcessor" />.
-    /// </summary>
-    /// <param name="scopeId">The <see cref="ScopeId" />.</param>
-    /// <param name="eventProcessorId"><see cref="EventProcessorId"/>.</param>
-    /// <param name="sourceStreamId">The <see cref="StreamId"/>.</param>
-    public record StreamProcessorId(ScopeId ScopeId, EventProcessorId EventProcessorId, StreamId SourceStreamId) : IStreamProcessorId
-    {
-        /// <inheritdoc />
-        public override string ToString() => $"Scope: {ScopeId.Value} Event Processor Id: {EventProcessorId.Value} Source Stream: {SourceStreamId.Value}";
-    }
+    /// <inheritdoc />
+    public override string ToString() => $"Scope: {ScopeId.Value} Event Processor Id: {EventProcessorId.Value} Source Stream: {SourceStreamId.Value}";
 }

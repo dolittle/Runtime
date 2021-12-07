@@ -3,16 +3,15 @@
 
 using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Defines the basis of a unique identifier of a Stream Processor.
+/// </summary>
+public interface IStreamProcessorId
 {
     /// <summary>
-    /// Defines the basis of a unique identifier of a Stream Processor.
+    /// Gets the <see cref="ScopeId" />.
     /// </summary>
-    public interface IStreamProcessorId
-    {
-        /// <summary>
-        /// Gets the <see cref="ScopeId" />.
-        /// </summary>
-        ScopeId ScopeId { get; }
-    }
+    ScopeId ScopeId { get; }
 }

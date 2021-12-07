@@ -4,22 +4,21 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.Clients.for_ClientManager.when_getting.with_host_and_address
+namespace Dolittle.Runtime.Services.Clients.for_ClientManager.when_getting.with_host_and_address;
+
+public class and_type_does_not_implement_clientbase : given.a_client_manager
 {
-    public class and_type_does_not_implement_clientbase : given.a_client_manager
+    static string host;
+    static int port;
+    static Exception result;
+
+    Establish context = () =>
     {
-        static string host;
-        static int port;
-        static Exception result;
+        host = "host";
+        port = 1;
+    };
 
-        Establish context = () =>
-        {
-            host = "host";
-            port = 1;
-        };
+    Because of = () => result = Catch.Exception(() => client_manager.Get(typeof(string), host, port));
 
-        Because of = () => result = Catch.Exception(() => client_manager.Get(typeof(string), host, port));
-
-        It should_throw_type_does_not_implement_client_base = () => result.ShouldBeOfExactType<TypeDoesNotImplementClientBase>();
-    }
+    It should_throw_type_does_not_implement_client_base = () => result.ShouldBeOfExactType<TypeDoesNotImplementClientBase>();
 }

@@ -3,16 +3,15 @@
 
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates
+namespace Dolittle.Runtime.Events.Store.MongoDB.Aggregates;
+
+/// <summary>
+/// Defines a system knows about the <see cref="IMongoCollection{TDocument}" /> for <see cref="AggregateRoot" />.
+/// </summary>
+public interface IAggregatesCollection : IEventStoreConnection
 {
     /// <summary>
-    /// Defines a system knows about the <see cref="IMongoCollection{TDocument}" /> for <see cref="AggregateRoot" />.
+    /// Gets the <see cref="IMongoCollection{TDocument}" /> of <see cref="AggregateRoot" />.
     /// </summary>
-    public interface IAggregatesCollection : IEventStoreConnection
-    {
-        /// <summary>
-        /// Gets the <see cref="IMongoCollection{TDocument}" /> of <see cref="AggregateRoot" />.
-        /// </summary>
-        IMongoCollection<AggregateRoot> Aggregates { get; }
-    }
+    IMongoCollection<AggregateRoot> Aggregates { get; }
 }

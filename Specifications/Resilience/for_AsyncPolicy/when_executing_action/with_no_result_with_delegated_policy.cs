@@ -8,21 +8,20 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Resilience.for_AsyncPolicy.when_executing_action
+namespace Dolittle.Runtime.Resilience.for_AsyncPolicy.when_executing_action;
+
+public class with_no_result_with_delegated_policy
 {
-    public class with_no_result_with_delegated_policy
+    static AsyncPolicy policy;
+    static Mock<IAsyncPolicy> delegated_policy;
+
+    Establish context = () =>
     {
-        static AsyncPolicy policy;
-        static Mock<IAsyncPolicy> delegated_policy;
+        delegated_policy = new Mock<IAsyncPolicy>();
+        policy = new AsyncPolicy(delegated_policy.Object);
+    };
 
-        Establish context = () =>
-        {
-            delegated_policy = new Mock<IAsyncPolicy>();
-            policy = new AsyncPolicy(delegated_policy.Object);
-        };
+    Because of = () => policy.Execute(() => Task.CompletedTask).GetAwaiter().GetResult();
 
-        Because of = () => policy.Execute(() => Task.CompletedTask).GetAwaiter().GetResult();
-
-        It should_forward_call_to_delegated_policy = () => delegated_policy.Verify(_ => _.Execute(Moq.It.IsAny<Func<CancellationToken, Task>>(), Moq.It.IsAny<bool>(), Moq.It.IsAny<CancellationToken>()), Times.Once);
-    }
+    It should_forward_call_to_delegated_policy = () => delegated_policy.Verify(_ => _.Execute(Moq.It.IsAny<Func<CancellationToken, Task>>(), Moq.It.IsAny<bool>(), Moq.It.IsAny<CancellationToken>()), Times.Once);
 }

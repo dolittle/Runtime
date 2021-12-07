@@ -7,19 +7,18 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_starting
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_starting;
+
+public class twice : given.all_dependencies
 {
-    public class twice : given.all_dependencies
+    static Task<Try> result;
+
+    Because of = () =>
     {
-        static Task<Try> result;
+        embedding_processor.Start(CancellationToken.None);
+        result = embedding_processor.Start(CancellationToken.None);
+    };
 
-        Because of = () =>
-        {
-            embedding_processor.Start(CancellationToken.None);
-            result = embedding_processor.Start(CancellationToken.None);
-        };
-
-        It should_fail_the_second_time = () => result.Result.Success.ShouldBeFalse();
-        It should_fail_because_it_is_already_started = () => result.Result.Exception.ShouldBeOfExactType<EmbeddingProcessorAlreadyStarted>();
-    }
+    It should_fail_the_second_time = () => result.Result.Success.ShouldBeFalse();
+    It should_fail_because_it_is_already_started = () => result.Result.Exception.ShouldBeOfExactType<EmbeddingProcessorAlreadyStarted>();
 }

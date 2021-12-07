@@ -4,51 +4,50 @@
 using System;
 using System.Threading;
 
-namespace Dolittle.Runtime.Services.ReverseCalls
+namespace Dolittle.Runtime.Services.ReverseCalls;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICancelTokenIfDeadlineIsMissed"/> that uses a <see cref="CancellationTokenSource"/>.
+/// </summary>
+public class TokenSourceDeadline : ICancelTokenIfDeadlineIsMissed
 {
-    /// <summary>
-    /// Represents an implementation of <see cref="ICancelTokenIfDeadlineIsMissed"/> that uses a <see cref="CancellationTokenSource"/>.
-    /// </summary>
-    public class TokenSourceDeadline : ICancelTokenIfDeadlineIsMissed
+    readonly CancellationTokenSource _source = new();
+    bool _disposed;
+
+    /// <inheritdoc/>
+    public void RefreshDeadline(TimeSpan nextRefreshBefore)
     {
-        readonly CancellationTokenSource _source = new();
-        bool _disposed;
-
-        /// <inheritdoc/>
-        public void RefreshDeadline(TimeSpan nextRefreshBefore)
+        if (nextRefreshBefore == TimeSpan.Zero)
         {
-            if (nextRefreshBefore == TimeSpan.Zero)
-            {
-                _source.Cancel();
-                return;
-            }
-
-            _source.CancelAfter(nextRefreshBefore);
+            _source.Cancel();
+            return;
         }
 
-        /// <inheritdoc/>
-        public CancellationToken Token => _source.Token;
+        _source.CancelAfter(nextRefreshBefore);
+    }
 
-        /// <inheritdoc/>
-        public void Dispose()
+    /// <inheritdoc/>
+    public CancellationToken Token => _source.Token;
+
+    /// <inheritdoc/>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            return;
         }
 
-        protected virtual void Dispose(bool disposing)
+        if (disposing)
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            if (disposing)
-            {
-                _source.Dispose();
-            }
-
-            _disposed = true;
+            _source.Dispose();
         }
+
+        _disposed = true;
     }
 }

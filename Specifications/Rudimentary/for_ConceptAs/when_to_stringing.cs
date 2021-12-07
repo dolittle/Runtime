@@ -3,23 +3,22 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Rudimentary.for_ConceptAs
+namespace Dolittle.Runtime.Rudimentary.for_ConceptAs;
+
+public class when_to_stringing : Rudimentary.given.concepts
 {
-    public class when_to_stringing : Rudimentary.given.concepts
+    static string result;
+    static string result_of_empty_string;
+    static string result_of_null_string;
+
+    Because of = () =>
     {
-        static string result;
-        static string result_of_empty_string;
-        static string result_of_null_string;
+        result = first_string.ToString();
+        result_of_empty_string = string_is_empty.ToString();
+        result_of_null_string = string_value_is_null.ToString();
+    };
 
-        Because of = () =>
-        {
-            result = first_string.ToString();
-            result_of_empty_string = string_is_empty.ToString();
-            result_of_null_string = string_value_is_null.ToString();
-        };
-
-        It should_give_a_string = () => result.ShouldNotBeEmpty();
-        It should_give_a_string_from_empty = () => result_of_empty_string.ShouldNotBeEmpty();
-        It should_give_a_string_from_null = () => result_of_null_string.ShouldNotBeNull();
-    }
+    It should_give_a_string = () => result.ShouldNotBeEmpty();
+    It should_give_a_string_from_empty = () => result_of_empty_string.ShouldNotBeEmpty();
+    It should_give_a_string_from_null = () => result_of_null_string.ShouldNotBeNull();
 }

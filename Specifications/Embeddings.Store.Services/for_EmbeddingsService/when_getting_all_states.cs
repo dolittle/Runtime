@@ -8,31 +8,30 @@ using Machine.Specifications;
 using static Moq.It;
 using static Moq.Times;
 
-namespace Dolittle.Runtime.Embeddings.Store.Services.for_EmbeddingsService
+namespace Dolittle.Runtime.Embeddings.Store.Services.for_EmbeddingsService;
+
+public class when_getting_all_states : given.the_service
 {
-    public class when_getting_all_states : given.the_service
+    static IEnumerable<EmbeddingCurrentState> stored_states;
+    Establish context = () =>
     {
-        static IEnumerable<EmbeddingCurrentState> stored_states;
-        Establish context = () =>
+        stored_states = new[]
         {
-            stored_states = new[]
-            {
-                a_current_state,
-                a_current_state with { State = "some other state" },
-                a_current_state with { State = "weird state" }
-            };
-            embedding_store
-                .Setup(_ => _.TryGetAll(embedding, cancellation_token))
-                .Returns(Task.FromResult(Try<IEnumerable<EmbeddingCurrentState>>.Succeeded(stored_states)));
+            a_current_state,
+            a_current_state with { State = "some other state" },
+            a_current_state with { State = "weird state" }
         };
+        embedding_store
+            .Setup(_ => _.TryGetAll(embedding, cancellation_token))
+            .Returns(Task.FromResult(Try<IEnumerable<EmbeddingCurrentState>>.Succeeded(stored_states)));
+    };
 
-        static Try<IEnumerable<EmbeddingCurrentState>> result;
+    static Try<IEnumerable<EmbeddingCurrentState>> result;
 
-        Because of = () => result = service.TryGetAll(embedding, execution_context, cancellation_token).GetAwaiter().GetResult();
+    Because of = () => result = service.TryGetAll(embedding, execution_context, cancellation_token).GetAwaiter().GetResult();
 
-        It should_set_the_execution_context = () => execution_context_manager.Verify(_ => _.CurrentFor(execution_context, IsAny<string>(), IsAny<int>(), IsAny<string>()));
-        It should_call_the_embedding_store = () => embedding_store.Verify(_ => _.TryGetAll(embedding, cancellation_token), Once);
-        It should_return_successfull_result = () => result.Success.ShouldBeTrue();
-        It should_return_the_current_state = () => result.Result.ShouldContainOnly(stored_states);
-    }
+    It should_set_the_execution_context = () => execution_context_manager.Verify(_ => _.CurrentFor(execution_context, IsAny<string>(), IsAny<int>(), IsAny<string>()));
+    It should_call_the_embedding_store = () => embedding_store.Verify(_ => _.TryGetAll(embedding, cancellation_token), Once);
+    It should_return_successfull_result = () => result.Success.ShouldBeTrue();
+    It should_return_the_current_state = () => result.Result.ShouldContainOnly(stored_states);
 }

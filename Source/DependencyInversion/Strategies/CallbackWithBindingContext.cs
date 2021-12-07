@@ -3,25 +3,24 @@
 
 using System;
 
-namespace Dolittle.Runtime.DependencyInversion.Strategies
+namespace Dolittle.Runtime.DependencyInversion.Strategies;
+
+/// <summary>
+/// Represents an <see cref="IActivationStrategy"/> that gets activated through a callback.
+/// </summary>
+public class CallbackWithBindingContext : IActivationStrategy
 {
     /// <summary>
-    /// Represents an <see cref="IActivationStrategy"/> that gets activated through a callback.
+    /// Initializes a new instance of the <see cref="CallbackWithBindingContext"/> class.
     /// </summary>
-    public class CallbackWithBindingContext : IActivationStrategy
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CallbackWithBindingContext"/> class.
-        /// </summary>
-        /// <param name="target">The callback target.</param>
-        public CallbackWithBindingContext(Func<BindingContext, object> target) => Target = target;
+    /// <param name="target">The callback target.</param>
+    public CallbackWithBindingContext(Func<BindingContext, object> target) => Target = target;
 
-        /// <summary>
-        /// Gets the target.
-        /// </summary>
-        public Func<BindingContext, object> Target { get; }
+    /// <summary>
+    /// Gets the target.
+    /// </summary>
+    public Func<BindingContext, object> Target { get; }
 
-        /// <inheritdoc/>
-        public System.Type GetTargetType() => Target.GetType();
-    }
+    /// <inheritdoc/>
+    public System.Type GetTargetType() => Target.GetType();
 }

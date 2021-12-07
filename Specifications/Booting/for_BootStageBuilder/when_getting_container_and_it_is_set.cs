@@ -5,21 +5,20 @@ using System;
 using Dolittle.Runtime.DependencyInversion;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Booting.for_BootStageBuilder
+namespace Dolittle.Runtime.Booting.for_BootStageBuilder;
+
+public class when_getting_container_and_it_is_set : given.an_empty_boot_stage_builder
 {
-    public class when_getting_container_and_it_is_set : given.an_empty_boot_stage_builder
+    static IContainer result;
+    static IContainer expected;
+
+    Establish context = () =>
     {
-        static IContainer result;
-        static IContainer expected;
+        expected = Moq.Mock.Of<IContainer>();
+        builder.UseContainer(expected);
+    };
 
-        Establish context = () =>
-        {
-            expected = Moq.Mock.Of<IContainer>();
-            builder.UseContainer(expected);
-        };
+    Because of = () => result = builder.Container;
 
-        Because of = () => result = builder.Container;
-
-        It should_return_the_used_container = () => result.ShouldEqual(expected);
-    }
+    It should_return_the_used_container = () => result.ShouldEqual(expected);
 }

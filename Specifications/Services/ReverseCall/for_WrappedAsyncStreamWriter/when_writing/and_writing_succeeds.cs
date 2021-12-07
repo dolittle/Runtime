@@ -5,23 +5,22 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Services.ReverseCalls.given;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_writing
+namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter.when_writing;
+
+public class and_writing_succeeds : given.a_wrapped_stream_writer
 {
-    public class and_writing_succeeds : given.a_wrapped_stream_writer
+    static a_message message;
+
+    Establish context = () =>
     {
-        static a_message message;
+        message = new a_message();
 
-        Establish context = () =>
-        {
-            message = new();
+        original_writer
+            .Setup(_ => _.WriteAsync(message))
+            .Returns(Task.CompletedTask);
+    };
 
-            original_writer
-                .Setup(_ => _.WriteAsync(message))
-                .Returns(Task.CompletedTask);
-        };
+    Because of = () => wrapped_writer.WriteAsync(message).GetAwaiter().GetResult();
 
-        Because of = () => wrapped_writer.WriteAsync(message).GetAwaiter().GetResult();
-
-        It should_write_the_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(message));
-    }
+    It should_write_the_message_to_the_original_stream = () => original_writer.Verify(_ => _.WriteAsync(message));
 }

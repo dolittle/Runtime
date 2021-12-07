@@ -3,37 +3,35 @@
 
 using System;
 
-namespace Dolittle.Runtime.Services.Callbacks
+namespace Dolittle.Runtime.Services.Callbacks;
+
+/// <summary>
+/// Represents a callback with a callback on it's Dispose() method.
+/// </summary>
+public class DisposableCallback : IDisposable
 {
-
     /// <summary>
-    /// Represents a callback with a callback on it's Dispose() method.
+    /// Initializes a new instance of the <see cref="DisposableCallback"/> class.
     /// </summary>
-    public class DisposableCallback : IDisposable
+    /// <param name="callback">The <see cref="Action"/>.</param>
+    /// <param name="unregister">The <see cref="Action"/> to call when this instance is disposed.</param>
+    public DisposableCallback(Action callback, Action<DisposableCallback> unregister)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DisposableCallback"/> class.
-        /// </summary>
-        /// <param name="callback">The <see cref="Action"/>.</param>
-        /// <param name="unregister">The <see cref="Action"/> to call when this instance is disposed.</param>
-        public DisposableCallback(Action callback, Action<DisposableCallback> unregister)
-        {
-            Callback = callback;
-            Unregister = unregister;
-        }
-        /// <summary>
-        /// Gets the callback.
-        /// </summary>
-        public Action Callback { get; }
-        /// <summary>
-        /// Gets the callback that's called when disposed of.
-        /// </summary>
-        public Action<DisposableCallback> Unregister { get; }
+        Callback = callback;
+        Unregister = unregister;
+    }
+    /// <summary>
+    /// Gets the callback.
+    /// </summary>
+    public Action Callback { get; }
+    /// <summary>
+    /// Gets the callback that's called when disposed of.
+    /// </summary>
+    public Action<DisposableCallback> Unregister { get; }
 
-        public void Dispose()
-        {
-            Unregister(this);
-            GC.SuppressFinalize(this);
-        }
+    public void Dispose()
+    {
+        Unregister(this);
+        GC.SuppressFinalize(this);
     }
 }

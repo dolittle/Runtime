@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Types.for_ContractToImplementorsMap
+namespace Dolittle.Runtime.Types.for_ContractToImplementorsMap;
+
+public class when_feeding_two_times : given.an_empty_map
 {
-    public class when_feeding_two_times : given.an_empty_map
-    {
-        Establish context = () => map.Feed(new[] { typeof(ImplementationOfInterface) });
+    Establish context = () => map.Feed(new[] { typeof(ImplementationOfInterface) });
 
-        Because of = () => map.Feed(new[] { typeof(SecondImplementationOfInterface) });
+    Because of = () => map.Feed(new[] { typeof(SecondImplementationOfInterface) });
 
-        It should_have_both_the_implementations_only = () => map.GetImplementorsFor(typeof(IInterface)).ShouldContainOnly(typeof(ImplementationOfInterface), typeof(SecondImplementationOfInterface));
-    }
+    It should_have_both_the_implementations_only = () => map.GetImplementorsFor(typeof(IInterface)).ShouldContainOnly(typeof(ImplementationOfInterface), typeof(SecondImplementationOfInterface));
 }

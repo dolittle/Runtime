@@ -5,18 +5,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Defines a system that can update all embedding states.
+/// </summary>
+public interface IUpdateEmbeddingStates
 {
     /// <summary>
-    /// Defines a system that can update all embedding states.
+    /// Try to update all the embedding states by projecting all aggregate root events.
     /// </summary>
-    public interface IUpdateEmbeddingStates
-    {
-        /// <summary>
-        /// Try to update all the embedding states by projecting all aggregate root events.
-        /// </summary>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A<see cref="Task" /> that, when resolved, returns a<see cref= "Try" /> that indicates whether the operation was successful or not.</returns>
-        Task<Try> TryUpdateAll(CancellationToken cancellationToken);
-    }
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A<see cref="Task" /> that, when resolved, returns a<see cref= "Try" /> that indicates whether the operation was successful or not.</returns>
+    Task<Try> TryUpdateAll(CancellationToken cancellationToken);
 }

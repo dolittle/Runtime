@@ -5,18 +5,17 @@ using System;
 using Dolittle.Runtime.Events.Store.Streams;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
+
+static class LoggerExtensions
 {
-    static class LoggerExtensions
-    {
-        static readonly Action<ILogger, ulong, Guid, Guid, Exception> _writingEventToStream = LoggerMessage
-            .Define<ulong, Guid, Guid>(
-                LogLevel.Trace,
-                new EventId(203084185, nameof(WritingEventToStream)),
-                "Writing event: {EventLogSequenceNumber} to stream: {Stream} in scope: {Scope}");
+    static readonly Action<ILogger, ulong, Guid, Guid, Exception> _writingEventToStream = LoggerMessage
+        .Define<ulong, Guid, Guid>(
+            LogLevel.Trace,
+            new EventId(203084185, nameof(WritingEventToStream)),
+            "Writing event: {EventLogSequenceNumber} to stream: {Stream} in scope: {Scope}");
 
-        internal static void WritingEventToStream(this ILogger logger, EventLogSequenceNumber eventLogSequenceNumber, StreamId stream, ScopeId scope)
-            => _writingEventToStream(logger, eventLogSequenceNumber, stream, scope, null);
+    internal static void WritingEventToStream(this ILogger logger, EventLogSequenceNumber eventLogSequenceNumber, StreamId stream, ScopeId scope)
+        => _writingEventToStream(logger, eventLogSequenceNumber, stream, scope, null);
 
-    }
 }

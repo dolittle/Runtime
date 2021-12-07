@@ -8,33 +8,32 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Resilience.for_Policies.when_creating
+namespace Dolittle.Runtime.Resilience.for_Policies.when_creating;
+
+public class with_multiple_definers_for_typed_policy
 {
-    public class with_multiple_definers_for_typed_policy
+    static Type policy_type = typeof(string);
+    static IInstancesOf<IDefinePolicyForType> typed_policy_definers;
+    static Exception result;
+
+    Establish context = () =>
     {
-        static Type policy_type = typeof(string);
-        static IInstancesOf<IDefinePolicyForType> typed_policy_definers;
-        static Exception result;
+        var firstDefiner = new Mock<IDefinePolicyForType>();
+        firstDefiner.SetupGet(_ => _.Type).Returns(policy_type);
+        var secondDefiner = new Mock<IDefinePolicyForType>();
+        secondDefiner.SetupGet(_ => _.Type).Returns(policy_type);
+        typed_policy_definers = new StaticInstancesOf<IDefinePolicyForType>(
+            firstDefiner.Object,
+            secondDefiner.Object);
+    };
 
-        Establish context = () =>
-        {
-            var firstDefiner = new Mock<IDefinePolicyForType>();
-            firstDefiner.SetupGet(_ => _.Type).Returns(policy_type);
-            var secondDefiner = new Mock<IDefinePolicyForType>();
-            secondDefiner.SetupGet(_ => _.Type).Returns(policy_type);
-            typed_policy_definers = new StaticInstancesOf<IDefinePolicyForType>(
-                firstDefiner.Object,
-                secondDefiner.Object);
-        };
+    Because of = () => result = Catch.Exception(() => new Policies(
+        new StaticInstancesOf<IDefineDefaultPolicy>(),
+        new StaticInstancesOf<IDefineDefaultAsyncPolicy>(),
+        new StaticInstancesOf<IDefineNamedPolicy>(),
+        new StaticInstancesOf<IDefineNamedAsyncPolicy>(),
+        typed_policy_definers,
+        new StaticInstancesOf<IDefineAsyncPolicyForType>()));
 
-        Because of = () => result = Catch.Exception(() => new Policies(
-            new StaticInstancesOf<IDefineDefaultPolicy>(),
-            new StaticInstancesOf<IDefineDefaultAsyncPolicy>(),
-            new StaticInstancesOf<IDefineNamedPolicy>(),
-            new StaticInstancesOf<IDefineNamedAsyncPolicy>(),
-            typed_policy_definers,
-            new StaticInstancesOf<IDefineAsyncPolicyForType>()));
-
-        It should_throw_multiple_policy_definers_for_type_found = () => result.ShouldBeOfExactType<MultiplePolicyDefinersForTypeFound>();
-    }
+    It should_throw_multiple_policy_definers_for_type_found = () => result.ShouldBeOfExactType<MultiplePolicyDefinersForTypeFound>();
 }

@@ -4,20 +4,19 @@
 using Autofac;
 using Dolittle.Runtime.Assemblies;
 
-namespace Dolittle.Runtime.DependencyInversion.Autofac
+namespace Dolittle.Runtime.DependencyInversion.Autofac;
+
+/// <summary>
+/// Represents async implementation of <see cref="ICanProvideContainer"/> specific for Autofac.
+/// </summary>
+public class ContainerProvider : ICanProvideContainer
 {
-    /// <summary>
-    /// Represents async implementation of <see cref="ICanProvideContainer"/> specific for Autofac.
-    /// </summary>
-    public class ContainerProvider : ICanProvideContainer
+    /// <inheritdoc/>
+    public IContainer Provide(IAssemblies assemblies, IBindingCollection bindings)
     {
-        /// <inheritdoc/>
-        public IContainer Provide(IAssemblies assemblies, IBindingCollection bindings)
-        {
-            var containerBuilder = new ContainerBuilder();
-            containerBuilder.AddDolittle(assemblies, bindings);
-            var autofacContainer = containerBuilder.Build();
-            return new Container(autofacContainer);
-        }
+        var containerBuilder = new ContainerBuilder();
+        containerBuilder.AddDolittle(assemblies, bindings);
+        var autofacContainer = containerBuilder.Build();
+        return new Container(autofacContainer);
     }
 }

@@ -3,14 +3,13 @@
 
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Services.for_Endpoints.given
+namespace Dolittle.Runtime.Services.for_Endpoints.given;
+
+public class FirstServiceTypeSecondBinder : ICanBindFirstServiceType
 {
-    public class FirstServiceTypeSecondBinder : ICanBindFirstServiceType
-    {
-        public IEnumerable<Service> ServicesToBind;
+    public IEnumerable<Service> ServicesToBind;
 
-        public ServiceAspect Aspect => "Specs";
+    public ServiceAspect Aspect => "Specs";
 
-        public IEnumerable<Service> BindServices() => ServicesToBind;
-    }
+    public IEnumerable<Service> BindServices() => ServicesToBind;
 }

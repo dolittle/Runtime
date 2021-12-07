@@ -9,21 +9,20 @@ using Dolittle.Runtime.Services;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.given
-{
-    public class all_dependencies
-    {
-        protected static ScopeId scope;
-        protected static EventProcessorId event_processor_id;
-        protected static Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>> dispatcher;
-        protected static Mock<IExecutionContextManager> execution_context_manager;
+namespace Dolittle.Runtime.Events.Processing.EventHandlers.for_EventProcessor.given;
 
-        Establish context = () =>
-        {
-            scope = Guid.NewGuid();
-            event_processor_id = Guid.NewGuid();
-            dispatcher = new Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>>();
-            execution_context_manager = new Mock<IExecutionContextManager>();
-        };
-    }
+public class all_dependencies
+{
+    protected static ScopeId scope;
+    protected static EventProcessorId event_processor_id;
+    protected static Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>> dispatcher;
+    protected static Mock<IExecutionContextManager> execution_context_manager;
+
+    Establish context = () =>
+    {
+        scope = Guid.NewGuid();
+        event_processor_id = Guid.NewGuid();
+        dispatcher = new Mock<IReverseCallDispatcher<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse>>();
+        execution_context_manager = new Mock<IExecutionContextManager>();
+    };
 }

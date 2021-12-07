@@ -4,14 +4,13 @@
 using System.Reflection;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Serialization.Protobuf.for_PropertyDescription
+namespace Dolittle.Runtime.Serialization.Protobuf.for_PropertyDescription;
+
+public class when_creating_without_custom_name
 {
-    public class when_creating_without_custom_name
-    {
-        static PropertyDescription result;
+    static PropertyDescription result;
 
-        Because of = () => result = new PropertyDescription(class_with_property.some_property);
+    Because of = () => result = new PropertyDescription(class_with_property.some_property);
 
-        It should_hold_the_name_of_the_property = () => result.Name.ShouldEqual(class_with_property.some_property.Name);
-    }
+    It should_hold_the_name_of_the_property = () => result.Name.ShouldEqual(class_with_property.some_property.Name);
 }

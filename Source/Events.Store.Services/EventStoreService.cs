@@ -12,86 +12,85 @@ using Microsoft.Extensions.Logging;
 using DolittleExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using IExecutionContextManager = Dolittle.Runtime.Execution.IExecutionContextManager;
 
-namespace Dolittle.Runtime.Events.Store.Services
+namespace Dolittle.Runtime.Events.Store.Services;
+
+/// <summary>
+/// Represents the implementation of <see cref="IEventStoreService" />.
+/// </summary>
+[Singleton]
+public class EventStoreService : IEventStoreService
 {
+    readonly FactoryFor<IEventStore> _eventStoreFactory;
+    readonly IExecutionContextManager _executionContextManager;
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents the implementation of <see cref="IEventStoreService" />.
+    /// Initializes a new instance of the <see cref="EventStoreService"/> class.
     /// </summary>
-    [Singleton]
-    public class EventStoreService : IEventStoreService
+    /// <param name="eventStoreFactory"><see cref="IEventStore"/>.</param>
+    /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
+    /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+    public EventStoreService(
+        FactoryFor<IEventStore> eventStoreFactory,
+        IExecutionContextManager executionContextManager,
+        ILogger logger)
     {
-        readonly FactoryFor<IEventStore> _eventStoreFactory;
-        readonly IExecutionContextManager _executionContextManager;
-        readonly ILogger _logger;
+        _eventStoreFactory = eventStoreFactory;
+        _executionContextManager = executionContextManager;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventStoreService"/> class.
-        /// </summary>
-        /// <param name="eventStoreFactory"><see cref="IEventStore"/>.</param>
-        /// <param name="executionContextManager"><see cref="IExecutionContextManager" />.</param>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public EventStoreService(
-            FactoryFor<IEventStore> eventStoreFactory,
-            IExecutionContextManager executionContextManager,
-            ILogger logger)
+    /// <inheritdoc/>
+    public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, DolittleExecutionContext context, CancellationToken token)
+    {
+        try
         {
-            _eventStoreFactory = eventStoreFactory;
-            _executionContextManager = executionContextManager;
-            _logger = logger;
+            _executionContextManager.CurrentFor(context);
+            _logger.EventsReceivedForCommitting(false, events.Count);
+            var committedEvents = await _eventStoreFactory().CommitEvents(events, token).ConfigureAwait(false);
+            Log.EventsSuccessfullyCommitted(_logger);
+            return committedEvents;
         }
-
-        /// <inheritdoc/>
-        public async Task<Try<CommittedEvents>> TryCommit(UncommittedEvents events, DolittleExecutionContext context, CancellationToken token)
+        catch (Exception ex)
         {
-            try
-            {
-                _executionContextManager.CurrentFor(context);
-                _logger.EventsReceivedForCommitting(false, events.Count);
-                var committedEvents = await _eventStoreFactory().CommitEvents(events, token).ConfigureAwait(false);
-                _logger.LogDebug("Events were successfully committed");
-                return committedEvents;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Error committing events");
-                return ex;
-            }
+            Log.ErrorCommittingEvents(_logger, ex);
+            return ex;
         }
+    }
 
-        /// <inheritdoc/>
-        public async Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, DolittleExecutionContext context, CancellationToken token)
+    /// <inheritdoc/>
+    public async Task<Try<CommittedAggregateEvents>> TryCommitForAggregate(UncommittedAggregateEvents events, DolittleExecutionContext context, CancellationToken token)
+    {
+        try
         {
-            try
-            {
-                _executionContextManager.CurrentFor(context);
-                _logger.EventsReceivedForCommitting(true, events.Count);
-                var committedEvents = await _eventStoreFactory().CommitAggregateEvents(events, token).ConfigureAwait(false);
-                _logger.LogDebug("Aggregate events were successfully committed");
-                return committedEvents;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Error committing aggregate events");
-                return ex;
-            }
+            _executionContextManager.CurrentFor(context);
+            _logger.EventsReceivedForCommitting(true, events.Count);
+            var committedEvents = await _eventStoreFactory().CommitAggregateEvents(events, token).ConfigureAwait(false);
+            Log.AggregateEventsSuccessfullyCommitted(_logger);
+            return committedEvents;
         }
-
-        /// <inheritdoc/>
-        public async Task<Try<CommittedAggregateEvents>> TryFetchForAggregate(ArtifactId aggregateRoot, EventSourceId eventSource, DolittleExecutionContext context, CancellationToken token)
+        catch (Exception ex)
         {
-            try
-            {
-                _logger.LogDebug("Fetch for aggregate");
-                _executionContextManager.CurrentFor(context);
-                var committedEvents = await _eventStoreFactory().FetchForAggregate(eventSource, aggregateRoot, token).ConfigureAwait(false);
-                _logger.LogDebug("Successfully fetched events for aggregate");
-                return committedEvents;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Error fetching events from aggregate");
-                return ex;
-            }
+            Log.ErrorCommittingAggregateEvents(_logger, ex);
+            return ex;
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task<Try<CommittedAggregateEvents>> TryFetchForAggregate(ArtifactId aggregateRoot, EventSourceId eventSource, DolittleExecutionContext context, CancellationToken token)
+    {
+        try
+        {
+            Log.FetchEventsForAggregate(_logger);
+            _executionContextManager.CurrentFor(context);
+            var committedEvents = await _eventStoreFactory().FetchForAggregate(eventSource, aggregateRoot, token).ConfigureAwait(false);
+            Log.SuccessfullyFetchedEventsForAggregate(_logger);
+            return committedEvents;
+        }
+        catch (Exception ex)
+        {
+            Log.ErrorFetchingEventsFromAggregate(_logger, ex);
+            return ex;
         }
     }
 }

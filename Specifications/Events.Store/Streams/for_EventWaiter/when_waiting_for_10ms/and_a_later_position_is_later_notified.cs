@@ -6,40 +6,39 @@ using System.Threading;
 using System.Threading.Tasks;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting_for_10ms
+namespace Dolittle.Runtime.Events.Store.Streams.for_EventWaiter.when_waiting_for_10ms;
+
+public class and_a_later_position_is_later_notified : given.an_event_waiter
 {
-    public class and_a_later_position_is_later_notified : given.an_event_waiter
+    static StreamPosition last_position;
+    static CancellationTokenSource token_source;
+    static CancellationToken token;
+    static IList<Task> tasks;
+
+    Establish context = () =>
     {
-        static StreamPosition last_position;
-        static CancellationTokenSource token_source;
-        static CancellationToken token;
-        static IList<Task> tasks;
+        token_source = new CancellationTokenSource();
+        token = token_source.Token;
+        last_position = 3;
+        tasks = new List<Task>();
+    };
 
-        Establish context = () =>
+    Because of = () =>
+    {
+        for (ulong i = 0; i <= last_position.Value; i++)
         {
-            token_source = new CancellationTokenSource();
-            token = token_source.Token;
-            last_position = 3;
-            tasks = new List<Task>();
-        };
+            tasks.Add(event_waiter.Wait(i, token));
+        }
 
-        Because of = () =>
-        {
-            for (ulong i = 0; i <= last_position.Value; i++)
-            {
-                tasks.Add(event_waiter.Wait(i, token));
-            }
+        event_waiter.Notify(last_position.Value + 1);
+        Thread.Sleep(100);
+    };
 
-            event_waiter.Notify(last_position.Value + 1);
-            Thread.Sleep(100);
-        };
+    It should_be_done_waiting_for_all_events = () => tasks.ShouldEachConformTo(_ => _.IsCompletedSuccessfully);
 
-        It should_be_done_waiting_for_all_events = () => tasks.ShouldEachConformTo(_ => _.IsCompletedSuccessfully);
-
-        Cleanup clean = () =>
-        {
-            token_source.Cancel();
-            token_source.Dispose();
-        };
-    }
+    Cleanup clean = () =>
+    {
+        token_source.Cancel();
+        token_source.Dispose();
+    };
 }

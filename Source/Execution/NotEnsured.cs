@@ -3,26 +3,25 @@
 
 using System;
 
-namespace Dolittle.Runtime.Execution
+namespace Dolittle.Runtime.Execution;
+
+/// <summary>
+/// Exception that gets thrown when something is not <see cref="Ensure">ensured</see>.
+/// </summary>
+public class NotEnsured : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when something is not <see cref="Ensure">ensured</see>.
+    /// Initializes a new instance of the <see cref="NotEnsured"/> class.
     /// </summary>
-    public class NotEnsured : Exception
+    /// <param name="name">Name to associate that is not ensured.</param>
+    public NotEnsured(string name)
+        : base($"{name} cannot be null.")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NotEnsured"/> class.
-        /// </summary>
-        /// <param name="name">Name to associate that is not ensured.</param>
-        public NotEnsured(string name)
-            : base($"{name} cannot be null.")
-        {
-            Property = name;
-        }
-
-        /// <summary>
-        /// Gets the property that failed ensure test.
-        /// </summary>
-        public string Property { get; }
+        Property = name;
     }
+
+    /// <summary>
+    /// Gets the property that failed ensure test.
+    /// </summary>
+    public string Property { get; }
 }

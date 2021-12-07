@@ -5,20 +5,19 @@ using System.Reflection;
 using Dolittle.Runtime.Specifications;
 using Microsoft.Extensions.DependencyModel;
 
-namespace Dolittle.Runtime.Assemblies.Rules
+namespace Dolittle.Runtime.Assemblies.Rules;
+
+/// <summary>
+/// Represents a <see cref="Specification{T}">rule</see> specific to <see cref="Assembly">assemblies</see>
+/// and used for the <see cref="Assemblies"/>.
+/// </summary>
+public class IncludeAllRule : Specification<Library>
 {
     /// <summary>
-    /// Represents a <see cref="Specification{T}">rule</see> specific to <see cref="Assembly">assemblies</see>
-    /// and used for the <see cref="Assemblies"/>.
+    /// Initializes a new instance of the <see cref="IncludeAllRule"/> class.
     /// </summary>
-    public class IncludeAllRule : Specification<Library>
+    public IncludeAllRule()
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="IncludeAllRule"/> class.
-        /// </summary>
-        public IncludeAllRule()
-        {
-            Predicate = a => true;
-        }
+        Predicate = a => true;
     }
 }

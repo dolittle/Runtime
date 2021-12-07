@@ -3,18 +3,17 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.CLI.Runtime.Aggregates
+namespace Dolittle.Runtime.CLI.Runtime.Aggregates;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Adds services related to management of Aggregates.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    public static void AddAggregatesServices(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds services related to management of Aggregates.
-        /// </summary>
-        /// <param name="services">The service collection to add services to.</param>
-        public static void AddAggregatesServices(this IServiceCollection services)
-        {
-            services.AddTransient<IManagementClient, ManagementClient>();
-            services.AddTransient<IResolveAggregateRootId, AggregateRootIdResolver>();
-        }
+        services.AddTransient<IManagementClient, ManagementClient>();
+        services.AddTransient<IResolveAggregateRootId, AggregateRootIdResolver>();
     }
 }

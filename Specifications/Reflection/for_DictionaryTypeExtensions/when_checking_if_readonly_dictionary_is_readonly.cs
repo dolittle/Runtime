@@ -4,14 +4,13 @@
 using System.Collections.ObjectModel;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions
+namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions;
+
+public class when_checking_if_readonly_dictionary_is_readonly
 {
-    public class when_checking_if_readonly_dictionary_is_readonly
-    {
-        static bool result;
+    static bool result;
 
-        Because of = () => result = typeof(ReadOnlyDictionary<string, string>).IsReadOnlyDictionary();
+    Because of = () => result = typeof(ReadOnlyDictionary<string, string>).IsReadOnlyDictionary();
 
-        It should_be_considered_a_readonly_dictionary = () => result.ShouldBeTrue();
-    }
+    It should_be_considered_a_readonly_dictionary = () => result.ShouldBeTrue();
 }

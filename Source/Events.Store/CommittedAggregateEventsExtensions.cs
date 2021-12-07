@@ -4,29 +4,28 @@
 using System.Linq;
 using Dolittle.Runtime.Protobuf;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store;
+
+/// <summary>
+/// Extension methods for <see cref="CommittedAggregateEvents" />.
+/// </summary>
+public static class CommittedAggregateEventsExtensions
 {
     /// <summary>
-    /// Extension methods for <see cref="CommittedAggregateEvents" />.
+    /// Converts the <see cref="CommittedAggregateEvents" /> to <see cref="Contracts.CommittedAggregateEvents" />s.
     /// </summary>
-    public static class CommittedAggregateEventsExtensions
+    /// <param name="committedAggregateEvents">The committed events.</param>
+    /// <returns>The converted <see cref="Contracts.CommittedAggregateEvents" />.</returns>
+    public static Contracts.CommittedAggregateEvents ToProtobuf(this CommittedAggregateEvents committedAggregateEvents)
     {
-        /// <summary>
-        /// Converts the <see cref="CommittedAggregateEvents" /> to <see cref="Contracts.CommittedAggregateEvents" />s.
-        /// </summary>
-        /// <param name="committedAggregateEvents">The committed events.</param>
-        /// <returns>The converted <see cref="Contracts.CommittedAggregateEvents" />.</returns>
-        public static Contracts.CommittedAggregateEvents ToProtobuf(this CommittedAggregateEvents committedAggregateEvents)
+        var aggregateRootVersion = committedAggregateEvents.AsEnumerable().LastOrDefault()?.AggregateRootVersion ?? 0;
+        var protobuf = new Contracts.CommittedAggregateEvents
         {
-            var aggregateRootVersion = committedAggregateEvents.AsEnumerable().LastOrDefault()?.AggregateRootVersion ?? 0;
-            var protobuf = new Contracts.CommittedAggregateEvents
-            {
-                AggregateRootId = committedAggregateEvents.AggregateRoot.ToProtobuf(),
-                EventSourceId = committedAggregateEvents.EventSource.Value,
-                AggregateRootVersion = aggregateRootVersion
-            };
-            protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));
-            return protobuf;
-        }
+            AggregateRootId = committedAggregateEvents.AggregateRoot.ToProtobuf(),
+            EventSourceId = committedAggregateEvents.EventSource.Value,
+            AggregateRootVersion = aggregateRootVersion
+        };
+        protobuf.Events.AddRange(committedAggregateEvents.Select(_ => _.ToProtobuf()));
+        return protobuf;
     }
 }

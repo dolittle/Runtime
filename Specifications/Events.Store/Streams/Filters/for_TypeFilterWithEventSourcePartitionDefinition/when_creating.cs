@@ -7,29 +7,28 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_TypeFilterWithEventSourcePartitionDefinition
+namespace Dolittle.Runtime.Events.Store.Streams.Filters.for_TypeFilterWithEventSourcePartitionDefinition;
+
+public class when_creating
 {
-    public class when_creating
+    static StreamId source_stream;
+    static StreamId target_stream;
+    static IEnumerable<ArtifactId> types;
+    static bool partitioned;
+    static TypeFilterWithEventSourcePartitionDefinition definition;
+
+    Establish context = () =>
     {
-        static StreamId source_stream;
-        static StreamId target_stream;
-        static IEnumerable<ArtifactId> types;
-        static bool partitioned;
-        static TypeFilterWithEventSourcePartitionDefinition definition;
+        source_stream = Guid.NewGuid();
+        target_stream = Guid.NewGuid();
+        types = new ArtifactId[] { given.artifacts.single().Id }.AsEnumerable();
+        partitioned = true;
+    };
 
-        Establish context = () =>
-        {
-            source_stream = Guid.NewGuid();
-            target_stream = Guid.NewGuid();
-            types = new ArtifactId[] { given.artifacts.single().Id }.AsEnumerable();
-            partitioned = true;
-        };
+    Because of = () => definition = new TypeFilterWithEventSourcePartitionDefinition(source_stream, target_stream, types, partitioned);
 
-        Because of = () => definition = new TypeFilterWithEventSourcePartitionDefinition(source_stream, target_stream, types, partitioned);
-
-        It should_have_the_correct_source_stream = () => definition.SourceStream.ShouldEqual(source_stream);
-        It should_have_the_correct_target_stream = () => definition.TargetStream.ShouldEqual(target_stream);
-        It should_have_the_correct_types = () => definition.Types.ShouldContain(types);
-        It should_have_the_correct_partitioned_value = () => definition.Partitioned.ShouldEqual(partitioned);
-    }
+    It should_have_the_correct_source_stream = () => definition.SourceStream.ShouldEqual(source_stream);
+    It should_have_the_correct_target_stream = () => definition.TargetStream.ShouldEqual(target_stream);
+    It should_have_the_correct_types = () => definition.Types.ShouldContain(types);
+    It should_have_the_correct_partitioned_value = () => definition.Partitioned.ShouldEqual(partitioned);
 }

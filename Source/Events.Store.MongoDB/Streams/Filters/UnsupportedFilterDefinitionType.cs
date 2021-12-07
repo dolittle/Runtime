@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
+
+/// <summary>
+/// Exception that gets thrown when trying to convert an unsupported type of <see cref="IFilterDefinition"/> in <see cref="Extensions"/>.
+/// </summary>
+public class UnsupportedFilterDefinitionType : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when trying to convert an unsupported type of <see cref="IFilterDefinition"/> in <see cref="Extensions"/>.
+    /// Initializes a new instance of the <see cref="UnsupportedFilterDefinitionType"/> class.
     /// </summary>
-    public class UnsupportedFilterDefinitionType : Exception
+    /// <param name="filter">The unsupported filter.</param>
+    public UnsupportedFilterDefinitionType(IFilterDefinition filter)
+        : base($"IFilterDefinition implementation {filter.GetType()} is not supported.")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnsupportedFilterDefinitionType"/> class.
-        /// </summary>
-        /// <param name="filter">The unsupported filter.</param>
-        public UnsupportedFilterDefinitionType(IFilterDefinition filter)
-            : base($"IFilterDefinition implementation {filter.GetType()} is not supported.")
-        {
-        }
     }
 }

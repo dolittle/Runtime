@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Serialization.Json.Specs.for_StringExtensions
+namespace Dolittle.Runtime.Serialization.Json.Specs.for_StringExtensions;
+
+public class when_converting_a_string_with_camel_casing_to_pascal_casing
 {
-    public class when_converting_a_string_with_camel_casing_to_pascal_casing
-    {
-        static string result;
+    static string result;
 
-        Because of = () => result = "camelCased".ToPascalCase();
+    Because of = () => result = "camelCased".ToPascalCase();
 
-        It should_turn_it_into_pascal_case = () => result.ShouldEqual("CamelCased");
-    }
+    It should_turn_it_into_pascal_case = () => result.ShouldEqual("CamelCased");
 }

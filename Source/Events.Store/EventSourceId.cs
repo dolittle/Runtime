@@ -3,17 +3,16 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store;
+
+/// <summary>
+/// Represents the identification of an event source.
+/// </summary>
+public record EventSourceId(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents the identification of an event source.
+    /// Implicitly convert from a <see cref="string"/> to an <see cref="EventSourceId"/>.
     /// </summary>
-    public record EventSourceId(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Implicitly convert from a <see cref="string"/> to an <see cref="EventSourceId"/>.
-        /// </summary>
-        /// <param name="eventSourceId">EventSourceId as <see cref="string"/>.</param>
-        public static implicit operator EventSourceId(string eventSourceId) => new(eventSourceId);
-    }
+    /// <param name="eventSourceId">EventSourceId as <see cref="string"/>.</param>
+    public static implicit operator EventSourceId(string eventSourceId) => new(eventSourceId);
 }

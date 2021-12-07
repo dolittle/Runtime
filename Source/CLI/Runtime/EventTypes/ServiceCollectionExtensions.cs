@@ -3,18 +3,17 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventTypes
+namespace Dolittle.Runtime.CLI.Runtime.EventTypes;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Adds services related to management of Aggregates.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    public static void AddEventTypesServices(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds services related to management of Aggregates.
-        /// </summary>
-        /// <param name="services">The service collection to add services to.</param>
-        public static void AddEventTypesServices(this IServiceCollection services)
-        {
-            services.AddTransient<IManagementClient, ManagementClient>();
-            services.AddTransient<IDiscoverEventTypes, DiscoverEventTypes>();
-        }
+        services.AddTransient<IManagementClient, ManagementClient>();
+        services.AddTransient<IDiscoverEventTypes, DiscoverEventTypes>();
     }
 }

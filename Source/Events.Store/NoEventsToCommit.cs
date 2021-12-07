@@ -3,19 +3,18 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store;
+
+/// <summary>
+/// Exception that gets thrown when there are no events in the <see cref="UncommittedEvents" /> sequence when it is being committed.
+/// </summary>
+public class NoEventsToCommit : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when there are no events in the <see cref="UncommittedEvents" /> sequence when it is being committed.
+    /// Initializes a new instance of the <see cref="NoEventsToCommit"/> class.
     /// </summary>
-    public class NoEventsToCommit : Exception
+    public NoEventsToCommit()
+        : base("There are no events in uncommitted events sequence")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NoEventsToCommit"/> class.
-        /// </summary>
-        public NoEventsToCommit()
-            : base("There are no events in uncommitted events sequence")
-        {
-        }
     }
 }

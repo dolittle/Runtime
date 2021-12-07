@@ -4,24 +4,23 @@
 using Dolittle.Runtime.Projections.Store.State;
 using ContractsProjectionCurrentStateType = Dolittle.Runtime.Projections.Contracts.ProjectionCurrentStateType;
 
-namespace Dolittle.Runtime.Events.Processing.Projections
+namespace Dolittle.Runtime.Events.Processing.Projections;
+
+/// <summary>
+/// Extensions for <see cref="ProjectionCurrentStateType"/>.
+/// </summary>
+public static class ProjectionCurrentStateTypeExtensions
 {
     /// <summary>
-    /// Extensions for <see cref="ProjectionCurrentStateType"/>.
+    /// Convert to a protobuf representation of <see cref="ProjectionCurrentStateType"/>.
     /// </summary>
-    public static class ProjectionCurrentStateTypeExtensions
-    {
-        /// <summary>
-        /// Convert to a protobuf representation of <see cref="ProjectionCurrentStateType"/>.
-        /// </summary>
-        /// <param name="type"><see cref="ProjectionCurrentStateType"/> to convert.</param>
-        /// <returns>Converted <see cref="ContractsProjectionCurrentStateType"/>.</returns>
-        public static ContractsProjectionCurrentStateType ToProtobuf(this ProjectionCurrentStateType type)
-            => type switch
-            {
-                ProjectionCurrentStateType.CreatedFromInitialState => ContractsProjectionCurrentStateType.CreatedFromInitialState,
-                ProjectionCurrentStateType.Persisted => ContractsProjectionCurrentStateType.Persisted,
-                _ => throw new UnknownProjectionCurrentStateType(type),
-            };
-    }
+    /// <param name="type"><see cref="ProjectionCurrentStateType"/> to convert.</param>
+    /// <returns>Converted <see cref="ContractsProjectionCurrentStateType"/>.</returns>
+    public static ContractsProjectionCurrentStateType ToProtobuf(this ProjectionCurrentStateType type)
+        => type switch
+        {
+            ProjectionCurrentStateType.CreatedFromInitialState => ContractsProjectionCurrentStateType.CreatedFromInitialState,
+            ProjectionCurrentStateType.Persisted => ContractsProjectionCurrentStateType.Persisted,
+            _ => throw new UnknownProjectionCurrentStateType(type),
+        };
 }

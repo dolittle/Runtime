@@ -4,19 +4,18 @@
 using System;
 using Dolittle.Runtime.DependencyInversion;
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// Exception that gets thrown when the <see cref="IContainer"/> is not set yet.
+/// </summary>
+public class ContainerNotSetYet : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when the <see cref="IContainer"/> is not set yet.
+    /// Initializes a new instance of the <see cref="ContainerNotSetYet"/> class.
     /// </summary>
-    public class ContainerNotSetYet : Exception
+    public ContainerNotSetYet()
+        : base("Container has not been set yet ")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ContainerNotSetYet"/> class.
-        /// </summary>
-        public ContainerNotSetYet()
-            : base("Container has not been set yet ")
-        {
-        }
     }
 }

@@ -6,38 +6,37 @@ using System.Linq;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Represents an implementation of <see cref="IDetectEmbeddingLoops" />.
+/// </summary>
+public class EmbeddingLoopsDetector : IDetectEmbeddingLoops
 {
+    readonly ICompareStates _comparer;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IDetectEmbeddingLoops" />.
+    /// Initializes a new instance of the <see cref="EmbeddingLoopsDetector"/> class.
     /// </summary>
-    public class EmbeddingLoopsDetector : IDetectEmbeddingLoops
+    /// <param name="comparer">The <see cref="ICompareStates"/> to use for comparing current and previous states.</param>
+    public EmbeddingLoopsDetector(ICompareStates comparer)
     {
-        readonly ICompareStates _comparer;
+        _comparer = comparer;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EmbeddingLoopsDetector"/> class.
-        /// </summary>
-        /// <param name="comparer">The <see cref="ICompareStates"/> to use for comparing current and previous states.</param>
-        public EmbeddingLoopsDetector(ICompareStates comparer)
+    /// <inheritdoc/>
+    public Try<bool> TryCheckForProjectionStateLoop(ProjectionState currentState, IEnumerable<ProjectionState> previousStates)
+    {
+        var equalityResults = previousStates.AsParallel()
+            .Select(previousState => _comparer.TryCheckEquality(previousState, currentState))
+            // The query execution is deferred so need to call for ToList here
+            // https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/introduction-to-plinq#the-forall-operator
+            .ToList();
+        var failure = equalityResults.FirstOrDefault(_ => !_.Success);
+        if (failure is not null)
         {
-            _comparer = comparer;
+            return failure.Exception;
         }
-
-        /// <inheritdoc/>
-        public Try<bool> TryCheckForProjectionStateLoop(ProjectionState currentState, IEnumerable<ProjectionState> previousStates)
-        {
-            var equalityResults = previousStates.AsParallel()
-                .Select(previousState => _comparer.TryCheckEquality(previousState, currentState))
-                // The query execution is deferred so need to call for ToList here
-                // https://docs.microsoft.com/en-us/dotnet/standard/parallel-programming/introduction-to-plinq#the-forall-operator
-                .ToList();
-            var failure = equalityResults.FirstOrDefault(_ => !_.Success);
-            if (failure is not null)
-            {
-                return failure.Exception;
-            }
-            return equalityResults.Any(_ => _.Result);
-        }
+        return equalityResults.Any(_ => _.Result);
     }
 }

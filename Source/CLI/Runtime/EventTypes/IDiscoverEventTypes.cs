@@ -6,18 +6,17 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.Events;
 using Dolittle.Runtime.Microservices;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventTypes
+namespace Dolittle.Runtime.CLI.Runtime.EventTypes;
+
+/// <summary>
+/// Defines a system that discovers Event Types in the Runtime.
+/// </summary>
+public interface IDiscoverEventTypes
 {
     /// <summary>
-    /// Defines a system that discovers Event Types in the Runtime.
+    /// Gets the discovered Event Types in the Runtime.
     /// </summary>
-    public interface IDiscoverEventTypes
-    {
-        /// <summary>
-        /// Gets the discovered Event Types in the Runtime.
-        /// </summary>
-        /// <param name="runtime">The Runtime microservice address.</param>
-        /// <returns>The discovered Event Types.</returns>
-        Task<IEnumerable<EventType>> Discover(MicroserviceAddress runtime);
-    }
+    /// <param name="runtime">The Runtime microservice address.</param>
+    /// <returns>The discovered Event Types.</returns>
+    Task<IEnumerable<EventType>> Discover(MicroserviceAddress runtime);
 }

@@ -11,48 +11,47 @@ using Machine.Specifications;
 using Moq;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.given
+namespace Dolittle.Runtime.EventHorizon.Consumer.Processing.for_EventProcessor.given;
+
+public class all_dependencies
 {
-    public class all_dependencies
+    protected static ConsentId consent_id;
+    protected static SubscriptionId subscription_id;
+    protected static IAsyncPolicyFor<EventProcessor> event_processor_policy;
+    protected static Mock<IWriteEventHorizonEvents> event_horizon_events_writer;
+    protected static IMetricsCollector metrics;
+    protected static ILogger logger;
+    protected static CommittedEvent @event;
+    protected static PartitionId partition;
+
+    Establish context = () =>
     {
-        protected static ConsentId consent_id;
-        protected static SubscriptionId subscription_id;
-        protected static IAsyncPolicyFor<EventProcessor> event_processor_policy;
-        protected static Mock<IWriteEventHorizonEvents> event_horizon_events_writer;
-        protected static IMetricsCollector metrics;
-        protected static ILogger logger;
-        protected static CommittedEvent @event;
-        protected static PartitionId partition;
+        event_processor_policy = new AsyncPolicyFor<EventProcessor>(new EventProcessorPolicy(Mock.Of<ILogger<EventProcessor>>()).Define());
 
-        Establish context = () =>
-        {
-            event_processor_policy = new AsyncPolicyFor<EventProcessor>(new EventProcessorPolicy(Mock.Of<ILogger<EventProcessor>>()).Define());
+        consent_id = Guid.NewGuid();
 
-            consent_id = Guid.NewGuid();
+        subscription_id = new SubscriptionId(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            "partition id");
 
-            subscription_id = new SubscriptionId(
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                Guid.NewGuid(),
-                "partition id");
+        partition = "another partition id";
 
-            partition = "another partition id";
+        event_horizon_events_writer = new Mock<IWriteEventHorizonEvents>();
 
-            event_horizon_events_writer = new Mock<IWriteEventHorizonEvents>();
+        metrics = Mock.Of<IMetricsCollector>();
+        logger = NullLogger.Instance;
 
-            metrics = Mock.Of<IMetricsCollector>();
-            logger = NullLogger.Instance;
-
-            @event = new CommittedEvent(
-                0,
-                DateTimeOffset.Now,
-                "event source id",
-                execution_contexts.create(),
-                new Artifacts.Artifact(Guid.NewGuid(), 0),
-                true,
-                "");
-        };
-    }
+        @event = new CommittedEvent(
+            0,
+            DateTimeOffset.Now,
+            "event source id",
+            execution_contexts.create(),
+            new Artifacts.Artifact(Guid.NewGuid(), 0),
+            true,
+            "");
+    };
 }

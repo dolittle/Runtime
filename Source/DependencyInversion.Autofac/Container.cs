@@ -4,25 +4,24 @@
 using System;
 using Autofac;
 
-namespace Dolittle.Runtime.DependencyInversion.Autofac
+namespace Dolittle.Runtime.DependencyInversion.Autofac;
+
+/// <summary>
+/// Represents an implementation of <see cref="IContainer"/> specific for Autofac.
+/// </summary>
+public class Container : IContainer
 {
+    readonly global::Autofac.IContainer _container;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IContainer"/> specific for Autofac.
+    /// Initializes a new instance of the <see cref="Container"/> class.
     /// </summary>
-    public class Container : IContainer
-    {
-        readonly global::Autofac.IContainer _container;
+    /// <param name="container"><see cref="global::Autofac.IContainer"/> instance.</param>
+    public Container(global::Autofac.IContainer container) => _container = container;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Container"/> class.
-        /// </summary>
-        /// <param name="container"><see cref="global::Autofac.IContainer"/> instance.</param>
-        public Container(global::Autofac.IContainer container) => _container = container;
+    /// <inheritdoc/>
+    public T Get<T>() => _container.Resolve<T>();
 
-        /// <inheritdoc/>
-        public T Get<T>() => _container.Resolve<T>();
-
-        /// <inheritdoc/>
-        public object Get(Type type) => _container.Resolve(type);
-    }
+    /// <inheritdoc/>
+    public object Get(Type type) => _container.Resolve(type);
 }

@@ -3,21 +3,20 @@
 
 using System;
 
-namespace Dolittle.Runtime.DependencyInversion.Strategies
+namespace Dolittle.Runtime.DependencyInversion.Strategies;
+
+/// <summary>
+/// Represents a generic <see cref="Callback"/>.
+/// </summary>
+/// <typeparam name="TResult">Type of result from the callback.</typeparam>
+public class Callback<TResult> : Callback
 {
     /// <summary>
-    /// Represents a generic <see cref="Callback"/>.
+    /// Initializes a new instance of the <see cref="Callback{TResult}"/> class.
     /// </summary>
-    /// <typeparam name="TResult">Type of result from the callback.</typeparam>
-    public class Callback<TResult> : Callback
+    /// <param name="target">Target <see cref="Func{TResult}"/>.</param>
+    public Callback(Func<TResult> target)
+        : base(() => target())
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Callback{TResult}"/> class.
-        /// </summary>
-        /// <param name="target">Target <see cref="Func{TResult}"/>.</param>
-        public Callback(Func<TResult> target)
-            : base(() => target())
-        {
-        }
     }
 }

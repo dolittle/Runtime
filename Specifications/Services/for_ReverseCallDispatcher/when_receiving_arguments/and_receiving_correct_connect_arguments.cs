@@ -10,42 +10,41 @@ using Machine.Specifications;
 using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using System;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_receiving_arguments;
+
+public class and_receiving_correct_connect_arguments : given.a_dispatcher
 {
-    public class and_receiving_correct_connect_arguments : given.a_dispatcher
+    static bool result;
+    static MyConnectArguments arguments;
+
+    Establish context = () =>
     {
-        static bool result;
-        static MyConnectArguments arguments;
-
-        Establish context = () =>
+        arguments = new MyConnectArguments
         {
-            arguments = new MyConnectArguments
+            Context = new ReverseCallArgumentsContext
             {
-                Context = new ReverseCallArgumentsContext
-                {
-                    ExecutionContext = execution_context.ToProtobuf(),
-                    PingInterval = Duration.FromTimeSpan(new TimeSpan(0, 0, 1))
-                }
-            };
-
-            client_to_runtime_stream
-                .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(true));
-            client_to_runtime_stream
-                .SetupGet(_ => _.Current)
-                .Returns(new MyClientMessage { Arguments = arguments });
+                ExecutionContext = execution_context.ToProtobuf(),
+                PingInterval = Duration.FromTimeSpan(new TimeSpan(0, 0, 1))
+            }
         };
 
-        Because of = () => result = dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();
+        client_to_runtime_stream
+            .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(true));
+        client_to_runtime_stream
+            .SetupGet(_ => _.Current)
+            .Returns(new MyClientMessage { Arguments = arguments });
+    };
 
-        It should_return_true = () => result.ShouldBeTrue();
-        It should_have_the_correct_arguments = () => dispatcher.Arguments.ShouldEqual(arguments);
-        It should_change_execution_context = () => execution_context_manager
-            .Verify(
-                _ => _.CurrentFor(
-                    execution_context,
-                    Moq.It.IsAny<string>(),
-                    Moq.It.IsAny<int>(),
-                    Moq.It.IsAny<string>()), Moq.Times.Once);
-    }
+    Because of = () => result = dispatcher.ReceiveArguments(CancellationToken.None).GetAwaiter().GetResult();
+
+    It should_return_true = () => result.ShouldBeTrue();
+    It should_have_the_correct_arguments = () => dispatcher.Arguments.ShouldEqual(arguments);
+    It should_change_execution_context = () => execution_context_manager
+        .Verify(
+            _ => _.CurrentFor(
+                execution_context,
+                Moq.It.IsAny<string>(),
+                Moq.It.IsAny<int>(),
+                Moq.It.IsAny<string>()), Moq.Times.Once);
 }

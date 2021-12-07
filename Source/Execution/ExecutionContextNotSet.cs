@@ -3,12 +3,11 @@
 
 using System;
 
-namespace Dolittle.Runtime.Execution
+namespace Dolittle.Runtime.Execution;
+
+/// <summary>
+/// Exception that gets thrown when <see cref="ExecutionContext"/> is not set.
+/// </summary>
+public class ExecutionContextNotSet : Exception
 {
-    /// <summary>
-    /// Exception that gets thrown when <see cref="ExecutionContext"/> is not set.
-    /// </summary>
-    public class ExecutionContextNotSet : Exception
-    {
-    }
 }

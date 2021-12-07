@@ -3,19 +3,18 @@
 
 using System;
 
-namespace Dolittle.Runtime.Resilience
+namespace Dolittle.Runtime.Resilience;
+
+/// <summary>
+/// Exception that gets thrown whenthere are multiple implementations of <see cref="IDefineDefaultPolicy"/> in the system.
+/// </summary>
+public class MultipleDefaultPolicyDefinersFound : Exception
 {
     /// <summary>
-    /// Exception that gets thrown whenthere are multiple implementations of <see cref="IDefineDefaultPolicy"/> in the system.
+    /// Initializes a new instance of the <see cref="MultipleDefaultPolicyDefinersFound"/> class.
     /// </summary>
-    public class MultipleDefaultPolicyDefinersFound : Exception
+    public MultipleDefaultPolicyDefinersFound()
+        : base("Multiple implementations of IDefineDefaultPolicy found - there can be only one")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MultipleDefaultPolicyDefinersFound"/> class.
-        /// </summary>
-        public MultipleDefaultPolicyDefinersFound()
-            : base("Multiple implementations of IDefineDefaultPolicy found - there can be only one")
-        {
-        }
     }
 }

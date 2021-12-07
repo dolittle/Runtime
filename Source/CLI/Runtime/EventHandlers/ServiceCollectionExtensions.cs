@@ -3,18 +3,17 @@
 
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
+namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
+
+public static class ServiceCollectionExtensions
 {
-    public static class ServiceCollectionExtensions
+    /// <summary>
+    /// Adds services related to management of Event Handlers.
+    /// </summary>
+    /// <param name="services">The service collection to add services to.</param>
+    public static void AddEventHandlerServices(this IServiceCollection services)
     {
-        /// <summary>
-        /// Adds services related to management of Event Handlers.
-        /// </summary>
-        /// <param name="services">The service collection to add services to.</param>
-        public static void AddEventHandlerServices(this IServiceCollection services)
-        {
-            services.AddTransient<IManagementClient, ManagementClient>();
-            services.AddTransient<IResolveEventHandlerId, EventHandlerIdResolver>();
-        }
+        services.AddTransient<IManagementClient, ManagementClient>();
+        services.AddTransient<IResolveEventHandlerId, EventHandlerIdResolver>();
     }
 }

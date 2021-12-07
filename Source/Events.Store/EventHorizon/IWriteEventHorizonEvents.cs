@@ -4,21 +4,20 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Dolittle.Runtime.Events.Store.EventHorizon
+namespace Dolittle.Runtime.Events.Store.EventHorizon;
+
+/// <summary>
+/// Defines a system that can write events from an event horizon.
+/// </summary>
+public interface IWriteEventHorizonEvents
 {
     /// <summary>
-    /// Defines a system that can write events from an event horizon.
+    /// Writes a received event.
     /// </summary>
-    public interface IWriteEventHorizonEvents
-    {
-        /// <summary>
-        /// Writes a received event.
-        /// </summary>
-        /// <param name="event">The <see cref="CommittedEvent" />.</param>
-        /// <param name="consentId">The <see cref="ConsentId" />.</param>
-        /// <param name="scope">The <see cref="ScopeId" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The task.</returns>
-        Task Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken);
-    }
+    /// <param name="event">The <see cref="CommittedEvent" />.</param>
+    /// <param name="consentId">The <see cref="ConsentId" />.</param>
+    /// <param name="scope">The <see cref="ScopeId" />.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>The task.</returns>
+    Task Write(CommittedEvent @event, ConsentId consentId, ScopeId scope, CancellationToken cancellationToken);
 }

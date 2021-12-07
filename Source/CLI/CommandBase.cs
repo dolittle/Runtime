@@ -10,51 +10,50 @@ using McMaster.Extensions.CommandLineUtils;
 using ConsoleTables;
 using Newtonsoft.Json;
 
-namespace Dolittle.Runtime.CLI
+namespace Dolittle.Runtime.CLI;
+
+/// <summary>
+/// A shared command base for the "dolittle" commands that provides shared arguments.
+/// </summary>
+public abstract class CommandBase
 {
+    readonly ISerializer _jsonSerializer;
+        
     /// <summary>
-    /// A shared command base for the "dolittle" commands that provides shared arguments.
+    /// Initializes a new instance of the <see cref="CommandBase"/> class.
     /// </summary>
-    public abstract class CommandBase
+    /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
+    protected CommandBase(ISerializer jsonSerializer)
     {
-        readonly ISerializer _jsonSerializer;
+        _jsonSerializer = jsonSerializer;
+    }
         
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CommandBase"/> class.
-        /// </summary>
-        /// <param name="jsonSerializer">The json <see cref="ISerializer"/>.</param>
-        protected CommandBase(ISerializer jsonSerializer)
-        {
-            _jsonSerializer = jsonSerializer;
-        }
-        
-        [Option("-o|--output", CommandOptionType.SingleValue, Description = "The output type.")]
-        protected OutputType Output { get; } = OutputType.Table;
+    [Option("-o|--output", CommandOptionType.SingleValue, Description = "The output type.")]
+    protected OutputType Output { get; } = OutputType.Table;
 
-        [Option("-w|--wide", CommandOptionType.NoValue, Description = "Whether the table output is wide or not.")]
-        protected bool Wide { get; }
+    [Option("-w|--wide", CommandOptionType.NoValue, Description = "Whether the table output is wide or not.")]
+    protected bool Wide { get; }
 
-        protected Task WriteOutput<T>(CommandLineApplication cli, T obj)
-            => cli.Out.WriteAsync(CreateOutput(new [] {obj}, true));
+    protected Task WriteOutput<T>(CommandLineApplication cli, T obj)
+        => cli.Out.WriteAsync(CreateOutput(new [] {obj}, true));
         
-        protected Task WriteOutput<T>(CommandLineApplication cli, IEnumerable<T> objects)
-            => cli.Out.WriteAsync(CreateOutput(objects.ToArray(), false));
+    protected Task WriteOutput<T>(CommandLineApplication cli, IEnumerable<T> objects)
+        => cli.Out.WriteAsync(CreateOutput(objects.ToArray(), false));
         
-        string CreateOutput<T>(T[] obj, bool singular)
+    string CreateOutput<T>(T[] obj, bool singular)
+    {
+        var output = Output switch
         {
-            var output = Output switch
-            {
-                OutputType.Table => ConsoleTable.From(obj).ToMinimalString(),
-                OutputType.Json => _jsonSerializer.ToJson(
-                    !singular ? obj : obj[0],
-                    SerializationOptions.Custom(SerializationOptionsFlags.None, callback: _ =>
-                    {
-                        _.Formatting = Formatting.Indented;
-                    })),
-                _ => ""
-            };
-            output += "\n";
-            return output;
-        }
+            OutputType.Table => ConsoleTable.From(obj).ToMinimalString(),
+            OutputType.Json => _jsonSerializer.ToJson(
+                !singular ? obj : obj[0],
+                SerializationOptions.Custom(SerializationOptionsFlags.None, callback: _ =>
+                {
+                    _.Formatting = Formatting.Indented;
+                })),
+            _ => ""
+        };
+        output += "\n";
+        return output;
     }
 }

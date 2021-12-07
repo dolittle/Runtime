@@ -3,11 +3,10 @@
 
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.Metrics
-{
-    /// <summary>
-    /// Represents the <see cref="IConfigurationObject"/> for Metrics.
-    /// </summary>
-    [Name("metrics")]
-    public record MetricsConfiguration(int Port) : IConfigurationObject;
-}
+namespace Dolittle.Runtime.Metrics;
+
+/// <summary>
+/// Represents the <see cref="IConfigurationObject"/> for Metrics.
+/// </summary>
+[Name("metrics")]
+public record MetricsConfiguration(int Port) : IConfigurationObject;

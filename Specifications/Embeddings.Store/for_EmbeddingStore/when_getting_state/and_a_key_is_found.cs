@@ -10,36 +10,35 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_state
+namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_getting_state;
+
+public class and_a_key_is_found : given.all_dependencies
 {
-    public class and_a_key_is_found : given.all_dependencies
+
+    static EmbeddingId id;
+    static ProjectionKey key;
+    static EmbeddingState persisted_state;
+
+    Establish context = () =>
     {
+        id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
+        key = new ProjectionKey("test_key");
 
-        static EmbeddingId id;
-        static ProjectionKey key;
-        static EmbeddingState persisted_state;
+        persisted_state = new EmbeddingState("persisted_state", 1, false);
 
-        Establish context = () =>
-        {
-            id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
-            key = new ProjectionKey("test_key");
+        states
+            .Setup(_ => _.TryGet(id, key, Moq.It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(Try<EmbeddingState>.Succeeded(persisted_state)));
+    };
 
-            persisted_state = new EmbeddingState("persisted_state", 1, false);
+    static Try<EmbeddingCurrentState> result;
 
-            states
-                .Setup(_ => _.TryGet(id, key, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<EmbeddingState>.Succeeded(persisted_state)));
-        };
+    Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
 
-        static Try<EmbeddingCurrentState> result;
+    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_get_the_state = () => result.Result.State.ShouldEqual(persisted_state.State);
+    It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
+    It should_have_the_same_aggregate_version = () => result.Result.Version.ShouldEqual(persisted_state.Version);
+    It should_get_a_persisted_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
 
-        Because of = () => result = store.TryGet(id, key, CancellationToken.None).GetAwaiter().GetResult();
-
-        It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_get_the_state = () => result.Result.State.ShouldEqual(persisted_state.State);
-        It should_get_the_key = () => result.Result.Key.ShouldEqual(key);
-        It should_have_the_same_aggregate_version = () => result.Result.Version.ShouldEqual(persisted_state.Version);
-        It should_get_a_persisted_state = () => result.Result.Type.ShouldEqual(EmbeddingCurrentStateType.Persisted);
-
-    }
 }

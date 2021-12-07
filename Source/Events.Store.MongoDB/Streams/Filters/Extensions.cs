@@ -5,28 +5,27 @@ using System.Linq;
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 using Dolittle.Runtime.Events.Store.Streams.Filters.EventHorizon;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
+
+/// <summary>
+/// Extension methods.
+/// </summary>
+public static class Extensions
 {
     /// <summary>
-    /// Extension methods.
+    /// Converts the <see cref="IFilterDefinition" /> to <see cref="AbstractFilterDefinition" />.
     /// </summary>
-    public static class Extensions
+    /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
+    /// <returns>Converted <see cref="AbstractFilterDefinition" />.</returns>
+    public static AbstractFilterDefinition ToStoreRepresentation(this IFilterDefinition filterDefinition)
     {
-        /// <summary>
-        /// Converts the <see cref="IFilterDefinition" /> to <see cref="AbstractFilterDefinition" />.
-        /// </summary>
-        /// <param name="filterDefinition">The <see cref="IFilterDefinition" />.</param>
-        /// <returns>Converted <see cref="AbstractFilterDefinition" />.</returns>
-        public static AbstractFilterDefinition ToStoreRepresentation(this IFilterDefinition filterDefinition)
+        return filterDefinition switch
         {
-            return filterDefinition switch
-            {
-                TypeFilterWithEventSourcePartitionDefinition definition =>
-                    new TypePartitionFilterDefinition(definition.Types.Select(_ => _.Value)),
-                PublicFilterDefinition => new RemoteFilterDefinition(),
-                FilterDefinition => new RemoteFilterDefinition(),
-                _ => throw new UnsupportedFilterDefinitionType(filterDefinition)
-            };
-        }
+            TypeFilterWithEventSourcePartitionDefinition definition =>
+                new TypePartitionFilterDefinition(definition.Types.Select(_ => _.Value)),
+            PublicFilterDefinition => new RemoteFilterDefinition(),
+            FilterDefinition => new RemoteFilterDefinition(),
+            _ => throw new UnsupportedFilterDefinitionType(filterDefinition)
+        };
     }
 }

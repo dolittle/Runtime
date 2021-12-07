@@ -3,17 +3,16 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.ApplicationModel
+namespace Dolittle.Runtime.ApplicationModel;
+
+/// <summary>
+/// Represents the name of a <see cref="Microservice"/>.
+/// </summary>
+public record MicroserviceName(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents the name of a <see cref="Microservice"/>.
+    /// Implicitly converts from a <see cref="string"/> to a <see cref="MicroserviceName"/>.
     /// </summary>
-    public record MicroserviceName(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Implicitly converts from a <see cref="string"/> to a <see cref="MicroserviceName"/>.
-        /// </summary>
-        /// <param name="microserviceName">Name of the <see cref="Microservice"/>.</param>
-        public static implicit operator MicroserviceName(string microserviceName) => new(microserviceName);
-    }
+    /// <param name="microserviceName">Name of the <see cref="Microservice"/>.</param>
+    public static implicit operator MicroserviceName(string microserviceName) => new(microserviceName);
 }

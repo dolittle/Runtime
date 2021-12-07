@@ -117,6 +117,9 @@ dotnet_diagnostic.IDE0130.severity = none
 # IDE0058: Remove unnecessary expression value
 dotnet_diagnostic.IDE0058.severity = none
 
+# IDE0160: Convert to file-scoped namespace
+csharp_style_namespace_declarations = file_scoped:warning
+
 #### C# Coding Conventions ####
 
 # var preferences
