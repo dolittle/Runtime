@@ -3,11 +3,14 @@
 
 using System;
 using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Handshake.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
 using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Handshake.Contracts.Handshake;
+using Environment = Dolittle.Runtime.Execution.Environment;
+using Version = Dolittle.Runtime.Versioning.Version;
 using Failure = Dolittle.Protobuf.Contracts.Failure;
 
 namespace Dolittle.Runtime.Server.Handshake;
@@ -42,19 +45,14 @@ public class HandshakeService : HandshakeBase
             var runtimeVersion = VersionInfo.CurrentVersion;
             var runtimeContractsVersion = Contracts.VersionInfo.CurrentVersion.ToVersion();
             var headContractsVersion = request.ContractsVersion.ToVersion();
-            if (_contractsCompatibility.IsCompatible(runtimeContractsVersion, request.ContractsVersion.ToVersion()))
+            if (VersionsAreIncompatible(runtimeVersion, runtimeContractsVersion, headContractsVersion, out var failedResponse))
             {
-                var (microservice, environment) = await _platformEnvironment.Resolve().ConfigureAwait(false);
-                return new HandshakeResponse
-                {
-                    Environment = environment,
-                    MicroserviceId = microservice.ToProtobuf(),
-                    ContractsVersion = Contracts.VersionInfo.CurrentVersion,
-                    RuntimeVersion = VersionInfo.CurrentVersion.ToProtobuf()
-                };
+                Log.HeadAndRuntimeContractsIncompatible(_logger, headContractsVersion, runtimeContractsVersion);
+                return failedResponse;
             }
-            Log.HeadAndRuntimeContractsIncompatible(_logger, headContractsVersion, runtimeContractsVersion);
-            return CreateFailedResponse($"Runtime version {runtimeVersion} uses contracts version {runtimeContractsVersion} which is not compatible with the Head's version {headContractsVersion} of contracts");
+            var (microserviceId, environment) = await _platformEnvironment.Resolve().ConfigureAwait(false);
+            Log.SuccessfulHandshake(_logger, runtimeVersion, microserviceId, runtimeContractsVersion, environment, headContractsVersion);
+            return CreateSuccessfulResponse(microserviceId, environment, runtimeVersion, runtimeContractsVersion);
         }
         catch (Exception ex)
         {
@@ -62,6 +60,15 @@ public class HandshakeService : HandshakeBase
             return CreateFailedResponse(ex.Message);
         }
     }
+
+    static HandshakeResponse CreateSuccessfulResponse(MicroserviceId microserviceId, Environment environment, Version runtimeVersion, Version runtimeContractsVersion)
+        => new()
+        {
+            Environment = environment,
+            MicroserviceId = microserviceId.ToProtobuf(),
+            RuntimeVersion = runtimeVersion.ToProtobuf(),
+            ContractsVersion = runtimeContractsVersion.ToProtobuf()
+        };
 
     static HandshakeResponse CreateFailedResponse(FailureReason reason)
         => new()
@@ -72,4 +79,16 @@ public class HandshakeService : HandshakeBase
                 Reason = reason
             }
         };
+
+    bool VersionsAreIncompatible(Version runtimeVersion, Version runtimeContractsVersion, Version headContractsVersion, out HandshakeResponse failedResponse)
+    {
+        failedResponse = null;
+        if (_contractsCompatibility.IsCompatible(runtimeContractsVersion, headContractsVersion))
+        {
+            return false;
+        }
+        
+        failedResponse = CreateFailedResponse($"Runtime version {runtimeVersion} uses contracts version {runtimeContractsVersion} which is not compatible with the Head's version {headContractsVersion} of contracts");
+        return true;
+    }
 }
