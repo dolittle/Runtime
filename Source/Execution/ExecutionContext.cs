@@ -12,7 +12,7 @@ namespace Dolittle.Runtime.Execution;
 /// Represents a <see cref="ExecutionContext"/>.
 /// </summary>
 public record ExecutionContext(
-    Microservice Microservice,
+    MicroserviceId Microservice,
     TenantId Tenant,
     Version Version,
     Environment Environment,

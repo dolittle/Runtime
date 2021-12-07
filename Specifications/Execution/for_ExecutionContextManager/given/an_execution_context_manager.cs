@@ -17,6 +17,6 @@ public class an_execution_context_manager
     {
         logger = Mock.Of<ILogger>();
         execution_context_manager = new ExecutionContextManager(logger);
-        execution_context_manager.CurrentFor(Microservice.NotSet, TenantId.Unknown, CorrelationId.System, "", 0, "");
+        execution_context_manager.CurrentFor(MicroserviceId.NotSet, TenantId.Unknown, CorrelationId.System, "", 0, "");
     };
 }

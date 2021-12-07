@@ -22,8 +22,8 @@ static class LoggerExtensions
             new EventId(355323827, nameof(WritingEventToPublisStream)),
             "Writing event: {EventLogSequenceNumber} to public stream: {Stream}");
 
-    internal static void WritingEventHorizonEvent(this ILogger logger, EventLogSequenceNumber eventLogSequenceNumber, TenantId producerTenant, Microservice microservice, ScopeId scope)
-        => _writingEventHorizonEvent(logger, eventLogSequenceNumber, producerTenant, microservice, scope, null);
+    internal static void WritingEventHorizonEvent(this ILogger logger, EventLogSequenceNumber eventLogSequenceNumber, TenantId producerTenant, MicroserviceId microserviceId, ScopeId scope)
+        => _writingEventHorizonEvent(logger, eventLogSequenceNumber, producerTenant, microserviceId, scope, null);
 
     internal static void WritingEventToPublisStream(this ILogger logger, EventLogSequenceNumber eventLogSequenceNumber, StreamId stream)
         => _writingEventToPublisStream(logger, eventLogSequenceNumber, stream, null);

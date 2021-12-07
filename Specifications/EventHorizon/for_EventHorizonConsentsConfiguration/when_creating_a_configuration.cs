@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.EventHorizon.for_EventHorizonConsentsConfiguration;
 public class when_creating_a_configuration
 {
     static TenantId producer_tenant;
-    static Microservice consumer_microservice;
+    static MicroserviceId _consumerMicroserviceId;
     static TenantId consumer_tenant;
     static StreamId stream;
     static PartitionId partition;
@@ -28,7 +28,7 @@ public class when_creating_a_configuration
     Establish context = () =>
     {
         producer_tenant = Guid.Parse("75230eee-2620-4a38-b69c-c07a0bb5e0fa");
-        consumer_microservice = Guid.Parse("07b697ed-44e4-4167-805f-ff5a9851cf98");
+        _consumerMicroserviceId = Guid.Parse("07b697ed-44e4-4167-805f-ff5a9851cf98");
         consumer_tenant = Guid.Parse("8e18214b-287f-41a1-9fef-dd67ef0cf86f");
         stream = Guid.Parse("82695d13-f7a2-4755-ba24-a473154ab7a3");
         partition = "1221f439-7b6c-4f34-b084-856e52974f67";
@@ -42,14 +42,14 @@ public class when_creating_a_configuration
             producer_tenant,
             new[]
             {
-                new EventHorizonConsentConfiguration(consumer_microservice, consumer_tenant, stream, partition, consent)
+                new EventHorizonConsentConfiguration(_consumerMicroserviceId, consumer_tenant, stream, partition, consent)
             }
         }
     });
 
     It should_only_have_entry_for_producer_tenant = () => result.Keys.ShouldContainOnly(producer_tenant);
     It should_have_one_consent_configuration = () => result[producer_tenant].Count().ShouldEqual(1);
-    It should_have_correct_consumer_microservice = () => result[producer_tenant].First().Microservice.ShouldEqual(consumer_microservice.Value);
+    It should_have_correct_consumer_microservice = () => result[producer_tenant].First().Microservice.ShouldEqual(_consumerMicroserviceId.Value);
     It should_have_correct_consumer_tenant = () => result[producer_tenant].First().Tenant.ShouldEqual(consumer_tenant.Value);
     It should_have_correct_stream = () => result[producer_tenant].First().Stream.ShouldEqual(stream.Value);
     It should_have_correct_partition = () => result[producer_tenant].First().Partition.ShouldEqual(partition.Value);
@@ -60,7 +60,7 @@ public class when_creating_a_configuration
         config.ShouldNotBeEmpty();
         config.Count().ShouldEqual(1);
         var item = config.First();
-        item.Microservice.ShouldEqual(consumer_microservice);
+        item.Microservice.ShouldEqual(_consumerMicroserviceId);
         item.Tenant.ShouldEqual(consumer_tenant);
         item.Stream.ShouldEqual(stream);
         item.Partition.ShouldEqual(partition);

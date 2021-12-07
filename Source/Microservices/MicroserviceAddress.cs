@@ -6,14 +6,14 @@ using Dolittle.Runtime.ApplicationModel;
 namespace Dolittle.Runtime.Microservices;
 
 /// <summary>
-/// Represents the address of a <see cref="Microservice" />.
+/// Represents the address of a Microservice.
 /// </summary>
 /// <param name="Host">The host of a microservice.</param>
 /// <param name="Port">The host of a microservice.</param>
 public record MicroserviceAddress(MicroserviceHost Host, MicroservicePort Port);
 
 /// <summary>
-/// Represents the address configuration of a <see cref="Microservice" />.
+/// Represents the address configuration of a Microservice.
 /// </summary>
 /// <param name="Host">The host of a microservice.</param>
 /// <param name="Port">The host of a microservice.</param>

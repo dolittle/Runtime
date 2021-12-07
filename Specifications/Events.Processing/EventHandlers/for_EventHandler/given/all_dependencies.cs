@@ -47,7 +47,7 @@ public class all_dependencies
     protected static ExecutionContext execution_context;
     protected static EventProcessorId event_handler_id = Guid.Parse("6afafdf6-33e8-4135-b271-2f7634b70a7f");
     protected static ScopeId scope = Guid.Empty;
-    protected static Microservice microservice = Guid.Parse("cfa85cf2-b463-4e05-8877-211fd3d1237a");
+    protected static MicroserviceId MicroserviceId = Guid.Parse("cfa85cf2-b463-4e05-8877-211fd3d1237a");
     protected static TenantId tenant = TenantId.Development;
     protected static Version version = Version.NotSet;
     protected static Environment environment = Environment.Production;
@@ -70,7 +70,7 @@ public class all_dependencies
         stream_writer = new Mock<IWriteEventsToStreams>(MockBehavior.Strict);
         logger_factory = new NullLoggerFactory();
         execution_context = new ExecutionContext(
-            microservice,
+            MicroserviceId,
             tenant,
             version,
             environment,

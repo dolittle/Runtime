@@ -25,8 +25,8 @@ static class LoggerExtensions
         .Define<Guid>(
             LogLevel.Warning,
             new EventId(371825462, nameof(NoMicroserviceConfigurationFor)),
-            "There is no microservice configuration for the producer microservice: {ProducerMicrosrevice}");
-    internal static void NoMicroserviceConfigurationFor(this ILogger logger, Microservice producerMicroservice)
+            "There is no microservice configuration for the producer microservice: {ProducerMicroservice}");
+    internal static void NoMicroserviceConfigurationFor(this ILogger logger, MicroserviceId producerMicroservice)
         => _noMicroserviceConfigurationFor(logger, producerMicroservice, null);
 
     static readonly Action<ILogger, SubscriptionId, Exception> _startingCreatedSubscription = LoggerMessage

@@ -30,7 +30,7 @@ static partial class Log
 
 
     [LoggerMessage(0, LogLevel.Trace, "Processing event type: {EventTypeId} from event horizon in scope: {Scope} from microservice: {ProducerMicroservice} and tenant: {ProducerTenant}")]
-    internal static partial void ProcessEvent(ILogger logger, ArtifactId eventTypeId, ScopeId scope, Microservice producerMicroservice, TenantId producerTenant);
+    internal static partial void ProcessEvent(ILogger logger, ArtifactId eventTypeId, ScopeId scope, MicroserviceId producerMicroservice, TenantId producerTenant);
 
     [LoggerMessage(0, LogLevel.Trace, "Retry processing event from event horizon for subscription {SubscriptionId}")]
     internal static partial void RetryProcessEvent(ILogger logger, SubscriptionId subscriptionId);

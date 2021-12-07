@@ -14,9 +14,9 @@ namespace Dolittle.Runtime.EventHorizon;
 public record EventHorizonConsent
 {
     /// <summary>
-    /// Gets or sets the <see cref="Microservice" /> to give consent to.
+    /// Gets or sets the <see cref="MicroserviceId" /> to give consent to.
     /// </summary>
-    public Microservice Microservice { get; init; }
+    public MicroserviceId Microservice { get; init; }
 
     /// <summary>
     /// Gets or sets the <see cref="TenantId" /> tenant to give consent to.

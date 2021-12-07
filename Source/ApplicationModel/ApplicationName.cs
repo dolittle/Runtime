@@ -6,7 +6,7 @@ using Dolittle.Runtime.Rudimentary;
 namespace Dolittle.Runtime.ApplicationModel;
 
 /// <summary>
-/// Represents the name of <see cref="Application"/>.
+/// Represents the name of <see cref="ApplicationId"/>.
 /// </summary>
 public record ApplicationName(string Value) : ConceptAs<string>(Value)
 {
