@@ -8,7 +8,7 @@ using Dolittle.Runtime.Execution;
 namespace Dolittle.Runtime.Applications.Configuration;
 
 /// <summary>
-/// Binds up the bindings related to the running application. The<see cref="Application"/>, the <see cref="Microservice"/> and the <see cref="Environment"/>.
+/// Binds up the bindings related to the running application. The<see cref="ApplicationId"/>, the <see cref="MicroserviceId"/> and the <see cref="Environment"/>.
 /// </summary>
 public class ApplicationBindings : ICanProvideBindings
 {
@@ -26,7 +26,7 @@ public class ApplicationBindings : ICanProvideBindings
     /// <inheritdoc/>
     public void Provide(IBindingProviderBuilder builder)
     {
-        builder.Bind<Application>().To(() => _boundedContextConfiguration.Application);
-        builder.Bind<Microservice>().To(() => _boundedContextConfiguration.BoundedContext);
+        builder.Bind<ApplicationId>().To(() => _boundedContextConfiguration.Application);
+        builder.Bind<MicroserviceId>().To(() => _boundedContextConfiguration.BoundedContext);
     }
 }

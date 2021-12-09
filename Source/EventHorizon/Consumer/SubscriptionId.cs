@@ -13,7 +13,7 @@ namespace Dolittle.Runtime.EventHorizon.Consumer;
 /// </summary>
 public record SubscriptionId(
     TenantId ConsumerTenantId,
-    Microservice ProducerMicroserviceId,
+    MicroserviceId ProducerMicroserviceId,
     TenantId ProducerTenantId,
     ScopeId ScopeId,
     StreamId StreamId,

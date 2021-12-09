@@ -33,7 +33,7 @@ namespace Dolittle.Runtime.EventHorizon.Producer;
 [Singleton]
 public class ConsumerService : ConsumerBase, IDisposable
 {
-    readonly Microservice _thisMicroservice;
+    readonly MicroserviceId _thisMicroserviceId;
     readonly IExecutionContextManager _executionContextManager;
     readonly EventHorizonConsentsConfiguration _eventHorizonConsents;
     readonly ITenants _tenants;
@@ -71,7 +71,7 @@ public class ConsumerService : ConsumerBase, IDisposable
         IMetricsCollector metrics,
         ILogger logger)
     {
-        _thisMicroservice = boundedContextConfiguration.BoundedContext;
+        _thisMicroserviceId = boundedContextConfiguration.BoundedContext;
         _executionContextManager = executionContextManager;
         _eventHorizonConsents = eventHorizonConsents;
         _tenants = tenants;
@@ -119,14 +119,14 @@ public class ConsumerService : ConsumerBase, IDisposable
         _metrics.IncrementTotalIncomingSubscriptions();
         Log.IncomingEventHorizonSubscription(
             _logger,
-            arguments.ConsumerMicroservice,
+            arguments.ConsumerMicroserviceId,
             arguments.ConsumerTenant,
             arguments.ProducerTenant,
             arguments.StreamPosition,
             arguments.Partition,
             arguments.PublicStream);
 
-        var subscriptionResponse = CreateSubscriptionResponse(arguments.ConsumerMicroservice, arguments.ConsumerTenant, arguments.ProducerTenant, arguments.PublicStream, arguments.Partition);
+        var subscriptionResponse = CreateSubscriptionResponse(arguments.ConsumerMicroserviceId, arguments.ConsumerTenant, arguments.ProducerTenant, arguments.PublicStream, arguments.Partition);
         if (subscriptionResponse.Failure != null)
         {
             _metrics.IncrementTotalRejectedSubscriptions();
@@ -137,7 +137,7 @@ public class ConsumerService : ConsumerBase, IDisposable
         _metrics.IncrementTotalAcceptedSubscriptions();
         Log.SuccessfullySubscribed(
             _logger,
-            arguments.ConsumerMicroservice,
+            arguments.ConsumerMicroserviceId,
             arguments.ConsumerTenant,
             arguments.ProducerTenant,
             arguments.StreamPosition,
@@ -167,7 +167,7 @@ public class ConsumerService : ConsumerBase, IDisposable
                 Log.ErrorOccurredInEventHorizon(
                     _logger,
                     ex,
-                    arguments.ConsumerMicroservice,
+                    arguments.ConsumerMicroserviceId,
                     arguments.ConsumerTenant,
                     arguments.ProducerTenant,
                     arguments.Partition,
@@ -182,7 +182,7 @@ public class ConsumerService : ConsumerBase, IDisposable
                 Log.ErrorOccurredInEventHorizon(
                     _logger,
                     ex,
-                    arguments.ConsumerMicroservice,
+                    arguments.ConsumerMicroserviceId,
                     arguments.ConsumerTenant,
                     arguments.ProducerTenant,
                     arguments.Partition,
@@ -191,7 +191,7 @@ public class ConsumerService : ConsumerBase, IDisposable
 
             Log.EventHorizonStopped(
                 _logger,
-                arguments.ConsumerMicroservice,
+                arguments.ConsumerMicroserviceId,
                 arguments.ConsumerTenant,
                 arguments.ProducerTenant,
                 arguments.Partition,
@@ -205,7 +205,7 @@ public class ConsumerService : ConsumerBase, IDisposable
                 Log.ErrorOccurredInEventHorizon(
                     _logger,
                     ex,
-                    arguments.ConsumerMicroservice,
+                    arguments.ConsumerMicroserviceId,
                     arguments.ConsumerTenant,
                     arguments.ProducerTenant,
                     arguments.Partition,
@@ -218,7 +218,7 @@ public class ConsumerService : ConsumerBase, IDisposable
         {
             Log.EventHorizonDisconnecting(
                 _logger,
-                arguments.ConsumerMicroservice,
+                arguments.ConsumerMicroserviceId,
                 arguments.ConsumerTenant,
                 arguments.ProducerTenant,
                 arguments.Partition,
@@ -248,7 +248,7 @@ public class ConsumerService : ConsumerBase, IDisposable
         try
         {
             _executionContextManager.CurrentFor(
-                _thisMicroservice,
+                _thisMicroserviceId,
                 producerTenant,
                 _executionContextManager.Current.CorrelationId);
             var publicEvents = await _getEventFetchers().GetPartitionedFetcherFor(
@@ -292,7 +292,7 @@ public class ConsumerService : ConsumerBase, IDisposable
         }
     }
 
-    SubscriptionResponse CreateSubscriptionResponse(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
+    SubscriptionResponse CreateSubscriptionResponse(MicroserviceId consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition)
     {
         try
         {
@@ -330,7 +330,7 @@ public class ConsumerService : ConsumerBase, IDisposable
         }
     }
 
-    bool TryGetConsentFor(Microservice consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out ConsentId consentId)
+    bool TryGetConsentFor(MicroserviceId consumerMicroservice, TenantId consumerTenant, TenantId producerTenant, StreamId publicStream, PartitionId partition, out ConsentId consentId)
     {
         consentId = null;
         Log.CheckingConsents(

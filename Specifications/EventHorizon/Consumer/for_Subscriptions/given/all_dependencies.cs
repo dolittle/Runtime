@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 
 namespace Dolittle.Runtime.EventHorizon.Consumer.for_Subscriptions.given;
 
-public record MicroservicesEntry(Microservice Id, MicroserviceAddress Address);
+public record MicroservicesEntry(MicroserviceId Id, MicroserviceAddress Address);
 public class all_dependencies
 {
     protected static TaskCompletionSource<SubscriptionResponse> connection_response_completion_source;
@@ -73,7 +73,7 @@ public class all_dependencies
             .Keys
             .Select(microservice => microservices_configuration.Remove(microservice, out var _));
 
-    protected static void AddMicroservice(Microservice microservice, string host, int port)
-        => microservices_configuration.TryAdd(microservice, new MicroserviceAddressConfiguration(host, port));
+    protected static void AddMicroservice(MicroserviceId microserviceId, string host, int port)
+        => microservices_configuration.TryAdd(microserviceId, new MicroserviceAddressConfiguration(host, port));
 
 }

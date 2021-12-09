@@ -7,7 +7,7 @@ using Dolittle.Runtime.Rudimentary;
 namespace Dolittle.Runtime.Microservices;
 
 /// <summary>
-/// Represents the port of a <see cref="Microservice" />.
+/// Represents the port of a <see cref="MicroserviceId" />.
 /// </summary>
 /// <param name="Value">The port of a microservice.</param>
 public record MicroservicePort(int Value) : ConceptAs<int>(Value)

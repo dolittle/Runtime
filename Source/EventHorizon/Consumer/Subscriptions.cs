@@ -76,7 +76,7 @@ public class Subscriptions : ISubscriptions
         return subscription.ConnectionResponse;
     }
 
-    bool TryGetProducerMicroserviceAddress(Microservice producerMicroservice, out MicroserviceAddress microserviceAddress)
+    bool TryGetProducerMicroserviceAddress(MicroserviceId producerMicroservice, out MicroserviceAddress microserviceAddress)
     {
         microserviceAddress = default;
         if (!_microservicesConfiguration.TryGetValue(producerMicroservice, out var microserviceAddressConfig))

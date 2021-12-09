@@ -25,7 +25,7 @@ public class MicroservicesConfiguration :
     /// <summary>
     /// Initializes a new instance of the <see cref="MicroservicesConfiguration"/> class.
     /// </summary>
-    /// <param name="configuration">Dictionary for <see cref="Microservice"/> with <see cref="MicroserviceAddress"/>.</param>
+    /// <param name="configuration">Dictionary for <see cref="MicroserviceId"/> with <see cref="MicroserviceAddress"/>.</param>
     public MicroservicesConfiguration(IDictionary<Guid, MicroserviceAddressConfiguration> configuration)
         : base(configuration)
     {

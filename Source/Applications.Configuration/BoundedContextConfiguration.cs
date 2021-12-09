@@ -10,7 +10,7 @@ using Dolittle.Runtime.ResourceTypes;
 namespace Dolittle.Runtime.Applications.Configuration;
 
 /// <summary>
-/// Represents the definition of a <see cref="Microservice"/> for configuration.
+/// Represents the definition of a <see cref="MicroserviceId"/> for configuration.
 /// </summary>
 [Name("bounded-context")]
 public record BoundedContextConfiguration(

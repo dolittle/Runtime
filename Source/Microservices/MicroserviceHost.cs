@@ -6,7 +6,7 @@ using Dolittle.Runtime.ApplicationModel;
 namespace Dolittle.Runtime.Microservices;
 
 /// <summary>
-/// Represents the host of a <see cref="Microservice" />.
+/// Represents the host of a <see cref="MicroserviceId" />.
 /// </summary>
 /// <param name="host">The host of a microservice.</param>
 public record MicroserviceHost(string Value) : ConceptAs<string>(Value)

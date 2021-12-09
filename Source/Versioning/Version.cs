@@ -14,7 +14,7 @@ public record Version(int Major, int Minor, int Patch, int Build = 0, string Pre
     public static Version NotSet => new(0, 0, 0, 0);
 
     /// <summary>
-    /// Gets a value indicating whether or not the software is a prerelease.
+    /// Gets a value indicating whether or not the software is a pre release.
     /// </summary>
     public bool IsPreRelease => !string.IsNullOrEmpty(PreReleaseString);
 
@@ -22,7 +22,10 @@ public record Version(int Major, int Minor, int Patch, int Build = 0, string Pre
     public override string ToString()
     {
         var result = $"{Major}.{Minor}.{Patch}.{Build}";
-        if (IsPreRelease) result += $"-{PreReleaseString}.{Build}";
+        if (IsPreRelease)
+        {
+            result += $"-{PreReleaseString}.{Build}";
+        }
         return result;
     }
 }

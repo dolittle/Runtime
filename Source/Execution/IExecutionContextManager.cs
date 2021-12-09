@@ -21,13 +21,13 @@ public interface IExecutionContextManager
     /// <summary>
     /// Set constants that are used typically within a running process.
     /// </summary>
-    /// <param name="microservice">Which <see cref="Microservice"/> that is running.</param>
-    /// <param name="version">The <see cref="Version" /> of the <see cref="Microservice" />.</param>
+    /// <param name="microserviceId">Which <see cref="MicroserviceId"/> that is running.</param>
+    /// <param name="version">The <see cref="Version" /> of the <see cref="MicroserviceId" />.</param>
     /// <param name="environment">Which <see cref="Environment"/> the system is running in.</param>
     /// <param name="filePath">FilePath of the caller.</param>
     /// <param name="lineNumber">Linenumber in the file of the caller.</param>
     /// <param name="member">Membername of the caller.</param>
-    void SetConstants(Microservice microservice, Version version, Environment environment, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
+    void SetConstants(MicroserviceId microserviceId, Version version, Environment environment, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 
     /// <summary>
     /// Sets the current execution context to be for the system.
@@ -69,15 +69,15 @@ public interface IExecutionContextManager
     ExecutionContext CurrentFor(TenantId tenant, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 
     /// <summary>
-    /// Set current execution context for a <see cref="Microservice" /> and <see cref="TenantId"/>.
+    /// Set current execution context for a <see cref="MicroserviceId" /> and <see cref="TenantId"/>.
     /// </summary>
-    /// <param name="microservice"><see cref="Microservice" /> to set for.</param>
+    /// <param name="microserviceId"><see cref="MicroserviceId" /> to set for.</param>
     /// <param name="tenant"><see cref="TenantId"/> to set for.</param>
     /// <param name="filePath">FilePath of the caller.</param>
     /// <param name="lineNumber">Linenumber in the file of the caller.</param>
     /// <param name="member">Membername of the caller.</param>
     /// <returns>Current <see cref="ExecutionContext"/>.</returns>
-    ExecutionContext CurrentFor(Microservice microservice, TenantId tenant, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
+    ExecutionContext CurrentFor(MicroserviceId microserviceId, TenantId tenant, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 
     /// <summary>
     /// Set current execution context for a <see cref="TenantId"/>.
@@ -91,16 +91,16 @@ public interface IExecutionContextManager
     ExecutionContext CurrentFor(TenantId tenant, CorrelationId correlationId, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 
     /// <summary>
-    /// Set current execution context for a <see cref="Microservice" /> and <see cref="TenantId"/>.
+    /// Set current execution context for a <see cref="MicroserviceId" /> and <see cref="TenantId"/>.
     /// </summary>
-    /// <param name="microservice"><see cref="Microservice" /> to set for.</param>
+    /// <param name="microserviceId"><see cref="MicroserviceId" /> to set for.</param>
     /// <param name="tenant"><see cref="TenantId"/> to set for.</param>
     /// <param name="correlationId"><see cref="CorrelationId"/> to associate.</param>
     /// <param name="filePath">FilePath of the caller.</param>
     /// <param name="lineNumber">Linenumber in the file of the caller.</param>
     /// <param name="member">Membername of the caller.</param>
     /// <returns>Current <see cref="ExecutionContext"/>.</returns>
-    ExecutionContext CurrentFor(Microservice microservice, TenantId tenant, CorrelationId correlationId, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
+    ExecutionContext CurrentFor(MicroserviceId microserviceId, TenantId tenant, CorrelationId correlationId, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 
     /// <summary>
     /// Set current execution context for a <see cref="TenantId"/> with <see cref="CorrelationId"/> and <see cref="Claims"/>.
@@ -115,9 +115,9 @@ public interface IExecutionContextManager
     ExecutionContext CurrentFor(TenantId tenant, CorrelationId correlationId, Claims claims, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 
     /// <summary>
-    /// Set current execution context for a <see cref="Microservice" /> and <see cref="TenantId"/>.
+    /// Set current execution context for a <see cref="MicroserviceId" /> and <see cref="TenantId"/>.
     /// </summary>
-    /// <param name="microservice"><see cref="Microservice" /> to set for.</param>
+    /// <param name="microserviceId"><see cref="MicroserviceId" /> to set for.</param>
     /// <param name="tenant"><see cref="TenantId"/> to set for.</param>
     /// <param name="correlationId"><see cref="CorrelationId"/> to associate.</param>
     /// <param name="claims"><see cref="Claims"/> to associate.</param>
@@ -125,5 +125,5 @@ public interface IExecutionContextManager
     /// <param name="lineNumber">Linenumber in the file of the caller.</param>
     /// <param name="member">Membername of the caller.</param>
     /// <returns>Current <see cref="ExecutionContext"/>.</returns>
-    ExecutionContext CurrentFor(Microservice microservice, TenantId tenant, CorrelationId correlationId, Claims claims, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
+    ExecutionContext CurrentFor(MicroserviceId microserviceId, TenantId tenant, CorrelationId correlationId, Claims claims, [CallerFilePath] string filePath = "", [CallerLineNumber] int lineNumber = 0, [CallerMemberName] string member = "");
 }

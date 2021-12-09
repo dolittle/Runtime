@@ -14,7 +14,7 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Debug, "Incoming event horizon subscription from microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}")]
     internal static partial void IncomingEventHorizonSubscription(
         ILogger logger,
-        Microservice consumerMicroservice,
+        MicroserviceId consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         StreamPosition streamPosition,
@@ -24,7 +24,7 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Information, "Microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} successfully subscribed to tenant: {ProducerTenant} starting at position: {StreamPosition} in partition: {Partition} in stream: {PublicStream}")]
     internal static partial void SuccessfullySubscribed(
         ILogger logger,
-        Microservice consumerMicroservice,
+        MicroserviceId consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         StreamPosition streamPosition,
@@ -35,7 +35,7 @@ static partial class Log
     internal static partial void ErrorOccurredInEventHorizon(
         ILogger logger,
         Exception exception,
-        Microservice consumerMicroservice,
+        MicroserviceId consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         PartitionId partition,
@@ -44,7 +44,7 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Warning, "Event horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream} stopped")]
     internal static partial void EventHorizonStopped(
         ILogger logger,
-        Microservice consumerMicroservice,
+        MicroserviceId consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         PartitionId partition,
@@ -53,7 +53,7 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Warning, "Disconnecting Event Horizon for microservice: {ConsumerMicroservice} and tenant: {ConsumerTenant} with producer tenant: {ProducerTenant} in partition: {Partition} in stream: {PublicStream}")]
     internal static partial void EventHorizonDisconnecting(
         ILogger logger,
-        Microservice consumerMicroservice,
+        MicroserviceId consumerMicroservice,
         TenantId consumerTenant,
         TenantId producerTenant,
         PartitionId partition,
@@ -79,7 +79,7 @@ static partial class Log
         StreamId publicStream,
         TenantId producerTenant,
         TenantId consumerTenant,
-        Microservice consumerMicroservice);
+        MicroserviceId consumerMicroservice);
 
     [LoggerMessage(0, LogLevel.Debug, "There are multiple consents configured for Partition {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}")]
     internal static partial void MultipleConsentsConfiguredForConsumer(
@@ -88,11 +88,11 @@ static partial class Log
         StreamId publicStream,
         TenantId producerTenant,
         TenantId consumerTenant,
-        Microservice consumerMicroservice);
+        MicroserviceId consumerMicroservice);
     
     [LoggerMessage(0, LogLevel.Warning, "Error occurred while creating subscription response")]
     internal static partial void ErrorCreatingSubscriptionResponse(ILogger logger, Exception ex);
 
     [LoggerMessage(0, LogLevel.Trace, "Checking consents configured for Partition: {Partition} in Public Stream {PublicStream} in Tenant {ProducerTenant} to Consumer Tenant {ConsumerTenant} in Microservice {ConsumerMicroservice}")]
-    internal static partial void CheckingConsents(ILogger logger, PartitionId partition, StreamId publicStream, TenantId producerTenant, TenantId consumerTenant, Microservice consumerMicroservice);
+    internal static partial void CheckingConsents(ILogger logger, PartitionId partition, StreamId publicStream, TenantId producerTenant, TenantId consumerTenant, MicroserviceId consumerMicroservice);
 }

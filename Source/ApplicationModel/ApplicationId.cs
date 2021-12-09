@@ -9,22 +9,22 @@ namespace Dolittle.Runtime.ApplicationModel;
 /// <summary>
 /// Represents the concept of an application.
 /// </summary>
-public record Application(Guid Value) : ConceptAs<Guid>(Value)
+public record ApplicationId(Guid Value) : ConceptAs<Guid>(Value)
 {
     /// <summary>
     /// Represents the identifier for a not set application.
     /// </summary>
-    public static readonly Application NotSet = Guid.Parse("4fe9492c-1d19-4e6b-be72-03208789906e");
+    public static readonly ApplicationId NotSet = Guid.Parse("4fe9492c-1d19-4e6b-be72-03208789906e");
 
     /// <summary>
-    /// Implicitly converts from a <see cref="Guid"/> to a <see cref="Application"/>.
+    /// Implicitly converts from a <see cref="Guid"/> to a <see cref="ApplicationId"/>.
     /// </summary>
     /// <param name="application"><see cref="Guid"/> representing the application.</param>
-    public static implicit operator Application(Guid application) => new(application);
+    public static implicit operator ApplicationId(Guid application) => new(application);
 
     /// <summary>
-    /// Create a new <see cref="Application"/>identifier.
+    /// Create a new <see cref="ApplicationId"/>identifier.
     /// </summary>
-    /// <returns><see cref="Application"/>.</returns>
-    public static Application New() => Guid.NewGuid();
+    /// <returns><see cref="ApplicationId"/>.</returns>
+    public static ApplicationId New() => Guid.NewGuid();
 }
