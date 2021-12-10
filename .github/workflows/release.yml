@@ -65,7 +65,7 @@ jobs:
         uses: dolittle/update-version-info-action@v1
         with:
           version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
-          files-to-update: Source/Server/VersionInfo.cs
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Production Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -104,7 +104,7 @@ jobs:
         uses: dolittle/update-version-info-action@v1
         with:
           version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
-          files-to-update: Source/Server/VersionInfo.cs
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push ARM64 Production Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -143,7 +143,7 @@ jobs:
         uses: dolittle/update-version-info-action@v1
         with:
           version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
-          files-to-update: Source/Server/VersionInfo.cs
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Debug Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -182,7 +182,7 @@ jobs:
         uses: dolittle/update-version-info-action@v1
         with:
           version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
-          files-to-update: Source/Server/VersionInfo.cs
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Development Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -221,7 +221,7 @@ jobs:
         uses: dolittle/update-version-info-action@v1
         with:
           version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
-          files-to-update: Source/Server/VersionInfo.cs
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push ARM64 Development Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -258,7 +258,7 @@ jobs:
         uses: dolittle/update-version-info-action@v1
         with:
           version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
-          files-to-update: Source/Server/VersionInfo.cs
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Package as DotNET tool
         working-directory: ./Source/CLI
         run: dotnet pack --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PackageVersion=${{ needs.setup.outputs.next-version }}
