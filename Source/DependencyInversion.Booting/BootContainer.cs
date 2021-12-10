@@ -29,7 +29,7 @@ public class BootContainer : IContainer
         _bindings = bindings.ToDictionary(_ => _.Service, _ => _.Strategy);
 
         _bindings[typeof(IContainer)] = new Strategies.Constant(this);
-        _bindings[typeof(GetContainer)] = new Strategies.Constant(() => this);
+        _bindings[typeof(GetContainer)] = new Strategies.Constant(new GetContainer(() => this));
 
         newBindingsNotifier.SubscribeTo(_ => _.ToDictionary(_ => _.Service, _ => _.Strategy).ForEach(_bindings.Add));
     }

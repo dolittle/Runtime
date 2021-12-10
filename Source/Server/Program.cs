@@ -4,67 +4,69 @@
 using System;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Hosting.Microsoft;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Server;
 
-static class Program
+public class Program
 {
-    /// <summary>
-    /// Main method.
-    /// </summary>
-    /// <param name="args">Arguments for the process.</param>
-    public static async Task Main(string[] args)
+    public static void Main(string[] args)
     {
         AppDomain.CurrentDomain.UnhandledException += UnhandledExceptions;
-
-        await CreateHostBuilder(args)
-            .Build()
-            .RunAsync().ConfigureAwait(false);
-    }
-
-    /// <summary>
-    /// Create a host builder.
-    /// </summary>
-    /// <param name="args">Arguments for the process.</param>
-    /// <returns>Host builder to build and run.</returns>
-    public static IHostBuilder CreateHostBuilder(string[] args)
-    {
         var appConfig = new ConfigurationBuilder()
             .AddJsonFile("appsettings.json")
             .Build();
+        var builder = WebApplication.CreateBuilder(new WebApplicationOptions { EnvironmentName = "Development", Args = args });
+        builder.Configuration.AddConfiguration(appConfig);
+        builder.Services.AddControllers();
+        builder.Services.AddEndpointsApiExplorer();
+        builder.Services.AddSwaggerGen();
+        builder.Host.UseDolittle();
+        builder.WebHost.UseUrls("http://0.0.0.0:8001");
 
-        return Host.CreateDefaultBuilder(args)
-            .ConfigureAppConfiguration(config => config.AddConfiguration(appConfig))
-            .UseDolittle()
-            .ConfigureWebHostDefaults(webBuilder =>
-            {
-                webBuilder
-                    .UseUrls("http://0.0.0.0:8001")
-                    .UseEnvironment("Development")
-                    .UseStartup<Startup>();
-            });
+        var app = builder.Build();
+        if (app.Environment.IsDevelopment())
+        {
+            app.UseDeveloperExceptionPage();
+        }
+        app.UseSwagger();
+        app.UseSwaggerUI(c =>
+        {
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Runtime API v1");
+        });
+        app.UseStaticFiles();
+
+        app.UseRouting();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
+        
+        app.Run();
     }
-
     static void UnhandledExceptions(object sender, UnhandledExceptionEventArgs args)
     {
-        if (args.ExceptionObject is Exception exception)
+        if (args.ExceptionObject is not Exception exception)
         {
-            Console.WriteLine("************ BEGIN UNHANDLED EXCEPTION ************");
-            PrintExceptionInfo(exception);
-
-            while (exception.InnerException != null)
-            {
-                Console.WriteLine("\n------------ BEGIN INNER EXCEPTION ------------");
-                PrintExceptionInfo(exception.InnerException);
-                exception = exception.InnerException;
-                Console.WriteLine("------------ END INNER EXCEPTION ------------\n");
-            }
-
-            Console.WriteLine("************ END UNHANDLED EXCEPTION ************ ");
+            return;
         }
+        Console.WriteLine("************ BEGIN UNHANDLED EXCEPTION ************");
+        PrintExceptionInfo(exception);
+
+        while (exception.InnerException != null)
+        {
+            Console.WriteLine("\n------------ BEGIN INNER EXCEPTION ------------");
+            PrintExceptionInfo(exception.InnerException);
+            exception = exception.InnerException;
+            Console.WriteLine("------------ END INNER EXCEPTION ------------\n");
+        }
+
+        Console.WriteLine("************ END UNHANDLED EXCEPTION ************ ");
     }
 
     static void PrintExceptionInfo(Exception exception)
