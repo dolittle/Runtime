@@ -3,7 +3,7 @@
 
 using System.Threading.Tasks;
 
-namespace Dolittle.Runtime.Server.Handshake;
+namespace Dolittle.Runtime.Platform.Handshake;
 
 /// <summary>
 /// Defines a system that can resolve the <see cref="PlatformEnvironment"/>.

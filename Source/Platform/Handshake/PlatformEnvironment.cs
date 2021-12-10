@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.ApplicationModel;
 
-namespace Dolittle.Runtime.Server.Handshake;
+namespace Dolittle.Runtime.Platform.Handshake;
 
 /// <summary>
 /// Represents the platform information about the running Microservice.

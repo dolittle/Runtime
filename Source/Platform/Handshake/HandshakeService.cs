@@ -13,7 +13,7 @@ using Environment = Dolittle.Runtime.Execution.Environment;
 using Version = Dolittle.Runtime.Versioning.Version;
 using Failure = Dolittle.Protobuf.Contracts.Failure;
 
-namespace Dolittle.Runtime.Server.Handshake;
+namespace Dolittle.Runtime.Platform.Handshake;
 
 /// <summary>
 /// Represents the implementation of.
