@@ -4,7 +4,7 @@
 using System;
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.Server.Configuration;
+namespace Dolittle.Runtime.Platform;
 
 /// <summary>
 /// Represents the .

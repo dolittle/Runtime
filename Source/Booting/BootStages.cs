@@ -57,7 +57,7 @@ public class BootStages : IBootStages
         };
         IBindingCollection bindingCollection = new BindingCollection(new[]
         {
-            new BindingBuilder(Binding.For(typeof(GetContainer))).To((GetContainer)(() => _container)).Build()
+            new BindingBuilder(Binding.For(typeof(GetContainer))).To(new GetContainer(() => _container)).Build()
         });
 
         aggregatedAssociations[WellKnownAssociations.Bindings] = bindingCollection;

@@ -3,10 +3,8 @@
 
 using System.Threading.Tasks;
 using Dolittle.Runtime.Lifecycle;
-using Dolittle.Runtime.ResourceTypes.Configuration;
-using Dolittle.Runtime.Server.Configuration;
 
-namespace Dolittle.Runtime.Server.Handshake;
+namespace Dolittle.Runtime.Platform.Handshake;
 
 /// <summary>
 /// Represents an implementation of <see cref="IResolvePlatformEnvironment"/>.
@@ -14,9 +12,9 @@ namespace Dolittle.Runtime.Server.Handshake;
 [Singleton]
 public class ResolvePlatformEnvironment : IResolvePlatformEnvironment
 {
-    readonly IConfigurationFor<PlatformConfiguration> _platformConfig;
+    readonly PlatformConfiguration _platformConfig;
 
-    public ResolvePlatformEnvironment(IConfigurationFor<PlatformConfiguration> platformConfig)
+    public ResolvePlatformEnvironment(PlatformConfiguration platformConfig)
     {
         _platformConfig = platformConfig;
     }
@@ -24,7 +22,6 @@ public class ResolvePlatformEnvironment : IResolvePlatformEnvironment
     /// <inheritdoc />
     public Task<PlatformEnvironment> Resolve()
     {
-        var config = _platformConfig.Instance;
-        return Task.FromResult(new PlatformEnvironment(config.MicroserviceID, config.Environment));
+        return Task.FromResult(new PlatformEnvironment(_platformConfig.MicroserviceID, _platformConfig.Environment));
     }
 }

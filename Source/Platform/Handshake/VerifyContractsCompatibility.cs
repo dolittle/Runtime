@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Versioning;
 
-namespace Dolittle.Runtime.Server.Handshake;
+namespace Dolittle.Runtime.Platform.Handshake;
 
 /// <summary>
 /// Represents an implementation of <see cref="IVerifyContractsCompatibility"/>.

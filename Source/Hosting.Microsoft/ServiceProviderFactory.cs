@@ -45,7 +45,10 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
 
         var bootResult = Bootloader.Configure(_ =>
         {
-            if (_context.HostingEnvironment.IsDevelopment()) _.Development();
+            if (_context.HostingEnvironment.IsDevelopment())
+            {
+                _.Development();
+            }
             _.SkipBootprocedures();
             _.WithLoggingFactory(serviceProvider.GetRequiredService<ILoggerFactory>());
             _.UseContainer<ServiceProviderContainer>();
@@ -84,21 +87,21 @@ public class ServiceProviderFactory : IServiceProviderFactory<ContainerBuilder>
          */
 
         var defaultLoggerFactory = services.FirstOrDefault(_ => _.ServiceType == typeof(ILoggerFactory) && _.ImplementationType == typeof(LoggerFactory));
-        if (defaultLoggerFactory != null)
+        if (defaultLoggerFactory == null)
         {
-            // So we remove the default binding.
-            services.Remove(defaultLoggerFactory);
-
-            // And if there are no other bindings - meaning developer bound implementations.
-            if (!services.Any(_ => _.ServiceType == typeof(ILoggerFactory)))
-            {
-                // We bind the ILoggerFactory explicitly to the correct constructor.
-                // See: https://github.com/aspnet/Logging/issues/691
-                services.AddSingleton<ILoggerFactory>(serviceProvider =>
-                    new LoggerFactory(
-                        serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>(),
-                        serviceProvider.GetRequiredService<IOptionsMonitor<LoggerFilterOptions>>()));
-            }
+            return;
+        }
+        // So we remove the default binding.
+        services.Remove(defaultLoggerFactory);
+        
+        // And if there are no other bindings - meaning developer bound implementations.
+        if (services.All(_ => _.ServiceType != typeof(ILoggerFactory)))
+        {
+            // We bind the ILoggerFactory explicitly to the correct constructor.
+            // See: https://github.com/aspnet/Logging/issues/691
+            services.AddSingleton<ILoggerFactory>(serviceProvider => new LoggerFactory(
+                serviceProvider.GetRequiredService<IEnumerable<ILoggerProvider>>(),
+                serviceProvider.GetRequiredService<IOptionsMonitor<LoggerFilterOptions>>()));
         }
     }
 }

@@ -127,7 +127,7 @@ public static class Boot
             Bind(typeof(IAssemblies), assemblies),
             Bind(typeof(ITypeFinder), typeFinder),
             Bind(typeof(ILoggerFactory), loggerFactory),
-            Bind(typeof(GetContainer), (GetContainer)(() => _container))
+            Bind(typeof(GetContainer), new GetContainer(() => _container))
         });
     }
 

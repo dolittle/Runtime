@@ -4,7 +4,7 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Server.Handshake;
+namespace Dolittle.Runtime.Platform.Handshake;
 
 /// <summary>
 /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing

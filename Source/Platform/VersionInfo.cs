@@ -3,7 +3,7 @@
 
 using Dolittle.Runtime.Versioning;
 
-namespace Dolittle.Runtime.Server;
+namespace Dolittle.Runtime.Platform;
 
 /// <summary>
 /// Represents a container for the Dolittle Runtime version.

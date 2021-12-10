@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 using Environment = Dolittle.Runtime.Execution.Environment;
 using Version = Dolittle.Runtime.Versioning.Version;
 
-namespace Dolittle.Runtime.Server.Handshake;
+namespace Dolittle.Runtime.Platform.Handshake;
 
 static partial class Log
 {
