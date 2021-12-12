@@ -44,7 +44,11 @@ public class HandshakeService : HandshakeBase
         {
             var runtimeVersion = VersionInfo.CurrentVersion;
             var runtimeContractsVersion = Contracts.VersionInfo.CurrentVersion.ToVersion();
+            var sdk = request.Sdk;
+            var sdkVersion = request.SdkVersion.ToVersion();
+            var headVersion = request.HeadVersion.ToVersion();
             var headContractsVersion = request.ContractsVersion.ToVersion();
+            Log.HeadInitiatedHandshake(_logger, sdk, sdkVersion, headVersion, headContractsVersion);
             if (VersionsAreIncompatible(runtimeVersion, runtimeContractsVersion, headContractsVersion, out var failedResponse))
             {
                 Log.HeadAndRuntimeContractsIncompatible(_logger, headContractsVersion, runtimeContractsVersion);
