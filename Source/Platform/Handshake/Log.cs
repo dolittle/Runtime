@@ -3,6 +3,7 @@
 
 using System;
 using Dolittle.Runtime.ApplicationModel;
+using Dolittle.Runtime.Protobuf;
 using Microsoft.Extensions.Logging;
 using Environment = Dolittle.Runtime.Execution.Environment;
 using Version = Dolittle.Runtime.Versioning.Version;
@@ -11,15 +12,21 @@ namespace Dolittle.Runtime.Platform.Handshake;
 
 static partial class Log
 {
-    [LoggerMessage(0, LogLevel.Debug, "Handshake initiated by a Head v{HeadVersion} using the {SDK} SDK using version {HeadContractsVersion} Contracts")]
-    internal static partial void HeadInitiatedHandshake(ILogger logger, string sdk, Version sdkVersion, Version headVersion, Version headContractsVersion);
-    
-    [LoggerMessage(0, LogLevel.Warning, "Cannot perform handshake between Head and Runtime because the Head's version of contracts ({HeadContractsVersion}) is incompatible with the Runtime version of contracts ({RuntimeContractsVersion})")]
-    internal static partial void HeadAndRuntimeContractsIncompatible(ILogger logger, Version headContractsVersion, Version runtimeContractsVersion);
+    [LoggerMessage(0, LogLevel.Error, "Failed to parse handshake request because {Reason}")]
+    internal static partial void RequestParsingFailed(ILogger logger, FailureReason reason);
 
-    [LoggerMessage(0, LogLevel.Information, "Runtime v{RuntimeVersion} with Microservice ID {MicroserviceId} using version {RuntimeContractsVersion} Contracts running in environment {Environment} successfully performed handshake with Head using version {HeadContractsVersion} Contracts")]
-    internal static partial void SuccessfulHandshake(ILogger logger, Version runtimeVersion, MicroserviceId microserviceId, Version runtimeContractsVersion, Environment environment, Version headContractsVersion);
+    [LoggerMessage(0, LogLevel.Debug, "Handshake attempt {Attempt} initiated by a Head version {HeadVersion} using the {SDKIdentifier} SDK {SDKVersion} with Contracts {HeadContractsVersion}")]
+    internal static partial void HeadInitiatedHandshake(ILogger logger, HandshakeAttempt attempt, Version headVersion, SDKIdentifier sdkIdentifier, Version sdkVersion, Version headContractsVersion);
     
-    [LoggerMessage(0, LogLevel.Warning, "An error occurred while performing handshake")]
+    [LoggerMessage(0, LogLevel.Warning, "The Client that initiated the handshake is using a Contracts version {HeadContractsVersion} that is older than the Contracts version {RuntimeContractsVersion} of this Runtime")]
+    internal static partial void ClientContractsVersionTooOld(ILogger logger, Version headContractsVersion, Version runtimeContractsVersion);
+    
+    [LoggerMessage(0, LogLevel.Warning, "The Client that initiated the handshake is using a Contracts version {HeadContractsVersion} that is newer than the Contracts version {RuntimeContractsVersion} of this Runtime")]
+    internal static partial void RuntimeContractsVersionTooOld(ILogger logger, Version headContractsVersion, Version runtimeContractsVersion);
+
+    [LoggerMessage(0, LogLevel.Information, "Handshake successful with Head version {HeadVersion} using {SDKIdentifier} SDK version {SDKVersion} for microservice {Microservice} in environment {Environment} at attempt {Attempt} after {TimeSpent}")]
+    internal static partial void SuccessfulHandshake(ILogger logger, Version headVersion, SDKIdentifier sdkIdentifier, Version sdkVersion, MicroserviceId microservice, Environment environment, HandshakeAttempt attempt, HandshakeTimeSpent timeSpent);
+    
+    [LoggerMessage(0, LogLevel.Error, "An error occurred while performing handshake")]
     internal static partial void ErrorWhilePerformingHandshake(ILogger logger, Exception ex);
 }
