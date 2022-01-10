@@ -15,6 +15,6 @@ public interface IVerifyContractsCompatibility
     /// </summary>
     /// <param name="runtimeContractsVersion">The <see cref="Version"/> of the contracts for the Runtime.</param>
     /// <param name="headContractsVersion">The <see cref="Version"/> of the contracts for the Head.</param>
-    /// <returns></returns>
-    bool IsCompatible(Version runtimeContractsVersion, Version headContractsVersion);
+    /// <returns>A <see cref="ContractsCompatibility"/> result indicating whether or not the versions are compatible.</returns>
+    ContractsCompatibility CheckCompatibility(Version runtimeContractsVersion, Version headContractsVersion);
 }

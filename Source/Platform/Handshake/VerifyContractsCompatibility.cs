@@ -11,13 +11,18 @@ namespace Dolittle.Runtime.Platform.Handshake;
 public class VerifyContractsCompatibility : IVerifyContractsCompatibility
 {
     /// <inheritdoc />
-    public bool IsCompatible(Version runtimeContractsVersion, Version headContractsVersion)
-        => HasSameMajor(runtimeContractsVersion, headContractsVersion)
-            && HasCompatibleMinor(runtimeContractsVersion, headContractsVersion);
+    public ContractsCompatibility CheckCompatibility(Version runtimeContractsVersion, Version headContractsVersion)
+    {
+        if (headContractsVersion.Major > runtimeContractsVersion.Major)
+        {
+            return ContractsCompatibility.RuntimeTooOld;
+        }
+        
+        if (headContractsVersion.Major < runtimeContractsVersion.Major || headContractsVersion.Minor < runtimeContractsVersion.Minor)
+        {
+            return ContractsCompatibility.ClientTooOld;
+        }
 
-    static bool HasSameMajor(Version version, Version otherVersion)
-        => version.Major == otherVersion.Major;
-    
-    static bool HasCompatibleMinor(Version runtimeContractsVersion, Version headContractsVersion)
-        => runtimeContractsVersion.Minor >= headContractsVersion.Minor;
+        return ContractsCompatibility.Compatible;
+    }
 }
