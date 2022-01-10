@@ -24,7 +24,7 @@ public record ConceptAs<TValue>(TValue Value)
     public static implicit operator TValue(ConceptAs<TValue> value) => value == null ? default : value.Value;
 
     /// <inheritdoc/>
-    public override string ToString() => Value == null ? default(TValue).ToString() : Value.ToString();
+    public sealed override string ToString() => Value?.ToString() ?? "NULL";
 
     /// <inheritdoc/>
     public override int GetHashCode() => HashCodeHelper.Generate(typeof(TValue), Value);

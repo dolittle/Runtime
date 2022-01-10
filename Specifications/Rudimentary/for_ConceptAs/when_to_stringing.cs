@@ -18,7 +18,7 @@ public class when_to_stringing : Rudimentary.given.concepts
         result_of_null_string = string_value_is_null.ToString();
     };
 
-    It should_give_a_string = () => result.ShouldNotBeEmpty();
-    It should_give_a_string_from_empty = () => result_of_empty_string.ShouldNotBeEmpty();
-    It should_give_a_string_from_null = () => result_of_null_string.ShouldNotBeNull();
+    It should_return_the_first_string_itself = () => result.ShouldEqual(first_string.Value);
+    It should_return_the_empty_string_for_empty_string_concept = () => result_of_empty_string.ShouldEqual(string.Empty);
+    It should_return_NULL_string_from_null = () => result_of_null_string.ShouldEqual("NULL");
 }

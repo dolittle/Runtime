@@ -54,7 +54,10 @@ public class HandshakeService : HandshakeBase
                 Log.HeadAndRuntimeContractsIncompatible(_logger, headContractsVersion, runtimeContractsVersion);
                 return failedResponse;
             }
-            var (microserviceId, environment) = await _platformEnvironment.Resolve().ConfigureAwait(false);
+            
+            var platformEnvironment = await _platformEnvironment.Resolve().ConfigureAwait(false);
+            var microserviceId = platformEnvironment.MicroserviceId;
+            var environment = platformEnvironment.Environment;
             Log.SuccessfulHandshake(_logger, runtimeVersion, microserviceId, runtimeContractsVersion, environment, headContractsVersion);
             return CreateSuccessfulResponse(microserviceId, environment, runtimeVersion, runtimeContractsVersion);
         }

@@ -7,14 +7,14 @@ using Dolittle.Runtime.Configuration;
 namespace Dolittle.Runtime.Platform;
 
 /// <summary>
-/// Represents the .
+/// Represents the definition of the Platform configuration.
 /// </summary>
 [Name("platform")]
 public record PlatformConfiguration(
+    Guid CustomerID,
     Guid ApplicationID,
     Guid MicroserviceID,
-    Guid CustomerID,
+    string CustomerName,
     string ApplicationName,
     string MicroserviceName,
-    string CustomerName,
     string Environment) : IConfigurationObject;

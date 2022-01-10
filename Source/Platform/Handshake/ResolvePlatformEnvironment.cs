@@ -22,6 +22,13 @@ public class ResolvePlatformEnvironment : IResolvePlatformEnvironment
     /// <inheritdoc />
     public Task<PlatformEnvironment> Resolve()
     {
-        return Task.FromResult(new PlatformEnvironment(_platformConfig.MicroserviceID, _platformConfig.Environment));
+        return Task.FromResult(new PlatformEnvironment(
+            _platformConfig.CustomerID,
+            _platformConfig.ApplicationID,
+            _platformConfig.MicroserviceID,
+            _platformConfig.CustomerName,
+            _platformConfig.ApplicationName,
+            _platformConfig.MicroserviceName,
+            _platformConfig.Environment));
     }
 }
