@@ -11,4 +11,4 @@ namespace Dolittle.Runtime.Platform.Handshake;
 /// </summary>
 public record RuntimeMustBeUpdated(Version MinimumContractsVersion) : Failure(
     HandshakeFailures.RuntimeMustBeUpdated,
-    $"This version of the Runtime is too old to be used with the SDK you are currently using. Please upgrade your SDK to a version that supports Contracts {MinimumContractsVersion}.");
+    $"This version of the Runtime is too old to be used with the SDK you are currently using. Please upgrade your Runtime to a version that supports Contracts {MinimumContractsVersion}.");
