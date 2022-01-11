@@ -3,12 +3,13 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
+using Dolittle.Runtime.Execution;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
@@ -23,6 +24,8 @@ public class EmbeddingProcessor : IEmbeddingProcessor
 {
     readonly ConcurrentQueue<Func<bool, Task>> _jobs = new();
     readonly EmbeddingId _embedding;
+    readonly TenantId _tenant;
+    readonly IExecutionContextManager _executionContextManager;
     readonly IUpdateEmbeddingStates _stateUpdater;
     readonly IStreamEventWatcher _eventWaiter;
     readonly IEventStore _eventStore;
@@ -37,6 +40,8 @@ public class EmbeddingProcessor : IEmbeddingProcessor
     /// Initializes a new instance of the <see cref="EmbeddingProcessor"/> class.
     /// </summary>
     /// <param name="embedding">The <see cref="EmbeddingId"/> that identifies the embedding.</param>
+    /// <param name="tenant">The <see cref="TenantId"/> that this processor is processing for.</param>
+    /// <param name="executionContextManager">The <see cref="IExecutionContextManager"/> to use to set the execution context of the processing loop.</param>
     /// <param name="stateUpdater">The <see cref="IUpdateEmbeddingStates"/> to use for recalculating embedding states from aggregate root events.</param>
     /// <param name="eventWaiter">The <see cref="IStreamEventWatcher"/> to use for waiting on events to be committed to the event log.</param>
     /// <param name="eventStore">The <see cref="IEventStore"/> to use for fetching and committing aggregate root events.</param>
@@ -45,6 +50,8 @@ public class EmbeddingProcessor : IEmbeddingProcessor
     /// <param name="logger">The <see cref="ILogger"/>.</param>
     public EmbeddingProcessor(
         EmbeddingId embedding,
+        TenantId tenant,
+        IExecutionContextManager executionContextManager,
         IUpdateEmbeddingStates stateUpdater,
         IStreamEventWatcher eventWaiter,
         IEventStore eventStore,
@@ -53,6 +60,8 @@ public class EmbeddingProcessor : IEmbeddingProcessor
         ILogger logger)
     {
         _embedding = embedding;
+        _tenant = tenant;
+        _executionContextManager = executionContextManager;
         _stateUpdater = stateUpdater;
         _eventWaiter = eventWaiter;
         _eventStore = eventStore;
@@ -91,6 +100,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
 
     async Task<Try> Loop()
     {
+        _executionContextManager.CurrentFor(_tenant);
         try
         {
             while (!_cancellationToken.IsCancellationRequested)
@@ -146,7 +156,7 @@ public class EmbeddingProcessor : IEmbeddingProcessor
             }
             _logger.CommittingTransitionEvents(_embedding, key, uncommittedEvents);
             var committedEvents = await _eventStore.CommitAggregateEvents(uncommittedEvents.Result, cancellationToken).ConfigureAwait(false);
-            await replaceOrRemoveEmbedding(committedEvents[committedEvents.Count - 1].AggregateRootVersion + 1).ConfigureAwait(false);
+            await replaceOrRemoveEmbedding(committedEvents[^1].AggregateRootVersion + 1).ConfigureAwait(false);
             return Try.Succeeded();
         }
         catch (Exception ex)
@@ -183,9 +193,18 @@ public class EmbeddingProcessor : IEmbeddingProcessor
             return Task.FromResult<Try>(new OperationCanceledException());
         }
 
+        var requestExecutionContext = _executionContextManager.Current;
+        if (requestExecutionContext.Tenant != _tenant)
+        {
+            throw new EmbeddingRequestWorkScheduledForWrongTenant(requestExecutionContext.Tenant, _tenant);
+        }
+
         var completionSource = new TaskCompletionSource<Try>(TaskCreationOptions.RunContinuationsAsynchronously);
         _jobs.Enqueue(async shouldRun =>
         {
+            var loopExecutionContext = _executionContextManager.Current;
+            _executionContextManager.CurrentFor(requestExecutionContext);
+            
             if (!shouldRun || _cancellationToken.IsCancellationRequested)
             {
                 completionSource.SetResult(new OperationCanceledException());
@@ -195,6 +214,8 @@ public class EmbeddingProcessor : IEmbeddingProcessor
                 var result = await job().ConfigureAwait(false);
                 completionSource.SetResult(result);
             }
+
+            _executionContextManager.CurrentFor(loopExecutionContext);
         });
         _waitForEvent?.Cancel();
         return completionSource.Task;

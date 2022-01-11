@@ -65,6 +65,8 @@ public class EmbeddingProcessorFactory : IEmbeddingProcessorFactory
             var projectManyEvents = CreateProjectManyEvents(embeddingId, embedding, initialState);
             return new EmbeddingProcessor(
                 embeddingId,
+                tenant,
+                _executionContextManager,
                 CreateEmbeddingStateUpdater(embeddingId, eventStore, embeddingStore, projectManyEvents),
                 _streamEventWatcherFactory(),
                 eventStore,
