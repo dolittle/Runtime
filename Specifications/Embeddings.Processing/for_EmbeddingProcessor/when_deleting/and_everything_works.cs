@@ -7,6 +7,8 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
+using Moq;
+using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingProcessor.when_deleting;
@@ -39,6 +41,7 @@ public class and_everything_works : given.all_dependencies_and_a_key
     Because of = () => result = embedding_processor.Delete(key, cancellation_token).GetAwaiter().GetResult();
 
     It should_still_be_running = () => task.Status.ShouldEqual(TaskStatus.WaitingForActivation);
+    It should_set_the_execution_context_twice = () => execution_context_manager.Verify(_ => _.CurrentFor(Moq.It.IsAny<ExecutionContext>(), Moq.It.IsAny<string>(), Moq.It.IsAny<int>(), Moq.It.IsAny<string>()), Times.Exactly(2));
     It should_fetch_the_current_state = () => embedding_store.Verify(_ => _.TryGet(embedding, key, Moq.It.IsAny<CancellationToken>()));
     It should_calculate_the_transition_events = () => transition_calculator.Verify(_ => _.TryDelete(current_state, Moq.It.IsAny<CancellationToken>()));
     It should_commit_the_calculated_events = () => event_store.Verify(_ => _.CommitAggregateEvents(uncommitted_events, Moq.It.IsAny<CancellationToken>()));

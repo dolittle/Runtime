@@ -62,20 +62,20 @@ public class concurrently : given.a_wrapped_stream_writer
         Task second_write_status = wrapped_writer.WriteAsync(second_message);
         Task third_write_status = wrapped_writer.WriteAsync(third_message);
 
-        Thread.Sleep(5);
+        Thread.Sleep(20);
         first_write_first_check = first_write_status.IsCompleted;
         second_write_first_check = second_write_status.IsCompleted;
         third_write_first_check = third_write_status.IsCompleted;
 
         first_message_write.SetResult();
         third_message_write.SetResult();
-        Thread.Sleep(5);
+        Thread.Sleep(20);
         first_write_second_check = first_write_status.IsCompleted;
         second_write_second_check = second_write_status.IsCompleted;
         third_write_second_check = third_write_status.IsCompleted;
 
         second_message_write.SetResult();
-        Thread.Sleep(5);
+        Thread.Sleep(20);
         first_write_third_check = first_write_status.IsCompleted;
         second_write_third_check = second_write_status.IsCompleted;
         third_write_third_check = third_write_status.IsCompleted;
