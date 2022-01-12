@@ -15,5 +15,7 @@ static partial class Log
     
     [LoggerMessage(0, LogLevel.Debug, "Connecting Event Handler")]
     internal static partial void ConnectingEventHandler(ILogger logger);
-    
+
+    [LoggerMessage(0, LogLevel.Warning, "Event Handler {EventHandler} already registered")]
+    internal static partial void EventHandlerAlreadyRegistered(ILogger logger, EventHandlerId eventHandler);
 }
