@@ -14,6 +14,11 @@ public static class EventHandlersFailures
     /// Gets the <see cref="FailureId" /> that represents the 'NoEventHandlerRegistrationReceived' failure type.
     /// </summary>
     public static FailureId NoEventHandlerRegistrationReceived => FailureId.Create("209a79c7-824c-4988-928b-0dd517746ca0");
+    
+    /// <summary>
+    /// Gets the <see cref="FailureId" /> that represents the 'EventHandlerAlreadyRegistered' failure type.
+    /// </summary>
+    public static FailureId EventHandlerAlreadyRegistered => FailureId.Create("19dc6254-1732-4625-90af-444732bce795");
 
     /// <summary>
     /// Gets the <see cref="FailureId" /> that represents the 'CannotRegisterEventHandlerOnNonWriteableStream' failure type.
