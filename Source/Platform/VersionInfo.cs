@@ -5,6 +5,8 @@ using Dolittle.Runtime.Versioning;
 
 namespace Dolittle.Runtime.Platform;
 
+#pragma warning disable SA1122 // To allow replacing pre release with "" instead of string.Empty
+
 /// <summary>
 /// Represents a container for the Dolittle Runtime version.
 /// </summary>
