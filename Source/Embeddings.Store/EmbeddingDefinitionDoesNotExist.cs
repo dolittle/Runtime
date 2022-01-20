@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Embeddings.Store
+namespace Dolittle.Runtime.Embeddings.Store;
+
+/// <summary>
+/// Exception that gets thrown when a <see cref="EmbeddingDefinition" /> does not exist.
+/// </summary>
+public class EmbeddingDefinitionDoesNotExist : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a <see cref="EmbeddingDefinition" /> does not exist.
+    /// Initializes an instance of the <see cref="EmbeddingDefinitionDoesNotExist" /> class.
     /// </summary>
-    public class EmbeddingDefinitionDoesNotExist : Exception
+    /// <param name="embedding">The embedding id.</param>
+    public EmbeddingDefinitionDoesNotExist(EmbeddingId embedding)
+        : base($"Embedding {embedding.Value} doesn't have a definition")
     {
-        /// <summary>
-        /// Initializes an instance of the <see cref="EmbeddingDefinitionDoesNotExist" /> class.
-        /// </summary>
-        /// <param name="embedding">The embedding id.</param>
-        public EmbeddingDefinitionDoesNotExist(EmbeddingId embedding)
-            : base($"Embedding {embedding.Value} doesn't have a definition")
-        {
-        }
     }
 }

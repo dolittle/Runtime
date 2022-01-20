@@ -5,35 +5,34 @@ using Dolittle.Runtime.CLI.Configuration.Files;
 using Dolittle.Runtime.ResourceTypes.Configuration;
 using Microsoft.Extensions.FileProviders;
 
-namespace Dolittle.Runtime.CLI.Configuration.Runtime
+namespace Dolittle.Runtime.CLI.Configuration.Runtime;
+
+/// <summary>
+/// Represents an implementation of <see cref="IRuntimeConfiguration"/>
+/// </summary>
+public class RuntimeConfiguration : IRuntimeConfiguration
 {
+    readonly IFileProvider _files;
+    readonly ISerializer _serializer;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IRuntimeConfiguration"/>
+    /// Initializes a new instance of the <see cref="RuntimeConfiguration"/> class.
     /// </summary>
-    public class RuntimeConfiguration : IRuntimeConfiguration
+    /// <param name="files">The file provider to use to locate files in the filesystem.</param>
+    /// <param name="serializer">The file serializer to use to parse the contents of the configuration files.</param>
+    public RuntimeConfiguration(IFileProvider files, ISerializer serializer)
     {
-        readonly IFileProvider _files;
-        readonly ISerializer _serializer;
+        _files = files;
+        _serializer = serializer;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeConfiguration"/> class.
-        /// </summary>
-        /// <param name="files">The file provider to use to locate files in the filesystem.</param>
-        /// <param name="serializer">The file serializer to use to parse the contents of the configuration files.</param>
-        public RuntimeConfiguration(IFileProvider files, ISerializer serializer)
+    /// <inheritdoc />
+    public ResourceConfigurationsByTenant Resources
+    {
+        get
         {
-            _files = files;
-            _serializer = serializer;
-        }
-
-        /// <inheritdoc />
-        public ResourceConfigurationsByTenant Resources
-        {
-            get
-            {
-                var file = _files.GetFileInfo(".dolittle/resources.json");
-                return _serializer.FromJsonFile<ResourceConfigurationsByTenant>(file);
-            }
+            var file = _files.GetFileInfo(".dolittle/resources.json");
+            return _serializer.FromJsonFile<ResourceConfigurationsByTenant>(file);
         }
     }
 }

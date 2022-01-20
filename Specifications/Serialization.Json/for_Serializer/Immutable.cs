@@ -3,7 +3,6 @@
 
 using System;
 
-namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer
-{
-    public record Immutable(Guid guid, string label);
-}
+namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer;
+
+public record Immutable(Guid guid, string label);

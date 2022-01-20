@@ -3,23 +3,22 @@
 
 using Dolittle.Runtime.Specifications;
 
-namespace Dolittle.Runtime.Assemblies.Rules
+namespace Dolittle.Runtime.Assemblies.Rules;
+
+/// <summary>
+/// Provides extensions for <see cref="IAssemblyRuleBuilder"/>.
+/// </summary>
+public static class AssemblyRuleBuilderExtensions
 {
     /// <summary>
-    /// Provides extensions for <see cref="IAssemblyRuleBuilder"/>.
+    /// Excludes specified assemblies.
     /// </summary>
-    public static class AssemblyRuleBuilderExtensions
+    /// <param name="assemblyBuilder"><see cref="IAssemblyRuleBuilder"/> to build upon.</param>
+    /// <param name="names">Names that assemblies should not be starting with.</param>
+    /// <returns>Chained <see cref="IAssemblyRuleBuilder"/>.</returns>
+    public static IAssemblyRuleBuilder ExcludeAssembliesStartingWith(this IAssemblyRuleBuilder assemblyBuilder, params string[] names)
     {
-        /// <summary>
-        /// Excludes specified assemblies.
-        /// </summary>
-        /// <param name="assemblyBuilder"><see cref="IAssemblyRuleBuilder"/> to build upon.</param>
-        /// <param name="names">Names that assemblies should not be starting with.</param>
-        /// <returns>Chained <see cref="IAssemblyRuleBuilder"/>.</returns>
-        public static IAssemblyRuleBuilder ExcludeAssembliesStartingWith(this IAssemblyRuleBuilder assemblyBuilder, params string[] names)
-        {
-            assemblyBuilder.Specification = assemblyBuilder.Specification.And(new ExceptAssembliesStartingWith(names));
-            return assemblyBuilder;
-        }
+        assemblyBuilder.Specification = assemblyBuilder.Specification.And(new ExceptAssembliesStartingWith(names));
+        return assemblyBuilder;
     }
 }

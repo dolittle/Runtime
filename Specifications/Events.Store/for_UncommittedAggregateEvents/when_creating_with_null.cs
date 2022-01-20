@@ -4,19 +4,18 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents
+namespace Dolittle.Runtime.Events.Store.Specs.for_UncommittedAggregateEvents;
+
+public class when_creating_with_null : given.events_and_an_aggregate
 {
-    public class when_creating_with_null : given.events_and_an_aggregate
+    static UncommittedAggregateEvents events;
+    static Exception exception;
+
+    Because of = () => exception = Catch.Exception(() =>
     {
-        static UncommittedAggregateEvents events;
-        static Exception exception;
+        events = new UncommittedAggregateEvents(event_source_id, aggregate_artifact, aggregate_version, new[] { event_one, null, event_three });
+    });
 
-        Because of = () => exception = Catch.Exception(() =>
-        {
-            events = new UncommittedAggregateEvents(event_source_id, aggregate_artifact, aggregate_version, new[] { event_one, null, event_three });
-        });
-
-        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
-        It should_not_be_created = () => events.ShouldBeNull();
-    }
+    It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
+    It should_not_be_created = () => events.ShouldBeNull();
 }

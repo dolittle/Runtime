@@ -7,75 +7,74 @@ using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Execution;
 
-namespace Dolittle.Runtime.Tenancy
+namespace Dolittle.Runtime.Tenancy;
+
+/// <summary>
+/// Represents an implementation of <see cref="IPerformActionOnAllTenants" />.
+/// </summary>
+public class PerformActionOnAllTenants : IPerformActionOnAllTenants
 {
+    readonly ITenants _tenants;
+    readonly IExecutionContextManager _executionContextManager;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IPerformActionOnAllTenants" />.
+    /// Initializes a new instance of the <see cref="PerformActionOnAllTenants"/> class.
     /// </summary>
-    public class PerformActionOnAllTenants : IPerformActionOnAllTenants
+    /// <param name="tenants">The <see cref="ITenants" />.</param>
+    /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
+    public PerformActionOnAllTenants(ITenants tenants, IExecutionContextManager executionContextManager)
     {
-        readonly ITenants _tenants;
-        readonly IExecutionContextManager _executionContextManager;
+        _tenants = tenants;
+        _executionContextManager = executionContextManager;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="PerformActionOnAllTenants"/> class.
-        /// </summary>
-        /// <param name="tenants">The <see cref="ITenants" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        public PerformActionOnAllTenants(ITenants tenants, IExecutionContextManager executionContextManager)
+    /// <inheritdoc/>
+    public void Perform(Action<TenantId> action)
+    {
+        var originalExecutionContext = _executionContextManager.Current;
+        try
         {
-            _tenants = tenants;
-            _executionContextManager = executionContextManager;
-        }
-
-        /// <inheritdoc/>
-        public void Perform(Action<TenantId> action)
-        {
-            var originalExecutionContext = _executionContextManager.Current;
-            try
+            foreach (var tenant in _tenants.All.ToArray())
             {
-                foreach (var tenant in _tenants.All.ToArray())
-                {
-                    _executionContextManager.CurrentFor(tenant);
-                    action(tenant);
-                }
-            }
-            finally
-            {
-                _executionContextManager.CurrentFor(originalExecutionContext);
+                _executionContextManager.CurrentFor(tenant);
+                action(tenant);
             }
         }
-
-        /// <inheritdoc/>
-        public async Task PerformAsync(Func<TenantId, Task> action)
+        finally
         {
-            var originalExecutionContext = _executionContextManager.Current;
-            try
+            _executionContextManager.CurrentFor(originalExecutionContext);
+        }
+    }
+
+    /// <inheritdoc/>
+    public async Task PerformAsync(Func<TenantId, Task> action)
+    {
+        var originalExecutionContext = _executionContextManager.Current;
+        try
+        {
+            foreach (var tenant in _tenants.All.ToArray())
             {
-                foreach (var tenant in _tenants.All.ToArray())
-                {
-                    _executionContextManager.CurrentFor(tenant);
-                    await action(tenant).ConfigureAwait(false);
-                }
-            }
-            finally
-            {
-                _executionContextManager.CurrentFor(originalExecutionContext);
+                _executionContextManager.CurrentFor(tenant);
+                await action(tenant).ConfigureAwait(false);
             }
         }
-
-        /// <inheritdoc/>
-        public Task PerformInParallel(Func<TenantId, Task> action)
+        finally
         {
-            var tenants = _tenants.All.ToArray();
-            var tasks = tenants.Length == 0 ?
-                new[] { Task.CompletedTask } :
-                tenants.Select(tenant => Task.Run(async () =>
-                    {
-                        _executionContextManager.CurrentFor(tenant);
-                        await action(tenant).ConfigureAwait(false);
-                    }));
-            return Task.WhenAll(tasks);
+            _executionContextManager.CurrentFor(originalExecutionContext);
         }
+    }
+
+    /// <inheritdoc/>
+    public Task PerformInParallel(Func<TenantId, Task> action)
+    {
+        var tenants = _tenants.All.ToArray();
+        var tasks = tenants.Length == 0 ?
+            new[] { Task.CompletedTask } :
+            tenants.Select(tenant => Task.Run(async () =>
+            {
+                _executionContextManager.CurrentFor(tenant);
+                await action(tenant).ConfigureAwait(false);
+            }));
+        return Task.WhenAll(tasks);
     }
 }

@@ -3,22 +3,21 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Events.Store
+namespace Dolittle.Runtime.Events.Store;
+
+/// <summary>
+/// Represents a version of an aggregate root as a natural number, corresponding to the number of events the Aggregate Root has applied to an Event Source.
+/// </summary>
+public record AggregateRootVersion(ulong Value) : ConceptAs<ulong>(Value)
 {
     /// <summary>
-    /// Represents a version of an aggregate root as a natural number, corresponding to the number of events the Aggregate Root has applied to an Event Source.
+    /// The initial version of an aggregate root that has applied no events.
     /// </summary>
-    public record AggregateRootVersion(ulong Value) : ConceptAs<ulong>(Value)
-    {
-        /// <summary>
-        /// The initial version of an aggregate root that has applied no events.
-        /// </summary>
-        public static readonly AggregateRootVersion Initial = 0;
+    public static readonly AggregateRootVersion Initial = 0;
 
-        /// <summary>
-        /// Implicitly convert a <see cref="ulong"/> to an <see cref="AggregateRootVersion"/>.
-        /// </summary>
-        /// <param name="number">The number.</param>
-        public static implicit operator AggregateRootVersion(ulong number) => new(number);
-    }
+    /// <summary>
+    /// Implicitly convert a <see cref="ulong"/> to an <see cref="AggregateRootVersion"/>.
+    /// </summary>
+    /// <param name="number">The number.</param>
+    public static implicit operator AggregateRootVersion(ulong number) => new(number);
 }

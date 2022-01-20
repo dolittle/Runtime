@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.DependencyInversion.Autofac
+namespace Dolittle.Runtime.DependencyInversion.Autofac;
+
+/// <summary>
+/// Exception that gets thrown when a <see cref="ICanProvideRegistrationSources"/> does not have a default constructor.
+/// </summary>
+public class RegistrationSourceProviderMustHaveADefaultConstructor : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a <see cref="ICanProvideRegistrationSources"/> does not have a default constructor.
+    /// Initializes a new instance of the <see cref="RegistrationSourceProviderMustHaveADefaultConstructor"/> class.
     /// </summary>
-    public class RegistrationSourceProviderMustHaveADefaultConstructor : Exception
+    /// <param name="type"><see cref="Type"/> of <see cref="ICanProvideRegistrationSources"/> that is missing default constructor.</param>
+    public RegistrationSourceProviderMustHaveADefaultConstructor(Type type)
+        : base($"Registration source '{type.AssemblyQualifiedName}' is missing a default constructor")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RegistrationSourceProviderMustHaveADefaultConstructor"/> class.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> of <see cref="ICanProvideRegistrationSources"/> that is missing default constructor.</param>
-        public RegistrationSourceProviderMustHaveADefaultConstructor(Type type)
-            : base($"Registration source '{type.AssemblyQualifiedName}' is missing a default constructor")
-        {
-        }
     }
 }

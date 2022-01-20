@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Booting
+namespace Dolittle.Runtime.Booting;
+
+/// <summary>
+/// Exception that gets thrown when an association is missing.
+/// </summary>
+public class MissingAssociation : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when an association is missing.
+    /// Initializes a new instance of the <see cref="MissingAssociation"/> class.
     /// </summary>
-    public class MissingAssociation : Exception
+    /// <param name="key">Key for association that is missing.</param>
+    public MissingAssociation(string key)
+        : base($"Missing association with key '{key}'")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingAssociation"/> class.
-        /// </summary>
-        /// <param name="key">Key for association that is missing.</param>
-        public MissingAssociation(string key)
-            : base($"Missing association with key '{key}'")
-        {
-        }
     }
 }

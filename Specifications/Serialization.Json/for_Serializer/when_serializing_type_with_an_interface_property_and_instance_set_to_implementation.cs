@@ -3,26 +3,25 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer
+namespace Dolittle.Runtime.Serialization.Json.Specs.for_Serializer;
+
+public class when_serializing_type_with_an_interface_property_and_instance_set_to_implementation : given.a_serializer
 {
-    public class when_serializing_type_with_an_interface_property_and_instance_set_to_implementation : given.a_serializer
+    const string expected_content_value = "Something";
+
+    static ClassToSerialize class_to_serialize;
+
+    static string result;
+
+    Establish context = () =>
     {
-        const string expected_content_value = "Something";
+        class_to_serialize = new ClassToSerialize
+        {
+            Something = new SomethingImplementation { SomeValue = expected_content_value }
+        };
+    };
 
-        static ClassToSerialize class_to_serialize;
+    Because of = () => result = serializer.ToJson(class_to_serialize);
 
-        static string result;
-
-        Establish context = () =>
-                                {
-                                    class_to_serialize = new ClassToSerialize
-                                    {
-                                        Something = new SomethingImplementation { SomeValue = expected_content_value }
-                                    };
-                                };
-
-        Because of = () => result = serializer.ToJson(class_to_serialize);
-
-        It should_not_contain_type_information = () => result.ShouldNotContain(typeof(SomethingImplementation).Name);
-    }
+    It should_not_contain_type_information = () => result.ShouldNotContain(typeof(SomethingImplementation).Name);
 }

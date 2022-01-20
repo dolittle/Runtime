@@ -3,19 +3,18 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Streams
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams;
+
+/// <summary>
+/// Exception that gets thrown when an Event Log is attempted retrieved as a normal Stream.
+/// </summary>
+public class CannotGetEventLogStream : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when an Event Log is attempted retrieved as a normal Stream.
+    /// Initializes a new instance of the <see cref="CannotGetEventLogStream"/> class.
     /// </summary>
-    public class CannotGetEventLogStream : Exception
+    public CannotGetEventLogStream()
+        : base($"An Event Log cannot be retrieved as a normal Stream")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CannotGetEventLogStream"/> class.
-        /// </summary>
-        public CannotGetEventLogStream()
-            : base($"An Event Log cannot be retrieved as a normal Stream")
-        {
-        }
     }
 }

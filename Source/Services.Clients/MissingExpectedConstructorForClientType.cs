@@ -4,20 +4,19 @@
 using System;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Exception that gets thrown when a client type does not have a constructor that takes <see cref="CallInvoker"/> as the only argument.
+/// </summary>
+public class MissingExpectedConstructorForClientType : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a client type does not have a constructor that takes <see cref="CallInvoker"/> as the only argument.
+    /// Initializes a new instance of the <see cref="MissingExpectedConstructorForClientType"/> class.
     /// </summary>
-    public class MissingExpectedConstructorForClientType : Exception
+    /// <param name="type"><see cref="Type"/> that does not have the expected constructor.</param>
+    public MissingExpectedConstructorForClientType(Type type)
+        : base($"Type '{type.AssemblyQualifiedName}' does not have a constructor that takes a CallInvoker as the only argument.")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingExpectedConstructorForClientType"/> class.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> that does not have the expected constructor.</param>
-        public MissingExpectedConstructorForClientType(Type type)
-            : base($"Type '{type.AssemblyQualifiedName}' does not have a constructor that takes a CallInvoker as the only argument.")
-        {
-        }
     }
 }

@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Reflection.Specs.for_TypeExtensions
+namespace Dolittle.Runtime.Reflection.Specs.for_TypeExtensions;
+
+public class when_asking_a_type_with_a_default_constructor_if_it_has_a_default_constructor
 {
-    public class when_asking_a_type_with_a_default_constructor_if_it_has_a_default_constructor
-    {
-        static bool result;
+    static bool result;
 
-        Because of = () => result = typeof(TypeWithDefaultConstructor).HasDefaultConstructor();
+    Because of = () => result = typeof(TypeWithDefaultConstructor).HasDefaultConstructor();
 
-        It should_return_true = () => result.ShouldBeTrue();
-    }
+    It should_return_true = () => result.ShouldBeTrue();
 }

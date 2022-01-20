@@ -10,131 +10,130 @@ using Dolittle.Runtime.Execution;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Resilience;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Processing.Streams;
+
+/// <summary>
+/// Represents an implementation <see cref="ICreateScopedStreamProcessors" />.
+/// </summary>
+public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
 {
+    readonly IEventFetchers _eventFetchers;
+    readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
+    readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
+    readonly ILoggerFactory _loggerFactory;
+    readonly IStreamEventWatcher _streamWatcher;
+    readonly TenantId _tenant;
+
     /// <summary>
-    /// Represents an implementation <see cref="ICreateScopedStreamProcessors" />.
+    /// Initializes a new instance of the <see cref="CreateScopedStreamProcessors"/> class.
     /// </summary>
-    public class CreateScopedStreamProcessors : ICreateScopedStreamProcessors
+    /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
+    /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
+    /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
+    /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
+    /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
+    /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
+    public CreateScopedStreamProcessors(
+        IEventFetchers eventFetchers,
+        IResilientStreamProcessorStateRepository streamProcessorStates,
+        IExecutionContextManager executionContextManager,
+        IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
+        IStreamEventWatcher streamWatcher,
+        ILoggerFactory loggerFactory)
     {
-        readonly IEventFetchers _eventFetchers;
-        readonly IResilientStreamProcessorStateRepository _streamProcessorStates;
-        readonly IAsyncPolicyFor<ICanFetchEventsFromStream> _eventsFetcherPolicy;
-        readonly ILoggerFactory _loggerFactory;
-        readonly IStreamEventWatcher _streamWatcher;
-        readonly TenantId _tenant;
+        _eventFetchers = eventFetchers;
+        _streamProcessorStates = streamProcessorStates;
+        _eventsFetcherPolicy = eventsFetcherPolicy;
+        _tenant = executionContextManager.Current.Tenant;
+        _streamWatcher = streamWatcher;
+        _loggerFactory = loggerFactory;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CreateScopedStreamProcessors"/> class.
-        /// </summary>
-        /// <param name="eventFetchers">The <see cref="IEventFetchers" />.</param>
-        /// <param name="streamProcessorStates">The <see cref="IResilientStreamProcessorStateRepository" />.</param>
-        /// <param name="executionContextManager">The <see cref="IExecutionContextManager" />.</param>
-        /// <param name="eventsFetcherPolicy">The <see cref="IAsyncPolicyFor{T}" /> <see cref="ICanFetchEventsFromStream" />.</param>
-        /// <param name="streamWatcher">The <see cref="IStreamEventWatcher" />.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory" />.</param>
-        public CreateScopedStreamProcessors(
-            IEventFetchers eventFetchers,
-            IResilientStreamProcessorStateRepository streamProcessorStates,
-            IExecutionContextManager executionContextManager,
-            IAsyncPolicyFor<ICanFetchEventsFromStream> eventsFetcherPolicy,
-            IStreamEventWatcher streamWatcher,
-            ILoggerFactory loggerFactory)
+    /// <inheritdoc />
+    public async Task<AbstractScopedStreamProcessor> Create(
+        IStreamDefinition streamDefinition,
+        IStreamProcessorId streamProcessorId,
+        IEventProcessor eventProcessor,
+        CancellationToken cancellationToken)
+    {
+        if (streamDefinition.Partitioned)
         {
-            _eventFetchers = eventFetchers;
-            _streamProcessorStates = streamProcessorStates;
-            _eventsFetcherPolicy = eventsFetcherPolicy;
-            _tenant = executionContextManager.Current.Tenant;
-            _streamWatcher = streamWatcher;
-            _loggerFactory = loggerFactory;
+            var eventFetcher = await _eventFetchers.GetPartitionedFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
+            return await CreatePartitionedScopedStreamProcessor(streamProcessorId, streamDefinition, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            var eventFetcher = await _eventFetchers.GetFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
+            return await CreateUnpartitionedScopedStreamProcessor(streamProcessorId, streamDefinition, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
+        }
+    }
+
+    async Task<Partitioned.ScopedStreamProcessor> CreatePartitionedScopedStreamProcessor(
+        IStreamProcessorId streamProcessorId,
+        IStreamDefinition streamDefinition,
+        IEventProcessor eventProcessor,
+        ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
+        CancellationToken cancellationToken)
+    {
+        var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
+        if (!tryGetStreamProcessorState.Success)
+        {
+            tryGetStreamProcessorState = Partitioned.StreamProcessorState.New;
+            await _streamProcessorStates.Persist(streamProcessorId, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
         }
 
-        /// <inheritdoc />
-        public async Task<AbstractScopedStreamProcessor> Create(
-            IStreamDefinition streamDefinition,
-            IStreamProcessorId streamProcessorId,
-            IEventProcessor eventProcessor,
-            CancellationToken cancellationToken)
+        if (!tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedPartitionedStreamProcessorState(streamProcessorId);
+        NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
+
+        return new Partitioned.ScopedStreamProcessor(
+            _tenant,
+            streamProcessorId,
+            streamDefinition,
+            tryGetStreamProcessorState.Result as Partitioned.StreamProcessorState,
+            eventProcessor,
+            _streamProcessorStates,
+            eventsFromStreamsFetcher,
+            new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy),
+            _eventsFetcherPolicy,
+            _streamWatcher,
+            new Partitioned.TimeToRetryForPartitionedStreamProcessor(),
+            _loggerFactory.CreateLogger<Partitioned.ScopedStreamProcessor>());
+    }
+
+    async Task<ScopedStreamProcessor> CreateUnpartitionedScopedStreamProcessor(
+        IStreamProcessorId streamProcessorId,
+        IStreamDefinition streamDefinition,
+        IEventProcessor eventProcessor,
+        ICanFetchEventsFromStream eventsFromStreamsFetcher,
+        CancellationToken cancellationToken)
+    {
+        var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
+        if (!tryGetStreamProcessorState.Success)
         {
-            if (streamDefinition.Partitioned)
-            {
-                var eventFetcher = await _eventFetchers.GetPartitionedFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-                return await CreatePartitionedScopedStreamProcessor(streamProcessorId, streamDefinition, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                var eventFetcher = await _eventFetchers.GetFetcherFor(eventProcessor.Scope, streamDefinition, cancellationToken).ConfigureAwait(false);
-                return await CreateUnpartitionedScopedStreamProcessor(streamProcessorId, streamDefinition, eventProcessor, eventFetcher, cancellationToken).ConfigureAwait(false);
-            }
+            tryGetStreamProcessorState = StreamProcessorState.New;
+            await _streamProcessorStates.Persist(streamProcessorId, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
         }
 
-        async Task<Partitioned.ScopedStreamProcessor> CreatePartitionedScopedStreamProcessor(
-            IStreamProcessorId streamProcessorId,
-            IStreamDefinition streamDefinition,
-            IEventProcessor eventProcessor,
-            ICanFetchEventsFromPartitionedStream eventsFromStreamsFetcher,
-            CancellationToken cancellationToken)
-        {
-            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
-            if (!tryGetStreamProcessorState.Success)
-            {
-                tryGetStreamProcessorState = Partitioned.StreamProcessorState.New;
-                await _streamProcessorStates.Persist(streamProcessorId, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
-            }
+        if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
+        NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
+        return new ScopedStreamProcessor(
+            _tenant,
+            streamProcessorId,
+            streamDefinition,
+            tryGetStreamProcessorState.Result as StreamProcessorState,
+            eventProcessor,
+            _streamProcessorStates,
+            eventsFromStreamsFetcher,
+            _eventsFetcherPolicy,
+            _streamWatcher,
+            new TimeToRetryForUnpartitionedStreamProcessor(),
+            _loggerFactory.CreateLogger<ScopedStreamProcessor>());
+    }
 
-            if (!tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedPartitionedStreamProcessorState(streamProcessorId);
-            NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
-
-            return new Partitioned.ScopedStreamProcessor(
-                _tenant,
-                streamProcessorId,
-                streamDefinition,
-                tryGetStreamProcessorState.Result as Partitioned.StreamProcessorState,
-                eventProcessor,
-                _streamProcessorStates,
-                eventsFromStreamsFetcher,
-                new Partitioned.FailingPartitions(_streamProcessorStates, eventProcessor, eventsFromStreamsFetcher, _eventsFetcherPolicy),
-                _eventsFetcherPolicy,
-                _streamWatcher,
-                new Partitioned.TimeToRetryForPartitionedStreamProcessor(),
-                _loggerFactory.CreateLogger<Partitioned.ScopedStreamProcessor>());
-        }
-
-        async Task<ScopedStreamProcessor> CreateUnpartitionedScopedStreamProcessor(
-            IStreamProcessorId streamProcessorId,
-            IStreamDefinition streamDefinition,
-            IEventProcessor eventProcessor,
-            ICanFetchEventsFromStream eventsFromStreamsFetcher,
-            CancellationToken cancellationToken)
-        {
-            var tryGetStreamProcessorState = await _streamProcessorStates.TryGetFor(streamProcessorId, cancellationToken).ConfigureAwait(false);
-            if (!tryGetStreamProcessorState.Success)
-            {
-                tryGetStreamProcessorState = StreamProcessorState.New;
-                await _streamProcessorStates.Persist(streamProcessorId, tryGetStreamProcessorState.Result, cancellationToken).ConfigureAwait(false);
-            }
-
-            if (tryGetStreamProcessorState.Result.Partitioned) throw new ExpectedUnpartitionedStreamProcessorState(streamProcessorId);
-            NotifyStream(streamProcessorId.ScopeId, streamDefinition, tryGetStreamProcessorState.Result.Position);
-            return new ScopedStreamProcessor(
-                _tenant,
-                streamProcessorId,
-                streamDefinition,
-                tryGetStreamProcessorState.Result as StreamProcessorState,
-                eventProcessor,
-                _streamProcessorStates,
-                eventsFromStreamsFetcher,
-                _eventsFetcherPolicy,
-                _streamWatcher,
-                new TimeToRetryForUnpartitionedStreamProcessor(),
-                _loggerFactory.CreateLogger<ScopedStreamProcessor>());
-        }
-
-        void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
-        {
-            if (position == StreamPosition.Start) return;
-            if (streamDefinition.Public) _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
-            else _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
-        }
+    void NotifyStream(ScopeId scopeId, IStreamDefinition streamDefinition, StreamPosition position)
+    {
+        if (position == StreamPosition.Start) return;
+        if (streamDefinition.Public) _streamWatcher.NotifyForEvent(streamDefinition.StreamId, position - 1);
+        else _streamWatcher.NotifyForEvent(scopeId, streamDefinition.StreamId, position - 1);
     }
 }

@@ -4,17 +4,16 @@
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy.for_InstancesPerTenant.given
-{
-    public class all_dependencies
-    {
-        protected static Mock<ITenantKeyCreator> tenant_key_creator;
-        protected static Mock<ITypeActivator> type_activator;
+namespace Dolittle.Runtime.DependencyInversion.Autofac.Tenancy.for_InstancesPerTenant.given;
 
-        Establish context = () =>
-        {
-            tenant_key_creator = new Mock<ITenantKeyCreator>();
-            type_activator = new Mock<ITypeActivator>();
-        };
-    }
+public class all_dependencies
+{
+    protected static Mock<ITenantKeyCreator> tenant_key_creator;
+    protected static Mock<ITypeActivator> type_activator;
+
+    Establish context = () =>
+    {
+        tenant_key_creator = new Mock<ITenantKeyCreator>();
+        type_activator = new Mock<ITypeActivator>();
+    };
 }

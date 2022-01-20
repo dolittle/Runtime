@@ -6,10 +6,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client;
+using Dolittle.Services.Contracts;
 using Grpc.Core;
 using Machine.Specifications;
 using Moq;
-using Contracts = Dolittle.Services.Contracts;
 using It = Machine.Specifications.It;
 using ReverseCallClient = Dolittle.Runtime.Services.Clients.ReverseCallClient<
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyClient,
@@ -19,93 +19,93 @@ using ReverseCallClient = Dolittle.Runtime.Services.Clients.ReverseCallClient<
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyConnectResponse,
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyRequest,
                             Dolittle.Runtime.Services.Clients.for_ReverseCallClient.given.a_client.MyResponse>;
+using Status = Grpc.Core.Status;
 
-namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established
+namespace Dolittle.Runtime.Services.Clients.for_ReverseCallClient.when_handling.and_connection_is_established;
+
+public class and_the_ping_times_out : given.a_reverse_call_client
 {
-    public class and_the_ping_times_out : given.a_reverse_call_client
+    static Execution.ExecutionContext execution_context;
+    static ReverseCallHandler<MyRequest, MyResponse> callback;
+    static bool callback_was_called;
+    static MyRequest callback_argument;
+    static MyServerMessage server_request;
+    static MyRequest request;
+    static MyResponse response;
+    static Guid call_id;
+    static CancellationTokenSource cts;
+
+    Establish context = () =>
     {
-        static Execution.ExecutionContext execution_context;
-        static ReverseCallHandler<MyRequest, MyResponse> callback;
-        static bool callback_was_called;
-        static MyRequest callback_argument;
-        static MyServerMessage server_request;
-        static MyRequest request;
-        static MyResponse response;
-        static Guid call_id;
-        static CancellationTokenSource cts;
+        cts = new CancellationTokenSource();
+        execution_context = given.execution_contexts.create();
+        execution_context_manager
+            .SetupGet(_ => _.Current)
+            .Returns(execution_context);
 
-        Establish context = () =>
+        server_to_client_stream
+            .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
+            .Returns(() => Task.FromResult(true));
+
+        server_to_client_stream
+            .SetupGet(_ => _.Current)
+            .Returns(new MyServerMessage { ConnectResponse = new MyConnectResponse() });
+
+        call_id = Guid.Parse("6e53a922-7207-49f7-b5fd-e8ec159fa4db");
+        request = new MyRequest
         {
-            cts = new();
-            execution_context = given.execution_contexts.create();
-            execution_context_manager
-                .SetupGet(_ => _.Current)
-                .Returns(execution_context);
-
-            server_to_client_stream
-                .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
-                .Returns(() => Task.FromResult(true));
-
-            server_to_client_stream
-                .SetupGet(_ => _.Current)
-                .Returns(new MyServerMessage { ConnectResponse = new MyConnectResponse() });
-
-            call_id = Guid.Parse("6e53a922-7207-49f7-b5fd-e8ec159fa4db");
-            request = new()
+            Context = new ReverseCallRequestContext
             {
-                Context = new()
-                {
-                    ExecutionContext = execution_context.ToProtobuf(),
-                    CallId = call_id.ToProtobuf()
-                }
-            };
-            server_request = new MyServerMessage
-            {
-                Request = request
-            };
-
-            response = new();
-
-            callback = (request, token) =>
-            {
-                callback_was_called = true;
-                callback_argument = request;
-                return Task.FromResult(response);
-            };
-
-            client_to_server_stream
-                .Setup(_ => _.WriteAsync(Moq.It.IsAny<MyClientMessage>()))
-                .Returns(Task.FromResult(true))
-                .Callback<MyClientMessage>(message =>
-                {
-                    if (message.Response != default)
-                    {
-                        cts.Cancel();
-                    }
-                });
-
-            var connect_response = reverse_call_client.Connect(new MyConnectArguments
-            {
-                Context = new Contracts.ReverseCallArgumentsContext
-                {
-                    ExecutionContext = execution_context.ToProtobuf()
-                }
-            }, CancellationToken.None).GetAwaiter().GetResult();
-
-            server_to_client_stream
-                .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
-                // wait for the keepalive to timeout, then throw the exception mimicking a cancelled connection
-                .ThrowsAsync(new RpcException(new(StatusCode.Cancelled, "")), ping_interval.Multiply(ReverseCallClient.PingThreshold + 1));
+                ExecutionContext = execution_context.ToProtobuf(),
+                CallId = call_id.ToProtobuf()
+            }
+        };
+        server_request = new MyServerMessage
+        {
+            Request = request
         };
 
-        static Exception exception;
+        response = new MyResponse();
 
-        Because of = () => exception = Catch.Exception(() =>
-            reverse_call_client.Handle(callback, CancellationToken.None).GetAwaiter().GetResult());
+        callback = (request, token) =>
+        {
+            callback_was_called = true;
+            callback_argument = request;
+            return Task.FromResult(response);
+        };
 
-        It should_not_call_the_callback = () =>
-            callback_was_called.ShouldBeFalse();
-        It should_throw_an_exception = () =>
-            exception.ShouldBeOfExactType<PingTimedOut>();
-    }
+        client_to_server_stream
+            .Setup(_ => _.WriteAsync(Moq.It.IsAny<MyClientMessage>()))
+            .Returns(Task.FromResult(true))
+            .Callback<MyClientMessage>(message =>
+            {
+                if (message.Response != default)
+                {
+                    cts.Cancel();
+                }
+            });
+
+        var connect_response = reverse_call_client.Connect(new MyConnectArguments
+        {
+            Context = new Dolittle.Services.Contracts.ReverseCallArgumentsContext
+            {
+                ExecutionContext = execution_context.ToProtobuf()
+            }
+        }, CancellationToken.None).GetAwaiter().GetResult();
+
+        server_to_client_stream
+            .Setup(_ => _.MoveNext(Moq.It.IsAny<CancellationToken>()))
+            // wait for the keepalive to timeout, then throw the exception mimicking a cancelled connection
+            .ThrowsAsync(new RpcException(new Status(StatusCode.Cancelled, "")), ping_interval.Multiply(ReverseCallClient.PingThreshold + 1));
+    };
+
+    static Exception exception;
+
+    Because of = () => exception = Catch.Exception(() =>
+        reverse_call_client.Handle(callback, CancellationToken.None).GetAwaiter().GetResult());
+
+    It should_not_call_the_callback = () =>
+        callback_was_called.ShouldBeFalse();
+    It should_throw_an_exception = () =>
+        exception.ShouldBeOfExactType<PingTimedOut>();
 }

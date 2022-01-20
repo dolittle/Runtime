@@ -7,60 +7,58 @@ using System.Linq;
 using System.Reflection;
 using Dolittle.Runtime.Assemblies;
 
-namespace Dolittle.Runtime.Configuration.Files
+namespace Dolittle.Runtime.Configuration.Files;
+
+/// <summary>
+/// Represents a <see cref="ICanProvideConfigurationObjects">configuration provider</see> for
+/// embedded resources.
+/// </summary>
+/// <remarks>
+/// It will only look for embedded resources in the entry assembly.
+/// </remarks>
+public class ManifestResourceStreamConfigurationObjectsProvider : ICanProvideConfigurationObjects
 {
+    readonly Assembly _entryAssembly;
+    readonly IConfigurationFileParsers _parsers;
+
     /// <summary>
-    /// Represents a <see cref="ICanProvideConfigurationObjects">configuration provider</see> for
-    /// embedded resources.
+    /// Initializes a new instance of the <see cref="ManifestResourceStreamConfigurationObjectsProvider"/> class.
     /// </summary>
-    /// <remarks>
-    /// It will only look for embedded resources in the entry assembly.
-    /// </remarks>
-    public class ManifestResourceStreamConfigurationObjectsProvider : ICanProvideConfigurationObjects
+    /// <param name="assemblies"><see cref="IAssemblies"/> for getting assembly for embedded resources.</param>
+    /// <param name="parsers"><see cref="IConfigurationFileParsers"/> for parsing.</param>
+    public ManifestResourceStreamConfigurationObjectsProvider(
+        IAssemblies assemblies,
+        IConfigurationFileParsers parsers)
     {
-        readonly Assembly _entryAssembly;
-        readonly IConfigurationFileParsers _parsers;
+        _entryAssembly = assemblies.EntryAssembly;
+        _parsers = parsers;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ManifestResourceStreamConfigurationObjectsProvider"/> class.
-        /// </summary>
-        /// <param name="assemblies"><see cref="IAssemblies"/> for getting assembly for embedded resources.</param>
-        /// <param name="parsers"><see cref="IConfigurationFileParsers"/> for parsing.</param>
-        public ManifestResourceStreamConfigurationObjectsProvider(
-            IAssemblies assemblies,
-            IConfigurationFileParsers parsers)
+    /// <inheritdoc/>
+    public bool CanProvide(Type type)
+    {
+        var resourceNames = _entryAssembly.GetManifestResourceNames().Where(_ => _.EndsWith(GetFilenameFor(type), StringComparison.InvariantCultureIgnoreCase)).ToArray();
+        if (resourceNames.Length > 1)
         {
-            _entryAssembly = assemblies.EntryAssembly;
-            _parsers = parsers;
+            throw new MultipleFilesAvailableOfSameType(type, resourceNames);
         }
+        return resourceNames.Length == 1;
+    }
 
-        /// <inheritdoc/>
-        public bool CanProvide(Type type)
+    /// <inheritdoc/>
+    public object Provide(Type type)
+    {
+        var resourceName = _entryAssembly.GetManifestResourceNames().SingleOrDefault(_ => _.EndsWith(GetFilenameFor(type), StringComparison.InvariantCultureIgnoreCase));
+        if (resourceName == null)
         {
-            var filename = GetFilenameFor(type);
-            var resourceNames = _entryAssembly.GetManifestResourceNames().Where(_ => _.EndsWith(filename, StringComparison.InvariantCultureIgnoreCase)).ToArray();
-            if (resourceNames.Length > 1) throw new MultipleFilesAvailableOfSameType(type, resourceNames);
-            return resourceNames.Length == 1;
-        }
-
-        /// <inheritdoc/>
-        public object Provide(Type type)
-        {
-            var filename = GetFilenameFor(type);
-            var resourceName = _entryAssembly.GetManifestResourceNames().SingleOrDefault(_ => _.EndsWith(filename, StringComparison.InvariantCultureIgnoreCase));
-            if (resourceName != null)
-            {
-                using var reader = new StreamReader(_entryAssembly.GetManifestResourceStream(resourceName));
-                var content = reader.ReadToEnd();
-                return _parsers.Parse(type, resourceName, content);
-            }
-
             throw new UnableToProvideConfigurationObject<ManifestResourceStreamConfigurationObjectsProvider>(type);
         }
+        using var reader = new StreamReader(_entryAssembly.GetManifestResourceStream(resourceName));
+        var content = reader.ReadToEnd();
+        return _parsers.Parse(type, resourceName, content);
 
-        string GetFilenameFor(Type type)
-        {
-            return $"{type.GetFriendlyConfigurationName()}.json";
-        }
     }
+
+    static string GetFilenameFor(Type type)
+        => $"{type.GetFriendlyConfigurationName()}.json";
 }

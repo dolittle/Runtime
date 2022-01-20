@@ -8,12 +8,27 @@ The [Runtime]({{< ref "docs/concepts/overview" >}}) uses JSON configuration file
 
 | Configuration file            | Required |
 |-------------------------------|----------|
+| `platform.json`               | ✔️        |
 | `tenants.json`                | ✔️        |
 | `resources.json`              | ✔️        |
 | `event-horizon-consents.json` | ✔️        |
-| `microservices.json`          |  ️        |
+| `microservices.json`          |          |
 | `metrics.json`                |          |
 | `endpoints.json`              |          |
+
+## `platform.json`
+**Required.** Configures the Microservice environment for the Runtime.
+```json
+{
+    "applicationName": "<application-name>",
+    "applicationID": "<application-id>",
+    "microserviceName": "<microservice-name>",
+    "microserviceID": "<microservice-id>",
+    "customerName": "<customer-name>",
+    "customerID": "<customer-id>",
+    "environment": "<environment-name>"
+}
+```
 
 ## `tenants.json`
 **Required.** Defines each [Tenant]({{< ref "docs/concepts/tenants" >}}) in the Runtime.

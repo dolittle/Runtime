@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime.EventHandlers
+namespace Dolittle.Runtime.CLI.Runtime.EventHandlers;
+
+/// <summary>
+/// Exception that gets thrown when getting all Event Handlers fails.
+/// </summary>
+public class GetAllEventHandlersFailed : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when getting all Event Handlers fails.
+    /// Initializes a new instance of the <see cref="GetAllEventHandlersFailed"/> class.
     /// </summary>
-    public class GetAllEventHandlersFailed : Exception
+    /// <param name="reason">The reason why getting all Event Handlers failed.</param>
+    public GetAllEventHandlersFailed(string reason)
+        : base($"Could not get all event handlers because {reason}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetAllEventHandlersFailed"/> class.
-        /// </summary>
-        /// <param name="reason">The reason why getting all Event Handlers failed.</param>
-        public GetAllEventHandlersFailed(string reason)
-            : base($"Could not get all event handlers because {reason}")
-        {
-        }
     }
 }

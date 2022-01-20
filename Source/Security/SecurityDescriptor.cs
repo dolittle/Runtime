@@ -4,52 +4,51 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Dolittle.Runtime.Security
+namespace Dolittle.Runtime.Security;
+
+/// <summary>
+/// Represents a <see cref="ISecurityDescriptor"/>.
+/// </summary>
+public class SecurityDescriptor : ISecurityDescriptor
 {
+    readonly List<ISecurityAction> _actions = new();
+
     /// <summary>
-    /// Represents a <see cref="ISecurityDescriptor"/>.
+    /// Initializes a new instance of the <see cref="SecurityDescriptor"/> class.
     /// </summary>
-    public class SecurityDescriptor : ISecurityDescriptor
+    public SecurityDescriptor()
     {
-        readonly List<ISecurityAction> _actions = new List<ISecurityAction>();
+        When = new SecurityDescriptorBuilder(this);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SecurityDescriptor"/> class.
-        /// </summary>
-        public SecurityDescriptor()
+    /// <inheritdoc/>
+    public ISecurityDescriptorBuilder When { get; }
+
+    /// <inheritdoc/>
+    public IEnumerable<ISecurityAction> Actions => _actions;
+
+    /// <inheritdoc/>
+    public void AddAction(ISecurityAction securityAction)
+    {
+        _actions.Add(securityAction);
+    }
+
+    /// <inheritdoc/>
+    public bool CanAuthorize<T>(object instanceToAuthorize)
+        where T : ISecurityAction
+    {
+        return _actions.Any(a => a.GetType() == typeof(T) && a.CanAuthorize(instanceToAuthorize));
+    }
+
+    /// <inheritdoc/>
+    public AuthorizeDescriptorResult Authorize(object instanceToAuthorize)
+    {
+        var result = new AuthorizeDescriptorResult();
+        foreach (var action in Actions.Where(a => a.CanAuthorize(instanceToAuthorize)))
         {
-            When = new SecurityDescriptorBuilder(this);
+            result.ProcessAuthorizeActionResult(action.Authorize(instanceToAuthorize));
         }
 
-        /// <inheritdoc/>
-        public ISecurityDescriptorBuilder When { get; }
-
-        /// <inheritdoc/>
-        public IEnumerable<ISecurityAction> Actions => _actions;
-
-        /// <inheritdoc/>
-        public void AddAction(ISecurityAction securityAction)
-        {
-            _actions.Add(securityAction);
-        }
-
-        /// <inheritdoc/>
-        public bool CanAuthorize<T>(object instanceToAuthorize)
-            where T : ISecurityAction
-        {
-            return _actions.Any(a => a.GetType() == typeof(T) && a.CanAuthorize(instanceToAuthorize));
-        }
-
-        /// <inheritdoc/>
-        public AuthorizeDescriptorResult Authorize(object instanceToAuthorize)
-        {
-            var result = new AuthorizeDescriptorResult();
-            foreach (var action in Actions.Where(a => a.CanAuthorize(instanceToAuthorize)))
-            {
-                result.ProcessAuthorizeActionResult(action.Authorize(instanceToAuthorize));
-            }
-
-            return result;
-        }
+        return result;
     }
 }

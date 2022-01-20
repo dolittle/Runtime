@@ -3,125 +3,126 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using Dolittle.Runtime.Collections;
 using Microsoft.Extensions.Logging;
 
-namespace Dolittle.Runtime.Types
+namespace Dolittle.Runtime.Types;
+
+/// <summary>
+/// Represents an implementation of <see cref="IContractToImplementorsSerializer"/>.
+/// </summary>
+public class ContractToImplementorsSerializer : IContractToImplementorsSerializer
 {
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IContractToImplementorsSerializer"/>.
+    /// Initializes a new instance of the <see cref="ContractToImplementorsSerializer"/> class.
     /// </summary>
-    public class ContractToImplementorsSerializer : IContractToImplementorsSerializer
+    /// <param name="logger"><see cref="ILogger"/> for logging.</param>
+    public ContractToImplementorsSerializer(ILogger logger)
     {
-        readonly ILogger _logger;
+        _logger = logger;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ContractToImplementorsSerializer"/> class.
-        /// </summary>
-        /// <param name="logger"><see cref="ILogger"/> for logging.</param>
-        public ContractToImplementorsSerializer(ILogger logger)
+    /// <inheritdoc/>
+    public string SerializeMap(IDictionary<Type, IEnumerable<Type>> map)
+    {
+        var builder = new StringBuilder();
+        map.ForEach(keyValue =>
         {
-            _logger = logger;
-        }
-
-        /// <inheritdoc/>
-        public string SerializeMap(IDictionary<Type, IEnumerable<Type>> map)
-        {
-            var builder = new StringBuilder();
-            map.ForEach(keyValue =>
+            var (key, value) = keyValue;
+            var contract = GetAssemblyQualifiedNameFor(key);
+            builder.Append(CultureInfo.InvariantCulture, $"{contract}:");
+            var first = true;
+            value.ForEach(implementor =>
             {
-                var contract = GetAssemblyQualifiedNameFor(keyValue.Key);
-                builder.Append($"{contract}:");
-                var first = true;
-                keyValue.Value.ForEach(implementor =>
+                if (!first)
                 {
-                    if (!first) builder.Append(";");
-                    first = false;
-                    builder.Append(GetAssemblyQualifiedNameFor(implementor));
-                });
-                builder.Append("\n");
+                    builder.Append(";");
+                }
+                first = false;
+                builder.Append(GetAssemblyQualifiedNameFor(implementor));
             });
+            builder.Append("\n");
+        });
 
-            return builder.ToString();
-        }
+        return builder.ToString();
+    }
 
-        /// <inheritdoc/>
-        public string SerializeTypes(IEnumerable<Type> types)
+    /// <inheritdoc/>
+    public string SerializeTypes(IEnumerable<Type> types)
+    {
+        var builder = new StringBuilder();
+        types.ForEach(_ =>
         {
-            var builder = new StringBuilder();
-            types.ForEach(_ =>
-            {
-                builder.Append(GetAssemblyQualifiedNameFor(_));
-                builder.Append("\n");
-            });
-            return builder.ToString();
-        }
+            builder.Append(GetAssemblyQualifiedNameFor(_));
+            builder.Append("\n");
+        });
+        return builder.ToString();
+    }
 
-        /// <inheritdoc/>
-        public IDictionary<Type, IEnumerable<Type>> DeserializeMap(string serializedMap)
+    /// <inheritdoc/>
+    public IDictionary<Type, IEnumerable<Type>> DeserializeMap(string serializedMap)
+    {
+        var map = new Dictionary<Type, IEnumerable<Type>>();
+
+        var lines = serializedMap.Split('\n');
+        var contractsCount = 0;
+        var implementorsCount = 0;
+        lines.ForEach(line =>
         {
-            var map = new Dictionary<Type, IEnumerable<Type>>();
+            var keyValue = line.Split(':');
+            var contract = Type.GetType(keyValue[0]);
 
-            var lines = serializedMap.Split('\n');
-            var contractsCount = 0;
-            var implementorsCount = 0;
-            lines.ForEach(line =>
+            if (contract != null)
             {
-                var keyValue = line.Split(':');
-                var contract = Type.GetType(keyValue[0]);
-
-                if (contract != null)
+                var implementors = keyValue[1]
+                    .Split(';')
+                    .Select(Type.GetType)
+                    .Where(_ => _ != null)
+                    .ToArray();
+                if (implementors.Length > 0)
                 {
-                    var implementors = keyValue[1]
-                        .Split(';')
-                        .Select(_ => Type.GetType(_))
-                        .Where(_ => _ != null)
-                        .ToArray();
-                    if (implementors.Length > 0)
-                    {
-                        map[contract] = implementors;
-                        contractsCount++;
-                        implementorsCount += implementors.Length;
-                    }
-                    else
-                    {
-                        _logger.LogDebug("No implementations of '{contract}'", keyValue[0]);
-                    }
+                    map[contract] = implementors;
+                    contractsCount++;
+                    implementorsCount += implementors.Length;
                 }
                 else
                 {
-                    _logger.LogDebug("Can't find contract type '{contract}' - {line}", keyValue[0], line);
+                    Log.NoImplementationsOfContract(_logger, keyValue[0]);
                 }
-            });
-
-            _logger.LogTrace("Using {contractsCount} contracts mapped to {implementorsCount} implementors in total", contractsCount, implementorsCount);
-
-            return map;
-        }
-
-        /// <inheritdoc/>
-        public IEnumerable<Type> DeserializeTypes(string serializedTypes)
-        {
-            var lines = serializedTypes.Split('\n');
-            return lines.Select(_ => Type.GetType(_))
-                        .Where(_ => _ != null)
-                        .ToArray();
-        }
-
-        string GetAssemblyQualifiedNameFor(Type type)
-        {
-            var name = type.AssemblyQualifiedName;
-            if (string.IsNullOrEmpty(name))
-            {
-                if (type.IsGenericType)
-                    name = $"{type.Namespace}.{type.Name}, {type.Assembly.GetName().FullName}";
-                else
-                    name = $"{type}, {type.Assembly.GetName().FullName}";
             }
+            else
+            {
+                Log.CannotFindContractType(_logger, keyValue[0], line);
+            }
+        });
 
-            return name;
+        Log.UsingContractsMappedToImplementors(_logger, contractsCount, implementorsCount);
+
+        return map;
+    }
+
+    /// <inheritdoc/>
+    public IEnumerable<Type> DeserializeTypes(string serializedTypes)
+    {
+        var lines = serializedTypes.Split('\n');
+        return lines.Select(Type.GetType)
+            .Where(_ => _ != null)
+            .ToArray();
+    }
+
+    static string GetAssemblyQualifiedNameFor(Type type)
+    {
+        var name = type.AssemblyQualifiedName;
+        if (string.IsNullOrEmpty(name))
+        {
+            name = type.IsGenericType ? $"{type.Namespace}.{type.Name}, {type.Assembly.GetName().FullName}" : $"{type}, {type.Assembly.GetName().FullName}";
         }
+
+        return name;
     }
 }

@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Resilience.for_Policies.when_getting_default.policy
-{
-    public class and_it_is_defined : given.defined_default_policy
-    {
-        static IAsyncPolicy policy;
-        Because of = () => policy = policies.DefaultAsync;
+namespace Dolittle.Runtime.Resilience.for_Policies.when_getting_default.policy;
 
-        It should_return_a_policy = () => policy.ShouldBeOfExactType<AsyncPolicy>();
-        It should_pass_the_underlying_policy = () => (policy as AsyncPolicy).UnderlyingPolicy.ShouldEqual(underlying_async_policy);
-    }
+public class and_it_is_defined : given.defined_default_policy
+{
+    static IAsyncPolicy policy;
+    Because of = () => policy = policies.DefaultAsync;
+
+    It should_return_a_policy = () => policy.ShouldBeOfExactType<AsyncPolicy>();
+    It should_pass_the_underlying_policy = () => (policy as AsyncPolicy).UnderlyingPolicy.ShouldEqual(underlying_async_policy);
 }

@@ -4,21 +4,20 @@
 using System.Reflection;
 using Dolittle.Runtime.Execution;
 
-namespace Dolittle.Runtime.Booting.Stages
+namespace Dolittle.Runtime.Booting.Stages;
+
+/// <summary>
+/// Represents the settings for <see cref="BootStage.Basics"/> stage.
+/// </summary>
+public class BasicsSettings : IRepresentSettingsForBootStage
 {
     /// <summary>
-    /// Represents the settings for <see cref="BootStage.Basics"/> stage.
+    /// Gets the <see cref="Environment"/> we're running in.
     /// </summary>
-    public class BasicsSettings : IRepresentSettingsForBootStage
-    {
-        /// <summary>
-        /// Gets the <see cref="Environment"/> we're running in.
-        /// </summary>
-        public Environment Environment { get; internal set; }
+    public Environment Environment { get; internal set; }
 
-        /// <summary>
-        /// Gets the entry <see cref="Assembly"/>.
-        /// </summary>
-        public Assembly EntryAssembly { get; internal set; }
-    }
+    /// <summary>
+    /// Gets the entry <see cref="Assembly"/>.
+    /// </summary>
+    public Assembly EntryAssembly { get; internal set; }
 }

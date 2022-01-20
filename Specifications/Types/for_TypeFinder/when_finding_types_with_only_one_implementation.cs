@@ -4,18 +4,17 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Types.for_TypeFinder
+namespace Dolittle.Runtime.Types.for_TypeFinder;
+
+[Subject(typeof(TypeFinder))]
+public class when_finding_types_with_only_one_implementation : given.a_type_finder
 {
-    [Subject(typeof(TypeFinder))]
-    public class when_finding_types_with_only_one_implementation : given.a_type_finder
-    {
-        static Type type_found;
+    static Type type_found;
 
-        Establish context = () => contract_to_implementors_map_mock.Setup(c => c.GetImplementorsFor(typeof(ISingle))).Returns(new[] { typeof(Single) });
+    Establish context = () => contract_to_implementors_map_mock.Setup(c => c.GetImplementorsFor(typeof(ISingle))).Returns(new[] { typeof(Single) });
 
-        Because of = () => type_found = type_finder.FindSingle<ISingle>();
+    Because of = () => type_found = type_finder.FindSingle<ISingle>();
 
-        It should_not_return_null = () => type_found.ShouldNotBeNull();
-        It should_return_correct_implementation_when = () => type_found.ShouldEqual(typeof(Single));
-    }
+    It should_not_return_null = () => type_found.ShouldNotBeNull();
+    It should_return_correct_implementation_when = () => type_found.ShouldEqual(typeof(Single));
 }

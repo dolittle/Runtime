@@ -5,26 +5,25 @@ using Microsoft.Extensions.Logging;
 using Grpc.Core;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.for_BoundServices
+namespace Dolittle.Runtime.Services.for_BoundServices;
+
+public class when_registering
 {
-    public class when_registering
+    const string service_type = "My Service Type";
+
+    static BoundServices bound_services;
+    static Service first_service;
+    static Service second_service;
+
+    Establish context = () =>
     {
-        const string service_type = "My Service Type";
+        bound_services = new BoundServices(Moq.Mock.Of<ILogger>());
 
-        static BoundServices bound_services;
-        static Service first_service;
-        static Service second_service;
+        first_service = new Service(null, ServerServiceDefinition.CreateBuilder().Build(), null);
+        second_service = new Service(null, ServerServiceDefinition.CreateBuilder().Build(), null);
+    };
 
-        Establish context = () =>
-        {
-            bound_services = new BoundServices(Moq.Mock.Of<ILogger>());
+    Because of = () => bound_services.Register(service_type, new[] { first_service, second_service });
 
-            first_service = new Service(null, ServerServiceDefinition.CreateBuilder().Build(), null);
-            second_service = new Service(null, ServerServiceDefinition.CreateBuilder().Build(), null);
-        };
-
-        Because of = () => bound_services.Register(service_type, new[] { first_service, second_service });
-
-        It should_hold_the_registered_services = () => bound_services.GetFor(service_type).ShouldContainOnly(new[] { first_service, second_service });
-    }
+    It should_hold_the_registered_services = () => bound_services.GetFor(service_type).ShouldContainOnly(new[] { first_service, second_service });
 }

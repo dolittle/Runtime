@@ -3,21 +3,20 @@
 
 using System;
 
-namespace Dolittle.Runtime.Configuration.Files
+namespace Dolittle.Runtime.Configuration.Files;
+
+/// <summary>
+/// Exception that gets thrown when there are multiple <see cref="ICanParseConfigurationFile">parsers</see> for
+/// the same configuration file.
+/// </summary>
+public class MultipleParsersForConfigurationFile : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when there are multiple <see cref="ICanParseConfigurationFile">parsers</see> for
-    /// the same configuration file.
+    /// Initializes a new instance of the <see cref="MultipleParsersForConfigurationFile"/> class.
     /// </summary>
-    public class MultipleParsersForConfigurationFile : Exception
+    /// <param name="filename">Name of the file.</param>
+    public MultipleParsersForConfigurationFile(string filename)
+        : base($"Multiple parsers for '{filename}' - unable to decide which to use")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MultipleParsersForConfigurationFile"/> class.
-        /// </summary>
-        /// <param name="filename">Name of the file.</param>
-        public MultipleParsersForConfigurationFile(string filename)
-            : base($"Multiple parsers for '{filename}' - unable to decide which to use")
-        {
-        }
     }
 }

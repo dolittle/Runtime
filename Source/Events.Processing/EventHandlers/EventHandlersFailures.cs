@@ -3,26 +3,30 @@
 
 using Dolittle.Runtime.Protobuf;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
+namespace Dolittle.Runtime.Events.Processing.EventHandlers;
+
+/// <summary>
+/// Holds the unique <see cref="FailureId"> failure ids </see> unique to the Event Handlers.
+/// </summary>
+public static class EventHandlersFailures
 {
     /// <summary>
-    /// Holds the unique <see cref="FailureId"> failure ids </see> unique to the Event Handlers.
+    /// Gets the <see cref="FailureId" /> that represents the 'NoEventHandlerRegistrationReceived' failure type.
     /// </summary>
-    public static class EventHandlersFailures
-    {
-        /// <summary>
-        /// Gets the <see cref="FailureId" /> that represents the 'NoEventHandlerRegistrationReceived' failure type.
-        /// </summary>
-        public static FailureId NoEventHandlerRegistrationReceived => FailureId.Create("209a79c7-824c-4988-928b-0dd517746ca0");
+    public static FailureId NoEventHandlerRegistrationReceived => FailureId.Create("209a79c7-824c-4988-928b-0dd517746ca0");
+    
+    /// <summary>
+    /// Gets the <see cref="FailureId" /> that represents the 'EventHandlerAlreadyRegistered' failure type.
+    /// </summary>
+    public static FailureId EventHandlerAlreadyRegistered => FailureId.Create("19dc6254-1732-4625-90af-444732bce795");
 
-        /// <summary>
-        /// Gets the <see cref="FailureId" /> that represents the 'CannotRegisterEventHandlerOnNonWriteableStream' failure type.
-        /// </summary>
-        public static FailureId CannotRegisterEventHandlerOnNonWriteableStream => FailureId.Create("45b4c918-37a5-405c-9865-d032869b1d24");
+    /// <summary>
+    /// Gets the <see cref="FailureId" /> that represents the 'CannotRegisterEventHandlerOnNonWriteableStream' failure type.
+    /// </summary>
+    public static FailureId CannotRegisterEventHandlerOnNonWriteableStream => FailureId.Create("45b4c918-37a5-405c-9865-d032869b1d24");
 
-        /// <summary>
-        /// Gets the <see cref="FailureId" /> that represents the 'FailedToRegisterEventHandler' failure type.
-        /// </summary>
-        public static FailureId FailedToRegisterEventHandler => FailureId.Create("dbfdfa15-e727-49f6-bed8-7a787954a4c6");
-    }
+    /// <summary>
+    /// Gets the <see cref="FailureId" /> that represents the 'FailedToRegisterEventHandler' failure type.
+    /// </summary>
+    public static FailureId FailedToRegisterEventHandler => FailureId.Create("dbfdfa15-e727-49f6-bed8-7a787954a4c6");
 }

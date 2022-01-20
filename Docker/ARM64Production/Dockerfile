@@ -1,5 +1,5 @@
 # DotNet Build
-FROM mcr.microsoft.com/dotnet/sdk:5.0-buster-slim-arm64v8 AS dotnet-build
+FROM mcr.microsoft.com/dotnet/sdk:6.0-bullseye-slim-arm64v8 AS dotnet-build
 ARG CONFIGURATION=Release
 ARG VERSION
 
@@ -16,7 +16,7 @@ RUN dotnet restore
 RUN dotnet publish -c ${CONFIGURATION} -p:Version=${VERSION} -o out
 
 # Runtime Image
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-buster-slim-arm64v8
+FROM mcr.microsoft.com/dotnet/aspnet:6.0-bullseye-slim-arm64v8
 ARG CONFIGURATION=Release
 ARG VERSION
 
@@ -40,6 +40,7 @@ RUN if [ "$CONFIGURATION" = "Debug" ] ; then curl -sSL https://aka.ms/getvsdbgsh
 WORKDIR /app
 COPY --from=dotnet-build /app/Source/Server/out ./
 COPY --from=dotnet-build /app/Source/Server/.dolittle ./.dolittle
+COPY Docker/Production/.dolittle ./.dolittle
 
 EXPOSE 9700 50052 50053 51052
 

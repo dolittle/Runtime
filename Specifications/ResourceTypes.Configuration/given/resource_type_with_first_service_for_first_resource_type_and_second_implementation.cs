@@ -4,35 +4,34 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given
+namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given;
+
+public class resource_type_with_first_service_for_first_resource_type_and_second_implementation : IRepresentAResourceType
 {
-    public class resource_type_with_first_service_for_first_resource_type_and_second_implementation : IRepresentAResourceType
+    IDictionary<Type, Type> _bindings;
+
+    public ResourceType Type => all_dependencies.first_resource_type;
+
+    public ResourceTypeImplementation ImplementationName => all_dependencies.second_resource_type_implementation;
+
+    public Type ConfigurationObjectType => typeof(configuration_for_first_resource_type);
+
+    public IDictionary<Type, Type> Bindings
     {
-        IDictionary<Type, Type> _bindings;
-
-        public ResourceType Type => all_dependencies.first_resource_type;
-
-        public ResourceTypeImplementation ImplementationName => all_dependencies.second_resource_type_implementation;
-
-        public Type ConfigurationObjectType => typeof(configuration_for_first_resource_type);
-
-        public IDictionary<Type, Type> Bindings
+        get
         {
-            get
-            {
-                if (_bindings == null)
-                    InitializeBindings();
+            if (_bindings == null)
+                InitializeBindings();
 
-                return _bindings;
-            }
+            return _bindings;
         }
+    }
 
-        void InitializeBindings()
+    void InitializeBindings()
+    {
+        _bindings = new Dictionary<Type, Type>
         {
-            _bindings = new Dictionary<Type, Type>
-            {
-                { typeof(first_service), typeof(implementation_of_first_service_for_second_implementation_type) }
-            };
-        }
+            { typeof(first_service), typeof(implementation_of_first_service_for_second_implementation_type) }
+        };
     }
 }

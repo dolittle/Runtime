@@ -4,25 +4,24 @@
 using System.Reflection;
 using Dolittle.Runtime.Execution;
 
-namespace Dolittle.Runtime.Booting.Stages
+namespace Dolittle.Runtime.Booting.Stages;
+
+/// <summary>
+/// Represents the <see cref="BootStage.Basics"/> stage of booting.
+/// </summary>
+public class Basics : ICanPerformBootStage<BasicsSettings>
 {
-    /// <summary>
-    /// Represents the <see cref="BootStage.Basics"/> stage of booting.
-    /// </summary>
-    public class Basics : ICanPerformBootStage<BasicsSettings>
+    /// <inheritdoc/>
+    public BootStage BootStage => BootStage.Basics;
+
+    /// <inheritdoc/>
+    public void Perform(BasicsSettings settings, IBootStageBuilder builder)
     {
-        /// <inheritdoc/>
-        public BootStage BootStage => BootStage.Basics;
+        var entryAssembly = settings.EntryAssembly ?? Assembly.GetEntryAssembly();
+        var environment = settings.Environment ?? Environment.Production;
 
-        /// <inheritdoc/>
-        public void Perform(BasicsSettings settings, IBootStageBuilder builder)
-        {
-            var entryAssembly = settings.EntryAssembly ?? Assembly.GetEntryAssembly();
-            var environment = settings.Environment ?? Environment.Production;
-
-            builder.Associate(WellKnownAssociations.EntryAssembly, entryAssembly);
-            builder.Associate(WellKnownAssociations.Environment, environment);
-            builder.Bindings.Bind<Environment>().To(environment);
-        }
+        builder.Associate(WellKnownAssociations.EntryAssembly, entryAssembly);
+        builder.Associate(WellKnownAssociations.Environment, environment);
+        builder.Bindings.Bind<Environment>().To(environment);
     }
 }

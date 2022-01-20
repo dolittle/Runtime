@@ -9,38 +9,36 @@ using Moq;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.given
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingLoopDetector.given;
+
+public class all_dependencies
 {
+    protected static IDetectEmbeddingLoops detector;
+    protected static Mock<ICompareStates> comparer;
+    protected static IList<ProjectionState> previous_states;
 
-    public class all_dependencies
+    Establish context = () =>
     {
-        protected static IDetectEmbeddingLoops detector;
-        protected static Mock<ICompareStates> comparer;
-        protected static IList<ProjectionState> previous_states;
-
-        Establish context = () =>
+        previous_states = new List<ProjectionState>
         {
-            previous_states = new List<ProjectionState>
-            {
-                CreateStateWithKeyValue("FirstObject", "FirstObjectValue"),
-                CreateStateWithKeyValue("SecondObject", "SecondObjectValue"),
-                CreateStateWithKeyValue("ThirdObject", "ThirdObjectValue"),
-                CreateStateWithKeyValue("FourthObject", "FourthObjectValue"),
-                CreateStateWithKeyValue("FifthObject", "FifthObjectValue"),
-                CreateStateWithKeyValue("SixthObject", "SixthObjectValue")
-            };
-
-            comparer = new Mock<ICompareStates>();
-            detector = new EmbeddingLoopsDetector(comparer.Object);
+            CreateStateWithKeyValue("FirstObject", "FirstObjectValue"),
+            CreateStateWithKeyValue("SecondObject", "SecondObjectValue"),
+            CreateStateWithKeyValue("ThirdObject", "ThirdObjectValue"),
+            CreateStateWithKeyValue("FourthObject", "FourthObjectValue"),
+            CreateStateWithKeyValue("FifthObject", "FifthObjectValue"),
+            CreateStateWithKeyValue("SixthObject", "SixthObjectValue")
         };
 
-        protected static ProjectionState CreateStateWithKeyValue(string key, string value)
+        comparer = new Mock<ICompareStates>();
+        detector = new EmbeddingLoopsDetector(comparer.Object);
+    };
+
+    protected static ProjectionState CreateStateWithKeyValue(string key, string value)
+    {
+        var jObject = new JObject
         {
-            var jObject = new JObject
-            {
-                { key, value }
-            };
-            return new ProjectionState(JsonConvert.SerializeObject(jObject));
-        }
+            { key, value }
+        };
+        return new ProjectionState(JsonConvert.SerializeObject(jObject));
     }
 }

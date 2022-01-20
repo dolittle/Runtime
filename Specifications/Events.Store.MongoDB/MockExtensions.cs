@@ -5,15 +5,14 @@ using System;
 using System.Linq.Expressions;
 using Moq;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB;
+
+public static class MockExtensions
 {
-    public static class MockExtensions
+    public static void VerifyOnlyCall<T, TResult>(this Mock<T> mock, Expression<Func<T, TResult>> expression)
+        where T : class
     {
-        public static void VerifyOnlyCall<T, TResult>(this Mock<T> mock, Expression<Func<T, TResult>> expression)
-            where T : class
-        {
-            mock.Verify(expression, Times.Once);
-            mock.VerifyNoOtherCalls();
-        }
+        mock.Verify(expression, Times.Once);
+        mock.VerifyNoOtherCalls();
     }
 }

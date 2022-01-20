@@ -6,50 +6,49 @@ using System.Diagnostics.CodeAnalysis;
 using Google.Protobuf;
 using Google.Protobuf.Reflection;
 
-namespace Dolittle.Runtime.Protobuf.for_Extensions
+namespace Dolittle.Runtime.Protobuf.for_Extensions;
+
+public class MyMessage : IMessage<MyMessage>
 {
-    public class MyMessage : IMessage<MyMessage>
+    public MessageDescriptor Descriptor => throw new NotImplementedException();
+
+    public int CalculateSize()
     {
-        public MessageDescriptor Descriptor => throw new NotImplementedException();
+        return 0;
+    }
 
-        public int CalculateSize()
-        {
-            return 0;
-        }
+    public MyMessage Clone()
+    {
+        throw new NotImplementedException();
+    }
 
-        public MyMessage Clone()
-        {
-            throw new NotImplementedException();
-        }
+    public bool Equals([AllowNull] MyMessage other)
+    {
+        throw new NotImplementedException();
+    }
 
-        public bool Equals([AllowNull] MyMessage other)
-        {
-            throw new NotImplementedException();
-        }
+    public void MergeFrom(MyMessage message)
+    {
+        throw new NotImplementedException();
+    }
 
-        public void MergeFrom(MyMessage message)
-        {
-            throw new NotImplementedException();
-        }
+    public void MergeFrom(CodedInputStream input)
+    {
+        throw new NotImplementedException();
+    }
 
-        public void MergeFrom(CodedInputStream input)
-        {
-            throw new NotImplementedException();
-        }
+    public void WriteTo(CodedOutputStream output)
+    {
+        throw new NotImplementedException();
+    }
 
-        public void WriteTo(CodedOutputStream output)
-        {
-            throw new NotImplementedException();
-        }
+    public override bool Equals(object obj)
+    {
+        return false;
+    }
 
-        public override bool Equals(object obj)
-        {
-            return false;
-        }
-
-        public override int GetHashCode()
-        {
-            return 0;
-        }
+    public override int GetHashCode()
+    {
+        return 0;
     }
 }

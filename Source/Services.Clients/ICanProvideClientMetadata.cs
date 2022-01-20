@@ -4,17 +4,16 @@
 using System.Collections.Generic;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Defines a system that is capable of providing metadata for client calls.
+/// </summary>
+public interface ICanProvideClientMetadata
 {
     /// <summary>
-    /// Defines a system that is capable of providing metadata for client calls.
+    /// Provide the necessary <see cref="Metadata.Entry">entries</see>.
     /// </summary>
-    public interface ICanProvideClientMetadata
-    {
-        /// <summary>
-        /// Provide the necessary <see cref="Metadata.Entry">entries</see>.
-        /// </summary>
-        /// <returns><see cref="Metadata.Entry">Metadata entries</see>.</returns>
-        IEnumerable<Metadata.Entry> Provide();
-    }
+    /// <returns><see cref="Metadata.Entry">Metadata entries</see>.</returns>
+    IEnumerable<Metadata.Entry> Provide();
 }

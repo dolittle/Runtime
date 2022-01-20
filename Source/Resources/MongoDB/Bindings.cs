@@ -3,18 +3,17 @@
 
 using Dolittle.Runtime.DependencyInversion;
 
-namespace Dolittle.Runtime.Resources.MongoDB
+namespace Dolittle.Runtime.Resources.MongoDB;
+
+/// <summary>
+/// Represents <see cref="ICanProvideBindings">bindings</see> for the resources system.
+/// </summary>
+public class Bindings : ICanProvideBindings
 {
-    /// <summary>
-    /// Represents <see cref="ICanProvideBindings">bindings</see> for the resources system.
-    /// </summary>
-    public class Bindings : ICanProvideBindings
+    /// <inheritdoc />
+    public void Provide(IBindingProviderBuilder builder)
     {
-        /// <inheritdoc />
-        public void Provide(IBindingProviderBuilder builder)
-        {
-            builder.Bind<IKnowTheConnectionString>().To<ConnectionStringFromResourceConfiguration>();
-            builder.Bind<ICanGetResourceForTenant>().To<ResourceForTenantGetter>();
-        }
+        builder.Bind<IKnowTheConnectionString>().To<ConnectionStringFromResourceConfiguration>();
+        builder.Bind<ICanGetResourceForTenant>().To<ResourceForTenantGetter>();
     }
 }

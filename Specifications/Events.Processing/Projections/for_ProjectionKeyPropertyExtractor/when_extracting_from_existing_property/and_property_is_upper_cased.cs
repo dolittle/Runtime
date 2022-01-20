@@ -6,22 +6,21 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.when_extracting_from_existing_property
+namespace Dolittle.Runtime.Events.Processing.Projections.for_ProjectionKeyPropertyExtractor.when_extracting_from_existing_property;
+
+public class and_property_is_upper_cased : given.all_dependencies
 {
-    public class and_property_is_upper_cased : given.all_dependencies
+    static bool result;
+    static ProjectionKey key;
+    static content_structure json_object;
+
+    Establish context = () =>
     {
-        static bool result;
-        static ProjectionKey key;
-        static content_structure json_object;
+        json_object = content_structure.create();
+    };
 
-        Establish context = () =>
-        {
-            json_object = content_structure.create();
-        };
+    Because of = () => result = extractor.TryExtract(serializer.ToJson(json_object), nameof(json_object.CASE_SENSITIVE), out key);
 
-        Because of = () => result = extractor.TryExtract(serializer.ToJson(json_object), nameof(json_object.CASE_SENSITIVE), out key);
-
-        It should_return_true = () => result.ShouldBeTrue();
-        It should_set_key_correct_value = () => key.Value.ShouldEqual("CASE_SENSITIVE");
-    }
+    It should_return_true = () => result.ShouldBeTrue();
+    It should_set_key_correct_value = () => key.Value.ShouldEqual("CASE_SENSITIVE");
 }

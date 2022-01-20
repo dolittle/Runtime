@@ -7,21 +7,20 @@ using Dolittle.Runtime.Types;
 using Machine.Specifications;
 using Moq;
 
-namespace Dolittle.Runtime.Services.for_Endpoints.given
+namespace Dolittle.Runtime.Services.for_Endpoints.given;
+
+public class default_configuration_providers
 {
-    public class default_configuration_providers
+    protected static IInstancesOf<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>> default_providers;
+
+    private Establish context = () =>
     {
-        protected static IInstancesOf<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>> default_providers;
+        var mock = new Mock<IInstancesOf<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>>>();
+        var list = new List<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>>();
 
-        private Establish context = () =>
-        {
-            var mock = new Mock<IInstancesOf<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>>>();
-            var list = new List<ICanProvideDefaultConfigurationFor<EndpointsConfiguration>>();
+        mock.Setup(_ => _.GetEnumerator())
+            .Returns(list.GetEnumerator());
 
-            mock.Setup(_ => _.GetEnumerator())
-                .Returns(list.GetEnumerator());
-
-            default_providers = mock.Object;
-        };
-    }
+        default_providers = mock.Object;
+    };
 }

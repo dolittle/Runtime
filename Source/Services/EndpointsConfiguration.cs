@@ -5,23 +5,22 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.Services
+namespace Dolittle.Runtime.Services;
+
+/// <summary>
+/// Represents the configuration for hosts by <see cref="EndpointVisibility"/>.
+/// </summary>
+[Name("endpoints")]
+public class EndpointsConfiguration :
+    ReadOnlyDictionary<EndpointVisibility, EndpointConfiguration>,
+    IConfigurationObject
 {
     /// <summary>
-    /// Represents the configuration for hosts by <see cref="EndpointVisibility"/>.
+    /// Initializes a new instance of the <see cref="EndpointsConfiguration"/> class.
     /// </summary>
-    [Name("endpoints")]
-    public class EndpointsConfiguration :
-        ReadOnlyDictionary<EndpointVisibility, EndpointConfiguration>,
-        IConfigurationObject
+    /// <param name="configuration">Dictionary for <see cref="EndpointVisibility"/> with <see cref="EndpointConfiguration"/>.</param>
+    public EndpointsConfiguration(IDictionary<EndpointVisibility, EndpointConfiguration> configuration)
+        : base(configuration)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EndpointsConfiguration"/> class.
-        /// </summary>
-        /// <param name="configuration">Dictionary for <see cref="EndpointVisibility"/> with <see cref="EndpointConfiguration"/>.</param>
-        public EndpointsConfiguration(IDictionary<EndpointVisibility, EndpointConfiguration> configuration)
-            : base(configuration)
-        {
-        }
     }
 }

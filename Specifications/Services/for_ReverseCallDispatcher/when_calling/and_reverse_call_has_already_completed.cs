@@ -3,17 +3,17 @@
 
 using System;
 using System.Threading;
+using Dolittle.Runtime.Services.for_ReverseCallDispatcher.given;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling
+namespace Dolittle.Runtime.Services.for_ReverseCallDispatcher.when_calling;
+
+public class and_reverse_call_has_already_completed : given.a_dispatcher
 {
-    public class and_reverse_call_has_already_completed : given.a_dispatcher
-    {
-        Establish context = () => dispatcher.Accept(new(), new CancellationToken(true)).GetAwaiter().GetResult();
+    Establish context = () => dispatcher.Accept(new MyConnectResponse(), new CancellationToken(true)).GetAwaiter().GetResult();
 
-        static Exception exception;
-        Because of = () => exception = Catch.Exception(() => dispatcher.Call(new(), CancellationToken.None).GetAwaiter().GetResult());
+    static Exception exception;
+    Because of = () => exception = Catch.Exception(() => dispatcher.Call(new MyRequest(), CancellationToken.None).GetAwaiter().GetResult());
 
-        It should_fail = () => exception.ShouldBeOfExactType<CannotPerformCallOnCompletedReverseCallConnection>();
-    }
+    It should_fail = () => exception.ShouldBeOfExactType<CannotPerformCallOnCompletedReverseCallConnection>();
 }

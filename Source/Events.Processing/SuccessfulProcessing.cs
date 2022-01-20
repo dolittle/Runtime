@@ -3,23 +3,22 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing;
+
+/// <summary>
+/// Represents a successful <see cref="IProcessingResult" />.
+/// </summary>
+public class SuccessfulProcessing : IProcessingResult
 {
-    /// <summary>
-    /// Represents a successful <see cref="IProcessingResult" />.
-    /// </summary>
-    public class SuccessfulProcessing : IProcessingResult
-    {
-        /// <inheritdoc/>
-        public bool Succeeded => true;
+    /// <inheritdoc/>
+    public bool Succeeded => true;
 
-        /// <inheritdoc/>
-        public string FailureReason => string.Empty;
+    /// <inheritdoc/>
+    public string FailureReason => string.Empty;
 
-        /// <inheritdoc/>
-        public bool Retry => false;
+    /// <inheritdoc/>
+    public bool Retry => false;
 
-        /// <inheritdoc/>
-        public TimeSpan RetryTimeout => TimeSpan.Zero;
-    }
+    /// <inheritdoc/>
+    public TimeSpan RetryTimeout => TimeSpan.Zero;
 }

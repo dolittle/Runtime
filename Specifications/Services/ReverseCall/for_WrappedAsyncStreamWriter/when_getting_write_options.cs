@@ -4,24 +4,23 @@
 using Grpc.Core;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter
+namespace Dolittle.Runtime.Services.ReverseCalls.for_WrappedAsyncStreamWriter;
+
+public class when_getting_write_options : given.a_wrapped_stream_writer
 {
-    public class when_getting_write_options : given.a_wrapped_stream_writer
+    static WriteOptions options;
+
+    Establish context = () =>
     {
-        static WriteOptions options;
+        options = new WriteOptions();
+        original_writer
+            .SetupGet(_ => _.WriteOptions)
+            .Returns(options);
+    };
 
-        Establish context = () =>
-        {
-            options = new();
-            original_writer
-                .SetupGet(_ => _.WriteOptions)
-                .Returns(options);
-        };
+    static WriteOptions result;
+    Because of = () => result = wrapped_writer.WriteOptions;
 
-        static WriteOptions result;
-        Because of = () => result = wrapped_writer.WriteOptions;
-
-        It should_get_the_options_of_the_original_stream = () => original_writer.VerifyGet(_ => _.WriteOptions);
-        It should_return_the_options_from_the_original_stream = () => result.ShouldEqual(options);
-    }
+    It should_get_the_options_of_the_original_stream = () => original_writer.VerifyGet(_ => _.WriteOptions);
+    It should_return_the_options_from_the_original_stream = () => result.ShouldEqual(options);
 }

@@ -4,13 +4,12 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Immutability.for_ImmutableExtensions.when_asserting_type
-{
-    public class should_be_immutable_with_record_with_primary_constructor
-    {
-        static Exception exception;
-        Because of = () => exception = Catch.Exception(() => typeof(record_with_primary_constructor).ShouldBeImmutable());
+namespace Dolittle.Runtime.Immutability.for_ImmutableExtensions.when_asserting_type;
 
-        It should_not_throw_an_exception = () => exception.ShouldBeNull();
-    }
+public class should_be_immutable_with_record_with_primary_constructor
+{
+    static Exception exception;
+    Because of = () => exception = Catch.Exception(() => typeof(record_with_primary_constructor).ShouldBeImmutable());
+
+    It should_not_throw_an_exception = () => exception.ShouldBeNull();
 }

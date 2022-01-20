@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Embeddings.Store
+namespace Dolittle.Runtime.Embeddings.Store;
+
+/// <summary>
+/// Exception that gets thrown when attempting to convert a <see cref="EmbeddingCurrentStateType"/> that is not known.
+/// </summary>
+public class UnknownEmbeddingCurrentStateType : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when attempting to convert a <see cref="EmbeddingCurrentStateType"/> that is not known.
+    /// Initializes an instance of the <see cref="UnknownEmbeddingCurrentStateType"/> class.
     /// </summary>
-    public class UnknownEmbeddingCurrentStateType : Exception
+    /// <param name="type">The current state type that is not known.</param>
+    public UnknownEmbeddingCurrentStateType(EmbeddingCurrentStateType type)
+        : base($"{nameof(EmbeddingCurrentStateType)} {type} is not known")
     {
-        /// <summary>
-        /// Initializes an instance of the <see cref="UnknownEmbeddingCurrentStateType"/> class.
-        /// </summary>
-        /// <param name="type">The current state type that is not known.</param>
-        public UnknownEmbeddingCurrentStateType(EmbeddingCurrentStateType type)
-            : base($"{nameof(EmbeddingCurrentStateType)} {type} is not known")
-        {
-        }
     }
 }

@@ -3,17 +3,16 @@
 
 using Dolittle.Runtime.DependencyInversion;
 
-namespace Dolittle.Runtime.Services.ReverseCalls
+namespace Dolittle.Runtime.Services.ReverseCalls;
+
+/// <summary>
+/// Represents a <see cref="ICanProvideBindings">binding provider</see> for services.
+/// </summary>
+public class Bindings : ICanProvideBindings
 {
-    /// <summary>
-    /// Represents a <see cref="ICanProvideBindings">binding provider</see> for services.
-    /// </summary>
-    public class Bindings : ICanProvideBindings
+    /// <inheritdoc/>
+    public void Provide(IBindingProviderBuilder builder)
     {
-        /// <inheritdoc/>
-        public void Provide(IBindingProviderBuilder builder)
-        {
-            builder.Bind<IKeepConnectionsAlive>().To<PingedConnectionFactory>();
-        }
+        builder.Bind<IKeepConnectionsAlive>().To<PingedConnectionFactory>();
     }
 }

@@ -3,18 +3,17 @@
 
 using System;
 
-namespace Dolittle.Runtime.DependencyInversion
+namespace Dolittle.Runtime.DependencyInversion;
+
+/// <summary>
+/// Represents a binding definition for any IOC container to hook up.
+/// </summary>
+public record Binding(Type Service, IActivationStrategy Strategy, IScope Scope)
 {
     /// <summary>
-    /// Represents a binding definition for any IOC container to hook up.
+    /// Create a <see cref="Binding"/> for a specific service <see cref="Type"/>.
     /// </summary>
-    public record Binding(Type Service, IActivationStrategy Strategy, IScope Scope)
-    {
-        /// <summary>
-        /// Create a <see cref="Binding"/> for a specific service <see cref="Type"/>.
-        /// </summary>
-        /// <param name="service"><see cref="Type"/> of paramref name="service" to create <see cref="Binding"/> for.</param>
-        /// <returns><see cref="Binding"/>.</returns>
-        public static Binding For(Type service) => new(service, new Strategies.Null(), new Scopes.Transient());
-    }
+    /// <param name="service"><see cref="Type"/> of paramref name="service" to create <see cref="Binding"/> for.</param>
+    /// <returns><see cref="Binding"/>.</returns>
+    public static Binding For(Type service) => new(service, new Strategies.Null(), new Scopes.Transient());
 }

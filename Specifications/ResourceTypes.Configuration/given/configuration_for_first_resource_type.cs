@@ -4,9 +4,8 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given
+namespace Dolittle.Runtime.ResourceTypes.Configuration.Specs.given;
+
+public class configuration_for_first_resource_type
 {
-    public class configuration_for_first_resource_type
-    {
-    }
 }

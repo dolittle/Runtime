@@ -10,31 +10,30 @@ using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_removing
+namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.when_removing;
+
+public class and_it_fails : given.all_dependencies
 {
-    public class and_it_fails : given.all_dependencies
+    static EmbeddingId id;
+    static ProjectionKey key;
+    static AggregateRootVersion version;
+    static Exception exception;
+    Establish context = () =>
     {
-        static EmbeddingId id;
-        static ProjectionKey key;
-        static AggregateRootVersion version;
-        static Exception exception;
-        Establish context = () =>
-        {
-            id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
-            key = new ProjectionKey("test_key");
-            version = AggregateRootVersion.Initial;
-            exception = new Exception();
+        id = new EmbeddingId(Guid.Parse("091e7458-e1d2-4b21-b134-bf5a42ce1ef5"));
+        key = new ProjectionKey("test_key");
+        version = AggregateRootVersion.Initial;
+        exception = new Exception();
 
-            states
-                .Setup(_ => _.TryMarkAsRemove(id, key, version, Moq.It.IsAny<CancellationToken>()))
-                .Returns(Task.FromResult(Try<bool>.Failed(exception)));
-        };
+        states
+            .Setup(_ => _.TryMarkAsRemove(id, key, version, Moq.It.IsAny<CancellationToken>()))
+            .Returns(Task.FromResult(Try<bool>.Failed(exception)));
+    };
 
-        static Try result;
+    static Try result;
 
-        Because of = () => result = store.TryRemove(id, key, version, CancellationToken.None).GetAwaiter().GetResult();
+    Because of = () => result = store.TryRemove(id, key, version, CancellationToken.None).GetAwaiter().GetResult();
 
-        It should_fail = () => result.Success.ShouldBeFalse();
-        It should_have_the_correct_exception = () => result.Exception.ShouldEqual(exception);
-    }
+    It should_fail = () => result.Success.ShouldBeFalse();
+    It should_have_the_correct_exception = () => result.Exception.ShouldEqual(exception);
 }

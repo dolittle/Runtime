@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Processing.Streams;
+
+/// <summary>
+/// Exception that gets thrown when attempting to register a Stream Processor which has already been registered.
+/// </summary>
+public class StreamProcessorAlreadyRegistered : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when attempting to register a Stream Processor which has already been registered.
+    /// Initializes a new instance of the <see cref="StreamProcessorAlreadyRegistered"/> class.
     /// </summary>
-    public class StreamProcessorAlreadyRegistered : Exception
+    /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+    public StreamProcessorAlreadyRegistered(IStreamProcessorId streamProcessorId)
+        : base($"Stream Processor: '{streamProcessorId}' is already initialized")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessorAlreadyRegistered"/> class.
-        /// </summary>
-        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
-        public StreamProcessorAlreadyRegistered(IStreamProcessorId streamProcessorId)
-            : base($"Stream Processor: '{streamProcessorId}' is already initialized")
-        {
-        }
     }
 }

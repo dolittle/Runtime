@@ -7,32 +7,31 @@ using Machine.Specifications;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing
+namespace Dolittle.Runtime.Embeddings.Processing.for_CompareProjectionStates.when_comparing;
+
+public class and_the_states_have_a_different_value
 {
-    public class and_the_states_have_a_different_value
+    static CompareProjectionStates comparer;
+    static ProjectionState left;
+    static ProjectionState right;
+
+    Establish context = () =>
     {
-        static CompareProjectionStates comparer;
-        static ProjectionState left;
-        static ProjectionState right;
+        dynamic left_dynamic = new JObject();
+        left_dynamic.FirstProp = "FirstProp";
+        left = new ProjectionState(JsonConvert.SerializeObject(left_dynamic));
 
-        Establish context = () =>
-        {
-            dynamic left_dynamic = new JObject();
-            left_dynamic.FirstProp = "FirstProp";
-            left = new ProjectionState(JsonConvert.SerializeObject(left_dynamic));
+        dynamic right_dynamic = new JObject();
+        right_dynamic.FirstProp = "NotFirstProp";
+        right = new ProjectionState(JsonConvert.SerializeObject(right_dynamic));
 
-            dynamic right_dynamic = new JObject();
-            right_dynamic.FirstProp = "NotFirstProp";
-            right = new ProjectionState(JsonConvert.SerializeObject(right_dynamic));
+        comparer = new CompareProjectionStates();
+    };
 
-            comparer = new CompareProjectionStates();
-        };
+    static Try<bool> result;
 
-        static Try<bool> result;
+    Because of = () => result = comparer.TryCheckEquality(left, right);
 
-        Because of = () => result = comparer.TryCheckEquality(left, right);
-
-        It should_succeed = () => result.Success.ShouldBeTrue();
-        It should_not_be_equal = () => result.Result.ShouldBeFalse();
-    }
+    It should_succeed = () => result.Success.ShouldBeTrue();
+    It should_not_be_equal = () => result.Result.ShouldBeFalse();
 }

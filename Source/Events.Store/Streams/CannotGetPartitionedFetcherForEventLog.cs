@@ -3,19 +3,18 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Exception that gets thrown when getting a partitioned Fetcher for the Event Log stream.
+/// </summary>
+public class CannotGetPartitionedFetcherForEventLog : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when getting a partitioned Fetcher for the Event Log stream.
+    /// Initializes a new instance of the <see cref="CannotGetPartitionedFetcherForEventLog"/> class.
     /// </summary>
-    public class CannotGetPartitionedFetcherForEventLog : Exception
+    public CannotGetPartitionedFetcherForEventLog()
+        : base($"Cannot get partitioned Fetcher for Event Log")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CannotGetPartitionedFetcherForEventLog"/> class.
-        /// </summary>
-        public CannotGetPartitionedFetcherForEventLog()
-            : base($"Cannot get partitioned Fetcher for Event Log")
-        {
-        }
     }
 }

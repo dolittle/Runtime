@@ -5,21 +5,20 @@ using System;
 using Dolittle.Runtime.Embeddings.Contracts;
 using Dolittle.Runtime.Embeddings.Store;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Exception that gets thrown when an unexpected embedding response is received.
+/// </summary>
+public class UnexpectedEmbeddingResponse : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when an unexpected embedding response is received.
+    /// Initializes a new instance of the <see cref="UnexpectedEmbeddingResponse"/> class.
     /// </summary>
-    public class UnexpectedEmbeddingResponse : Exception
+    /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
+    /// <param name="responseCase">The <see cref="EmbeddingResponse.ResponseOneofCase"/> </param>
+    public UnexpectedEmbeddingResponse(EmbeddingId embedding, EmbeddingResponse.ResponseOneofCase responseCase)
+        : base($"Embedding {embedding.Value} returned an unexpected response case {responseCase}")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UnexpectedEmbeddingResponse"/> class.
-        /// </summary>
-        /// <param name="embedding">The <see cref="EmbeddingId"/> </param>
-        /// <param name="responseCase">The <see cref="EmbeddingResponse.ResponseOneofCase"/> </param>
-        public UnexpectedEmbeddingResponse(EmbeddingId embedding, EmbeddingResponse.ResponseOneofCase responseCase)
-            : base($"Embedding {embedding.Value} returned an unexpected response case {responseCase}")
-        {
-        }
     }
 }

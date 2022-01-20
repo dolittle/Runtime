@@ -4,20 +4,19 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Reflection.Specs.for_TypeExtensions.for_IsEnumerable
+namespace Dolittle.Runtime.Reflection.Specs.for_TypeExtensions.for_IsEnumerable;
+
+public class MyEnumerable : IEnumerable<ComplexType>
 {
-    public class MyEnumerable : IEnumerable<ComplexType>
+    IEnumerable<ComplexType> _list = new List<ComplexType>();
+
+    public IEnumerator<ComplexType> GetEnumerator()
     {
-        IEnumerable<ComplexType> _list = new List<ComplexType>();
+        return _list.GetEnumerator();
+    }
 
-        public IEnumerator<ComplexType> GetEnumerator()
-        {
-            return _list.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return _list.GetEnumerator();
-        }
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return _list.GetEnumerator();
     }
 }

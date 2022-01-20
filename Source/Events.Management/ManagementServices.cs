@@ -5,32 +5,31 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Management;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Management
+namespace Dolittle.Runtime.Events.Management;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindManagementServices"/> that exposes Events management services.
+/// </summary>
+public class ManagementServices : ICanBindManagementServices
 {
+    readonly EventTypesService _eventTypes;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindManagementServices"/> that exposes Events management services.
+    /// Initializes a new instance of the <see cref="ManagementServices"/> class.
     /// </summary>
-    public class ManagementServices : ICanBindManagementServices
+    /// <param name="eventTypes">The <see cref="EventTypesService"/>.</param>
+    public ManagementServices(EventTypesService eventTypes)
     {
-        readonly EventTypesService _eventTypes;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ManagementServices"/> class.
-        /// </summary>
-        /// <param name="eventTypes">The <see cref="EventTypesService"/>.</param>
-        public ManagementServices(EventTypesService eventTypes)
-        {
-            _eventTypes = eventTypes;
-        }
-
-        /// <inheritdoc />
-        public ServiceAspect Aspect => "Events.Management";
-
-        /// <inheritdoc />
-        public IEnumerable<Service> BindServices() =>
-            new[]
-            {
-                new Service(_eventTypes, Contracts.EventTypes.BindService(_eventTypes), Contracts.EventTypes.Descriptor),
-            };
+        _eventTypes = eventTypes;
     }
+
+    /// <inheritdoc />
+    public ServiceAspect Aspect => "Events.Management";
+
+    /// <inheritdoc />
+    public IEnumerable<Service> BindServices() =>
+        new[]
+        {
+            new Service(_eventTypes, Contracts.EventTypes.BindService(_eventTypes), Contracts.EventTypes.Descriptor),
+        };
 }

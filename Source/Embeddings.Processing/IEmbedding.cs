@@ -9,37 +9,36 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Embeddings.Processing
+namespace Dolittle.Runtime.Embeddings.Processing;
+
+/// <summary>
+/// Defines an embedding.
+/// </summary>
+public interface IEmbedding
 {
     /// <summary>
-    /// Defines an embedding.
+    /// Tries to get <see cref="UncommittedEvents"/> that will get the current state closer to the desired state.
     /// </summary>
-    public interface IEmbedding
-    {
-        /// <summary>
-        /// Tries to get <see cref="UncommittedEvents"/> that will get the current state closer to the desired state.
-        /// </summary>
-        /// <param name="currentState">The <see cref="EmbeddingCurrentState">current state</see>.</param>
-        /// <param name="desiredState">The <see cref="ProjectionState">desired state</see>.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="UncommittedEvents" />.</returns>
-        Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken);
+    /// <param name="currentState">The <see cref="EmbeddingCurrentState">current state</see>.</param>
+    /// <param name="desiredState">The <see cref="ProjectionState">desired state</see>.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="UncommittedEvents" />.</returns>
+    Task<Try<UncommittedEvents>> TryCompare(EmbeddingCurrentState currentState, ProjectionState desiredState, CancellationToken cancellationToken);
 
-        /// <summary>
-        /// Tries to get <see cref=" UncommittedEvents"/> that will get the current state closer to be deleted.
-        /// </summary>
-        /// <param name="currentState">The <see cref="EmbeddingCurrentState" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="UncommittedEvents" />.</returns>
-        Task<Try<UncommittedEvents>> TryDelete(EmbeddingCurrentState currentState, CancellationToken cancellationToken);
+    /// <summary>
+    /// Tries to get <see cref=" UncommittedEvents"/> that will get the current state closer to be deleted.
+    /// </summary>
+    /// <param name="currentState">The <see cref="EmbeddingCurrentState" />.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="UncommittedEvents" />.</returns>
+    Task<Try<UncommittedEvents>> TryDelete(EmbeddingCurrentState currentState, CancellationToken cancellationToken);
 
-        /// <summary>
-        /// Projects a <see cref="UncommittedEvent" /> from onto a <see cref="ProjectionCurrentState"/> to calculate the new <see cref="ProjectionState"/>.
-        /// </summary>
-        /// <param name="state">The <see cref="ProjectionCurrentState"/> to update.</param>
-        /// <param name="event">The <see cref="UncommittedEvent"/> to use to update the state.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns an <see cref="IProjectionResult" />.</returns>
-        Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken);
-    }
+    /// <summary>
+    /// Projects a <see cref="UncommittedEvent" /> from onto a <see cref="ProjectionCurrentState"/> to calculate the new <see cref="ProjectionState"/>.
+    /// </summary>
+    /// <param name="state">The <see cref="ProjectionCurrentState"/> to update.</param>
+    /// <param name="event">The <see cref="UncommittedEvent"/> to use to update the state.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns an <see cref="IProjectionResult" />.</returns>
+    Task<IProjectionResult> Project(ProjectionCurrentState state, UncommittedEvent @event, CancellationToken cancellationToken);
 }

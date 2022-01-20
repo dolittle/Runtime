@@ -9,44 +9,43 @@ using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
-namespace Dolittle.Runtime.Types.for_TypeFeeder
+namespace Dolittle.Runtime.Types.for_TypeFeeder;
+
+[Subject(typeof(TypeFeeder))]
+public class when_feeding
 {
-    [Subject(typeof(TypeFeeder))]
-    public class when_feeding
+    protected static Type[] types;
+    static Mock<Assembly> assembly_mock;
+    static Mock<IAssemblies> assemblies_mock;
+    static Mock<IContractToImplementorsMap> contract_to_implementors_map_mock;
+
+    static TypeFeeder type_feeder;
+
+    Establish context = () =>
     {
-        protected static Type[] types;
-        static Mock<Assembly> assembly_mock;
-        static Mock<IAssemblies> assemblies_mock;
-        static Mock<IContractToImplementorsMap> contract_to_implementors_map_mock;
-
-        static TypeFeeder type_feeder;
-
-        Establish context = () =>
+        types = new[]
         {
-            types = new[]
-            {
-                typeof(ISingle),
-                typeof(Single),
-                typeof(IMultiple),
-                typeof(FirstMultiple),
-                typeof(SecondMultiple)
-            };
-
-            assembly_mock = new Mock<Assembly>();
-            assembly_mock.Setup(a => a.GetTypes()).Returns(types);
-            assembly_mock.Setup(a => a.FullName).Returns("A.Full.Name");
-
-            assemblies_mock = new Mock<IAssemblies>();
-            assemblies_mock.Setup(x => x.GetAll()).Returns(new[] { assembly_mock.Object });
-
-            contract_to_implementors_map_mock = new Mock<IContractToImplementorsMap>();
-            contract_to_implementors_map_mock.SetupGet(c => c.All).Returns(types);
-
-            type_feeder = new TypeFeeder(Mock.Of<ILogger>());
+            typeof(ISingle),
+            typeof(Single),
+            typeof(IMultiple),
+            typeof(FirstMultiple),
+            typeof(SecondMultiple)
         };
 
-        Because of = () => type_feeder.Feed(assemblies_mock.Object, contract_to_implementors_map_mock.Object);
+        assembly_mock = new Mock<Assembly>();
+        assembly_mock.Setup(a => a.GetTypes()).Returns(types);
+        assembly_mock.Setup(a => a.FullName).Returns("A.Full.Name");
 
-        It should_populate_map = () => contract_to_implementors_map_mock.Verify(c => c.Feed(types), Times.Once);
-    }
+        assemblies_mock = new Mock<IAssemblies>();
+        assemblies_mock.Setup(x => x.GetAll()).Returns(new[] { assembly_mock.Object });
+
+        contract_to_implementors_map_mock = new Mock<IContractToImplementorsMap>();
+        contract_to_implementors_map_mock.SetupGet(c => c.All).Returns(types);
+
+        type_feeder = new TypeFeeder(Mock.Of<ILogger>());
+    };
+
+    Because of = () => type_feeder.Feed(assemblies_mock.Object, contract_to_implementors_map_mock.Object);
+
+    It should_populate_map = () => contract_to_implementors_map_mock.Verify(c => c.Feed(types), Times.Once);
 }

@@ -3,10 +3,9 @@
 
 
 
-namespace Dolittle.Runtime.Rudimentary.given
+namespace Dolittle.Runtime.Rudimentary.given;
+
+public record IntConcept(int value) : ConceptAs<int>(value)
 {
-    public record IntConcept(int value) : ConceptAs<int>(value)
-    {
-        public static implicit operator IntConcept(int value) => new(value);
-    }
+    public static implicit operator IntConcept(int value) => new(value);
 }

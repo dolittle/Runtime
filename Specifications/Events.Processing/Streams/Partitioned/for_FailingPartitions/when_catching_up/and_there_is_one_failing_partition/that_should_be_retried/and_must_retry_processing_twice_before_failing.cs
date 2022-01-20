@@ -8,36 +8,35 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Events.Store.Streams;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitions.when_catching_up.and_there_is_one_failing_partition.that_should_be_retried
+namespace Dolittle.Runtime.Events.Processing.Streams.Partitioned.for_FailingPartitions.when_catching_up.and_there_is_one_failing_partition.that_should_be_retried;
+
+public class and_must_retry_processing_twice_before_failing : given.all_dependencies
 {
-    public class and_must_retry_processing_twice_before_failing : given.all_dependencies
-    {
-        const string new_failing_reason = "new failing reason";
-        static int num_processed = 0;
-        static StreamProcessorState result;
+    const string new_failing_reason = "new failing reason";
+    static int num_processed = 0;
+    static StreamProcessorState result;
 
-        Establish context = () =>
-            event_processor
-                .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
-                .Returns<CommittedEvent, PartitionId, string, uint, CancellationToken>((@event, partition, reason, retryCount, _) => Task.FromResult<IProcessingResult>(num_processed++ >= 2 ? new FailedProcessing(new_failing_reason) : new FailedProcessing(new_failing_reason, true, TimeSpan.Zero)));
+    Establish context = () =>
+        event_processor
+            .Setup(_ => _.Process(Moq.It.IsAny<CommittedEvent>(), Moq.It.IsAny<PartitionId>(), Moq.It.IsAny<string>(), Moq.It.IsAny<uint>(), Moq.It.IsAny<CancellationToken>()))
+            .Returns<CommittedEvent, PartitionId, string, uint, CancellationToken>((@event, partition, reason, retryCount, _) => Task.FromResult<IProcessingResult>(num_processed++ >= 2 ? new FailedProcessing(new_failing_reason) : new FailedProcessing(new_failing_reason, true, TimeSpan.Zero)));
 
-        Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
+    Because of = () => result = failing_partitions.CatchupFor(stream_processor_id, stream_processor_state, CancellationToken.None).GetAwaiter().GetResult() as StreamProcessorState;
 
-        It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
-        It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);
-        It should_have_failing_partition_with_correct_id = () => result.FailingPartitions.ContainsKey(failing_partition_id).ShouldBeTrue();
-        It should_not_change_failing_partition_position = () => failing_partition(failing_partition_id).Position.ShouldEqual(initial_failing_partition_position);
-        It should_have_new_failing_partition_reason = () => failing_partition(failing_partition_id).Reason.ShouldEqual(new_failing_reason);
-        It should_not_retry_failing_partition = () => failing_partition(failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
+    It should_return_the_same_stream_position = () => result.Position.ShouldEqual(stream_processor_state.Position);
+    It should_have_one_failing_partition = () => result.FailingPartitions.Count.ShouldEqual(1);
+    It should_have_failing_partition_with_correct_id = () => result.FailingPartitions.ContainsKey(failing_partition_id).ShouldBeTrue();
+    It should_not_change_failing_partition_position = () => failing_partition(failing_partition_id).Position.ShouldEqual(initial_failing_partition_position);
+    It should_have_new_failing_partition_reason = () => failing_partition(failing_partition_id).Reason.ShouldEqual(new_failing_reason);
+    It should_not_retry_failing_partition = () => failing_partition(failing_partition_id).RetryTime.ShouldEqual(DateTimeOffset.MaxValue);
 
-        It should_have_retried_processing_three_times = () => event_processor.Verify(
-            _ => _.Process(
-                events[(int)failing_partition(failing_partition_id).Position.Value].Event,
-                failing_partition_id,
-                Moq.It.IsAny<string>(),
-                Moq.It.IsAny<uint>(),
-                Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(3));
+    It should_have_retried_processing_three_times = () => event_processor.Verify(
+        _ => _.Process(
+            events[(int)failing_partition(failing_partition_id).Position.Value].Event,
+            failing_partition_id,
+            Moq.It.IsAny<string>(),
+            Moq.It.IsAny<uint>(),
+            Moq.It.IsAny<CancellationToken>()), Moq.Times.Exactly(3));
 
-        static FailingPartitionState failing_partition(PartitionId partition_id) => result.FailingPartitions[partition_id];
-    }
+    static FailingPartitionState failing_partition(PartitionId partition_id) => result.FailingPartitions[partition_id];
 }

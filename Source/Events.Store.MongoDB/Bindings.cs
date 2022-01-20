@@ -4,17 +4,16 @@
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Events.Store.MongoDB.Streams;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB;
+
+/// <summary>
+/// Binds up the bindings related to the event store.
+/// </summary>
+public class Bindings : ICanProvideBindings
 {
-    /// <summary>
-    /// Binds up the bindings related to the event store.
-    /// </summary>
-    public class Bindings : ICanProvideBindings
+    /// <inheritdoc/>
+    public void Provide(IBindingProviderBuilder builder)
     {
-        /// <inheritdoc/>
-        public void Provide(IBindingProviderBuilder builder)
-        {
-            builder.Bind<IWriteEventsToStreamCollection>().To<EventsToStreamsWriter>();
-        }
+        builder.Bind<IWriteEventsToStreamCollection>().To<EventsToStreamsWriter>();
     }
 }

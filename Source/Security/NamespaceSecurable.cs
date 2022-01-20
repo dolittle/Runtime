@@ -4,36 +4,35 @@
 using System;
 using System.Globalization;
 
-namespace Dolittle.Runtime.Security
+namespace Dolittle.Runtime.Security;
+
+/// <summary>
+/// Represents a <see cref="Securable"/> that applies to a specific namespace.
+/// </summary>
+public class NamespaceSecurable : Securable
 {
+    const string NAMESPACE = "InNamespace_{{{0}}}";
+
     /// <summary>
-    /// Represents a <see cref="Securable"/> that applies to a specific namespace.
+    /// Initializes a new instance of the <see cref="NamespaceSecurable"/> class.
     /// </summary>
-    public class NamespaceSecurable : Securable
+    /// <param name="namespace">Namespace to secure.</param>
+    public NamespaceSecurable(string @namespace)
+        : base(string.Format(CultureInfo.InvariantCulture, NAMESPACE, @namespace))
     {
-        const string NAMESPACE = "InNamespace_{{{0}}}";
+        Namespace = @namespace;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="NamespaceSecurable"/> class.
-        /// </summary>
-        /// <param name="namespace">Namespace to secure.</param>
-        public NamespaceSecurable(string @namespace)
-            : base(string.Format(CultureInfo.InvariantCulture, NAMESPACE, @namespace))
-        {
-            Namespace = @namespace;
-        }
+    /// <summary>
+    /// Gets the namespace that is secured.
+    /// </summary>
+    public string Namespace { get; }
 
-        /// <summary>
-        /// Gets the namespace that is secured.
-        /// </summary>
-        public string Namespace { get; }
-
-        /// <inheritdoc/>
-        public override bool CanAuthorize(object actionToAuthorize)
-        {
-            return actionToAuthorize?.GetType().Namespace.StartsWith(
-                Namespace,
-                StringComparison.Ordinal) == true;
-        }
+    /// <inheritdoc/>
+    public override bool CanAuthorize(object actionToAuthorize)
+    {
+        return actionToAuthorize?.GetType().Namespace.StartsWith(
+            Namespace,
+            StringComparison.Ordinal) == true;
     }
 }

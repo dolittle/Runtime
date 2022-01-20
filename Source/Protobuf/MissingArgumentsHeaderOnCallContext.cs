@@ -4,20 +4,19 @@
 using System;
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Protobuf
+namespace Dolittle.Runtime.Protobuf;
+
+/// <summary>
+/// Exception that gets thrown when a <see cref="ServerCallContext"/> is missing a required arguments message in the header.
+/// </summary>
+public class MissingArgumentsHeaderOnCallContext : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a <see cref="ServerCallContext"/> is missing a required arguments message in the header.
+    /// Initializes a new instance of the <see cref="MissingArgumentsHeaderOnCallContext"/> class.
     /// </summary>
-    public class MissingArgumentsHeaderOnCallContext : Exception
+    /// <param name="callContext">The <see cref="ServerCallContext"/> where header is missing.</param>
+    public MissingArgumentsHeaderOnCallContext(ServerCallContext callContext)
+        : base($"Missing arguments header on call of server method '{callContext.Method}'")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MissingArgumentsHeaderOnCallContext"/> class.
-        /// </summary>
-        /// <param name="callContext">The <see cref="ServerCallContext"/> where header is missing.</param>
-        public MissingArgumentsHeaderOnCallContext(ServerCallContext callContext)
-            : base($"Missing arguments header on call of server method '{callContext.Method}'")
-        {
-        }
     }
 }

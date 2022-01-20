@@ -5,36 +5,34 @@ using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon
+namespace Dolittle.Runtime.Events.Processing.Filters.EventHorizon;
+
+/// <summary>
+/// Represents an implementation of <see cref="IPartitionedFiltersProtocol" />.
+/// </summary>
+public class PublicFiltersProtocol : FiltersProtocol<PublicFilterClientToRuntimeMessage, PublicFilterRegistrationRequest, PartitionedFilterResponse, PublicFilterRegistrationArguments>, IPublicFiltersProtocol
 {
+    /// <inheritdoc/>
+    public override PublicFilterRegistrationArguments ConvertConnectArguments(PublicFilterRegistrationRequest arguments)
+        => new(arguments.CallContext.ExecutionContext.ToExecutionContext(), arguments.FilterId.ToGuid());
 
-    /// <summary>
-    /// Represents an implementation of <see cref="IPartitionedFiltersProtocol" />.
-    /// </summary>
-    public class PublicFiltersProtocol : FiltersProtocol<PublicFilterClientToRuntimeMessage, PublicFilterRegistrationRequest, PartitionedFilterResponse, PublicFilterRegistrationArguments>, IPublicFiltersProtocol
-    {
-        /// <inheritdoc/>
-        public override PublicFilterRegistrationArguments ConvertConnectArguments(PublicFilterRegistrationRequest arguments)
-            => new(arguments.CallContext.ExecutionContext.ToExecutionContext(), arguments.FilterId.ToGuid());
+    /// <inheritdoc/>
+    public override ReverseCallArgumentsContext GetArgumentsContext(PublicFilterRegistrationRequest message)
+        => message.CallContext;
 
-        /// <inheritdoc/>
-        public override ReverseCallArgumentsContext GetArgumentsContext(PublicFilterRegistrationRequest message)
-            => message.CallContext;
+    /// <inheritdoc/>
+    public override PublicFilterRegistrationRequest GetConnectArguments(PublicFilterClientToRuntimeMessage message)
+        => message.RegistrationRequest;
 
-        /// <inheritdoc/>
-        public override PublicFilterRegistrationRequest GetConnectArguments(PublicFilterClientToRuntimeMessage message)
-            => message.RegistrationRequest;
+    /// <inheritdoc/>
+    public override Pong GetPong(PublicFilterClientToRuntimeMessage message)
+        => message.Pong;
 
-        /// <inheritdoc/>
-        public override Pong GetPong(PublicFilterClientToRuntimeMessage message)
-            => message.Pong;
+    /// <inheritdoc/>
+    public override PartitionedFilterResponse GetResponse(PublicFilterClientToRuntimeMessage message)
+        => message.FilterResult;
 
-        /// <inheritdoc/>
-        public override PartitionedFilterResponse GetResponse(PublicFilterClientToRuntimeMessage message)
-            => message.FilterResult;
-
-        /// <inheritdoc/>
-        public override ReverseCallResponseContext GetResponseContext(PartitionedFilterResponse message)
-            => message.CallContext;
-    }
+    /// <inheritdoc/>
+    public override ReverseCallResponseContext GetResponseContext(PartitionedFilterResponse message)
+        => message.CallContext;
 }

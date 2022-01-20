@@ -3,17 +3,16 @@
 
 using System;
 
-namespace Dolittle.Runtime.DependencyInversion
+namespace Dolittle.Runtime.DependencyInversion;
+
+/// <summary>
+/// Defines the strategy in which a binding will be provided.
+/// </summary>
+public interface IActivationStrategy
 {
     /// <summary>
-    /// Defines the strategy in which a binding will be provided.
+    /// Get the target type.
     /// </summary>
-    public interface IActivationStrategy
-    {
-        /// <summary>
-        /// Get the target type.
-        /// </summary>
-        /// <returns>The type of the target - typically the implementing type.</returns>
-        Type GetTargetType();
-    }
+    /// <returns>The type of the target - typically the implementing type.</returns>
+    Type GetTargetType();
 }

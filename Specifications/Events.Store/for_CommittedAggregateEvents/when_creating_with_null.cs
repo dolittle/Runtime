@@ -4,16 +4,15 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents
+namespace Dolittle.Runtime.Events.Store.Specs.for_CommittedAggregateEvents;
+
+public class when_creating_with_null : given.events_and_an_artifact
 {
-    public class when_creating_with_null : given.events_and_an_artifact
-    {
-        static CommittedAggregateEvents events;
-        static Exception exception;
+    static CommittedAggregateEvents events;
+    static Exception exception;
 
-        Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, new[] { event_one, null, event_three }));
+    Because of = () => exception = Catch.Exception(() => events = new CommittedAggregateEvents(event_source_id, aggregate_artifact.Id, new[] { event_one, null, event_three }));
 
-        It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
-        It should_not_be_created = () => events.ShouldBeNull();
-    }
+    It should_throw_an_exception = () => exception.ShouldBeOfExactType<EventCanNotBeNull>();
+    It should_not_be_created = () => events.ShouldBeNull();
 }

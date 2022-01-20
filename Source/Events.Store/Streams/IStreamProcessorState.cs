@@ -3,21 +3,20 @@
 
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Defines the basis for the state of a <see cref="AbstractScopedStreamProcessor" />.
+/// </summary>
+public interface IStreamProcessorState
 {
     /// <summary>
-    /// Defines the basis for the state of a <see cref="AbstractScopedStreamProcessor" />.
+    /// Gets the <see cref="StreamPosition" />.
     /// </summary>
-    public interface IStreamProcessorState
-    {
-        /// <summary>
-        /// Gets the <see cref="StreamPosition" />.
-        /// </summary>
-        StreamPosition Position { get; }
+    StreamPosition Position { get; }
 
-        /// <summary>
-        /// Gets a value indicating whether this <see cref="AbstractScopedStreamProcessor" /> is partitioned or not.
-        /// </summary>
-        bool Partitioned { get; }
-    }
+    /// <summary>
+    /// Gets a value indicating whether this <see cref="AbstractScopedStreamProcessor" /> is partitioned or not.
+    /// </summary>
+    bool Partitioned { get; }
 }

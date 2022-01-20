@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Exception that gets thrown when getting a partitioned Fetcher for an unpartitioned Stream.
+/// </summary>
+public class CannotGetPartitionedFetcherForUnpartitionedStream : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when getting a partitioned Fetcher for an unpartitioned Stream.
+    /// Initializes a new instance of the <see cref="CannotGetPartitionedFetcherForUnpartitionedStream"/> class.
     /// </summary>
-    public class CannotGetPartitionedFetcherForUnpartitionedStream : Exception
+    /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
+    public CannotGetPartitionedFetcherForUnpartitionedStream(IStreamDefinition streamDefinition)
+        : base($"Cannot get partitioned Fetcher from unpartitioned Stream Definition: '{streamDefinition}'")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CannotGetPartitionedFetcherForUnpartitionedStream"/> class.
-        /// </summary>
-        /// <param name="streamDefinition">The <see cref="IStreamDefinition" />.</param>
-        public CannotGetPartitionedFetcherForUnpartitionedStream(IStreamDefinition streamDefinition)
-            : base($"Cannot get partitioned Fetcher from unpartitioned Stream Definition: '{streamDefinition}'")
-        {
-        }
     }
 }

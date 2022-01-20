@@ -7,28 +7,27 @@ using System.Collections.ObjectModel;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.Microservices
+namespace Dolittle.Runtime.Microservices;
+
+/// <summary>
+/// Represents the configuration for microservices.
+/// </summary>
+[Name(ConfigurationName)]
+public class MicroservicesConfiguration :
+    ReadOnlyDictionary<Guid, MicroserviceAddressConfiguration>,
+    IConfigurationObject
 {
     /// <summary>
-    /// Represents the configuration for microservices.
+    /// The name of the <see cref="IConfigurationObject" />.
     /// </summary>
-    [Name(ConfigurationName)]
-    public class MicroservicesConfiguration :
-        ReadOnlyDictionary<Guid, MicroserviceAddressConfiguration>,
-        IConfigurationObject
-    {
-        /// <summary>
-        /// The name of the <see cref="IConfigurationObject" />.
-        /// </summary>
-        public const string ConfigurationName = "microservices";
+    public const string ConfigurationName = "microservices";
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MicroservicesConfiguration"/> class.
-        /// </summary>
-        /// <param name="configuration">Dictionary for <see cref="Microservice"/> with <see cref="MicroserviceAddress"/>.</param>
-        public MicroservicesConfiguration(IDictionary<Guid, MicroserviceAddressConfiguration> configuration)
-            : base(configuration)
-        {
-        }
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MicroservicesConfiguration"/> class.
+    /// </summary>
+    /// <param name="configuration">Dictionary for <see cref="MicroserviceId"/> with <see cref="MicroserviceAddress"/>.</param>
+    public MicroservicesConfiguration(IDictionary<Guid, MicroserviceAddressConfiguration> configuration)
+        : base(configuration)
+    {
     }
 }

@@ -3,12 +3,11 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Types.for_ContractToImplementorsMap.given
-{
-    public class an_empty_map
-    {
-        protected static ContractToImplementorsMap map;
+namespace Dolittle.Runtime.Types.for_ContractToImplementorsMap.given;
 
-        Establish context = () => map = new ContractToImplementorsMap();
-    }
+public class an_empty_map
+{
+    protected static ContractToImplementorsMap map;
+
+    Establish context = () => map = new ContractToImplementorsMap();
 }

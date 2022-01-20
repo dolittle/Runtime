@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Resilience
+namespace Dolittle.Runtime.Resilience;
+
+/// <summary>
+/// Exception that gets thrown whenthere are multiple implementations of <see cref="IDefinePolicyForType"/> in the system.
+/// </summary>
+public class MultiplePolicyDefinersForTypeFound : Exception
 {
     /// <summary>
-    /// Exception that gets thrown whenthere are multiple implementations of <see cref="IDefinePolicyForType"/> in the system.
+    /// Initializes a new instance of the <see cref="MultiplePolicyDefinersForTypeFound"/> class.
     /// </summary>
-    public class MultiplePolicyDefinersForTypeFound : Exception
+    /// <param name="type"><see cref="Type"/> missing policy for.</param>
+    public MultiplePolicyDefinersForTypeFound(Type type)
+        : base($"Multiple implementations of IDefinePolicyForType found for '{type.AssemblyQualifiedName}' - there can be only one")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MultiplePolicyDefinersForTypeFound"/> class.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> missing policy for.</param>
-        public MultiplePolicyDefinersForTypeFound(Type type)
-            : base($"Multiple implementations of IDefinePolicyForType found for '{type.AssemblyQualifiedName}' - there can be only one")
-        {
-        }
     }
 }

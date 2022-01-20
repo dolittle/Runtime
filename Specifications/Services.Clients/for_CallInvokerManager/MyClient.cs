@@ -3,9 +3,8 @@
 
 using Grpc.Core;
 
-namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager
+namespace Dolittle.Runtime.Services.Clients.for_CallInvokerManager;
+
+public class MyClient : ClientBase
 {
-    public class MyClient : ClientBase
-    {
-    }
 }

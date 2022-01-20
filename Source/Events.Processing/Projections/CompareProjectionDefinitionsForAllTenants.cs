@@ -11,97 +11,96 @@ using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Tenancy;
 
-namespace Dolittle.Runtime.Events.Processing.Projections
+namespace Dolittle.Runtime.Events.Processing.Projections;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICompareProjectionDefinitionsForAllTenants" />.
+/// </summary>
+[Singleton]
+public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefinitionsForAllTenants
 {
+    readonly IPerformActionOnAllTenants _onTenants;
+    readonly FactoryFor<IProjectionDefinitions> _getDefinitions;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICompareProjectionDefinitionsForAllTenants" />.
+    /// Initializes an instance of the <see cref="CompareProjectionDefinitionsForAllTenants" /> class.
     /// </summary>
-    [Singleton]
-    public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefinitionsForAllTenants
+    /// <param name="onTenants">The tool for performing an action on all tenants.</param>
+    /// <param name="getDefinitions">The factory for getting projection definitions.</param>
+    public CompareProjectionDefinitionsForAllTenants(
+        IPerformActionOnAllTenants onTenants,
+        FactoryFor<IProjectionDefinitions> getDefinitions)
     {
-        readonly IPerformActionOnAllTenants _onTenants;
-        readonly FactoryFor<IProjectionDefinitions> _getDefinitions;
+        _onTenants = onTenants;
+        _getDefinitions = getDefinitions;
+    }
 
-        /// <summary>
-        /// Initializes an instance of the <see cref="CompareProjectionDefinitionsForAllTenants" /> class.
-        /// </summary>
-        /// <param name="onTenants">The tool for performing an action on all tenants.</param>
-        /// <param name="getDefinitions">The factory for getting projection definitions.</param>
-        public CompareProjectionDefinitionsForAllTenants(
-            IPerformActionOnAllTenants onTenants,
-            FactoryFor<IProjectionDefinitions> getDefinitions)
+    /// <inheritdoc/>
+    public async Task<IDictionary<TenantId, ProjectionDefinitionComparisonResult>> DiffersFromPersisted(ProjectionDefinition definition, CancellationToken token)
+    {
+        var results = new Dictionary<TenantId, ProjectionDefinitionComparisonResult>();
+        await _onTenants.PerformAsync(async tenant =>
         {
-            _onTenants = onTenants;
-            _getDefinitions = getDefinitions;
-        }
-
-        /// <inheritdoc/>
-        public async Task<IDictionary<TenantId, ProjectionDefinitionComparisonResult>> DiffersFromPersisted(ProjectionDefinition definition, CancellationToken token)
-        {
-            var results = new Dictionary<TenantId, ProjectionDefinitionComparisonResult>();
-            await _onTenants.PerformAsync(async tenant =>
+            var definitions = _getDefinitions();
+            var tryGetDefinition = await definitions.TryGet(definition.Projection, definition.Scope, token).ConfigureAwait(false);
+            var comparisonResult = tryGetDefinition.Success switch
             {
-                var definitions = _getDefinitions();
-                var tryGetDefinition = await definitions.TryGet(definition.Projection, definition.Scope, token).ConfigureAwait(false);
-                var comparisonResult = tryGetDefinition.Success switch
-                {
-                    true => DefinitionsAreEqual(definition, tryGetDefinition),
-                    false => ProjectionDefinitionComparisonResult.Equal
-                };
-                results.Add(tenant, comparisonResult);
-            }).ConfigureAwait(false);
+                true => DefinitionsAreEqual(definition, tryGetDefinition),
+                false => ProjectionDefinitionComparisonResult.Equal
+            };
+            results.Add(tenant, comparisonResult);
+        }).ConfigureAwait(false);
 
-            return results;
+        return results;
+    }
+
+    ProjectionDefinitionComparisonResult DefinitionsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition)
+    {
+        var result = ProjectionDefinitionComparisonResult.Equal;
+        if (!InitialStatesAreEqual(newDefinition, oldDefinition, ref result)) return result;
+        if (!EventsAreEqual(newDefinition, oldDefinition, ref result)) return result;
+        return result;
+    }
+
+    bool InitialStatesAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
+    {
+        if (newDefinition.InititalState != oldDefinition.InititalState)
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("The initial projection state is not the same as the persisted definition");
+            return false;
+        }
+        return true;
+    }
+    bool EventsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
+    {
+        if (newDefinition.Events.Count() != oldDefinition.Events.Count())
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("The definitions does not have the same number of events");
+            return false;
         }
 
-        ProjectionDefinitionComparisonResult DefinitionsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition)
+        foreach (var newEvent in newDefinition.Events)
         {
-            var result = ProjectionDefinitionComparisonResult.Equal;
-            if (!InitialStatesAreEqual(newDefinition, oldDefinition, ref result)) return result;
-            if (!EventsAreEqual(newDefinition, oldDefinition, ref result)) return result;
-            return result;
-        }
-
-        bool InitialStatesAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
-        {
-            if (newDefinition.InititalState != oldDefinition.InititalState)
+            var oldEvent = oldDefinition.Events.FirstOrDefault(_ => _.EventType == newEvent.EventType);
+            if (oldEvent == default)
             {
-                result = ProjectionDefinitionComparisonResult.Unequal("The initial projection state is not the same as the persisted definition");
-                return false;
-            }
-            return true;
-        }
-        bool EventsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
-        {
-            if (newDefinition.Events.Count() != oldDefinition.Events.Count())
-            {
-                result = ProjectionDefinitionComparisonResult.Unequal("The definitions does not have the same number of events");
+                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} was not in previous projectiondefinition");
                 return false;
             }
 
-            foreach (var newEvent in newDefinition.Events)
+            if (oldEvent.KeySelectorType != newEvent.KeySelectorType)
             {
-                var oldEvent = oldDefinition.Events.FirstOrDefault(_ => _.EventType == newEvent.EventType);
-                if (oldEvent == default)
-                {
-                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} was not in previous projectiondefinition");
-                    return false;
-                }
-
-                if (oldEvent.KeySelectorType != newEvent.KeySelectorType)
-                {
-                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector type");
-                    return false;
-                }
-
-                if (oldEvent.KeySelectorExpression != newEvent.KeySelectorExpression)
-                {
-                    result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector expressions");
-                    return false;
-                }
+                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector type");
+                return false;
             }
 
-            return true;
+            if (oldEvent.KeySelectorExpression != newEvent.KeySelectorExpression)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector expressions");
+                return false;
+            }
         }
+
+        return true;
     }
 }

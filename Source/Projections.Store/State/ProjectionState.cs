@@ -3,19 +3,18 @@
 
 using Dolittle.Runtime.Rudimentary;
 
-namespace Dolittle.Runtime.Projections.Store.State
+namespace Dolittle.Runtime.Projections.Store.State;
+
+/// <summary>
+/// Represents a state from a projection.
+/// </summary>
+/// <param name="Value">The state.</param>
+/// <typeparam name="string">The type of the concept.</typeparam>
+public record ProjectionState(string Value) : ConceptAs<string>(Value)
 {
     /// <summary>
-    /// Represents a state from a projection.
+    /// Implicitly convers the string to a <see cref="ProjectionState" />.
     /// </summary>
-    /// <param name="Value">The state.</param>
-    /// <typeparam name="string">The type of the concept.</typeparam>
-    public record ProjectionState(string Value) : ConceptAs<string>(Value)
-    {
-        /// <summary>
-        /// Implicitly convers the string to a <see cref="ProjectionState" />.
-        /// </summary>
-        /// <param name="state">The <see cref="ProjectionState" />.</param>
-        public static implicit operator ProjectionState(string state) => new(state);
-    }
+    /// <param name="state">The <see cref="ProjectionState" />.</param>
+    public static implicit operator ProjectionState(string state) => new(state);
 }

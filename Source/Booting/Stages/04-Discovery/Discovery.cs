@@ -9,41 +9,56 @@ using Dolittle.Runtime.Collections;
 using Microsoft.Extensions.Logging;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.Booting.Stages
+namespace Dolittle.Runtime.Booting.Stages;
+
+/// <summary>
+/// Represents the <see cref="BootStage.Discovery"/> stage of booting.
+/// </summary>
+public class Discovery : ICanPerformBootStage<DiscoverySettings>
 {
-    /// <summary>
-    /// Represents the <see cref="BootStage.Discovery"/> stage of booting.
-    /// </summary>
-    public class Discovery : ICanPerformBootStage<DiscoverySettings>
+    /// <inheritdoc/>
+    public BootStage BootStage => BootStage.Discovery;
+
+    /// <inheritdoc/>
+    public void Perform(DiscoverySettings settings, IBootStageBuilder builder)
     {
-        /// <inheritdoc/>
-        public BootStage BootStage => BootStage.Discovery;
+        var entryAssembly = builder.GetAssociation<Assembly>(WellKnownAssociations.EntryAssembly);
+        var loggerFactory = builder.GetAssociation<ILoggerFactory>(WellKnownAssociations.LoggerFactory);
+        var logger = loggerFactory.CreateLogger<Discovery>();
 
-        /// <inheritdoc/>
-        public void Perform(DiscoverySettings settings, IBootStageBuilder builder)
+        Log.Discovery(logger);
+        var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
         {
-            var entryAssembly = builder.GetAssociation<Assembly>(WellKnownAssociations.EntryAssembly);
-            var loggerFactory = builder.GetAssociation<ILoggerFactory>(WellKnownAssociations.LoggerFactory);
-            var logger = loggerFactory.CreateLogger<Discovery>();
-
-            logger.LogDebug("  Discovery");
-            var assemblies = Assemblies.Bootstrap.Boot.Start(logger, entryAssembly, settings.AssemblyProvider, _ =>
+            if (!(settings.IncludeAssembliesStartWith?.Count() > 0))
             {
-                if (settings.IncludeAssembliesStartWith?.Count() > 0)
-                {
-                    settings.IncludeAssembliesStartWith.ForEach(name => logger.LogTrace("Including assemblies starting with '{name}'", name));
-                    _.ExceptAssembliesStartingWith(settings.IncludeAssembliesStartWith.ToArray());
-                }
-            });
-            logger.LogDebug("  Set up type system for discovery");
-            var typeFinder = Types.Bootstrap.Boot.Start(assemblies, logger, entryAssembly);
-            logger.LogDebug("  Type system ready");
+                return;
+            }
+            settings.IncludeAssembliesStartWith.ForEach(name => Log.IncludingAssemblies(logger, name));
+            _.ExceptAssembliesStartingWith(settings.IncludeAssembliesStartWith.ToArray());
+        });
+        Log.SetupTypeSystem(logger);
+        var typeFinder = Types.Bootstrap.Boot.Start(assemblies, logger, entryAssembly);
+        Log.TypeSystemReady(logger);
 
-            builder.Bindings.Bind<IAssemblies>().To(assemblies);
-            builder.Bindings.Bind<ITypeFinder>().To(typeFinder);
+        builder.Bindings.Bind<IAssemblies>().To(assemblies);
+        builder.Bindings.Bind<ITypeFinder>().To(typeFinder);
 
-            builder.Associate(WellKnownAssociations.Assemblies, assemblies);
-            builder.Associate(WellKnownAssociations.TypeFinder, typeFinder);
-        }
+        builder.Associate(WellKnownAssociations.Assemblies, assemblies);
+        builder.Associate(WellKnownAssociations.TypeFinder, typeFinder);
     }
+}
+
+static partial class Log
+{
+    [LoggerMessage(0, LogLevel.Debug, "  Type system ready")]
+    internal static partial void TypeSystemReady(ILogger logger);
+    
+    [LoggerMessage(0, LogLevel.Debug, "  Set up type system for discovery")]
+    internal static partial void SetupTypeSystem(ILogger logger);
+    
+    [LoggerMessage(0, LogLevel.Trace, "Including assemblies starting with '{AssemblyName}'")]
+    internal static partial void IncludingAssemblies(ILogger logger, string assemblyName);
+    
+    [LoggerMessage(0, LogLevel.Trace, "  Discovery")]
+    internal static partial void Discovery(ILogger logger);
 }

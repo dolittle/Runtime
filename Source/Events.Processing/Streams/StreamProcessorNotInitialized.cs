@@ -4,20 +4,19 @@
 using System;
 using Dolittle.Runtime.Events.Store.Streams;
 
-namespace Dolittle.Runtime.Events.Processing.Streams
+namespace Dolittle.Runtime.Events.Processing.Streams;
+
+/// <summary>
+/// Exception that gets thrown when a Stream Processor is initialized multiple times.
+/// </summary>
+public class StreamProcessorNotInitialized : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when a Stream Processor is initialized multiple times.
+    /// Initializes a new instance of the <see cref="StreamProcessorNotInitialized"/> class.
     /// </summary>
-    public class StreamProcessorNotInitialized : Exception
+    /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
+    public StreamProcessorNotInitialized(IStreamProcessorId streamProcessorId)
+        : base($"Stream Processor: '{streamProcessorId}' is not initialized")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StreamProcessorNotInitialized"/> class.
-        /// </summary>
-        /// <param name="streamProcessorId">The <see cref="IStreamProcessorId" />.</param>
-        public StreamProcessorNotInitialized(IStreamProcessorId streamProcessorId)
-            : base($"Stream Processor: '{streamProcessorId}' is not initialized")
-        {
-        }
     }
 }

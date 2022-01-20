@@ -4,33 +4,32 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
+namespace Dolittle.Runtime.Events.Processing.EventHandlers;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
+/// runtime service implementations for Heads.
+/// </summary>
+public class RuntimeServices : ICanBindRuntimeServices
 {
+    readonly EventHandlersService _eventHandlers;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindRuntimeServices"/> for exposing
-    /// runtime service implementations for Heads.
+    /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
     /// </summary>
-    public class RuntimeServices : ICanBindRuntimeServices
+    /// <param name="eventHandlers">The <see cref="EventHandlersService"/>.</param>
+    public RuntimeServices(EventHandlersService eventHandlers)
     {
-        readonly EventHandlersService _eventHandlers;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="RuntimeServices"/> class.
-        /// </summary>
-        /// <param name="eventHandlers">The <see cref="EventHandlersService"/>.</param>
-        public RuntimeServices(EventHandlersService eventHandlers)
-        {
-            _eventHandlers = eventHandlers;
-        }
-
-        /// <inheritdoc/>
-        public ServiceAspect Aspect => "Events.Processing";
-
-        /// <inheritdoc/>
-        public IEnumerable<Service> BindServices() =>
-            new Service[]
-            {
-                new Service(_eventHandlers, Contracts.EventHandlers.BindService(_eventHandlers), Contracts.EventHandlers.Descriptor)
-            };
+        _eventHandlers = eventHandlers;
     }
+
+    /// <inheritdoc/>
+    public ServiceAspect Aspect => "Events.Processing";
+
+    /// <inheritdoc/>
+    public IEnumerable<Service> BindServices() =>
+        new Service[]
+        {
+            new(_eventHandlers, Contracts.EventHandlers.BindService(_eventHandlers), Contracts.EventHandlers.Descriptor)
+        };
 }

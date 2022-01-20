@@ -5,32 +5,31 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Management;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers
+namespace Dolittle.Runtime.Events.Processing.Management.EventHandlers;
+
+/// <summary>
+/// Represents an implementation of <see cref="ICanBindManagementServices"/> that exposes EventHandler management services.
+/// </summary>
+public class ManagementServices : ICanBindManagementServices
 {
+    readonly EventHandlersService _eventHandlers;
+
     /// <summary>
-    /// Represents an implementation of <see cref="ICanBindManagementServices"/> that exposes EventHandler management services.
+    /// Initializes a new instance of the <see cref="ManagementServices"/> class.
     /// </summary>
-    public class ManagementServices : ICanBindManagementServices
+    /// <param name="eventHandlers">The <see cref="EventHandlersService"/>.</param>
+    public ManagementServices(EventHandlersService eventHandlers)
     {
-        readonly EventHandlersService _eventHandlers;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ManagementServices"/> class.
-        /// </summary>
-        /// <param name="eventHandlers">The <see cref="EventHandlersService"/>.</param>
-        public ManagementServices(EventHandlersService eventHandlers)
-        {
-            _eventHandlers = eventHandlers;
-        }
-
-        /// <inheritdoc />
-        public ServiceAspect Aspect => "Events.Processing.Management";
-
-        /// <inheritdoc />
-        public IEnumerable<Service> BindServices() =>
-            new[]
-            {
-                new Service(_eventHandlers, Contracts.EventHandlers.BindService(_eventHandlers), Contracts.EventHandlers.Descriptor),
-            };
+        _eventHandlers = eventHandlers;
     }
+
+    /// <inheritdoc />
+    public ServiceAspect Aspect => "Events.Processing.Management";
+
+    /// <inheritdoc />
+    public IEnumerable<Service> BindServices() =>
+        new[]
+        {
+            new Service(_eventHandlers, Contracts.EventHandlers.BindService(_eventHandlers), Contracts.EventHandlers.Descriptor),
+        };
 }

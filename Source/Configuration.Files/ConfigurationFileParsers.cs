@@ -7,46 +7,51 @@ using System.Linq;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Types;
 
-namespace Dolittle.Runtime.Configuration.Files
+namespace Dolittle.Runtime.Configuration.Files;
+
+/// <summary>
+/// Represents an implementation of <see creF="IConfigurationFileParsers"/>.
+/// </summary>
+public class ConfigurationFileParsers : IConfigurationFileParsers
 {
+    readonly IEnumerable<ICanParseConfigurationFile> _parsers;
+
     /// <summary>
-    /// Represents an implementation of <see creF="IConfigurationFileParsers"/>.
+    /// Initializes a new instance of the <see cref="ConfigurationFileParsers"/> class.
     /// </summary>
-    public class ConfigurationFileParsers : IConfigurationFileParsers
+    /// <param name="typeFinder"><see cref="ITypeFinder"/> to use for finding parsers.</param>
+    /// <param name="container"><see cerf="IContainer"/> used to get instances.</param>
+    public ConfigurationFileParsers(ITypeFinder typeFinder, IContainer container)
     {
-        readonly IEnumerable<ICanParseConfigurationFile> _parsers;
+        _parsers = typeFinder
+            .FindMultiple<ICanParseConfigurationFile>()
+            .Select(_ => container.Get(_) as ICanParseConfigurationFile);
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConfigurationFileParsers"/> class.
-        /// </summary>
-        /// <param name="typeFinder"><see cref="ITypeFinder"/> to use for finding parsers.</param>
-        /// <param name="container"><see cerf="IContainer"/> used to get instances.</param>
-        public ConfigurationFileParsers(ITypeFinder typeFinder, IContainer container)
+    /// <inheritdoc/>
+    public object Parse(Type type, string filename, string content)
+    {
+        var parsers = _parsers.Where(_ => _.CanParse(type, filename, content)).ToArray();
+        ThrowIfMultipleParsersForConfigurationFile(filename, parsers);
+        ThrowIfMissingParserForConfigurationFile(filename, parsers);
+
+        var parser = parsers.Single();
+        return parser.Parse(type, filename, content);
+    }
+
+    static void ThrowIfMultipleParsersForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
+    {
+        if (parsers.Length > 1)
         {
-            _parsers = typeFinder
-                        .FindMultiple<ICanParseConfigurationFile>()
-                        .Select(_ => container.Get(_) as ICanParseConfigurationFile);
+            throw new MultipleParsersForConfigurationFile(filename);
         }
+    }
 
-        /// <inheritdoc/>
-        public object Parse(Type type, string filename, string content)
+    static void ThrowIfMissingParserForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
+    {
+        if (parsers.Length == 0)
         {
-            var parsers = _parsers.Where(_ => _.CanParse(type, filename, content)).ToArray();
-            ThrowIfMultipleParsersForConfigurationFile(filename, parsers);
-            ThrowIfMissingParserForConfigurationFile(filename, parsers);
-
-            var parser = parsers.Single();
-            return parser.Parse(type, filename, content);
-        }
-
-        void ThrowIfMultipleParsersForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
-        {
-            if (parsers.Length > 1) throw new MultipleParsersForConfigurationFile(filename);
-        }
-
-        void ThrowIfMissingParserForConfigurationFile(string filename, ICanParseConfigurationFile[] parsers)
-        {
-            if (parsers.Length == 0) throw new MissingParserForConfigurationFile(filename);
+            throw new MissingParserForConfigurationFile(filename);
         }
     }
 }

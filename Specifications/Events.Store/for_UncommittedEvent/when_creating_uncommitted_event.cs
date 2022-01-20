@@ -5,31 +5,30 @@ using System;
 using Dolittle.Runtime.Artifacts;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Store.for_UncommittedEvent
+namespace Dolittle.Runtime.Events.Store.for_UncommittedEvent;
+
+public class when_creating_uncommitted_event
 {
-    public class when_creating_uncommitted_event
+    static EventSourceId event_source_id;
+    static ArtifactId artifact_id;
+    static ArtifactGeneration artifact_generation;
+    static bool is_public;
+    static string content;
+    static UncommittedEvent uncommitted_event;
+
+    Establish context = () =>
     {
-        static EventSourceId event_source_id;
-        static ArtifactId artifact_id;
-        static ArtifactGeneration artifact_generation;
-        static bool is_public;
-        static string content;
-        static UncommittedEvent uncommitted_event;
+        event_source_id = "the event source™";
+        artifact_id = Guid.NewGuid();
+        artifact_generation = 0;
+        is_public = false;
+        content = "content";
+    };
 
-        Establish context = () =>
-        {
-            event_source_id = "the event source™";
-            artifact_id = Guid.NewGuid();
-            artifact_generation = 0;
-            is_public = false;
-            content = "content";
-        };
+    Because of = () => uncommitted_event = new UncommittedEvent(event_source_id, new Artifact(artifact_id, artifact_generation), is_public, content);
 
-        Because of = () => uncommitted_event = new UncommittedEvent(event_source_id, new Artifact(artifact_id, artifact_generation), is_public, content);
-
-        It should_have_the_correct_artifact_id = () => uncommitted_event.Type.Id.ShouldEqual(artifact_id);
-        It should_have_the_correct_artifact_generation = () => uncommitted_event.Type.Generation.ShouldEqual(artifact_generation);
-        It should_have_the_correct_is_public_value = () => uncommitted_event.Public.ShouldEqual(is_public);
-        It should_have_the_correct_content = () => uncommitted_event.Content.ShouldEqual(content);
-    }
+    It should_have_the_correct_artifact_id = () => uncommitted_event.Type.Id.ShouldEqual(artifact_id);
+    It should_have_the_correct_artifact_generation = () => uncommitted_event.Type.Generation.ShouldEqual(artifact_generation);
+    It should_have_the_correct_is_public_value = () => uncommitted_event.Public.ShouldEqual(is_public);
+    It should_have_the_correct_content = () => uncommitted_event.Content.ShouldEqual(content);
 }

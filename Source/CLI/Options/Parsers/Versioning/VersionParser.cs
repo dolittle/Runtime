@@ -7,29 +7,28 @@ using Dolittle.Runtime.Versioning;
 using McMaster.Extensions.CommandLineUtils.Abstractions;
 using Version = Dolittle.Runtime.Versioning.Version;
 
-namespace CLI.Options.Parsers.Versioning
+namespace CLI.Options.Parsers.Versioning;
+
+/// <summary>
+/// An implementation of <see cref="IValueParser"/> that parses semantic version values as <see cref="Version"/>.
+/// </summary>
+public class VersionParser : IValueParser
 {
+    readonly IVersionConverter _converter;
+
     /// <summary>
-    /// An implementation of <see cref="IValueParser"/> that parses semantic version values as <see cref="Version"/>.
+    /// Initializes a new instance of the <see cref="VersionParser"/> class.
     /// </summary>
-    public class VersionParser : IValueParser
+    /// <param name="converter">The version converter to use to convert a <see cref="string"/> to a <see cref="Version"/>.</param>
+    public VersionParser(IVersionConverter converter)
     {
-        readonly IVersionConverter _converter;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="VersionParser"/> class.
-        /// </summary>
-        /// <param name="converter">The version converter to use to convert a <see cref="string"/> to a <see cref="Version"/>.</param>
-        public VersionParser(IVersionConverter converter)
-        {
-            _converter = converter;
-        }
-
-        /// <inheritdoc/>
-        public Type TargetType => typeof(Version);
-
-        /// <inheritdoc/>
-        public object Parse(string argName, string value, CultureInfo culture)
-            => _converter.FromString(value);
+        _converter = converter;
     }
+
+    /// <inheritdoc/>
+    public Type TargetType => typeof(Version);
+
+    /// <inheritdoc/>
+    public object Parse(string argName, string value, CultureInfo culture)
+        => _converter.FromString(value);
 }

@@ -4,29 +4,28 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration
+namespace Dolittle.Runtime.ResourceTypes.Configuration;
+
+/// <summary>
+/// Represents a configuration for the Resource System.
+/// </summary>
+public interface IResourceConfiguration
 {
     /// <summary>
-    /// Represents a configuration for the Resource System.
+    /// Gets a value indicating whether or not the resource configuration system is configured.
     /// </summary>
-    public interface IResourceConfiguration
-    {
-        /// <summary>
-        /// Gets a value indicating whether or not the resource configuration system is configured.
-        /// </summary>
-        bool IsConfigured { get; }
+    bool IsConfigured { get; }
 
-        /// <summary>
-        /// Gets the implementation for a specific service.
-        /// </summary>
-        /// <param name="service"><see cref="Type"/> of service to get implementation for.</param>
-        /// <returns>Implementing <see cref="Type"/>.</returns>
-        Type GetImplementationFor(Type service);
+    /// <summary>
+    /// Gets the implementation for a specific service.
+    /// </summary>
+    /// <param name="service"><see cref="Type"/> of service to get implementation for.</param>
+    /// <returns>Implementing <see cref="Type"/>.</returns>
+    Type GetImplementationFor(Type service);
 
-        /// <summary>
-        /// Sets the ResourceType to ResourceTypeImplementation mapping .
-        /// </summary>
-        /// <param name="resourceTypeToImplementationMap"><see cref="IDictionary{TKEy,TValye}">Map</see> of <see cref="ResourceType"/> to <see cref="ResourceTypeImplementation"/>.</param>
-        void ConfigureResourceTypes(IDictionary<ResourceType, ResourceTypeImplementation> resourceTypeToImplementationMap);
-    }
+    /// <summary>
+    /// Sets the ResourceType to ResourceTypeImplementation mapping .
+    /// </summary>
+    /// <param name="resourceTypeToImplementationMap"><see cref="IDictionary{TKEy,TValye}">Map</see> of <see cref="ResourceType"/> to <see cref="ResourceTypeImplementation"/>.</param>
+    void ConfigureResourceTypes(IDictionary<ResourceType, ResourceTypeImplementation> resourceTypeToImplementationMap);
 }

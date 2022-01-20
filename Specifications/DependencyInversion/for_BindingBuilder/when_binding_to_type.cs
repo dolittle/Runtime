@@ -3,20 +3,19 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.DependencyInversion.for_BindingBuilder
+namespace Dolittle.Runtime.DependencyInversion.for_BindingBuilder;
+
+public class when_binding_to_type : given.a_null_binding
 {
-    public class when_binding_to_type : given.a_null_binding
+    static Binding result;
+
+    Because of = () =>
     {
-        static Binding result;
+        builder.To(typeof(string));
+        result = builder.Build();
+    };
 
-        Because of = () =>
-        {
-            builder.To(typeof(string));
-            result = builder.Build();
-        };
-
-        It should_have_a_type_strategy = () => result.Strategy.ShouldBeOfExactType<Strategies.Type>();
-        It should_hold_the_type_in_the_strategy = () => ((Strategies.Type)result.Strategy).Target.ShouldEqual(typeof(string));
-        It should_have_transient_scope = () => result.Scope.ShouldBeAssignableTo<Scopes.Transient>();
-    }
+    It should_have_a_type_strategy = () => result.Strategy.ShouldBeOfExactType<Strategies.Type>();
+    It should_hold_the_type_in_the_strategy = () => ((Strategies.Type)result.Strategy).Target.ShouldEqual(typeof(string));
+    It should_have_transient_scope = () => result.Scope.ShouldBeAssignableTo<Scopes.Transient>();
 }

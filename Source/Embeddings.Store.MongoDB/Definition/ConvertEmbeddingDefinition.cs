@@ -5,28 +5,27 @@ using System.Linq;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Lifecycle;
 
-namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition
-{
-    /// <summary>
-    /// Represents an implementation of <see cref="IConvertEmbeddingDefinition" />.
-    /// </summary>
-    [Singleton]
-    public class ConvertEmbeddingDefinition : IConvertEmbeddingDefinition
-    {
-        /// <inheritdoc/>
-        public Store.Definition.EmbeddingDefinition ToRuntime(EmbeddingDefinition definition)
-            => new(
-                definition.Embedding,
-                definition.Events.Select(_ => new Artifact(_, ArtifactGeneration.First)),
-                definition.InitialState);
+namespace Dolittle.Runtime.Embeddings.Store.MongoDB.Definition;
 
-        /// <inheritdoc/>
-        public EmbeddingDefinition ToStored(Store.Definition.EmbeddingDefinition definition)
-            => new()
-            {
-                Embedding = definition.Embedding,
-                InitialState = definition.InititalState,
-                Events = definition.Events.Select(_ => _.Id.Value).ToArray()
-            };
-    }
+/// <summary>
+/// Represents an implementation of <see cref="IConvertEmbeddingDefinition" />.
+/// </summary>
+[Singleton]
+public class ConvertEmbeddingDefinition : IConvertEmbeddingDefinition
+{
+    /// <inheritdoc/>
+    public Store.Definition.EmbeddingDefinition ToRuntime(EmbeddingDefinition definition)
+        => new(
+            definition.Embedding,
+            definition.Events.Select(_ => new Artifact(_, ArtifactGeneration.First)),
+            definition.InitialState);
+
+    /// <inheritdoc/>
+    public EmbeddingDefinition ToStored(Store.Definition.EmbeddingDefinition definition)
+        => new()
+        {
+            Embedding = definition.Embedding,
+            InitialState = definition.InititalState,
+            Events = definition.Events.Select(_ => _.Id.Value).ToArray()
+        };
 }

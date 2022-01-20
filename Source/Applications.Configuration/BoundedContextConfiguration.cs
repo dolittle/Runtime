@@ -7,17 +7,16 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Configuration;
 using Dolittle.Runtime.ResourceTypes;
 
-namespace Dolittle.Runtime.Applications.Configuration
-{
-    /// <summary>
-    /// Represents the definition of a <see cref="Microservice"/> for configuration.
-    /// </summary>
-    [Name("bounded-context")]
-    public record BoundedContextConfiguration(
-        Guid Application,
-        Guid BoundedContext,
-        string BoundedContextName,
-        CoreConfiguration Core,
-        IEnumerable<InteractionLayerConfiguration> Interaction,
-        IDictionary<string, ResourceTypeImplementationConfiguration> Resources) : IConfigurationObject;
-}
+namespace Dolittle.Runtime.Applications.Configuration;
+
+/// <summary>
+/// Represents the definition of a <see cref="MicroserviceId"/> for configuration.
+/// </summary>
+[Name("bounded-context")]
+public record BoundedContextConfiguration(
+    Guid Application,
+    Guid BoundedContext,
+    string BoundedContextName,
+    CoreConfiguration Core,
+    IEnumerable<InteractionLayerConfiguration> Interaction,
+    IDictionary<string, ResourceTypeImplementationConfiguration> Resources) : IConfigurationObject;

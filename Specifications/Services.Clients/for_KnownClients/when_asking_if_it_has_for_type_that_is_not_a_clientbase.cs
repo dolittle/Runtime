@@ -4,14 +4,13 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.Clients.for_KnownClients
+namespace Dolittle.Runtime.Services.Clients.for_KnownClients;
+
+public class when_asking_if_it_has_for_type_that_is_not_a_clientbase : given.no_known_clients
 {
-    public class when_asking_if_it_has_for_type_that_is_not_a_clientbase : given.no_known_clients
-    {
-        static Exception result;
+    static Exception result;
 
-        Because of = () => result = Catch.Exception(() => known_clients.HasFor(typeof(string)));
+    Because of = () => result = Catch.Exception(() => known_clients.HasFor(typeof(string)));
 
-        It should_throw_type_does_not_implement_client_base = () => result.ShouldBeOfExactType<TypeDoesNotImplementClientBase>();
-    }
+    It should_throw_type_does_not_implement_client_base = () => result.ShouldBeOfExactType<TypeDoesNotImplementClientBase>();
 }

@@ -4,16 +4,15 @@
 using System;
 using Dolittle.Runtime.Events.Store;
 
-namespace Dolittle.Runtime.Events.Processing.Projections
+namespace Dolittle.Runtime.Events.Processing.Projections;
+
+/// <summary>
+/// Exception that gets throw when getting the projection key from an event fails.
+/// </summary>
+public class CouldNotGetProjectionKey : Exception
 {
-    /// <summary>
-    /// Exception that gets throw when getting the projection key from an event fails.
-    /// </summary>
-    public class CouldNotGetProjectionKey : Exception
+    public CouldNotGetProjectionKey(CommittedEvent @event)
+        : base($"Could not get projection key from event on sequence number {@event.EventLogSequenceNumber} with content '{@event.Content}'")
     {
-        public CouldNotGetProjectionKey(CommittedEvent @event)
-            : base($"Could not get projection key from event on sequence number {@event.EventLogSequenceNumber} with content '{@event.Content}'")
-        {
-        }
     }
 }

@@ -4,22 +4,21 @@
 using System.Collections.ObjectModel;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions
+namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions;
+
+public class when_checking_type_deriving_from_readonly_dictionary_if_is_dictionary
 {
-    public class when_checking_type_deriving_from_readonly_dictionary_if_is_dictionary
+    class derived : ReadOnlyDictionary<string, string>
     {
-        class derived : ReadOnlyDictionary<string, string>
+        derived()
+            : base(null)
         {
-            derived()
-                : base(null)
-            {
-            }
         }
-
-        static bool result;
-
-        Because of = () => result = typeof(derived).IsDictionary();
-
-        It should_be_considered_a_dictionary = () => result.ShouldBeTrue();
     }
+
+    static bool result;
+
+    Because of = () => result = typeof(derived).IsDictionary();
+
+    It should_be_considered_a_dictionary = () => result.ShouldBeTrue();
 }

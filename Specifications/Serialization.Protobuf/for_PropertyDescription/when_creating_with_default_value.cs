@@ -3,15 +3,14 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Serialization.Protobuf.for_PropertyDescription
+namespace Dolittle.Runtime.Serialization.Protobuf.for_PropertyDescription;
+
+public class when_creating_with_default_value
 {
-    public class when_creating_with_default_value
-    {
-        const string default_value = "The default value";
-        static PropertyDescription result;
+    const string default_value = "The default value";
+    static PropertyDescription result;
 
-        Because of = () => result = new PropertyDescription(class_with_property.some_property, defaultValue: default_value);
+    Because of = () => result = new PropertyDescription(class_with_property.some_property, defaultValue: default_value);
 
-        It should_set_default_value = () => result.DefaultValue.ShouldEqual(default_value);
-    }
+    It should_set_default_value = () => result.DefaultValue.ShouldEqual(default_value);
 }

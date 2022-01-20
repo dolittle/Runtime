@@ -1,5 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <Import Project="../../default.props"/>
+  <Import Project="../../default.props" />
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Heads</AssemblyName>
@@ -11,9 +11,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../Metrics/Metrics.csproj"/>
-    <ProjectReference Include="../Services/Services.csproj"/>
-    <ProjectReference Include="../Protobuf/Protobuf.csproj"/>
+    <ProjectReference Include="../Metrics/Metrics.csproj" />
+    <ProjectReference Include="../Services/Services.csproj" />
+    <ProjectReference Include="../Protobuf/Protobuf.csproj" />
   </ItemGroup>
  
 </Project>

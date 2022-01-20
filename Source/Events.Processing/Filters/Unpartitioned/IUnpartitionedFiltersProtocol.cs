@@ -3,12 +3,11 @@
 
 using Dolittle.Runtime.Events.Processing.Contracts;
 
-namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned
+namespace Dolittle.Runtime.Events.Processing.Filters.Unpartitioned;
+
+/// <summary>
+/// Defines the protocol for unpartitioned filters.
+/// </summary>
+public interface IUnpartitionedFiltersProtocol : IFiltersProtocol<FilterClientToRuntimeMessage, FilterRegistrationRequest, FilterResponse, UnpartitionedFilterRegistrationArguments>
 {
-    /// <summary>
-    /// Defines the protocol for unpartitioned filters.
-    /// </summary>
-    public interface IUnpartitionedFiltersProtocol : IFiltersProtocol<FilterClientToRuntimeMessage, FilterRegistrationRequest, FilterResponse, UnpartitionedFilterRegistrationArguments>
-    {
-    }
 }

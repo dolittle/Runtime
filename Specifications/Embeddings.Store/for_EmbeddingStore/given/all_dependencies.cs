@@ -7,19 +7,18 @@ using Machine.Specifications;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.given
-{
-    public class all_dependencies
-    {
-        protected static Mock<IEmbeddingStates> states;
-        protected static Mock<IEmbeddingDefinitions> definitions;
-        protected static IEmbeddingStore store;
+namespace Dolittle.Runtime.Embeddings.Store.for_EmbeddingStore.given;
 
-        Establish context = () =>
-        {
-            states = new Mock<IEmbeddingStates>();
-            definitions = new Mock<IEmbeddingDefinitions>();
-            store = new EmbeddingStore(states.Object, definitions.Object, Mock.Of<ILogger>());
-        };
-    }
+public class all_dependencies
+{
+    protected static Mock<IEmbeddingStates> states;
+    protected static Mock<IEmbeddingDefinitions> definitions;
+    protected static IEmbeddingStore store;
+
+    Establish context = () =>
+    {
+        states = new Mock<IEmbeddingStates>();
+        definitions = new Mock<IEmbeddingDefinitions>();
+        store = new EmbeddingStore(states.Object, definitions.Object, Mock.Of<ILogger>());
+    };
 }

@@ -10,26 +10,25 @@ using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
 using System;
 
-namespace Dolittle.Runtime.Events.Processing
+namespace Dolittle.Runtime.Events.Processing;
+
+public class in_memory_stream_processor_state_repository : IResilientStreamProcessorStateRepository
 {
-    public class in_memory_stream_processor_state_repository : IResilientStreamProcessorStateRepository
+    readonly IDictionary<StreamProcessorId, IStreamProcessorState> states = new NullFreeDictionary<StreamProcessorId, IStreamProcessorState>();
+
+    public void Dispose()
     {
-        readonly IDictionary<StreamProcessorId, IStreamProcessorState> states = new NullFreeDictionary<StreamProcessorId, IStreamProcessorState>();
+    }
 
-        public void Dispose()
-        {
-        }
+    public Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
+    {
+        states[streamProcessorId as StreamProcessorId] = streamProcessorState;
+        return Task.CompletedTask;
+    }
 
-        public Task Persist(IStreamProcessorId streamProcessorId, IStreamProcessorState streamProcessorState, CancellationToken cancellationToken)
-        {
-            states[streamProcessorId as StreamProcessorId] = streamProcessorState;
-            return Task.CompletedTask;
-        }
-
-        public Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
-        {
-            if (states.ContainsKey(streamProcessorId as StreamProcessorId)) return Task.FromResult(Try<IStreamProcessorState>.Succeeded(states[streamProcessorId as StreamProcessorId]));
-            else return Task.FromResult(Try<IStreamProcessorState>.Failed(new Exception()));
-        }
+    public Task<Try<IStreamProcessorState>> TryGetFor(IStreamProcessorId streamProcessorId, CancellationToken cancellationToken)
+    {
+        if (states.ContainsKey(streamProcessorId as StreamProcessorId)) return Task.FromResult(Try<IStreamProcessorState>.Succeeded(states[streamProcessorId as StreamProcessorId]));
+        else return Task.FromResult(Try<IStreamProcessorState>.Failed(new Exception()));
     }
 }

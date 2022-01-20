@@ -4,14 +4,13 @@
 using System.Reflection;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Immutability.for_ImmutableExtensions
+namespace Dolittle.Runtime.Immutability.for_ImmutableExtensions;
+
+public class when_getting_writeable_fields
 {
-    public class when_getting_writeable_fields
-    {
-        static FieldInfo[] fields;
+    static FieldInfo[] fields;
 
-        Because of = () => fields = typeof(class_with_readonly_fields).GetWriteableFields();
+    Because of = () => fields = typeof(class_with_readonly_fields).GetWriteableFields();
 
-        It should_return_the_writeable_field = () => fields[0].Name.ShouldEqual("field_that_can_write");
-    }
+    It should_return_the_writeable_field = () => fields[0].Name.ShouldEqual("field_that_can_write");
 }

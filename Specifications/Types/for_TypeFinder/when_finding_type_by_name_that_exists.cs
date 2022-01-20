@@ -4,16 +4,15 @@
 using System;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Types.for_TypeFinder
+namespace Dolittle.Runtime.Types.for_TypeFinder;
+
+[Subject(typeof(TypeFinder))]
+public class when_finding_type_by_name_that_exists : given.a_type_finder
 {
-    [Subject(typeof(TypeFinder))]
-    public class when_finding_type_by_name_that_exists : given.a_type_finder
-    {
-        static Type type_found;
+    static Type type_found;
 
-        Because of = () => type_found = type_finder.FindTypeByFullName(typeof(Single).FullName);
+    Because of = () => type_found = type_finder.FindTypeByFullName(typeof(Single).FullName);
 
-        It should_not_return_null = () => type_found.ShouldNotBeNull();
-        It should_return_the_correct_type = () => type_found.ShouldEqual(typeof(Single));
-    }
+    It should_not_return_null = () => type_found.ShouldNotBeNull();
+    It should_return_the_correct_type = () => type_found.ShouldEqual(typeof(Single));
 }

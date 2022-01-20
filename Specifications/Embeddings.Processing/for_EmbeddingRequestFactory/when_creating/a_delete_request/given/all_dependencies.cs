@@ -5,15 +5,14 @@ using Dolittle.Runtime.Embeddings.Store;
 using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.when_creating.a_delete_request.given
-{
-    public class all_dependencies : for_EmbeddingRequestFactory.given.all_dependencies
-    {
-        protected static EmbeddingCurrentState current_state;
+namespace Dolittle.Runtime.Embeddings.Processing.for_EmbeddingRequestFactory.when_creating.a_delete_request.given;
 
-        Establish context = () =>
-        {
-            current_state = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.Persisted, "current state", "key");
-        };
-    }
+public class all_dependencies : for_EmbeddingRequestFactory.given.all_dependencies
+{
+    protected static EmbeddingCurrentState current_state;
+
+    Establish context = () =>
+    {
+        current_state = new EmbeddingCurrentState(0, EmbeddingCurrentStateType.Persisted, "current state", "key");
+    };
 }

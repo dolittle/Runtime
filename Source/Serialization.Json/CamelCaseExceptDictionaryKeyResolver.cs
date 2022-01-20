@@ -4,21 +4,20 @@
 using System;
 using Newtonsoft.Json.Serialization;
 
-namespace Dolittle.Runtime.Serialization.Json
+namespace Dolittle.Runtime.Serialization.Json;
+
+/// <summary>
+/// Represents a <see cref="CamelCasePropertyNamesContractResolver"/>that ignores the casing of Dictionary keys.
+/// </summary>
+public class CamelCaseExceptDictionaryKeyResolver : CamelCasePropertyNamesContractResolver
 {
-    /// <summary>
-    /// Represents a <see cref="CamelCasePropertyNamesContractResolver"/>that ignores the casing of Dictionary keys.
-    /// </summary>
-    public class CamelCaseExceptDictionaryKeyResolver : CamelCasePropertyNamesContractResolver
+    /// <inheritdoc/>
+    protected override JsonDictionaryContract CreateDictionaryContract(Type objectType)
     {
-        /// <inheritdoc/>
-        protected override JsonDictionaryContract CreateDictionaryContract(Type objectType)
-        {
-            var contract = base.CreateDictionaryContract(objectType);
+        var contract = base.CreateDictionaryContract(objectType);
 
-            contract.DictionaryKeyResolver = propertyName => propertyName;
+        contract.DictionaryKeyResolver = propertyName => propertyName;
 
-            return contract;
-        }
+        return contract;
     }
 }

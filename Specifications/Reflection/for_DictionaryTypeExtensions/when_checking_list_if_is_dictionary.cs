@@ -4,14 +4,13 @@
 using System.Collections.Generic;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions
+namespace Dolittle.Runtime.Reflection.for_DictionaryTypeExtensions;
+
+public class when_checking_list_if_is_dictionary
 {
-    public class when_checking_list_if_is_dictionary
-    {
-        static bool result;
+    static bool result;
 
-        Because of = () => result = typeof(List<string>).IsDictionary();
+    Because of = () => result = typeof(List<string>).IsDictionary();
 
-        It should_not_be_considered_a_dictionary = () => result.ShouldBeFalse();
-    }
+    It should_not_be_considered_a_dictionary = () => result.ShouldBeFalse();
 }

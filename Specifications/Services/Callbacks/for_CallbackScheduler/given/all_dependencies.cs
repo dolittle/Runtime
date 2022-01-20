@@ -7,22 +7,21 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler.given
+namespace Dolittle.Runtime.Services.Callbacks.for_CallbackScheduler.given;
+
+public class all_dependencies
 {
-    public class all_dependencies
+    protected static ICallbackScheduler scheduler;
+    protected static Mock<IHostApplicationLifetime> host_application_lifetime;
+    protected static CancellationTokenSource host_application_cts;
+    Establish context = () =>
     {
-        protected static ICallbackScheduler scheduler;
-        protected static Mock<IHostApplicationLifetime> host_application_lifetime;
-        protected static CancellationTokenSource host_application_cts;
-        Establish context = () =>
-        {
-            host_application_cts = new();
-            host_application_lifetime = new();
-            host_application_lifetime.Setup(_ => _.ApplicationStopping).Returns(host_application_cts.Token);
-            scheduler = new CallbackScheduler(
-                host_application_lifetime.Object,
-                Mock.Of<ILoggerFactory>(),
-                Mock.Of<IMetricsCollector>());
-        };
-    }
+        host_application_cts = new CancellationTokenSource();
+        host_application_lifetime = new Mock<IHostApplicationLifetime>();
+        host_application_lifetime.Setup(_ => _.ApplicationStopping).Returns(host_application_cts.Token);
+        scheduler = new CallbackScheduler(
+            host_application_lifetime.Object,
+            Mock.Of<ILoggerFactory>(),
+            Mock.Of<IMetricsCollector>());
+    };
 }

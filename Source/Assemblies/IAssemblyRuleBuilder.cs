@@ -4,17 +4,16 @@
 using Dolittle.Runtime.Specifications;
 using Microsoft.Extensions.DependencyModel;
 
-namespace Dolittle.Runtime.Assemblies
+namespace Dolittle.Runtime.Assemblies;
+
+/// <summary>
+/// Defines a rule builder for building configuration for assemblies and how to include
+/// or exclude assemblies.
+/// </summary>
+public interface IAssemblyRuleBuilder
 {
     /// <summary>
-    /// Defines a rule builder for building configuration for assemblies and how to include
-    /// or exclude assemblies.
+    /// Gets or sets the specification to use.
     /// </summary>
-    public interface IAssemblyRuleBuilder
-    {
-        /// <summary>
-        /// Gets or sets the specification to use.
-        /// </summary>
-        Specification<Library> Specification { get; set; }
-    }
+    Specification<Library> Specification { get; set; }
 }

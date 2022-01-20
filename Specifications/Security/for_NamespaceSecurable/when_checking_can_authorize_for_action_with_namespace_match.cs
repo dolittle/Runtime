@@ -3,15 +3,14 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Security.Specs.for_NamespaceSecurable
+namespace Dolittle.Runtime.Security.Specs.for_NamespaceSecurable;
+
+[Subject(typeof(NamespaceSecurable))]
+public class when_checking_can_authorize_for_action_with_namespace_match : given.a_namespace_securable
 {
-    [Subject(typeof(NamespaceSecurable))]
-    public class when_checking_can_authorize_for_action_with_namespace_match : given.a_namespace_securable
-    {
-        static bool authorized;
+    static bool authorized;
 
-        Because of = () => authorized = namespace_securable.CanAuthorize(action_with_namespace_match);
+    Because of = () => authorized = namespace_securable.CanAuthorize(action_with_namespace_match);
 
-        It should_be_authorized = () => authorized.ShouldBeTrue();
-    }
+    It should_be_authorized = () => authorized.ShouldBeTrue();
 }

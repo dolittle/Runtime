@@ -3,12 +3,11 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Serialization.Protobuf.for_MessageDescriptions.given
-{
-    public class no_message_descriptions
-    {
-        protected static MessageDescriptions message_descriptions;
+namespace Dolittle.Runtime.Serialization.Protobuf.for_MessageDescriptions.given;
 
-        Establish context = () => message_descriptions = new MessageDescriptions();
-    }
+public class no_message_descriptions
+{
+    protected static MessageDescriptions message_descriptions;
+
+    Establish context = () => message_descriptions = new MessageDescriptions();
 }

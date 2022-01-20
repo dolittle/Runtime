@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  PRERELEASE_BRANCHES: legolas # Comma separated list of prerelease branch names. 'alpha,rc, ...'
+  PRERELEASE_BRANCHES: gimli # Comma separated list of prerelease branch names. 'alpha,rc, ...'
 
 on:
   pull_request:
@@ -61,6 +61,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Production Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -95,6 +100,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push ARM64 Production Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -129,6 +139,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Debug Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -163,6 +178,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push Development Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -197,6 +217,11 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Push ARM64 Development Image to Docker Hub
         uses: docker/build-push-action@v2
         with:
@@ -228,7 +253,12 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: "5.0.x"
+          dotnet-version: "6.0.x"
+      - name: Update VersionInfo
+        uses: dolittle/update-version-info-action@v1
+        with:
+          version: ${{ needs.setup.outputs.next-version || '0.0.0-prerelease' }}
+          files-to-update: Source/Platform/VersionInfo.cs
       - name: Package as DotNET tool
         working-directory: ./Source/CLI
         run: dotnet pack --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PackageVersion=${{ needs.setup.outputs.next-version }}
@@ -243,21 +273,21 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/osx-x64/publish/Dolittle.Runtime.CLI
+          asset_path: ./Source/CLI/bin/Release/net6.0/osx-x64/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-macos-x64
           asset_content_type: application/octet-stream
-      #      - name: Publish for macOS arm64
-      #        working-directory: ./Source/CLI
-      #        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx.11.0-arm64
-      #      - name: Upload macOS arm64
-      #        uses: actions/upload-release-asset@v1
-      #        env:
-      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #        with:
-      #          upload_url: ${{ needs.setup.outputs.release-upload-url }}
-      #          asset_path: ./Source/CLI/bin/Release/net5.0/osx.11.0-arm64/publish/Dolittle.Runtime.CLI
-      #          asset_name: dolittle-macos-arm64
-      #          asset_content_type: application/octet-stream
+      - name: Publish for macOS arm64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx.11.0-arm64
+      - name: Upload macOS arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/osx.11.0-arm64/publish/Dolittle.Runtime.CLI
+          asset_name: dolittle-macos-arm64
+          asset_content_type: application/octet-stream
       - name: Publish for Windows x64
         working-directory: ./Source/CLI
         run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x64
@@ -267,7 +297,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-x64/publish/Dolittle.Runtime.CLI.exe
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-x64/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-x64.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows x86
@@ -279,7 +309,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-x86/publish/Dolittle.Runtime.CLI.exe
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-x86/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-x86.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows arm64
@@ -291,7 +321,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm64/publish/Dolittle.Runtime.CLI.exe
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-arm64/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-arm64.exe
           asset_content_type: application/octet-stream
       - name: Publish for Windows arm
@@ -303,7 +333,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/win-arm/publish/Dolittle.Runtime.CLI.exe
+          asset_path: ./Source/CLI/bin/Release/net6.0/win-arm/publish/Dolittle.Runtime.CLI.exe
           asset_name: dolittle-win-arm.exe
           asset_content_type: application/octet-stream
       - name: Publish for Linux x64
@@ -315,7 +345,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/linux-x64/publish/Dolittle.Runtime.CLI
+          asset_path: ./Source/CLI/bin/Release/net6.0/linux-x64/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-linux-x64
           asset_content_type: application/octet-stream
       - name: Publish for Linux arm64
@@ -327,7 +357,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/linux-arm64/publish/Dolittle.Runtime.CLI
+          asset_path: ./Source/CLI/bin/Release/net6.0/linux-arm64/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-linux-arm64
           asset_content_type: application/octet-stream
       - name: Publish for Linux arm
@@ -339,6 +369,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.setup.outputs.release-upload-url }}
-          asset_path: ./Source/CLI/bin/Release/net5.0/linux-arm/publish/Dolittle.Runtime.CLI
+          asset_path: ./Source/CLI/bin/Release/net6.0/linux-arm/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-linux-arm
           asset_content_type: application/octet-stream

@@ -4,25 +4,24 @@
 using System;
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.DependencyInversion
+namespace Dolittle.Runtime.DependencyInversion;
+
+/// <summary>
+/// Defines a collection for holding bindings.
+/// </summary>
+public interface IBindingCollection : IEnumerable<Binding>
 {
     /// <summary>
-    /// Defines a collection for holding bindings.
+    /// Check if there is a binding for a specific type by generic parameter.
     /// </summary>
-    public interface IBindingCollection : IEnumerable<Binding>
-    {
-        /// <summary>
-        /// Check if there is a binding for a specific type by generic parameter.
-        /// </summary>
-        /// <typeparam name="T"><see cref="Type"/> to check if has binding.</typeparam>
-        /// <returns>true if there is a binding, false if not.</returns>
-        bool HasBindingFor<T>();
+    /// <typeparam name="T"><see cref="Type"/> to check if has binding.</typeparam>
+    /// <returns>true if there is a binding, false if not.</returns>
+    bool HasBindingFor<T>();
 
-        /// <summary>
-        /// Check if there is a binding for a specific type.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> to check if has binding.</param>
-        /// <returns>true if there is a binding, false if not.</returns>
-        bool HasBindingFor(Type type);
-    }
+    /// <summary>
+    /// Check if there is a binding for a specific type.
+    /// </summary>
+    /// <param name="type"><see cref="Type"/> to check if has binding.</param>
+    /// <returns>true if there is a binding, false if not.</returns>
+    bool HasBindingFor(Type type);
 }

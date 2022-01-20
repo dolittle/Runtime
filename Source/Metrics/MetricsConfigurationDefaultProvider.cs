@@ -3,17 +3,16 @@
 
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.Metrics
+namespace Dolittle.Runtime.Metrics;
+
+/// <summary>
+/// Represents the <see cref="ICanProvideDefaultConfigurationFor{T}">default provider</see> for <see cref="MetricsConfiguration"/>.
+/// </summary>
+public class MetricsConfigurationDefaultProvider : ICanProvideDefaultConfigurationFor<MetricsConfiguration>
 {
-    /// <summary>
-    /// Represents the <see cref="ICanProvideDefaultConfigurationFor{T}">default provider</see> for <see cref="MetricsConfiguration"/>.
-    /// </summary>
-    public class MetricsConfigurationDefaultProvider : ICanProvideDefaultConfigurationFor<MetricsConfiguration>
+    /// <inheritdoc/>
+    public MetricsConfiguration Provide()
     {
-        /// <inheritdoc/>
-        public MetricsConfiguration Provide()
-        {
-            return new MetricsConfiguration(9700);
-        }
+        return new MetricsConfiguration(9700);
     }
 }

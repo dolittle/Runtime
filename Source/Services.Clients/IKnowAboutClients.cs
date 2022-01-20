@@ -3,16 +3,15 @@
 
 using System.Collections.Generic;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Defines a system that knows about <see cref="Client">clients</see>.
+/// </summary>
+public interface IKnowAboutClients
 {
     /// <summary>
-    /// Defines a system that knows about <see cref="Client">clients</see>.
+    /// Gets the <see cref="IEnumerable{T}">collection</see> of <see cref="Client"/>.
     /// </summary>
-    public interface IKnowAboutClients
-    {
-        /// <summary>
-        /// Gets the <see cref="IEnumerable{T}">collection</see> of <see cref="Client"/>.
-        /// </summary>
-        IEnumerable<Client> Clients { get; }
-    }
+    IEnumerable<Client> Clients { get; }
 }

@@ -4,12 +4,11 @@
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
+namespace Dolittle.Runtime.Events.Processing.EventHandlers;
+
+/// <summary>
+/// Defines the protocol for event handlers.
+/// </summary>
+public interface IEventHandlersProtocol : IReverseCallServiceProtocol<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse, EventHandlerRegistrationArguments>
 {
-    /// <summary>
-    /// Defines the protocol for event handlers.
-    /// </summary>
-    public interface IEventHandlersProtocol : IReverseCallServiceProtocol<EventHandlerClientToRuntimeMessage, EventHandlerRuntimeToClientMessage, EventHandlerRegistrationRequest, EventHandlerRegistrationResponse, HandleEventRequest, EventHandlerResponse, EventHandlerRegistrationArguments>
-    {
-    }
 }

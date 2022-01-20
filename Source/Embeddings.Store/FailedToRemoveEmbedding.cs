@@ -5,23 +5,22 @@ using System;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
 
-namespace Dolittle.Runtime.Embeddings.Store
-{
-    /// <summary>
-    /// Exception that gets thrown when the embedding store failed to remove an embedding.
-    /// </summary>
-    public class FailedToRemoveEmbedding : Exception
-    {
+namespace Dolittle.Runtime.Embeddings.Store;
 
-        /// <summary>
-        /// Initializes an instance of the <see cref="FailedToRemoveEmbedding" /> class.
-        /// </summary>
-        /// <param name="embedding">The embedding identifier.</param>
-        /// <param name="key">The projection key</param>
-        /// <param name="version">The aggregate root version.</param>
-        public FailedToRemoveEmbedding(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version)
-            : base($"Failed to remove embedding with id {embedding.Value}, key {key.Value} and aggregate root version {version.Value}")
-        {
-        }
+/// <summary>
+/// Exception that gets thrown when the embedding store failed to remove an embedding.
+/// </summary>
+public class FailedToRemoveEmbedding : Exception
+{
+
+    /// <summary>
+    /// Initializes an instance of the <see cref="FailedToRemoveEmbedding" /> class.
+    /// </summary>
+    /// <param name="embedding">The embedding identifier.</param>
+    /// <param name="key">The projection key</param>
+    /// <param name="version">The aggregate root version.</param>
+    public FailedToRemoveEmbedding(EmbeddingId embedding, ProjectionKey key, AggregateRootVersion version)
+        : base($"Failed to remove embedding with id {embedding.Value}, key {key.Value} and aggregate root version {version.Value}")
+    {
     }
 }

@@ -6,24 +6,23 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.ResourceTypes.Configuration
+namespace Dolittle.Runtime.ResourceTypes.Configuration;
+
+/// <summary>
+/// Represents the <see cref="IConfigurationObject"/> for resources per tenant.
+/// </summary>
+[Name("resources")]
+public class ResourceConfigurationsByTenant :
+    ReadOnlyDictionary<Guid, ReadOnlyDictionary<string, dynamic>>,
+    IConfigurationObject
 {
     /// <summary>
-    /// Represents the <see cref="IConfigurationObject"/> for resources per tenant.
+    /// Initializes a new instance of the <see cref="ResourceConfigurationsByTenant"/> class.
     /// </summary>
-    [Name("resources")]
-    public class ResourceConfigurationsByTenant :
-        ReadOnlyDictionary<Guid, ReadOnlyDictionary<string, dynamic>>,
-        IConfigurationObject
+    /// <param name="dictionary">The configuration to initialize with.</param>
+    public ResourceConfigurationsByTenant(
+        IDictionary<Guid, ReadOnlyDictionary<string, dynamic>> dictionary)
+        : base(dictionary)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ResourceConfigurationsByTenant"/> class.
-        /// </summary>
-        /// <param name="dictionary">The configuration to initialize with.</param>
-        public ResourceConfigurationsByTenant(
-            IDictionary<Guid, ReadOnlyDictionary<string, dynamic>> dictionary)
-            : base(dictionary)
-        {
-        }
     }
 }

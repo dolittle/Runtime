@@ -3,16 +3,15 @@
 
 using System;
 
-namespace Dolittle.Runtime.CLI.Runtime
+namespace Dolittle.Runtime.CLI.Runtime;
+
+/// <summary>
+/// Exception that gets thrown when unable to decide a Runtime address to connect to.
+/// </summary>
+public class CouldNotFindRuntimeAddress : Exception
 {
-    /// <summary>
-    /// Exception that gets thrown when unable to decide a Runtime address to connect to.
-    /// </summary>
-    public class CouldNotFindRuntimeAddress : Exception
+    public CouldNotFindRuntimeAddress()
+        : base("No Runtimes discovered, and no address was provided as an argument.")
     {
-        public CouldNotFindRuntimeAddress()
-            : base("No Runtimes discovered, and no address was provided as an argument.")
-        {
-        }
     }
 }

@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters
+namespace Dolittle.Runtime.Events.Store.MongoDB.Streams.Filters;
+
+/// <summary>
+/// Exception that gets thrown when a required field is missing from <see cref="AbstractFilterDefinition"/> document.
+/// </summary>
+public class AbstractFilterDefinitionDocumentIsMissingTypeField : EventStoreConsistencyError
 {
     /// <summary>
-    /// Exception that gets thrown when a required field is missing from <see cref="AbstractFilterDefinition"/> document.
+    /// Initializes a new instance of the <see cref="AbstractFilterDefinitionDocumentIsMissingTypeField"/> class.
     /// </summary>
-    public class AbstractFilterDefinitionDocumentIsMissingTypeField : EventStoreConsistencyError
+    /// <param name="id">The _id field.</param>
+    public AbstractFilterDefinitionDocumentIsMissingTypeField(Guid id)
+        : base($"The Type field was missing from the filter definition document with id: {id}", null)
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AbstractFilterDefinitionDocumentIsMissingTypeField"/> class.
-        /// </summary>
-        /// <param name="id">The _id field.</param>
-        public AbstractFilterDefinitionDocumentIsMissingTypeField(Guid id)
-            : base($"The Type field was missing from the filter definition document with id: {id}", null)
-        {
-        }
     }
 }

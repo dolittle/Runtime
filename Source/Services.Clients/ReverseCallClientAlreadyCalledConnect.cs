@@ -3,20 +3,19 @@
 
 using System;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Exception that gets thrown when <see cref="ReverseCallClient{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Connect(TConnectArguments, System.Threading.CancellationToken)" />
+/// is called more than once.
+/// </summary>
+public class ReverseCallClientAlreadyCalledConnect : Exception
 {
     /// <summary>
-    /// Exception that gets thrown when <see cref="ReverseCallClient{TClientMessage, TServerMessage, TConnectArguments, TConnectResponse, TRequest, TResponse}.Connect(TConnectArguments, System.Threading.CancellationToken)" />
-    /// is called more than once.
+    /// Initializes a new instance of the <see cref="ReverseCallClientAlreadyCalledConnect"/> class.
     /// </summary>
-    public class ReverseCallClientAlreadyCalledConnect : Exception
+    public ReverseCallClientAlreadyCalledConnect()
+        : base($"Reverse Call Client can only connect once")
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReverseCallClientAlreadyCalledConnect"/> class.
-        /// </summary>
-        public ReverseCallClientAlreadyCalledConnect()
-            : base($"Reverse Call Client can only connect once")
-        {
-        }
     }
 }

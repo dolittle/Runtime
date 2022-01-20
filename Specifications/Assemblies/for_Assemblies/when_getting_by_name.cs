@@ -4,13 +4,12 @@
 using System.Reflection;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Assemblies.for_Assemblies
-{
-    public class when_getting_by_name : given.two_assemblies
-    {
-        static Assembly result;
-        Because of = () => result = assemblies.GetByName(second_assembly_name.Name);
+namespace Dolittle.Runtime.Assemblies.for_Assemblies;
 
-        It should_return_correct_assembly = () => result.ShouldEqual(second_assembly_mock.Object);
-    }
+public class when_getting_by_name : given.two_assemblies
+{
+    static Assembly result;
+    Because of = () => result = assemblies.GetByName(second_assembly_name.Name);
+
+    It should_return_correct_assembly = () => result.ShouldEqual(second_assembly_mock.Object);
 }

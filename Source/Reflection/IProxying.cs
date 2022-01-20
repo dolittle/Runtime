@@ -3,25 +3,24 @@
 
 using System;
 
-namespace Dolittle.Runtime.Reflection
+namespace Dolittle.Runtime.Reflection;
+
+/// <summary>
+/// Defines something can deal with creating proxy types.
+/// </summary>
+public interface IProxying
 {
     /// <summary>
-    /// Defines something can deal with creating proxy types.
+    /// Build an interface type that contains the properties from a specific other type.
     /// </summary>
-    public interface IProxying
-    {
-        /// <summary>
-        /// Build an interface type that contains the properties from a specific other type.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> to get properties from.</param>
-        /// <returns>A new <see cref="Type"/>.</returns>
-        Type BuildInterfaceWithPropertiesFrom(Type type);
+    /// <param name="type"><see cref="Type"/> to get properties from.</param>
+    /// <returns>A new <see cref="Type"/>.</returns>
+    Type BuildInterfaceWithPropertiesFrom(Type type);
 
-        /// <summary>
-        /// Build a class type that contains the properties from a specific other type.
-        /// </summary>
-        /// <param name="type"><see cref="Type"/> to get properties from.</param>
-        /// <returns>A new <see cref="Type"/>.</returns>
-        Type BuildClassWithPropertiesFrom(Type type);
-    }
+    /// <summary>
+    /// Build a class type that contains the properties from a specific other type.
+    /// </summary>
+    /// <param name="type"><see cref="Type"/> to get properties from.</param>
+    /// <returns>A new <see cref="Type"/>.</returns>
+    Type BuildClassWithPropertiesFrom(Type type);
 }

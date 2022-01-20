@@ -7,59 +7,58 @@ using System.Reflection;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Reflection;
 
-namespace Dolittle.Runtime.Resilience
+namespace Dolittle.Runtime.Resilience;
+
+/// <summary>
+/// Represents the bindings for all <see cref="IPolicyFor{T}"/>.
+/// </summary>
+public class Bindings : ICanProvideBindings
 {
+    readonly GetContainer _getContainer;
+
     /// <summary>
-    /// Represents the bindings for all <see cref="IPolicyFor{T}"/>.
+    /// Initializes a new instance of the <see cref="Bindings"/> class.
     /// </summary>
-    public class Bindings : ICanProvideBindings
+    /// <param name="getContainer"><see cref="GetContainer"/> for getting the <see cref="IContainer"/>.</param>
+    public Bindings(GetContainer getContainer)
     {
-        readonly GetContainer _getContainer;
+        _getContainer = getContainer;
+    }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Bindings"/> class.
-        /// </summary>
-        /// <param name="getContainer"><see cref="GetContainer"/> for getting the <see cref="IContainer"/>.</param>
-        public Bindings(GetContainer getContainer)
+    /// <inheritdoc/>
+    public void Provide(IBindingProviderBuilder builder)
+    {
+        BindPolicyFor(builder);
+        BindAsyncPolicyFor(builder);
+    }
+
+    void BindPolicyFor(IBindingProviderBuilder builder)
+    {
+        builder.Bind(typeof(IPolicyFor<>)).To((BindingContext context) =>
         {
-            _getContainer = getContainer;
-        }
+            var policies = _getContainer().Get<IPolicies>();
 
-        /// <inheritdoc/>
-        public void Provide(IBindingProviderBuilder builder)
+            Expression<Func<IPolicyFor<object>>> getForExpression = () => policies.GetFor<object>();
+            var methodInfo = getForExpression.GetMethodInfo().GetGenericMethodDefinition();
+            var target = context.Service.GenericTypeArguments[0];
+            var genericMethodInfo = methodInfo.MakeGenericMethod(target);
+            var result = genericMethodInfo.Invoke(policies, null);
+            return result;
+        });
+    }
+
+    void BindAsyncPolicyFor(IBindingProviderBuilder builder)
+    {
+        builder.Bind(typeof(IAsyncPolicyFor<>)).To((BindingContext context) =>
         {
-            BindPolicyFor(builder);
-            BindAsyncPolicyFor(builder);
-        }
+            var policies = _getContainer().Get<IPolicies>();
 
-        void BindPolicyFor(IBindingProviderBuilder builder)
-        {
-            builder.Bind(typeof(IPolicyFor<>)).To((BindingContext context) =>
-            {
-                var policies = _getContainer().Get<IPolicies>();
-
-                Expression<Func<IPolicyFor<object>>> getForExpression = () => policies.GetFor<object>();
-                var methodInfo = getForExpression.GetMethodInfo().GetGenericMethodDefinition();
-                var target = context.Service.GenericTypeArguments[0];
-                var genericMethodInfo = methodInfo.MakeGenericMethod(target);
-                var result = genericMethodInfo.Invoke(policies, null);
-                return result;
-            });
-        }
-
-        void BindAsyncPolicyFor(IBindingProviderBuilder builder)
-        {
-            builder.Bind(typeof(IAsyncPolicyFor<>)).To((BindingContext context) =>
-            {
-                var policies = _getContainer().Get<IPolicies>();
-
-                Expression<Func<IAsyncPolicyFor<object>>> getForExpression = () => policies.GetAsyncFor<object>();
-                var methodInfo = getForExpression.GetMethodInfo().GetGenericMethodDefinition();
-                var target = context.Service.GenericTypeArguments[0];
-                var genericMethodInfo = methodInfo.MakeGenericMethod(target);
-                var result = genericMethodInfo.Invoke(policies, null);
-                return result;
-            });
-        }
+            Expression<Func<IAsyncPolicyFor<object>>> getForExpression = () => policies.GetAsyncFor<object>();
+            var methodInfo = getForExpression.GetMethodInfo().GetGenericMethodDefinition();
+            var target = context.Service.GenericTypeArguments[0];
+            var genericMethodInfo = methodInfo.MakeGenericMethod(target);
+            var result = genericMethodInfo.Invoke(policies, null);
+            return result;
+        });
     }
 }

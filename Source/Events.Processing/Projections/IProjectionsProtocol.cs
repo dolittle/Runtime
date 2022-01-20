@@ -4,12 +4,11 @@
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Services;
 
-namespace Dolittle.Runtime.Events.Processing.Projections
+namespace Dolittle.Runtime.Events.Processing.Projections;
+
+/// <summary>
+/// Defines the protocol for projections.
+/// </summary>
+public interface IProjectionsProtocol : IReverseCallServiceProtocol<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse, ProjectionRegistrationArguments>
 {
-    /// <summary>
-    /// Defines the protocol for projections.
-    /// </summary>
-    public interface IProjectionsProtocol : IReverseCallServiceProtocol<ProjectionClientToRuntimeMessage, ProjectionRuntimeToClientMessage, ProjectionRegistrationRequest, ProjectionRegistrationResponse, ProjectionRequest, ProjectionResponse, ProjectionRegistrationArguments>
-    {
-    }
 }

@@ -5,18 +5,17 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Services;
 using Dolittle.Runtime.Services.Clients;
 
-namespace Dolittle.Runtime.EventHorizon.Consumer
+namespace Dolittle.Runtime.EventHorizon.Consumer;
+
+/// <summary>
+/// Represents something that knows about service clients.
+/// </summary>
+public class ServiceClients : IKnowAboutClients
 {
-    /// <summary>
-    /// Represents something that knows about service clients.
-    /// </summary>
-    public class ServiceClients : IKnowAboutClients
-    {
-        /// <inheritdoc/>
-        public IEnumerable<Client> Clients =>
-            new[]
-            {
-                new Client(EndpointVisibility.Public, typeof(Contracts.Consumer.ConsumerClient), Contracts.Consumer.Descriptor),
-            };
-    }
+    /// <inheritdoc/>
+    public IEnumerable<Client> Clients =>
+        new[]
+        {
+            new Client(EndpointVisibility.Public, typeof(Contracts.Consumer.ConsumerClient), Contracts.Consumer.Descriptor),
+        };
 }

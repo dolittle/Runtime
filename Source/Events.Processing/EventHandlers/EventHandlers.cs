@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
+using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Events.Processing.Filters;
 using Dolittle.Runtime.Events.Processing.Streams;
 using Dolittle.Runtime.Events.Store.Streams;
@@ -22,93 +23,102 @@ using ReverseCallDispatcherType = Dolittle.Runtime.Services.IReverseCallDispatch
                                     Dolittle.Runtime.Events.Processing.Contracts.HandleEventRequest,
                                     Dolittle.Runtime.Events.Processing.Contracts.EventHandlerResponse>;
 
-namespace Dolittle.Runtime.Events.Processing.EventHandlers
+namespace Dolittle.Runtime.Events.Processing.EventHandlers;
+
+/// <summary>
+/// Represents an implementation of <see cref="IEventHandlers"/>.
+/// </summary>
+[Singleton]
+public class EventHandlers : IEventHandlers
 {
+    readonly ConcurrentDictionary<EventHandlerId, EventHandler> _eventHandlers = new();
+        
+    readonly IValidateFilterForAllTenants _filterValidator;
+    readonly IStreamProcessors _streamProcessors;
+    readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
+    readonly IStreamDefinitions _streamDefinitions;
+    readonly ILoggerFactory _loggerFactory;
+    readonly ILogger _logger;
+
     /// <summary>
-    /// Represents an implementation of <see cref="IEventHandlers"/>.
+    /// Initializes a new instance of the <see cref="EventHandlers"/> class.
     /// </summary>
-    [Singleton]
-    public class EventHandlers : IEventHandlers
+    /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
+    /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
+    /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> <see cref="IWriteEventsToStreams" />.</param>
+    /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
+    /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
+    public EventHandlers(
+        IValidateFilterForAllTenants filterForAllTenants,
+        IStreamProcessors streamProcessors,
+        FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
+        IStreamDefinitions streamDefinitions,
+        ILoggerFactory loggerFactory)
     {
-        readonly ConcurrentDictionary<EventHandlerId, EventHandler> _eventHandlers = new();
+        _filterValidator = filterForAllTenants;
+        _streamProcessors = streamProcessors;
+        _getEventsToStreamsWriter = getEventsToStreamsWriter;
+        _streamDefinitions = streamDefinitions;
+        _loggerFactory = loggerFactory;
+        _logger = _loggerFactory.CreateLogger<EventHandlers>();
+    }
         
-        readonly IStreamProcessors _streamProcessors;
-        readonly FactoryFor<IWriteEventsToStreams> _getEventsToStreamsWriter;
-        readonly IStreamDefinitions _streamDefinitions;
-        readonly ILoggerFactory _loggerFactory;
-        readonly IValidateFilterForAllTenants _filterValidator;
+    /// <inheritdoc />
+    public IEnumerable<EventHandlerInfo> All => _eventHandlers.Select(_ => _.Value.Info);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EventHandlers"/> class.
-        /// </summary>
-        /// <param name="filterForAllTenants">The <see cref="IValidateFilterForAllTenants" />.</param>
-        /// <param name="streamProcessors">The <see cref="IStreamProcessors" />.</param>
-        /// <param name="getEventsToStreamsWriter">The <see cref="FactoryFor{T}" /> <see cref="IWriteEventsToStreams" />.</param>
-        /// <param name="streamDefinitions">The<see cref="IStreamDefinitions" />.</param>
-        /// <param name="loggerFactory">The <see cref="ILoggerFactory"/>.</param>
-        public EventHandlers(
-            IValidateFilterForAllTenants filterForAllTenants,
-            IStreamProcessors streamProcessors,
-            FactoryFor<IWriteEventsToStreams> getEventsToStreamsWriter,
-            IStreamDefinitions streamDefinitions,
-            ILoggerFactory loggerFactory)
+    /// <inheritdoc />
+    public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId)
+        => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
+            ? eventHandler.GetEventHandlerCurrentState()
+            : new EventHandlerNotRegistered(eventHandlerId);
+        
+    /// <inheritdoc />
+    public async Task RegisterAndStart(ReverseCallDispatcherType dispatcher, EventHandlerRegistrationArguments arguments, CancellationToken cancellationToken)
+    {
+        using var eventHandler = new EventHandler(
+            _streamProcessors,
+            _filterValidator,
+            _streamDefinitions,
+            dispatcher,
+            arguments,
+            _getEventsToStreamsWriter,
+            _loggerFactory,
+            cancellationToken);
+        var eventHandlerId = new EventHandlerId(eventHandler.Scope, eventHandler.EventProcessor.Value);
+        if (!_eventHandlers.TryAdd(eventHandlerId, eventHandler))
         {
-            _filterValidator = filterForAllTenants;
-            _streamProcessors = streamProcessors;
-            _getEventsToStreamsWriter = getEventsToStreamsWriter;
-            _streamDefinitions = streamDefinitions;
-            _loggerFactory = loggerFactory;
-            _getEventsToStreamsWriter = getEventsToStreamsWriter;
-            _streamDefinitions = streamDefinitions;
-            _streamProcessors = streamProcessors;
+            Log.EventHandlerAlreadyRegistered(_logger, eventHandlerId);
+            await RejectAlreadyRegisteredEventHandler(dispatcher, eventHandlerId, cancellationToken).ConfigureAwait(false);
+            return;
         }
-        
-        /// <inheritdoc />
-        public IEnumerable<EventHandlerInfo> All => _eventHandlers.Select(_ => _.Value.Info);
-
-        /// <inheritdoc />
-        public Try<IDictionary<TenantId, IStreamProcessorState>> CurrentStateFor(EventHandlerId eventHandlerId)
-            => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
-                ? eventHandler.GetEventHandlerCurrentState()
-                : new EventHandlerNotRegistered(eventHandlerId);
-        
-        /// <inheritdoc />
-        public async Task RegisterAndStart(ReverseCallDispatcherType dispatcher, EventHandlerRegistrationArguments arguments, CancellationToken cancellationToken)
+        try
         {
-            using var eventHandler = new EventHandler(
-                _streamProcessors,
-                _filterValidator,
-                _streamDefinitions,
-                dispatcher,
-                arguments,
-                _getEventsToStreamsWriter,
-                _loggerFactory,
-                cancellationToken);
-            var eventHandlerId = new EventHandlerId(eventHandler.Scope, eventHandler.EventProcessor.Value);
-            if (!_eventHandlers.TryAdd(eventHandlerId, eventHandler))
-            {
-                throw new EventHandlerAlreadyRegistered(eventHandlerId);
-            }
-            try
-            {
-                await eventHandler.RegisterAndStart().ConfigureAwait(false);
-            }
-            finally
-            {
-                _eventHandlers.Remove(eventHandlerId, out _);
-            }
+            await eventHandler.RegisterAndStart().ConfigureAwait(false);
         }
+        finally
+        {
+            _eventHandlers.Remove(eventHandlerId, out _);
+        }
+    }
 
-        /// <inheritdoc />
-        public Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position)
-            => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
-                ? eventHandler.ReprocessEventsFrom(tenant, position)
-                : Task.FromResult<Try<StreamPosition>>(new EventHandlerNotRegistered(eventHandlerId));
+    /// <inheritdoc />
+    public Task<Try<StreamPosition>> ReprocessEventsFrom(EventHandlerId eventHandlerId, TenantId tenant, StreamPosition position)
+        => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
+            ? eventHandler.ReprocessEventsFrom(tenant, position)
+            : Task.FromResult<Try<StreamPosition>>(new EventHandlerNotRegistered(eventHandlerId));
 
-        /// <inheritdoc />
-        public Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId)
-            => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
-                ? eventHandler.ReprocessAllEvents()
-                : Task.FromResult<Try<IDictionary<TenantId, Try<StreamPosition>>>>(new EventHandlerNotRegistered(eventHandlerId));
+    /// <inheritdoc />
+    public Task<Try<IDictionary<TenantId, Try<StreamPosition>>>> ReprocessAllEvents(EventHandlerId eventHandlerId)
+        => _eventHandlers.TryGetValue(eventHandlerId, out var eventHandler)
+            ? eventHandler.ReprocessAllEvents()
+            : Task.FromResult<Try<IDictionary<TenantId, Try<StreamPosition>>>>(new EventHandlerNotRegistered(eventHandlerId));
+
+    Task RejectAlreadyRegisteredEventHandler(ReverseCallDispatcherType dispatcher, EventHandlerId eventHandlerId, CancellationToken cancellationToken)
+    {
+        var rejection = new EventHandlerRegistrationResponse
+        {
+            Failure = new EventHandlerAlreadyRegistered(eventHandlerId),
+        };
+        return dispatcher.Reject(rejection, cancellationToken);
     }
 }

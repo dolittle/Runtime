@@ -3,23 +3,22 @@
 
 using Dolittle.Runtime.Events.Store.Streams.Filters;
 
-namespace Dolittle.Runtime.Events.Store.Streams
+namespace Dolittle.Runtime.Events.Store.Streams;
+
+/// <summary>
+/// Represents the definition of a Stream.
+/// </summary>
+public record StreamDefinition(IFilterDefinition FilterDefinition) : IStreamDefinition
 {
-    /// <summary>
-    /// Represents the definition of a Stream.
-    /// </summary>
-    public record StreamDefinition(IFilterDefinition FilterDefinition) : IStreamDefinition
-    {
-        /// <inheritdoc/>
-        public bool Public => FilterDefinition.Public;
+    /// <inheritdoc/>
+    public bool Public => FilterDefinition.Public;
 
-        /// <inheritdoc/>
-        public StreamId StreamId => FilterDefinition.TargetStream;
+    /// <inheritdoc/>
+    public StreamId StreamId => FilterDefinition.TargetStream;
 
-        /// <inheritdoc/>
-        public bool Partitioned => FilterDefinition.Partitioned;
+    /// <inheritdoc/>
+    public bool Partitioned => FilterDefinition.Partitioned;
 
-        /// <inheritdoc/>
-        public override string ToString() => $"Stream Id: {StreamId.Value} Partitioned: {Partitioned} Public: {Public}";
-    }
+    /// <inheritdoc/>
+    public override string ToString() => $"Stream Id: {StreamId.Value} Partitioned: {Partitioned} Public: {Public}";
 }

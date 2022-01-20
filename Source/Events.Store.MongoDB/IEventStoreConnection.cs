@@ -5,27 +5,26 @@ using System.Threading;
 using System.Threading.Tasks;
 using MongoDB.Driver;
 
-namespace Dolittle.Runtime.Events.Store.MongoDB
+namespace Dolittle.Runtime.Events.Store.MongoDB;
+
+/// <summary>
+/// Defines a connection to the Event Store.
+/// </summary>
+public interface IEventStoreConnection
 {
     /// <summary>
-    /// Defines a connection to the Event Store.
+    /// Starts a client session.
     /// </summary>
-    public interface IEventStoreConnection
-    {
-        /// <summary>
-        /// Starts a client session.
-        /// </summary>
-        /// <param name="options">The <see cref="ClientSessionOptions" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>The <see cref="IClientSessionHandle" />.</returns>
-        IClientSessionHandle StartSession(ClientSessionOptions options = default, CancellationToken cancellationToken = default);
+    /// <param name="options">The <see cref="ClientSessionOptions" />.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>The <see cref="IClientSessionHandle" />.</returns>
+    IClientSessionHandle StartSession(ClientSessionOptions options = default, CancellationToken cancellationToken = default);
 
-        /// <summary>
-        /// Starts a client session.
-        /// </summary>
-        /// <param name="options">The <see cref="ClientSessionOptions" />.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
-        /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="IClientSessionHandle" />.</returns>
-        Task<IClientSessionHandle> StartSessionAsync(ClientSessionOptions options = default, CancellationToken cancellationToken = default);
-    }
+    /// <summary>
+    /// Starts a client session.
+    /// </summary>
+    /// <param name="options">The <see cref="ClientSessionOptions" />.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken" />.</param>
+    /// <returns>A <see cref="Task" /> that, when resolved, returns the <see cref="IClientSessionHandle" />.</returns>
+    Task<IClientSessionHandle> StartSessionAsync(ClientSessionOptions options = default, CancellationToken cancellationToken = default);
 }

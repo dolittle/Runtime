@@ -4,16 +4,15 @@
 using Grpc.Core;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+public class when_creating_with_type_implementing_clientbase
 {
-    public class when_creating_with_type_implementing_clientbase
-    {
-        class MyClient : ClientBase { }
+    class MyClient : ClientBase { }
 
-        static Client result;
+    static Client result;
 
-        Because of = () => result = new Client(EndpointVisibility.Public, typeof(MyClient), null);
+    Because of = () => result = new Client(EndpointVisibility.Public, typeof(MyClient), null);
 
-        It should_initialize_the_instance = () => result.ShouldNotBeNull();
-    }
+    It should_initialize_the_instance = () => result.ShouldNotBeNull();
 }

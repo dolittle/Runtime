@@ -4,20 +4,19 @@
 using System.Collections.Generic;
 using Dolittle.Runtime.Configuration;
 
-namespace Dolittle.Runtime.Services.Clients
+namespace Dolittle.Runtime.Services.Clients;
+
+/// <summary>
+/// Represents the default configuration for <see cref="ClientEndpointsConfiguration"/>.
+/// </summary>
+public class ClientEndpointsConfigurationDefaultProvider : ICanProvideDefaultConfigurationFor<ClientEndpointsConfiguration>
 {
-    /// <summary>
-    /// Represents the default configuration for <see cref="ClientEndpointsConfiguration"/>.
-    /// </summary>
-    public class ClientEndpointsConfigurationDefaultProvider : ICanProvideDefaultConfigurationFor<ClientEndpointsConfiguration>
-    {
-        /// <inheritdoc/>
-        public ClientEndpointsConfiguration Provide() =>
-            new(new Dictionary<EndpointVisibility, ClientEndpointConfiguration>
-            {
-                { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPublicPort) },
-                { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPrivatePort) },
-                { EndpointVisibility.Management, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultManagementPort) },
-            });
-    }
+    /// <inheritdoc/>
+    public ClientEndpointsConfiguration Provide() =>
+        new(new Dictionary<EndpointVisibility, ClientEndpointConfiguration>
+        {
+            { EndpointVisibility.Public, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPublicPort) },
+            { EndpointVisibility.Private, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultPrivatePort) },
+            { EndpointVisibility.Management, new ClientEndpointConfiguration("localhost", EndpointsConfigurationDefaultProvider.DefaultManagementPort) },
+        });
 }

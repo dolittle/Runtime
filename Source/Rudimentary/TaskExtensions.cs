@@ -6,28 +6,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Dolittle.Runtime.Rudimentary
+namespace Dolittle.Runtime.Rudimentary;
+
+/// <summary>
+/// Extensions for Task.
+/// </summary>
+public static class TaskExtension
 {
     /// <summary>
-    /// Extensions for Task.
+    /// Tries to get the first innermost <see cref="Exception" /> in a list of <see cref="Task" />.
     /// </summary>
-    public static class TaskExtension
+    /// <param name="tasks"><see cref="IEnumerable{T}"/> of <see cref="Task" />.</param>
+    /// <param name="exception">The first innermost <see cref="Exception"/>.</param>
+    /// <returns>true if any exceptions, false if not.</returns>
+    public static bool TryGetFirstInnerMostException(this IEnumerable<Task> tasks, out Exception exception)
     {
-        /// <summary>
-        /// Tries to get the first innermost <see cref="Exception" /> in a list of <see cref="Task" />.
-        /// </summary>
-        /// <param name="tasks"><see cref="IEnumerable{T}"/> of <see cref="Task" />.</param>
-        /// <param name="exception">The first innermost <see cref="Exception"/>.</param>
-        /// <returns>true if any exceptions, false if not.</returns>
-        public static bool TryGetFirstInnerMostException(this IEnumerable<Task> tasks, out Exception exception)
+        exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
+        if (exception != default)
         {
-            exception = tasks.FirstOrDefault(_ => _.Exception != default)?.Exception;
-            if (exception != default)
-            {
-                while (exception.InnerException != null) exception = exception.InnerException;
-            }
-
-            return exception != default;
+            while (exception.InnerException != null) exception = exception.InnerException;
         }
+
+        return exception != default;
     }
 }

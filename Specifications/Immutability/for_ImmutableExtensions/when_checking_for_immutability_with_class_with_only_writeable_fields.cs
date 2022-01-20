@@ -3,14 +3,13 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Immutability.for_ImmutableExtensions
+namespace Dolittle.Runtime.Immutability.for_ImmutableExtensions;
+
+public class when_checking_for_immutability_with_class_with_only_writeable_fields
 {
-    public class when_checking_for_immutability_with_class_with_only_writeable_fields
-    {
-        static bool result;
+    static bool result;
 
-        Because of = () => result = typeof(class_with_only_writeable_fields).IsImmutable();
+    Because of = () => result = typeof(class_with_only_writeable_fields).IsImmutable();
 
-        It should_be_considered_mutable = () => result.ShouldBeFalse();
-    }
+    It should_be_considered_mutable = () => result.ShouldBeFalse();
 }

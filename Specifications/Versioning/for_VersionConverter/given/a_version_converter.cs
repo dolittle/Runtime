@@ -3,12 +3,11 @@
 
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Versioning.for_VersionConverter.given
-{
-    public class a_version_converter
-    {
-        protected static VersionConverter version_converter;
+namespace Dolittle.Runtime.Versioning.for_VersionConverter.given;
 
-        Establish context = () => version_converter = new VersionConverter();
-    }
+public class a_version_converter
+{
+    protected static VersionConverter version_converter;
+
+    Establish context = () => version_converter = new VersionConverter();
 }
