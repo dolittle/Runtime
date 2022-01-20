@@ -24,7 +24,7 @@ public class RuntimeServices : ICanBindRuntimeServices
     }
 
     /// <inheritdoc/>
-    public ServiceAspect Aspect => "Server";
+    public ServiceAspect Aspect => "Platform.Handshake";
 
     /// <inheritdoc/>
     public IEnumerable<Service> BindServices() =>
