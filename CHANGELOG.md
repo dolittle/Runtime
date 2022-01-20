@@ -1,3 +1,19 @@
+# [7.4.0] - 2022-1-20 [PR: #597](https://github.com/dolittle/Runtime/pull/597)
+## Summary
+
+Updated to .net6 and C# 10 - and in the process updated all the code to use new language features (e.g. file scoped namespace and code generated logger messages), and fixed other build warnings in the process. Implemented Handshake service, and added some new and renamed some old concepts to represent the Runtime execution context. Introduced a new `platform.json` config file to be provided by the platform. Added VersionInfo to the Runtime to be baked in during build. Lastly fixed a bug in the Embedding processor that caused the wrong execution context to be passed to the Clients when processing embedding requests, and improved the error that is returned when attempting to register an EventHandler more than once. 
+
+### Added
+
+- Handshake service that checks if the connecting client uses a compatible version of the Contracts, and returns the Runtime execution context configured by `platform.json`
+- CLI build for macOS on M1 chips now work, so that binary is added to the release.
+
+### Fixed
+
+- A bug in the Embedding processor that caused the wrong execution context to be passed to Clients when processing embedding requests.
+- Improved the failure returned when attempting to register an Event Handler more than once.
+
+
 # [7.3.0] - 2021-11-18 [PR: #589](https://github.com/dolittle/Runtime/pull/589)
 ## Summary
 
