@@ -276,18 +276,18 @@ jobs:
           asset_path: ./Source/CLI/bin/Release/net6.0/osx-x64/publish/Dolittle.Runtime.CLI
           asset_name: dolittle-macos-x64
           asset_content_type: application/octet-stream
-      #      - name: Publish for macOS arm64
-      #        working-directory: ./Source/CLI
-      #        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx.11.0-arm64
-      #      - name: Upload macOS arm64
-      #        uses: actions/upload-release-asset@v1
-      #        env:
-      #          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #        with:
-      #          upload_url: ${{ needs.setup.outputs.release-upload-url }}
-      #          asset_path: ./Source/CLI/bin/Release/net6.0/osx.11.0-arm64/publish/Dolittle.Runtime.CLI
-      #          asset_name: dolittle-macos-arm64
-      #          asset_content_type: application/octet-stream
+      - name: Publish for macOS arm64
+        working-directory: ./Source/CLI
+        run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=osx.11.0-arm64
+      - name: Upload macOS arm64
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.setup.outputs.release-upload-url }}
+          asset_path: ./Source/CLI/bin/Release/net6.0/osx.11.0-arm64/publish/Dolittle.Runtime.CLI
+          asset_name: dolittle-macos-arm64
+          asset_content_type: application/octet-stream
       - name: Publish for Windows x64
         working-directory: ./Source/CLI
         run: dotnet publish --configuration Release -p:Version=${{ needs.setup.outputs.next-version }} -p:PublishSingleFile=true -p:IncludeAllContentForSelfExtract=true -p:RuntimeIdentifier=win-x64
