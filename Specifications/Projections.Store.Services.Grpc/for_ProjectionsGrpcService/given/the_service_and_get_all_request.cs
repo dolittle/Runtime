@@ -2,20 +2,17 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using Dolittle.Runtime.Projections.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using Grpc.Core;
-using Grpc.Core.Testing;
 using Machine.Specifications;
 using Moq;
 using ExecutionContext = Dolittle.Execution.Contracts.ExecutionContext;
 using Version = Dolittle.Versioning.Contracts.Version;
 
-namespace Projections.Store.Services.Grpc.for_ProjectionsGrpcService.given;
+namespace Dolittle.Runtime.Projections.Store.Services.Grpc.for_ProjectionsGrpcService.given;
 
 public class the_service_and_get_all_request : the_service
 {
