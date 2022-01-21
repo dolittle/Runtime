@@ -39,9 +39,13 @@ public class ProjectionsGrpcService : ProjectionsBase
             context.CancellationToken).ConfigureAwait(false);
 
         if (getOneResult.Success)
+        {
             response.State = getOneResult.Result.ToProtobuf();
+        }
         else
+        {
             response.Failure = getOneResult.Exception.ToFailure();
+        }
 
         return response;
     }
@@ -50,16 +54,20 @@ public class ProjectionsGrpcService : ProjectionsBase
     public override async Task<GetAllResponse> GetAll(GetAllRequest request, ServerCallContext context)
     {
         var response = new GetAllResponse();
-        var getOneResult = await _projectionsService.TryGetAll(
+        var getAllResult = await _projectionsService.TryGetAll(
             request.ProjectionId.ToGuid(),
             request.ScopeId.ToGuid(),
             request.CallContext.ExecutionContext.ToExecutionContext(),
             context.CancellationToken).ConfigureAwait(false);
 
-        if (getOneResult.Success)
-            response.States.AddRange(getOneResult.Result.ToProtobuf());
+        if (getAllResult.Success)
+        {
+            response.States.AddRange(getAllResult.Result.ToProtobuf());
+        }
         else
-            response.Failure = getOneResult.Exception.ToFailure();
+        {
+            response.Failure = getAllResult.Exception.ToFailure();
+        }
 
         return response;
     }
