@@ -23,12 +23,10 @@ public class and_it_returns_a_state_that_is_too_large : given.the_service_and_ge
 {
     private Establish context = () =>
     {
-        var states = new List<ProjectionCurrentState>
-        {
-            new (ProjectionCurrentStateType.Persisted, "small state", "key 01"),
-            new (ProjectionCurrentStateType.Persisted, GenerateRandomString(10000000), "key 02"),
-            new (ProjectionCurrentStateType.Persisted, "small state", "key 03"),
-        };
+        var states = AsyncEnumerable.Empty<ProjectionCurrentState>()
+            .Append(new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, "small state", "key 01"))
+            .Append(new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, GenerateRandomString(10000000), "key 02"))
+            .Append(new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, "small state", "key 03"));
 
         projections_service
             .Setup(_ => _.TryGetAll(
@@ -36,7 +34,7 @@ public class and_it_returns_a_state_that_is_too_large : given.the_service_and_ge
                 Moq.It.IsAny<ScopeId>(),
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Try<IEnumerable<ProjectionCurrentState>>.Succeeded(states));
+            .ReturnsAsync(Try<IAsyncEnumerable<ProjectionCurrentState>>.Succeeded(states));
     };
 
     Because of = () => grpc_service.GetAllInBatches(request, server_stream_writer.Object, call_context).GetAwaiter().GetResult();
