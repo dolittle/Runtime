@@ -25,6 +25,9 @@ static partial class Log
     [LoggerMessage(0, LogLevel.Trace, "Sending ProjectionStore GetAll failed for Projection {Projection} in Scope {Scope}")]
     internal static partial void SendingGetAllFailed(ILogger logger, Uuid projection, Uuid scope, Exception exception);
     
+    [LoggerMessage(0, LogLevel.Trace, "The state for Key {Key} of Projection {Projection} in Scope {Scope} is larger than the maximum batch size of {MaxSize} at {Size} bytes. It will be sent regardless as it might work")]
+    internal static partial void ProjectionStateTooLargeButSendingAnyways(ILogger logger, string key, Uuid projection, Uuid scope, int size, uint maxSize);
+    
     [LoggerMessage(0, LogLevel.Trace, "Sending ProjectionStore GetAllInBatches result for Projection {Projection} in Scope {Scope} with {Count} states")]
     internal static partial void SendingGetAllInBatchesResult(ILogger logger, Uuid projection, Uuid scope, int count);
     

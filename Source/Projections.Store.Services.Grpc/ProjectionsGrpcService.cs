@@ -94,37 +94,52 @@ public class ProjectionsGrpcService : ProjectionsBase
 
         if (!getAllResult.Success)
         {
-            var response = new GetAllResponse
-            {
-                Failure = getAllResult.Exception.ToFailure(),
-            };
             Log.SendingGetAllInBatchesFailed(_logger, request.ProjectionId, request.ScopeId, getAllResult.Exception);
+            var response = new GetAllResponse { Failure = getAllResult.Exception.ToFailure() };
             await responseStream.WriteAsync(response).ConfigureAwait(false);
             return;
         }
 
-        var nextResponse = new GetAllResponse();
+        var batchToSend = new GetAllResponse();
         foreach (var state in getAllResult.Result)
         {
-            var stateMessage = state.ToProtobuf();
+            var nextState = state.ToProtobuf();
 
-            if (nextResponse.States.Count == 0 || nextResponse.CalculateSize() + stateMessage.CalculateSize() < MaxBatchMessageSize)
+            if (!BatchWouldBeTooLarge(batchToSend, nextState))
             {
-                nextResponse.States.Add(stateMessage);
+                batchToSend.States.Add(nextState);
                 continue;
             }
-            
-            Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, nextResponse.States.Count);
-            await responseStream.WriteAsync(nextResponse).ConfigureAwait(false);
-            
-            nextResponse = new GetAllResponse();
-            nextResponse.States.Add(stateMessage);
+
+            if (batchToSend.States.Count > 0)
+            {
+                await SendBatch(request, batchToSend, responseStream, _logger).ConfigureAwait(false);
+                batchToSend = new GetAllResponse();
+            }
+
+            if (BatchWouldBeTooLarge(batchToSend, nextState))
+            {
+                Log.ProjectionStateTooLargeButSendingAnyways(_logger, nextState.Key, request.ProjectionId, request.ScopeId, nextState.CalculateSize(), MaxBatchMessageSize);
+                batchToSend.States.Add(nextState);
+                await SendBatch(request, batchToSend, responseStream, _logger).ConfigureAwait(false);
+                batchToSend = new GetAllResponse();
+            }
+            else
+            {
+                batchToSend.States.Add(nextState);
+            }
         }
         
-        if (nextResponse.States.Count > 0)
-        {
-            Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, nextResponse.States.Count);
-            await responseStream.WriteAsync(nextResponse).ConfigureAwait(false);
-        }
+        Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
+        await responseStream.WriteAsync(batchToSend).ConfigureAwait(false);
+    }
+
+    static bool BatchWouldBeTooLarge(GetAllResponse batch, ProjectionCurrentState nextState)
+        => batch.CalculateSize() + nextState.CalculateSize() > MaxBatchMessageSize;
+
+    static Task SendBatch(GetAllRequest request, GetAllResponse batchToSend, IServerStreamWriter<GetAllResponse> responseStream, ILogger logger)
+    {
+        Log.SendingGetAllInBatchesResult(logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
+        return responseStream.WriteAsync(batchToSend);
     }
 }
