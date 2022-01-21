@@ -14,6 +14,7 @@
         <ProjectReference Include="../ApplicationModel/ApplicationModel.csproj" />
         <ProjectReference Include="../Artifacts/Artifacts.csproj" />
         <ProjectReference Include="../Events.Processing/Events.Processing.csproj" />
+        <ProjectReference Include="../MongoDB/MongoDB.csproj" />
         <ProjectReference Include="../Projections.Store/Projections.Store.csproj" />
         <ProjectReference Include="../ResourceTypes/ResourceTypes.csproj" />
         <ProjectReference Include="../ResourceTypes.Configuration/ResourceTypes.Configuration.csproj" />
