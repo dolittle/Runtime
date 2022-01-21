@@ -6,6 +6,7 @@ using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Projections.Contracts;
 using Dolittle.Runtime.Protobuf;
 using Grpc.Core;
+using Microsoft.Extensions.Logging;
 using static Dolittle.Runtime.Projections.Contracts.Projections;
 
 namespace Dolittle.Runtime.Projections.Store.Services.Grpc;
@@ -15,16 +16,22 @@ namespace Dolittle.Runtime.Projections.Store.Services.Grpc;
 /// </summary>
 public class ProjectionsGrpcService : ProjectionsBase
 {
+    const uint MaxBatchMessageSize = 2097152; // 2 MB
     readonly IProjectionsService _projectionsService;
+    readonly ILogger _logger;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProjectionsGrpcService"/> class.
     /// </summary>
     /// <param name="projectionsService"><see cref="IProjectionsService"/>.</param>
+    /// <param name="logger">The logger to use.</param>
     public ProjectionsGrpcService(
-        IProjectionsService projectionsService)
+        IProjectionsService projectionsService,
+        ILogger logger
+    )
     {
         _projectionsService = projectionsService;
+        _logger = logger;
     }
 
     /// <inheritdoc/>
@@ -41,10 +48,12 @@ public class ProjectionsGrpcService : ProjectionsBase
         if (getOneResult.Success)
         {
             response.State = getOneResult.Result.ToProtobuf();
+            Log.SendingGetOneResult(_logger, request.Key, request.ProjectionId, request.ScopeId, getOneResult.Result.Type);
         }
         else
         {
             response.Failure = getOneResult.Exception.ToFailure();
+            Log.SendingGetOneFailed(_logger, request.Key, request.ProjectionId, request.ScopeId, getOneResult.Exception);
         }
 
         return response;
@@ -63,10 +72,12 @@ public class ProjectionsGrpcService : ProjectionsBase
         if (getAllResult.Success)
         {
             response.States.AddRange(getAllResult.Result.ToProtobuf());
+            Log.SendingGetAllResult(_logger, request.ProjectionId, request.ScopeId, response.States.Count);
         }
         else
         {
             response.Failure = getAllResult.Exception.ToFailure();
+            Log.SendingGetAllFailed(_logger, request.ProjectionId, request.ScopeId, getAllResult.Exception);
         }
 
         return response;
@@ -81,27 +92,39 @@ public class ProjectionsGrpcService : ProjectionsBase
             request.CallContext.ExecutionContext.ToExecutionContext(),
             context.CancellationToken).ConfigureAwait(false);
 
-        var response = new GetAllResponse();
         if (!getAllResult.Success)
         {
-            response.Failure = getAllResult.Exception.ToFailure();
+            var response = new GetAllResponse
+            {
+                Failure = getAllResult.Exception.ToFailure(),
+            };
+            Log.SendingGetAllInBatchesFailed(_logger, request.ProjectionId, request.ScopeId, getAllResult.Exception);
             await responseStream.WriteAsync(response).ConfigureAwait(false);
             return;
         }
 
+        var nextResponse = new GetAllResponse();
         foreach (var state in getAllResult.Result)
         {
-            response.States.Add(state.ToProtobuf());
+            var stateMessage = state.ToProtobuf();
 
-            if (response.CalculateSize() < 10) continue;
+            if (nextResponse.States.Count == 0 || nextResponse.CalculateSize() + stateMessage.CalculateSize() < MaxBatchMessageSize)
+            {
+                nextResponse.States.Add(stateMessage);
+                continue;
+            }
             
-            await responseStream.WriteAsync(response).ConfigureAwait(false);
-            response = new GetAllResponse();
+            Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, nextResponse.States.Count);
+            await responseStream.WriteAsync(nextResponse).ConfigureAwait(false);
+            
+            nextResponse = new GetAllResponse();
+            nextResponse.States.Add(stateMessage);
         }
-
-        if (response.States.Count > 0)
+        
+        if (nextResponse.States.Count > 0)
         {
-            await responseStream.WriteAsync(response).ConfigureAwait(false);
+            Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, nextResponse.States.Count);
+            await responseStream.WriteAsync(nextResponse).ConfigureAwait(false);
         }
     }
 }
