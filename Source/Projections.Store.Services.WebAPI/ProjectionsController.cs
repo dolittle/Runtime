@@ -2,6 +2,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,7 +41,13 @@ public class EventStoreController : ControllerBase
             request.Scope,
             request.Context.ExecutionContext.ToExecutionContext(),
             System.Threading.CancellationToken.None).ConfigureAwait(false);
-        if (getAllResult.Success) return Ok(GetAllResponse.From(getAllResult.Result));
+
+        if (getAllResult.Success)
+        {
+            var states = await getAllResult.Result.ToListAsync();
+            return Ok(GetAllResponse.From(states));
+        }
+        
         Response.StatusCode = StatusCodes.Status500InternalServerError;
         return new JsonResult(GetAllResponse.From(getAllResult.Exception.ToFailure()));
     }

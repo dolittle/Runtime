@@ -35,5 +35,5 @@ public interface IProjectionsService
     /// <param name="context"><see cref="RuntimeExecutionContext" /> the <see cref="UncommittedAggregateEvents" /> are committed in.</param>
     /// <param name="token"><see cref="CancellationToken" /> for cancelling the task.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of the <see cref="IEnumerable{T}" /> of <see cref="ProjectionCurrentState" />.</returns>
-    Task<Try<IEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, RuntimeExecutionContext context, CancellationToken token);
+    Task<Try<IAsyncEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, RuntimeExecutionContext context, CancellationToken token);
 }

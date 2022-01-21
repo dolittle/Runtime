@@ -31,7 +31,7 @@ public interface IProjectionStates
     /// <param name="scope">The scope id.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="ProjectionState" />.</returns>
-    Task<Try<IEnumerable<(ProjectionState State, ProjectionKey Key)>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token);
+    Task<Try<IAsyncEnumerable<(ProjectionState State, ProjectionKey Key)>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token);
 
     /// <summary>
     /// Try to replace a specific <see cref="ProjectionState" />.

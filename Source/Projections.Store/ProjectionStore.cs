@@ -64,7 +64,7 @@ public class ProjectionStore : IProjectionStore
     }
 
     /// <inheritdoc/>
-    public async Task<Try<IEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token)
+    public async Task<Try<IAsyncEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token)
     {
         try
         {
