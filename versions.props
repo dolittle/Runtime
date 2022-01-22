@@ -23,6 +23,7 @@
         <PollyVersion>7.2.0</PollyVersion>
         <PrometheusVersion>4.1.1</PrometheusVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
+        <SystemLinqAsyncVersion>5.1.0</SystemLinqAsyncVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
         <SystemReactiveVersion>4.4.1</SystemReactiveVersion>
         <SystemRuntimeVersion>4.3.0</SystemRuntimeVersion>

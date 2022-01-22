@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <AssemblyName>Dolittle.Runtime.MongoDB.Specs</AssemblyName>
+  </PropertyGroup>
+
+  <Import Project="../../specs.props"></Import>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Source/MongoDB/MongoDB.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="System.Linq.Async" Version="$(SystemLinqAsyncVersion)" />
+  </ItemGroup>
+
+</Project>

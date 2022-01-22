@@ -19,4 +19,9 @@
     <ProjectReference Include="../Tenancy/Tenancy.csproj" />
   </ItemGroup>
 
+
+  <ItemGroup>
+    <PackageReference Include="System.Linq.Async" Version="$(SystemLinqAsyncVersion)" />
+  </ItemGroup>
+
 </Project>

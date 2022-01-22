@@ -1,14 +1,11 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Contracts;
-using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
@@ -17,18 +14,16 @@ using It = Machine.Specifications.It;
 using ProjectionCurrentState = Dolittle.Runtime.Projections.Store.State.ProjectionCurrentState;
 using ProjectionCurrentStateType = Dolittle.Runtime.Projections.Store.State.ProjectionCurrentStateType;
 
-namespace Projections.Store.Services.Grpc.for_ProjectionsGrpcService.when_getting_all_in_batches;
+namespace Dolittle.Runtime.Projections.Store.Services.Grpc.for_ProjectionsGrpcService.when_getting_all_in_batches;
 
 public class and_it_returns_a_state_that_is_too_large : given.the_service_and_get_all_request
 {
     private Establish context = () =>
     {
-        var states = new List<ProjectionCurrentState>
-        {
-            new (ProjectionCurrentStateType.Persisted, "small state", "key 01"),
-            new (ProjectionCurrentStateType.Persisted, GenerateRandomString(10000000), "key 02"),
-            new (ProjectionCurrentStateType.Persisted, "small state", "key 03"),
-        };
+        var states = AsyncEnumerable.Empty<ProjectionCurrentState>()
+            .Append(new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, "small state", "key 01"))
+            .Append(new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, GenerateRandomString(10000000), "key 02"))
+            .Append(new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, "small state", "key 03"));
 
         projections_service
             .Setup(_ => _.TryGetAll(
@@ -36,7 +31,7 @@ public class and_it_returns_a_state_that_is_too_large : given.the_service_and_ge
                 Moq.It.IsAny<ScopeId>(),
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Try<IEnumerable<ProjectionCurrentState>>.Succeeded(states));
+            .ReturnsAsync(Try<IAsyncEnumerable<ProjectionCurrentState>>.Succeeded(states));
     };
 
     Because of = () => grpc_service.GetAllInBatches(request, server_stream_writer.Object, call_context).GetAwaiter().GetResult();

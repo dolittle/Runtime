@@ -3,11 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Contracts;
-using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 using Moq;
@@ -15,7 +13,7 @@ using ExecutionContext = Dolittle.Runtime.Execution.ExecutionContext;
 using It = Machine.Specifications.It;
 using ProjectionCurrentState = Dolittle.Runtime.Projections.Store.State.ProjectionCurrentState;
 
-namespace Projections.Store.Services.Grpc.for_ProjectionsGrpcService.when_getting_all_in_batches;
+namespace Dolittle.Runtime.Projections.Store.Services.Grpc.for_ProjectionsGrpcService.when_getting_all_in_batches;
 
 public class and_it_fails : given.the_service_and_get_all_request
 {
@@ -29,7 +27,7 @@ public class and_it_fails : given.the_service_and_get_all_request
                 Moq.It.IsAny<ScopeId>(),
                 Moq.It.IsAny<ExecutionContext>(),
                 Moq.It.IsAny<CancellationToken>()))
-            .ReturnsAsync(Try<IEnumerable<ProjectionCurrentState>>.Failed(exception));
+            .ReturnsAsync(Try<IAsyncEnumerable<ProjectionCurrentState>>.Failed(exception));
     };
 
     Because of = () => grpc_service.GetAllInBatches(request, server_stream_writer.Object, call_context).GetAwaiter().GetResult();

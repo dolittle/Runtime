@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Projections;
 using Dolittle.Runtime.Projections.Contracts;
@@ -71,7 +72,8 @@ public class ProjectionsGrpcService : ProjectionsBase
 
         if (getAllResult.Success)
         {
-            response.States.AddRange(getAllResult.Result.ToProtobuf());
+            var states = await getAllResult.Result.ToListAsync(context.CancellationToken).ConfigureAwait(false);
+            response.States.AddRange(states.ToProtobuf());
             Log.SendingGetAllResult(_logger, request.ProjectionId, request.ScopeId, response.States.Count);
         }
         else
@@ -101,7 +103,7 @@ public class ProjectionsGrpcService : ProjectionsBase
         }
 
         var batchToSend = new GetAllResponse();
-        foreach (var state in getAllResult.Result)
+        await foreach (var state in getAllResult.Result.WithCancellation(context.CancellationToken))
         {
             var nextState = state.ToProtobuf();
 

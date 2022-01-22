@@ -32,7 +32,7 @@ public interface IProjectionStore
     /// <param name="scope">The scope id.</param>
     /// <param name="token">The <see cref="CancellationToken" />.</param>
     /// <returns>A <see cref="Task" /> that, when resolved, returns <see cref="Try{TResult}" /> of <see cref="ProjectionCurrentState" />.</returns>
-    Task<Try<IEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token);
+    Task<Try<IAsyncEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, CancellationToken token);
 
     /// <summary>
     /// Try to replace a specific projection read model by projection id, scope id and projection key.

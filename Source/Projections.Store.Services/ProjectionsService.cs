@@ -45,7 +45,7 @@ public class ProjectionsService : IProjectionsService
     }
 
     /// <inheritdoc/>
-    public Task<Try<IEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, DolittleExecutionContext context, CancellationToken token)
+    public Task<Try<IAsyncEnumerable<ProjectionCurrentState>>> TryGetAll(ProjectionId projection, ScopeId scope, DolittleExecutionContext context, CancellationToken token)
     {
         _executionContextManager.CurrentFor(context);
         return _getProjectionStore().TryGetAll(projection, scope, token);
