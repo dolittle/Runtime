@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Dolittle.Runtime.Events.Processing.Projections;
@@ -103,42 +104,70 @@ public class ProjectionsGrpcService : ProjectionsBase
         }
 
         var batchToSend = new GetAllResponse();
-        await foreach (var state in getAllResult.Result.WithCancellation(context.CancellationToken))
+        var statesEnumerator = getAllResult.Result.GetAsyncEnumerator(context.CancellationToken);
+        try
         {
-            var nextState = state.ToProtobuf();
-
-            if (!BatchWouldBeTooLarge(batchToSend, nextState))
+            while (true)
             {
-                batchToSend.States.Add(nextState);
-                continue;
-            }
-
-            if (batchToSend.States.Count > 0)
-            {
-                await SendBatch(request, batchToSend, responseStream, _logger).ConfigureAwait(false);
-                batchToSend = new GetAllResponse();
-            }
-
-            if (BatchWouldBeTooLarge(batchToSend, nextState))
-            {
-                Log.ProjectionStateTooLargeButSendingAnyways(_logger, nextState.Key, request.ProjectionId, request.ScopeId, nextState.CalculateSize(), MaxBatchMessageSize);
-                batchToSend.States.Add(nextState);
-                await SendBatch(request, batchToSend, responseStream, _logger).ConfigureAwait(false);
-                batchToSend = new GetAllResponse();
-            }
-            else
-            {
-                batchToSend.States.Add(nextState);
+                var (batchOverflow, overflowState) = await FillUpBatch(statesEnumerator, batchToSend).ConfigureAwait(false);
+                if (BatchHasStatesToSend(batchToSend))
+                {
+                    await SendBatch(request, batchToSend, responseStream, _logger).ConfigureAwait(false);
+                    batchToSend = new GetAllResponse();
+                    if (batchOverflow)
+                    {
+                        batchToSend.States.Add(overflowState);
+                    }
+                }
+                else if (batchOverflow && !BatchHasStatesToSend(batchToSend))
+                {
+                    await SendTooBigState(overflowState, request, batchToSend, responseStream, _logger).ConfigureAwait(false);
+                    batchToSend = new GetAllResponse();
+                }
+                else
+                {
+                    break;
+                }
             }
         }
-        
-        Log.SendingGetAllInBatchesResult(_logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
-        await responseStream.WriteAsync(batchToSend).ConfigureAwait(false);
+        finally
+        {
+            await statesEnumerator.DisposeAsync().ConfigureAwait(false);
+        }
+    }
+
+    static async Task<(bool batchOverflow, ProjectionCurrentState overflowState)> FillUpBatch(IAsyncEnumerator<Projections.Store.State.ProjectionCurrentState> states, GetAllResponse batch)
+    {
+        while (await states.MoveNextAsync().ConfigureAwait(false))
+        {
+            var nextState = states.Current.ToProtobuf();
+            if (BatchWouldBeTooLarge(batch, nextState))
+            {
+                return (true, nextState);
+            }
+            batch.States.Add(nextState);
+        }
+        return (false, default);
     }
 
     static bool BatchWouldBeTooLarge(GetAllResponse batch, ProjectionCurrentState nextState)
         => batch.CalculateSize() + nextState.CalculateSize() > MaxBatchMessageSize;
 
+    static bool BatchHasStatesToSend(GetAllResponse batch) => batch.States.Count > 0;
+    
+    static Task SendTooBigState(ProjectionCurrentState stateThatDoesNotFitBatch, GetAllRequest request, GetAllResponse batchToSend, IServerStreamWriter<GetAllResponse> responseStream, ILogger logger)
+    {
+        Log.ProjectionStateTooLargeButSendingAnyways(
+            logger,
+            stateThatDoesNotFitBatch.Key,
+            request.ProjectionId,
+            request.ScopeId,
+            stateThatDoesNotFitBatch.CalculateSize(),
+            MaxBatchMessageSize);
+        batchToSend.States.Add(stateThatDoesNotFitBatch);
+        return SendBatch(request, batchToSend, responseStream, logger);
+    }
+    
     static Task SendBatch(GetAllRequest request, GetAllResponse batchToSend, IServerStreamWriter<GetAllResponse> responseStream, ILogger logger)
     {
         Log.SendingGetAllInBatchesResult(logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
