@@ -18,7 +18,7 @@ namespace Dolittle.Runtime.Projections.Store.Services.Grpc.for_ProjectionsGrpcSe
 
 public class and_it_returns_a_state_that_is_too_large : given.the_service_and_get_all_request
 {
-    private Establish context = () =>
+    Establish context = () =>
     {
         var states = AsyncEnumerable.Empty<ProjectionCurrentState>()
             .Append(new ProjectionCurrentState(ProjectionCurrentStateType.Persisted, "small state", "key 01"))
