@@ -103,31 +103,18 @@ public class ProjectionsGrpcService : ProjectionsBase
             return;
         }
 
-        var batchToSend = new GetAllResponse();
         var statesEnumerator = getAllResult.Result.GetAsyncEnumerator(context.CancellationToken);
         try
         {
-            while (true)
+            var hasMoreStates = await statesEnumerator.MoveNextAsync().ConfigureAwait(false);
+            
+            while (hasMoreStates)
             {
-                var (batchOverflow, overflowState) = await FillUpBatch(statesEnumerator, batchToSend).ConfigureAwait(false);
-                if (BatchHasStatesToSend(batchToSend))
-                {
-                    await SendBatch(request, batchToSend, responseStream, _logger).ConfigureAwait(false);
-                    batchToSend = new GetAllResponse();
-                    if (batchOverflow)
-                    {
-                        batchToSend.States.Add(overflowState);
-                    }
-                }
-                else if (batchOverflow && !BatchHasStatesToSend(batchToSend))
-                {
-                    await SendTooBigState(overflowState, request, batchToSend, responseStream, _logger).ConfigureAwait(false);
-                    batchToSend = new GetAllResponse();
-                }
-                else
-                {
-                    break;
-                }
+                var batchToSend = new GetAllResponse();
+                batchToSend.States.Add(statesEnumerator.Current.ToProtobuf());
+
+                hasMoreStates = await FillBatch(statesEnumerator, batchToSend).ConfigureAwait(false);
+                await SendBatch(request, batchToSend, responseStream, _logger).ConfigureAwait(false);
             }
         }
         finally
@@ -136,40 +123,38 @@ public class ProjectionsGrpcService : ProjectionsBase
         }
     }
 
-    static async Task<(bool batchOverflow, ProjectionCurrentState overflowState)> FillUpBatch(IAsyncEnumerator<Projections.Store.State.ProjectionCurrentState> states, GetAllResponse batch)
+    static async Task<bool> FillBatch(IAsyncEnumerator<Projections.Store.State.ProjectionCurrentState> states, GetAllResponse batch)
     {
         while (await states.MoveNextAsync().ConfigureAwait(false))
         {
             var nextState = states.Current.ToProtobuf();
             if (BatchWouldBeTooLarge(batch, nextState))
             {
-                return (true, nextState);
+                return true;
             }
             batch.States.Add(nextState);
         }
-        return (false, default);
+
+        return false;
     }
 
     static bool BatchWouldBeTooLarge(GetAllResponse batch, ProjectionCurrentState nextState)
         => batch.CalculateSize() + nextState.CalculateSize() > MaxBatchMessageSize;
-
-    static bool BatchHasStatesToSend(GetAllResponse batch) => batch.States.Count > 0;
-    
-    static Task SendTooBigState(ProjectionCurrentState stateThatDoesNotFitBatch, GetAllRequest request, GetAllResponse batchToSend, IServerStreamWriter<GetAllResponse> responseStream, ILogger logger)
-    {
-        Log.ProjectionStateTooLargeButSendingAnyways(
-            logger,
-            stateThatDoesNotFitBatch.Key,
-            request.ProjectionId,
-            request.ScopeId,
-            stateThatDoesNotFitBatch.CalculateSize(),
-            MaxBatchMessageSize);
-        batchToSend.States.Add(stateThatDoesNotFitBatch);
-        return SendBatch(request, batchToSend, responseStream, logger);
-    }
     
     static Task SendBatch(GetAllRequest request, GetAllResponse batchToSend, IServerStreamWriter<GetAllResponse> responseStream, ILogger logger)
     {
+        if (batchToSend.States.Count == 1 && batchToSend.CalculateSize() > MaxBatchMessageSize)
+        {
+            var stateThatIsTooLarge = batchToSend.States[0];
+            Log.ProjectionStateTooLargeButSendingAnyways(
+                logger,
+                stateThatIsTooLarge.Key,
+                request.ProjectionId,
+                request.ScopeId,
+                stateThatIsTooLarge.CalculateSize(),
+                MaxBatchMessageSize);
+        }
+        
         Log.SendingGetAllInBatchesResult(logger, request.ProjectionId, request.ScopeId, batchToSend.States.Count);
         return responseStream.WriteAsync(batchToSend);
     }
