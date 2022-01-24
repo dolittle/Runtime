@@ -1,3 +1,13 @@
+# [7.5.0] - 2022-1-24 [PR: #609](https://github.com/dolittle/Runtime/pull/609)
+## Summary
+
+Implements the new method introduced in the projection store that retrieves all projection states in batches to allow large and a high number of projection states to be retrieved by a client. The implementation also streams states directly from the underlying MongoDB storage to avoid having to read all into memory before passing along to a client. This provides a fix for the issues of fetching a large number of projections crashing the SDKs.
+
+### Added
+
+- A new `GetAllInBatches` method on the `ProjectionStore` service that streams the responses back to the client in dynamically sized batches of approximately 2MB. Singular projection states that are larger than 2MB are sent in their own batch, as the client might still accept larger gRPC messages.
+
+
 # [7.4.0] - 2022-1-20 [PR: #597](https://github.com/dolittle/Runtime/pull/597)
 ## Summary
 
