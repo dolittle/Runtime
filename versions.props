@@ -3,7 +3,7 @@
         <AutofacVersion>5.0.0</AutofacVersion>
         <AutofacExtensionsVersion>6.0.0</AutofacExtensionsVersion>
         <ConsoleTablesVersion>2.4.2</ConsoleTablesVersion>
-        <ContractsVersion>6.4.0</ContractsVersion>
+        <ContractsVersion>6.5.0</ContractsVersion>
         <CoverletVersion>2.9.0</CoverletVersion>
         <DolittleCommonSpecsVersion>2.*</DolittleCommonSpecsVersion>
         <DockerDotNetVersion>3.125.5</DockerDotNetVersion>
@@ -23,6 +23,7 @@
         <PollyVersion>7.2.0</PollyVersion>
         <PrometheusVersion>4.1.1</PrometheusVersion>
         <SystemDataHashFunctionVersion>2.0.0</SystemDataHashFunctionVersion>
+        <SystemLinqAsyncVersion>5.1.0</SystemLinqAsyncVersion>
         <SystemSecurityVersion>4.3.0</SystemSecurityVersion>
         <SystemReactiveVersion>4.4.1</SystemReactiveVersion>
         <SystemRuntimeVersion>4.3.0</SystemRuntimeVersion>
