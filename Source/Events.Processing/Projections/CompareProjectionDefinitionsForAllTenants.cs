@@ -59,6 +59,7 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
         var result = ProjectionDefinitionComparisonResult.Equal;
         if (!InitialStatesAreEqual(newDefinition, oldDefinition, ref result)) return result;
         if (!EventsAreEqual(newDefinition, oldDefinition, ref result)) return result;
+        if (!CopiesAreEqual(newDefinition, oldDefinition, ref result)) return result;
         return result;
     }
 
@@ -84,7 +85,7 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
             var oldEvent = oldDefinition.Events.FirstOrDefault(_ => _.EventType == newEvent.EventType);
             if (oldEvent == default)
             {
-                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} was not in previous projectiondefinition");
+                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} was not in previous projection definition");
                 return false;
             }
 
@@ -97,6 +98,49 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
             if (oldEvent.KeySelectorExpression != newEvent.KeySelectorExpression)
             {
                 result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector expressions");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool CopiesAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
+        => CopyToMongoDBsAreEqual(newDefinition, oldDefinition, ref result);
+    
+    bool CopyToMongoDBsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
+    {
+        if (newDefinition.Copies.MongoDB.ShouldCopyToMongoDB != oldDefinition.Copies.MongoDB.ShouldCopyToMongoDB)
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("Should copy to MongoDB has changed from the previous projection definition");
+            return false;
+        }
+
+        if (newDefinition.Copies.MongoDB.Collection != oldDefinition.Copies.MongoDB.Collection)
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("Copy to MongoDB collection name has changed the previous projection definition");
+            return false;
+        }
+
+        if (newDefinition.Copies.MongoDB.Conversions.Count != oldDefinition.Copies.MongoDB.Conversions.Count)
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("Copy to MongoDB does not have the same number of conversions as the previous projection definition");
+            return false;
+        }
+
+        foreach (var newConversion in newDefinition.Copies.MongoDB.Conversions)
+        {
+            var hasOldConversionForField = oldDefinition.Copies.MongoDB.Conversions.TryGetValue(newConversion.Key, out var oldConversionType);
+            
+            if (!hasOldConversionForField)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for field {newConversion.Key} did not exist in the previous projection definition");
+                return false;
+            }
+
+            if (newConversion.Value != oldConversionType)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for field {newConversion.Key} has changed from the previous projection definition");
                 return false;
             }
         }
