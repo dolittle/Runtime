@@ -2,6 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 
@@ -14,4 +15,13 @@ namespace Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 public record CopyToMongoDBSpecification(
     bool ShouldCopyToMongoDB,
     CollectionName Collection,
-    IDictionary<ProjectionField, ConversionBSONType> Conversions);
+    IDictionary<ProjectionField, ConversionBSONType> Conversions)
+{
+    /// <summary>
+    /// Gets the default value for <see cref="CopyToMongoDBSpecification"/> where no copies will be produced.
+    /// </summary>
+    public static readonly CopyToMongoDBSpecification Default = new(
+        false,
+        CollectionName.NotSet,
+        ImmutableDictionary<ProjectionField, ConversionBSONType>.Empty);
+}

@@ -9,4 +9,12 @@ namespace Dolittle.Runtime.Projections.Store.Definition.Copies;
 /// Represents a field in a Projection read model.
 /// </summary>
 /// <param name="Value"></param>
-public record ProjectionField(string Value) : ConceptAs<string>(Value);
+public record ProjectionField(string Value) : ConceptAs<string>(Value)
+{
+    /// <summary>
+    /// Implicitly convert from a <see cref="string"/> to a <see cref="ProjectionField"/>.
+    /// </summary>
+    /// <param name="name">The <see cref="string"/> representation of the projection field.</param>
+    /// <returns>The converted <see cref="ProjectionField"/> concept.</returns>
+    public static implicit operator ProjectionField(string name) => new(name);
+}

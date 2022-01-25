@@ -7,6 +7,8 @@ using Dolittle.Runtime.Protobuf;
 using Dolittle.Services.Contracts;
 using RuntimeProjectionEventSelector = Dolittle.Runtime.Projections.Store.Definition.ProjectionEventSelector;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Services;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -30,7 +32,8 @@ public class ProjectionsProtocol : IProjectionsProtocol
                     Contracts.ProjectionEventSelector.SelectorOneofCase.EventPropertyKeySelector => RuntimeProjectionEventSelector.EventProperty(eventSelector.EventType.Id.ToGuid(), eventSelector.EventPropertyKeySelector.PropertyName),
                     _ => throw new InvalidProjectionEventSelector(eventSelector.SelectorCase)
                 }),
-                arguments.InitialState
+                arguments.InitialState,
+                ConvertCopySpecification(arguments.Copies)
             ));
 
     /// <inheritdoc/>
@@ -84,5 +87,26 @@ public class ProjectionsProtocol : IProjectionsProtocol
             }
         }
         return ConnectArgumentsValidationResult.Ok;
+    }
+
+    ProjectionCopySpecification ConvertCopySpecification(ProjectionCopies copies)
+    {
+        var mongoDB = CopyToMongoDBSpecification.Default;
+        if (copies?.MongoDB is { } copyToMongoDb)
+        {
+            var conversions = copyToMongoDb.Conversions.ToDictionary(
+                _ => new ProjectionField(_.Key),
+                _ => _.Value switch
+                {
+                    ProjectionCopyToMongoDB.Types.BSONType.Date => ConversionBSONType.Date,
+                    ProjectionCopyToMongoDB.Types.BSONType.Timestamp => ConversionBSONType.Timestamp,
+                    ProjectionCopyToMongoDB.Types.BSONType.Binary => ConversionBSONType.Binary,
+                    _ => throw new InvalidMongoDBFieldConversion(_.Key, _.Value),
+                }
+            );
+            mongoDB = new CopyToMongoDBSpecification(true, copyToMongoDb.Collection, conversions);
+        }
+
+        return new ProjectionCopySpecification(mongoDB);
     }
 }
