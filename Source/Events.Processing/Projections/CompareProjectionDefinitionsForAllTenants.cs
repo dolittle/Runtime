@@ -64,7 +64,7 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
 
     bool InitialStatesAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
     {
-        if (newDefinition.InititalState != oldDefinition.InititalState)
+        if (newDefinition.InitialState != oldDefinition.InitialState)
         {
             result = ProjectionDefinitionComparisonResult.Unequal("The initial projection state is not the same as the persisted definition");
             return false;

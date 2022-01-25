@@ -34,7 +34,7 @@ public class and_initial_state_differs : given.all_dependencies
 
         definitions
             .Setup(_ => _.TryGet(definition.Projection, definition.Scope, Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<ProjectionDefinition>>(definition with { InititalState = "something else" }));
+            .Returns(Task.FromResult<Try<ProjectionDefinition>>(definition with { InitialState = "something else" }));
     };
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 

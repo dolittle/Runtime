@@ -32,8 +32,8 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
         => new()
         {
             Projection = definition.Projection,
-            InitialStateRaw = definition.InititalState,
-            InitialState = BsonDocument.Parse(definition.InititalState),
+            InitialStateRaw = definition.InitialState,
+            InitialState = BsonDocument.Parse(definition.InitialState),
             EventSelectors = definition.Events.Select(_ => new ProjectionEventSelector
             {
                 EventKeySelectorType = _.KeySelectorType,
