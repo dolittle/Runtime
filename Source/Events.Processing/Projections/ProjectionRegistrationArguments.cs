@@ -7,7 +7,7 @@ using Dolittle.Runtime.Projections.Store.Definition;
 namespace Dolittle.Runtime.Events.Processing.Projections;
 
 /// <summary>
-/// Represents the runtime representation of the projection registartion arguments.
+/// Represents the runtime representation of the projection registration arguments.
 /// </summary>
 /// <param name="ExecutionContext">The execution context.</param>
 /// <param name="ProjectionDefinition">The projection definition.</param>
