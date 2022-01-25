@@ -32,4 +32,9 @@ public class ProjectionDefinition
     /// Gets or sets the projection event selectors.
     /// </summary>
     public ProjectionEventSelector[] EventSelectors { get; set; }
+    
+    /// <summary>
+    /// Gets or sets the projection copy specification.
+    /// </summary>
+    public ProjectionCopies Copies { get; set; }
 }
