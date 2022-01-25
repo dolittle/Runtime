@@ -7,6 +7,7 @@ using Dolittle.Runtime.Lifecycle;
 using MongoDB.Bson;
 using System.Collections.Generic;
 using Dolittle.Runtime.Projections.Store.Definition.Copies;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 
@@ -33,14 +34,17 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
             ToRuntimeCopies(copies));
 
     static Store.Definition.Copies.ProjectionCopySpecification ToRuntimeCopies(ProjectionCopies specification)
-        => new(
-            ToRuntimeCopyToMongoDB(specification.MongoDB));
+        => specification == null
+            ? new(CopyToMongoDBSpecification.Default)
+            : new(ToRuntimeCopyToMongoDB(specification.MongoDB));
 
     static Store.Definition.Copies.MongoDB.CopyToMongoDBSpecification ToRuntimeCopyToMongoDB(ProjectionCopyToMongoDB specification)
-        => new(
-            specification.ShouldCopyToMongoDB,
-            specification.CollectionName,
-            specification.Conversions.ToDictionary(_ => new ProjectionField(_.Key), _ => _.Value));
+        => specification == null
+            ? CopyToMongoDBSpecification.Default
+            : new(
+                specification.ShouldCopyToMongoDB,
+                specification.CollectionName,
+                specification.Conversions.ToDictionary(_ => new ProjectionField(_.Key), _ => _.Value));
     
     public ProjectionDefinition ToStored(Store.Definition.ProjectionDefinition definition)
         => new()
