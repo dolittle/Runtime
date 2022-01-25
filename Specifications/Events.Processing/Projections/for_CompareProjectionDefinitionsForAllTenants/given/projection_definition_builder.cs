@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.given;
@@ -16,6 +18,7 @@ public class projection_definition_builder
     readonly ProjectionId _projection;
     readonly ScopeId _scope;
     ProjectionState _initial_state = string.Empty;
+    ProjectionCopySpecification _copy_specification = new ProjectionCopySpecification(CopyToMongoDBSpecification.Default);
 
     projection_definition_builder(ProjectionId projection, ScopeId scope)
     {
@@ -34,6 +37,12 @@ public class projection_definition_builder
         _initial_state = state;
         return this;
     }
+    
+    public projection_definition_builder with_copy_to_mongodb(CopyToMongoDBSpecification specification)
+    {
+        _copy_specification = new ProjectionCopySpecification(specification);
+        return this;
+    }
 
-    public ProjectionDefinition build() => new(_projection, _scope, selectors, _initial_state);
+    public ProjectionDefinition build() => new(_projection, _scope, selectors, _initial_state, _copy_specification);
 }

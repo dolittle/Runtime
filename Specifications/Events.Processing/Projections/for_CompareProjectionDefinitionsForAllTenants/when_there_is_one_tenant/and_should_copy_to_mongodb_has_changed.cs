@@ -16,7 +16,7 @@ using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant;
 
-public class and_there_is_a_different_number_of_event_types : given.all_dependencies
+public class and_should_copy_to_mongodb_has_changed : given.all_dependencies
 {
     static TenantId tenant;
     static ProjectionDefinition definition;
@@ -30,13 +30,22 @@ public class and_there_is_a_different_number_of_event_types : given.all_dependen
             .create(
                 "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",
                 "5e1c13f3-4af4-4335-93ef-7612b67f0f67")
-            .with_selector(ProjectionEventSelector.EventSourceId(Guid.NewGuid()))
+            .with_selector(ProjectionEventSelector.EventSourceId("fde86d09-1c24-40ae-afc9-d85100cabdd9"))
             .with_copy_to_mongodb(CopyToMongoDBSpecification.Default)
             .build();
 
         definitions
             .Setup(_ => _.TryGet(definition.Projection, definition.Scope, Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<ProjectionDefinition>>(definition with { Events = Array.Empty<ProjectionEventSelector>() }));
+            .Returns(Task.FromResult<Try<ProjectionDefinition>>(definition with
+            {
+                Copies = definition.Copies with
+                {
+                    MongoDB = definition.Copies.MongoDB with
+                    {
+                        ShouldCopyToMongoDB = true,
+                    }
+                }
+            }));
     };
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 
