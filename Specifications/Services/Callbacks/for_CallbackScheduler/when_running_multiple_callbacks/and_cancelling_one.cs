@@ -18,13 +18,14 @@ public class and_cancelling_one : given.all_dependencies
     static IDisposable callback_to_be_cancelled_disposable;
     static IDisposable not_cancelled_callback_disposable;
 
-    Establish context = () =>
+    private Establish context = () =>
     {
         not_cancelled_callback = new Mock<Action>();
+        
         callback_to_be_cancelled = new Mock<Action>();
         callback_to_be_cancelled.Setup(_ => _()).Callback(() => callback_to_be_cancelled_disposable?.Dispose());
         
-        interval = TimeSpan.FromMilliseconds(1000);
+        interval = TimeSpan.FromMilliseconds(100);
         callCount = 3;
         not_cancelled_callback_disposable = scheduler.ScheduleCallback(not_cancelled_callback.Object, interval);
     };
