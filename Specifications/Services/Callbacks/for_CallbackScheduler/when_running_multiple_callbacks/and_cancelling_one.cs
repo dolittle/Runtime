@@ -18,7 +18,7 @@ public class and_cancelling_one : given.all_dependencies
     static IDisposable callback_to_be_cancelled_disposable;
     static IDisposable not_cancelled_callback_disposable;
 
-    private Establish context = () =>
+    Establish context = () =>
     {
         not_cancelled_callback = new Mock<Action>();
         
@@ -30,7 +30,7 @@ public class and_cancelling_one : given.all_dependencies
         not_cancelled_callback_disposable = scheduler.ScheduleCallback(not_cancelled_callback.Object, interval);
     };
 
-    private Because of = () =>
+    Because of = () =>
     {
         callback_to_be_cancelled_disposable = scheduler.ScheduleCallback(callback_to_be_cancelled.Object, interval);
         Task.Delay(interval * (callCount + 1)).GetAwaiter().GetResult();
