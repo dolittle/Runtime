@@ -15,24 +15,25 @@ public class and_cancelling_one : given.all_dependencies
     static TimeSpan interval;
     static Mock<Action> callback_to_be_cancelled;
     static int callCount;
+    static IDisposable callback_to_be_cancelled_disposable;
     static IDisposable not_cancelled_callback_disposable;
 
     Establish context = () =>
     {
         not_cancelled_callback = new Mock<Action>();
+        
         callback_to_be_cancelled = new Mock<Action>();
-        interval = TimeSpan.FromMilliseconds(1000);
+        callback_to_be_cancelled.Setup(_ => _()).Callback(() => callback_to_be_cancelled_disposable?.Dispose());
+        
+        interval = TimeSpan.FromMilliseconds(100);
         callCount = 3;
         not_cancelled_callback_disposable = scheduler.ScheduleCallback(not_cancelled_callback.Object, interval);
     };
 
     Because of = () =>
     {
-        using (scheduler.ScheduleCallback(callback_to_be_cancelled.Object, interval))
-        {
-            Task.Delay(interval).GetAwaiter().GetResult();
-        }
-        Task.Delay(interval * callCount).GetAwaiter().GetResult();
+        callback_to_be_cancelled_disposable = scheduler.ScheduleCallback(callback_to_be_cancelled.Object, interval);
+        Task.Delay(interval * (callCount + 1)).GetAwaiter().GetResult();
     };
 
     It should_have_called_the_first_callback_at_least_thrice = () => not_cancelled_callback.Verify(_ => _(), Times.AtLeast(callCount));

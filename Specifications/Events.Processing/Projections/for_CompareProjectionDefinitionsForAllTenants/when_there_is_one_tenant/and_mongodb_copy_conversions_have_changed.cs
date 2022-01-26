@@ -10,13 +10,14 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 
 namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant;
 
-public class and_there_is_a_different_number_of_event_types : given.all_dependencies
+public class and_mongodb_copy_conversions_have_changed : given.all_dependencies
 {
     static TenantId tenant;
     static ProjectionDefinition definition;
@@ -30,13 +31,35 @@ public class and_there_is_a_different_number_of_event_types : given.all_dependen
             .create(
                 "c3c7c90e-b8e3-41eb-b641-1dff6fe90777",
                 "5e1c13f3-4af4-4335-93ef-7612b67f0f67")
-            .with_selector(ProjectionEventSelector.EventSourceId(Guid.NewGuid()))
-            .with_copy_to_mongodb(CopyToMongoDBSpecification.Default)
+            .with_selector(ProjectionEventSelector.EventSourceId("fde86d09-1c24-40ae-afc9-d85100cabdd9"))
+            .with_copy_to_mongodb(CopyToMongoDBSpecification.Default with
+            {
+                Conversions = new Dictionary<ProjectionField, ConversionBSONType>()
+                {
+                    { "field one", ConversionBSONType.Date },
+                    { "field two", ConversionBSONType.Timestamp },
+                    { "field three", ConversionBSONType.Binary },
+                }
+            })
             .build();
 
         definitions
             .Setup(_ => _.TryGet(definition.Projection, definition.Scope, Moq.It.IsAny<CancellationToken>()))
-            .Returns(Task.FromResult<Try<ProjectionDefinition>>(definition with { Events = Array.Empty<ProjectionEventSelector>() }));
+            .Returns(Task.FromResult<Try<ProjectionDefinition>>(definition with
+            {
+                Copies = definition.Copies with
+                {
+                    MongoDB = definition.Copies.MongoDB with
+                    {
+                        Conversions = new Dictionary<ProjectionField, ConversionBSONType>()
+                        {
+                            { "field one", ConversionBSONType.Timestamp },
+                            { "field two", ConversionBSONType.Timestamp },
+                            { "field four", ConversionBSONType.Binary },
+                        },
+                    }
+                }
+            }));
     };
     Because of = () => result = comparer.DiffersFromPersisted(definition, CancellationToken.None).GetAwaiter().GetResult();
 

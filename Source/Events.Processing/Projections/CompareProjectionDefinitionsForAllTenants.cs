@@ -9,6 +9,9 @@ using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.DependencyInversion;
 using Dolittle.Runtime.Lifecycle;
 using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
+using Dolittle.Runtime.Projections.Store.State;
 using Dolittle.Runtime.Tenancy;
 
 namespace Dolittle.Runtime.Events.Processing.Projections;
@@ -57,34 +60,35 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
     ProjectionDefinitionComparisonResult DefinitionsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition)
     {
         var result = ProjectionDefinitionComparisonResult.Equal;
-        if (!InitialStatesAreEqual(newDefinition, oldDefinition, ref result)) return result;
-        if (!EventsAreEqual(newDefinition, oldDefinition, ref result)) return result;
+        if (!InitialStatesAreEqual(newDefinition.InitialState, oldDefinition.InitialState, ref result)) return result;
+        if (!EventsAreEqual(newDefinition.Events, oldDefinition.Events, ref result)) return result;
+        if (!CopiesAreEqual(newDefinition.Copies, oldDefinition.Copies, ref result)) return result;
         return result;
     }
 
-    bool InitialStatesAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
+    bool InitialStatesAreEqual(ProjectionState newInitialState, ProjectionState oldInitialState, ref ProjectionDefinitionComparisonResult result)
     {
-        if (newDefinition.InititalState != oldDefinition.InititalState)
+        if (newInitialState != oldInitialState)
         {
             result = ProjectionDefinitionComparisonResult.Unequal("The initial projection state is not the same as the persisted definition");
             return false;
         }
         return true;
     }
-    bool EventsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition, ref ProjectionDefinitionComparisonResult result)
+    bool EventsAreEqual(IEnumerable<ProjectionEventSelector> newEvents, IEnumerable<ProjectionEventSelector> oldEvents, ref ProjectionDefinitionComparisonResult result)
     {
-        if (newDefinition.Events.Count() != oldDefinition.Events.Count())
+        if (newEvents.Count() != oldEvents.Count())
         {
             result = ProjectionDefinitionComparisonResult.Unequal("The definitions does not have the same number of events");
             return false;
         }
 
-        foreach (var newEvent in newDefinition.Events)
+        foreach (var newEvent in newEvents)
         {
-            var oldEvent = oldDefinition.Events.FirstOrDefault(_ => _.EventType == newEvent.EventType);
+            var oldEvent = oldEvents.FirstOrDefault(_ => _.EventType == newEvent.EventType);
             if (oldEvent == default)
             {
-                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} was not in previous projectiondefinition");
+                result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} was not in previous projection definition");
                 return false;
             }
 
@@ -97,6 +101,49 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
             if (oldEvent.KeySelectorExpression != newEvent.KeySelectorExpression)
             {
                 result = ProjectionDefinitionComparisonResult.Unequal($"Event {newEvent.EventType.Value} does not have the same key selector expressions");
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    bool CopiesAreEqual(ProjectionCopySpecification newSpecification, ProjectionCopySpecification oldSpecification, ref ProjectionDefinitionComparisonResult result)
+        => CopyToMongoDBsAreEqual(newSpecification.MongoDB, oldSpecification.MongoDB, ref result);
+    
+    bool CopyToMongoDBsAreEqual(CopyToMongoDBSpecification newSpecification, CopyToMongoDBSpecification oldSpecification, ref ProjectionDefinitionComparisonResult result)
+    {
+        if (newSpecification.ShouldCopyToMongoDB != oldSpecification.ShouldCopyToMongoDB)
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("Should copy to MongoDB has changed from the previous projection definition");
+            return false;
+        }
+
+        if (newSpecification.Collection != oldSpecification.Collection)
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("Copy to MongoDB collection name has changed the previous projection definition");
+            return false;
+        }
+
+        if (newSpecification.Conversions.Count != oldSpecification.Conversions.Count)
+        {
+            result = ProjectionDefinitionComparisonResult.Unequal("Copy to MongoDB does not have the same number of conversions as the previous projection definition");
+            return false;
+        }
+
+        foreach (var newConversion in newSpecification.Conversions)
+        {
+            var hasOldConversionForField = oldSpecification.Conversions.TryGetValue(newConversion.Key, out var oldConversionType);
+            
+            if (!hasOldConversionForField)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for field {newConversion.Key} did not exist in the previous projection definition");
+                return false;
+            }
+
+            if (newConversion.Value != oldConversionType)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for field {newConversion.Key} has changed from the previous projection definition");
                 return false;
             }
         }

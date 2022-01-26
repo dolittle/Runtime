@@ -17,7 +17,7 @@ public class when_registering_a_callback : given.all_dependencies
     Establish context = () =>
     {
         callback = new Mock<Action>();
-        interval = TimeSpan.FromMilliseconds(1000);
+        interval = TimeSpan.FromMilliseconds(100);
     };
 
     static int callCount;

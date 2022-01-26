@@ -6,6 +6,8 @@ using Dolittle.Runtime.Events.Store;
 using Dolittle.Runtime.Lifecycle;
 using MongoDB.Bson;
 using System.Collections.Generic;
+using Dolittle.Runtime.Projections.Store.Definition.Copies;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 
@@ -19,7 +21,8 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
         ProjectionId projection,
         ScopeId scope,
         IEnumerable<ProjectionEventSelector> eventSelectors,
-        Store.State.ProjectionState initialState)
+        Store.State.ProjectionState initialState,
+        ProjectionCopies copies)
         => new(
             projection,
             scope,
@@ -27,18 +30,48 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
                 _.EventType,
                 _.EventKeySelectorType,
                 _.EventKeySelectorExpression)),
-            initialState);
+            initialState,
+            ToRuntimeCopies(copies));
+
+    static Store.Definition.Copies.ProjectionCopySpecification ToRuntimeCopies(ProjectionCopies specification)
+        => specification == null
+            ? new(CopyToMongoDBSpecification.Default)
+            : new(ToRuntimeCopyToMongoDB(specification.MongoDB));
+
+    static Store.Definition.Copies.MongoDB.CopyToMongoDBSpecification ToRuntimeCopyToMongoDB(ProjectionCopyToMongoDB specification)
+        => specification == null
+            ? CopyToMongoDBSpecification.Default
+            : new(
+                specification.ShouldCopyToMongoDB,
+                specification.CollectionName,
+                specification.Conversions.ToDictionary(_ => new ProjectionField(_.Key), _ => _.Value));
+    
     public ProjectionDefinition ToStored(Store.Definition.ProjectionDefinition definition)
         => new()
         {
             Projection = definition.Projection,
-            InitialStateRaw = definition.InititalState,
-            InitialState = BsonDocument.Parse(definition.InititalState),
+            InitialStateRaw = definition.InitialState,
+            InitialState = BsonDocument.Parse(definition.InitialState),
             EventSelectors = definition.Events.Select(_ => new ProjectionEventSelector
             {
                 EventKeySelectorType = _.KeySelectorType,
                 EventKeySelectorExpression = _.KeySelectorExpression,
                 EventType = _.EventType,
-            }).ToArray()
+            }).ToArray(),
+            Copies = ToStoredCopies(definition.Copies),
+        };
+
+    static ProjectionCopies ToStoredCopies(Store.Definition.Copies.ProjectionCopySpecification specification)
+        => new()
+        {
+            MongoDB = ToStoredCopyToMongoDB(specification.MongoDB),
+        };
+
+    static ProjectionCopyToMongoDB ToStoredCopyToMongoDB(Store.Definition.Copies.MongoDB.CopyToMongoDBSpecification specification)
+        => new()
+        {
+            ShouldCopyToMongoDB = specification.ShouldCopyToMongoDB,
+            CollectionName = specification.Collection,
+            Conversions = specification.Conversions.ToDictionary(_ => _.Key.Value, _ => _.Value),
         };
 }

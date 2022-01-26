@@ -19,7 +19,7 @@ public enum ProjectEventKeySelectorType : ushort
     PartitionId,
 
     /// <summary>
-    /// The type when a specific propert on the event is the key.
+    /// The type when a specific property on the event is the key.
     /// </summary>
     Property
 }

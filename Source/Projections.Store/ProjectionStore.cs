@@ -88,7 +88,7 @@ public class ProjectionStore : IProjectionStore
             return definition.Exception;
         }
 
-        return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, definition.Result.InititalState, key);
+        return new ProjectionCurrentState(ProjectionCurrentStateType.CreatedFromInitialState, definition.Result.InitialState, key);
     }
 
     /// <inheritdoc/>

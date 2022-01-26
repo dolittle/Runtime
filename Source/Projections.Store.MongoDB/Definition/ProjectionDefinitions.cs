@@ -36,14 +36,14 @@ public class ProjectionDefinitions : IProjectionDefinitions
                 {
                     var findResult = await collection
                         .Find(CreateIdFilter(projection))
-                        .Project(_ => Tuple.Create(_.InitialStateRaw, _.EventSelectors))
+                        .Project(_ => Tuple.Create(_.InitialStateRaw, _.EventSelectors, _.Copies))
                         .SingleOrDefaultAsync(token).ConfigureAwait(false);
                     if (findResult == null)
                     {
                         return Try<Store.Definition.ProjectionDefinition>.Failed(new ProjectionDefinitionDoesNotExist(projection, scope));
                     }
-                    var (initialState, eventSelectors) = findResult;
-                    return _definitionConverter.ToRuntime(projection, scope, eventSelectors, initialState);
+                    var (initialState, eventSelectors, copies) = findResult;
+                    return _definitionConverter.ToRuntime(projection, scope, eventSelectors, initialState, copies);
                 },
                 token).ConfigureAwait(false);
         }

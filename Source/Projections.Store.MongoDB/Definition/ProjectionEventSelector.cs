@@ -8,6 +8,9 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Dolittle.Runtime.Projections.Store.MongoDB.Definition;
 
+/// <summary>
+/// Represents the persisted definition of a projection event selector.
+/// </summary>
 public class ProjectionEventSelector
 {
     /// <summary>
