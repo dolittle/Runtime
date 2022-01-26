@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Extensions.Logging;
 
 namespace Dolittle.Runtime.Services.Callbacks;
@@ -51,7 +52,7 @@ public class ScheduledCallbackGroup
         lock (_callbacks)
         {
             _lastCalled = DateTime.UtcNow;
-            foreach (var scheduledCallback in _callbacks)
+            foreach (var scheduledCallback in _callbacks.ToList())
             {
                 try
                 {
