@@ -38,7 +38,7 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
         try
         {
             var document = _converter.Convert(state, projection.Copies.MongoDB.Conversions);
-            document.Set("_id", key.Value);
+            AddKeyTo(document, key);
 
             var collection = GetCollectionFor(projection);
             var filter = GetFilterFor(key);
@@ -72,14 +72,14 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
     /// <inheritdoc />
     public async Task<bool> TryDrop(ProjectionDefinition projection, CancellationToken token)
     {
-        var collection = GetCollectionNameFor(projection);
-        if (collection == CollectionName.NotSet)
+        if (!projection.Copies.MongoDB.ShouldCopyToMongoDB)
         {
             return true;
         }
         
         try
         {
+            var collection = GetCollectionNameFor(projection);
             await _storage.Database.DropCollectionAsync(collection, token).ConfigureAwait(false);
             return true;
         }
@@ -94,7 +94,10 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
 
     static CollectionName GetCollectionNameFor(ProjectionDefinition projection)
         => projection.Copies.MongoDB.Collection;
-
+    
     static FilterDefinition<BsonDocument> GetFilterFor(ProjectionKey key)
         => Builders<BsonDocument>.Filter.Eq("_id", key.Value);
+
+    static void AddKeyTo(BsonDocument document, ProjectionKey key)
+        => document.Set("_id", key.Value);
 }
