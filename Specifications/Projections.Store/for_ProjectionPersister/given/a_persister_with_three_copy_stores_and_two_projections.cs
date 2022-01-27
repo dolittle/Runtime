@@ -20,6 +20,8 @@ public class a_persister_with_three_copy_stores_and_two_projections : two_projec
     protected static Mock<IProjectionCopyStore> copy_store_two;
     protected static Mock<IProjectionCopyStore> copy_store_three;
 
+    protected static Mock<IMetricsCollector> metrics;
+
     protected static ProjectionPersister projection_persister;
 
     protected static CancellationToken cancellation_token;
@@ -121,9 +123,12 @@ public class a_persister_with_three_copy_stores_and_two_projections : two_projec
                 It.IsAny<CancellationToken>()
             )).ReturnsAsync(true);
 
+        metrics = new Mock<IMetricsCollector>();
+
         projection_persister = new ProjectionPersister(
             projection_store.Object,
             new[] {copy_store_one.Object, copy_store_two.Object, copy_store_three.Object},
+            metrics.Object,
             NullLogger.Instance
         );
         

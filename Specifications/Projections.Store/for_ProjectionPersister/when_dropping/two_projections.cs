@@ -43,4 +43,8 @@ public class two_projections : given.a_persister_with_three_copy_stores_and_two_
     It should_not_have_dropped_projection_two_from_the_second_copy_store = () => copy_store_two.Verify(_ => _.TryDrop(projection_two, cancellation_token), Times.Never);
     It should_have_dropped_projection_two_from_the_third_copy_store = () => copy_store_three.Verify(_ => _.TryDrop(projection_two, cancellation_token), Times.Once);
     It should_have_dropped_projection_two_from_the_projection_store = () => projection_store.Verify(_ => _.TryDrop(projection_two_id, projection_two_scope, cancellation_token), Times.Once);
+    
+    It should_increment_total_drop_attempts_twice = () => metrics.Verify(_ => _.IncrementTotalDropAttempts(), Times.Exactly(2));
+    It should_increment_total_copy_store_drops_twice = () => metrics.Verify(_ => _.IncrementTotalCopyStoreDrops(), Times.Exactly(2));
+    It should_increment_total_copy_store_failures_once = () => metrics.Verify(_ => _.IncrementTotalFailedCopyStoreDrops(), Times.Once);
 }

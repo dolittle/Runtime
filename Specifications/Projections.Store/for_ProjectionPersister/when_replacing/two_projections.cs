@@ -42,4 +42,7 @@ public class two_projections : given.a_persister_with_three_copy_stores_and_two_
     It should_have_replaced_projection_two_from_the_second_copy_store = () => copy_store_two.Verify(_ => _.TryReplace(projection_two, key_one, state_one, cancellation_token), Times.Once);
     It should_have_replaced_projection_two_from_the_third_copy_store = () => copy_store_three.Verify(_ => _.TryReplace(projection_two, key_one, state_one, cancellation_token), Times.Once);
     It should_have_replaced_projection_two_from_the_projection_store = () => projection_store.Verify(_ => _.TryReplace(projection_two_id, projection_two_scope, key_one, state_one, cancellation_token), Times.Once);
+    
+    It should_increment_total_replace_attempts_twice = () => metrics.Verify(_ => _.IncrementTotalReplaceAttempts(), Times.Exactly(2));
+    It should_increment_total_copy_store_replacements_four_times = () => metrics.Verify(_ => _.IncrementTotalCopyStoreReplacements(), Times.Exactly(4));
 }

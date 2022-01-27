@@ -30,4 +30,6 @@ public class and_no_copy_stores_should_persist : given.a_persister_with_three_co
     It should_not_have_replaced_it_from_the_second_copy_store = () => copy_store_two.Verify(_ => _.TryReplace(projection_two, key_one, state_one, cancellation_token), Times.Never);
     It should_not_have_replaced_it_from_the_third_copy_store = () => copy_store_three.Verify(_ => _.TryReplace(projection_two, key_one, state_one, cancellation_token), Times.Never);
     It should_have_replaced_it_from_the_projection_store = () => projection_store.Verify(_ => _.TryReplace(projection_two_id, projection_two_scope, key_one, state_one, cancellation_token), Times.Once);
+    It should_increment_total_replace_attempts_once = () => metrics.Verify(_ => _.IncrementTotalReplaceAttempts(), Times.Once);
+    It should_not_increment_total_copy_store_replacements_twice = () => metrics.Verify(_ => _.IncrementTotalCopyStoreReplacements(), Times.Never);
 }
