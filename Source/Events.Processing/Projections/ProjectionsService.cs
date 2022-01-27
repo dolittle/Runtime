@@ -35,6 +35,7 @@ public class ProjectionsService : ProjectionsBase
     readonly IInitiateReverseCallServices _reverseCallServices;
     readonly IProjectionsProtocol _protocol;
     readonly ICompareProjectionDefinitionsForAllTenants _projectionDefinitionComparer;
+    readonly FactoryFor<IProjectionPersister> _getProjectionPersister;
     readonly FactoryFor<IProjectionStore> _getProjectionStore;
     readonly FactoryFor<IProjectionDefinitions> _getProjectionDefinitions;
     readonly FactoryFor<IResilientStreamProcessorStateRepository> _getStreamProcessorStates;
@@ -53,7 +54,8 @@ public class ProjectionsService : ProjectionsBase
     /// <param name="reverseCallServices">The <see cref="IInitiateReverseCallServices" />.</param>
     /// <param name="protocol">The <see cref="IProjectionsProtocol" />.</param>
     /// <param name="projectionDefinitionComparer">The <see cref="ICompareProjectionDefinitionsForAllTenants" />.</param>
-    /// <param name="getProjectionStore">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionStates" />.</param>
+    /// <param name="getProjectionPersister">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionPersister" />.</param>
+    /// <param name="getProjectionStore">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionStore" />.</param>
     /// <param name="getProjectionDefinitions">The <see cref="FactoryFor{T}" /> for <see cref="IProjectionDefinitions" />.</param>
     /// <param name="getStreamProcessorStates">The <see cref="FactoryFor{T}" /> for <see cref="IResilientStreamProcessorStateRepository" />.</param>
     /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
@@ -65,6 +67,7 @@ public class ProjectionsService : ProjectionsBase
         IInitiateReverseCallServices reverseCallServices,
         IProjectionsProtocol protocol,
         ICompareProjectionDefinitionsForAllTenants projectionDefinitionComparer,
+        FactoryFor<IProjectionPersister> getProjectionPersister,
         FactoryFor<IProjectionStore> getProjectionStore,
         FactoryFor<IProjectionDefinitions> getProjectionDefinitions,
         FactoryFor<IResilientStreamProcessorStateRepository> getStreamProcessorStates,
@@ -78,6 +81,7 @@ public class ProjectionsService : ProjectionsBase
         _reverseCallServices = reverseCallServices;
         _protocol = protocol;
         _projectionDefinitionComparer = projectionDefinitionComparer;
+        _getProjectionPersister = getProjectionPersister;
         _getProjectionStore = getProjectionStore;
         _getProjectionDefinitions = getProjectionDefinitions;
         _projectionKeys = projectionKeys;
@@ -114,6 +118,7 @@ public class ProjectionsService : ProjectionsBase
             arguments,
             () => new EventProcessor(
                 arguments.ProjectionDefinition,
+                _getProjectionPersister(),
                 _getProjectionStore(),
                 _projectionKeys,
                 new Projection(
@@ -233,8 +238,18 @@ public class ProjectionsService : ProjectionsBase
             if (!comparisonResult.Succeeded)
             {
                 _logger.ResettingProjections(arguments, tenant, comparisonResult.FailureReason);
-                await ResetStreamProcessorState(arguments.ProjectionDefinition, token).ConfigureAwait(false);
-                if (!await _getProjectionStore().TryDrop(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token).ConfigureAwait(false))
+
+                var persistedDefinition = await _getProjectionDefinitions()
+                    .TryGet(arguments.ProjectionDefinition.Projection, arguments.ProjectionDefinition.Scope, token)
+                    .ConfigureAwait(false);
+                if (!persistedDefinition.Success)
+                {
+                    throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
+                }
+
+                await ResetStreamProcessorState(persistedDefinition, token).ConfigureAwait(false);
+
+                if (!await _getProjectionPersister().TryDrop(persistedDefinition, token).ConfigureAwait(false))
                 {
                     throw new CouldNotResetProjectionStates(arguments.ProjectionDefinition, tenant);
                 }

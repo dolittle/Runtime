@@ -20,6 +20,7 @@ namespace Dolittle.Runtime.Events.Processing.Projections;
 public class EventProcessor : IEventProcessor
 {
     readonly ProjectionDefinition _projectionDefinition;
+    readonly IProjectionPersister _projectionPersister;
     readonly IProjectionStore _projectionStore;
     readonly IProjectionKeys _projectionKeys;
     readonly IProjection _projection;
@@ -29,12 +30,14 @@ public class EventProcessor : IEventProcessor
     /// Initializes a new instance of the <see cref="EventProcessor"/> class.
     /// </summary>
     /// <param name="projectionDefinition">The <see cref="ProjectionDefinition" />.</param>
+    /// <param name="projectionPersister">The <see cref="IProjectionPersister"/>.</param>
     /// <param name="projectionStore">The <see cref="IProjectionStore" />.</param>
     /// <param name="projectionKeys">The <see cref="IProjectionKeys" />.</param>
     /// <param name="projection">The <see cref="IProjection" />.</param>
     /// /// <param name="logger">The <see cref="ILogger" />.</param>
     public EventProcessor(
         ProjectionDefinition projectionDefinition,
+        IProjectionPersister projectionPersister,
         IProjectionStore projectionStore,
         IProjectionKeys projectionKeys,
         IProjection projection,
@@ -43,6 +46,7 @@ public class EventProcessor : IEventProcessor
         Scope = projectionDefinition.Scope;
         Identifier = projectionDefinition.Projection.Value;
         _projectionDefinition = projectionDefinition;
+        _projectionPersister = projectionPersister;
         _projectionStore = projectionStore;
         _projectionKeys = projectionKeys;
         _projection = projection;
@@ -113,7 +117,7 @@ public class EventProcessor : IEventProcessor
     {
         if (result is ProjectionReplaceResult replace)
         {
-            return await _projectionStore.TryReplace(_projectionDefinition.Projection, Scope, key, replace.State, token).ConfigureAwait(false) switch
+            return await _projectionPersister.TryReplace(_projectionDefinition, key, replace.State, token).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to replace state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
@@ -121,7 +125,7 @@ public class EventProcessor : IEventProcessor
         }
         else if (result is ProjectionDeleteResult)
         {
-            return await _projectionStore.TryRemove(_projectionDefinition.Projection, Scope, key, token).ConfigureAwait(false) switch
+            return await _projectionPersister.TryRemove(_projectionDefinition, key, token).ConfigureAwait(false) switch
             {
                 true => new SuccessfulProcessing(),
                 false => new FailedProcessing($"Failed to remove state for projection {_projectionDefinition.Projection.Value} with key {key.Value}"),
