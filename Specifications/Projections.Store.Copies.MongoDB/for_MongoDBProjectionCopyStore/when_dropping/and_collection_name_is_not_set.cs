@@ -2,13 +2,15 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
+using Dolittle.Runtime.Projections.Store.Definition;
+using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Machine.Specifications;
 using Moq;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_MongoDBProjectionCopyStore.when_dropping;
 
-public class and_should_copy_to_mongodb_is_false : given.a_projection_copy_store_and_a_projection
+public class and_collection_name_is_not_set : given.a_projection_copy_store_and_a_projection
 {
     Establish context = () =>
     {
@@ -18,7 +20,7 @@ public class and_should_copy_to_mongodb_is_false : given.a_projection_copy_store
             {
                 MongoDB = projection.Copies.MongoDB with
                 {
-                    ShouldCopyToMongoDB = false,
+                    Collection = CollectionName.NotSet,
                 }
             }
         };

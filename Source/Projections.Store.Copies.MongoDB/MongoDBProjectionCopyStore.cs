@@ -35,6 +35,8 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
     /// <inheritdoc />
     public async Task<bool> TryReplace(ProjectionDefinition projection, ProjectionKey key, ProjectionState state, CancellationToken token)
     {
+        ThrowIfShouldNotPersistFor(projection);
+        
         try
         {
             var document = _converter.Convert(state, projection.Copies.MongoDB.Conversions);
@@ -55,6 +57,8 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
     /// <inheritdoc />
     public async Task<bool> TryRemove(ProjectionDefinition projection, ProjectionKey key, CancellationToken token)
     {
+        ThrowIfShouldNotPersistFor(projection);
+        
         try
         {
             var collection = GetCollectionFor(projection);
@@ -72,10 +76,7 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
     /// <inheritdoc />
     public async Task<bool> TryDrop(ProjectionDefinition projection, CancellationToken token)
     {
-        if (!projection.Copies.MongoDB.ShouldCopyToMongoDB)
-        {
-            return true;
-        }
+        ThrowIfShouldNotPersistFor(projection);
         
         try
         {
@@ -86,6 +87,14 @@ public class MongoDBProjectionCopyStore : IProjectionCopyStore
         catch (MongoWaitQueueFullException)
         {
             return false;
+        }
+    }
+
+    void ThrowIfShouldNotPersistFor(ProjectionDefinition projection)
+    {
+        if (!ShouldPersistFor(projection))
+        {
+            throw new ProjectionShouldNotBeCopiedToMongoDB(projection);
         }
     }
 

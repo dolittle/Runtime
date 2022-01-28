@@ -9,7 +9,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_MongoDBProjectionCopyStore.when_dropping;
 
-public class and_should_copy_to_mongodb_is_true : given.a_projection_copy_store_and_a_projection
+public class and_collection_name_is_set_and_should_copy_to_mongodb_is_true : given.a_projection_copy_store_and_a_projection
 {
     static bool result;
 
