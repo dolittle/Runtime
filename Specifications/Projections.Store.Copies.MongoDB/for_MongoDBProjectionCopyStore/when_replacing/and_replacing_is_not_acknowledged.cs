@@ -31,6 +31,6 @@ public class and_replacing_is_not_acknowledged : given.a_projection_copy_store_a
         IsFilter(document => document["_id"].AsString == projection_key.Value),
         Moq.It.Is<BsonDocument>(document => document == converted_bson_document && document["_id"].AsString == projection_key.Value),
         Moq.It.Is<ReplaceOptions>(options => options.IsUpsert == true),
-        cancellation_token));
+        cancellation_token), Times.Once);
     It should_return_false = () => result.ShouldBeFalse();
 }
