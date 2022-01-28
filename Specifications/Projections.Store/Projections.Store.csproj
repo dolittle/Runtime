@@ -4,6 +4,7 @@
 
   <PropertyGroup>
     <AssemblyName>Dolittle.Runtime.Projections.Store.Specs</AssemblyName>
+    <RootNamespace>Dolittle.Runtime.Projections.Store</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
