@@ -18,7 +18,17 @@ public class VerifyContractsCompatibility : IVerifyContractsCompatibility
             return ContractsCompatibility.RuntimeTooOld;
         }
         
-        if (headContractsVersion.Major < runtimeContractsVersion.Major || headContractsVersion.Minor < runtimeContractsVersion.Minor)
+        if (headContractsVersion.Major < runtimeContractsVersion.Major)
+        {
+            return ContractsCompatibility.ClientTooOld;
+        }
+        
+        if (headContractsVersion.Minor > runtimeContractsVersion.Minor)
+        {
+            return ContractsCompatibility.RuntimeTooOld;
+        }
+        
+        if (headContractsVersion.Minor < runtimeContractsVersion.Minor)
         {
             return ContractsCompatibility.ClientTooOld;
         }
