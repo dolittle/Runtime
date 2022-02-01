@@ -77,7 +77,7 @@ public class ProjectionConverter : IProjectionConverter
                 return new ValueAndSetter[] {new(value, newValue => document.Set(property, newValue))};
             }
 
-            return array.Select((element, index) => new ValueAndSetter(element, newValue => array[index] = newValue));
+            return array.Select((element, index) => new ValueAndSetter(element, newValue => array[index] = newValue)).ToArray();
         });
     
     static IEnumerable<string> GetFieldPath(ProjectionField field)
