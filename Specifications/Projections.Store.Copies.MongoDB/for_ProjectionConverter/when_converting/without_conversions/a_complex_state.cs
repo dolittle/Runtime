@@ -23,7 +23,7 @@ public class a_complex_state : given.a_converter_and_inputs
                         },
                         {
                             ""title"": ""Does the Inertia of a Body Depend Upon Its Energy Content?"",
-                            ""released"": ""1905-11-21T00:00:00.000Z"",
+                            ""released"": ""1905-11-21T00:00:00.000Z""
                         }
                     ]
                 },
@@ -34,11 +34,11 @@ public class a_complex_state : given.a_converter_and_inputs
                     [
                         {
                             ""title"": ""Reguleringsteknikk"",
-                            ""released"": ""1963-01-01T00:00:00.000Z"",
+                            ""released"": ""1963-01-01T00:00:00.000Z""
                         },
                         {
                             ""title"": ""Process control. Structures and applications"",
-                            ""released"": ""1988-01-01T00:00:00.000Z"",
+                            ""released"": ""1988-01-01T00:00:00.000Z""
                         }
                     ]
                 },
@@ -49,7 +49,7 @@ public class a_complex_state : given.a_converter_and_inputs
                     [
                         {
                             ""title"": ""SignalR: Real-time Application Development"",
-                            ""released"": ""2013-01-01T00:00:00.000Z"",
+                            ""released"": ""2013-01-01T00:00:00.000Z""
                         }
                     ]
                 }
@@ -110,7 +110,7 @@ public class a_complex_state : given.a_converter_and_inputs
                     {
                         new BsonElement("title", new BsonString("SignalR: Real-time Application Development")),
                         new BsonElement("released", new BsonString("2013-01-01T00:00:00.000Z")),
-                    })
+                    }),
                 }))
             }),
         }))
