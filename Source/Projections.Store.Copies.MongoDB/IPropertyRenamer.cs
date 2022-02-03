@@ -17,5 +17,6 @@ public interface IPropertyRenamer
     /// </summary>
     /// <param name="document">The document to rename properties in.</param>
     /// <param name="conversions">The conversions that describe properties to rename.</param>
-    void RenamePropertiesIn(BsonDocument document, PropertyConversion[] conversions);
+    /// <returns>A new <see cref="BsonDocument"/> with properties renamed.</returns>
+    BsonDocument RenamePropertiesIn(BsonDocument document, PropertyConversion[] conversions);
 }

@@ -34,8 +34,7 @@ public class ProjectionConverter : IProjectionConverter
     {
         var document = BsonDocument.Parse(state);
         ConvertPropertiesIn(document, conversions);
-        _renamer.RenamePropertiesIn(document, conversions);
-        return document;
+        return _renamer.RenamePropertiesIn(document, conversions);
     }
 
     void ConvertPropertiesIn(BsonDocument document, PropertyConversion[] conversions)

@@ -7,6 +7,7 @@ using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
 using MongoDB.Bson;
 using Moq;
+using It = Moq.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConverter.given;
 
@@ -23,6 +24,9 @@ public class a_converter_and_inputs
     {
         value_converter = new Mock<IValueConverter>(MockBehavior.Strict);
         property_renamer = new Mock<IPropertyRenamer>();
+        property_renamer
+            .Setup(_ => _.RenamePropertiesIn(It.IsAny<BsonDocument>(), It.IsAny<PropertyConversion[]>()))
+            .Returns<BsonDocument, PropertyConversion[]>((document, _) => document);
 
         projection_converter = new ProjectionConverter(value_converter.Object, property_renamer.Object);
 
