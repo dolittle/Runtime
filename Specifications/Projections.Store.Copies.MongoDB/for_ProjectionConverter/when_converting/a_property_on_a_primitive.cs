@@ -8,7 +8,7 @@ using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConverter.when_converting;
 
-public class a_property_on_a_number : given.a_converter_and_inputs
+public class a_property_on_a_primitive : given.a_converter_and_inputs
 {
     Establish context = () =>
     {
