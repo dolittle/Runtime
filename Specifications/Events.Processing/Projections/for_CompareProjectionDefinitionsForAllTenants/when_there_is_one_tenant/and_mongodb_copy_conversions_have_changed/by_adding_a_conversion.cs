@@ -12,9 +12,9 @@ using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant;
+namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant.and_mongodb_copy_conversions_have_changed;
 
-public class and_mongodb_copy_conversions_have_changed : given.all_dependencies
+public class by_adding_a_conversion : given.all_dependencies
 {
     static TenantId tenant;
     static ProjectionDefinition definition;
@@ -34,8 +34,6 @@ public class and_mongodb_copy_conversions_have_changed : given.all_dependencies
                 Conversions = new []
                 {
                     new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
-                    new PropertyConversion("field two", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
-                    new PropertyConversion("field three", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
                 },
             })
             .build();
@@ -50,9 +48,8 @@ public class and_mongodb_copy_conversions_have_changed : given.all_dependencies
                     {
                         Conversions = new []
                         {
-                            new PropertyConversion("field one", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
-                            new PropertyConversion("field two", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
-                            new PropertyConversion("field four", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field two", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
                         },
                     }
                 }

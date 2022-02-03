@@ -12,9 +12,9 @@ using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant;
+namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant.and_mongodb_copy_conversions_have_changed;
 
-public class and_mongodb_copy_renamings_have_changed : given.all_dependencies
+public class rename_to_for_one_property : given.all_dependencies
 {
     static TenantId tenant;
     static ProjectionDefinition definition;
@@ -50,7 +50,7 @@ public class and_mongodb_copy_renamings_have_changed : given.all_dependencies
                         Conversions = new []
                         {
                             new PropertyConversion("field one", ConversionBSONType.Date, true, "field four", Array.Empty<PropertyConversion>()),
-                            new PropertyConversion("field two", ConversionBSONType.Guid, true, "field five", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field two", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
                         },
                     }
                 }
