@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Machine.Specifications;
 using MongoDB.Bson;
@@ -26,9 +27,27 @@ public class on_a_simple_state : given.a_converter_and_inputs
             }
         ";
         
-        conversions_to_apply.Add("some_string", ConversionBSONType.Date);
-        conversions_to_apply.Add("some_int", ConversionBSONType.Date);
-        conversions_to_apply.Add("some_date", ConversionBSONType.Date);
+        conversions_to_apply = new[]
+        {
+            new PropertyConversion(
+                "some_string",
+                ConversionBSONType.Date,
+                false,
+                "",
+                Array.Empty<PropertyConversion>()),
+            new PropertyConversion(
+                "some_int",
+                ConversionBSONType.Date,
+                false,
+                "",
+                Array.Empty<PropertyConversion>()),
+            new PropertyConversion(
+                "some_date",
+                ConversionBSONType.Date,
+                false,
+                "",
+                Array.Empty<PropertyConversion>()),
+        };
 
         converted_string = new BsonArray();
         converted_int = new BsonArray();
@@ -44,10 +63,6 @@ public class on_a_simple_state : given.a_converter_and_inputs
             .Setup(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.Date))
             .Returns(converted_date);
     };
-
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
 
     It should_convert_the_string = () => value_converter.Verify(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.Date), Times.Once);
     It should_convert_the_int = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date), Times.Once);

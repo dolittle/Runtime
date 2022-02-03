@@ -6,6 +6,8 @@ using MongoDB.Bson;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConverter.when_converting.without_conversions;
 
+#pragma warning disable CS0618
+
 public class objects : given.a_converter_and_inputs
 {
     Establish context = () => state_to_convert = @"
@@ -22,10 +24,6 @@ public class objects : given.a_converter_and_inputs
             }
         }
     ";
-
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
 
     It should_have_the_correct_first_object = () => result["first_object"].ShouldEqual(new BsonDocument(new []
     {

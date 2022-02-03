@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Machine.Specifications;
 using MongoDB.Bson;
@@ -24,8 +25,24 @@ public class on_an_object : given.a_converter_and_inputs
                 }
             }
         ";
-        
-        conversions_to_apply.Add("object.some_string", ConversionBSONType.Date);
+
+        conversions_to_apply = new[]
+        {
+            new PropertyConversion(
+                "object",
+                ConversionBSONType.None,
+                false,
+                "",
+                new[]
+                {
+                    new PropertyConversion(
+                        "some_string",
+                        ConversionBSONType.Date,
+                        false,
+                        "",
+                        Array.Empty<PropertyConversion>()),
+                }),
+        };
 
         converted_value = new BsonArray();
 
@@ -33,10 +50,6 @@ public class on_an_object : given.a_converter_and_inputs
             .Setup(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.Date))
             .Returns(converted_value);
     };
-
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
 
     It should_call_the_converter = () => value_converter.Verify(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.Date), Times.Once);
     It should_have_the_converted_value = () => result["object"]["some_string"].ShouldBeTheSameAs(converted_value);

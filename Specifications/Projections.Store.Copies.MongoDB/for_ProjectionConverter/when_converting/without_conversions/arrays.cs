@@ -17,10 +17,6 @@ public class arrays : given.a_converter_and_inputs
         }
     ";
     
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
-
     It should_have_the_correct_strings = () => result["an_array_of_strings"].AsBsonArray.ShouldContainOnly(
         new BsonString("a"), new BsonString("b"), new BsonString("c"));
     It should_have_the_correct_ints = () => result["an_array_of_ints"].AsBsonArray.ShouldContainOnly(

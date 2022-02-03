@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Machine.Specifications;
 using MongoDB.Bson;
@@ -22,8 +23,16 @@ public class on_an_array : given.a_converter_and_inputs
                 ""an_array_of_strings"": [""a"", ""b"", ""c""],
             }
         ";
-        
-        conversions_to_apply.Add("an_array_of_strings", ConversionBSONType.Date);
+
+        conversions_to_apply = new[]
+        {
+            new PropertyConversion(
+                "an_array_of_strings",
+                ConversionBSONType.Date,
+                false,
+                "",
+                Array.Empty<PropertyConversion>()),
+        };
 
         converted_a = new BsonArray();
         converted_b = new BsonArray();
@@ -39,10 +48,6 @@ public class on_an_array : given.a_converter_and_inputs
             .Setup(_ => _.Convert(new BsonString("c"), ConversionBSONType.Date))
             .Returns(converted_c);
     };
-    
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
 
     It should_call_the_value_converter_with_a = () => value_converter.Verify(_ => _.Convert(new BsonString("a"), ConversionBSONType.Date), Times.Once);
     It should_call_the_value_converter_with_b = () => value_converter.Verify(_ => _.Convert(new BsonString("b"), ConversionBSONType.Date), Times.Once);

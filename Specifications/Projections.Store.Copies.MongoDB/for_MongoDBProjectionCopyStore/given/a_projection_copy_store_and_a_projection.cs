@@ -2,10 +2,7 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using System.Threading;
-using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using Machine.Specifications;
@@ -55,7 +52,7 @@ public class a_projection_copy_store_and_a_projection : a_projection
 
         converter = new Mock<IProjectionConverter>();
         converter
-            .Setup(_ => _.Convert(It.IsAny<ProjectionState>(), It.IsAny<IDictionary<ProjectionField, ConversionBSONType>>()))
+            .Setup(_ => _.Convert(It.IsAny<ProjectionState>(), It.IsAny<PropertyConversion[]>()))
             .Returns(converted_bson_document);
 
         copy_store = new MongoDBProjectionCopyStore(storage.Object, converter.Object);
