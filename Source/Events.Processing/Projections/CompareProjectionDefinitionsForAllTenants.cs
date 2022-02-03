@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -57,7 +58,7 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
         return results;
     }
 
-    ProjectionDefinitionComparisonResult DefinitionsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition)
+    static ProjectionDefinitionComparisonResult DefinitionsAreEqual(ProjectionDefinition newDefinition, ProjectionDefinition oldDefinition)
     {
         var result = ProjectionDefinitionComparisonResult.Equal;
         if (!InitialStatesAreEqual(newDefinition.InitialState, oldDefinition.InitialState, ref result)) return result;
@@ -66,7 +67,7 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
         return result;
     }
 
-    bool InitialStatesAreEqual(ProjectionState newInitialState, ProjectionState oldInitialState, ref ProjectionDefinitionComparisonResult result)
+    static bool InitialStatesAreEqual(ProjectionState newInitialState, ProjectionState oldInitialState, ref ProjectionDefinitionComparisonResult result)
     {
         if (newInitialState != oldInitialState)
         {
@@ -75,7 +76,7 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
         }
         return true;
     }
-    bool EventsAreEqual(IEnumerable<ProjectionEventSelector> newEvents, IEnumerable<ProjectionEventSelector> oldEvents, ref ProjectionDefinitionComparisonResult result)
+    static bool EventsAreEqual(IEnumerable<ProjectionEventSelector> newEvents, IEnumerable<ProjectionEventSelector> oldEvents, ref ProjectionDefinitionComparisonResult result)
     {
         if (newEvents.Count() != oldEvents.Count())
         {
@@ -108,10 +109,10 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
         return true;
     }
 
-    bool CopiesAreEqual(ProjectionCopySpecification newSpecification, ProjectionCopySpecification oldSpecification, ref ProjectionDefinitionComparisonResult result)
+    static bool CopiesAreEqual(ProjectionCopySpecification newSpecification, ProjectionCopySpecification oldSpecification, ref ProjectionDefinitionComparisonResult result)
         => CopyToMongoDBsAreEqual(newSpecification.MongoDB, oldSpecification.MongoDB, ref result);
     
-    bool CopyToMongoDBsAreEqual(CopyToMongoDBSpecification newSpecification, CopyToMongoDBSpecification oldSpecification, ref ProjectionDefinitionComparisonResult result)
+    static bool CopyToMongoDBsAreEqual(CopyToMongoDBSpecification newSpecification, CopyToMongoDBSpecification oldSpecification, ref ProjectionDefinitionComparisonResult result)
     {
         if (newSpecification.ShouldCopyToMongoDB != oldSpecification.ShouldCopyToMongoDB)
         {
@@ -125,25 +126,46 @@ public class CompareProjectionDefinitionsForAllTenants : ICompareProjectionDefin
             return false;
         }
 
-        if (newSpecification.Conversions.Count != oldSpecification.Conversions.Count)
+        return CopyToMongoDBConversionsAreEqual(newSpecification.Conversions, oldSpecification.Conversions, ref result);
+    }
+
+    static bool CopyToMongoDBConversionsAreEqual(PropertyConversion[] newConversions, PropertyConversion[] oldConversions, ref ProjectionDefinitionComparisonResult result)
+    {
+        if (newConversions.Length != oldConversions.Length)
         {
             result = ProjectionDefinitionComparisonResult.Unequal("Copy to MongoDB does not have the same number of conversions as the previous projection definition");
             return false;
         }
 
-        foreach (var newConversion in newSpecification.Conversions)
+        foreach (var newConversion in newConversions)
         {
-            var hasOldConversionForField = oldSpecification.Conversions.TryGetValue(newConversion.Key, out var oldConversionType);
-            
-            if (!hasOldConversionForField)
+            var oldConversion = Array.Find(oldConversions, oldConversion => oldConversion.Property == newConversion.Property);
+            if (oldConversion == default)
             {
-                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for field {newConversion.Key} did not exist in the previous projection definition");
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for property {newConversion.Property} did not exist in the previous projection definition");
                 return false;
             }
 
-            if (newConversion.Value != oldConversionType)
+            if (newConversion.Conversion != oldConversion.Conversion)
             {
-                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for field {newConversion.Key} has changed from the previous projection definition");
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB conversion for property {newConversion.Property} has changed from the previous projection definition");
+                return false;
+            }
+
+            if (newConversion.ShouldRename != oldConversion.ShouldRename)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB should rename for property {newConversion.Property} has changed from the previous projection definition");
+                return false;
+            }
+
+            if (newConversion.RenameTo != oldConversion.RenameTo)
+            {
+                result = ProjectionDefinitionComparisonResult.Unequal($"Copy to MongoDB rename to for property {newConversion.Property} has changed from the previous projection definition");
+                return false;
+            }
+
+            if (!CopyToMongoDBConversionsAreEqual(newConversion.Children, oldConversion.Children, ref result))
+            {
                 return false;
             }
         }

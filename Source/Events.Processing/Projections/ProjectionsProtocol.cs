@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.Linq;
 using Dolittle.Runtime.Events.Processing.Contracts;
 using Dolittle.Runtime.Protobuf;
@@ -89,24 +90,30 @@ public class ProjectionsProtocol : IProjectionsProtocol
         return ConnectArgumentsValidationResult.Ok;
     }
 
-    ProjectionCopySpecification ConvertCopySpecification(ProjectionCopies copies)
+    static ProjectionCopySpecification ConvertCopySpecification(ProjectionCopies copies)
     {
         var mongoDB = CopyToMongoDBSpecification.Default;
         if (copies?.MongoDB is { } copyToMongoDb)
         {
-            var conversions = copyToMongoDb.Conversions.ToDictionary(
-                _ => new ProjectionField(_.Key),
-                _ => _.Value switch
-                {
-                    ProjectionCopyToMongoDB.Types.BSONType.Date => ConversionBSONType.Date,
-                    ProjectionCopyToMongoDB.Types.BSONType.Timestamp => ConversionBSONType.Timestamp,
-                    ProjectionCopyToMongoDB.Types.BSONType.Binary => ConversionBSONType.Binary,
-                    _ => throw new InvalidMongoDBFieldConversion(_.Key, _.Value),
-                }
-            );
-            mongoDB = new CopyToMongoDBSpecification(true, copyToMongoDb.Collection, conversions);
+            mongoDB = new CopyToMongoDBSpecification(true, copyToMongoDb.Collection, ConvertPropertyConversions(copyToMongoDb.Conversions));
         }
 
         return new ProjectionCopySpecification(mongoDB);
     }
+
+    static PropertyConversion[] ConvertPropertyConversions(IEnumerable<ProjectionCopyToMongoDB.Types.PropertyConversion> conversions)
+        => conversions.Select(conversion =>
+            new PropertyConversion(
+                conversion.PropertyName,
+                conversion.ConvertTo switch
+                {
+                    ProjectionCopyToMongoDB.Types.BSONType.None => ConversionBSONType.None,
+                    ProjectionCopyToMongoDB.Types.BSONType.Date => ConversionBSONType.Date,
+                    ProjectionCopyToMongoDB.Types.BSONType.Guid => ConversionBSONType.Guid,
+                    _ => throw new InvalidMongoDBFieldConversion(conversion.PropertyName, conversion.ConvertTo),
+                },
+                conversion.RenameTo != default,
+                conversion.RenameTo ?? "",
+                ConvertPropertyConversions(conversion.Children))
+            ).ToArray();
 }

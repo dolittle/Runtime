@@ -44,7 +44,16 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
             : new(
                 specification.ShouldCopyToMongoDB,
                 specification.CollectionName,
-                specification.Conversions.ToDictionary(_ => new ProjectionField(_.Key), _ => _.Value));
+                ToRuntimeCopyToMongoDBPropertyConversion(specification.Conversions));
+    
+    static Store.Definition.Copies.MongoDB.PropertyConversion[] ToRuntimeCopyToMongoDBPropertyConversion(IEnumerable<ProjectionCopyToMongoDBPropertyConversion> conversions)
+        => conversions.Select(conversion => new Store.Definition.Copies.MongoDB.PropertyConversion(
+            conversion.Property,
+            conversion.ConversionType,
+            conversion.ShouldRename,
+            conversion.RenameTo,
+            ToRuntimeCopyToMongoDBPropertyConversion(conversion.Children)
+        )).ToArray();
     
     public ProjectionDefinition ToStored(Store.Definition.ProjectionDefinition definition)
         => new()
@@ -72,6 +81,16 @@ public class ConvertProjectionDefinition : IConvertProjectionDefinition
         {
             ShouldCopyToMongoDB = specification.ShouldCopyToMongoDB,
             CollectionName = specification.Collection,
-            Conversions = specification.Conversions.ToDictionary(_ => _.Key.Value, _ => _.Value),
+            Conversions = ToStoredCopyToMongoDBPropertyConversion(specification.Conversions),
         };
+
+    static IEnumerable<ProjectionCopyToMongoDBPropertyConversion> ToStoredCopyToMongoDBPropertyConversion(Store.Definition.Copies.MongoDB.PropertyConversion[] conversions)
+        => conversions.Select(conversion => new ProjectionCopyToMongoDBPropertyConversion()
+        {
+            Property = conversion.Property,
+            ConversionType = conversion.Conversion,
+            ShouldRename = conversion.ShouldRename,
+            RenameTo = conversion.RenameTo,
+            Children = ToStoredCopyToMongoDBPropertyConversion(conversion.Children),
+        });
 }
