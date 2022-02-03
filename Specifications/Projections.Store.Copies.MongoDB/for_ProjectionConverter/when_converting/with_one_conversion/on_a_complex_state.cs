@@ -120,6 +120,7 @@ public class on_a_complex_state : given.a_converter_and_inputs
             .Returns(converted_five);
     };
 
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_convert_the_first_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-09-26T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
     It should_convert_the_second_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-11-21T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
     It should_convert_the_third_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1963-01-01T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);

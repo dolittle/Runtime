@@ -49,6 +49,7 @@ public class on_an_array : given.a_converter_and_inputs
             .Returns(converted_c);
     };
 
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_call_the_value_converter_with_a = () => value_converter.Verify(_ => _.Convert(new BsonString("a"), ConversionBSONType.Date), Times.Once);
     It should_call_the_value_converter_with_b = () => value_converter.Verify(_ => _.Convert(new BsonString("b"), ConversionBSONType.Date), Times.Once);
     It should_call_the_value_converter_with_c = () => value_converter.Verify(_ => _.Convert(new BsonString("c"), ConversionBSONType.Date), Times.Once);

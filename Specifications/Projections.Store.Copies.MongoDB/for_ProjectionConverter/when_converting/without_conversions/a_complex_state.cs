@@ -3,6 +3,8 @@
 
 using Machine.Specifications;
 using MongoDB.Bson;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConverter.when_converting.without_conversions;
 
@@ -59,6 +61,7 @@ public class a_complex_state : given.a_converter_and_inputs
         }
     ";
 
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_return_the_correct_document = () => result.ShouldEqual(
         new BsonDocument("people", new BsonArray(new []
         {

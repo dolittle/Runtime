@@ -13,6 +13,7 @@ namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConver
 public class a_converter_and_inputs
 {
     protected static Mock<IValueConverter> value_converter;
+    protected static Mock<IPropertyRenamer> property_renamer;
     protected static ProjectionConverter projection_converter;
 
     protected static ProjectionState state_to_convert;
@@ -21,7 +22,9 @@ public class a_converter_and_inputs
     Establish context = () =>
     {
         value_converter = new Mock<IValueConverter>(MockBehavior.Strict);
-        projection_converter = new ProjectionConverter(value_converter.Object);
+        property_renamer = new Mock<IPropertyRenamer>();
+
+        projection_converter = new ProjectionConverter(value_converter.Object, property_renamer.Object);
 
         conversions_to_apply = Array.Empty<PropertyConversion>();
     };

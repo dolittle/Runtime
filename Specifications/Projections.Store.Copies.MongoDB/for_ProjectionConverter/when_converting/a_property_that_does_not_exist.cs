@@ -32,5 +32,6 @@ public class a_property_that_does_not_exist : given.a_converter_and_inputs
         };
     };
 
+    It should_not_call_the_renamer = () => property_renamer.VerifyNoOtherCalls();
     It should_fail = () => exception.ShouldBeOfExactType<DocumentDoesNotHaveProperty>();
 }

@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using MongoDB.Bson;
@@ -19,14 +16,17 @@ record ValueAndSetter(BsonValue Value, Action<BsonValue> Setter);
 public class ProjectionConverter : IProjectionConverter
 {
     readonly IValueConverter _converter;
+    readonly IPropertyRenamer _renamer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProjectionConverter"/> class.
     /// </summary>
     /// <param name="converter">The converter to use for converting values.</param>
-    public ProjectionConverter(IValueConverter converter)
+    /// <param name="renamer">The renamer to use for renaming properties.</param>
+    public ProjectionConverter(IValueConverter converter, IPropertyRenamer renamer)
     {
         _converter = converter;
+        _renamer = renamer;
     }
 
     /// <inheritdoc />
@@ -34,6 +34,7 @@ public class ProjectionConverter : IProjectionConverter
     {
         var document = BsonDocument.Parse(state);
         ConvertPropertiesIn(document, conversions);
+        _renamer.RenamePropertiesIn(document, conversions);
         return document;
     }
 

@@ -64,6 +64,7 @@ public class on_a_simple_state : given.a_converter_and_inputs
             .Returns(converted_date);
     };
 
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_convert_the_string = () => value_converter.Verify(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.Date), Times.Once);
     It should_convert_the_int = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date), Times.Once);
     It should_convert_the_date = () => value_converter.Verify(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.Date), Times.Once);

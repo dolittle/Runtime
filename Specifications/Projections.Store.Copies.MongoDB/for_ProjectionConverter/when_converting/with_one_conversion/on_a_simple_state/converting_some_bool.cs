@@ -41,6 +41,7 @@ public class converting_some_bool : given.a_converter_and_inputs
             .Returns(converted_value);
     };
 
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_call_the_converter = () => value_converter.Verify(_ => _.Convert(new BsonBoolean(true), ConversionBSONType.Date), Times.Once);
     It should_have_the_correct_string = () => result["some_string"].ShouldEqual(new BsonString("hello world"));
     It should_have_the_correct_int = () => result["some_int"].ShouldEqual(new BsonInt32(42));

@@ -40,5 +40,6 @@ public class a_property_on_a_number : given.a_converter_and_inputs
         };
     };
 
+    It should_not_call_the_renamer = () => property_renamer.VerifyNoOtherCalls();
     It should_fail = () => exception.ShouldBeOfExactType<ValueIsNotDocument>();
 }
