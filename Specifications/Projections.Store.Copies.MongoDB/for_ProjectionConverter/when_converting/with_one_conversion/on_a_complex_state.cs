@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Machine.Specifications;
 using MongoDB.Bson;
@@ -8,6 +9,8 @@ using Moq;
 using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConverter.when_converting.with_one_conversion;
+
+#pragma warning disable CS0618
 
 public class on_a_complex_state : given.a_converter_and_inputs
 {
@@ -68,8 +71,32 @@ public class on_a_complex_state : given.a_converter_and_inputs
             }
         ";
         
-        conversions_to_apply.Add("people.works.released", ConversionBSONType.Date);
-
+        conversions_to_apply = new[]
+        {
+            new PropertyConversion(
+                "people",
+                ConversionBSONType.None,
+                false,
+                "",
+                new[]
+                {
+                    new PropertyConversion(
+                        "works",
+                        ConversionBSONType.None,
+                        false,
+                        "",
+                        new[]
+                        {
+                            new PropertyConversion(
+                                "released",
+                                ConversionBSONType.Date,
+                                false,
+                                "",
+                                Array.Empty<PropertyConversion>()),
+                        }),
+                }),
+        };
+        
         converted_one = new BsonArray();
         converted_two = new BsonArray();
         converted_three = new BsonArray();
@@ -93,10 +120,7 @@ public class on_a_complex_state : given.a_converter_and_inputs
             .Returns(converted_five);
     };
 
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
-
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_convert_the_first_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-09-26T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
     It should_convert_the_second_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1905-11-21T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);
     It should_convert_the_third_value = () => value_converter.Verify(_ => _.Convert(new BsonString("1963-01-01T00:00:00.000Z"), ConversionBSONType.Date), Times.Once);

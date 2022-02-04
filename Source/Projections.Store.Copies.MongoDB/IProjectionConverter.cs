@@ -1,8 +1,6 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Generic;
-using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using MongoDB.Bson;
@@ -20,5 +18,5 @@ public interface IProjectionConverter
     /// <param name="state">The projection state to convert.</param>
     /// <param name="conversions">The conversions to apply while converting.</param>
     /// <returns>The converted <see cref="BsonDocument"/>.</returns>
-    BsonDocument Convert(ProjectionState state, IDictionary<ProjectionField, ConversionBSONType> conversions);
+    BsonDocument Convert(ProjectionState state, PropertyConversion[] conversions);
 }

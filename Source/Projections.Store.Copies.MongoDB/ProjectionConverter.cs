@@ -2,9 +2,6 @@
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Projections.Store.State;
 using MongoDB.Bson;
@@ -19,67 +16,85 @@ record ValueAndSetter(BsonValue Value, Action<BsonValue> Setter);
 public class ProjectionConverter : IProjectionConverter
 {
     readonly IValueConverter _converter;
+    readonly IPropertyRenamer _renamer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ProjectionConverter"/> class.
     /// </summary>
     /// <param name="converter">The converter to use for converting values.</param>
-    public ProjectionConverter(IValueConverter converter)
+    /// <param name="renamer">The renamer to use for renaming properties.</param>
+    public ProjectionConverter(IValueConverter converter, IPropertyRenamer renamer)
     {
         _converter = converter;
+        _renamer = renamer;
     }
 
     /// <inheritdoc />
-    public BsonDocument Convert(ProjectionState state, IDictionary<ProjectionField, ConversionBSONType> conversions)
+    public BsonDocument Convert(ProjectionState state, PropertyConversion[] conversions)
     {
         var document = BsonDocument.Parse(state);
-        
-        foreach (var (field, conversion) in conversions)
-        {
-            ConvertField(document, field, conversion);
-        }
-
-        return document;
+        ConvertPropertiesIn(document, conversions);
+        return _renamer.RenamePropertiesIn(document, conversions);
     }
 
-    void ConvertField(BsonDocument document, ProjectionField field, ConversionBSONType conversion)
+    void ConvertPropertiesIn(BsonDocument document, PropertyConversion[] conversions)
     {
-        foreach (var (value, setter) in GetFieldValuesAndSetters(document, field))
+        foreach (var conversion in conversions)
         {
-            var newValue = _converter.Convert(value, conversion);
-            setter(newValue);
+            ConvertPropertyIn(document, conversion);
         }
     }
 
-    static IEnumerable<ValueAndSetter> GetFieldValuesAndSetters(BsonDocument document, ProjectionField field)
-        => GetFieldPath(field)
-            .Aggregate<string, IEnumerable<ValueAndSetter>>(
-                new ValueAndSetter[] { new(document, _ => { }) },
-                GetPropertyValuesAndSetters);
-
-    static IEnumerable<ValueAndSetter> GetPropertyValuesAndSetters(IEnumerable<ValueAndSetter> parents, string property)
-        => parents.SelectMany(valueAndSetter =>
+    void ConvertPropertyIn(BsonDocument document, PropertyConversion conversion)
+    {
+        if (!document.Contains(conversion.Property))
         {
-            var parent = valueAndSetter.Value;
-            if (parent is not BsonDocument document)
-            {
-                throw new ValueIsNotDocument(parent.BsonType, property);
-            }
+            throw new DocumentDoesNotHaveProperty(document, conversion.Property);
+        }
 
-            if (!document.Contains(property))
-            {
-                throw new DocumentDoesNotHaveProperty(document, property);
-            }
+        var value = document.GetValue(conversion.Property);
 
-            var value = document.GetValue(property);
-            if (value is not BsonArray array)
+        if (value is BsonArray array)
+        {
+            for (var i = 0; i < array.Count; i++)
             {
-                return new ValueAndSetter[] {new(value, newValue => document.Set(property, newValue))};
-            }
+                ConvertChildrenPropertiesIn(array[i], conversion);
 
-            return array.Select((element, index) => new ValueAndSetter(element, newValue => array[index] = newValue)).ToArray();
-        });
-    
-    static IEnumerable<string> GetFieldPath(ProjectionField field)
-        => field.Value.Split('.').Select(_ => _.Replace("\\.", "."));
+                if (conversion.Conversion == ConversionBSONType.None)
+                {
+                    continue;
+                }
+                
+                var newElement = _converter.Convert(array[i], conversion.Conversion);
+                array[i] = newElement;
+            }
+        }
+        else
+        {
+            ConvertChildrenPropertiesIn(value, conversion);
+
+            if (conversion.Conversion == ConversionBSONType.None)
+            {
+                return;
+            }
+            
+            var newValue = _converter.Convert(value, conversion.Conversion);
+            document.Set(conversion.Property, newValue);
+        }
+    }
+
+    void ConvertChildrenPropertiesIn(BsonValue parent, PropertyConversion conversion)
+    {
+        if (conversion.Children.Length < 1)
+        {
+            return;
+        }
+
+        if (parent is not BsonDocument document)
+        {
+            throw new ValueIsNotDocument(parent.BsonType, conversion.Property);
+        }
+        
+        ConvertPropertiesIn(document, conversion.Children);
+    }
 }

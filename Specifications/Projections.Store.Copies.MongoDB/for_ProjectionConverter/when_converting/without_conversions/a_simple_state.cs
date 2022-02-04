@@ -3,6 +3,8 @@
 
 using Machine.Specifications;
 using MongoDB.Bson;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConverter.when_converting.without_conversions;
 
@@ -17,10 +19,7 @@ public class a_simple_state : given.a_converter_and_inputs
         }
     ";
 
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
-
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_have_the_correct_string = () => result["some_string"].ShouldEqual(new BsonString("hello world"));
     It should_have_the_correct_int = () => result["some_int"].ShouldEqual(new BsonInt32(42));
     It should_have_the_correct_bool = () => result["some_bool"].ShouldEqual(new BsonBoolean(true));

@@ -17,9 +17,9 @@ public class ValueConverter : IValueConverter
     public BsonValue Convert(BsonValue value, ConversionBSONType conversion)
         => conversion switch
         {
+            ConversionBSONType.None => value,
             ConversionBSONType.Date => ConvertToDate(value),
-            ConversionBSONType.Timestamp => ConvertToTimestamp(value),
-            ConversionBSONType.Binary => ConvertToBinary(value),
+            ConversionBSONType.Guid => ConvertToGuid(value),
             _ => throw new UnknownBSONConversionType(conversion),
         };
 
@@ -31,17 +31,9 @@ public class ValueConverter : IValueConverter
             _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.Date),
         };
 
-    static BsonTimestamp ConvertToTimestamp(BsonValue value)
+    static BsonBinaryData ConvertToGuid(BsonValue value)
         => value switch
         {
-            BsonTimestamp timestampValue => timestampValue,
-            _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.Timestamp),
-        };
-
-    static BsonBinaryData ConvertToBinary(BsonValue value)
-        => value switch
-        {
-            BsonBinaryData binaryDataValue => binaryDataValue,
-            _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.Binary),
+            _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.Guid),
         };
 }

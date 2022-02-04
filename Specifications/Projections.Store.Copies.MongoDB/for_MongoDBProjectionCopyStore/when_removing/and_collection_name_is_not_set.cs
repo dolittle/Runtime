@@ -3,7 +3,6 @@
 
 using System;
 using System.Threading;
-using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Machine.Specifications;
 using MongoDB.Bson;

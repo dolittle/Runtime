@@ -7,17 +7,14 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using Dolittle.Runtime.ApplicationModel;
-using Dolittle.Runtime.Artifacts;
-using Dolittle.Runtime.Projections.Store;
 using Dolittle.Runtime.Projections.Store.Definition;
-using Dolittle.Runtime.Projections.Store.Definition.Copies;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Dolittle.Runtime.Rudimentary;
 using Machine.Specifications;
 
-namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant;
+namespace Dolittle.Runtime.Events.Processing.Projections.for_CompareProjectionDefinitionsForAllTenants.when_there_is_one_tenant.and_mongodb_copy_conversions_have_changed;
 
-public class and_mongodb_copy_conversions_have_changed : given.all_dependencies
+public class by_adding_a_conversion : given.all_dependencies
 {
     static TenantId tenant;
     static ProjectionDefinition definition;
@@ -34,12 +31,10 @@ public class and_mongodb_copy_conversions_have_changed : given.all_dependencies
             .with_selector(ProjectionEventSelector.EventSourceId("fde86d09-1c24-40ae-afc9-d85100cabdd9"))
             .with_copy_to_mongodb(CopyToMongoDBSpecification.Default with
             {
-                Conversions = new Dictionary<ProjectionField, ConversionBSONType>()
+                Conversions = new []
                 {
-                    { "field one", ConversionBSONType.Date },
-                    { "field two", ConversionBSONType.Timestamp },
-                    { "field three", ConversionBSONType.Binary },
-                }
+                    new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                },
             })
             .build();
 
@@ -51,11 +46,10 @@ public class and_mongodb_copy_conversions_have_changed : given.all_dependencies
                 {
                     MongoDB = definition.Copies.MongoDB with
                     {
-                        Conversions = new Dictionary<ProjectionField, ConversionBSONType>()
+                        Conversions = new []
                         {
-                            { "field one", ConversionBSONType.Timestamp },
-                            { "field two", ConversionBSONType.Timestamp },
-                            { "field four", ConversionBSONType.Binary },
+                            new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field two", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
                         },
                     }
                 }

@@ -3,8 +3,12 @@
 
 using Machine.Specifications;
 using MongoDB.Bson;
+using Moq;
+using It = Machine.Specifications.It;
 
 namespace Dolittle.Runtime.Projections.Store.Copies.MongoDB.for_ProjectionConverter.when_converting.without_conversions;
+
+#pragma warning disable CS0618
 
 public class objects : given.a_converter_and_inputs
 {
@@ -23,10 +27,7 @@ public class objects : given.a_converter_and_inputs
         }
     ";
 
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
-
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_have_the_correct_first_object = () => result["first_object"].ShouldEqual(new BsonDocument(new []
     {
         new BsonElement("some_string", new BsonString("hello world")),

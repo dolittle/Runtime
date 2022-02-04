@@ -1,7 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
-using System.Collections.Immutable;
+using System;
 using System.Linq;
 using Dolittle.Runtime.Projections.Store.Definition;
 using Dolittle.Runtime.Projections.Store.Definition.Copies;
@@ -36,7 +36,7 @@ public class a_projection
                 new CopyToMongoDBSpecification(
                     true,
                     collection_name,
-                    ImmutableDictionary<ProjectionField, ConversionBSONType>.Empty
+                    Array.Empty<PropertyConversion>()
                 )
             )
         );

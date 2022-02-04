@@ -1,6 +1,7 @@
 // Copyright (c) Dolittle. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+using System;
 using Dolittle.Runtime.Projections.Store.Definition.Copies.MongoDB;
 using Machine.Specifications;
 using MongoDB.Bson;
@@ -30,9 +31,30 @@ public class on_objects : given.a_converter_and_inputs
                 }
             }
         ";
-        
-        conversions_to_apply.Add("first_object.some_int", ConversionBSONType.Date);
-        conversions_to_apply.Add("second_object", ConversionBSONType.Date);
+
+        conversions_to_apply = new[]
+        {
+            new PropertyConversion(
+                "first_object",
+                ConversionBSONType.None,
+                false,
+                "",
+                new[]
+                {
+                    new PropertyConversion(
+                        "some_int",
+                        ConversionBSONType.Date,
+                        false,
+                        "",
+                        Array.Empty<PropertyConversion>()),
+                }),
+            new PropertyConversion(
+                "second_object",
+                ConversionBSONType.Date,
+                false,
+                "",
+                Array.Empty<PropertyConversion>()),
+        };
 
         converted_int = new BsonArray();
         converted_object = new BsonArray();
@@ -44,11 +66,8 @@ public class on_objects : given.a_converter_and_inputs
             .Setup(_ => _.Convert(Moq.It.IsAny<BsonDocument>(), ConversionBSONType.Date))
             .Returns(converted_object);
     };
-
-    static BsonDocument result;
-
-    Because of = () => result = projection_converter.Convert(state_to_convert, conversions_to_apply);
     
+    It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
     It should_convert_the_int = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date), Times.Once);
     It should_convert_the_object = () => value_converter.Verify(_ => _.Convert(Moq.It.IsAny<BsonDocument>(), ConversionBSONType.Date), Times.Once);
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
