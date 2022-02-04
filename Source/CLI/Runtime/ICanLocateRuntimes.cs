@@ -16,6 +16,6 @@ public interface ICanLocateRuntimes
     /// Gets the addresses of Runtimes that are available to connect to, or the address provided in the argument.
     /// </summary>
     /// <param name="argument">An optional address provided to the CLI as an argument.</param>
-    /// <returns>An <see cref="IEnumerable{T}"/> of type <see cref="MicroserviceAddress"/> to available Runtimes.</returns>
-    Task<IEnumerable<MicroserviceAddress>> GetAvailableRuntimeAddresses(MicroserviceAddress argument = null);
+    /// <returns>An <see cref="IEnumerable{T}"/> of type <see cref="NamedRuntimeAddress"/> to available Runtimes.</returns>
+    Task<IEnumerable<NamedRuntimeAddress>> GetAvailableRuntimeAddresses(MicroserviceAddress argument = null);
 }

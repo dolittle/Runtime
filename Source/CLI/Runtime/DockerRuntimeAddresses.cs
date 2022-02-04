@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Docker.DotNet;
 using Docker.DotNet.Models;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Services;
 
@@ -31,18 +32,18 @@ public class DockerRuntimeAddresses : ICanDiscoverRuntimeAddresses
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<MicroserviceAddress>> Discover()
+    public async Task<IEnumerable<NamedRuntimeAddress>> Discover()
     {
         try
         {
             var containers = await _client.Containers.ListContainersAsync(new ContainersListParameters());
             var runtimesWithExposedManagement =
                 containers.Where(IsRuntimeContainer).Where(HasManagementPortExposed);
-            return runtimesWithExposedManagement.Select(ManagmentPortAddress);
+            return runtimesWithExposedManagement.Select(ManagementPortAddress);
         }
         catch
         {
-            return Array.Empty<MicroserviceAddress>();
+            return Array.Empty<NamedRuntimeAddress>();
         }
     }
 
@@ -52,8 +53,27 @@ public class DockerRuntimeAddresses : ICanDiscoverRuntimeAddresses
     static bool HasManagementPortExposed(ContainerListResponse container)
         => container.Ports.Any(IsManagementPort);
         
-    static MicroserviceAddress ManagmentPortAddress(ContainerListResponse container)
-        => new("localhost", container.Ports.First(IsManagementPort).PublicPort);
+    static NamedRuntimeAddress ManagementPortAddress(ContainerListResponse container)
+        => new(
+            GetContainerName(container),
+            "localhost", 
+            container.Ports.First(IsManagementPort).PublicPort);
+
+    static MicroserviceName GetContainerName(ContainerListResponse container)
+    {
+        if (container.Labels.TryGetValue("com.docker.compose.service", out var dockerComposeName))
+        {
+            return dockerComposeName;
+        }
+
+        var name = container.Names.FirstOrDefault(_ => !string.IsNullOrWhiteSpace(_));
+        if (name != null)
+        {
+            return name.TrimStart('/');
+        }
+        
+        return MicroserviceName.NotSet;
+    }
 
     static bool IsManagementPort(Port port)
         => port.Type == "tcp" && port.PrivatePort == EndpointsConfigurationDefaultProvider.DefaultManagementPort;

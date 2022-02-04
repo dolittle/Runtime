@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Artifacts;
 using Dolittle.Runtime.CLI.Runtime.EventTypes;
 using Dolittle.Runtime.Events;
@@ -70,7 +71,7 @@ public abstract class CommandBase : CLI.CommandBase
 
         if (addresses.Count == 1)
         {
-            return addresses[0];
+            return new MicroserviceAddress(addresses[0].Host, addresses[0].Port);
         }
             
         await cli.Out.WriteLineAsync("Found multiple available Runtimes, please select one of the following:");
@@ -78,15 +79,22 @@ public abstract class CommandBase : CLI.CommandBase
         {
             for (var i = 0; i < addresses.Count; i++)
             {
-                var (host, port) = addresses[i];
-                await cli.Out.WriteLineAsync($"\t{i}) {host.Value}:{port.Value}");
+                var (name, host, port) = addresses[i];
+                if (name != MicroserviceName.NotSet && !string.IsNullOrWhiteSpace(name))
+                {
+                    await cli.Out.WriteLineAsync($"\t{i}) {name} ({host.Value}:{port.Value})");
+                }
+                else
+                {
+                    await cli.Out.WriteLineAsync($"\t{i}) {host.Value}:{port.Value}");
+                }
             }
 
             var selection = Prompt.GetInt($"Select Runtime (0-{addresses.Count - 1}):");
 
             if (selection >= 0 && selection < addresses.Count)
             {
-                return addresses[selection];
+                return new MicroserviceAddress(addresses[selection].Host, addresses[selection].Port);
             }
                 
             await cli.Out.WriteLineAsync("Invalid number, please select one of the following:");
