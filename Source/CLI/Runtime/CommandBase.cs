@@ -61,7 +61,7 @@ public abstract class CommandBase : CLI.CommandBase
     /// <returns>A <see cref="Try{TResult}"/> of type <see cref="MicroserviceAddress"/>.</returns>
     protected async Task<Try<MicroserviceAddress>> SelectRuntimeToConnectTo(CommandLineApplication cli)
     {
-        var addresses = (await _runtimes.GetAvailableRuntimeAddresses(Runtime)).ToList();
+        var addresses = (await _runtimes.GetAvailableRuntimeAddresses(Runtime)).OrderBy(ListTextFor).ToList();
 
         if (!addresses.Any())
         {
@@ -79,15 +79,7 @@ public abstract class CommandBase : CLI.CommandBase
         {
             for (var i = 0; i < addresses.Count; i++)
             {
-                var (name, host, port) = addresses[i];
-                if (name != MicroserviceName.NotSet && !string.IsNullOrWhiteSpace(name))
-                {
-                    await cli.Out.WriteLineAsync($"\t{i}) {name} ({host.Value}:{port.Value})");
-                }
-                else
-                {
-                    await cli.Out.WriteLineAsync($"\t{i}) {host.Value}:{port.Value}");
-                }
+                await cli.Out.WriteLineAsync($"\t{i}) {ListTextFor(addresses[i])})");
             }
 
             var selection = Prompt.GetInt($"Select Runtime (0-{addresses.Count - 1}):");
@@ -123,4 +115,10 @@ public abstract class CommandBase : CLI.CommandBase
             ? eventTypeId.Value.ToString()
             : eventType.Alias;
     }
+
+    static string ListTextFor(NamedRuntimeAddress address)
+        => address.Name != MicroserviceName.NotSet && !string.IsNullOrWhiteSpace(address.Name)
+            ? $"{address.Name} ({address.Host.Value}:{address.Port.Value})"
+            : $"{address.Host.Value}:{address.Port.Value}";
+
 }
