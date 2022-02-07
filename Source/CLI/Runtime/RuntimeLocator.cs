@@ -4,6 +4,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Dolittle.Runtime.ApplicationModel;
 using Dolittle.Runtime.Microservices;
 using Dolittle.Runtime.Services;
 
@@ -27,7 +28,7 @@ public class RuntimeLocator : ICanLocateRuntimes
     }
 
     /// <inheritdoc />
-    public async Task<IEnumerable<MicroserviceAddress>> GetAvailableRuntimeAddresses(MicroserviceAddress argument = null)
+    public async Task<IEnumerable<NamedRuntimeAddress>> GetAvailableRuntimeAddresses(MicroserviceAddress argument = null)
     {
         if (argument == null)
         {
@@ -35,7 +36,8 @@ public class RuntimeLocator : ICanLocateRuntimes
             return results.SelectMany(_ => _);
         }
             
-        var address = new MicroserviceAddress(
+        var address = new NamedRuntimeAddress(
+            MicroserviceName.NotSet,
             string.IsNullOrWhiteSpace(argument.Host) ? DefaultRuntimeHost : argument.Host,
             argument.Port == 0 ? EndpointsConfigurationDefaultProvider.DefaultManagementPort : argument.Port);
                 
