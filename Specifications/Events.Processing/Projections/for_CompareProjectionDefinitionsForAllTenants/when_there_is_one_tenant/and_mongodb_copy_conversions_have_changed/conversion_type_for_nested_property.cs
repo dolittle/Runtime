@@ -33,12 +33,12 @@ public class conversion_type_for_nested_property : given.all_dependencies
             {
                 Conversions = new []
                 {
-                    new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                    new PropertyConversion("field one", ConversionBSONType.DateAsDate, false, "", Array.Empty<PropertyConversion>()),
                     new PropertyConversion("field two", ConversionBSONType.None, false, "", new []
                     {
                         new PropertyConversion("first level", ConversionBSONType.None, false, "", new []
                         {
-                            new PropertyConversion("second level", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("second level", ConversionBSONType.DateAsDate, false, "", Array.Empty<PropertyConversion>()),
                         })
                     }),
                 },
@@ -55,12 +55,12 @@ public class conversion_type_for_nested_property : given.all_dependencies
                     {
                         Conversions = new []
                         {
-                            new PropertyConversion("field one", ConversionBSONType.Date, false, "", Array.Empty<PropertyConversion>()),
+                            new PropertyConversion("field one", ConversionBSONType.DateAsDate, false, "", Array.Empty<PropertyConversion>()),
                             new PropertyConversion("field two", ConversionBSONType.None, false, "", new []
                             {
                                 new PropertyConversion("first level", ConversionBSONType.None, false, "", new []
                                 {
-                                    new PropertyConversion("second level", ConversionBSONType.Guid, false, "", Array.Empty<PropertyConversion>()),
+                                    new PropertyConversion("second level", ConversionBSONType.GuidAsStandardBinary, false, "", Array.Empty<PropertyConversion>()),
                                 })
                             }),
                         },

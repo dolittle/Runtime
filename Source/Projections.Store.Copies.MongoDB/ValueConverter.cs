@@ -18,22 +18,22 @@ public class ValueConverter : IValueConverter
         => conversion switch
         {
             ConversionBSONType.None => value,
-            ConversionBSONType.Date => ConvertToDate(value),
-            ConversionBSONType.Guid => ConvertToGuid(value),
+            ConversionBSONType.DateAsDate => ConvertToDateAsDate(value),
+            ConversionBSONType.GuidAsStandardBinary => ConvertToGuidAsStandardBinary(value),
             _ => throw new UnknownBSONConversionType(conversion),
         };
 
-    static BsonDateTime ConvertToDate(BsonValue value)
+    static BsonDateTime ConvertToDateAsDate(BsonValue value)
         => value switch
         {
             BsonDateTime dateTimeValue => dateTimeValue,
             BsonString stringValue => new BsonDateTime(DateTimeOffset.Parse(stringValue.Value, CultureInfo.InvariantCulture).UtcDateTime),
-            _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.Date),
+            _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.DateAsDate),
         };
 
-    static BsonBinaryData ConvertToGuid(BsonValue value)
+    static BsonBinaryData ConvertToGuidAsStandardBinary(BsonValue value)
         => value switch
         {
-            _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.Guid),
+            _ => throw new CannotConvertValueUsingConversion(value, ConversionBSONType.GuidAsStandardBinary),
         };
 }

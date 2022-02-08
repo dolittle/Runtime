@@ -32,7 +32,7 @@ public class a_property_on_a_primitive : given.a_converter_and_inputs
                 {
                     new PropertyConversion(
                         "some_property",
-                        ConversionBSONType.Date,
+                        ConversionBSONType.DateAsDate,
                         false,
                         "",
                         Array.Empty<PropertyConversion>()),

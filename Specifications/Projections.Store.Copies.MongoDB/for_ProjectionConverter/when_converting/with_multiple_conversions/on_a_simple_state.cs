@@ -31,19 +31,19 @@ public class on_a_simple_state : given.a_converter_and_inputs
         {
             new PropertyConversion(
                 "some_string",
-                ConversionBSONType.Date,
+                ConversionBSONType.DateAsDate,
                 false,
                 "",
                 Array.Empty<PropertyConversion>()),
             new PropertyConversion(
                 "some_int",
-                ConversionBSONType.Date,
+                ConversionBSONType.DateAsDate,
                 false,
                 "",
                 Array.Empty<PropertyConversion>()),
             new PropertyConversion(
                 "some_date",
-                ConversionBSONType.Date,
+                ConversionBSONType.DateAsDate,
                 false,
                 "",
                 Array.Empty<PropertyConversion>()),
@@ -54,20 +54,20 @@ public class on_a_simple_state : given.a_converter_and_inputs
         converted_date = new BsonArray();
 
         value_converter
-            .Setup(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.DateAsDate))
             .Returns(converted_string);
         value_converter
-            .Setup(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonInt32(42), ConversionBSONType.DateAsDate))
             .Returns(converted_int);
         value_converter
-            .Setup(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.DateAsDate))
             .Returns(converted_date);
     };
 
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
-    It should_convert_the_string = () => value_converter.Verify(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.Date), Times.Once);
-    It should_convert_the_int = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date), Times.Once);
-    It should_convert_the_date = () => value_converter.Verify(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.Date), Times.Once);
+    It should_convert_the_string = () => value_converter.Verify(_ => _.Convert(new BsonString("hello world"), ConversionBSONType.DateAsDate), Times.Once);
+    It should_convert_the_int = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.DateAsDate), Times.Once);
+    It should_convert_the_date = () => value_converter.Verify(_ => _.Convert(new BsonString("2002-02-02T02:02:02.002Z"), ConversionBSONType.DateAsDate), Times.Once);
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
     It should_have_the_correct_string = () => result["some_string"].ShouldBeTheSameAs(converted_string);
     It should_have_the_correct_int = () => result["some_int"].ShouldBeTheSameAs(converted_int);

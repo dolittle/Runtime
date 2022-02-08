@@ -43,14 +43,14 @@ public class on_objects : given.a_converter_and_inputs
                 {
                     new PropertyConversion(
                         "some_int",
-                        ConversionBSONType.Date,
+                        ConversionBSONType.DateAsDate,
                         false,
                         "",
                         Array.Empty<PropertyConversion>()),
                 }),
             new PropertyConversion(
                 "second_object",
-                ConversionBSONType.Date,
+                ConversionBSONType.DateAsDate,
                 false,
                 "",
                 Array.Empty<PropertyConversion>()),
@@ -60,16 +60,16 @@ public class on_objects : given.a_converter_and_inputs
         converted_object = new BsonArray();
 
         value_converter
-            .Setup(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(new BsonInt32(42), ConversionBSONType.DateAsDate))
             .Returns(converted_int);
         value_converter
-            .Setup(_ => _.Convert(Moq.It.IsAny<BsonDocument>(), ConversionBSONType.Date))
+            .Setup(_ => _.Convert(Moq.It.IsAny<BsonDocument>(), ConversionBSONType.DateAsDate))
             .Returns(converted_object);
     };
     
     It should_call_the_renamer = () => property_renamer.Verify(_ => _.RenamePropertiesIn(Moq.It.IsAny<BsonDocument>(), conversions_to_apply), Times.Once);
-    It should_convert_the_int = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.Date), Times.Once);
-    It should_convert_the_object = () => value_converter.Verify(_ => _.Convert(Moq.It.IsAny<BsonDocument>(), ConversionBSONType.Date), Times.Once);
+    It should_convert_the_int = () => value_converter.Verify(_ => _.Convert(new BsonInt32(42), ConversionBSONType.DateAsDate), Times.Once);
+    It should_convert_the_object = () => value_converter.Verify(_ => _.Convert(Moq.It.IsAny<BsonDocument>(), ConversionBSONType.DateAsDate), Times.Once);
     It should_not_convert_anything_else = () => value_converter.VerifyNoOtherCalls();
     It should_not_have_touched_the_string = () => result["first_object"]["some_string"].ShouldEqual(new BsonString("hello world"));
     It should_have_the_converted_int = () => result["first_object"]["some_int"].ShouldBeTheSameAs(converted_int);
